@@ -11,6 +11,10 @@
 #include "zstr_mgr.h"
 #endif
 
+extern "C" {
+	#include "ext/standard/php_math.h"
+};
+
 namespace zpp {
 
 void //protected
@@ -89,6 +93,12 @@ void zstr_mgr::adopt(zend_string* rc)
 		s = rc;
 	}
 }
+
+zstr_mgr::zstr_mgr(zend_long ival)
+{
+    s = _php_math_longtobase(ival,10);
+}
+
 
 size_t 
 zstr_mgr::size() const

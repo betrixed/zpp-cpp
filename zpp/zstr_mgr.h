@@ -37,6 +37,8 @@ namespace zpp {
 	        own();
 	    }
 
+	    zstr_mgr(zend_long ival);
+	    
 	    zstr_mgr(zstr_mgr&& rc)
 	    {
 	        s = rc.s;

@@ -39,11 +39,9 @@ class zstr_buffer : public zstr_mgr
 
 		zstr_buffer (const char* c);
 
-		zstr_buffer& append(zend_string* s);
+		void append(const char* c, size_t slen);
 
-		zstr_buffer& append(zstr_user w) {
-			return append((zend_string*) w);
-		}
+		void append(zend_string* s);
 
 		size_t len() const { return a; }
 
@@ -52,25 +50,30 @@ class zstr_buffer : public zstr_mgr
 		zstr_buffer& operator=(const char* c)
 		{
 			reset();
-			return append(c, strlen(c));
+			append(c, strlen(c));
+			return *this;
 		}	
 
 		//zstr_buffer& operator<<(const bfmt& bf);
 
+		
 
 		zstr_buffer& operator<<(zstr_user w)
 		{
-			return append(w);
+			append(w);
+			return *this;
 		}
 
 		zstr_buffer& operator<<(zend_string* s)
 		{
-			return append(s);
+		 	append(s);
+		 	return *this;
 		}
 
 		zstr_buffer& operator<<(const char* c)
 		{
-			return append(c, strlen(c));
+			append(c, strlen(c));
+			return *this;
 		}
 		/*
 		void item_sep(char c = ',') 
@@ -81,7 +84,7 @@ class zstr_buffer : public zstr_mgr
 
 		zstr_buffer& operator<<(int iv);
 
-		zstr_buffer& append(const char* c, size_t slen);
+		
 
 		zstr_buffer& operator<<(char c);
 

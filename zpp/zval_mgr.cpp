@@ -78,7 +78,6 @@ zval_mgr::bind_string(zend_string* s)
 	}
 }
 
-
 void // protected
 zval_mgr::bind_object(zend_object* obj)
 {

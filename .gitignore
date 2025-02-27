@@ -1,0 +1,16 @@
+config*
+autom4te.cache/**
+build/**
+modules/**
+*sublime*
+Makefile
+Makefile.*
+configure*
+libtool
+*.la
+*.lo
+*.dep
+*arginfo.h
+.libs/**
+run-tests.php
+

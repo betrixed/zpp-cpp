@@ -1,6 +1,9 @@
 #ifndef ZSTR_BUFFER_CPP
 #define ZSTR_BUFFER_CPP
 
+extern "C" {
+	#include <Zend/zend_smart_str.h>
+};
 
 namespace zpp {
 
@@ -60,13 +63,10 @@ zstr_buffer::zstr_buffer(const std::string& cs)
 	a = size();
 }
 
-zstr_buffer::zstr_buffer(const zval_own& w)
-{
-	init_zs(w.zstr());
-}
 
 
-zstr_buffer& zstr_buffer::operator<<(zval* zv) 
+zstr_buffer& 
+zstr_buffer::operator<<(zval* zv) 
 {
 	if (!zv) {
 		return *this;
@@ -75,22 +75,23 @@ zstr_buffer& zstr_buffer::operator<<(zval* zv)
 
 	if (fx.isString())
 	{
-		return append(fx.zstr());
+		append(fx.zstr());
 	}
 	else {
-		zstr_mgr s(fx);
-		return append(s);
+		zstr_mgr convert(fx.to_zstr());
+		convert.decref();
+		append((zend_string*) convert);
 	}
+	return *this;
 }
 
-zstr_buffer& 
+void
 zstr_buffer::append(const char* c, size_t slen)
 {
 	if (!c || !slen) {
-		return *this;
+		return;
 	}
 	smart_str_appendl_ex((smart_str*)(this), c, slen, 0);
-	return *this;
 }
 
 zstr_buffer& 
@@ -105,26 +106,27 @@ zstr_buffer&
 zstr_buffer::operator<<(const std::string_view &v) 
 {
 	size_t slen = v.length();
-	if (slen > 0)
-		return append(v.data(), slen);
-	else
-		return *this;
+	if (slen > 0) {
+		append(v.data(), slen);
+	}
+	return *this;
 }
 
 zstr_buffer& 
 zstr_buffer::operator<<(int iv) 
 {	
-	zstr_own intstr((zend_long) iv);
-	return append(intstr);
+	zstr_mgr intstr((zend_long) iv);
+	append((zend_string*)intstr);
+	return *this;
 }
 
-zstr_buffer& 
+void
 zstr_buffer::append(zend_string* s) 
 {
 	if (!s) {
-		return *this;
+		return;
 	}
-	return append(ZSTR_VAL(s), ZSTR_LEN(s));
+	append(ZSTR_VAL(s), ZSTR_LEN(s));
 }
 
 // inalizes zend_string buffer, 

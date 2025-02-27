@@ -53,7 +53,7 @@ namespace zpp {
 
 	zval_mgr::zval_mgr(base_d* cobj)
 	{
-		ZVAL_OBJ(zv_, cobj->zobj());
+		ZVAL_OBJ(&zv_, cobj->zobj());
 	}
 };//namespace
 
