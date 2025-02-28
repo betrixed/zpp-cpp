@@ -52,6 +52,7 @@ Services::call_value(zobj_user callme)
 {
 	zval_mgr self(this->zobj());
 	// 1 argument
+	showmem("self svc", self);
 	return callme.callable(self);
 }
 
@@ -142,12 +143,18 @@ zobj_user
 Services::instance()
 {
 	zobj_user result;
+
+
 	Global gme = GLOBALS[Services::omg.class_name()];
 	
-	if (gme.value().isNull()) {
+	zval_user val = gme.value(); // good for while gme is around
+
+	if (val.isNull()) {
 		gme = Services::omg.new_zobj();
 	}
-	result = gme.value().zobject();
+	result = val.zobject();
+
+	//showobj("instance return", result);
 	return result;
 }
 
@@ -204,16 +211,19 @@ Services::newInstance(zstr_user name_class)
 
 	ReflectCache* rc = ReflectCache::cpp();
 
-	//showstr("newInstance of ", name_class);
+	showstr("newInstance of ", name_class);
 
 	zobj_mgr obj = rc->newInstance(name_class);
 	
-
 	if (obj.ok())
 	{
+		showarray("instances", instances_);
 		htab_user(instances_).set(name_class, obj);
 	}
-	//showmem("before return", obj);
+	else {
+		zend_throw_error(zend_ce_error, "newInstance failed for %s", name_class.data());
+	}
+
 	return obj;
 }
 
@@ -273,19 +283,20 @@ zval_mgr  Services::get(zstr_user name)
 	zval_mgr result;
 	zval_user value;
 
-	//showstr("services::get", name);
+	showstr("services::get", name);
 
 	if (!htab_user(active_).try_fetch(name, value))
 	{
 		result = activate(name);
 		return  result;
 	}
-
+	showmem("got active ", value);
 	int ztype = value.ztype();
 
 	if (value.isCallable())
 	{
 		zobj_user callme = value.zobject();
+		showobj("callable ", callme);
 		result = call_value(callme);
 	}
 	return result;

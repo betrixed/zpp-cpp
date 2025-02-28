@@ -1,5 +1,9 @@
-#ifndef ZOBJ_USER_H
-#define ZOBJ_USER_H
+#ifndef ZOBJ_USER_CPP
+#define ZOBJ_USER_CPP
+
+#ifndef FN_CALL_H
+#include "fn_call.h"
+#endif
 
 namespace zpp {
 
@@ -51,6 +55,11 @@ zobj_user::className()
     return nullptr;
 }
 
+void callable_failed()
+{
+   zend_throw_error(zend_ce_error, "Object callable failed ", 0); 
+}
+
 zval_mgr
 zobj_user::callable()
 {
@@ -59,15 +68,13 @@ zobj_user::callable()
     zval_mgr result;
 
     //callable is method of no object
-    zval_own callme (obj_); 
+    zval_mgr callme (obj_); 
 
-    if (callable_fn(result, callme))
+    if (!callable_fn(result, callme))
     {
-        return result;
+        callable_failed();
     }
-    else {
-        return zval_own();
-    }
+    return result;
 }
 
 zval_mgr
@@ -78,15 +85,13 @@ zobj_user::callable(zval_user arg1)
     zval_mgr   result;
     zval_init  argv;
 
-    ZVAL_COPY_VALUE(&argv, arg1);
+    ZVAL_COPY_VALUE(argv, arg1);
 
-    if (callable_fn(result, callme, 1, &argv))
-    {
-        return result;
-    }
-    else {
-        return zval_own();
-    }
+    showmem("callable arg1", argv);
+    
+    if (!callable_fn(result, callme, 1, argv))
+        callable_failed();
+    return result;
 }
 
 zval_mgr
@@ -97,17 +102,14 @@ zobj_user::callable(zval_user arg1, zval_user arg2)
     zval_mgr      result;
     zval_init     argv[2];
 
-    ZVAL_COPY_VALUE(&argv[0], arg1);
-    ZVAL_COPY_VALUE(&argv[1], arg2);
+    ZVAL_COPY_VALUE(argv[0], arg1);
+    ZVAL_COPY_VALUE(argv[1], arg2);
 
-    if (callable_fn(result, callme, 2, &argv[0]))
-    {
-        return result;
-    }
-    else {
-        return zval_own();
-    }
+    if (!callable_fn(result, callme, 2, argv[0]))
+        callable_failed();
+    return result;
 }
+
 
 }; // namespace
 #endif

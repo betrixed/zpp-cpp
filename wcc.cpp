@@ -46,6 +46,8 @@ extern "C" {
 
 #include "zpp/base.cpp"
 
+#define DEBUG_XTRA
+#include "zpp/show_zpp.cpp"
 
 //#include "src/zpp/all.cpp"
 
@@ -99,6 +101,7 @@ extern "C" {
 #include "src/plate_engine.cpp"
 */
 
+//WCC_SERVICES_CPP
 #include "src/reflect_cache.cpp"
 #include "src/services.cpp"
 
@@ -124,20 +127,21 @@ extern "C" {
 #include "src/pair.cpp"
 #include "src/route_match.cpp"
 #include "src/route_add.cpp"
-#include "src/strfns.cpp"
+
 */
+#include "zpp/strfns.cpp"
 
 PHP_FUNCTION(Wcc_init_globals)
 {
 	ZEND_PARSE_PARAMETERS_START(0, 0)
    ZEND_PARSE_PARAMETERS_END();
-/*
-	zval_mgr wrap;
-	//printf("init_globals\n");
 
-	wrap = Wcc_ReflectCache::instance();
-	//showmem("zval_own new_wrap", new_wrap);
-*/
+	zobj_mgr wrap;
+	printf("init_globals\n");
+
+	wrap = ReflectCache::instance();
+	showobj("zval_own new_wrap", wrap);
+
 }
 
 

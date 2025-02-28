@@ -13,6 +13,8 @@
 
 #include <string> 
 
+#include "show_zpp.h"
+
 #include "zstr_mgr.h"
 #include "zstr_user.h"
 
@@ -27,7 +29,7 @@
 #include "htab_walk.h"
 
 #include "state_init.h"
-#include "show_zpp.h"
+
 
 #include "globals.h"
 
@@ -312,6 +314,7 @@ namespace zpp {
 			// setup object with handlers
 			zobj_mgr result;
 			result.adopt(mydef::make_new());
+			showobj("new_zobj", result);
 			return result;
 		}
 

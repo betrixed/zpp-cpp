@@ -58,7 +58,33 @@ zval_mgr::try_decref()
 void 
 zval_mgr::make_ref()
 {
-    ZVAL_MAKE_REF(&zv_);
+    zval *zp = &zv_;
+    if (!Z_ISREF_P(zp)) { 
+        /*
+        zend_reference *ref = (zend_reference *) emalloc(sizeof(zend_reference));
+        ref->gc.refcount = 1;                               
+        GC_TYPE_INFO(ref) = GC_REFERENCE;                     
+        ZVAL_COPY_VALUE(&ref->val, zp);                        
+        ref->sources.ptr = NULL;                                  
+        Z_REF_P(zp) = ref;                                    
+        Z_TYPE_INFO_P(zp) = IS_REFERENCE_EX; 
+        */
+        ZVAL_NEW_REF(&zv_, zp);  
+    }                       
+}
+
+ 
+void
+zval_mgr::addref()
+{
+    Z_TRY_ADDREF(zv_);
+    /*
+    if (Z_REFCOUNTED_P(&zv_))
+    {
+        zv_.value.counted->gc.refcount++;
+    }
+    */
+    
 }
 
 void // protected
@@ -74,8 +100,14 @@ zval_mgr::bind_string(zend_string* s)
 	ZVAL_STR(&zv_, s);
 	if (!(GC_FLAGS(s) & IS_STR_INTERNED))
 	{
-		zend_string_addref(s);
+		GC_ADDREF(s);
 	}
+}
+
+void // protected
+zval_mgr::bind_long(zend_long value)
+{
+    ZVAL_LONG(&zv_, value);
 }
 
 void // protected
@@ -91,15 +123,35 @@ zval_mgr::bind_array(HashTable* ht)
     zval_addref_p(&zv_);
 }
 
+const zval_mgr& 
+zval_mgr::operator=(zend_long value)
+{
+    try_decref();
+    zv_ = {0};
+    bind_long(value);
+    return *this;
+}
+
 zval_mgr::zval_mgr() 
 {
     init();
 }
 
+void zval_mgr::set_null()
+{
+    lose();
+}
+
+void zval_mgr::set_bool(bool value)
+{
+    try_decref();
+    zv_ = {0};
+    ZVAL_BOOL(&zv_, value);
+}
+
 zval_mgr::zval_mgr(HashTable* ht)
 {
      init();
-
 }
 
 zval_mgr::zval_mgr(zval* zv)

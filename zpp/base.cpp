@@ -20,6 +20,7 @@
 #include "globals.cpp"
 #include "global.cpp"
 #include "zstr_buffer.cpp"
+#include "fn_call.cpp"
 
 namespace zpp {
 

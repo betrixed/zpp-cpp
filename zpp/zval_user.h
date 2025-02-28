@@ -157,6 +157,7 @@ public:
     //! return HashTable* pointer or nullptr
     HashTable* zarray() const;
 
+    
     int ztype() const {
         if (!p_)
             return 0;

@@ -34,7 +34,9 @@ public:
     Global &operator=(const T &value)
     {
         gval_.operator=(value);
+        //showmem("gval_ =", gval_);
         gval_.make_ref();
+        //showmem("gval ref_ =", gval_);
         return update();
     }
     

@@ -59,10 +59,14 @@ zval_user::zobject() const
 	if (!p_) {
 		return nullptr;
 	}
-	if (Z_TYPE_P(p_) != IS_OBJECT) {
+	zval* zv = (zval*) p_;
+
+	ZVAL_DEREF(zv);
+
+	if (Z_TYPE_P(zv) != IS_OBJECT) {
 		return nullptr;
 	}
-	return Z_OBJ_P(p_);
+	return Z_OBJ_P(zv);
 }
 
 size_t zval_user::size() const

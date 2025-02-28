@@ -42,6 +42,8 @@ namespace zpp {
     class  ZPP_EXPORT class_data {
     protected:
         zend_class_entry* class_entry_;
+
+        bool check(const char* msg);
     public:
         class_data() : class_entry_(nullptr) {}
 
@@ -59,7 +61,8 @@ namespace zpp {
             class_entry_ = ce;
         }
 
-        void set(zstr_user classname);
+        bool set(zstr_user classname);
+
 
         zend_string* className()
         {

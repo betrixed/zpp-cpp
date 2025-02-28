@@ -1,6 +1,7 @@
 config*
 autom4te.cache/**
 build/**
+php/**
 modules/**
 *sublime*
 Makefile

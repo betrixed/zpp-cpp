@@ -165,6 +165,8 @@ namespace zpp {
         zstr_intern  diff;
         zstr_intern  date;
         zstr_intern  strtotime;
+        zstr_intern  addcslashes;
+        zstr_intern  rawurlencode;
 
 
         

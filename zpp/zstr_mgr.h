@@ -10,6 +10,7 @@
 namespace zpp {
 
 	class zstr_user;
+	class zval_mgr;
 
 	class ZPP_EXPORT zstr_mgr {
 	protected:
@@ -20,12 +21,18 @@ namespace zpp {
 	    void bind(zend_string* rc);
 
 	    friend class zstr_user;
+	    friend class zval_mgr;
 
 	public:
 	    zstr_mgr() : s((zend_string*) nullptr)
 	    {   
 	    }
 
+
+	    ~zstr_mgr(){
+	        lose();
+	    }
+	    
 	    zstr_mgr(zend_string* p) : s(p)
 	    {
 	        own();
@@ -36,6 +43,8 @@ namespace zpp {
 	        s = rc.s;
 	        own();
 	    }
+
+	    zstr_mgr(zval_mgr&& rc);
 
 	    zstr_mgr(zend_long ival);
 	    
@@ -55,12 +64,6 @@ namespace zpp {
 
 	    zstr_mgr& operator=(zstr_mgr&& rc);
 
-
-	    
-
-	    ~zstr_mgr(){
-	        lose();
-	    }
 
 	    void adopt(zend_string* rc);
 

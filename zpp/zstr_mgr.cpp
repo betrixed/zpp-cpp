@@ -49,7 +49,16 @@ zstr_mgr::own()
 	{
 		return;
 	}
-	zend_string_addref(s);
+	GC_ADDREF(s);
+}
+
+void zstr_mgr::addref()
+{
+	if (GC_FLAGS(s) & IS_STR_INTERNED)
+	{
+		return;
+	}
+	GC_ADDREF(s);
 }
 
 void 
@@ -99,6 +108,15 @@ zstr_mgr::zstr_mgr(zend_long ival)
     s = _php_math_longtobase(ival,10);
 }
 
+zstr_mgr::zstr_mgr(zval_mgr&& rc)
+{
+	zval_user zu(rc);
+	if (zu.isString())
+	{
+		s = zu.zstr();
+	}
+	rc.lose();
+}
 
 size_t 
 zstr_mgr::size() const
@@ -133,11 +151,14 @@ zstr_intern::zstr_intern(const char* c, size_t slen)
 		slen = strlen(c);
 	}
 	s = zend_string_init(c, slen, 1);
+	//showstr("init s",s);
 	zend_string* p = zend_new_interned_string(s);
+	//showstr("interned s",p);
 	if ((p != s) && (GC_FLAGS(p) & IS_STR_INTERNED))
 	{
 		lose(); 
 		s = p;
+		//showstr("final s",s);
 	}
 }
 

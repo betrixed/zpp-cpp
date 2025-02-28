@@ -37,8 +37,9 @@ public:
 		reflection_class = zstr_intern("reflectionclass");
 		new_instance = zstr_intern("newinstance");
 		new_instance_args = zstr_intern("newinstanceargs");
-		// presume reflectionclass is configurd.
-		rfc_cdata.set(reflection_class);
+		// presume reflectionclass is configured.
+		//rfc_cdata.set(reflection_class); // this will segfault here
+		//zend_printf("ReflectCache_data::init\n");
 	}
 };
 
@@ -79,6 +80,7 @@ ReflectCache::getReflectClass(zstr_user class_name)
 
 	if (RFC_data.rfc_cdata.new_object(result))
 	{
+		showobj("new_object",result);
 		fn_call_args<1> fn;
 
 		fn.set_fci(result, RFC_data.construct_key);
@@ -92,6 +94,10 @@ ReflectCache::getReflectClass(zstr_user class_name)
 			result = temp.zobject();
 		}
 	}
+	else {
+		zend_throw_error(zend_ce_error,"new object failed for %s", class_name.data());
+	}
+	showobj("getReflectClass",result);
 	return result;
 
 }

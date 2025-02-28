@@ -44,7 +44,10 @@ protected:
 
     void assign_ptr(zval* p);
 
+    void bind_long(zend_long value);
+
     friend class zval_user;
+    friend class zstr_mgr;
     friend class htab_mgr;
     
 public:
@@ -58,6 +61,7 @@ public:
 
     zval_mgr(zval* zv);
     
+
     ~zval_mgr()
     {
         lose();
@@ -73,6 +77,10 @@ public:
         bind_object(rc);
     }
 
+    zval_mgr(zend_long value)
+    {
+        bind_long(value);
+    }
     zval_mgr(const zval_mgr& rc, bool byRef = false);
 
     zval_mgr(zval_mgr&& rc);
@@ -83,14 +91,18 @@ public:
 
 
 
-    void decref();
-    void addref();
+    void     decref();
+    void     addref();
 
     void make_ref();
-    
+    void set_bool(bool value);
+    void set_null();
+
     const zval_mgr& operator=(const zval_user &rc);
 
     const zval_mgr& operator=(const zobj_mgr &rc);
+
+    const zval_mgr& operator=(zend_long value);
 
     zval_mgr& operator=(zval_mgr&& rc);
 
