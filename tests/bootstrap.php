@@ -1,0 +1,37 @@
+<?php
+//bootstrap.php
+namespace Wcc;
+
+/** Folder containing Wcc PHP source */
+$workdir = dirname(__DIR__);
+
+chdir($workdir);
+
+//echo "Current directory is $workdir" .  PHP_EOL;
+
+$wcc_root = "php/Wcc";
+
+$version = phpversion("wcc");
+$xdebug = phpversion("xdebug");
+
+echo "wcc $version, xdebug $xdebug\n";
+
+if (!class_exists(Finder::class)) {
+	require $wcc_root . DIRECTORY_SEPARATOR . "Finder.php";
+}
+	
+require $wcc_root . DIRECTORY_SEPARATOR . "Loader.php";
+
+$loader = new Loader("");
+$loader->addPathArray([
+    "Wcc" => "php/Wcc",
+    "Wcd" => "php/Wcd",
+    "Wcf" => "php/Wcf",
+]);
+
+$loader->register();
+
+
+
+
+
