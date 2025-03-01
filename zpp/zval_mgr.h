@@ -48,6 +48,7 @@ protected:
 
     friend class zval_user;
     friend class zstr_mgr;
+    friend class zobj_mgr;
     friend class htab_mgr;
     
 public:
@@ -81,6 +82,9 @@ public:
     {
         bind_long(value);
     }
+
+    zval_mgr(bool value);
+    
     zval_mgr(const zval_mgr& rc, bool byRef = false);
 
     zval_mgr(zval_mgr&& rc);
@@ -89,7 +93,10 @@ public:
 
     zval_mgr(int value);
 
-
+    //! mutate to suggested type if necessary
+    void     toLong();
+    void     toDouble();
+    void     toString();
 
     void     decref();
     void     addref();
@@ -98,11 +105,16 @@ public:
     void set_bool(bool value);
     void set_null();
 
+    void new_array();
+    void empty_array();
+
     const zval_mgr& operator=(const zval_user &rc);
 
     const zval_mgr& operator=(const zobj_mgr &rc);
 
     const zval_mgr& operator=(zend_long value);
+
+    const zval_mgr& operator=(const zval_mgr &rc);
 
     zval_mgr& operator=(zval_mgr&& rc);
 

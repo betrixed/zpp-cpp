@@ -33,7 +33,10 @@
 extern "C" {
 
 #include "php_wcc.h"
-#include "wcc_arginfo.h"
+#include "stub/wcc_arginfo.h"
+
+
+
 
 /* For compatibility with older PHP versions */
 #ifndef ZEND_PARSE_PARAMETERS_NONE
@@ -105,17 +108,19 @@ extern "C" {
 #include "src/reflect_cache.cpp"
 #include "src/services.cpp"
 
+#define XMLREAD_CODE
+
+#ifdef XMLREAD_CODE
+#include "src/xmlread.cpp"
+#endif
+
 /*
  //ICACHE_DATA_CPP
 #include "src/icachedata.cpp"
 #include "src/icache.cpp"
 
 
-#define XMLREAD_CODE
 
-#ifdef XMLREAD_CODE
-#include "src/xmlread.cpp"
-#endif
 
 
 

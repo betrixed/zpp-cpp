@@ -16,7 +16,7 @@ zstr_user::data() const
 {
 	if (!s)
 	{
-		return nullptr;
+		return empty_zstr;
 	}
 	return ZSTR_VAL(s);
 }
@@ -71,6 +71,72 @@ zstr_user::vstr() const
 	return std::string_view(ps, slen);
 }
 
+
+std::string_view  
+zstr_user::subview(int offset, int len) const
+{
+	size_t slen = size();
+	size_t pos = 0;
+
+	static const char* strview_empty = "\0";
+
+	if (offset < 0)
+	{
+		if (slen > (-offset))
+		{
+			pos = slen + offset;
+		}
+	}
+	else {
+		pos = offset;
+	}
+	if (len < 0)
+	{
+		int remaining = int(slen) + len - int(pos);
+		if (remaining <= 0) {
+			return std::string_view(strview_empty);
+		}
+		slen = (size_t)remaining;
+	}
+	else {
+		slen = len;
+	}
+	//zend_printf("sview substr from %ld , len %ld\n", pos, slen);
+	return vstr().substr(pos,slen);
+}
+
+zstr_mgr
+zstr_user::substr(int offset, int len) const
+{
+	 std::string_view text(subview(offset, len));
+
+	 zstr_temp result(text.data(), text.size());
+
+	 //showstr("substr", result);
+	 return result;
+}
+
+zstr_mgr
+zstr_user::to_lower() const
+{
+	zstr_mgr result;
+	if (s)
+	{
+		result.adopt(zend_string_tolower(s));
+	}
+	return result;
+}
+
+zstr_mgr 
+zstr_user::to_upper() const
+{
+	zstr_mgr result;
+	if (s)
+	{
+		result.adopt(zend_string_toupper(s));
+	}
+	return result;
+}
 
 };
 //zstr_user.cpp

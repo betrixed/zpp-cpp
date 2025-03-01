@@ -3,10 +3,10 @@ set -e
 sudo make clean
 clear
 
-make wcc_arginfo.h
+make ./stub/wcc_arginfo.h
+make ./stub/xmlread_arginfo.h
 
 #make sqlipart_arginfo.h
-#make xmlread_arginfo.h
 #make icache_arginfo.h
 #make toml_arginfo.h
 #make htmlgem_arginfo.h

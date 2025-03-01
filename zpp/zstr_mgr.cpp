@@ -78,6 +78,7 @@ zstr_mgr::operator=(zstr_mgr&& rc)
     return *this;
 }
 
+
 const zstr_mgr& 
 zstr_mgr::operator=(zend_string* rc)
 {
@@ -93,6 +94,23 @@ zstr_mgr::operator=(zval* rc)
 	return *this;
 }
 
+zstr_mgr& 
+zstr_mgr::operator=(zval_mgr&& rc)
+{
+	zval_user zu(rc);
+	zend_string* p = zu.zstr();
+	if (s != p)
+	{
+		bind(p);
+	} 
+	else if (s) 
+	{
+		lose();
+	}
+	rc.lose();
+	return *this;	
+}
+
 
 void zstr_mgr::adopt(zend_string* rc)
 {
@@ -100,6 +118,16 @@ void zstr_mgr::adopt(zend_string* rc)
 	{
 		lose();
 		s = rc;
+	}
+}
+
+zstr_mgr::zstr_mgr(zval* copy)
+{
+	zval_user test(copy);
+	s = test.zstr();
+	if (s)
+	{
+		own();
 	}
 }
 

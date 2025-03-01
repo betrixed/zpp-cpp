@@ -17,6 +17,7 @@
 
 #include "state_init.cpp"
 
+#include "datetime.cpp"
 #include "globals.cpp"
 #include "global.cpp"
 #include "zstr_buffer.cpp"

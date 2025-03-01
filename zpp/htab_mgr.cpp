@@ -148,13 +148,19 @@ htab_mgr::operator=(HashTable* htab)
 	return *this;
 }
 
+HashTable* //static
+htab_mgr::new_array()
+{
+	return zend_new_array(HT_MIN_SIZE);
+}
+
 void htab_mgr::init()
 {
 	if (ht_)
 	{
 		lose();
 	}
-	ht_ = zend_new_array(HT_MIN_SIZE);
+	ht_ = new_array();
 	//ht_ = (HashTable*) &zend_empty_array;
 }
 

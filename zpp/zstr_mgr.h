@@ -38,6 +38,8 @@ namespace zpp {
 	        own();
 	    }
 
+	    zstr_mgr(zval* copy);
+
 	    zstr_mgr(const zstr_mgr& rc)
 	    {
 	        s = rc.s;
@@ -54,6 +56,14 @@ namespace zpp {
 	        rc.s = nullptr;
 	    }
 
+	    bool ok() const {
+	    	return (s);
+	    }
+
+	    bool isNull() const {
+	    	return !(s);
+	    }
+	    
 	    void decref();
 	    void addref();
 	    
@@ -62,6 +72,7 @@ namespace zpp {
 	    const zstr_mgr& operator=(zend_string* rc);
 	    const zstr_mgr& operator=(zval* rc);
 
+	    zstr_mgr& operator=(zval_mgr&& rc);
 	    zstr_mgr& operator=(zstr_mgr&& rc);
 
 

@@ -35,6 +35,8 @@
 
 #include "zstr_buffer.h"
 
+#include "datetime.h"
+
 #include "preg.h"
 
 #include <stdexcept>

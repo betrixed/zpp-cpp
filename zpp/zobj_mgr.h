@@ -35,7 +35,10 @@ namespace zpp {
 		    rc.obj_ = nullptr;
 		}
 		
+		zobj_mgr(zval_mgr&& m);
+
 		int decref();
+		int addref();
 
 		bool isNull() const { return !(obj_); }
 		bool ok() const { return (obj_); }

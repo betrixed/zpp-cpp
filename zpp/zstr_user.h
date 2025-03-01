@@ -59,6 +59,13 @@ namespace zpp {
 		bool ok() const { return (s); }
 		bool isNull() const { return !(s); }
 
+		std::string_view  subview(int offset, int len) const;
+
+		zstr_mgr substr(int offset, int len=INT_MAX) const;
+
+		zstr_mgr to_lower() const;
+
+		zstr_mgr to_upper() const;
 
 	};
 };

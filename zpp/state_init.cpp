@@ -149,5 +149,26 @@ bool class_data::check(const char* msg)
     zend_throw_error(zend_ce_exception, "new_object failed %s", ZSTR_VAL(s));
     return false;
  }
+
+zobj_mgr//static
+class_data::create_object(zstr_user classname)
+{
+    class_data temp(classname);
+
+    zobj_mgr result;
+
+    temp.new_object(result);
+
+    return result;
+}
+
+zobj_mgr//static
+class_data::std_object()
+{
+    zval_mgr init;
+    object_init(init);
+    return zobj_mgr(std::move(init));
+}
+
 }; // namespace
 #endif

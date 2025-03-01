@@ -14,6 +14,9 @@ namespace zpp {
         void own();
         void lose();
     public:
+
+        static HashTable* new_array();
+        
         ~htab_mgr();
 
         htab_mgr() : ht_(nullptr) {}

@@ -55,6 +55,14 @@ zobj_mgr::decref()
     return rc;
 }
 
+int 
+zobj_mgr::addref()
+{
+	if (obj_) {
+    	return GC_ADDREF(obj_);
+    }
+    return 0;
+}
 
 zobj_mgr& 
 zobj_mgr::operator=(const zobj_user &rc)
@@ -118,6 +126,21 @@ zobj_mgr::return_zv(zval* ret)
 		ZVAL_OBJ_COPY(ret, obj_);
 	else
 		ZVAL_NULL(ret);
+}
+
+zobj_mgr::zobj_mgr(zval_mgr&& m)
+{
+	zval_user zu(m);
+
+	if (zu.isObject())
+	{
+		obj_ = zu.zobject();
+	}
+	else {
+		obj_ = nullptr;
+	}
+	// force forget
+	m.lose();
 }
 
 }; //namespace zpp

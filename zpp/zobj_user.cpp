@@ -95,6 +95,16 @@ zobj_user::callable(zval_user arg1)
 }
 
 zval_mgr
+zobj_user::call(zstr_user method)
+{
+    fn_call fn;
+
+    fn.set_fci(obj_, method);
+
+    return fn.call_fn();
+}
+
+zval_mgr
 zobj_user::callable(zval_user arg1, zval_user arg2)
 {
     zval_mgr callme (obj_);
@@ -109,7 +119,97 @@ zobj_user::callable(zval_user arg1, zval_user arg2)
         callable_failed();
     return result;
 }
+void
+zobj_user::property(zstr_user key, const zval_mgr& value)
+{
+    // zend_class_entry* scope = obj_->ce;
+    zend_class_entry* scope = EG(fake_scope);
 
+    if (!scope) {
+        scope = zend_get_executed_scope();
+        //zend_printf("ex scope %lx\n", scope);
+    }
+
+    zend_update_property_ex(scope, obj_, key, value);    
+}
+
+/** get a dynamic property by name */
+zval_mgr 
+zobj_user::property(zstr_user key)
+{
+    zval_mgr result;
+    zval* direct;
+    // 
+    //amazing stuff from PHP-CPP Value::get(const har*, size_t)
+ 
+    zend_class_entry* scope = EG(fake_scope) ? EG(fake_scope) : zend_get_executed_scope();
+    
+    /**
+     *  phpinternals book php7, probably outdated.
+     *  says function can return pointer to zval  owned by object, and
+     *  this hasn't been modified by read_property.
+     * 
+     *  But the the indirect value is for temporary zvals, like returned by call to __get
+     *  and will have its reference count , which needs decrementing.
+     * 
+     *  Both work at same time, and then contain data with same reference count!!
+     *  
+     *  Not clear.
+     *  This call only wants to return one value!
+     *  Execution of direct & indirect indicates one may be same as the other!
+     *  
+     */ 
+    direct = zend_read_property_ex(scope, obj_, key, 0, (zval*)result);
+
+    return result;
+}
+
+
+zval_mgr
+zobj_user::call(zstr_user method, const zval_mgr& arg1)
+{
+
+    fn_call_args<1> caller;
+
+    caller.set_fci(obj_, method);
+
+    return caller.call1(arg1);
+}
+
+zval_mgr
+zobj_user::call(zstr_user method, 
+            const zval_mgr& arg1, const zval_mgr& arg2)
+{
+    fn_call_args<2> caller;
+
+    caller.set_fci(obj_, method);
+
+    return caller.call2(arg1,arg2);
+}
+
+zval_mgr
+zobj_user::call(zstr_user method, 
+            const zval_mgr& arg1, const zval_mgr& arg2, const zval_mgr& arg3)
+{
+    fn_call_args<3> caller;
+
+    caller.set_fci(obj_, method);
+
+    return caller.call3(arg1,arg2,arg3);
+}
+
+
+zval_mgr
+zobj_user::call(zstr_user method, 
+            const zval_mgr& arg1, const zval_mgr& arg2, 
+            const zval_mgr& arg3, const zval_mgr& arg4)
+{
+    fn_call_args<4> caller;
+
+    caller.set_fci(obj_, method);
+
+    return caller.call4(arg1,arg2,arg3, arg4);
+}
 
 }; // namespace
 #endif

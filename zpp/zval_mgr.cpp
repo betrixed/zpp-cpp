@@ -73,7 +73,24 @@ zval_mgr::make_ref()
     }                       
 }
 
- 
+void 
+zval_mgr::new_array()
+{
+    lose();
+    HashTable* ht = htab_mgr::new_array();
+    // added with rc == 1 
+    ZVAL_ARR(&zv_, ht);   
+}
+
+void 
+zval_mgr::empty_array()
+{
+    lose();
+    // zend_empty_array has rc == 2 
+    ZVAL_ARR(&zv_, (zend_array*) &zend_empty_array);   
+}
+
+
 void
 zval_mgr::addref()
 {
@@ -132,6 +149,8 @@ zval_mgr::operator=(zend_long value)
     return *this;
 }
 
+
+
 zval_mgr::zval_mgr() 
 {
     init();
@@ -153,6 +172,18 @@ zval_mgr::zval_mgr(HashTable* ht)
 {
      init();
      bind_array(ht);
+}
+
+zval_mgr::zval_mgr(bool bval)
+{
+    init();
+    if (bval)
+    {
+        ZVAL_TRUE(&zv_);
+    }
+    else {
+        ZVAL_FALSE(&zv_);
+    } 
 }
 
 zval_mgr::zval_mgr(zval* zv)
@@ -254,12 +285,59 @@ zval_mgr::operator=(const zobj_mgr &rc)
     return *this;
 }
 
+const zval_mgr& 
+zval_mgr::operator=(const zval_mgr &rc)
+{
+    lose(); 
+    ZVAL_COPY(&zv_, (zval*) &rc.zv_);
+    return *this;
+}
+
 void 
 zval_mgr::move_zv(zval* return_value)
 {
     ZVAL_COPY_VALUE(return_value, &zv_);
     init();
 }
+
+//! mutate value
+void 
+zval_mgr::toLong()
+{
+    zval* p = &zv_;
+    
+    if (!Z_TYPE_P(p) != IS_LONG) {
+        ZVAL_DEREF(p);
+        zend_long value =  zval_get_long_ex(p,false);
+        lose();
+        ZVAL_LONG(&zv_,value);
+    }
+}
+
+void zval_mgr::toDouble()
+{
+    zval* p = &zv_;
+    if (!Z_TYPE_P(p) != IS_DOUBLE) {
+        ZVAL_DEREF(p);
+        double value =  zval_get_double_func(p);
+        lose();
+        ZVAL_DOUBLE(&zv_,value);
+    }
+}
+
+void
+zval_mgr::toString() 
+{
+    zval* p = (zval*)  &zv_;
+    ZVAL_DEREF(p);
+    if (Z_TYPE_P(p) != IS_STRING)
+    {
+        zend_string* s = zval_get_string(p);
+        lose();
+        ZVAL_STR(&zv_, s);
+    }
+}
+
 
 }; // namespace Php
 

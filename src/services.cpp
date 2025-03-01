@@ -325,8 +325,6 @@ Services::setThrowFail(bool value)
 	throw_fail_ = value;
 }
 
-
-
 void Services::debug_info(htab_user info)
 {
 	//showarray("debug_info-0", info);

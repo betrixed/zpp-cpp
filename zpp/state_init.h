@@ -45,6 +45,11 @@ namespace zpp {
 
         bool check(const char* msg);
     public:
+
+        static zobj_mgr create_object(zstr_user classname);
+
+        static zobj_mgr std_object();
+        
         class_data() : class_entry_(nullptr) {}
 
         class_data(zend_class_entry* ce) : class_entry_(ce) 
@@ -63,7 +68,6 @@ namespace zpp {
 
         bool set(zstr_user classname);
 
-
         zend_string* className()
         {
             if (class_entry_)
@@ -78,6 +82,7 @@ namespace zpp {
 
         zval_mgr static_property(zend_string* s);
         zval_mgr static_constant(zend_string* s);
+
 
         bool new_object(zobj_mgr& om);
 
