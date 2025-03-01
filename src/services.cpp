@@ -283,7 +283,8 @@ void  Services::set(zstr_user name, zval_user value)
 	htab_user(active_).set(name, value);
 }
 
-zval_mgr  Services::get(zstr_user name)
+zval_mgr  
+Services::get(zstr_user name)
 {
 	zval_mgr result;
 	zval_user value;
@@ -303,6 +304,9 @@ zval_mgr  Services::get(zstr_user name)
 		zobj_user callme = value.zobject();
 		//showobj("callable ", callme);
 		result = call_value(callme);
+	}
+	else {
+		result = value;
 	}
 	return result;
 }
@@ -325,17 +329,17 @@ Services::setThrowFail(bool value)
 
 void Services::debug_info(htab_user info)
 {
-	showarray("debug_info-0", info);
+	//showarray("debug_info-0", info);
 
 	base_d::debug_info(info);
-	showarray("debug_info-1", info);
-	showstr("key data",SVC_data.active);
+	//showarray("debug_info-1", info);
+	//showstr("key data",SVC_data.active);
 	info.set(SVC_data.active, active_);
 	info.set(SVC_data.defer, defer_);
 	info.set(SVC_data.instances, instances_);
 	info.set(SVC_data.throw_fail, throw_fail_);
 	info.set(SVC_data.defer_ct, defer_ct_);
-	showarray("debug_info", info);
+	//showarray("debug_info", info);
 }
 
 }; // namespace wcc
