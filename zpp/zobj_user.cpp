@@ -87,7 +87,7 @@ zobj_user::callable(zval_user arg1)
 
     ZVAL_COPY_VALUE(argv, arg1);
 
-    showmem("callable arg1", argv);
+    //showmem("callable arg1", argv);
     
     if (!callable_fn(result, callme, 1, argv))
         callable_failed();

@@ -17,10 +17,9 @@ function hide1() {
 	else {
 		$c1 = null;
 	}
-
-
-
 	$svc = Services::instance();
+
+	//debug_zval_dump($svc);
 
 	if (class_exists(Config::class))
 	{
@@ -90,11 +89,11 @@ function hide1() {
 		$d1 = $svc->get("emty");
 
 		echo "got emty" . PHP_EOL;
-		debug_zval_dump($d1);
+		//debug_zval_dump($d1);
 		$d2 = $svc->get("config");
 		$d2->test = "property";
 
-		debug_zval_dump($d2);
+		//debug_zval_dump($d2);
 	}
 	catch (\Error $ex)
 	{
@@ -108,7 +107,7 @@ function hide1() {
 	$cfg = $ic->getService('config');
 	echo "service $cfg->test" . PHP_EOL;
 
-	debug_zval_dump($ic);
+	//debug_zval_dump($ic);
 
 }
 

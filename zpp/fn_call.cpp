@@ -365,8 +365,8 @@ bool callable_fn(zval_mgr& result, zval_mgr& callme, int argct, zval* argv)
 
     zval*    pzobj = nullptr;
 
-    showmem("argv", argv);
-    showmem("result", result);
+    //showmem("argv", argv);
+    //showmem("result", result);
 
     if (call_user_function( 
         CG(function_table), 
@@ -380,7 +380,7 @@ bool callable_fn(zval_mgr& result, zval_mgr& callme, int argct, zval* argv)
         zend_throw_error(zend_ce_error, "Invalid callable", 0);
         return false;
     }
-     showmem("result", result);
+     //showmem("result", result);
     return true;
 }
 

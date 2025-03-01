@@ -314,7 +314,7 @@ namespace zpp {
 			// setup object with handlers
 			zobj_mgr result;
 			result.adopt(mydef::make_new());
-			showobj("new_zobj", result);
+			//showobj("new_zobj", result);
 			return result;
 		}
 
@@ -409,7 +409,7 @@ namespace zpp {
 			/* to be deleted by zend */
 			*is_temp = 1; 
 			HashTable* ret = zend_new_array(6);
-			cobj->debug_info(ret);
+			cobj->debug_info(htab_user(ret));
 
 			return ret;
 		}

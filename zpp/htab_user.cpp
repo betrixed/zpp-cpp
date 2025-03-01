@@ -321,10 +321,9 @@ htab_user::set(zend_string* key, zend_string* value)
 
 void htab_user::set(zend_string* key, HashTable* value)
 {
-
+	//showstr("htab_user::set  key", key);
 	zval_mgr temp(value);
-	//showmem("htab_user::set htab_own&", temp);
-	update(key, temp);
+	update(key, (zval*)temp);
 }
 
 void htab_user::set(zend_string* key, zend_object* obj)

@@ -152,6 +152,7 @@ void zval_mgr::set_bool(bool value)
 zval_mgr::zval_mgr(HashTable* ht)
 {
      init();
+     bind_array(ht);
 }
 
 zval_mgr::zval_mgr(zval* zv)

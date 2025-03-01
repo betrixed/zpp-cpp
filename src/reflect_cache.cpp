@@ -80,7 +80,7 @@ ReflectCache::getReflectClass(zstr_user class_name)
 
 	if (RFC_data.rfc_cdata.new_object(result))
 	{
-		showobj("new_object",result);
+		//showobj("new_object",result);
 		fn_call_args<1> fn;
 
 		fn.set_fci(result, RFC_data.construct_key);
@@ -97,7 +97,7 @@ ReflectCache::getReflectClass(zstr_user class_name)
 	else {
 		zend_throw_error(zend_ce_error,"new object failed for %s", class_name.data());
 	}
-	showobj("getReflectClass",result);
+	//showobj("getReflectClass",result);
 	return result;
 
 }

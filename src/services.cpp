@@ -37,11 +37,16 @@ namespace wcc
 
 		virtual void init() 
 		{
-			zstr_intern active = zstr_intern("active");
-			zstr_intern defer = zstr_intern("defer");
-			zstr_intern instances = zstr_intern("instances");
-			zstr_intern throw_fail = zstr_intern("throw_fail");
-			zstr_intern defer_ct = zstr_intern("defer_ct");
+			
+			 active = zstr_intern("active");
+			
+			 defer = zstr_intern("defer");
+			
+			 instances = zstr_intern("instances");
+			
+			 throw_fail = zstr_intern("throw_fail");
+			
+			 defer_ct = zstr_intern("defer_ct");
 		}
 	};
 
@@ -52,7 +57,7 @@ Services::call_value(zobj_user callme)
 {
 	zval_mgr self(this->zobj());
 	// 1 argument
-	showmem("self svc", self);
+	//showmem("self svc", self);
 	return callme.callable(self);
 }
 
@@ -211,13 +216,13 @@ Services::newInstance(zstr_user name_class)
 
 	ReflectCache* rc = ReflectCache::cpp();
 
-	showstr("newInstance of ", name_class);
+	//showstr("newInstance of ", name_class);
 
 	zobj_mgr obj = rc->newInstance(name_class);
 	
 	if (obj.ok())
 	{
-		showarray("instances", instances_);
+		//showarray("instances", instances_);
 		htab_user(instances_).set(name_class, obj);
 	}
 	else {
@@ -283,20 +288,20 @@ zval_mgr  Services::get(zstr_user name)
 	zval_mgr result;
 	zval_user value;
 
-	showstr("services::get", name);
+	//showstr("services::get", name);
 
 	if (!htab_user(active_).try_fetch(name, value))
 	{
 		result = activate(name);
 		return  result;
 	}
-	showmem("got active ", value);
+	//showmem("got active ", value);
 	int ztype = value.ztype();
 
 	if (value.isCallable())
 	{
 		zobj_user callme = value.zobject();
-		showobj("callable ", callme);
+		//showobj("callable ", callme);
 		result = call_value(callme);
 	}
 	return result;
@@ -320,13 +325,17 @@ Services::setThrowFail(bool value)
 
 void Services::debug_info(htab_user info)
 {
+	showarray("debug_info-0", info);
 
+	base_d::debug_info(info);
+	showarray("debug_info-1", info);
+	showstr("key data",SVC_data.active);
 	info.set(SVC_data.active, active_);
 	info.set(SVC_data.defer, defer_);
 	info.set(SVC_data.instances, instances_);
 	info.set(SVC_data.throw_fail, throw_fail_);
 	info.set(SVC_data.defer_ct, defer_ct_);
-
+	showarray("debug_info", info);
 }
 
 }; // namespace wcc
