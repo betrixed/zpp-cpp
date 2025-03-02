@@ -35,9 +35,6 @@ extern "C" {
 #include "php_wcc.h"
 #include "stub/wcc_arginfo.h"
 
-
-
-
 /* For compatibility with older PHP versions */
 #ifndef ZEND_PARSE_PARAMETERS_NONE
 #define ZEND_PARSE_PARAMETERS_NONE() \

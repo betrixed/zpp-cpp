@@ -1,8 +1,6 @@
 #ifndef HTAB_WALK_CPP
 #define HTAB_WALK_CPP
 
-
-
 bool htab_walk::start(HashTable* ht)
 {
     wrap_ = ht;

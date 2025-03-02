@@ -1,6 +1,9 @@
 #ifndef GLOBAL_H
 #define GLOBAL_H
 
+#ifndef HTAB_WRITE_H
+#include "htab_write.h"
+#endif
 
 namespace zpp {
 
@@ -46,7 +49,7 @@ public:
     void set(int index,  zval_user value)
     {
         update();
-        htab_user hw(gval_);
+        htab_write hw(gval_);
         hw.set(index, value);
     }
 
@@ -54,7 +57,7 @@ public:
     void set(zstr_user key,  zval_user value)
     {
         update();
-        htab_user hw(gval_);      
+        htab_write hw(gval_);      
         hw.set(key, value);
     }
 

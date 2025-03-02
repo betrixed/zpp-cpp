@@ -37,7 +37,7 @@ public:
 
 	void clear();
 	
-	virtual void debug_info(HashTable *ht);
+	void debug_info(htab_write hw) override;
 };
 
 

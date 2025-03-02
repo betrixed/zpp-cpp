@@ -177,6 +177,7 @@ void RouteAdd::ready(Route* route)
 	if (url_prefix_.size())
 	{
 		bool preslash = (url_prefix_.data()[0] == '/');
+
 		if (!slashBegins) {
 			if (!preslash)
 			{
@@ -186,6 +187,7 @@ void RouteAdd::ready(Route* route)
 		}
 		else {
 			if (preslash) {
+				zend_printf("preslash \n");
 				pattern << url_prefix_.substr(1);
 			}
 			else {
@@ -193,6 +195,8 @@ void RouteAdd::ready(Route* route)
 			}
 		}
 	}
+	//showstr("pattern ", pattern);
+
 	if ((pr2 > 0)&&(m2.size() > 1)) {
 		segs = m2.get((int) 1);
 	}
@@ -207,10 +211,11 @@ void RouteAdd::ready(Route* route)
 	auto& value = wk.value();
 	zstr_own name;
 	zstr_own blob;
+	htab_own params;
 
 	if (segs.size()) 
 	{
-		htab_own params;
+
 		int   param_ix = 1;
 
 		for(wk.start(segs); wk.ok(); wk.next())
@@ -252,24 +257,28 @@ void RouteAdd::ready(Route* route)
 
 		}
 
-		auto pcount = params.size();
-		zstr_own cpattern;
-		zstr_own rpattern(std::move(pattern));
 
-		if (pcount > 0)
-		{
-			cpattern = compiled.zstr();
-			compiled << "#^" << cpattern << "$#";
-			cpattern = compiled.zstr();
-			zval_own zparams(params);
-			route->setParams(zparams);
-		}
-		else {
-			cpattern = rpattern;
-		}
-		route->setPattern(rpattern);
-		route->setCompiled(cpattern);
 	}
+	auto pcount = params.size();
+	zstr_own cpattern;
+	zstr_own rpattern(std::move(pattern));
+
+	if (pcount > 0)
+	{
+		cpattern = compiled.zstr();
+		compiled << "#^" << cpattern << "$#";
+		cpattern = compiled.zstr();
+		zval_own zparams(params);
+		route->setParams(zparams);
+	}
+	else {
+		cpattern = rpattern;
+	}
+	//showstr("rpattern", rpattern);
+	//showstr("cpattern", cpattern);
+	route->setPattern(rpattern);
+	route->setCompiled(cpattern);
+
 	zval_own target = route->getTarget();
 	if (target.isObject()) {
 		zobj_own tobj = target.zobject();

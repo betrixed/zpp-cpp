@@ -28,7 +28,7 @@ namespace zpp {
 		virtual ~preg_callback() 
 		{ }
 
-		virtual bool get_replace(htab_user captures) = 0; 
+		virtual bool get_replace(htab_read captures) = 0; 
 
 		friend class preg;
 	};
@@ -85,7 +85,7 @@ namespace zpp {
 		
 		zval_mgr& results() { return result_; }
 
-		htab_user  array() { return htab_user(result_); }
+		htab_read  array() { return htab_read(result_); }
 
 	};
 
@@ -95,9 +95,9 @@ namespace zpp {
 
 	zval_mgr explode(zstr_user sep,  zstr_user split, long limit = 0);
 
-	zval_mgr implode(zstr_user sep, htab_user w);
+	zval_mgr implode(zstr_user sep, htab_read w);
 
-	zval_mgr union_values(htab_user list1, htab_user list2);
+	zval_mgr union_values(htab_read list1, htab_read list2);
 
 	zval_mgr preg_quote(zstr_user regex, zval_user delim);
 

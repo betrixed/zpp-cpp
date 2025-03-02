@@ -91,6 +91,8 @@ public:
 
     zval_mgr(HashTable* ht);
 
+    zval_mgr(zstr_mgr&& rc);
+
     zval_mgr(int value);
 
     //! mutate to suggested type if necessary

@@ -328,7 +328,7 @@ strtable::init()
 
 }
 
-args_spread::args_spread(htab_user args)
+args_spread::args_spread(htab_read args)
 {
     argct_ = args.size();
     if (argct_)
@@ -358,7 +358,11 @@ args_spread::~args_spread()
 }
 
 
-bool callable_fn(zval_mgr& result, zval_mgr& callme, int argct, zval* argv)
+bool callable_fn(
+    zval_mgr& result, 
+    zval_mgr& callme, 
+    int argct, 
+    zval* argv)
 {
     result.set_null();
 
@@ -386,7 +390,10 @@ bool callable_fn(zval_mgr& result, zval_mgr& callme, int argct, zval* argv)
 
 
 bool 
-call_spread_fn(zval_mgr& result, zval_mgr& callme, htab_user args)
+call_spread_fn(
+    zval_mgr& result, 
+    zval_mgr& callme, 
+    htab_read args)
 {
     args_spread spread(args);
     return callable_fn(result, callme, spread.arg_ct(), spread.arg_v());

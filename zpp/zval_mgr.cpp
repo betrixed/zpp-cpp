@@ -338,6 +338,14 @@ zval_mgr::toString()
     }
 }
 
+zval_mgr::zval_mgr(zstr_mgr&& rc)
+{
+    if (rc.s)
+    {
+        ZVAL_STR(&zv_, rc.s);
+        rc.s = nullptr;
+    }
+}
 
 }; // namespace Php
 

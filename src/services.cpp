@@ -94,7 +94,7 @@ Services::activate(zstr_user key)
 	zval_mgr result;
 	//zend_printf("activate %s\n", ZSTR_VAL(key));
 
-	htab_user defer(defer_);
+	htab_read defer(defer_);
 
 	zval_user test;
 	if (!defer.try_fetch(key, test))
@@ -121,7 +121,7 @@ Services::activate(zstr_user key)
 
 		zval_mgr result2 = call_value(callme);
 
-		htab_user(active_).set(key, result2);
+		htab_write(active_).set(key, result2);
 
 		result = get(key);
 	}
@@ -223,7 +223,7 @@ Services::newInstance(zstr_user name_class)
 	if (obj.ok())
 	{
 		//showarray("instances", instances_);
-		htab_user(instances_).set(name_class, obj);
+		htab_write(instances_).set(name_class, obj);
 	}
 	else {
 		zend_throw_error(zend_ce_error, "newInstance failed for %s", name_class.data());
@@ -239,7 +239,7 @@ Services::getObject(zstr_user key)
 
 	zval_user test;
 
-	if (htab_user(instances_).try_fetch(key,test))
+	if (htab_write(instances_).try_fetch(key,test))
 	{
 		result = test.zobject();
 	}
@@ -255,7 +255,7 @@ Services::setObject(zobj_user obj, zstr_user key)
 		key = obj.className();
 	}
 
-	htab_user(instances_).set(key, obj);
+	htab_write(instances_).set(key, obj);
 	return obj;
 }
 
@@ -263,24 +263,24 @@ Services::setObject(zobj_user obj, zstr_user key)
 bool Services::isActive(zstr_user name)
 {
 
-	return htab_user(active_).has_key(name);
+	return htab_read(active_).has_key(name);
 }
 
 bool Services::has(zstr_user name)
 {
 
-	return (htab_user(active_).has_key(name) || htab_user(defer_).has_key(name));
+	return (htab_read(active_).has_key(name) || htab_read(defer_).has_key(name));
 }
 
 
 void Services::setDefer(zstr_user name, zval_user value)
 {
-	htab_user(defer_).set(name, value);
+	htab_write(defer_).set(name, value);
 }
 
 void  Services::set(zstr_user name, zval_user value)
 {
-	htab_user(active_).set(name, value);
+	htab_write(active_).set(name, value);
 }
 
 zval_mgr  
@@ -291,7 +291,7 @@ Services::get(zstr_user name)
 
 	//showstr("services::get", name);
 
-	if (!htab_user(active_).try_fetch(name, value))
+	if (!htab_read(active_).try_fetch(name, value))
 	{
 		result = activate(name);
 		return  result;
@@ -315,7 +315,7 @@ Services::get(zstr_user name)
 void  
 Services::unset(zstr_user name)
 {
-	htab_user(active_).unset(name);
+	htab_write(active_).unset(name);
 }
 
 
@@ -325,7 +325,7 @@ Services::setThrowFail(bool value)
 	throw_fail_ = value;
 }
 
-void Services::debug_info(htab_user info)
+void Services::debug_info(htab_write info)
 {
 	//showarray("debug_info-0", info);
 

@@ -62,7 +62,7 @@ ReflectCache::getReflectClass(zstr_user class_name)
 
 	//showstr("getReflectClass", class_name);
 
-	htab_user cache(cache_);
+	htab_write cache(cache_);
 
 	zval_user test(cache.get(class_name));
 
@@ -186,11 +186,8 @@ ReflectCache* ReflectCache::cpp()
 }
 
 void
-ReflectCache::debug_info(HashTable *ht)
+ReflectCache::debug_info(htab_write hw)
 {	
-	//zstr_make<true> key_str(cc_rc_cache);
-	htab_user  hw(ht);
-
 	hw.set(RFC_data.cache_key, cache_);
 }
 

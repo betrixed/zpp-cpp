@@ -5,8 +5,8 @@
 #include "zval_user.h"
 #endif
 
-#ifndef HTAB_USER_H
-#include "htab_user.h"
+#ifndef HTAB_READ_H
+#include "htab_read.h"
 #endif
 
 namespace zpp {
@@ -16,7 +16,7 @@ namespace zpp {
 
         rzpair data_;
 
-    	htab_user  wrap_;
+    	htab_read  wrap_;
 
         HashPosition iterate_ = 0;
 

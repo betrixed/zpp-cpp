@@ -262,10 +262,14 @@ RouteMatch::invoke(htab_ptr extra, zobj_ptr before, zobj_ptr after)
 				zval_ptr first(ppair->first());
 				zval_ptr second(ppair->second());
 
+				//zend_printf("Before ");
+				//showmem(" second", second);
+
 				method_name = first.zstr();
 				
 				if (method_name.size() && obj.method_exists(method_name))
 				{
+
 					htab_ptr args(second);
 
 					result = this->call_method(obj, method_name, args);

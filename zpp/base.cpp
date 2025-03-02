@@ -13,7 +13,8 @@
 #include "zval_user.cpp"
 
 #include "htab_mgr.cpp"
-#include "htab_user.cpp"
+#include "htab_read.cpp"
+#include "htab_write.cpp"
 
 #include "state_init.cpp"
 
@@ -22,11 +23,12 @@
 #include "global.cpp"
 #include "zstr_buffer.cpp"
 #include "fn_call.cpp"
+#include "preg.cpp"
 
 namespace zpp {
 
 	 void //virtual
-	 base_d::debug_info(htab_user di)
+	 base_d::debug_info(htab_write di)
 	 {
 	 	zobj_user temp(this->zobj());
 
@@ -34,7 +36,7 @@ namespace zpp {
 
 	 	if (temp.property_list(plist))
 	 	{
-	 		htab_user src(plist);
+	 		htab_read src(plist);
 
 		 	if (src.size())
 		 	{

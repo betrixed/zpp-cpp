@@ -4,7 +4,8 @@
 
 namespace zpp {
 
-    class htab_user;
+    class htab_read;
+    class htab_write;
 
     class htab_mgr {
     protected:
@@ -13,6 +14,10 @@ namespace zpp {
         void init();
         void own();
         void lose();
+
+        friend class htab_read;
+        friend class htab_write;
+
     public:
 
         static HashTable* new_array();

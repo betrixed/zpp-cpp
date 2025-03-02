@@ -25,11 +25,11 @@
 #include "zval_user.h"
 
 #include "htab_mgr.h"
-#include "htab_user.h"
+#include "htab_read.h"
+#include "htab_write.h"
+
 #include "htab_walk.h"
-
 #include "state_init.h"
-
 
 #include "globals.h"
 
@@ -111,8 +111,6 @@ namespace zpp {
 	protected:
 		zend_object* p_zobj_;
 	public:
-		static void init_intern();
-		static void free_intern();
 
 		base_d() : p_zobj_(nullptr) {}
 
@@ -152,7 +150,7 @@ namespace zpp {
 		{
 		}
 		
-		virtual void debug_info(htab_user ht);
+		virtual void debug_info(htab_write ht);
 
 		virtual zend_string* extender();
 
@@ -404,14 +402,16 @@ namespace zpp {
 			
 		}
 
-		static HashTable* base_debug_info(zend_object* object, int* is_temp)
+		static HashTable* base_debug_info(
+			zend_object* object, 
+			int* is_temp)
 		{
 			T* cobj = cpp(object);
 
 			/* to be deleted by zend */
 			*is_temp = 1; 
 			HashTable* ret = zend_new_array(6);
-			cobj->debug_info(htab_user(ret));
+			cobj->debug_info(htab_write(ret));
 
 			return ret;
 		}

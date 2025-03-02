@@ -367,7 +367,7 @@ Wcc_XmlRead::loop()
 
 				if (!result) {
 					//zstr_make<false> name(tag);
-					zstr_mgr classname = htab_user(tag_objs_).get((zend_string*)tag);
+					zstr_mgr classname = htab_read(tag_objs_).get((zend_string*)tag);
 					zstr_user test(classname);
 
 					if (test.isNull()) {
@@ -443,8 +443,7 @@ Wcc_XmlRead::tagsTable()
 					/*showmem("tagkey set", tag);
 					showmem("tagkey value", value);
 					showarray("tag_objs", tag_objs_);*/
-					htab_user(tag_objs_).set(tag, value);
-					
+					htab_write(tag_objs_).set(tag, value);	
 				}
 				break;
 			case Xntype::END_ELEMENT:
@@ -583,7 +582,7 @@ void Wcc_XmlRead::tag_end(zstr_user tag)
     	return;
     }
 
-	zval_user otag(htab_user(tag_objs_).get(tag));
+	zval_user otag(htab_read(tag_objs_).get(tag));
 
 	if (otag.isString())
 	{
@@ -623,7 +622,7 @@ void Wcc_XmlRead::throwNoKey()
 	done_ = true;
 }
 
-void Wcc_XmlRead::debug_info(htab_user s)
+void Wcc_XmlRead::debug_info(htab_write s)
 {
 	//zval_mgr temp(xml_);
 	s.set( XML_FNS.reader, xml_);
@@ -667,7 +666,7 @@ void Wcc_XmlRead::setValue(const zval_mgr& value,  zstr_user key)
 				throwNoKey();
 			}
 
-			htab_user hw(ref.zarray());
+			htab_write hw(ref.zarray());
 			hw.set(key, value);
 		}
 		break;
@@ -678,7 +677,7 @@ void Wcc_XmlRead::setValue(const zval_mgr& value,  zstr_user key)
 			{
 				throwKey(key);
 			}
-			htab_user hw(ref.zarray());
+			htab_write hw(ref.zarray());
 			hw.push_back(value);
 		}
 		break;

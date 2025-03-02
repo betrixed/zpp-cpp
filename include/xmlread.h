@@ -243,7 +243,7 @@ namespace wcc {
 		zval_mgr parseFile(zstr_user filename);
 		zval_mgr parse(zstr_user src);
 
-		virtual void debug_info(htab_user ht);
+		void debug_info(htab_write ht) override;
 	};
 
 

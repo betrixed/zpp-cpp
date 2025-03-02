@@ -28,7 +28,7 @@ namespace zpp {
         size_t              argct_;
         zval_init*          argv_;
     public:
-        args_spread(htab_user args);
+        args_spread(htab_read args);
         ~args_spread();
 
         size_t arg_ct() const { return argct_; }
@@ -37,7 +37,7 @@ namespace zpp {
     };
 
     bool callable_fn(zval_mgr& result, zval_mgr& callme, int argct = 0, zval* argv = nullptr);
-    bool call_spread_fn(zval_mgr& result, zval_mgr& callme, htab_user args);
+    bool call_spread_fn(zval_mgr& result, zval_mgr& callme, htab_read args);
 
     class ZPP_EXPORT fn_call {
     protected:
