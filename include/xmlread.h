@@ -97,7 +97,7 @@ namespace wcc {
 		zstr_mgr  xml_name();
 
 		zstr_mgr  get_attribute(zstr_user name);
-		zstr_mgr  xml_string();
+		//zstr_mgr  xml_string();
 
 		zval_mgr  xml_name_zval();
 		zval_mgr  xml_str_zval();
@@ -183,7 +183,7 @@ namespace wcc {
 
 		/** cache zend_string  used for repeated property/call access */
 			
-		XmlWrap xml_; // derived from zobj_mgr
+		XmlWrap xml_; // derived from zobj_mgr, adopts XmlReader
 		bool done_; // or error condition
 
 		/** PHP file handle returned by XMLReader::open */
@@ -215,7 +215,7 @@ namespace wcc {
 
 		void      setEmptyArray(zstr_user key);
 
-		void      setValue(zval_mgr& val, zstr_user key);
+		void      setValue(const zval_mgr& val, zstr_user key);
 
 		void      setBool(zstr_user key);
 		void      setInteger(zstr_user key);

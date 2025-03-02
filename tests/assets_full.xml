@@ -1,0 +1,316 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<pdoc>
+    <xtag>
+        <cfg>Wcc\Config</cfg>
+    </xtag>
+    <tb>
+        <a k='src_paths'>
+            <s>@site_leaf/web</s>
+            <s>@wc_leaf/web</s>
+        </a>
+        <s k='assetCache'>/pcan/cache</s> 
+        <cfg k="assets">
+            <tb k="form-format">
+                <a k='css'>
+                    <s>/css/form-format.css</s>
+                </a>
+            </tb>
+            <tb k='form'>
+                <a k='css'>
+                    <s>/css/form.css</s>
+                </a>        
+            </tb>
+            <tb k="link-click">
+                <a k="js">
+                    <s>/js/link_click.js</s>
+                </a>
+            </tb>
+            <tb k="ct-editor">
+                <a k="css">
+                    <s>/assets/content-tools/content-tools.min.css</s>
+                    <s>/assets/content-tools/editor.css</s>
+                </a>
+                <a k="js">
+                    <s>/assets/content-tools/content-tools.min.js</s>
+                    <s>/assets/content-tools/editor.js</s>
+                </a>
+            </tb>
+            <tb k="bulma-carousel">
+                <a k="css">
+                    <s>/node_modules/bulma-carousel/dist/css/bulma-carousel.min.css</s>
+                </a>
+                <a k="js">
+                    <s>/node_modules/bulma-carousel/dist/js/bulma-carousel.min.js</s>
+                </a>
+            </tb>
+            <tb k="fontawesome">
+                <tb k="link">
+                    <s k='rel'>stylesheet</s>
+                    <s k='href'>https://use.fontawesome.com/releases/v5.4.1/css/all.css</s>
+                    <s k='integrity'>sha384-5sAR7xN1Nv6T6+dT2mhtzEpVJvfS3NScPQTrOxhwjIuvcA67KV2R5Jz6kr4abQsz</s>
+                    <s k='crossorigin'>anonymous</s>
+                </tb>
+            </tb>
+            <tb k='tinymce'>
+                <a k='requires'>
+                    <s>jquery</s>
+                </a>
+                <a k='js'>
+                    <s>/node_modules/tinymce/jquery.tinymce.min.js</s>
+                    <s>/node_modules/tinymce/plugins/code/plugin.min.js</s>
+                </a>
+            </tb>
+            <tb k='parsley'>
+                <a k='requires'>
+                    <s>jquery</s>
+                </a> 
+                <a k='js'>
+                    <s>/node_modules/parsleyjs/dist/parsley.min.js</s>
+                </a>
+            </tb>
+            <tb k='codemirror'>
+                <a k='requires'>
+                    <s>jquery</s>
+                </a>
+                <a k='css'>
+                    <s>/codemirror/lib/codemirror.css</s>
+                    <s>/codemirror/theme/ambiance.css</s>
+                </a>
+                <a k='js'>
+                    <s>/codemirror/lib/codemirror.js</s>
+                    <s>/codemirror/mode/xml/xml.js</s>
+                    <s>/codemirror/mode/htmlmixed/htmlmixed.js</s>
+                    <s>/codemirror/mode/javascript/javascript.js</s>
+                    <s>/codemirror/mode/css/css.js</s>
+                    <s>/codemirror/mode/clike/clike.js</s>
+                    <s>/codemirror/mode/php/php.js</s>
+                    <s>/codemirror/addon/selection/active-line.js</s>
+                    <s>/codemirror/addon/edit/matchbrackets.js</s>
+                </a>
+            </tb>
+            <tb k='bulma'>
+                <a k='requires'>
+                    <s>fontawesome</s>
+                </a>
+                <a k='css'>
+                    <s>/node_modules/bulma/css/bulma.min.css</s>
+                </a>
+            </tb>
+            <tb k='simplegrid'>
+                <a k='css'>
+                    <s>/node_modules/simplegrid/simple-grid.css</s>
+                </a>
+            </tb>
+            <tb k='jquery'>
+                <a k='js'>
+                    <s>/node_modules/jquery/dist/jquery.min.js</s>
+                </a>
+            </tb>
+            <tb k='bootstrap'>
+                <a k='requires'>
+                    <s>jquery</s>
+                    <s>fontawesome</s>
+                </a>
+                <a k='css'>
+                    <s>/node_modules/bootstrap/dist/css/bootstrap.min.css</s>
+                </a>
+                <a k='js'>           
+                    <s>/node_modules/bootstrap/dist/js/bootstrap.bundle.min.js</s>
+                </a>
+            </tb>
+            <tb k='cart'>
+                <a k='css'>
+                    <s>/css/cart.css</s> 
+                </a>
+            </tb>   
+            <tb k='stripe'>
+                <a k='css'>
+                    <s>/css/stripe.css</s> 
+                    <s>/css/cart.css</s> 
+                </a>
+            </tb>
+            <tb k='styles'>
+                <a k='css'>
+                    <s>/css/many_styles.css</s>
+                </a>        
+            </tb>
+            <tb k='default'>
+                <a k='css'>
+                    <s>/css/sbo.css</s>
+                </a>
+            </tb>
+            <tb k='FlatPicker'>
+                <a k='css'>
+                    <s>/node_modules/flatpickr/dist/flatpickr.min.css</s>
+                </a>
+                <a k='js'>
+                    <s>/node_modules/flatpickr/dist/flatpickr.min.js</s>
+                </a>
+            </tb>
+            <tb k='Date'>
+                <a k='requires'>
+                    <s>FlatPicker</s>
+                </a>
+                <a k='js'>
+                    <s>/js/date.js</s>
+                </a>
+            </tb>
+            <tb k='DateTime'>
+                <a k='requires'>
+                    <s>FlatPicker</s>
+                </a>
+                <a k='js'>
+                    <s>/js/datetime.js</s>
+                </a>
+            </tb>
+            <tb k='jquery-form'>
+                <a k='requires'>
+                    <s>jquery</s>
+                </a>
+                <a k='js'>
+                    <s>/node_modules/jquery-form/dist/jquery.form.min.js</s>
+                </a>
+            </tb>
+            <tb k='cat-menu'>
+                <a k='js'>
+                    <s>/js/cat_menu.js</s>
+                </a>
+            </tb>
+            <tb k='cat-fetch'>
+                <a k='js'>
+                    <s>/js/cat_fetch.js</s>
+                </a>
+            </tb>
+            <tb k='imagelist'>
+                <tb k='js-inline'>
+                    <a k='source'>
+                        <s>/js/imagelist.js</s>
+                    </a>
+                </tb>
+                <a k='requires'>
+                    <s>DateTime</s>
+                </a>
+            </tb>
+            <tb k='gallery-progress'>
+                <a k='js'>
+                    <s>/js/progress.js</s>
+                </a>
+            </tb>
+            <tb k='gallery-upload'>
+                <a k='js'>
+                    <s>/js/upload.js</s>
+                </a>
+            </tb>
+            <tb k='summer-edit'>
+                <tb k='js-inline'>
+                    <a k='source'>
+                        <s>/js/editor.js</s>
+                    </a>
+                </tb>
+            </tb>
+            <tb k='blog-edit'>
+                <tb k='js-inline'>
+                    <a k='source'>
+                        <s>/js/blog.js</s>
+                    </a>
+                </tb>
+            </tb>
+            <tb k='links-edit'>
+                <a k='js'>
+                    <s>/js/links_edit.js</s>
+                </a>
+            </tb>
+            <tb k='member-js'>
+                <a k='js'>
+                    <s>/js/member.js</s>
+                </a>
+                <a k='requires'>
+                    <s>DateTime</s>
+                    <s>jquery-form</s>
+                </a>
+            </tb>
+            <tb k='are-you-sure'>
+                <a k='js'>
+                    <s>/node_modules/jquery.are-you-sure/jquery.are-you-sure.js</s>
+                </a>
+                <a k='requires'>
+                    <s>jquery</s>
+                </a>
+            </tb>
+            <tb k='prep-nocaptcha'>
+                <a k='js'>
+                    <s>/js/prep_nocaptcha.js</s>
+                </a>
+                <a k='requires'>
+                    <s>jquery</s>
+                </a>
+                <a k='requires'>
+                    <s>are-you-sure</s>
+                </a>
+            </tb>
+            <tb k='prep-captcha'>
+                <a k='js'>
+                    <s>/js/prep_captcha.js</s>
+                </a>
+                <a k='requires'>
+                    <s>jquery</s>
+                    <s>validate</s>
+                </a>
+                <a k='requires'>
+                    <s>are-you-sure</s>
+                </a>
+            </tb>
+            <!-- <tb k='new-password'>
+                <a k='js'>
+                    <s>/js/valid-pass/js/jquery.passwordRequirements.js</s>
+                </a>
+                <a k='css'>
+                    <s>/js/valid-pass/css/jquery.passwordRequirements.css</s>
+                </a>
+            </tb> -->
+            <tb k='more-validate'>
+                <a k='js'>
+                    <s>/node_modules/jquery-validation/dist/additional-methods.js</s>
+                </a>
+                <a k='requires'>
+                    <s>validate</s>
+                </a>        
+            </tb>
+            <tb k='validate'>
+                <a k='js'>
+                    <s>/node_modules/jquery-validation/dist/jquery.validate.js</s>
+                </a>
+                <a k='requires'>
+                    <s>jquery</s>
+                </a>        
+            </tb>
+            <tb k='register-js'>
+                <a k='js'>
+                    <s>/js/register.js</s>
+                </a>
+                <a k='requires'>
+                    <s>jquery-form</s>
+                </a>
+            </tb>
+            <tb k='grid'>
+                 <a k='js'>
+                    <s>/node_modules/salvattore/dist/salvattore.min.js</s>
+                    <s>/js/relayout.js</s>
+                </a> 
+                <!-- <a k='js'>
+                    <s>/node_modules/enquire.js/dist/enquire.min.js</s>
+                    <s>/node_modules/savvior/dist/savvior.min.js</s>
+                    <s>/js/relayout.js</s>
+                </a> -->
+            </tb>
+            <tb k='SummerNote'>
+                <a k='css'>
+                    <s>/node_modules/summernote/dist/summernote-lite.css</s>
+                </a>
+                <a k='js'>
+                    <s>/node_modules/summernote/dist/summernote-lite.min.js</s>
+                </a>
+            </tb>
+        </cfg>
+    </tb>
+</pdoc>

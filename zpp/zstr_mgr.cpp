@@ -89,25 +89,16 @@ zstr_mgr::operator=(zend_string* rc)
 const zstr_mgr& 
 zstr_mgr::operator=(zval* rc)
 {
-	zend_string* p = zval_user(rc).zstr();
-	bind(p);
+	bind(zval_user(rc).zstr());
 	return *this;
 }
 
 zstr_mgr& 
 zstr_mgr::operator=(zval_mgr&& rc)
 {
-	zval_user zu(rc);
-	zend_string* p = zu.zstr();
-	if (s != p)
-	{
-		bind(p);
-	} 
-	else if (s) 
-	{
-		lose();
-	}
-	rc.lose();
+	lose(); //not calling bind
+	s = zval_user(rc).zstr();
+	rc.init();
 	return *this;	
 }
 
@@ -121,29 +112,21 @@ void zstr_mgr::adopt(zend_string* rc)
 	}
 }
 
-zstr_mgr::zstr_mgr(zval* copy)
+zstr_mgr::zstr_mgr(zval* copy) : s(nullptr)
 {
-	zval_user test(copy);
-	s = test.zstr();
-	if (s)
-	{
-		own();
-	}
+	bind(zval_user(copy).zstr());
 }
 
 zstr_mgr::zstr_mgr(zend_long ival)
 {
+	// s has rc==1
     s = _php_math_longtobase(ival,10);
 }
 
-zstr_mgr::zstr_mgr(zval_mgr&& rc)
+zstr_mgr::zstr_mgr(zval_mgr&& rc): s(nullptr)
 {
-	zval_user zu(rc);
-	if (zu.isString())
-	{
-		s = zu.zstr();
-	}
-	rc.lose();
+	s = zval_user(rc).zstr();
+	rc.init();
 }
 
 size_t 
@@ -180,14 +163,9 @@ zstr_intern::zstr_intern(const char* c, size_t slen)
 	}
 	s = zend_string_init(c, slen, 1);
 	//showstr("init s",s);
-	zend_string* p = zend_new_interned_string(s);
+	s = zend_new_interned_string(s);
 	//showstr("interned s",p);
-	if ((p != s) && (GC_FLAGS(p) & IS_STR_INTERNED))
-	{
-		lose(); 
-		s = p;
-		//showstr("final s",s);
-	}
+
 }
 
 };

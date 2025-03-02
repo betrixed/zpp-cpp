@@ -160,7 +160,6 @@ zobj_user::property(zstr_user key)
      *  
      */ 
     direct = zend_read_property_ex(scope, obj_, key, 0, (zval*)result);
-
     return result;
 }
 

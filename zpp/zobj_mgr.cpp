@@ -130,17 +130,17 @@ zobj_mgr::return_zv(zval* ret)
 
 zobj_mgr::zobj_mgr(zval_mgr&& m)
 {
-	zval_user zu(m);
+	obj_ = zval_user(m).zobject();
+	m.init();
+}
 
-	if (zu.isObject())
-	{
-		obj_ = zu.zobject();
-	}
-	else {
-		obj_ = nullptr;
-	}
-	// force forget
-	m.lose();
+zobj_mgr& 
+zobj_mgr::operator=(zval_mgr&& rc)
+{
+	lose();
+	obj_ = zval_user(rc).zobject();
+	rc.init();
+	return *this;
 }
 
 }; //namespace zpp

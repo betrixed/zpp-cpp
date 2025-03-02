@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<pdoc>
+    <tb k="caches">
+        <s k="sql">Noop</s>
+        <s k="file">Noop</s>
+        <s k="data">Noop</s>
+    </tb>
+    <tb k="cache_config">
+        <tb k="Memcached">
+            <s k="class">Wcc\Cache\Libmemcached</s>
+            <i k="port">11211</i>
+            <s k="host">localhost</s>
+            <s k="prefix">pcan</s>
+            <i k="expire">3600</i>
+        </tb>
+        <tb k="Apcu">
+            <s k="class">Wcc\Cache\Apcu</s>
+            <i k="expire">3600</i>
+            <s k="prefix">pcan</s>
+        </tb>
+        <tb k="DirFile">
+            <s k="class">Wcc\Cache\DirFile</s>
+            <i k="expire">86400</i>
+            <s k="prefix">pcan</s>
+            <s k="cache_dir">@site_leaf/tmp/dfcache</s>
+        </tb>
+        <tb k="XattrFile">
+            <s k="class">Wcc\Cache\DirFile</s>
+            <i k="expire">86400</i>
+            <s k="prefix">pcan</s>
+            <s k="cache_dir">@site_leaf/tmp/xattr</s>
+        </tb>
+        <tb k="Noop">
+            <s k="class">Wcc\Cache\Noop</s>
+            <i k="expire">3600</i>
+            <s k="prefix">pcan</s>
+        </tb>
+    </tb> 
+</pdoc>

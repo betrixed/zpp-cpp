@@ -1,0 +1,1254 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<pdoc>
+<xtag>
+<sdef>Wcc\Schema\Mysql\Schema</sdef>
+<tdef>Wcc\Schema\Mysql\Table</tdef>
+<rdef>Wcc\Schema\Mysql\Relation</rdef>
+<col>Wcc\Schema\Mysql\Column</col>
+<indx>Wcc\Schema\Mysql\Index</indx>
+</xtag>
+<root c="Wcc\Schema\Mysql\Dump">
+  <s k="database">phpunit</s>
+  <s k="adapter">Mysql</s>
+  <tb k="tables">
+    <tdef k="property">
+      <tb k="columns">
+        <col k="property_id">
+          <s k="name">property_id</s>
+          <s k="type">int</s>
+          <i k="size">11</i>
+          <b k="null">0</b>
+          <b k="auto_inc">1</b>
+          <i k="idx">1</i>
+        </col>
+      </tb>
+      <tb k="indexes">
+        <indx k="PRIMARY">
+          <s k="name">PRIMARY</s>
+          <s k="type">PRIMARY</s>
+          <a k="columns">
+            <s>property_id</s>
+          </a>
+        </indx>
+      </tb>
+      <ea k="references"></ea>
+      <tb k="options">
+        <i k="auto_increment">1</i>
+        <s k="engine">InnoDB</s>
+        <s k="collate">utf8mb4_uca1400_ai_ci</s>
+      </tb>
+      <ea k="foreignkeys"></ea>
+      <s k="name">property</s>
+      <s k="type">table</s>
+    </tdef>
+    <tdef k="amenity">
+      <tb k="columns">
+        <col k="amenity_id">
+          <s k="name">amenity_id</s>
+          <s k="type">int</s>
+          <i k="size">11</i>
+          <b k="null">0</b>
+          <b k="auto_inc">1</b>
+          <i k="idx">1</i>
+        </col>
+        <col k="type">
+          <s k="name">type</s>
+          <s k="type">varchar</s>
+          <i k="size">40</i>
+          <b k="null">0</b>
+          <s k="collate">utf8mb4_uca1400_ai_ci</s>
+          <i k="idx">2</i>
+        </col>
+      </tb>
+      <tb k="indexes">
+        <indx k="PRIMARY">
+          <s k="name">PRIMARY</s>
+          <s k="type">PRIMARY</s>
+          <a k="columns">
+            <s>amenity_id</s>
+          </a>
+        </indx>
+      </tb>
+      <ea k="references"></ea>
+      <tb k="options">
+        <i k="auto_increment">1</i>
+        <s k="engine">InnoDB</s>
+        <s k="collate">utf8mb4_uca1400_ai_ci</s>
+      </tb>
+      <ea k="foreignkeys"></ea>
+      <s k="name">amenity</s>
+      <s k="type">table</s>
+    </tdef>
+    <tdef k="host">
+      <tb k="columns">
+        <col k="id">
+          <s k="name">id</s>
+          <s k="type">int</s>
+          <i k="size">11</i>
+          <b k="null">0</b>
+          <b k="auto_inc">1</b>
+          <i k="idx">1</i>
+        </col>
+        <col k="name">
+          <s k="name">name</s>
+          <s k="type">varchar</s>
+          <i k="size">25</i>
+          <b k="null">1</b>
+          <s k="collate">utf8mb4_uca1400_ai_ci</s>
+          <i k="idx">2</i>
+        </col>
+      </tb>
+      <tb k="indexes">
+        <indx k="PRIMARY">
+          <s k="name">PRIMARY</s>
+          <s k="type">PRIMARY</s>
+          <a k="columns">
+            <s>id</s>
+          </a>
+        </indx>
+      </tb>
+      <ea k="references"></ea>
+      <tb k="options">
+        <i k="auto_increment">1</i>
+        <s k="engine">InnoDB</s>
+        <s k="collate">utf8mb4_uca1400_ai_ci</s>
+      </tb>
+      <ea k="foreignkeys"></ea>
+      <s k="name">host</s>
+      <s k="type">table</s>
+    </tdef>
+    <tdef k="test">
+      <tb k="columns">
+        <col k="id">
+          <s k="name">id</s>
+          <s k="type">int</s>
+          <i k="size">11</i>
+          <b k="null">0</b>
+          <b k="auto_inc">1</b>
+          <i k="idx">1</i>
+        </col>
+        <col k="name">
+          <s k="name">name</s>
+          <s k="type">varchar</s>
+          <i k="size">1024</i>
+          <b k="null">0</b>
+          <s k="collate">utf8mb4_uca1400_ai_ci</s>
+          <i k="idx">2</i>
+        </col>
+        <col k="created_at">
+          <s k="name">created_at</s>
+          <s k="type">datetime</s>
+          <b k="null">1</b>
+          <i k="idx">3</i>
+        </col>
+        <col k="updated_at">
+          <s k="name">updated_at</s>
+          <s k="type">datetime</s>
+          <b k="null">1</b>
+          <i k="idx">4</i>
+        </col>
+      </tb>
+      <tb k="indexes">
+        <indx k="PRIMARY">
+          <s k="name">PRIMARY</s>
+          <s k="type">PRIMARY</s>
+          <a k="columns">
+            <s>id</s>
+          </a>
+        </indx>
+      </tb>
+      <ea k="references"></ea>
+      <tb k="options">
+        <i k="auto_increment">11</i>
+        <s k="engine">InnoDB</s>
+        <s k="collate">utf8mb4_uca1400_ai_ci</s>
+      </tb>
+      <ea k="foreignkeys"></ea>
+      <s k="name">test</s>
+      <s k="type">table</s>
+    </tdef>
+    <tdef k="publisher">
+      <tb k="columns">
+        <col k="publisher_id">
+          <s k="name">publisher_id</s>
+          <s k="type">int</s>
+          <i k="size">11</i>
+          <b k="null">0</b>
+          <b k="auto_inc">1</b>
+          <i k="idx">1</i>
+        </col>
+        <col k="name">
+          <s k="name">name</s>
+          <s k="type">varchar</s>
+          <i k="size">25</i>
+          <b k="null">0</b>
+          <s k="collate">utf8mb4_uca1400_ai_ci</s>
+          <i k="idx">2</i>
+        </col>
+      </tb>
+      <tb k="indexes">
+        <indx k="PRIMARY">
+          <s k="name">PRIMARY</s>
+          <s k="type">PRIMARY</s>
+          <a k="columns">
+            <s>publisher_id</s>
+          </a>
+        </indx>
+      </tb>
+      <ea k="references"></ea>
+      <tb k="options">
+        <i k="auto_increment">1</i>
+        <s k="engine">InnoDB</s>
+        <s k="collate">utf8mb4_uca1400_ai_ci</s>
+      </tb>
+      <ea k="foreignkeys"></ea>
+      <s k="name">publisher</s>
+      <s k="type">table</s>
+    </tdef>
+    <tdef k="position">
+      <tb k="columns">
+        <col k="id">
+          <s k="name">id</s>
+          <s k="type">int</s>
+          <i k="size">11</i>
+          <b k="null">0</b>
+          <b k="auto_inc">1</b>
+          <i k="idx">1</i>
+        </col>
+        <col k="employee_id">
+          <s k="name">employee_id</s>
+          <s k="type">int</s>
+          <i k="size">11</i>
+          <b k="null">0</b>
+          <i k="idx">2</i>
+        </col>
+        <col k="title">
+          <s k="name">title</s>
+          <s k="type">varchar</s>
+          <i k="size">255</i>
+          <b k="null">0</b>
+          <s k="collate">utf8mb4_uca1400_ai_ci</s>
+          <i k="idx">3</i>
+        </col>
+        <col k="active">
+          <s k="name">active</s>
+          <s k="type">smallint</s>
+          <i k="size">6</i>
+          <b k="null">0</b>
+          <i k="idx">4</i>
+        </col>
+      </tb>
+      <tb k="indexes">
+        <indx k="PRIMARY">
+          <s k="name">PRIMARY</s>
+          <s k="type">PRIMARY</s>
+          <a k="columns">
+            <s>id</s>
+          </a>
+        </indx>
+      </tb>
+      <ea k="references"></ea>
+      <tb k="options">
+        <i k="auto_increment">1</i>
+        <s k="engine">InnoDB</s>
+        <s k="collate">utf8mb4_uca1400_ai_ci</s>
+      </tb>
+      <ea k="foreignkeys"></ea>
+      <s k="name">position</s>
+      <s k="type">table</s>
+    </tdef>
+    <tdef k="venue">
+      <tb k="columns">
+        <col k="id">
+          <s k="name">id</s>
+          <s k="type">int</s>
+          <i k="size">11</i>
+          <b k="null">0</b>
+          <b k="auto_inc">1</b>
+          <i k="idx">1</i>
+        </col>
+        <col k="name">
+          <s k="name">name</s>
+          <s k="type">varchar</s>
+          <i k="size">50</i>
+          <b k="null">1</b>
+          <s k="collate">utf8mb4_uca1400_ai_ci</s>
+          <i k="idx">2</i>
+        </col>
+        <col k="city">
+          <s k="name">city</s>
+          <s k="type">varchar</s>
+          <i k="size">60</i>
+          <b k="null">1</b>
+          <s k="collate">utf8mb4_uca1400_ai_ci</s>
+          <i k="idx">3</i>
+        </col>
+        <col k="state">
+          <s k="name">state</s>
+          <s k="type">char</s>
+          <i k="size">2</i>
+          <b k="null">1</b>
+          <s k="collate">utf8mb4_uca1400_ai_ci</s>
+          <i k="idx">4</i>
+        </col>
+        <col k="address">
+          <s k="name">address</s>
+          <s k="type">varchar</s>
+          <i k="size">50</i>
+          <b k="null">1</b>
+          <s k="collate">utf8mb4_uca1400_ai_ci</s>
+          <i k="idx">5</i>
+        </col>
+        <col k="phone">
+          <s k="name">phone</s>
+          <s k="type">varchar</s>
+          <i k="size">10</i>
+          <b k="null">1</b>
+          <s k="collate">utf8mb4_uca1400_ai_ci</s>
+          <i k="idx">6</i>
+        </col>
+      </tb>
+      <tb k="indexes">
+        <indx k="PRIMARY">
+          <s k="name">PRIMARY</s>
+          <s k="type">PRIMARY</s>
+          <a k="columns">
+            <s>id</s>
+          </a>
+        </indx>
+        <indx k="name">
+          <s k="name">name</s>
+          <s k="type">UNIQUE</s>
+          <a k="columns">
+            <s>name</s>
+            <s>address</s>
+          </a>
+        </indx>
+      </tb>
+      <ea k="references"></ea>
+      <tb k="options">
+        <i k="auto_increment">4</i>
+        <s k="engine">InnoDB</s>
+        <s k="collate">utf8mb4_uca1400_ai_ci</s>
+      </tb>
+      <ea k="foreignkeys"></ea>
+      <s k="name">venue</s>
+      <s k="type">table</s>
+    </tdef>
+    <tdef k="book">
+      <tb k="columns">
+        <col k="book_id">
+          <s k="name">book_id</s>
+          <s k="type">int</s>
+          <i k="size">11</i>
+          <b k="null">0</b>
+          <b k="auto_inc">1</b>
+          <i k="idx">1</i>
+        </col>
+        <col k="Author_id">
+          <s k="name">Author_id</s>
+          <s k="type">int</s>
+          <i k="size">11</i>
+          <b k="null">1</b>
+          <i k="idx">2</i>
+        </col>
+        <col k="secondary_author_id">
+          <s k="name">secondary_author_id</s>
+          <s k="type">int</s>
+          <i k="size">11</i>
+          <b k="null">1</b>
+          <i k="idx">3</i>
+        </col>
+        <col k="name">
+          <s k="name">name</s>
+          <s k="type">varchar</s>
+          <i k="size">50</i>
+          <b k="null">1</b>
+          <s k="collate">utf8mb4_uca1400_ai_ci</s>
+          <i k="idx">4</i>
+        </col>
+        <col k="numeric_test">
+          <s k="name">numeric_test</s>
+          <s k="type">varchar</s>
+          <i k="size">10</i>
+          <b k="null">1</b>
+          <s k="collate">utf8mb4_uca1400_ai_ci</s>
+          <i k="idx">5</i>
+        </col>
+        <col k="special">
+          <s k="name">special</s>
+          <s k="type">decimal</s>
+          <i k="size">10</i>
+          <b k="null">1</b>
+          <f k="default">0</f>
+          <i k="idx">6</i>
+        </col>
+      </tb>
+      <tb k="indexes">
+        <indx k="PRIMARY">
+          <s k="name">PRIMARY</s>
+          <s k="type">PRIMARY</s>
+          <a k="columns">
+            <s>book_id</s>
+          </a>
+        </indx>
+      </tb>
+      <ea k="references"></ea>
+      <tb k="options">
+        <i k="auto_increment">5</i>
+        <s k="engine">InnoDB</s>
+        <s k="collate">utf8mb4_uca1400_ai_ci</s>
+      </tb>
+      <ea k="foreignkeys"></ea>
+      <s k="name">book</s>
+      <s k="type">table</s>
+    </tdef>
+    <tdef k="user_newsletter">
+      <tb k="columns">
+        <col k="id">
+          <s k="name">id</s>
+          <s k="type">int</s>
+          <i k="size">11</i>
+          <b k="null">0</b>
+          <b k="auto_inc">1</b>
+          <i k="idx">1</i>
+        </col>
+        <col k="user_id">
+          <s k="name">user_id</s>
+          <s k="type">int</s>
+          <i k="size">11</i>
+          <b k="null">0</b>
+          <i k="idx">2</i>
+        </col>
+        <col k="newsletter_id">
+          <s k="name">newsletter_id</s>
+          <s k="type">int</s>
+          <i k="size">11</i>
+          <b k="null">0</b>
+          <i k="idx">3</i>
+        </col>
+      </tb>
+      <tb k="indexes">
+        <indx k="PRIMARY">
+          <s k="name">PRIMARY</s>
+          <s k="type">PRIMARY</s>
+          <a k="columns">
+            <s>id</s>
+          </a>
+        </indx>
+      </tb>
+      <ea k="references"></ea>
+      <tb k="options">
+        <i k="auto_increment">1</i>
+        <s k="engine">InnoDB</s>
+        <s k="collate">utf8mb4_uca1400_ai_ci</s>
+      </tb>
+      <ea k="foreignkeys"></ea>
+      <s k="name">user_newsletter</s>
+      <s k="type">table</s>
+    </tdef>
+    <tdef k="valuestore">
+      <tb k="columns">
+        <col k="id">
+          <s k="name">id</s>
+          <s k="type">int</s>
+          <i k="size">11</i>
+          <b k="null">0</b>
+          <b k="auto_inc">1</b>
+          <i k="idx">1</i>
+        </col>
+        <col k="key">
+          <s k="name">key</s>
+          <s k="type">varchar</s>
+          <i k="size">20</i>
+          <b k="null">0</b>
+          <s k="collate">utf8mb4_uca1400_ai_ci</s>
+          <i k="idx">2</i>
+        </col>
+        <col k="value">
+          <s k="name">value</s>
+          <s k="type">varchar</s>
+          <i k="size">255</i>
+          <b k="null">0</b>
+          <s k="collate">utf8mb4_uca1400_ai_ci</s>
+          <i k="idx">3</i>
+        </col>
+      </tb>
+      <tb k="indexes">
+        <indx k="PRIMARY">
+          <s k="name">PRIMARY</s>
+          <s k="type">PRIMARY</s>
+          <a k="columns">
+            <s>id</s>
+          </a>
+        </indx>
+      </tb>
+      <ea k="references"></ea>
+      <tb k="options">
+        <i k="auto_increment">1</i>
+        <s k="engine">InnoDB</s>
+        <s k="collate">utf8mb4_uca1400_ai_ci</s>
+      </tb>
+      <ea k="foreignkeys"></ea>
+      <s k="name">valuestore</s>
+      <s k="type">table</s>
+    </tdef>
+    <tdef k="awesome_people">
+      <tb k="columns">
+        <col k="id">
+          <s k="name">id</s>
+          <s k="type">int</s>
+          <i k="size">11</i>
+          <b k="null">0</b>
+          <b k="auto_inc">1</b>
+          <i k="idx">1</i>
+        </col>
+        <col k="author_id">
+          <s k="name">author_id</s>
+          <s k="type">int</s>
+          <i k="size">11</i>
+          <b k="null">1</b>
+          <i k="idx">2</i>
+        </col>
+        <col k="is_awesome">
+          <s k="name">is_awesome</s>
+          <s k="type">int</s>
+          <i k="size">11</i>
+          <b k="null">1</b>
+          <f k="default">1</f>
+          <i k="idx">3</i>
+        </col>
+      </tb>
+      <tb k="indexes">
+        <indx k="PRIMARY">
+          <s k="name">PRIMARY</s>
+          <s k="type">PRIMARY</s>
+          <a k="columns">
+            <s>id</s>
+          </a>
+        </indx>
+      </tb>
+      <ea k="references"></ea>
+      <tb k="options">
+        <i k="auto_increment">1</i>
+        <s k="engine">InnoDB</s>
+        <s k="collate">utf8mb4_uca1400_ai_ci</s>
+      </tb>
+      <ea k="foreignkeys"></ea>
+      <s k="name">awesome_people</s>
+      <s k="type">table</s>
+    </tdef>
+    <tdef k="pay_item">
+      <tb k="columns">
+        <col k="trans_id">
+          <s k="name">trans_id</s>
+          <s k="type">int</s>
+          <i k="size">11</i>
+          <b k="null">0</b>
+          <i k="idx">1</i>
+        </col>
+        <col k="id">
+          <s k="name">id</s>
+          <s k="type">int</s>
+          <i k="size">11</i>
+          <b k="null">0</b>
+          <i k="idx">2</i>
+        </col>
+        <col k="detail">
+          <s k="name">detail</s>
+          <s k="type">varchar</s>
+          <i k="size">255</i>
+          <b k="null">1</b>
+          <s k="collate">utf8mb4_unicode_ci</s>
+          <i k="idx">3</i>
+        </col>
+        <col k="amount">
+          <s k="name">amount</s>
+          <s k="type">int</s>
+          <i k="size">11</i>
+          <b k="null">0</b>
+          <i k="idx">4</i>
+        </col>
+        <col k="purpose">
+          <s k="name">purpose</s>
+          <s k="type">varchar</s>
+          <i k="size">15</i>
+          <b k="null">0</b>
+          <s k="collate">utf8mb4_unicode_ci</s>
+          <i k="idx">5</i>
+        </col>
+      </tb>
+      <tb k="indexes">
+        <indx k="PRIMARY">
+          <s k="name">PRIMARY</s>
+          <s k="type">PRIMARY</s>
+          <a k="columns">
+            <s>trans_id</s>
+            <s>id</s>
+          </a>
+        </indx>
+      </tb>
+      <ea k="references"></ea>
+      <tb k="options">
+        <s k="engine">InnoDB</s>
+        <s k="collate">utf8mb4_unicode_ci</s>
+      </tb>
+      <ea k="foreignkeys"></ea>
+      <s k="name">pay_item</s>
+      <s k="type">table</s>
+    </tdef>
+    <tdef k="event">
+      <tb k="columns">
+        <col k="id">
+          <s k="name">id</s>
+          <s k="type">int</s>
+          <i k="size">11</i>
+          <b k="null">0</b>
+          <b k="auto_inc">1</b>
+          <i k="idx">1</i>
+        </col>
+        <col k="venue_id">
+          <s k="name">venue_id</s>
+          <s k="type">int</s>
+          <i k="size">11</i>
+          <b k="null">1</b>
+          <i k="idx">2</i>
+        </col>
+        <col k="host_id">
+          <s k="name">host_id</s>
+          <s k="type">int</s>
+          <i k="size">11</i>
+          <b k="null">0</b>
+          <i k="idx">3</i>
+        </col>
+        <col k="title">
+          <s k="name">title</s>
+          <s k="type">varchar</s>
+          <i k="size">60</i>
+          <b k="null">0</b>
+          <s k="collate">utf8mb4_uca1400_ai_ci</s>
+          <i k="idx">4</i>
+        </col>
+        <col k="description">
+          <s k="name">description</s>
+          <s k="type">varchar</s>
+          <i k="size">50</i>
+          <b k="null">1</b>
+          <s k="collate">utf8mb4_uca1400_ai_ci</s>
+          <i k="idx">5</i>
+        </col>
+        <col k="type">
+          <s k="name">type</s>
+          <s k="type">varchar</s>
+          <i k="size">15</i>
+          <b k="null">1</b>
+          <s k="collate">utf8mb4_uca1400_ai_ci</s>
+          <i k="idx">6</i>
+        </col>
+      </tb>
+      <tb k="indexes">
+        <indx k="PRIMARY">
+          <s k="name">PRIMARY</s>
+          <s k="type">PRIMARY</s>
+          <a k="columns">
+            <s>id</s>
+          </a>
+        </indx>
+      </tb>
+      <ea k="references"></ea>
+      <tb k="options">
+        <i k="auto_increment">1</i>
+        <s k="engine">InnoDB</s>
+        <s k="collate">utf8mb4_uca1400_ai_ci</s>
+      </tb>
+      <ea k="foreignkeys"></ea>
+      <s k="name">event</s>
+      <s k="type">table</s>
+    </tdef>
+    <tdef k="test_related">
+      <tb k="columns">
+        <col k="id">
+          <s k="name">id</s>
+          <s k="type">int</s>
+          <i k="size">11</i>
+          <b k="null">0</b>
+          <b k="auto_inc">1</b>
+          <i k="idx">1</i>
+        </col>
+        <col k="value">
+          <s k="name">value</s>
+          <s k="type">varchar</s>
+          <i k="size">1024</i>
+          <b k="null">0</b>
+          <s k="collate">utf8mb4_uca1400_ai_ci</s>
+          <i k="idx">2</i>
+        </col>
+        <col k="created_at">
+          <s k="name">created_at</s>
+          <s k="type">datetime</s>
+          <b k="null">1</b>
+          <i k="idx">3</i>
+        </col>
+        <col k="updated_at">
+          <s k="name">updated_at</s>
+          <s k="type">datetime</s>
+          <b k="null">1</b>
+          <i k="idx">4</i>
+        </col>
+      </tb>
+      <tb k="indexes">
+        <indx k="PRIMARY">
+          <s k="name">PRIMARY</s>
+          <s k="type">PRIMARY</s>
+          <a k="columns">
+            <s>id</s>
+          </a>
+        </indx>
+      </tb>
+      <ea k="references"></ea>
+      <tb k="options">
+        <i k="auto_increment">1</i>
+        <s k="engine">InnoDB</s>
+        <s k="collate">utf8mb4_uca1400_ai_ci</s>
+      </tb>
+      <ea k="foreignkeys"></ea>
+      <s k="name">test_related</s>
+      <s k="type">table</s>
+    </tdef>
+    <tdef k="property_amenity">
+      <tb k="columns">
+        <col k="id">
+          <s k="name">id</s>
+          <s k="type">int</s>
+          <i k="size">11</i>
+          <b k="null">0</b>
+          <b k="auto_inc">1</b>
+          <i k="idx">1</i>
+        </col>
+        <col k="amenity_id">
+          <s k="name">amenity_id</s>
+          <s k="type">int</s>
+          <i k="size">11</i>
+          <b k="null">0</b>
+          <i k="idx">2</i>
+        </col>
+        <col k="property_id">
+          <s k="name">property_id</s>
+          <s k="type">int</s>
+          <i k="size">11</i>
+          <b k="null">0</b>
+          <i k="idx">3</i>
+        </col>
+      </tb>
+      <tb k="indexes">
+        <indx k="PRIMARY">
+          <s k="name">PRIMARY</s>
+          <s k="type">PRIMARY</s>
+          <a k="columns">
+            <s>id</s>
+          </a>
+        </indx>
+      </tb>
+      <ea k="references"></ea>
+      <tb k="options">
+        <i k="auto_increment">1</i>
+        <s k="engine">InnoDB</s>
+        <s k="collate">utf8mb4_uca1400_ai_ci</s>
+      </tb>
+      <ea k="foreignkeys"></ea>
+      <s k="name">property_amenity</s>
+      <s k="type">table</s>
+    </tdef>
+    <tdef k="newsletter">
+      <tb k="columns">
+        <col k="id">
+          <s k="name">id</s>
+          <s k="type">int</s>
+          <i k="size">11</i>
+          <b k="null">0</b>
+          <b k="auto_inc">1</b>
+          <i k="idx">1</i>
+        </col>
+      </tb>
+      <tb k="indexes">
+        <indx k="PRIMARY">
+          <s k="name">PRIMARY</s>
+          <s k="type">PRIMARY</s>
+          <a k="columns">
+            <s>id</s>
+          </a>
+        </indx>
+      </tb>
+      <ea k="references"></ea>
+      <tb k="options">
+        <i k="auto_increment">1</i>
+        <s k="engine">InnoDB</s>
+        <s k="collate">utf8mb4_uca1400_ai_ci</s>
+      </tb>
+      <ea k="foreignkeys"></ea>
+      <s k="name">newsletter</s>
+      <s k="type">table</s>
+    </tdef>
+    <tdef k="user">
+      <tb k="columns">
+        <col k="id">
+          <s k="name">id</s>
+          <s k="type">int</s>
+          <i k="size">11</i>
+          <b k="null">0</b>
+          <b k="auto_inc">1</b>
+          <i k="idx">1</i>
+        </col>
+      </tb>
+      <tb k="indexes">
+        <indx k="PRIMARY">
+          <s k="name">PRIMARY</s>
+          <s k="type">PRIMARY</s>
+          <a k="columns">
+            <s>id</s>
+          </a>
+        </indx>
+      </tb>
+      <ea k="references"></ea>
+      <tb k="options">
+        <i k="auto_increment">1</i>
+        <s k="engine">InnoDB</s>
+        <s k="collate">utf8mb4_uca1400_ai_ci</s>
+      </tb>
+      <ea k="foreignkeys"></ea>
+      <s k="name">user</s>
+      <s k="type">table</s>
+    </tdef>
+    <tdef k="payment">
+      <tb k="columns">
+        <col k="id">
+          <s k="name">id</s>
+          <s k="type">int</s>
+          <i k="size">11</i>
+          <b k="null">0</b>
+          <b k="auto_inc">1</b>
+          <i k="idx">1</i>
+        </col>
+        <col k="memberid">
+          <s k="name">memberid</s>
+          <s k="type">int</s>
+          <i k="size">11</i>
+          <b k="null">0</b>
+          <i k="idx">2</i>
+        </col>
+        <col k="emailid">
+          <s k="name">emailid</s>
+          <s k="type">int</s>
+          <i k="size">11</i>
+          <b k="null">0</b>
+          <i k="idx">3</i>
+        </col>
+        <col k="status">
+          <s k="name">status</s>
+          <s k="type">varchar</s>
+          <i k="size">15</i>
+          <b k="null">0</b>
+          <s k="collate">armscii8_general_ci</s>
+          <i k="idx">4</i>
+        </col>
+        <col k="total_cost">
+          <s k="name">total_cost</s>
+          <s k="type">int</s>
+          <i k="size">11</i>
+          <b k="null">0</b>
+          <i k="idx">5</i>
+        </col>
+        <col k="trans_fee">
+          <s k="name">trans_fee</s>
+          <s k="type">int</s>
+          <i k="size">11</i>
+          <b k="null">0</b>
+          <i k="idx">6</i>
+        </col>
+        <col k="trans_code">
+          <s k="name">trans_code</s>
+          <s k="type">varchar</s>
+          <i k="size">80</i>
+          <b k="null">0</b>
+          <s k="collate">ascii_bin</s>
+          <i k="idx">7</i>
+        </col>
+        <col k="created_at">
+          <s k="name">created_at</s>
+          <s k="type">datetime</s>
+          <b k="null">0</b>
+          <i k="idx">8</i>
+        </col>
+      </tb>
+      <tb k="indexes">
+        <indx k="PRIMARY">
+          <s k="name">PRIMARY</s>
+          <s k="type">PRIMARY</s>
+          <a k="columns">
+            <s>id</s>
+          </a>
+        </indx>
+      </tb>
+      <ea k="references"></ea>
+      <tb k="options">
+        <i k="auto_increment">2</i>
+        <s k="engine">InnoDB</s>
+        <s k="collate">utf8mb4_unicode_ci</s>
+      </tb>
+      <ea k="foreignkeys"></ea>
+      <s k="name">payment</s>
+      <s k="type">table</s>
+    </tdef>
+    <tdef k="test2">
+      <tb k="columns">
+        <col k="id">
+          <s k="name">id</s>
+          <s k="type">int</s>
+          <i k="size">11</i>
+          <b k="null">0</b>
+          <i k="idx">1</i>
+        </col>
+        <col k="test_id">
+          <s k="name">test_id</s>
+          <s k="type">int</s>
+          <i k="size">11</i>
+          <b k="null">0</b>
+          <i k="idx">2</i>
+        </col>
+        <col k="value">
+          <s k="name">value</s>
+          <s k="type">varchar</s>
+          <i k="size">255</i>
+          <b k="null">0</b>
+          <s k="collate">utf8mb4_uca1400_ai_ci</s>
+          <i k="idx">3</i>
+        </col>
+      </tb>
+      <ea k="indexes"></ea>
+      <ea k="references"></ea>
+      <tb k="options">
+        <s k="engine">InnoDB</s>
+        <s k="collate">utf8mb4_uca1400_ai_ci</s>
+      </tb>
+      <ea k="foreignkeys"></ea>
+      <s k="name">test2</s>
+      <s k="type">table</s>
+    </tdef>
+    <tdef k="author">
+      <tb k="columns">
+        <col k="author_id">
+          <s k="name">author_id</s>
+          <s k="type">int</s>
+          <i k="size">11</i>
+          <b k="null">0</b>
+          <i k="idx">1</i>
+        </col>
+        <col k="parent_author_id">
+          <s k="name">parent_author_id</s>
+          <s k="type">int</s>
+          <i k="size">11</i>
+          <b k="null">1</b>
+          <i k="idx">2</i>
+        </col>
+        <col k="publisher_id">
+          <s k="name">publisher_id</s>
+          <s k="type">int</s>
+          <i k="size">11</i>
+          <b k="null">1</b>
+          <i k="idx">3</i>
+        </col>
+        <col k="name">
+          <s k="name">name</s>
+          <s k="type">varchar</s>
+          <i k="size">25</i>
+          <b k="null">0</b>
+          <s k="collate">utf8mb4_unicode_ci</s>
+          <i k="idx">4</i>
+        </col>
+        <col k="updated_at">
+          <s k="name">updated_at</s>
+          <s k="type">datetime</s>
+          <b k="null">1</b>
+          <i k="idx">5</i>
+        </col>
+        <col k="created_at">
+          <s k="name">created_at</s>
+          <s k="type">datetime</s>
+          <b k="null">1</b>
+          <i k="idx">6</i>
+        </col>
+        <col k="some_Date">
+          <s k="name">some_Date</s>
+          <s k="type">date</s>
+          <b k="null">1</b>
+          <i k="idx">7</i>
+        </col>
+        <col k="some_time">
+          <s k="name">some_time</s>
+          <s k="type">time</s>
+          <b k="null">1</b>
+          <i k="idx">8</i>
+        </col>
+        <col k="some_text">
+          <s k="name">some_text</s>
+          <s k="type">text</s>
+          <b k="null">1</b>
+          <s k="collate">utf8mb4_unicode_ci</s>
+          <i k="idx">9</i>
+        </col>
+        <col k="some_enum">
+          <s k="name">some_enum</s>
+          <s k="type">enum</s>
+          <i k="size">0</i>
+          <b k="null">1</b>
+          <s k="collate">utf8mb4_unicode_ci</s>
+          <i k="idx">10</i>
+        </col>
+        <col k="encrypted_password">
+          <s k="name">encrypted_password</s>
+          <s k="type">varchar</s>
+          <i k="size">50</i>
+          <b k="null">1</b>
+          <s k="collate">utf8mb4_unicode_ci</s>
+          <i k="idx">11</i>
+        </col>
+        <col k="mixedCaseField">
+          <s k="name">mixedCaseField</s>
+          <s k="type">varchar</s>
+          <i k="size">50</i>
+          <b k="null">1</b>
+          <s k="collate">utf8mb4_unicode_ci</s>
+          <i k="idx">12</i>
+        </col>
+      </tb>
+      <tb k="indexes">
+        <indx k="PRIMARY">
+          <s k="name">PRIMARY</s>
+          <s k="type">PRIMARY</s>
+          <a k="columns">
+            <s>author_id</s>
+          </a>
+        </indx>
+      </tb>
+      <ea k="references"></ea>
+      <tb k="options">
+        <s k="engine">InnoDB</s>
+        <s k="collate">utf8mb4_unicode_ci</s>
+      </tb>
+      <ea k="foreignkeys"></ea>
+      <s k="name">author</s>
+      <s k="type">table</s>
+    </tdef>
+    <tdef k="rm-bldg">
+      <tb k="columns">
+        <col k="rm-id">
+          <s k="name">rm-id</s>
+          <s k="type">int</s>
+          <i k="size">11</i>
+          <b k="null">0</b>
+          <i k="idx">1</i>
+        </col>
+        <col k="rm-name">
+          <s k="name">rm-name</s>
+          <s k="type">varchar</s>
+          <i k="size">10</i>
+          <b k="null">0</b>
+          <s k="collate">utf8mb4_uca1400_ai_ci</s>
+          <i k="idx">2</i>
+        </col>
+        <col k="space out">
+          <s k="name">space out</s>
+          <s k="type">varchar</s>
+          <i k="size">1</i>
+          <b k="null">0</b>
+          <s k="collate">utf8mb4_uca1400_ai_ci</s>
+          <i k="idx">3</i>
+        </col>
+      </tb>
+      <ea k="indexes"></ea>
+      <ea k="references"></ea>
+      <tb k="options">
+        <s k="engine">InnoDB</s>
+        <s k="collate">utf8mb4_uca1400_ai_ci</s>
+      </tb>
+      <ea k="foreignkeys"></ea>
+      <s k="name">rm-bldg</s>
+      <s k="type">table</s>
+    </tdef>
+    <tdef k="author_author_id_seq">
+      <tb k="columns">
+        <col k="next_not_cached_value">
+          <s k="name">next_not_cached_value</s>
+          <s k="type">bigint</s>
+          <i k="size">21</i>
+          <b k="null">0</b>
+          <i k="idx">1</i>
+        </col>
+        <col k="minimum_value">
+          <s k="name">minimum_value</s>
+          <s k="type">bigint</s>
+          <i k="size">21</i>
+          <b k="null">0</b>
+          <i k="idx">2</i>
+        </col>
+        <col k="maximum_value">
+          <s k="name">maximum_value</s>
+          <s k="type">bigint</s>
+          <i k="size">21</i>
+          <b k="null">0</b>
+          <i k="idx">3</i>
+        </col>
+        <col k="start_value">
+          <s k="name">start_value</s>
+          <s k="type">bigint</s>
+          <i k="size">21</i>
+          <b k="null">0</b>
+          <i k="idx">4</i>
+        </col>
+        <col k="increment">
+          <s k="name">increment</s>
+          <s k="type">bigint</s>
+          <i k="size">21</i>
+          <b k="null">0</b>
+          <i k="idx">5</i>
+        </col>
+        <col k="cache_size">
+          <s k="name">cache_size</s>
+          <s k="type">bigint</s>
+          <i k="size">21</i>
+          <b k="unsigned">1</b>
+          <b k="null">0</b>
+          <i k="idx">6</i>
+        </col>
+        <col k="cycle_option">
+          <s k="name">cycle_option</s>
+          <s k="type">tinyint</s>
+          <i k="size">1</i>
+          <b k="unsigned">1</b>
+          <b k="null">0</b>
+          <i k="idx">7</i>
+        </col>
+        <col k="cycle_count">
+          <s k="name">cycle_count</s>
+          <s k="type">bigint</s>
+          <i k="size">21</i>
+          <b k="null">0</b>
+          <i k="idx">8</i>
+        </col>
+      </tb>
+      <ea k="indexes"></ea>
+      <ea k="references"></ea>
+      <tb k="options">
+        <s k="engine">InnoDB</s>
+        <s k="collate">utf8mb4_uca1400_ai_ci</s>
+      </tb>
+      <ea k="foreignkeys"></ea>
+      <s k="name">author_author_id_seq</s>
+      <s k="type">table</s>
+    </tdef>
+    <tdef k="employee">
+      <tb k="columns">
+        <col k="id">
+          <s k="name">id</s>
+          <s k="type">int</s>
+          <i k="size">11</i>
+          <b k="null">0</b>
+          <b k="auto_inc">1</b>
+          <i k="idx">1</i>
+        </col>
+        <col k="first_name">
+          <s k="name">first_name</s>
+          <s k="type">varchar</s>
+          <i k="size">255</i>
+          <b k="null">0</b>
+          <s k="collate">utf8mb4_uca1400_ai_ci</s>
+          <i k="idx">2</i>
+        </col>
+        <col k="last_name">
+          <s k="name">last_name</s>
+          <s k="type">varchar</s>
+          <i k="size">255</i>
+          <b k="null">0</b>
+          <s k="collate">utf8mb4_uca1400_ai_ci</s>
+          <i k="idx">3</i>
+        </col>
+        <col k="nick_name">
+          <s k="name">nick_name</s>
+          <s k="type">varchar</s>
+          <i k="size">255</i>
+          <b k="null">0</b>
+          <s k="collate">utf8mb4_uca1400_ai_ci</s>
+          <i k="idx">4</i>
+        </col>
+      </tb>
+      <tb k="indexes">
+        <indx k="PRIMARY">
+          <s k="name">PRIMARY</s>
+          <s k="type">PRIMARY</s>
+          <a k="columns">
+            <s>id</s>
+          </a>
+        </indx>
+      </tb>
+      <ea k="references"></ea>
+      <tb k="options">
+        <i k="auto_increment">1</i>
+        <s k="engine">InnoDB</s>
+        <s k="collate">utf8mb4_uca1400_ai_ci</s>
+      </tb>
+      <ea k="foreignkeys"></ea>
+      <s k="name">employee</s>
+      <s k="type">table</s>
+    </tdef>
+    <tdef k="test_intermediate">
+      <tb k="columns">
+        <col k="test_id">
+          <s k="name">test_id</s>
+          <s k="type">int</s>
+          <i k="size">11</i>
+          <b k="null">0</b>
+          <i k="idx">1</i>
+        </col>
+        <col k="test_related_id">
+          <s k="name">test_related_id</s>
+          <s k="type">int</s>
+          <i k="size">11</i>
+          <b k="null">0</b>
+          <i k="idx">2</i>
+        </col>
+        <col k="intermediate_value">
+          <s k="name">intermediate_value</s>
+          <s k="type">varchar</s>
+          <i k="size">1024</i>
+          <b k="null">1</b>
+          <s k="collate">utf8mb4_uca1400_ai_ci</s>
+          <i k="idx">3</i>
+        </col>
+        <col k="created_at">
+          <s k="name">created_at</s>
+          <s k="type">datetime</s>
+          <b k="null">1</b>
+          <i k="idx">4</i>
+        </col>
+        <col k="updated_at">
+          <s k="name">updated_at</s>
+          <s k="type">datetime</s>
+          <b k="null">1</b>
+          <i k="idx">5</i>
+        </col>
+      </tb>
+      <ea k="indexes"></ea>
+      <ea k="references"></ea>
+      <tb k="options">
+        <s k="engine">InnoDB</s>
+        <s k="collate">utf8mb4_uca1400_ai_ci</s>
+      </tb>
+      <ea k="foreignkeys"></ea>
+      <s k="name">test_intermediate</s>
+      <s k="type">table</s>
+    </tdef>
+  </tb>
+  <dtm k="date">2024-12-26 13:41:40.164907</dtm>
+  <ea k="relations"></ea>
+</root>
+</pdoc>

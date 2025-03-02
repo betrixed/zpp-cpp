@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<tb>
+	<s k="value">Hello</s>
+
+	<s k="w">World</s>
+
+	<a k="strings">
+		<s>Zero</s>
+		<s>One</s>
+		<s>Two</s>
+		<s>Three</s>
+	</a>
+
+	<a k="values">
+		
+		<dtm>June 30 2024 16:20:00</dtm>
+		
+		<s>A short sentence.</s>
+		<_n/>
+		<b>False</b>
+		<tb>
+			<i k="integer">3932676</i>
+			<f k="float">12.342e-5</f>
+			<s k="multiline">
+				This is a paragraph.
+				Another line.</s>
+			<dtm k="A date time object">June 30 1957 16:20:00</dtm>
+			<b k="boolean">True</b>
+		</tb>
+	</a>
+
+</tb>

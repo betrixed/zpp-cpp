@@ -92,6 +92,7 @@ namespace zpp {
             argv_ = &targv_[0];
             argct_ = ARGCT;
         }
+        zval* argptr(size_t ix) { return argv_[ix]; }
     };
 
 // prepared function call table

@@ -113,7 +113,7 @@ namespace wcc {
 		{
 			// ~test will decref
 			lose();
-			test.addref();
+			test.addref(); // anticipate source decref
 			self_ = (zend_object*) test;
 			obj_ = self_;
 
@@ -126,6 +126,7 @@ namespace wcc {
 		}
 		return result;
 	}
+
 	bool XmlWrap::fromString(zstr_user xml)
 	{
 		
@@ -141,12 +142,12 @@ namespace wcc {
 		hold_ = path;
 
 		zobj_mgr test(XML_FNS.xml_file.call(path));
+
 		return adopt_xmlobj(test);
 	}
 
 	void XmlWrap::fn_setup()
 	{
-		// resetting this may be a problem
 		getattribute_.set_fci(obj_, XML_FNS.get_attribute);
 		readstring_.set_fci(obj_, XML_FNS.read_string);
 		read_.set_fci(obj_, XML_FNS.read);
@@ -159,54 +160,38 @@ namespace wcc {
 
 	zstr_mgr XmlWrap::xml_name()
 	{
-		zval_mgr temp = self_.property(XML_FNS.k_name);
-		//showmem("temp xml_name", temp);
-		if (zval_user(temp).isString())
-		{	
-			return zstr_mgr(std::move(temp));
-		}
-		return zstr_mgr();
+		return zstr_mgr(std::move(self_.property(XML_FNS.k_name)));
 	}
 
 	zstr_mgr
 	XmlWrap::get_attribute(zstr_user name)
 	{	
-		zstr_mgr result;
+		ZVAL_STR(getattribute_.argptr(0), name);
+		//zstr_mgr result(getattribute_.call_fn());
 
-		zval_mgr arg1(name);
-		
-		zval_mgr temp(getattribute_.call1(arg1));
-
-		if (zval_user(temp).isString())
-		{
-			result = std::move(temp);
-		}
 		// TODO throw error?
-		return result;
+		return getattribute_.call_fn();
 	}
 
 	zval_mgr
 	XmlWrap::xml_str_zval()
 	{
-		return std::move(readstring_.call_fn());
+		return readstring_.call_fn();
 	}
 
+	/**
 	zstr_mgr
 	XmlWrap::xml_string()
 	{
-		zval_mgr temp = readstring_.call_fn();
-		zstr_mgr result;
-
-		if (zval_user(temp).isString())
-		{
-			result = std::move(temp);
-		}
-		return result;
+		return readstring_.call_fn();
 	}
+	*/
 
 	bool XmlWrap::read()
 	{
+
 		zval_mgr result = read_.call_fn();
+
 		zval_user test(result);
 
 		return (test.ztype() == IS_TRUE) ? true : false;
@@ -346,7 +331,7 @@ zval_mgr //static
 Wcc_XmlRead::fromFile(zstr_user filename)
 {
 	zobj_mgr xmlr = Wcc_XmlRead::omg.new_zobj();
-
+	showobj("new_zobj", xmlr);
 	Wcc_XmlRead* cobj = zobj_toc<Wcc_XmlRead>(xmlr);
 	
 	return cobj->parseFile(filename);
@@ -358,6 +343,8 @@ Wcc_XmlRead::loop()
 	zval_mgr result;
 	done_ = false;
 
+	//showobj("loop", xml_);
+
 	while(!done_ && xml_.read())
 	{
 		auto ntype = xml_.nodeType();
@@ -367,12 +354,16 @@ Wcc_XmlRead::loop()
 			case Xntype::ELEMENT:
 			{
 				zstr_mgr tag = xml_.xml_name();
-				//zend_printf("tag = %s\n", tag.data());
+				zstr_user tagstr(tag);
+
+				//zend_printf("tag = %s\n", tagstr.data());
 
 				zstr_mgr attr = xml_.get_attribute(XML_FNS.k_k);
+				zstr_user attrstr(attr);
+
 				//zend_printf("k = %s\n", attr.data());
 
-				bool result = tag_start(tag, attr);
+				bool result = tag_start(tagstr, attrstr);
 
 				if (!result) {
 					//zstr_make<false> name(tag);
@@ -393,7 +384,6 @@ Wcc_XmlRead::loop()
 		case Xntype::END_ELEMENT:
 			{
 				zstr_mgr tag = xml_.xml_name();
-
 				tag_end(tag);
 				//zend_printf("exit tag_end\n");
 			}
@@ -404,7 +394,7 @@ Wcc_XmlRead::loop()
 			break;
 		}
 	}
-	if (!root_) {
+	if (root_ && !stacked_) {
 		result = std::move(root_->ref_);
 		delete root_;
 		root_ = nullptr;
@@ -589,7 +579,6 @@ void Wcc_XmlRead::tag_end(zstr_user tag)
 
     if ( (s == pdoc_tag)) 
     {
-    	//zend_printf("set done true\n");
     	done_ = true;
     	return;
     }
@@ -648,7 +637,7 @@ void Wcc_XmlRead::debug_info(htab_user s)
 	s.set( XML_FNS.tags, tag_objs_);
 }
 
-void Wcc_XmlRead::setValue(zval_mgr& value,  zstr_user key)
+void Wcc_XmlRead::setValue(const zval_mgr& value,  zstr_user key)
 {
 	auto ix = stacked_;
 	if (ix == 0) {
@@ -714,16 +703,16 @@ void Wcc_XmlRead::setFloat(zstr_user key)
 
 void Wcc_XmlRead::setNull(zstr_user key)
 {
-	zval_mgr nval = xml_.xml_str_zval();
-	setValue(nval, key);
+	//zval_mgr nval = xml_.xml_str_zval();
+	setValue(xml_.xml_str_zval(), key);
 	nextEnd();
 }
 
 void Wcc_XmlRead::setString(zstr_user key)
 {
-	zval_mgr sval = xml_.xml_str_zval();
+	//zval_mgr sval = xml_.xml_str_zval();
 	//showmem("setString", sval);
-	setValue(sval, key);
+	setValue(xml_.xml_str_zval(), key);
 	nextEnd();
 }
 

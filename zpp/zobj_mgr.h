@@ -47,6 +47,8 @@ namespace zpp {
 
 		zobj_mgr& operator=(zobj_mgr&& rc);
 
+		zobj_mgr& operator=(zval_mgr&& rc);
+
 		const zobj_mgr& operator=(zend_object* rc);
 
 		~zobj_mgr(){

@@ -6,25 +6,21 @@ use Wcc\RequestGlobals;
 
 require "bootstrap.php";
 
-class EmptyTest {
-};
-
 function hide1() {
 	if (class_exists(EmptyTest::class)) {
 		$c1 = new EmptyTest();
-		echo "has empty" . PHP_EOL;
+		echo "has emty" . PHP_EOL;
 	}
 	else {
 		$c1 = null;
 	}
+
+
+
 	$svc = Services::instance();
 
-	//debug_zval_dump($svc);
 
-	if (class_exists(Config::class))
-	{
-		$cfg = $svc->newInstance(Config::class);
-	}
+	$cfg = $svc->newInstance(Config::class);
 	//$svc->setObject($cfg);
 
 	echo "has setObject" . PHP_EOL;
@@ -72,15 +68,14 @@ function hide1() {
 	echo "got object " . print_r($c2, true) . PHP_EOL;
 
 	$svc->set(
-		"emty", 
-		function(Services $svc)
-		{
-			echo "called back with service \n";
+		"emty", function(Services $svc){
+			echo "called back with service " . debug_zval_dump($svc) . PHP_EOL;
 			return new EmptyTest();
 		});
 
 	echo "set called" . PHP_EOL;
 
+	debug_zval_dump($svc);
 	$svc->set("config", new Config());
 
 	echo "set config" . PHP_EOL;
@@ -89,15 +84,15 @@ function hide1() {
 		$d1 = $svc->get("emty");
 
 		echo "got emty" . PHP_EOL;
-		//debug_zval_dump($d1);
+		debug_zval_dump($d1);
 		$d2 = $svc->get("config");
 		$d2->test = "property";
 
-		//debug_zval_dump($d2);
+		debug_zval_dump($d2);
 	}
 	catch (\Error $ex)
 	{
-		echo "Service get failed " . $ex->getMessage() . PHP_EOL;
+		echo "Service get failed " . ex.getMessage() . PHP_EOL;
 	}
 
 	$ic = new ICache([], $svc);
@@ -107,7 +102,7 @@ function hide1() {
 	$cfg = $ic->getService('config');
 	echo "service $cfg->test" . PHP_EOL;
 
-	//debug_zval_dump($ic);
+	debug_zval_dump($ic);
 
 }
 

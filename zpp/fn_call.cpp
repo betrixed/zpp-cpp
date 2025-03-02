@@ -200,22 +200,21 @@ fn_call::call_fn()
         zend_throw_error(zend_ce_error,"call_fn() fci is not initialized",0);
         return std::move(result_);
     }
-    if (track_)
-    {
-        //showobj("call_fn(obj)", fci_.object);
-        //showmem("call_fn()", &fci_.function_name);
-        //zend_printf("fn handler %lx\n", cache_.function_handler);
-        //zend_printf("argct %ld params %lx np %lx\n", 
-        //   fci_.param_count, fci_.params, fci_.named_params);
+    /*
+        showobj("call_fn(obj)", fci_.object);
+        showmem("call_fn()", &fci_.function_name);
+        zend_printf("fn handler %lx\n", cache_.function_handler);
+        zend_printf("argct %ld params %lx np %lx\n", 
+        fci_.param_count, fci_.params, fci_.named_params);
+    */
 
-    }
     zend_result ok =  zend_call_function(&fci_, &cache_);
 
     if (ok != SUCCESS)
     {
         throw_failed();
     }
-
+    //showmem("call_fn result", result_);
     return std::move(result_);
 }
 
