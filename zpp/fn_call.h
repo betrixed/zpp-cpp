@@ -58,6 +58,7 @@ namespace zpp {
     	fn_call();
         ~fn_call();
 
+
         void set_track(bool value) { track_ = value; }
         void set_fci(zend_object* obj , zstr_user method, HashTable* nargs = nullptr);
         //void set_fname(const char* name);
@@ -68,15 +69,17 @@ namespace zpp {
         void set_arg(size_t ix, zval* vp);
 
         zval_mgr&& call_fn();
-        
+        zval* argsptr() const { return (zval*) argv_; }
+
         /** Direct set args and return in one call. 
          *  These must be used from correct size in template<size_t ARGCT>
-         */
+         *
         zval_mgr&& call1(zval* a1);
         zval_mgr&& call2(zval* a1, zval* a2);
         zval_mgr&& call3(zval* a1, zval* a2, zval* a3);
         zval_mgr&& call4(zval* a1, zval* a2, zval* a3, zval* a4);
         zval_mgr&& call5(zval* a1, zval* a2, zval* a3, zval* a4, zval* a5);
+        */
     };
 
 
@@ -84,15 +87,14 @@ namespace zpp {
 
     template <size_t ARGCT>
     class fn_call_args : public fn_call {
-    protected:
-        zval_init targv_[ARGCT];
     public:
+        zval_init targv_[ARGCT];
         fn_call_args() : fn_call()
         {
             argv_ = &targv_[0];
             argct_ = ARGCT;
         }
-        zval* argptr(size_t ix) { return argv_[ix]; }
+        
     };
 
 // prepared function call table

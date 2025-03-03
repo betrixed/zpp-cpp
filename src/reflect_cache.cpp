@@ -82,10 +82,10 @@ ReflectCache::getReflectClass(zstr_user class_name)
 	{
 		//showobj("new_object",result);
 		fn_call_args<1> fn;
-
+		ZVAL_STR(fn.argsptr(), class_name);
 		fn.set_fci(result, RFC_data.construct_key);
-		zval_mgr name(class_name);
-		zval_mgr crc = fn.call1(name);
+		
+		zval_mgr crc = fn.call_fn();
 		zval_user temp(crc);
 
 		if (temp.isObject())
@@ -143,14 +143,16 @@ ReflectCache::staticInstanceArgs(zstr_user class_name, zval_user args)
 zobj_mgr 
 ReflectCache::newInstanceArgs(zstr_user class_name, zval_user args)
 {
-	zobj_mgr rfc = getReflectClass(class_name);
 	zobj_mgr result;
 
+	zobj_mgr rfc = getReflectClass(class_name);
 	if (rfc.ok())
 	{
 		fn_call_args<1> fn;
+		ZVAL_COPY_VALUE(fn.argsptr(), args);
+
 		fn.set_fci(rfc, RFC_data.new_instance_args);
-		zval_mgr recall(fn.call1(args));
+		zval_mgr recall(fn.call_fn());
 		zval_user test(recall);
 
 		if (test.isObject())

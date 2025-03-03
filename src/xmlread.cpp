@@ -52,20 +52,21 @@ namespace zpp {
 	xmlreader_xml::call(zstr_user src)
 	{
 	 	//showstr("xml src", src);
+		zval* pz = argsptr();
+		ZVAL_STR(pz, src);
+		ZVAL_NULL(pz+1);
+		ZVAL_LONG(pz+2, 0);
 
-		zval_mgr arg1(src);
-		zval_mgr arg2;
-		zval_mgr arg3(0);
-
-		return zobj_mgr(call3(arg1, arg2, arg3));
+		return zobj_mgr(call_fn());
 	}
 
 	zobj_mgr xmlreader_open::call(zstr_user path)
 	{
-		zval_mgr arg1(path);
-		zval_mgr arg2;
-		zval_mgr arg3(0);
-		return zobj_mgr(call3(arg1, arg2, arg3));
+		zval* pz = argsptr();
+		ZVAL_STR(pz, path);
+		ZVAL_NULL(pz+1);
+		ZVAL_LONG(pz+2, 0);
+		return zobj_mgr(call_fn());
 	}
 };
 
@@ -166,10 +167,8 @@ namespace wcc {
 	zstr_mgr
 	XmlWrap::get_attribute(zstr_user name)
 	{	
-		ZVAL_STR(getattribute_.argptr(0), name);
-		//zstr_mgr result(getattribute_.call_fn());
+		ZVAL_STR(getattribute_.argsptr(), name);
 
-		// TODO throw error?
 		return getattribute_.call_fn();
 	}
 

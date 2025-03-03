@@ -74,7 +74,8 @@ datetime_obj::strtotime(zval* value)
 	fn_call_args<1> strtotime;
 
 	strtotime.set_fname(DTData.strtotime);
-	return strtotime.call1(value);
+	ZVAL_COPY_VALUE(strtotime.argsptr(), value);
+	return strtotime.call_fn();
 }
 
 zstr_mgr 
@@ -88,7 +89,10 @@ datetime_obj::reformat(zval* fmt, zval* value)
 	{
 		fn_call_args<2> datefmt;
 		datefmt.set_fname(DTData.date);
-		result = datefmt.call2(fmt, timeval);
+		zval* pz = datefmt.argsptr();
+		ZVAL_COPY_VALUE(pz, fmt);
+		ZVAL_COPY_VALUE(pz+1, timeval);
+		result = datefmt.call_fn();
 	}
 	return result;
 }
@@ -144,27 +148,28 @@ datetime_obj::setDate(int year, int month, int day)
 {
 	fn_call_args<3> set_date;
 
-	zval_mgr arg1(year);
-	zval_mgr arg2(month);
-	zval_mgr arg3(day);
+	zval* pz = set_date.argsptr();
+	ZVAL_LONG(pz, year);
+	ZVAL_LONG(pz+1, month);
+	ZVAL_LONG(pz+2, day);
 
 	set_date.set_fci(obj_, DTData.setdate);
 	//throw away return result
-	set_date.call3(arg1,arg2,arg3);
+	set_date.call_fn();
 }
 
 void 
 datetime_obj::setTime(int hour, int minute, int second, int millisec)
 {
 	fn_call_args<4> set_time;
-
-	zval_mgr arg1(hour);
-	zval_mgr arg2(minute);
-	zval_mgr arg3(second);
-	zval_mgr arg4(millisec);
+	zval* pz = set_time.argsptr();
+	ZVAL_LONG(pz, hour);
+	ZVAL_LONG(pz+1, minute);
+	ZVAL_LONG(pz+2, second);
+	ZVAL_LONG(pz+3, millisec);
 
 	set_time.set_fci(obj_, DTData.settime);
-	set_time.call4(arg1,arg2,arg3,arg4);
+	set_time.call_fn();
 }
 
 
@@ -200,9 +205,9 @@ datetime_obj::diff(datetime_obj& dtm)
 
 	diffobj.set_fci(obj_, DTData.diff);
 
-	zval_mgr arg1(dtm);
+	ZVAL_OBJ(diffobj.argsptr(),(zend_object*) dtm);
 
-	return zobj_mgr(diffobj.call1(arg1));
+	return zobj_mgr(diffobj.call_fn());
 
 }
 

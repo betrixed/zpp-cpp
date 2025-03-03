@@ -78,7 +78,7 @@ zobj_user::callable()
 }
 
 zval_mgr
-zobj_user::callable(zval_user arg1)
+zobj_user::callable(zval* arg1)
 {
     zval_mgr callme (obj_);
 
@@ -105,7 +105,7 @@ zobj_user::call(zstr_user method)
 }
 
 zval_mgr
-zobj_user::callable(zval_user arg1, zval_user arg2)
+zobj_user::callable(zval* arg1, zval* arg2)
 {
     zval_mgr callme (obj_);
 
@@ -120,7 +120,7 @@ zobj_user::callable(zval_user arg1, zval_user arg2)
     return result;
 }
 void
-zobj_user::property(zstr_user key, const zval_mgr& value)
+zobj_user::property(zstr_user key, zval* value)
 {
     // zend_class_entry* scope = obj_->ce;
     zend_class_entry* scope = EG(fake_scope);
@@ -165,49 +165,63 @@ zobj_user::property(zstr_user key)
 
 
 zval_mgr
-zobj_user::call(zstr_user method, const zval_mgr& arg1)
+zobj_user::call(zstr_user method, zval* arg1)
 {
 
     fn_call_args<1> caller;
 
     caller.set_fci(obj_, method);
-
-    return caller.call1(arg1);
+    ZVAL_COPY_VALUE(caller.argsptr(), arg1);
+    return caller.call_fn();
 }
 
 zval_mgr
 zobj_user::call(zstr_user method, 
-            const zval_mgr& arg1, const zval_mgr& arg2)
+            zval* arg1, zval* arg2)
 {
     fn_call_args<2> caller;
-
     caller.set_fci(obj_, method);
+    zval* pz = caller.argsptr();
 
-    return caller.call2(arg1,arg2);
+    ZVAL_COPY_VALUE(pz, arg1);
+    ZVAL_COPY_VALUE(pz+1, arg2);
+
+    return caller.call_fn();
 }
 
 zval_mgr
 zobj_user::call(zstr_user method, 
-            const zval_mgr& arg1, const zval_mgr& arg2, const zval_mgr& arg3)
+            zval*  arg1, zval*  arg2, zval*  arg3)
 {
     fn_call_args<3> caller;
 
     caller.set_fci(obj_, method);
+    zval* pz = caller.argsptr();
 
-    return caller.call3(arg1,arg2,arg3);
+    ZVAL_COPY_VALUE(pz, arg1);
+    ZVAL_COPY_VALUE(pz+1, arg2);
+    ZVAL_COPY_VALUE(pz+2, arg3);
+
+    return caller.call_fn();
 }
 
 
 zval_mgr
 zobj_user::call(zstr_user method, 
-            const zval_mgr& arg1, const zval_mgr& arg2, 
-            const zval_mgr& arg3, const zval_mgr& arg4)
+            zval*  arg1, zval*  arg2, 
+            zval*  arg3, zval*  arg4)
 {
     fn_call_args<4> caller;
 
     caller.set_fci(obj_, method);
+    zval* pz = caller.argsptr();
 
-    return caller.call4(arg1,arg2,arg3, arg4);
+    ZVAL_COPY_VALUE(pz, arg1);
+    ZVAL_COPY_VALUE(pz+1, arg2);
+    ZVAL_COPY_VALUE(pz+2, arg3);
+    ZVAL_COPY_VALUE(pz+3, arg4);
+
+    return caller.call_fn();
 }
 
 }; // namespace

@@ -21,6 +21,7 @@ namespace zpp {
         HashTable* ht_;
 
         friend class htab_mgr;
+        friend class htab_write;
         friend class zval_mgr;
     public:
         static HashTable* make_own(HashTable* ht);

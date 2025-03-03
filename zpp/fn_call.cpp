@@ -27,7 +27,7 @@ fn_call::~fn_call()
 {
 
 }
-
+/*
 zval_mgr&& 
 fn_call::call1(zval *vp)
 {
@@ -48,7 +48,7 @@ fn_call::call2(zval *arg0, zval* arg1)
 zval_mgr&& 
 fn_call::call3(zval *arg0, zval* arg1, zval* arg2)
 {
-     assert(argct_==3);
+    assert(argct_==3);
     ZVAL_COPY_VALUE(argv_[0],arg0);
     ZVAL_COPY_VALUE(argv_[1],arg1);
     ZVAL_COPY_VALUE(argv_[2],arg2);
@@ -77,7 +77,7 @@ fn_call::call5(zval *arg0, zval* arg1, zval* arg2, zval* arg3, zval* arg4)
     ZVAL_COPY_VALUE(argv_[4],arg4);
     return call_fn();
 }
-
+*/
 
 
 void 
@@ -151,17 +151,20 @@ void fn_call::throw_failed()
 
 bool fnexists::call(zstr_user arg)
 {
-    zval_mgr val(arg);
-    zval_mgr result = call1(val);
+    ZVAL_STR(argsptr(), (zend_string*)arg);
+    zval_mgr result = call_fn();
     return zval_user(result).zbool();
 }
 
 zstr_mgr 
 pregquote::call(zstr_user str, zstr_user delimiter)
 {
-    zval_mgr sval(str);
-    zval_mgr dval(delimiter);
-    zval_mgr result = call2(sval, dval);
+    zval* pz = argsptr();
+
+    ZVAL_STR(pz, (zend_string*) str);
+    ZVAL_STR(pz+1, (zend_string*) delimiter);
+
+    zval_mgr result = call_fn();
     return zstr_mgr(zval_user(result).zstr());
 }
 
@@ -169,21 +172,20 @@ zstr_mgr
 file_content::call(zstr_user path, int offset, size_t len)
 {
     //showmem("fn_name", &fci_.function_name);
+    zval* pz = argsptr();
 
-    zval_mgr zoff(offset);
-    zval_mgr zlen;
-    zval_mgr zpath(path);
-
+    ZVAL_STR(pz, (zend_string*) path);
+    ZVAL_BOOL(pz+1, false);
+    ZVAL_NULL(pz+2); // resource arg
+    ZVAL_LONG(pz+3, offset);
     if (len > 0)
     {
-        zlen = (zend_long)len; // else null;
+        ZVAL_LONG(pz+4, len);
     }
-    zval_mgr zfalse;
-    zfalse.set_bool(false);
-
-    zval_mgr resource;
-
-    return zstr_mgr(call5(zpath, zfalse, resource, zoff, zlen));
+    else {
+        ZVAL_NULL(pz+4);
+    }
+    return zstr_mgr(call_fn());
 }
 
 zstr_mgr 
@@ -221,13 +223,12 @@ fn_call::call_fn()
 zstr_mgr 
 addcslashes(zstr_user s, zstr_user escapes)
 {
-    zval_mgr arg1(s);
-    zval_mgr arg2(escapes);
-
     fn_call_args<2>  fn;
-
     fn.set_fci(nullptr, STAB.addcslashes, nullptr);
-    zstr_mgr result = fn.call2(arg1,arg2);
+    zval* pz = fn.argsptr();
+    ZVAL_STR(pz, (zend_string*) s);
+    ZVAL_STR(pz+1, (zend_string*) escapes);
+    zstr_mgr result = fn.call_fn();
     return result;
 }
 
@@ -250,8 +251,8 @@ bool extension_loaded(zstr_user name)
 
 bool extnloaded::call(zstr_user name)
 {
-    zval_mgr zname(name);
-    zval_mgr result = call1(zname);
+    ZVAL_STR(argsptr(), (zend_string*) name);
+    zval_mgr result = call_fn();
     return zval_user(result).isTrue();
 }
 
@@ -265,10 +266,12 @@ zstr_mgr
 mb_detect_order(const zval_mgr& encoding)
 {
     fn_call_args<1>  fn;
+    zval* pz = fn.argsptr();
 
     fn.set_fci(nullptr, STAB.mb_detect_order, nullptr);
-    zval_mgr result(fn.call1(encoding));
-    return result;
+    ZVAL_COPY_VALUE(fn.argsptr(), encoding);
+
+    return fn.call_fn();
 }
     
 zstr_mgr 
@@ -276,23 +279,23 @@ mb_detect_encoding(zstr_user str, const zval_mgr& encodings, bool strict)
 {
     fn_call_args<3>  fn;
 
-    zval_mgr arg1(str);
-    zval_mgr arg3;
-    arg3.set_bool(strict);
+    zval* pz = fn.argsptr();
+    ZVAL_STR(pz, (zend_string*) str);
+    ZVAL_COPY_VALUE(pz+1, encodings);
+    ZVAL_BOOL(pz+2,strict);
 
     fn.set_fci(nullptr, STAB.mb_detect_encoding, nullptr);
-    return fn.call3(arg1, encodings, arg3);
+    return fn.call_fn();
 }
 
 zstr_mgr 
 rawurlencode(zstr_user s)
 {
     fn_call_args<1>  fn;
-    zval_mgr arg1(s);
+    ZVAL_STR(fn.argsptr(), s);
+
     fn.set_fci(nullptr, STAB.rawurlencode, nullptr);
-    fn.set_arg(1,arg1);
-    zval_mgr result = fn.call_fn();
-    return result;
+    return fn.call_fn();
 
 }
 

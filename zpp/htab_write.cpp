@@ -8,16 +8,10 @@ htab_write::htab_write(htab_mgr& mgr)
 	ht_ = mgr.ht_;
 }
 
-void //protected
-htab_write::cowop()
+htab_write::htab_write(zpp::htab_read hr)
 {
-	if (GC_REFCOUNT(ht_) > 1) {
-		HashTable* used = ht_;
-		ht_ = zend_array_dup(used);
-		GC_TRY_DELREF(used);
-	}
+	ht_ = hr.ht_;
 }
-
 
 void htab_write::update(zend_long idx, zval* val)
 {

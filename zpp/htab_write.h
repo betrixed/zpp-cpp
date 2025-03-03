@@ -10,7 +10,15 @@ namespace zpp {
     class htab_write : public htab_read 
     {
     protected:
-    	void  cowop();
+    	inline void cowop()
+        {
+            if (GC_REFCOUNT(ht_) > 1) 
+            {
+                HashTable* used = ht_;
+                ht_ = zend_array_dup(used);
+                GC_TRY_DELREF(used);
+            }
+        }
 
     public:
         // for use in child classes
@@ -24,12 +32,11 @@ namespace zpp {
 
         const htab_write& operator=(const zval* p);
         
-        void apply_all(fn_zval fn);
+
 
         //zstr_mgr print_all(const char* label = nullptr);
 
-        uint32_t size() const;
-
+        
         void merge(HashTable* src);
 
         void clear();

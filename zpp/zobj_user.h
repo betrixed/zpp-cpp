@@ -38,14 +38,14 @@ namespace zpp {
 
 		//! Closures, isCallables
 		zval_mgr callable();
-		zval_mgr callable(zval_user arg1);
-		zval_mgr callable(zval_user arg1, zval_user arg2);
+		zval_mgr callable(zval* arg1);
+		zval_mgr callable(zval* arg1, zval* arg2);
 
 		
 
 		//! get a property value
 		zval_mgr property(zstr_user key);
-		void     property(zstr_user key, const zval_mgr& value);
+		void     property(zstr_user key, zval* value);
 
 		bool isNull() const { return !(obj_); }
 		bool ok() const { return (obj_); }
@@ -55,19 +55,16 @@ namespace zpp {
 		//! calling methods
 		zval_mgr call(zstr_user method);
 
-		zval_mgr call(zstr_user method, 
-	        const zval_mgr& arg1);
+		zval_mgr call(zstr_user method, zval* arg1);
 
 		zval_mgr call(zstr_user method, 
-	        const zval_mgr& arg1, const zval_mgr& arg2);
+	        zval* arg1, zval* arg2);
 
 		zval_mgr call(zstr_user method, 
-	        const zval_mgr& arg1, const zval_mgr& arg2, 
-	        const zval_mgr& arg3);
+	        zval* arg1, zval* arg2, zval* arg3);
 
 		zval_mgr call(zstr_user method, 
-	        const zval_mgr& arg1, const zval_mgr& arg2, 
-	        const zval_mgr& arg3, const zval_mgr& arg4);
+	        zval* arg1, zval* arg2, zval* arg3, zval* arg4);
 
 	};
 };
