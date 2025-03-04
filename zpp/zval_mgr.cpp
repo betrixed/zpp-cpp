@@ -192,6 +192,21 @@ zval_mgr::zval_mgr(zval* zv)
     ZVAL_COPY(&zv_, zv);
 }
 
+zval_mgr::zval_mgr(const zval_user& rc)
+{
+    init();
+    ZVAL_COPY(&zv_, rc);
+}
+
+const zval_mgr& 
+zval_mgr::operator=(zval* rc)
+{
+    lose();
+    ZVAL_COPY(&zv_, rc);
+    return *this;
+}
+
+
  zval_mgr::zval_mgr(int value)
  {
     init();
@@ -345,6 +360,32 @@ zval_mgr::zval_mgr(zstr_mgr&& rc)
         ZVAL_STR(&zv_, rc.s);
         rc.s = nullptr;
     }
+}
+
+zval_mgr::zval_mgr(zend_string* rc)
+{
+    init();
+    bind_string(rc);
+}
+
+zval_mgr::zval_mgr(zend_object* rc)
+{
+    init();
+    bind_object(rc);
+}
+
+zval_mgr::zval_mgr(zend_long value)
+{
+    init();
+    bind_long(value);
+}
+
+const zval_mgr& 
+zval_mgr::operator=(zend_object* rc)
+{
+    lose();
+    bind_object(rc);
+    return *this;
 }
 
 }; // namespace Php

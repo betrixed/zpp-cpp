@@ -410,10 +410,10 @@ namespace zpp {
 
 			/* to be deleted by zend */
 			*is_temp = 1; 
-			HashTable* ret = zend_new_array(6);
-			cobj->debug_info(htab_write(ret));
-
-			return ret;
+			
+			htab_init ret;
+			cobj->debug_info(ret);
+			return ret.steal();
 		}
 
 		static zend_object *znew_ex(

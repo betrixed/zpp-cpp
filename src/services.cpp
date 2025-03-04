@@ -287,6 +287,7 @@ zval_mgr
 Services::get(zstr_user name)
 {
 	zval_mgr result;
+	
 	zval_user value;
 
 	//showstr("services::get", name);

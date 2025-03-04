@@ -665,7 +665,7 @@ void Wcc_XmlRead::setValue(const zval_mgr& value,  zstr_user key)
 				throwNoKey();
 			}
 
-			htab_write hw(ref.zarray());
+			htab_write hw(ref);
 			hw.set(key, value);
 		}
 		break;
@@ -676,7 +676,7 @@ void Wcc_XmlRead::setValue(const zval_mgr& value,  zstr_user key)
 			{
 				throwKey(key);
 			}
-			htab_write hw(ref.zarray());
+			htab_write hw(ref);
 			hw.push_back(value);
 		}
 		break;

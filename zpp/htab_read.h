@@ -30,6 +30,8 @@ namespace zpp {
 
         htab_read(const htab_read& rc) : ht_(rc.ht_) {}
 
+        htab_read(const htab_mgr& rc) : ht_(rc.ht_) {}
+        
         htab_read(HashTable* ht);
 
         operator HashTable*() const { return ht_; }

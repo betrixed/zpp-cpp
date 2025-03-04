@@ -1,6 +1,25 @@
 #ifndef HTAB_WALK_CPP
 #define HTAB_WALK_CPP
 
+#ifndef HTAB_WALK_H
+#include "htab_walk.h"
+#endif
+
+namespace zpp {
+
+htab_walk::htab_walk(): key_(), iterate_(0), ok_(false) 
+{  
+    keyptr_ = key_;
+    valptr_ = value_;
+}
+        
+htab_walk::htab_walk(const htab_walk &c)
+    : key_(c.key_), value_(c.value_), wrap_(c.wrap_), iterate_(c.iterate_)
+{ 
+    keyptr_ = key_;
+    valptr_ = value_;
+}
+
 bool htab_walk::start(HashTable* ht)
 {
     wrap_ = ht;
@@ -63,17 +82,18 @@ bool htab_walk::prev()
     return prev(); // recurse
 }
 
+
 bool htab_walk::getdata()
 {
 	HashTable* ht = wrap_;
 
-    data_.first.set_null();
+    key_.lose();
     // read in the current key
-    // if string key, data_.first has a ZVAL_STR_COPY of key 
+    // key can be ZVAL_STR_COPY of key, may require decref later
 
-    zend_hash_get_current_key_zval_ex(ht, data_.first, &iterate_);
+    zend_hash_get_current_key_zval_ex(ht, key_, &iterate_);
     zend_string* keystr;
-    if (data_.first.getStringData(&keystr))
+    if (keyptr_.getStringData(&keystr))
     {
         const char* zero = ZSTR_VAL(keystr);
         /* 
@@ -87,16 +107,14 @@ bool htab_walk::getdata()
     }
 
     // if the key is set to NULL, it means that the object is not at a valid position
-    if (data_.first.isNull()) 
+    if (keyptr_.isNull()) 
     {
     	return invalid();
     }
 
     // iterator is at a valid position,  fetch data, add reference
  
-    zval* zptr = zend_hash_get_current_data_ex(ht, &iterate_);
-
-    data_.second.set(zptr);
+    value_ = zend_hash_get_current_data_ex(ht, &iterate_);
 
     // we can now update the current data
 
@@ -120,12 +138,13 @@ bool htab_walk::invalid()
     	zend_hash_internal_pointer_end_ex(ht, &iterate_);
     	zend_hash_move_forward_ex(ht, &iterate_);
     }
-   
-    data_ = std::pair<zval_own,zval_own>();
+    key_.lose();
+    value_.lose();
 
     return false;
 }
 
+};//namespace
 
 #endif
 //htab_walk.cpp

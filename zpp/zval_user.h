@@ -64,52 +64,26 @@ public:
     //! methods to check contained PHP type
     int  ref_type() const;
 
-    bool isDouble() const
-    {
-        return ((p_ != nullptr) && (ref_type() == IS_DOUBLE));
-    }
+    bool isDouble() const;
 
-    bool isLong() const
-    {
-        return ((p_ != nullptr) && (ref_type() == IS_LONG));
-    }
+    bool isLong() const;
 
-    bool isArray() const
-    {
-        return ((p_ != nullptr) && (ref_type() == IS_ARRAY));
-    }
-
+    bool isArray() const;
     
-    bool isNull() const
-    {
-        return ((p_ == nullptr) || (ref_type() == IS_NULL));
-    }
+    bool isNull() const;
 
-    bool isObject() const
-    { 
-        return ((p_ != nullptr) && (ref_type() == IS_OBJECT));
-    }
+    bool isObject() const;
 
-    bool isString() const
-    {
-        return ((p_ != nullptr) && (ref_type() == IS_STRING));
-    }
+    bool ok() const;
 
-    bool isTrue() const 
-    {
-        return ((p_ != nullptr) && (ref_type() == IS_TRUE));
-    }
+    bool isString() const;
 
-    bool isFalse() const 
-    {
-        return ((p_ == nullptr) || (ref_type() == IS_FALSE));
-    }
+    bool isTrue() const;
 
-    bool isPointer() const
-    {
-        return ((p_ == nullptr) || (ref_type() == IS_PTR));
-    }
+    bool isFalse() const;
 
+    bool isPointer() const;
+    
     bool isCallable() const;
 
 
@@ -157,12 +131,15 @@ public:
     //! return HashTable* pointer or nullptr
     HashTable* zarray() const;
 
+    void return_zv(zval* ret);
     
     int ztype() const {
         if (!p_)
             return 0;
         return Z_TYPE_P(p_);
     }
+
+    const zval_user& operator=(const zval_mgr& rc);
 
 };
 

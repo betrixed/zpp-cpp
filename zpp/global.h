@@ -24,6 +24,8 @@ protected:
      *  @var bool
      */
     bool exists_;
+    friend class htab_write;
+
 public:
 
     Global(const Global &global) = delete;

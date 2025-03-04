@@ -12,9 +12,12 @@
 namespace zpp {
 
     class htab_walk {
-        typedef std::pair<zval_mgr,zval_mgr> rzpair;
+    private:
+        zval_mgr key_;
+        zval_mgr value_;
 
-        rzpair data_;
+        zval_user keyptr_;
+        zval_user valptr_;
 
     	htab_read  wrap_;
 
@@ -22,13 +25,9 @@ namespace zpp {
 
         bool ok_ = false;
     public:
-
-        htab_walk(): iterate_(0), ok_(false) 
-        {  /* void */ }
+        htab_walk();
+        htab_walk(const htab_walk& c);
         
-        htab_walk(const htab_walk &c)
-            : wrap_(c.wrap_), iterate_(c.iterate_)
-        { /* void */ }
 
         ~htab_walk() = default;
 
@@ -58,18 +57,14 @@ namespace zpp {
             return (wrap_ == c.wrap_) && (iterate_ == c.iterate_);
         }
 
-        zval_user key(){
-        	return zval_user(data_.first);
-        }
-
-        zval_user value() {
-        	return zval_user(data_.second);
-        }
-
-
-        const rzpair& data() const
+        zval_user key()
         {
-            return data_;
+        	return keyptr_;
+        }
+
+        zval_user value() 
+        {
+        	return valptr_;
         }
 
     private:

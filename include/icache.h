@@ -2,90 +2,87 @@
 #define ICACHE_H
 
 
-#ifndef WC_BASE_H
-#include "wc_base.h"
+#ifndef ZPP_BASE_H
+#include "zpp/base.h"
 #endif
 
 
 
 namespace wcc {
 
-class  Wcc_ICache : public base_d {
+class  ICache : public base_d {
 protected:
-	htab_own cached_;
-	htab_own svc_cache_;
-	zstr_own prefix_;
-	htab_own options_;
-	zobj_own services_;
+	htab_init cached_;
+	htab_init svc_cache_;
+	htab_mgr  options_;
+	zstr_mgr  prefix_;
+	zobj_mgr  services_;
 	zend_long ttl_;
 public:
 
-	static const char* class_name;
+	static base_obj_mgr<ICache> omg;
 
-	static zval_own make_cache( zval_ptr options, zval_ptr services);
+	static zobj_mgr make_cache( zval_user options, zval_user services);
 
-	void __construct(zval_ptr options, zval_ptr services);
+	void __construct(zval_user options, zval_user services);
 
-	void addLocal(zval_own& pkg);
+	void addLocal(zval_user pkg);
 
 	bool clear();
 
-	bool clearPrefix(zend_string* prefix);
+	bool clearPrefix(zstr_user prefix);
 
-	bool deleteKey(zend_string* key);
+	bool deleteKey(zstr_user key);
 
-	htab_own getExpired();
+	htab_mgr getExpired();
 	
 	int  deleteExpired();
 
-	bool deleteMultiple(zval_own& keys);
+	bool deleteMultiple(htab_read keys);
 
-	zval_own get(zend_string* key, zval_own& noval);
+	zval_mgr get(zstr_user key, zval_user noval);
 
-	zval_own getCached(zend_string* key);
+	zval_mgr getCached(zstr_user key);
 
-	zval_own getData(zend_string* key);
+	zval_mgr getData(zstr_user key);
 
-	zval_own getMultiple(zval_own& keys, zval_own& noval);
+	zval_mgr getMultiple(htab_read keys, zval_user noval);
 
-	zstr_own getPrefix()
+	zstr_user getPrefix()
 	{
 		return prefix_;
 	}
 
-	zval_own getService(zend_string* key);
+	zval_mgr getService(zstr_user key);
 
 	zend_long getTTL() {
 		return ttl_;
 	}
 
-	zval_own getUnsaved();
+	htab_mgr getUnsaved();
 
-	zval_own getOption(zend_string* key);
+	zval_mgr getOption(zstr_user key);
 
-	void setOption(zend_string* key, zval_ptr value);
+	void setOption(zstr_user key, zval_user value);
 	
-	bool set(zend_string* key, zval_own& data, zend_long ttl);
+	bool set(zstr_user key, zval_user data, zend_long ttl);
 
-	zval_own setCached(zend_string* key, zval_own& data, zend_long ttl);
+	zobj_mgr setCached(zstr_user key, zval_user data, zend_long ttl);
 
-	bool setMultiple(zval_own& values, zend_long ttl);
+	bool setMultiple(zval_user values, zend_long ttl);
 
-	void setServices(zval_own& svc);
+	void setServices(zval_user svc);
 
 	void setTTL(zend_long ttl)
 	{
 		ttl_ = ttl;
 	}
 
-	virtual void debug_info(HashTable *ht);
+	virtual void debug_info(htab_write s);
 
 
 };
 
-	typedef base_obj_mgr<Wcc_ICache>  Wcc_ICache_Mgr;
-
-	extern Wcc_ICache_Mgr icache_mgr;
 
 }; // namespace
 

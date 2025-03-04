@@ -16,6 +16,14 @@ void htab_mgr::own()
 	GC_TRY_ADDREF(ht_);
 }
 
+HashTable* 
+htab_mgr::steal()
+{
+	HashTable* result = ht_;
+	ht_ = nullptr;
+	return result;
+}
+
 void  
 htab_mgr::decref()
 {
@@ -154,13 +162,19 @@ htab_mgr::new_array()
 	return zend_new_array(HT_MIN_SIZE);
 }
 
+HashTable* //static
+htab_mgr::empty_array()
+{
+	return (HashTable*) &zend_empty_array;
+}
+
 void htab_mgr::init()
 {
 	if (ht_)
 	{
 		lose();
 	}
-	ht_ = new_array();
+	ht_ = empty_array();
 	//ht_ = (HashTable*) &zend_empty_array;
 }
 
@@ -210,14 +224,31 @@ void htab_mgr::cow(const htab_mgr& c)
 
 htab_mgr::htab_mgr(htab_mgr&& m)
 {
-
 	ht_ = m.ht_;
 	m.ht_ = nullptr;
 }
 
+bool //static
+htab_mgr::cowop(HashTable*& inout)
+{
+	HashTable* used = inout;
+	if (used == nullptr) 
+	{
+		inout = zend_new_array(HT_MIN_SIZE);
+		return true;
+	}
+	if (GC_REFCOUNT(used) > 1) 
+	{
+	    inout = zend_array_dup(used);
+	    GC_TRY_DELREF(used); // safe to decref
+	    return true;
+	}
+	return false;
+}
 
 const htab_mgr& 
-htab_mgr::operator=(const htab_mgr& c){
+htab_mgr::operator=(const htab_mgr& c)
+{
 	if (ht_)
 	{
 		lose();
@@ -251,6 +282,11 @@ void htab_mgr::move_zv(zval* return_value)
 
 //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
+
+htab_init::htab_init()
+{
+	ht_ = htab_mgr::empty_array();
+}
 
 }; // namespace
 //htab_mgr.cpp

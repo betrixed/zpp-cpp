@@ -87,7 +87,7 @@ preg::capture(size_t ix)
 
 	if (test.isArray())
 	{
-		htab_write captures(test.zarray());
+		htab_write captures(test);
 
 		if (ix < captures.size()) 
 		{

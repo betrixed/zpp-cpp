@@ -111,12 +111,11 @@ extern "C" {
 #include "src/xmlread.cpp"
 #endif
 
-/*
  //ICACHE_DATA_CPP
 #include "src/icachedata.cpp"
 #include "src/icache.cpp"
 
-
+/*
 
 
 

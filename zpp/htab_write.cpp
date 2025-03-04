@@ -1,21 +1,54 @@
 #ifndef HTAB_WRITE_CPP
 #define HTAB_WRITE_CPP
 
+
+#ifndef HTAB_MGR_H
+#include "htab_mgr.h"
+#endif
+
 namespace zpp {
+
+void 
+htab_write::giveback(zval* mgr)
+{
+	zval_user test(mgr);
+	HashTable* h = test.zarray();
+	if (!h)
+	{
+		// try to clean
+		Z_TRY_DELREF_P(mgr);
+		*mgr = {0};
+		h = zend_new_array(HT_MIN_SIZE);
+		ZVAL_ARR(mgr, h);
+	}
+	else if (htab_mgr::cowop(h))
+	{
+		//write back with rc == 1
+		ZVAL_ARR(mgr, h);
+	}
+	ht_ = h;
+}
 
 htab_write::htab_write(htab_mgr& mgr)
 {
+	// ensure both mgr, and write have same array rc==1
+	htab_mgr::cowop(mgr.ht_);
 	ht_ = mgr.ht_;
 }
 
-htab_write::htab_write(zpp::htab_read hr)
+
+htab_write::htab_write(zval_mgr& mgr)
 {
-	ht_ = hr.ht_;
+	giveback(mgr);
+}
+
+htab_write::htab_write(zval_user mgr)
+{
+	giveback(mgr);
 }
 
 void htab_write::update(zend_long idx, zval* val)
 {
-	cowop();
 	if(zend_hash_index_update(ht_, idx, val))
 	{
 		Z_TRY_ADDREF(*val);
@@ -24,7 +57,6 @@ void htab_write::update(zend_long idx, zval* val)
 
 void htab_write::update(zend_string* key, zval* val)
 {
-	cowop();
 	if (zend_hash_update(ht_, key, val))
 	{
 		Z_TRY_ADDREF(*val);
@@ -33,7 +65,6 @@ void htab_write::update(zend_string* key, zval* val)
 
 void htab_write::append(zval* pz)
 {
-	cowop();
 	if (zend_hash_next_index_insert(ht_, pz))
 	{
 		Z_TRY_ADDREF_P(pz);
@@ -43,13 +74,11 @@ void htab_write::append(zval* pz)
 
 bool htab_write::remove(zend_string* skey)
 {
-	cowop();
 	return (zend_hash_del(ht_, skey) == SUCCESS);
 }
 
 bool htab_write::remove(zend_long idx)
 {
-	cowop();
 	return (zend_hash_index_del(ht_, idx) == SUCCESS);
 }
 
@@ -215,8 +244,6 @@ bool htab_write::unset(zend_long idx)
 void
 htab_write::merge(HashTable* src)
 {
-
-	cowop();
 	htab_walk w;
 	auto key = w.key();
 	auto value = w.value();

@@ -50,6 +50,7 @@ protected:
     friend class zstr_mgr;
     friend class zobj_mgr;
     friend class htab_mgr;
+    friend class htab_walk;
     
 public:
 	/** not usually called directlly */
@@ -68,20 +69,11 @@ public:
         lose();
     }
 
-    zval_mgr(zend_string* rc)
-    {
-    	bind_string(rc);
-    }
+    zval_mgr(zend_string* rc);
 
-    zval_mgr(zend_object* rc)
-    {
-        bind_object(rc);
-    }
+    zval_mgr(zend_object* rc);
 
-    zval_mgr(zend_long value)
-    {
-        bind_long(value);
-    }
+    zval_mgr(zend_long value);
 
     zval_mgr(bool value);
     
@@ -94,6 +86,8 @@ public:
     zval_mgr(zstr_mgr&& rc);
 
     zval_mgr(int value);
+
+    zval_mgr(const zval_user& rc);
 
     //! mutate to suggested type if necessary
     void     toLong();
@@ -117,6 +111,10 @@ public:
     const zval_mgr& operator=(zend_long value);
 
     const zval_mgr& operator=(const zval_mgr &rc);
+
+    const zval_mgr& operator=(zval* rc);
+
+    const zval_mgr& operator=(zend_object* rc);
 
     zval_mgr& operator=(zval_mgr&& rc);
 

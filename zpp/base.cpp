@@ -15,6 +15,7 @@
 #include "htab_mgr.cpp"
 #include "htab_read.cpp"
 #include "htab_write.cpp"
+#include "htab_walk.cpp"
 
 #include "state_init.cpp"
 

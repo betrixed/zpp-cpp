@@ -35,6 +35,67 @@ zval_user::ref_type() const
     return Z_TYPE_P(zv);
 }
 
+
+bool 
+zval_user::isDouble() const
+{
+    return ((p_ != nullptr) && (ref_type() == IS_DOUBLE));
+}
+
+bool 
+zval_user::isLong() const
+{
+    return ((p_ != nullptr) && (ref_type() == IS_LONG));
+}
+
+bool 
+zval_user::isArray() const
+{
+    return ((p_ != nullptr) && (ref_type() == IS_ARRAY));
+}
+
+
+bool 
+zval_user::isNull() const
+{
+    return ((p_ == nullptr) || (ref_type() == IS_NULL));
+}
+
+bool 
+zval_user::isObject() const
+{ 
+    return ((p_ != nullptr) && (ref_type() == IS_OBJECT));
+}
+
+bool 
+zval_user::ok() const {
+    return ((p_ != nullptr) && (ref_type() >= IS_TRUE));
+}
+
+bool 
+zval_user::isString() const
+{
+    return ((p_ != nullptr) && (ref_type() == IS_STRING));
+}
+
+bool 
+zval_user::isTrue() const 
+{
+    return ((p_ != nullptr) && (ref_type() == IS_TRUE));
+}
+
+bool 
+zval_user::isFalse() const 
+{
+    return ((p_ == nullptr) || (ref_type() == IS_FALSE));
+}
+
+bool 
+zval_user::isPointer() const
+{
+    return ((p_ == nullptr) || (ref_type() == IS_PTR));
+}
+
 zend_string* 
 zval_user::className() const
 {
@@ -86,6 +147,7 @@ size_t zval_user::size() const
 		return 0;
 	}
 }
+
 
 /*
 * Return managed string
@@ -246,6 +308,19 @@ zval_user::zarray() const
 	}
 
 	return Z_ARRVAL_P(zv);
+}
+
+void 
+zval_user::return_zv(zval* ret)
+{
+	ZVAL_COPY(ret, p_);
+}
+
+const zval_user& 
+zval_user::operator=(const zval_mgr& rc)
+{
+	p_ = rc;
+	return *this;
 }
 
 };

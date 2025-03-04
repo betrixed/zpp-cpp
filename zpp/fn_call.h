@@ -23,12 +23,16 @@ namespace zpp {
      *  callable_fn, for PHP "Callable"
      *  Is PHP wrap for call_user_function
      */
-
+    /**
+     * Create parameter space dynamically.
+     *  and copy array values starting at prefix index.
+     */ 
     class ZPP_EXPORT args_spread  {
         size_t              argct_;
-        zval_init*          argv_;
+        zval*               argv_;
     public:
-        args_spread(htab_read args);
+        //! Reserve extra number of parameters in front.
+        args_spread(htab_read args, int prefixct = 0);
         ~args_spread();
 
         size_t arg_ct() const { return argct_; }
@@ -43,14 +47,13 @@ namespace zpp {
     protected:
         // C-array of zvals arguments to call_user_fn
         size_t          argct_;
-        zval_init*      argv_;
+        zval*           argv_;
         zval_mgr        result_;
         //zstr_own        method_name_; // real owner of method name
         // PHP call cache info for multiple calls
         zend_fcall_info       fci_;
         zend_fcall_info_cache cache_;
-        bool              track_;
-        //size_t          call_ct_;
+        bool                  autowipe_;
     public:
 
         void throw_failed();
@@ -58,18 +61,22 @@ namespace zpp {
     	fn_call();
         ~fn_call();
 
-
-        void set_track(bool value) { track_ = value; }
         void set_fci(zend_object* obj , zstr_user method, HashTable* nargs = nullptr);
-        //void set_fname(const char* name);
+        
         void set_fname(zstr_user name);
 
-        // 1-based index for arguments, not zero
-
-        void set_arg(size_t ix, zval* vp);
+        void wipe() const
+        {
+            memset(argv_, 0, argct_*sizeof(zval));
+        }
 
         zval_mgr&& call_fn();
-        zval* argsptr() const { return (zval*) argv_; }
+
+
+        //! This is the only means to ensure auto clean  
+        //! of arg space, prior to setting parameters
+        //! call only once for each function call.
+        zval* argsptr() const { wipe(); return (zval*) argv_; }
 
         /** Direct set args and return in one call. 
          *  These must be used from correct size in template<size_t ARGCT>
@@ -80,6 +87,8 @@ namespace zpp {
         zval_mgr&& call4(zval* a1, zval* a2, zval* a3, zval* a4);
         zval_mgr&& call5(zval* a1, zval* a2, zval* a3, zval* a4, zval* a5);
         */
+
+
     };
 
 
@@ -88,13 +97,12 @@ namespace zpp {
     template <size_t ARGCT>
     class fn_call_args : public fn_call {
     public:
-        zval_init targv_[ARGCT];
+        zval  params[ARGCT];
         fn_call_args() : fn_call()
         {
-            argv_ = &targv_[0];
+            argv_ =  (zval*) &params;
             argct_ = ARGCT;
         }
-        
     };
 
 // prepared function call table

@@ -23,39 +23,38 @@ extern "C" {
 namespace wcc {
 	base_obj_mgr<ICache> ICache::omg;
 
+using namespace zpp;
 
-zval_mgr 
+zobj_mgr 
 ICache::make_cache( zval_user options, zval_user services)
 {
 	//showmem("options", options);
 	//return zval_mgr();
-    htab_ptr opt(options);
-    zval_mgr result;
+    htab_read opt(options);
+    zobj_mgr  result;
 
-    zstr_mgr aclass = opt[wis->classkey];
+    zstr_mgr aclass = opt.get(IC_STR.class_key);
 
     if (aclass.isNull()) {
         zend_throw_exception(zend_ce_exception, "ICache::make_cache - adapter 'class' not specified", 100);
         return result;
     }
 
-    result = class_data.create_object(aclass);
+    result = class_data::create_object(aclass);
     zobj_user test(result);
 
     if (test.ok()) {
-
-        zval_mgr arg_opt(options);
-        zval_mgr arg_svc(services);
         
-        test.call(STAB.construct_key, arg_opt, arg_svc);
+        test.call(STAB.construct_key, options, services);
 
-        if (arg_svc.isObject())
+        if (services.isObject())
         {
-            zstr_own key = opt[wis->service];
+            zstr_user key(opt.get(IC_STR.service_key));
            
             if (key.size()) {
-                  Wcc_Services* svc = zval_toc<Wcc_Services>(services.ptr());
-                  svc->set(key, result);
+                  Services* svc = zval_toc<Services>(services);
+                  zval_mgr temp(result);
+                  svc->set(key, temp);
             }
         }
     }
@@ -72,11 +71,13 @@ void ICache::__construct(zval_user options, zval_user services)
 		services_ = services.zobject();
 	}
 
-	options_ = options.cow_array();
+	options_ = options.zarray();
 
-	zval_own  value;
+	htab_read hread(options_);
 
-	if (!options_.try_fetch("prefix", value))
+	zval_user value;
+
+	if (!hread.try_fetch(IC_STR.prefix_key, value))
 	{
 		prefix_ = zend_empty_string;
 	}
@@ -84,8 +85,8 @@ void ICache::__construct(zval_user options, zval_user services)
 		prefix_ = value.to_zstr();
 	}
 
-	zval_own temp;
-	if (options_.try_fetch("expire", temp))
+	zval_user temp;
+	if (hread.try_fetch(IC_STR.expire_key, temp))
 	{
 		ttl_ = temp.zlong();
 	}
@@ -94,54 +95,64 @@ void ICache::__construct(zval_user options, zval_user services)
 	}
 }
 
+	zstr_intern expiry_key;
+	zstr_intern expire_key;
+	zstr_intern prefix_key;
+	zstr_intern key_key;
+	zstr_intern data_key;
+	zstr_intern ttl_key;
+	zstr_intern stored_key;
+	zstr_intern saved;
+	zstr_intern class_key;
+	zstr_intern service_key;
 
-void ICache::debug_info(HashTable *ht)
+
+
+void ICache::debug_info(htab_write s)
 {
-	htab_ptr s(ht);
-
-	s.set("cached", cached_);
-	s.set("svc_cache", svc_cache_);
-	s.set("prefix", prefix_);
-	s.set("options", options_);
-	s.set("services", services_);
-	s.set("ttl", ttl_);
+	s.set(IC_STR.cached, cached_);
+	s.set(IC_STR.svc_cache, svc_cache_);
+	s.set(IC_STR.prefix_key, prefix_);
+	s.set(IC_STR.options, options_);
+	s.set(IC_STR.services, services_);
 }
 
 void ICache::addLocal(zval_user pkg)
 {
-	htab_ptr cached(cached_);
+	htab_write hw(cached_);
 
-	ICacheData* icd = zval_toc<ICacheData>(pkg.ptr());
+	ICacheData* icd = zval_toc<ICacheData>(pkg);
 
-	cached.set(icd->getKey(), pkg);
+	hw.set(icd->getKey(), pkg);
 }
 
 
 bool ICache::clear()
 {
-	cached_.clear();
+	htab_write(cached_).clear();
 	return true;
 }
 
 
 bool ICache::clearPrefix(zstr_user prefix)
 {
-	zval_own del_array;
+	htab_init del_array;
 
-	del_array.init_array();
-	htab_ptr  delkeys(del_array);
+	htab_write  delkeys(del_array);
 
-	htab_ptr  allkeys(cached_);
+	htab_read  allkeys(cached_);
 	htab_walk  htw;
 
-	zstr_ptr spref(prefix);
+	zstr_user spref(prefix);
 	std::string_view starts_with = spref.vstr();
 
-	auto& key = htw.key();
+	auto key = htw.key();
 	for( htw.start(allkeys) ; htw.ok() ; htw.next())
 	{
-		zstr_ptr tempstr(key.to_zstr());
-		std::string_view sv = tempstr.vstr();
+		zstr_mgr tempstr(key.to_zstr());
+
+		std::string_view sv = zstr_user(tempstr).vstr();
+
 		if (sv.rfind(starts_with, 0) == 0)
 		{
 			delkeys.push_back(key);
@@ -158,47 +169,51 @@ bool ICache::clearPrefix(zstr_user prefix)
 bool 
 ICache::deleteKey(zstr_user key)
 {
-	return cached_.unset(key);
+	return htab_write(cached_).unset(key);
 }
 
 int 
 ICache::deleteExpired()
 {
-	htab_own expired = getExpired();
+	htab_mgr hset = getExpired();
+	htab_read  expired(hset);
+	htab_write cache(cached_);
 
 	int result = expired.size();
 
 	if (result > 0)
 	{
 		htab_walk htw;
-		auto& value = htw.value();
+		auto value = htw.value();
 
 		for(htw.start(expired); htw.ok(); htw.next())
 		{
-			cached_.unset(value);
+			cache.unset(value);
 		}
 	}
 	return result;
 }
 
 
-htab_own ICache::getExpired()
+htab_mgr
+ICache::getExpired()
 {
-	int result = 0;
-
-	htab_own rtab;
+	htab_init  result;
+	htab_write rtab(result);
+	htab_read  cache(cached_);
 
 	htab_walk htw;
-	auto& value = htw.value();
-	auto& key = htw.key();
+
+	auto value = htw.value();
+	auto key = htw.key();
 
 	int now = time(nullptr);
 
-	for(htw.start(cached_); htw.ok(); htw.next())
+	for(htw.start(cache); htw.ok(); htw.next())
 	{
 		if (value.isObject())
 		{
-			ICacheData* pkg = zval_toc<ICacheData>(value.ptr());
+			ICacheData* pkg = zval_toc<ICacheData>(value);
 			if (pkg->getExpiry() < now)
 			{
 				rtab.push_back(key);
@@ -206,20 +221,18 @@ htab_own ICache::getExpired()
 		}
 	}
 
-	return rtab;
-
+	return result;
 }
 
-bool ICache::deleteMultiple(zval_user keys)
+bool ICache::deleteMultiple(htab_read keys)
 {
 	bool result = true;
-	htab_ptr dlist(keys);
 
 	htab_walk htw;
-	auto& key = htw.key();
-	for(htw.start(dlist); htw.ok(); htw.next())
+	auto key = htw.key();
+	for(htw.start(keys); htw.ok(); htw.next())
 	{
-		if (!deleteKey(key.zstr()))
+		if (!deleteKey(key))
 		{
 			result = false;
 		}
@@ -228,159 +241,160 @@ bool ICache::deleteMultiple(zval_user keys)
 }
 
 
-zval_own ICache::get(zstr_user key, zval_user noval)
+zval_mgr 
+ICache::get(zstr_user key, zval_user noval)
 {
-
-
-	htab_ptr cache(cached_);
-	zval_user result = cache[key];
+	htab_read cache(cached_);
+	zval_user result = cache.get(key);
 	if (result.isObject())
 	{
-		ICacheData* icd = zval_toc<ICacheData>(result.ptr());
+		ICacheData* icd = zval_toc<ICacheData>(result);
 		return icd->getData();
 	}
 	return noval;
 }
 
 
-zval_own ICache::getCached(zstr_user key)
+zval_mgr 
+ICache::getCached(zstr_user key)
 {
-	zval_own result;
+	htab_read cache(cached_);
 
-	htab_ptr cache(cached_);
-
-	if (cache.try_fetch(key,result))
-	{
-		return result;
-	}
-	return result;	
+	return cache.get(key);
 }
 
 
-zval_own ICache::getData(zstr_user key)
+zval_mgr 
+ICache::getData(zstr_user key)
 {
-	zval_own nullvalue;
+	zval_mgr nullvalue;
 	return get(key,nullvalue);
 }
 
-
-zval_own ICache::getMultiple(zval_user keys, zval_user noval)
+zval_mgr 
+ICache::getMultiple(htab_read keys, zval_user noval)
 {
-	zval_own result;
-	zval_own nullvalue;
+	zval_mgr result;
+	zval_mgr nullvalue;
 
-	htab_ptr newtab(result);
-
-	htab_ptr ktab(keys);
+	htab_write newtab(result);
 
 	htab_walk iter;
-	auto& k = iter.key();
+	auto k = iter.key();
 
-	for( iter.start(ktab); iter.ok(); iter.next())
+	zval_mgr nullval;
+	for( iter.start(keys); iter.ok(); iter.next())
 	{
 		zstr_user zkey = k.zstr();
-		zval_own temp;
-		zval* z = get(zkey, temp);
-		if (z) {
-			newtab.set(zkey, z);
-		}
-		else {
-			newtab.set(zkey, noval);
+		if (zkey.ok())
+		{
+			
+			zval_mgr  value = get(zkey, nullval);
+
+			if (zval_user(value).ok()) 
+			{
+				newtab.set(zkey, value);
+			}
 		}
 	}
 	return result;
 }
 
-
-
-zval_own ICache::getService(zstr_user key)
+zval_mgr 
+ICache::getService(zstr_user key)
 {
-	zval_own result;
+	zval_mgr result;
+	zval_user test;
 
-	if (svc_cache_.try_fetch(key,result))
+	htab_write svc(svc_cache_);
+
+	if (svc.try_fetch(key,test))
 	{
+		result = test;
 		return result;
 	}
 
-	Wcc_Services* sobj = zobj_toc<Wcc_Services>(services_.ptr());
+	Services* sobj = zobj_toc<Services>(services_);
 	result = sobj->get(key);
-
-	if (!result.isNull())
+	test = result;
+	if (test.ok())
 	{
-		svc_cache_.set(key, result);
+		svc.set(key, result);
 	}
-	return std::move(result);
+	return result;
 }
 
 
-zval_own ICache::getUnsaved()
+htab_mgr 
+ICache::getUnsaved()
 {
-	htab_own rtab;
+	htab_init rlist;
+	
+	htab_write rtab(rlist);
 
 	htab_walk htw;
-	auto& value = htw.value();
-
+	auto value = htw.value();
+	
 	for(htw.start(cached_); htw.ok(); htw.next())
 	{
 		if (value.isObject())
 		{
-			ICacheData* pkg = zval_toc<ICacheData>(value.ptr());
+			ICacheData* pkg = zval_toc<ICacheData>(value);
 			if (!pkg->isSaved())
 			{
 				rtab.push_back(value);
 			}
 		}
 	}
-	return rtab;
+	return rlist;
 }
 
 
-zval_own 
+zval_mgr 
 ICache::getOption(zstr_user key)
 {
-	zval_own result;
-
-	options_.try_fetch(key, result);
-
-	return result;
+	return htab_read(options_).get(key);
 }
 
 void 
 ICache::setOption(zstr_user key, zval_user value)
 {
-	options_.set(key, value.ptr());
+	htab_write(options_).set(key, value);
 }
 
-bool ICache::set(zstr_user key, zval_user data, zend_long ttl)
+bool 
+ICache::set(zstr_user key, zval_user data, zend_long ttl)
 {
-	zval_own icd = ICacheData::new_ICacheData(key, data, ttl);
-	cached_.set(key, icd);
+	zobj_mgr icd = ICacheData::new_ICacheData(key, data, ttl);
+	htab_write(cached_).set(key, icd);
 
 	return true;
 }
 
 
-zval_own ICache::setCached(zstr_user key, zval_user data, zend_long ttl)
+zobj_mgr
+ICache::setCached(zstr_user key, zval_user data, zend_long ttl)
 {
 	if (ttl<=0)
 	{
 		ttl = ttl_;
 	}
-	zval_own icd = ICacheData::new_ICacheData(key, data, ttl);
-	cached_.set(key, icd);
+	zobj_mgr icd = ICacheData::new_ICacheData(key, data, ttl);
+	htab_write(cached_).set(key, icd);
 	return icd;	
 }
 
 
-bool ICache::setMultiple(zval_user values, zend_long ttl)
+bool 
+ICache::setMultiple(zval_user values, zend_long ttl)
 {
 	bool result = true;
 
-	htab_ptr list_w(values);
+	htab_read list_w(values);
 
 	htab_walk walk;
-	auto& k=walk.key();
-	auto& v=walk.value();
+	auto k=walk.key();
+	auto v=walk.value();
 
 	for(walk.start(list_w) ; walk.ok(); walk.next())
 	{
@@ -407,7 +421,7 @@ ZEND_METHOD(Wcc_ICache, __construct)
 	zval* options = nullptr;
 	zval* services_obj = nullptr;
 
-	zend_class_entry* services_ce = services_mgr.classEntry();
+	zend_class_entry* services_ce = Services::omg.classEntry();
 
 
 	ZEND_PARSE_PARAMETERS_START(0, 2)
@@ -416,22 +430,21 @@ ZEND_METHOD(Wcc_ICache, __construct)
 	Z_PARAM_OBJECT_OF_CLASS(services_obj, services_ce)
 	ZEND_PARSE_PARAMETERS_END();
 
-	zval_own options_z;
-	zval_own services_z;
+	zval_mgr options_z;
+	zval_mgr services_z;
 
 	if (!options)
 	{
-		options_z.init_array();
-		options = options_z.ptr();
+		options_z.empty_array();
+		options = options_z;
 	}
 
 	if (!services_obj) {
-		services_z = Wcc_Services::instance();
-		services_obj = services_z.ptr();
+		services_z = Services::instance();
+		services_obj = services_z;
 	}
 
-
-	auto cobj = zval_toc<Wcc_ICache>(ZEND_THIS);
+	auto cobj = zval_toc<ICache>(ZEND_THIS);
 	cobj->__construct(options,services_obj);
 }
 
@@ -439,7 +452,7 @@ ZEND_METHOD(Wcc_ICache, make_cache)
 {
     zval* options = nullptr;
     zval* services_obj = nullptr;
-    zend_class_entry* services_ce = services_mgr.classEntry();
+    zend_class_entry* services_ce = Services::omg.classEntry();
 
     ZEND_PARSE_PARAMETERS_START(1, 2)
     Z_PARAM_ARRAY(options)
@@ -447,22 +460,22 @@ ZEND_METHOD(Wcc_ICache, make_cache)
     Z_PARAM_OBJECT_OF_CLASS(services_obj, services_ce)
     ZEND_PARSE_PARAMETERS_END();   
 
-    zval_own cache = Wcc_ICache::make_cache(options, services_obj);
+    zobj_mgr cache = ICache::make_cache(options, services_obj);
     cache.move_zv(return_value);
 }
 
 
 ZEND_METHOD(Wcc_ICache, addLocal)
 {
-	zend_class_entry* cobj_ce = icachedata_mgr.classEntry();
+	zend_class_entry* cobj_ce = ICacheData::omg.classEntry();
 	zval* pkg;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 	Z_PARAM_OBJECT_OF_CLASS(pkg, cobj_ce)
 	ZEND_PARSE_PARAMETERS_END();
 
-	auto cobj = zval_toc<Wcc_ICache>(ZEND_THIS);
-	zval_own data(pkg);
+	auto cobj = zval_toc<ICache>(ZEND_THIS);
+	zval_mgr data(pkg);
 	cobj->addLocal(data);
 }
 
@@ -471,7 +484,7 @@ ZEND_METHOD(Wcc_ICache, clear)
 	ZEND_PARSE_PARAMETERS_START(0, 0)
 	ZEND_PARSE_PARAMETERS_END();
 
-	auto cobj = zval_toc<Wcc_ICache>(ZEND_THIS);
+	auto cobj = zval_toc<ICache>(ZEND_THIS);
 	RETURN_BOOL(cobj->clear());
 }
 
@@ -482,7 +495,7 @@ ZEND_METHOD(Wcc_ICache, clearPrefix)
 	Z_PARAM_STR(key)
 	ZEND_PARSE_PARAMETERS_END();
 
-	auto cobj = zval_toc<Wcc_ICache>(ZEND_THIS);
+	auto cobj = zval_toc<ICache>(ZEND_THIS);
 	RETURN_BOOL(cobj->clearPrefix(key));
 }
 
@@ -493,7 +506,7 @@ ZEND_METHOD(Wcc_ICache, delete)
 	Z_PARAM_STR(key)
 	ZEND_PARSE_PARAMETERS_END();
 
-	auto cobj = zval_toc<Wcc_ICache>(ZEND_THIS);
+	auto cobj = zval_toc<ICache>(ZEND_THIS);
 	RETURN_BOOL(cobj->deleteKey(key));
 }
 
@@ -501,7 +514,7 @@ ZEND_METHOD(Wcc_ICache, deleteExpired)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	auto cobj = zval_toc<Wcc_ICache>(ZEND_THIS);
+	auto cobj = zval_toc<ICache>(ZEND_THIS);
 	RETURN_LONG(cobj->deleteExpired());
 }
 ZEND_METHOD(Wcc_ICache, deleteMultiple)
@@ -511,8 +524,8 @@ ZEND_METHOD(Wcc_ICache, deleteMultiple)
 	Z_PARAM_ARRAY(keys)
 	ZEND_PARSE_PARAMETERS_END();
 
-	auto cobj = zval_toc<Wcc_ICache>(ZEND_THIS);
-	zval_own w_keys(keys);
+	auto cobj = zval_toc<ICache>(ZEND_THIS);
+	zval_mgr w_keys(keys);
 
 	RETURN_BOOL(cobj->deleteMultiple(w_keys));
 }
@@ -528,10 +541,10 @@ ZEND_METHOD(Wcc_ICache, get)
 	Z_PARAM_ZVAL(noval)
 	ZEND_PARSE_PARAMETERS_END();
 
-	zval_own   defval(noval);
+	zval_mgr   defval(noval);
 
-	auto cobj = zval_toc<Wcc_ICache>(ZEND_THIS);
-	zval_own   result = cobj->get(key, defval);
+	auto cobj = zval_toc<ICache>(ZEND_THIS);
+	zval_mgr   result = cobj->get(key, defval);
 	result.move_zv(return_value);
 }
 
@@ -542,10 +555,10 @@ ZEND_METHOD(Wcc_ICache, getData)
 	Z_PARAM_STR(key)
 	ZEND_PARSE_PARAMETERS_END();
 
-	auto cobj = zval_toc<Wcc_ICache>(ZEND_THIS);
-	zval_own noval;
+	auto cobj = zval_toc<ICache>(ZEND_THIS);
+	zval_mgr noval;
 
-	zval_own result = cobj->get(key,noval);
+	zval_mgr result = cobj->get(key,noval);
 	result.move_zv(return_value);
 }
 
@@ -560,11 +573,11 @@ ZEND_METHOD(Wcc_ICache, getMultiple)
 	Z_PARAM_ZVAL(noval)
 	ZEND_PARSE_PARAMETERS_END();
 
-	zval_own w_keys(keys);
-	zval_own w_noval(noval);
+	zval_mgr w_keys(keys);
+	zval_mgr w_noval(noval);
 
-	auto cobj = zval_toc<Wcc_ICache>(ZEND_THIS);
-	zval_own result = cobj->getMultiple(w_keys, w_noval);
+	auto cobj = zval_toc<ICache>(ZEND_THIS);
+	zval_mgr result = cobj->getMultiple(w_keys, w_noval);
 	result.move_zv(return_value);
 }
 
@@ -575,8 +588,8 @@ ZEND_METHOD(Wcc_ICache, getOption)
 	Z_PARAM_STR(key)
 	ZEND_PARSE_PARAMETERS_END();
 
-	auto cobj = zval_toc<Wcc_ICache>(ZEND_THIS);
-	zval_own result = cobj->getOption(key);
+	auto cobj = zval_toc<ICache>(ZEND_THIS);
+	zval_mgr result = cobj->getOption(key);
 	result.move_zv(return_value);
 }
 
@@ -585,9 +598,9 @@ ZEND_METHOD(Wcc_ICache, getPrefix)
 	ZEND_PARSE_PARAMETERS_START(0, 0)
 	ZEND_PARSE_PARAMETERS_END();
 
-	auto cobj = zval_toc<Wcc_ICache>(ZEND_THIS);
-	zval_own result = cobj->getPrefix();
-	result.move_zv(return_value);
+	auto cobj = zval_toc<ICache>(ZEND_THIS);
+	zstr_user result = cobj->getPrefix();
+	result.return_zv(return_value);
 }
 
 ZEND_METHOD(Wcc_ICache, getService)
@@ -597,8 +610,8 @@ ZEND_METHOD(Wcc_ICache, getService)
 	Z_PARAM_STR(key)
 	ZEND_PARSE_PARAMETERS_END();
 
-	auto cobj = zval_toc<Wcc_ICache>(ZEND_THIS);
-	zval_own result = cobj->getService(key);
+	auto cobj = zval_toc<ICache>(ZEND_THIS);
+	zval_mgr result = cobj->getService(key);
 	result.move_zv(return_value);
 }
 
@@ -607,7 +620,7 @@ ZEND_METHOD(Wcc_ICache, getTTL)
 	ZEND_PARSE_PARAMETERS_START(0, 0)
 	ZEND_PARSE_PARAMETERS_END();
 
-	auto cobj = zval_toc<Wcc_ICache>(ZEND_THIS);
+	auto cobj = zval_toc<ICache>(ZEND_THIS);
 	zend_long ttl = cobj->getTTL();
 	RETURN_LONG(ttl);
 }
@@ -617,8 +630,8 @@ ZEND_METHOD(Wcc_ICache, getUnsaved)
 	ZEND_PARSE_PARAMETERS_START(0, 0)
 	ZEND_PARSE_PARAMETERS_END();
 
-	auto cobj = zval_toc<Wcc_ICache>(ZEND_THIS);
-	zval_own result = cobj->getUnsaved();
+	auto cobj = zval_toc<ICache>(ZEND_THIS);
+	htab_mgr result = cobj->getUnsaved();
 	result.move_zv(return_value);
 }
 
@@ -629,8 +642,8 @@ ZEND_METHOD(Wcc_ICache, getCached)
 	Z_PARAM_STR(key)
 	ZEND_PARSE_PARAMETERS_END();
 
-	auto cobj = zval_toc<Wcc_ICache>(ZEND_THIS);
-	zval_own result = cobj->getService(key);
+	auto cobj = zval_toc<ICache>(ZEND_THIS);
+	zval_mgr result = cobj->getService(key);
 	result.move_zv(return_value);
 }
 
@@ -647,9 +660,9 @@ ZEND_METHOD(Wcc_ICache, set)
 	Z_PARAM_LONG(ttl)
 	ZEND_PARSE_PARAMETERS_END();
 
-	zval_own w_value(value);
+	zval_mgr w_value(value);
 
-	auto cobj = zval_toc<Wcc_ICache>(ZEND_THIS);
+	auto cobj = zval_toc<ICache>(ZEND_THIS);
 	bool result = cobj->set(key,w_value, ttl);
 	RETURN_BOOL(result);
 }
@@ -667,10 +680,10 @@ ZEND_METHOD(Wcc_ICache, setCached)
 	Z_PARAM_LONG(ttl)
 	ZEND_PARSE_PARAMETERS_END();
 
-	zval_own w_value(value);
+	zval_mgr w_value(value);
 
-	auto cobj = zval_toc<Wcc_ICache>(ZEND_THIS);
-	zval_own result = cobj->setCached(key,w_value, ttl);
+	auto cobj = zval_toc<ICache>(ZEND_THIS);
+	zobj_mgr result = cobj->setCached(key,w_value, ttl);
 	result.move_zv(return_value);
 }
 
@@ -685,9 +698,9 @@ ZEND_METHOD(Wcc_ICache, setMultiple)
 	Z_PARAM_LONG(ttl)
 	ZEND_PARSE_PARAMETERS_END();
 
-	zval_own w_values(values);
+	zval_mgr w_values(values);
 
-	auto cobj = zval_toc<Wcc_ICache>(ZEND_THIS);
+	auto cobj = zval_toc<ICache>(ZEND_THIS);
 	bool result = cobj->setMultiple(w_values, ttl);
 	RETURN_BOOL(result);
 }
@@ -702,21 +715,21 @@ ZEND_METHOD(Wcc_ICache, setOption)
 	Z_PARAM_ZVAL(value)
 	ZEND_PARSE_PARAMETERS_END();
 
-	auto cobj = zval_toc<Wcc_ICache>(ZEND_THIS);
+	auto cobj = zval_toc<ICache>(ZEND_THIS);
 	cobj->setOption(key, value);
 }
 
 ZEND_METHOD(Wcc_ICache, setServices)
 {
-	zend_class_entry* svc_ce = services_mgr.classEntry();
+	zend_class_entry* svc_ce = Services::omg.classEntry();
 	zval*     svc;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 	Z_PARAM_OBJECT_OF_CLASS(svc, svc_ce)
 	ZEND_PARSE_PARAMETERS_END();
 
-	auto cobj = zval_toc<Wcc_ICache>(ZEND_THIS);
-	zval_own data(svc);
+	auto cobj = zval_toc<ICache>(ZEND_THIS);
+	zval_mgr data(svc);
 	cobj->setServices(data);	
 }
 
@@ -728,7 +741,7 @@ ZEND_METHOD(Wcc_ICache, setTTL)
 	Z_PARAM_LONG(ttl)
 	ZEND_PARSE_PARAMETERS_END();
 
-	auto cobj = zval_toc<Wcc_ICache>(ZEND_THIS);
+	auto cobj = zval_toc<ICache>(ZEND_THIS);
 	cobj->setTTL(ttl);
 }
 
@@ -738,7 +751,7 @@ PHP_MINIT_FUNCTION(Wcc_ICache_reg)
 {
 	auto ce = register_class_Wcc_ICache();
 
-	icache_mgr.classEntry(ce);
+	ICache::omg.classEntry(ce);
 
 	return SUCCESS;
 }

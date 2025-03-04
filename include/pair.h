@@ -12,8 +12,8 @@ namespace wcc {
 	class Pair : public base_d 
 	{
 	protected:
-		zval_own first_;
-		zval_own second_;
+		zval_mgr first_;
+		zval_mgr second_;
 
 
 	public:
@@ -25,9 +25,9 @@ namespace wcc {
 			second_ = s2;
 		}
 
-		const zval_own& first() const { return first_; }
+		zval_user first() const { return first_; }
 
-		const zval_own& second() const { return first_; }
+		zval_user second() const { return first_; }
 	};
 
 }; // namespace

@@ -11,6 +11,10 @@
 #include "zpp/fn_call.h"
 #endif
 
+extern "C" {
+#include "Zend/zend_alloc.h"    
+};
+
 namespace zpp {
 
 // static and externals
@@ -19,7 +23,7 @@ strtable STAB;
 
 
 fn_call::fn_call() 
-	: argct_(0), argv_(nullptr), track_(false)
+	: argct_(0), argv_(nullptr), autowipe_(false)
 {
 }
 
@@ -80,16 +84,6 @@ fn_call::call5(zval *arg0, zval* arg1, zval* arg2, zval* arg3, zval* arg4)
 */
 
 
-void 
-fn_call::set_arg(size_t ix, zval* vp)
-{
-    if ((ix < 1) || (ix > argct_))
-    {
-    	zend_throw_error(zend_ce_exception, "zpp::fn_call index %ld is out of bounds ", ix);
-    }
-    zval* p = argv_[ix-1];
-    ZVAL_COPY_VALUE(p,vp);
-}
 
 /** reset this from the constructor information */
 void 
@@ -331,20 +325,24 @@ strtable::init()
 
 }
 
-args_spread::args_spread(htab_read args)
+/**
+ * Dyanmic args setup, array values only
+ */
+args_spread::args_spread(htab_read args, int prefixct)
 {
-    argct_ = args.size();
+    argct_ = args.size() + prefixct;
     if (argct_)
     {
-        argv_ = new zval_init[argct_];
+        // get cleared memory from PHP. Used to have 3rd offset argument.
+        argv_ = (zval*) ecalloc(argct_, sizeof(zval));
+
         // general but inefficient
         htab_walk wk;
         auto value = wk.value();
-        size_t ix = 0;
-
+        size_t ix = prefixct;
         for(wk.start(args); wk.ok(); wk.next(), ix++)
         {
-            ZVAL_COPY_VALUE(argv_[ix], value);
+            ZVAL_COPY_VALUE(argv_+ix, value);
         }
     }
     else {
@@ -356,7 +354,7 @@ args_spread::args_spread(htab_read args)
 args_spread::~args_spread()
 {
     if (argv_) {
-        delete[] argv_;
+        efree(argv_);
     }
 }
 

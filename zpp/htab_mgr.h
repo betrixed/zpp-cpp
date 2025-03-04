@@ -14,6 +14,7 @@ namespace zpp {
         void init();
         void own();
         void lose();
+        static bool cowop(HashTable*& inout);
 
         friend class htab_read;
         friend class htab_write;
@@ -21,7 +22,8 @@ namespace zpp {
     public:
 
         static HashTable* new_array();
-        
+        static HashTable* empty_array();
+
         ~htab_mgr();
 
         htab_mgr() : ht_(nullptr) {}
@@ -59,15 +61,15 @@ namespace zpp {
         void move_zv(zval* return_value);
 
         operator HashTable* () const { return (HashTable*) ht_; }
+
+        //! Take away, nullptr internal HashTable*, to avoid decref;
+        HashTable* steal();
  
     };
 
     class htab_init : public htab_mgr {
     public:
-        htab_init() : htab_mgr() 
-        {
-            init();
-        }
+        htab_init();
     };
 
 

@@ -15,13 +15,18 @@ $file = "tests/routeset.sample.cache";
 
 //$fc = new XattrFile(["cache_dir" => "tests"], Services::instance());
 
-$ic = unserialize(file_get_contents($file));
+$icd = unserialize(file_get_contents($file));
 
 $file = "tests/routeset2.sample.cache";
 
-$ic = unserialize(file_get_contents($file));
+$icd = unserialize(file_get_contents($file));
 echo "returned unserialize" . PHP_EOL;
 
-echo "print_r " . PHP_EOL;
-debug_zval_dump($ic);
+
+
+$ic = new ICache([], $svc);
+
+$data = $ic->getUnsaved();
+
+echo "got unsaved " . PHP_EOL;
 

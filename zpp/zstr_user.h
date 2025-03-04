@@ -10,6 +10,8 @@
 namespace zpp {
 
 	class zstr_mgr;
+	class zval_user;
+
 	class ZPP_EXPORT zstr_user {
 	protected:
 	    zend_string* s;
@@ -32,10 +34,15 @@ namespace zpp {
 	        s = p;
 	    }   
 
-	    zstr_user(const zstr_user &rc)
+	    zstr_user(zval* p);
+
+	    zstr_user(const zstr_user& rc)
 	    {
 	        s = rc.s;
 	    }
+
+	    //! Can't declare inline here
+	    zstr_user(const zval_user& rc);
 
 	    zstr_user(const zstr_mgr& mgr)
 	    {
@@ -66,6 +73,11 @@ namespace zpp {
 		zstr_mgr to_lower() const;
 
 		zstr_mgr to_upper() const;
+
+		void return_zv(zval* ret);
+
+		const zstr_user& operator=(zval* rc);
+		
 
 	};
 };

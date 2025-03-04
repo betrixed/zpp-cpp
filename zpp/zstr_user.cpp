@@ -11,6 +11,16 @@ namespace zpp {
 
 const char* zstr_user::empty_zstr = "\0";
 
+zstr_user::zstr_user(const zval_user& rc)
+{
+    s = rc.zstr();
+}
+
+zstr_user::zstr_user(zval* p)
+{
+	s = zval_user(p).zstr();
+}
+
 const char* 
 zstr_user::data() const
 {
@@ -136,6 +146,18 @@ zstr_user::to_upper() const
 		result.adopt(zend_string_toupper(s));
 	}
 	return result;
+}
+
+void zstr_user::return_zv(zval* ret)
+{
+	ZVAL_STR_COPY(ret, s);
+}
+
+const zstr_user& 
+zstr_user::operator=(zval* rc)
+{
+	s = zval_user(rc).zstr();
+	return *this;
 }
 
 };
