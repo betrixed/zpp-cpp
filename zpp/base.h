@@ -411,7 +411,8 @@ namespace zpp {
 			/* to be deleted by zend */
 			*is_temp = 1; 
 			
-			htab_init ret;
+			htab_mgr ret = htab_empty();
+			
 			cobj->debug_info(ret);
 			return ret.steal();
 		}
@@ -429,7 +430,7 @@ namespace zpp {
 			zend_object* zobj = (zend_object*) (bp+1); // next T*
 			pzo->set_zobj(zobj);
 			zend_object_std_init(zobj, class_type);
-			object_properties_init(zobj, class_type);
+			//object_properties_init(zobj, class_type);
 			
 #ifdef BASE_DEBUG
 			obj_count_++;

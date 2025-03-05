@@ -38,7 +38,7 @@ void Route_init::init()
 {
 
 	//route_verbs.reset();
-	zend_hash_init(&route_verbs, 10, NULL,   ZVAL_PTR_DTOR,1);
+	zend_hash_init(&route_verbs, 10, NULL, ZVAL_PTR_DTOR,1);
 	zend_hash_init(&verb_names, 10, NULL, ZVAL_PTR_DTOR,1);
 	GET_S = zstr_intern("GET");
 	POST_S = zstr_intern("POST");
@@ -63,7 +63,7 @@ void Route_init::init()
 	cc_vary = zstr_intern("vary");
 	cc_file = zstr_intern("file");
 
-	htab_ptr rv(&route_verbs);
+	htab_write rv(&route_verbs);
 
 	rv.set(GET_S, (int)html::V_GET);
 	rv.set(POST_S, (int)html::V_POST);
@@ -78,7 +78,7 @@ void Route_init::init()
 
 	//verb_names.reset();
 
-	htab_ptr p2(&verb_names);
+	htab_write p2(&verb_names);
 
 	// Order of enum values. (power of 2)
 	p2.push_back(GET_S); 
@@ -97,7 +97,7 @@ void Route_init::init()
 void Route_init::init_ce(zend_class_entry* ce)
 {
 	//zend_printf("Init Route Class\n");
-	class_init fn(ce);
+	class_data fn(ce);
 	
 // match the php script constant values
 	fn.add_constant("GET_S",GET_S);
@@ -144,8 +144,9 @@ int isRouteObject(zend_object* obj) {
 
 Route::Route() : base_d(), verbs_(0), ajax_(0)
 {
-	compiled_.clear();
-	pattern_.clear();
+	compiled_ = zstr_empty();
+	pattern_ = zstr_empty();
+	params_ = htab_empty();
 }
 
 Route::~Route()
@@ -154,10 +155,8 @@ Route::~Route()
 }
 
 void
-Route::debug_info(HashTable *ht)
+Route::debug_info(htab_write hw)
 {
-	htab_ptr  hw(ht);
-
 	hw.set(route_data.cc_verbs, (int)verbs_);
 
 	hw.set(route_data.cc_ajax,  (int)ajax_);
@@ -173,12 +172,13 @@ Route::debug_info(HashTable *ht)
 	hw.set(route_data.cc_id,  id_);
 }
 
-htab_own 
+htab_mgr 
 Route::__serialize()
 {
 
-	htab_own hw;
+	htab_mgr result;
 
+	htab_write hw(result);
 	hw.set(route_data.cc_id, id_);
 
 	hw.set(route_data.cc_verbs,  (int)verbs_);
@@ -188,15 +188,15 @@ Route::__serialize()
 	hw.set(route_data.cc_target,  target_);
 	hw.set(route_data.cc_params,  params_);
 
-	return hw;
+	return result;
 }
 
 void
-Route::__unserialize(htab_ptr htab)
+Route::__unserialize(htab_read htab)
 {
-	zval_own temp;
+	zval_user temp;
 
-	params_ = zval_ptr(htab.get(route_data.cc_params));
+	params_ = htab.get(route_data.cc_params);
 
 	if (htab.try_fetch(route_data.cc_compiled, temp))
 	{	
@@ -211,8 +211,7 @@ Route::__unserialize(htab_ptr htab)
 	}
 
 	//showmem("target_ before  ", target_);
-	htab.try_fetch(route_data.cc_target,  target_);
-	//showmem("target_ after ", target_);
+	target_ = htab.get(route_data.cc_target);
 
 	if (htab.try_fetch(route_data.cc_verbs, temp))
 	{
@@ -222,6 +221,7 @@ Route::__unserialize(htab_ptr htab)
 			 //temp.set_null();
 		}
 	}
+
 	if (htab.try_fetch(route_data.cc_ajax, temp))
 	{
 		if (temp.isLong())
@@ -243,49 +243,57 @@ Route::__unserialize(htab_ptr htab)
 }
 
 void 
-Route::construct(int verbs, zstr_ptr pattern, zval_ptr target)
+Route::construct(int verbs, zstr_user pattern, zval_user target)
 {
 	verbs_ = verbs;
 	pattern_ = pattern;
 	target_ = target;
 }
 
-zobj_own //static
-Route::get(zstr_ptr pattern, zval_ptr target, int ajax)
+zobj_mgr //static
+Route::get(zstr_user pattern, zval_user target, int ajax)
 {
+	zobj_mgr result;
+
 	Route* cobj = route_mgr.make_new();
 	cobj->construct(html::V_GET, pattern, target);
 	cobj->ajax_ = ajax;
-	return zobj_own(cobj);
+	result.adopt(cobj);
+	return result;
 }
 
-zobj_own  //static
-Route::post(zstr_ptr pattern, zval_ptr target, int ajax)
+zobj_mgr  //static
+Route::post(zstr_user pattern, zval_user target, int ajax)
 {
+	zobj_mgr result;
 	Route* cobj = route_mgr.make_new();
 	cobj->construct(html::V_POST, pattern, target);
 	cobj->ajax_ = ajax;
-	return zobj_own(cobj);	
+	result.adopt(cobj);
+	return result;	
 }
 
-zobj_own  //static
-Route::methods(int verbs, zstr_ptr pattern, zval_ptr target, int ajax)
+zobj_mgr  //static
+Route::methods(int verbs, zstr_user pattern, zval_user target, int ajax)
 {
+	zobj_mgr result;
+
 	Route* cobj = route_mgr.make_new();
 	cobj->construct(verbs, pattern, target);
 	cobj->ajax_ = ajax;
-	return zobj_own(cobj);	
+	result.adopt(cobj);
+	return result;	
 }
 	
 
 zend_long 
-Route::getVerbInt(const zstr_base& sverb)
+Route::getVerbInt(zstr_user sverb)
 {
-	zstr_own verb_str(((const zstr_ptr&)sverb).to_upper());
-	htab_ptr hw(&route_data.route_verbs);
-	zval_own test;
+	zstr_mgr verbstr = sverb.to_upper();
+	htab_read hr(&route_data.route_verbs);
+	zval_user test;
 
-	if (hw.try_fetch(verb_str,test))
+	if (hr.try_fetch(verbstr,test))
 	{
 		return test.zlong();
 	}
@@ -293,46 +301,47 @@ Route::getVerbInt(const zstr_base& sverb)
 }
 
 void 
-Route::name(zstr_ptr name)
+Route::name(zstr_user name)
 {
 	id_ = name;
 }
 
-zstr_ptr  
+zstr_user 
 Route::getName()
 {
 	return id_;
 }
 
-htab_ptr 
+htab_read 
 Route::getParams()
 {
 	return params_;
 }
 
 void 
-Route::setParams(zval_ptr params)
+Route::setParams(htab_read params)
 {
 	params_ = params;
 }
 
 class param_replace : public preg_callback {
 public:
-	htab_ptr params_;
+	htab_mgr params_;
 
-	param_replace(htab_ptr plist) : params_(plist)
+	param_replace(htab_read plist) : params_(plist)
 	{			
 	}
 
-	virtual bool get_replace(htab_ptr captures)
+	virtual bool get_replace(htab_read captures)
 	{
-		if (call_count_ < params_.size())
+		htab_read plist(params_);
+		if (call_count_ < plist.size())
 		{
-			zstr_ptr key = captures.get(int(1));
-			zstr_own value = params_.get(call_count_);
+			zstr_user key = captures.get(int(1));
+			zstr_mgr value = plist.get(call_count_);
 			if (value.isNull())
 			{
-				value = params_.get(key);
+				value = plist.get(key);
 			}
 			if (!value.isNull())
 			{
@@ -347,21 +356,22 @@ public:
 	}
 };
 
-zval_own 
-Route::routeUrl(htab_ptr params)
+zstr_mgr
+Route::routeUrl(htab_read pvalues)
 {
-	zval_own result;
+	zstr_mgr result;
 
-	if (this->params_.size() == 0)
+
+	if (htab_read(this->params_).size() == 0)
 	{
 		result = pattern_;
 	}
 	else {
 		preg url_params("#{([a-zA-Z][\\w\\d]*)}#");
 
-		param_replace replace(this->params_);
+		param_replace replace(pvalues);
 
-		result = url_params.replace_callback(replace, pattern_.ptr());
+		result = url_params.replace_callback(replace, pattern_);
 	}
 	return result;
 
@@ -375,41 +385,43 @@ static const char* end_rex = "$#";
 
 
 //static 
-htab_own 
+htab_mgr 
 Route::getVerbNames( zend_long flags )
 {
-	htab_own rval;
+	htab_mgr result;
 
-	htab_ptr names(&route_data.verb_names);
+	htab_write rval(result);
+
+	htab_read names(&route_data.verb_names);
 
 	size_t nct = names.size();
 	for( size_t mix = 0; mix < nct; mix++) {
 		size_t mask = 1 << mix;
 		if ((flags & mask) != 0) {
-			zval_ptr vname = names.get(mix);
-			if (!vname.isNull()) {
+			zval_user vname = names.get(mix);
+			if (vname.isString()) {
 				rval.push_back(vname);
 			}
 		}
 	}
-	return rval;
+	return result;
 }
 
 
 // static method returns string
 // for first verb bit encountered.
 
-zstr_own 
+zstr_mgr 
 Route::getVerb(zend_long verb)
 {
-	htab_ptr names(&route_data.verb_names);
-	zstr_own rval;
+	htab_read names(&route_data.verb_names);
+	zstr_mgr rval;
 
 	for( zend_long mix = 0; mix < 9; mix++) {
 		zend_long mask = 1 << mix;
 		if ((verb & mask) != 0) {
 			rval = names.get(mix);
-			if (!rval.isNull()) {
+			if (rval.ok()) {
 				break;
 			}
 		}
@@ -454,7 +466,7 @@ PHP_METHOD(Wcc_Route, get)
 	Z_PARAM_LONG(ajax)
 	ZEND_PARSE_PARAMETERS_END();
 
-	zobj_own obj = Route::get(pattern, target, ajax);
+	zobj_mgr obj = Route::get(pattern, target, ajax);
 	obj.move_zv(return_value);
 }
 
@@ -473,7 +485,7 @@ PHP_METHOD(Wcc_Route, post)
 	Z_PARAM_LONG(ajax)
 	ZEND_PARSE_PARAMETERS_END();
 
-	zobj_own obj = Route::post(pattern, target, ajax);
+	zobj_mgr obj = Route::post(pattern, target, ajax);
 	obj.move_zv(return_value);
 }
 
@@ -494,7 +506,7 @@ PHP_METHOD(Wcc_Route, methods)
 	Z_PARAM_LONG(ajax)
 	ZEND_PARSE_PARAMETERS_END();
 
-	zobj_own obj = Route::methods(verbs, pattern, target, ajax);
+	zobj_mgr obj = Route::methods(verbs, pattern, target, ajax);
 	obj.move_zv(return_value);
 }
 
@@ -545,10 +557,8 @@ PHP_METHOD(Wcc_Route, getCompiled)
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	Route* cobj = zval_toc<Route>(ZEND_THIS);
-
-	cobj->compiled_.return_zv(return_value);
-	//showmem("return compiled",return_value);
-	return;
+	zstr_user s = cobj->getCompiled();
+	s.return_zv(return_value);
 }
 
 PHP_METHOD(Wcc_Route, getPattern) 
@@ -557,8 +567,8 @@ PHP_METHOD(Wcc_Route, getPattern)
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	Route* cobj = zval_toc<Route>(ZEND_THIS);
-
-	cobj->pattern_.return_zv(return_value);
+	zstr_user s = cobj->getPattern();
+	s.return_zv(return_value);
 }
 
 PHP_METHOD(Wcc_Route, getVerbs) 
@@ -575,8 +585,8 @@ PHP_METHOD(Wcc_Route, getParams)
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	Route* cobj = zval_toc<Route>(ZEND_THIS);
-
-	cobj->params_.return_zv(return_value);
+	htab_read hr = cobj->getParams();
+	hr.return_zv(return_value);
 }
 
 
@@ -589,7 +599,7 @@ PHP_METHOD(Wcc_Route, GetVerbInt)
 	long vlen;
 	zend_string* key;
 	zval  *zv_find = NULL;
-	zval_own test;
+	zval_mgr test;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 	Z_PARAM_STR(verb)
@@ -613,7 +623,7 @@ PHP_METHOD(Wcc_Route, GetVerbNames)
 	Z_PARAM_LONG(verbs)
 	ZEND_PARSE_PARAMETERS_END();
 
-	htab_own rval = Route::getVerbNames(verbs);
+	htab_mgr rval = Route::getVerbNames(verbs);
 
 	rval.move_zv(return_value);
 }
@@ -628,9 +638,7 @@ PHP_METHOD(Wcc_Route, setCompiled)
 	ZEND_PARSE_PARAMETERS_END();
 
 	Route* cobj = zval_toc<Route>(ZEND_THIS);
-
-	cobj->compiled_.set(cpat);
-
+	cobj->setCompiled(cpat);
 	return;
 }
 
@@ -643,8 +651,7 @@ PHP_METHOD(Wcc_Route, setPattern)
 	ZEND_PARSE_PARAMETERS_END();
 
 	Route* cobj = zval_toc<Route>(ZEND_THIS);
-	cobj->pattern_.set(pattern);
-
+	cobj->setPattern(pattern);
 }
 
 PHP_METHOD(Wcc_Route, setAjax)
@@ -675,8 +682,7 @@ PHP_METHOD(Wcc_Route, setParams)
 	ZEND_PARSE_PARAMETERS_END();
 
 	Route* cobj = zval_toc<Route>(ZEND_THIS);
-
-	cobj->params_ = zval_ptr(data);
+	cobj->setParams(data);
 	return;
 
 }
@@ -707,7 +713,7 @@ PHP_METHOD(Wcc_Route, GetVerb)
 	Z_PARAM_LONG(verb)
 	ZEND_PARSE_PARAMETERS_END();
 
-	zstr_own rval = Route::getVerb(verb);
+	zstr_mgr rval = Route::getVerb(verb);
 
 	rval.move_zv(return_value);
 }
@@ -718,7 +724,7 @@ PHP_METHOD(Wcc_Route, hasParams)
 
 	Route* cobj = zval_toc<Route>(ZEND_THIS);
 
-	if (cobj->params_.size() > 0) 
+	if (cobj->hasParams())
 	{
 		RETURN_TRUE;
 	}
@@ -732,8 +738,9 @@ PHP_METHOD(Wcc_Route, getTarget)
 	ZEND_PARSE_PARAMETERS_NONE();
 	
 	Route* cobj = zval_toc<Route>(ZEND_THIS);
+	zval_user ret = cobj->getTarget();
 
-	cobj->target_.return_zv(return_value);
+	ret.return_zv(return_value);
 
 }
 
@@ -749,7 +756,7 @@ PHP_METHOD(Wcc_Route, name)
 	Route* cobj = zval_toc<Route>(ZEND_THIS);
 	cobj->name(name);
 
-	zobj_own result(cobj->zobj());
+	zobj_mgr result(cobj->zobj());
 	result.move_zv(return_value);
 }
 
@@ -762,14 +769,15 @@ PHP_METHOD(Wcc_Route, routeUrl)
 	Z_PARAM_OPTIONAL
 	Z_PARAM_ARRAY(params);
 	ZEND_PARSE_PARAMETERS_END();
-	htab_ptr plist;
+
+	htab_read plist;
 
 	if (params)
 	{
 		plist = params;
 	}
 	Route* cobj = zval_toc<Route>(ZEND_THIS);
-	zval_own result = cobj->routeUrl(plist);
+	zval_mgr result = cobj->routeUrl(plist);
 
 	result.move_zv(return_value);
 }
@@ -780,7 +788,8 @@ PHP_METHOD(Wcc_Route,getName)
 	
 	Route* cobj = zval_toc<Route>(ZEND_THIS);
 
-	cobj->getName().return_zv(return_value);
+	zstr_user name = cobj->getName();
+	name.return_zv(return_value);
 
 }
 
@@ -790,7 +799,7 @@ PHP_METHOD(Wcc_Route, __serialize)
 	
 	Route* cobj = zval_toc<Route>(ZEND_THIS);
 
-	htab_own ret = cobj->__serialize();
+	htab_mgr ret = cobj->__serialize();
 
 	ret.move_zv(return_value);
 }
@@ -803,11 +812,11 @@ PHP_METHOD(Wcc_Route, __unserialize)
 	Z_PARAM_ARRAY(data)
 	ZEND_PARSE_PARAMETERS_END();
 
-	htab_ptr htab(Z_ARR_P(data));
+	htab_read hr(data);
 
 	Route* cobj = zval_toc<Route>(ZEND_THIS);
 
-	cobj->__unserialize(htab);
+	cobj->__unserialize(hr);
 
 }
 PHP_MSHUTDOWN_FUNCTION(wcc_route_d)

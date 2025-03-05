@@ -69,12 +69,14 @@ namespace zpp {
 	    
 	    size_t size() const;
 	    
+	    const zstr_mgr& operator=(const zstr_mgr& rc);
 	    const zstr_mgr& operator=(zend_string* rc);
 	    const zstr_mgr& operator=(zval* rc);
 
 	    zstr_mgr& operator=(zval_mgr&& rc);
 	    zstr_mgr& operator=(zstr_mgr&& rc);
 
+	    void move_zv(zval* ret);
 
 	    void adopt(zend_string* rc);
 
@@ -83,11 +85,19 @@ namespace zpp {
 	    zstr_mgr& operator=(zstr_user&&	rc);
 	};
 
+	class zstr_empty : public zstr_mgr
+	{
+	public:
+		zstr_empty();
+	};
+	
 	/** A "persistent" string, not using emalloc and efree */
 	class zstr_perm : public zstr_mgr {
 	public:
 		zstr_perm() : zstr_mgr() {}
 		zstr_perm(const char* c, size_t slen = 0);
+
+		operator zend_string*() const { return (zend_string*) s; }
 	};
 
 	/** A "temporary" string, during a request, uses emalloc and efree */
@@ -95,6 +105,8 @@ namespace zpp {
 	public:
 		zstr_temp() : zstr_mgr() {}
 		zstr_temp(const char* c, size_t slen = 0);
+
+		operator zend_string*() const { return (zend_string*) s; }
 	};
 	
 	/** A "persistent" string stored as "interned", for module/class initialize */
@@ -102,6 +114,8 @@ namespace zpp {
 	public:
 		zstr_intern() : zstr_mgr() {}
 		zstr_intern(const char* c, size_t slen = 0);
+
+		operator zend_string*() const { return (zend_string*) s; }
 	};
 
 

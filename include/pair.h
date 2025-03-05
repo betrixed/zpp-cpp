@@ -3,11 +3,12 @@
 
 //pair.h
 
-#ifndef WC_BASE_H
-#include "wc_base.h"
+#ifndef ZPP_BASE_H
+#include "zpp/base.h"
 #endif
 
 namespace wcc {
+using namespace zpp;
 
 	class Pair : public base_d 
 	{
@@ -19,7 +20,7 @@ namespace wcc {
 	public:
 		static base_obj_mgr<Pair> omg;
 
-		void construct(zval_ptr f1, zval_ptr s2)
+		void construct(zval_user f1, zval_user s2)
 		{
 			first_ = f1;
 			second_ = s2;
@@ -27,7 +28,7 @@ namespace wcc {
 
 		zval_user first() const { return first_; }
 
-		zval_user second() const { return first_; }
+		zval_user second() const { return second_; }
 	};
 
 }; // namespace

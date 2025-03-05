@@ -12,8 +12,8 @@ namespace wcc {
 
 class  ICache : public base_d {
 protected:
-	htab_init cached_;
-	htab_init svc_cache_;
+	htab_mgr  cached_;
+	htab_mgr  svc_cache_;
 	htab_mgr  options_;
 	zstr_mgr  prefix_;
 	zobj_mgr  services_;

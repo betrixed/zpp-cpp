@@ -1,8 +1,8 @@
 #ifndef  WCC_ROUTE_H
 #define  WCC_ROUTE_H
 
-#ifndef WC_BASE_H
-#include "wc_base.h"
+#ifndef ZPP_BASE_H
+#include "zpp/base.h"
 #endif
 
 #include <map>
@@ -36,85 +36,85 @@ public:
 	zend_long    verbs_;
 	zend_long	 ajax_;
 
-	zstr_own     id_;
+	zstr_mgr     id_;
 
-	zstr_own 	 pattern_;
-	zstr_own 	 compiled_;
+	zstr_mgr 	 pattern_;
+	zstr_mgr 	 compiled_;
 
-	zval_own 	 target_;
+	zval_mgr 	 target_;
 
 	// matched values of reg-expression
-	htab_own 	 params_;
+	htab_mgr 	 params_;
 
 
 
 	Route();
 	virtual ~Route();
 
-	virtual void debug_info(HashTable *ht);
+	virtual void debug_info(htab_write hw);
 
-	static bool isMyClass(zend_object* obj);
+	static bool isMyClass(zstr_user obj);
 
-	static zend_long getVerbInt(const zstr_base& sverb);
-	static htab_own getVerbNames( zend_long flags );
+	static zend_long getVerbInt(zstr_user sverb);
+	static htab_mgr  getVerbNames( zend_long flags );
 	
-	static zstr_own getVerb(zend_long verb);
+	static zstr_mgr getVerb(zend_long verb);
 
-	static zobj_own get(zstr_ptr pattern, zval_ptr target, int ajax = ajax::AJ_NONE);
+	static zobj_mgr get(zstr_user pattern, zval_user target, int ajax = ajax::AJ_NONE);
 
-	static zobj_own post(zstr_ptr pattern, zval_ptr target, int ajax = ajax::AJ_NONE);
+	static zobj_mgr post(zstr_user pattern, zval_user target, int ajax = ajax::AJ_NONE);
 
-	static zobj_own methods(int verbs, zstr_ptr pattern, zval_ptr target, int ajax = ajax::AJ_NONE);
+	static zobj_mgr methods(int verbs, zstr_user pattern, zval_user target, int ajax = ajax::AJ_NONE);
 
 	
 
-	void construct(int verbs, zstr_ptr pattern, zval_ptr target);
+	void construct(int verbs, zstr_user pattern, zval_user target);
 
-	void name(zstr_ptr name);
-	zstr_ptr  getName();
-
-	bool hasParams()
-	{
-		return (params_.size() > 0) ? true : false;
-	}
-
-	htab_ptr getParams();
+	void name(zstr_user name);
+	zstr_user  getName();
 
 	zend_long getVerbs() const 
 	{
 		return verbs_;
 	}
-	
-	void setParams(zval_ptr params);
 
-	zval_own routeUrl(htab_ptr params);
+	bool hasParams()
+	{
+		return (htab_read(params_).size() > 0) ? true : false;
+	}
+
+	htab_read getParams();
 	
-	zstr_ptr getCompiled() const
+	void setParams(htab_read params);
+
+	zstr_mgr routeUrl(htab_read pvalues);
+	
+	zstr_user getCompiled() const
 	{
 		return compiled_;
 	}
-	zstr_ptr getPattern() const
+	zstr_user getPattern() const
 	{
 		return pattern_;
 	}
 
-	const zval_own getTarget() const {
+	zval_user getTarget() const {
 		return target_;
 	}
 
-	void setPattern(zstr_ptr p)
+	void setPattern(zstr_user p)
 	{
 		pattern_ = p;
 	}
 
-	void setCompiled(zstr_ptr c)
+	void setCompiled(zstr_user c)
 	{
 		compiled_ = c;
 	}
 
-	htab_own __serialize();
+	htab_mgr __serialize();
 	
-	void __unserialize(htab_ptr htab);
+	void __unserialize(htab_read htab);
 };
 
 class RouteMgr : public base_obj_mgr<Route> {
@@ -153,10 +153,10 @@ public:
 	zstr_intern cc_file;
 	/* Hash tables cannot be dyanmically allocated during Module Init
 	 and cannot be dynamically deallocated during Module Shutdown.
-	 Static storage seems to work.
+	 This static storage seems to work.
 	*/
 	HashTable  route_verbs;
-	HashTable verb_names;
+	HashTable  verb_names;
 
 	//Route_init() : route_verbs((HashTable*)nullptr), verb_names((HashTable*)nullptr) {}
 

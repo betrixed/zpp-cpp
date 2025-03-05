@@ -11,9 +11,9 @@ namespace wcc {
 
 class  Services : public base_d {
 protected:
-	htab_init active_;
-	htab_init defer_;
-	htab_init instances_;
+	htab_mgr  active_;
+	htab_mgr  defer_;
+	htab_mgr  instances_;
 
 	int       defer_ct_;
 	bool      throw_fail_;

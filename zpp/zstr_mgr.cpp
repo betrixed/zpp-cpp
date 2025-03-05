@@ -39,6 +39,7 @@ zstr_mgr::bind(zend_string* rc)
     }
 }
 
+
 void //protected
 zstr_mgr::own()
 {
@@ -101,7 +102,12 @@ zstr_mgr::operator=(zval_mgr&& rc)
 	rc.init();
 	return *this;	
 }
-
+const zstr_mgr& 
+zstr_mgr::operator=(const zstr_mgr& rc)
+{
+	bind(rc.s);
+	return *this;
+}
 
 void zstr_mgr::adopt(zend_string* rc)
 {
@@ -137,6 +143,19 @@ zstr_mgr::size() const
 	return ZSTR_LEN(s);
 }
 
+void 
+zstr_mgr::move_zv(zval* ret)
+{
+	if (s)
+	{
+		ZVAL_STR(ret, s);
+		s = nullptr;
+	}
+	else {
+		ZVAL_NULL(ret);
+	}
+}
+
 zstr_perm::zstr_perm(const char* c, size_t slen)
 {
 	if (!slen)
@@ -167,6 +186,12 @@ zstr_intern::zstr_intern(const char* c, size_t slen)
 	//showstr("interned s",p);
 
 }
+
+zstr_empty::zstr_empty() {
+	s = zend_empty_string;
+}
+
+
 
 };
 

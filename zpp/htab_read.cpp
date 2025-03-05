@@ -282,7 +282,7 @@ void htab_read::return_zv(zval* return_value) const
 htab_mgr
 htab_read::getValues()
 {
-	 htab_init result;
+	 htab_mgr result;
 	 htab_write merge(result);
 
 	 htab_walk wk;
@@ -298,7 +298,7 @@ htab_read::getValues()
 htab_mgr 
 htab_read::getKeys()
 {
-	 htab_init result;
+	 htab_mgr result;
 	 htab_write merge(result);
 
 	 htab_walk wk;

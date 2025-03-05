@@ -136,7 +136,7 @@ bool ICache::clear()
 
 bool ICache::clearPrefix(zstr_user prefix)
 {
-	htab_init del_array;
+	htab_mgr del_array;
 
 	htab_write  delkeys(del_array);
 
@@ -198,7 +198,7 @@ ICache::deleteExpired()
 htab_mgr
 ICache::getExpired()
 {
-	htab_init  result;
+	htab_mgr  result;
 	htab_write rtab(result);
 	htab_read  cache(cached_);
 
@@ -328,7 +328,7 @@ ICache::getService(zstr_user key)
 htab_mgr 
 ICache::getUnsaved()
 {
-	htab_init rlist;
+	htab_mgr rlist;
 	
 	htab_write rtab(rlist);
 

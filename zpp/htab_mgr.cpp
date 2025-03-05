@@ -280,13 +280,32 @@ void htab_mgr::move_zv(zval* return_value)
 	ht_ = nullptr;
 }
 
+const htab_mgr& 
+htab_mgr::operator=(zval* zv)
+{
+	lose();
+	ht_ = zval_user(zv).zarray();
+	own();
+	return *this;
+}
+
 //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 
-htab_init::htab_init()
+htab_empty::htab_empty()
 {
 	ht_ = htab_mgr::empty_array();
 }
+/*
+const htab_mgr& 
+htab_init::operator=(zval *v)
+{
+	lose();
+	zval_user(v).zarray();
+	own();
+	return *this;
+}
+*/
 
 }; // namespace
 //htab_mgr.cpp

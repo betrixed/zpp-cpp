@@ -47,6 +47,11 @@ htab_write::htab_write(zval_user mgr)
 	giveback(mgr);
 }
 
+htab_write::htab_write(HashTable* h)
+{
+	ht_ = h;
+}
+
 void htab_write::update(zend_long idx, zval* val)
 {
 	if(zend_hash_index_update(ht_, idx, val))
@@ -222,6 +227,10 @@ bool htab_write::unset(zval_user key)
 	return false;
 }
 
+void htab_write::set(zend_long idx, zval_user value)
+{
+	update(idx, value);
+}
 
 void htab_write::set(zend_long idx, HashTable* value)
 {
@@ -276,7 +285,7 @@ htab_mgr
 htab_write::extract(htab_read exkeys)
 {
 
-	htab_init result;
+	htab_mgr 		result;
 
 	htab_write merger(result);
 	//showarray("exkeys", exkeys);

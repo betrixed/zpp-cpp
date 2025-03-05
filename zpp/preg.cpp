@@ -39,7 +39,7 @@ zval_mgr implode(zstr_user sep, htab_read arr)
 zval_mgr
 union_values(htab_read list1, htab_read list2)
 {
-	htab_init keyset;
+	htab_mgr   keyset;
 	htab_write ks(keyset);
 
 	zval_mgr one(1);

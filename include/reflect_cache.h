@@ -12,7 +12,7 @@ using namespace zpp;
 
 class  ReflectCache : public base_d {
 protected:
-	htab_init  cache_;
+	htab_mgr  cache_;
 public:
 
 	static const char* class_name;

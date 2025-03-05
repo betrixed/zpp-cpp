@@ -76,9 +76,14 @@ namespace zpp {
             }
             return zend_empty_string;
         }
+
         void add_constant(const char* name, const char* value);
-        void add_constant(const char* name, zstr_perm zs);
+        void add_constant(const char* name, zend_string* zs);
         void add_constant(const char* name, zend_long value);
+
+
+        //void add_constant(const zstr_intern& name,  zval_user value, int flags = ZEND_ACC_PUBLIC);
+
 
         zval_mgr static_property(zend_string* s);
         zval_mgr static_constant(zend_string* s);

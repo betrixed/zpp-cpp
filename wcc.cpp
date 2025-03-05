@@ -48,6 +48,8 @@ extern "C" {
 
 //#define DEBUG_XTRA
 #include "zpp/show_zpp.cpp"
+#include "src/pair.cpp"
+#include "src/route.cpp"
 
 //#include "src/zpp/all.cpp"
 
@@ -116,16 +118,12 @@ extern "C" {
 #include "src/icache.cpp"
 
 /*
-
-
-
-
 #include "src/reflect_cache.cpp"
 #include "src/finder.cpp"
 #include "src/target.cpp"
 #include "src/route.cpp"
 #include "src/route_set.cpp"
-#include "src/pair.cpp"
+
 #include "src/route_match.cpp"
 #include "src/route_add.cpp"
 
@@ -221,10 +219,17 @@ PHP_MINIT(wc_services_md)(INIT_FUNC_ARGS_PASSTHRU);
 PHP_MINIT(Wcc_ReflectCache)(INIT_FUNC_ARGS_PASSTHRU);
 #endif
 
+#ifdef WCC_PAIR_CPP
+PHP_MINIT(wcc_pair_d)(INIT_FUNC_ARGS_PASSTHRU);
+#endif
+
 #ifdef WCC_ROUTE_CPP
 	PHP_MINIT(wcc_route_d)(INIT_FUNC_ARGS_PASSTHRU);
+#endif
+
+#ifdef WCC_ROUTESET_CPP
 	PHP_MINIT(wcc_routeset_d)(INIT_FUNC_ARGS_PASSTHRU);
-	PHP_MINIT(wcc_pair_d)(INIT_FUNC_ARGS_PASSTHRU);
+
 	PHP_MINIT(route_match_d)(INIT_FUNC_ARGS_PASSTHRU);
 	PHP_MINIT(wcc_target)(INIT_FUNC_ARGS_PASSTHRU);
 	PHP_MINIT(wcc_route_add)(INIT_FUNC_ARGS_PASSTHRU);

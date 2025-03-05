@@ -18,6 +18,7 @@ namespace zpp {
         htab_write(htab_mgr& mgr);
         htab_write(zval_mgr& mgr);
         htab_write(zval_user mgr);
+        htab_write(HashTable* h);
 
         bool isNull() {
             return (ht_ == nullptr);
@@ -57,6 +58,11 @@ namespace zpp {
         void push_back(const zstr_user bs);
         void push_back(const zobj_user bs);
 
+        void push_back(const zstr_intern& si)
+        {
+            push_back((zend_string*) si);
+        }
+
         void push_back(const zval_mgr& zo);
 
         void push_back(const char* s, std::size_t slen);
@@ -68,16 +74,12 @@ namespace zpp {
         void set(zend_string* key, double value);
         
         void set(zval_user key, zval_user value);
+        void set(zend_long idx, zval_user value);
 
         void set(zend_string* key, HashTable* value);
         void set(zend_string* key, zend_object* obj);
 
         void set(zend_long idx, HashTable* value);
-
-        void set(zend_long idx, zval* val)
-        {
-            update(idx, val);
-        }
 
         bool unset(zend_long idx);
         bool unset(zend_string* key);

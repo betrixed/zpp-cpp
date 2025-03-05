@@ -84,9 +84,20 @@ class_data::add_constant(const char* name, const char* value)
         name, strlen(name), 
         value, strlen(value));
 }
+/**
+ * 
+zend_declare_class_constant_ex(
+    end_class_entry *ce, 
+    zend_string *name, 
+    zval *value, 
+    int flags, 
+    zend_string *doc_comment)
+*/
+
+
 
 void 
-class_data::add_constant(const char* name,  zstr_perm value)
+class_data::add_constant(const char* name,  zend_string* value)
 {
     zval_mgr temp(value);
     zend_declare_class_constant(class_entry_, name, strlen(name), temp);

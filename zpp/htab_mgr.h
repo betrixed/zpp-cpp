@@ -33,6 +33,7 @@ namespace zpp {
 
         htab_mgr(const zval_user& zptr);
         
+
         /** passing nullptr can stop HashTable create */
         htab_mgr(HashTable *h);
 
@@ -54,6 +55,7 @@ namespace zpp {
         htab_mgr& operator=(htab_mgr&& m);
 
         const htab_mgr& operator=(HashTable* htab);
+        const htab_mgr& operator=(zval* zv);
 
         void  decref();
 
@@ -67,9 +69,9 @@ namespace zpp {
  
     };
 
-    class htab_init : public htab_mgr {
+    class htab_empty : public htab_mgr {
     public:
-        htab_init();
+        htab_empty();
     };
 
 

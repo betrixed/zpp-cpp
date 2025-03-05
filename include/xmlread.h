@@ -179,7 +179,7 @@ namespace wcc {
 
 		zobj_mgr   addRoot_; /* preinstalled object root ? */
 
-		htab_init  tag_objs_; /* Array of tag name - class name */
+		htab_mgr  tag_objs_; /* Array of tag name - class name */
 
 		/** cache zend_string  used for repeated property/call access */
 			

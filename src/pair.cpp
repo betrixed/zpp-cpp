@@ -9,6 +9,8 @@ namespace wcc {
 	base_obj_mgr<Pair> Pair::omg;
 };
 
+using namespace wcc;
+
 ZEND_METHOD(Wcc_Pair, __construct)
 {
 	zval* p1;
@@ -31,7 +33,7 @@ ZEND_METHOD(Wcc_Pair, first)
 
 	Pair* cobj = zval_toc<Pair>(ZEND_THIS);
 
-	const zval_own& result = cobj->first();
+	zval_user result = cobj->first();
 	result.return_zv(return_value);
 }
 
@@ -41,7 +43,7 @@ ZEND_METHOD(Wcc_Pair, second)
 
 	Pair* cobj = zval_toc<Pair>(ZEND_THIS);
 
-	const zval_own&  result = cobj->second();
+	zval_user  result = cobj->second();
 	result.return_zv(return_value);
 }
 

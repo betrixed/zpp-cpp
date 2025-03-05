@@ -98,7 +98,7 @@ ICacheData::member_info(htab_write s, bool store)
 htab_mgr 
 ICacheData::serialize()
 {
-	htab_init s;
+	htab_mgr s;
 
 	member_info(s, false);
 
