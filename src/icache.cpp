@@ -409,7 +409,7 @@ ICache::setMultiple(zval_user values, zend_long ttl)
 
 void ICache::setServices(zval_user svc)
 {
-	services_ = svc;
+	services_ = svc.zobject();
 }
 
 }; //namespace wcc

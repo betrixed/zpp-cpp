@@ -28,6 +28,9 @@ namespace zpp {
 
 		zobj_user(const zobj_mgr& rc) : obj_(rc.obj_) {}
 
+		zobj_user(const zval_user& rc);
+		
+
 		operator zend_object* () const { return (zend_object*) obj_; }
 
 		const zobj_user& operator=(zend_object* rc);

@@ -15,7 +15,8 @@
 
 namespace wcc {
  	
-RouteMgr   route_mgr;
+base_obj_mgr<Route> Route::omg;
+
 Route_init route_data;
 
 
@@ -138,7 +139,7 @@ void RouteMgr::init_class_fn()
 
 // class has base_obj_mgr zend_class_entry
 int isRouteObject(zend_object* obj) {
-	return (route_mgr.classEntry() == obj->ce) ? 1 : 0;
+	return (Route::omg.classEntry() == obj->ce) ? 1 : 0;
 }
 
 
@@ -255,9 +256,12 @@ Route::get(zstr_user pattern, zval_user target, int ajax)
 {
 	zobj_mgr result;
 
-	Route* cobj = route_mgr.make_new();
+	result = Route::omg.new_zobj();
+	Route* cobj = zobj_toc<Route>(result);
+
 	cobj->construct(html::V_GET, pattern, target);
 	cobj->ajax_ = ajax;
+
 	result.adopt(cobj);
 	return result;
 }
@@ -266,10 +270,13 @@ zobj_mgr  //static
 Route::post(zstr_user pattern, zval_user target, int ajax)
 {
 	zobj_mgr result;
-	Route* cobj = route_mgr.make_new();
+
+	result =  Route::omg.new_zobj();
+	Route* cobj = zobj_toc<Route>(result);
+
 	cobj->construct(html::V_POST, pattern, target);
 	cobj->ajax_ = ajax;
-	result.adopt(cobj);
+
 	return result;	
 }
 
@@ -278,10 +285,12 @@ Route::methods(int verbs, zstr_user pattern, zval_user target, int ajax)
 {
 	zobj_mgr result;
 
-	Route* cobj = route_mgr.make_new();
+	result =  Route::omg.new_zobj();
+	Route* cobj = zobj_toc<Route>(result);
+
 	cobj->construct(verbs, pattern, target);
 	cobj->ajax_ = ajax;
-	result.adopt(cobj);
+
 	return result;	
 }
 	
@@ -831,7 +840,7 @@ PHP_MINIT_FUNCTION(wcc_route_d)
 {
 	//WcR_ce = wcc_class_reg("Wc\\Route", class_Wcc_Route_methods);
 	zend_class_entry *ce = register_class_Wcc_Route();
-	route_mgr.classEntry(ce);
+	Route::omg.classEntry(ce);
 	
 	return SUCCESS;
 

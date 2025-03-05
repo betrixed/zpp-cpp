@@ -388,6 +388,14 @@ zval_mgr::operator=(zend_object* rc)
     return *this;
 }
 
+const zval_mgr& 
+zval_mgr::operator=(HashTable* rc)
+{
+    lose();
+    bind_array(rc);
+    return *this;
+}
+
 }; // namespace Php
 
 #endif

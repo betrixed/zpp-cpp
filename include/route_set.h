@@ -2,8 +2,8 @@
 #define WCC_ROUTESET_H
 
 
-#ifndef WC_BASE_H
-#include "wc_base.h"
+#ifndef ZPP_BASE_H
+#include "zpp/base.h"
 #endif
 
 #ifndef WCC_ROUTE_H
@@ -18,14 +18,14 @@ class   RouteSet : public base_d {
 protected:
 
 	void indexRoutes();
-	void indexItem(const zval_own &obj);
-	void indexRouteKey(Route* ro);
+	void indexItem(zval_user obj);
+	void indexRouteKey(zobj_user obj);
 
 public:
-	htab_own fixed_;
-	htab_own vary_;
-	zstr_own file_;
-	htab_own nameIndex_;
+	htab_mgr fixed_;
+	htab_mgr vary_;
+	zstr_mgr file_;
+	htab_mgr nameIndex_;
 
 	static base_obj_mgr<RouteSet> omg;
 
@@ -33,20 +33,35 @@ public:
 	
 	virtual ~RouteSet();
 
-	virtual void debug_info(HashTable* ht);
+	virtual void debug_info(htab_write di);
 
 	Route* match(RouteMatch* rm);
 	
-	htab_own serialize();
-	void     unserialize(htab_ptr htab);
+	htab_mgr serialize();
+	void     unserialize(htab_read htab);
 
-	void  addRouteList(zval* list);
-	void  addRoute(Route* route);
+	void  addRouteList(zval_user list);
+	void  addRoute(zval_user route);
 
-	zobj_ptr getRoute(zstr_ptr name);
-	zstr_own routeUrl(zstr_ptr name, htab_ptr params);
+	zobj_mgr getRoute(zstr_user name);
+	zstr_mgr routeUrl(zstr_user name, htab_read params);
 	
-	static void  appendRoute(htab_own& array, zstr_own& key, Route* route);
+	void setFile(zstr_user name) {
+		file_ = name;
+	}
+
+	zstr_user getFile() const {
+		return file_;
+	}
+
+	htab_read getFixed() {
+		return fixed_;
+	}
+
+	htab_read getVary() {
+		return vary_;
+	}
+	static void  appendRoute(htab_write array, zstr_user key, Route* route);
 };
 
 

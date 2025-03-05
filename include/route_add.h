@@ -1,8 +1,8 @@
 #ifndef WCC_ROUTE_ADD_H
 #define WCC_ROUTE_ADD_H
 
-#ifndef WC_BASE_H
-#include "wc_base.h"
+#ifndef ZPP_BASE_H
+#include "zpp/base.h"
 #endif
 
 
@@ -13,32 +13,32 @@ namespace wcc {
 	class RouteAdd : public base_d 
 	{
 	protected:
-		zobj_own route_set_;
-		zstr_own module_name_;
-		zstr_own method_sfx_;
-		zstr_own url_prefix_;
-		zval_own fallback_;
+		zobj_mgr route_set_;
+		zstr_mgr module_name_;
+		zstr_mgr method_sfx_;
+		zstr_mgr url_prefix_;
+		zstr_mgr fallback_;
 	public:
 
 		static base_obj_mgr<RouteAdd> omg;
 
-		static zstr_ptr rex_url();
+		static zstr_mgr rex_url();
 		
-		virtual void debug_info(HashTable* ht);
+		virtual void debug_info(htab_write hw);
 
-		void construct(zobj_ptr rset);
+		void construct(zobj_user rset);
 
-		void addRoutes(htab_ptr list, zstr_ptr prefix, zstr_ptr module);
+		void addRoutes(htab_read list, zstr_user prefix, zstr_user module);
 
-		void fallback(zval_ptr backup);
+		void fallback(zval_user backup);
 
-		const zobj_own& getRouteSet() const;
+		zobj_user getRouteSet() const;
 
-		void methodSfx(zstr_ptr sfx);
+		void methodSfx(zstr_user sfx);
 
-		void module(zstr_ptr name);
+		void module(zstr_user name);
 
-		void prefix(zstr_ptr start);
+		void prefix(zstr_user start);
 
 		void ready(Route* route);
 

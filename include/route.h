@@ -51,6 +51,8 @@ public:
 	Route();
 	virtual ~Route();
 
+	static base_obj_mgr<Route> omg;
+
 	virtual void debug_info(htab_write hw);
 
 	static bool isMyClass(zstr_user obj);
@@ -167,7 +169,6 @@ public:
 
 };
 
-extern RouteMgr   route_mgr;
 extern Route_init route_data;
 
 

@@ -1,8 +1,8 @@
 #ifndef route_match_h
 #define route_match_h
 
-#ifndef WC_BASE_H
-#include "wc_base.h"
+#ifndef ZPP_BASE_H
+#include "zpp/base.h"
 #endif
 
 #ifndef WCC_PAIR_H
@@ -17,43 +17,42 @@ class RouteMatch : public base_d {
 
 protected:
 
-	void set_tuple12(htab_ptr tg);
-	void set_tuple14(htab_ptr tg);
-	htab_own fetchArgs();
-	Route*    testRoute(zend_object* robj);
+	void set_tuple12(htab_read tg);
+	void set_tuple14(htab_read tg);
+	htab_mgr fetchArgs();
 
-	Route*    firstMatch(zval_own& wrap);
+	Route*    testRoute(zval_user robj);
+
+	Route*    firstMatch(zval_user wrap);
 public:
-	zobj_own route_;
-	htab_own roles_;
-	htab_own ob_args_;
-	htab_own match_args_;
-	htab_own errors_;
+	zobj_mgr route_;
+	htab_mgr roles_;
+	htab_mgr ob_args_;
+	htab_mgr match_args_;
+	htab_mgr errors_;
 
 // string values
-	zstr_own uri_;
-	zstr_own module_name_;
-	zstr_own ob_class_;
-	zstr_own ob_method_;
+	zstr_mgr uri_;
+	zstr_mgr module_name_;
+	zstr_mgr ob_class_;
+	zstr_mgr ob_method_;
 
 
 	long verb_flag_;
 	long ajax_flag_;
 
 //  processing values
-	zval_own target_; 
-	zval_own result_;
+	zval_mgr target_; 
+	zval_mgr result_;
 
 	static base_obj_mgr<RouteMatch> omg;
 
-	static zval_own call_method(zobj_ptr obj, zstr_ptr method, htab_ptr args);
+	static zval_mgr call_method(zobj_user obj, zstr_user method, htab_read args);
 
 
-	virtual void debug_info(HashTable *ht) override;
+	virtual void debug_info(htab_write di) override;
 
-	
-
-	const zobj_own& getMatch()
+	zobj_user getMatch()
 	{
 		return route_;
 	}
@@ -68,9 +67,7 @@ public:
 
 	bool prepare_call();
 
-	
-
-	zval_own invoke(htab_ptr extra, zobj_ptr before, zobj_ptr after);
+	zval_mgr invoke(htab_read extra, zobj_user before, zobj_user after);
 };
 
 

@@ -45,9 +45,11 @@ RouteSet::~RouteSet()
 {	
 }
 
-htab_own RouteSet::serialize()
+htab_mgr RouteSet::serialize()
 {
-	htab_own hw;
+	htab_mgr result;
+
+	htab_write hw(result);
 
 	//showarray("fixed 1", fixed_);
 	hw.set(route_data.cc_fixed, fixed_);
@@ -57,33 +59,21 @@ htab_own RouteSet::serialize()
 
 	hw.set(route_data.cc_file, file_);
 
-	return hw;
+	return result;
 }
 
 void     
-RouteSet::unserialize(htab_ptr hw)
+RouteSet::unserialize(htab_read hr)
 {
-	zval_own temp;
-
-	if (hw.try_fetch(route_data.cc_fixed, temp))
-	{
-		fixed_ = std::move(temp);
-	}
-	if (hw.try_fetch(route_data.cc_vary, temp))
-	{
-		vary_ = std::move(temp);
-	}
-	if (hw.try_fetch(route_data.cc_file, temp))
-	{
-		file_ = temp.zstr();
-	}
-
-	//fixed_.show_data("fixed all");
-	//vary_.show_data("vary all");
+	fixed_ = hr.get(route_data.cc_fixed);
+	vary_ = hr.get(route_data.cc_vary);
+	file_ = hr.get(route_data.cc_file);
 }
 
-void  RouteSet::addRoute(Route* ro)
+void  RouteSet::addRoute(zval_user obj)
 {
+	Route* ro = zval_toc<Route>(obj);
+
 	if (ro->hasParams())
 	{
 		appendRoute(vary_,  ro->compiled_, ro);
@@ -95,29 +85,32 @@ void  RouteSet::addRoute(Route* ro)
 	}
 }
 
-void RouteSet::indexRouteKey(Route* ro)
+void 
+RouteSet::indexRouteKey(zobj_user ro)
 {
-	zstr_ptr  key = ro->id_;
+	Route* route = zobj_toc<Route>(ro);
+	zstr_user  key = route->id_;
 	if (key.size())
-	{
-		nameIndex_.set(key, ro->zobj());
+	{	
+		htab_write(nameIndex_).set(key, ro);
 	}	
 }
 
-void RouteSet::indexItem(const zval_own &obj)
+void 
+RouteSet::indexItem(zval_user obj)
 {
 	if (obj.isArray())
 	{
 		htab_walk wk;
-		auto& ro = wk.value();
+		auto ro = wk.value();
 		for( wk.start(obj.zarray()); wk.ok(); wk.next())
 		{
-			indexRouteKey(zval_toc<Route>(ro));
+			indexRouteKey(ro);
 		}
 	}
 	else if (obj.isObject())
 	{
-		indexRouteKey(zval_toc<Route>(obj));
+		indexRouteKey(obj);
 	}
 }
 
@@ -125,7 +118,7 @@ void
 RouteSet::indexRoutes()
 {
 	htab_walk wk;
-	auto& robj = wk.value();
+	auto robj = wk.value();
 	for( wk.start(fixed_); wk.ok(); wk.next())
 	{
 		indexItem(robj);
@@ -136,44 +129,48 @@ RouteSet::indexRoutes()
 	}
 }
 
-zobj_ptr
-RouteSet::getRoute(zstr_ptr name)
+zobj_mgr
+RouteSet::getRoute(zstr_user name)
 {
 
-	zobj_ptr result;
-	if (nameIndex_.size()==0) 
+	zobj_mgr result;
+	htab_read idx(nameIndex_);
+
+	if (idx.size()==0) 
 	{
 		this->indexRoutes();
 	}
-	if (nameIndex_.size() > 0)
+	// may have created HashTable*
+	idx = nameIndex_;
+
+	if (idx.size() > 0)
 	{
-		result = nameIndex_.get(name);
+		result = idx.get(name);
 	}
 	return result;
 }
 
 
-void  RouteSet::addRouteList(zval* list)
+void  RouteSet::addRouteList(zval_user list)
 {
 	//showmem(" list: ", list);
-	zval_ptr wzp(list);
-
 	htab_walk walk;
+
 	int loopct = 0;
 
-	auto& route = walk.value();
+	auto route = walk.value();
 	
-	for(walk.start(wzp.zarray()); walk.ok(); walk.next())
+	for(walk.start(list.zarray()); walk.ok(); walk.next())
 	{
 		//zend_printf("rlist iterate ");
 		//showmem(" route: ", (zval*) route);
 		loopct++;
 		if (route.isObject())
 		{
-			zend_object* obj = route.zobject();
-			if (!route_mgr.myType(obj))
+			zobj_user obj = route.zobject();
+			if (!Route::omg.myType(obj))
 				continue;
-			this->addRoute( zobj_toc<Route>(obj) );
+			this->addRoute(route);
 		}
 
 	}
@@ -181,59 +178,62 @@ void  RouteSet::addRouteList(zval* list)
 }
 
 void RouteSet::appendRoute(
-	htab_own& rarr, 
-	zstr_own& key, 
+	htab_write rarr, 
+	zstr_user key, 
 	Route* myroute)
 {
-	zval_ptr  zip;
+	zval_mgr store(myroute->zobj());
 
-	zval_own robj(myroute->zobj());
+	zval_user  zip;
 
 	if (!rarr.try_fetch(key, zip))
 	{
-		rarr.set(key, robj);
+		// first time, store as object
+		rarr.set(key, store);
 		return;
 	}
 	
 	if (zip.isObject())
 	{
-		htab_own sublist;
+		// Already one stored as object, convert to list of 2 objects
+		htab_mgr sublist;
 
-		sublist.push_back(zip); 
-		sublist.push_back(robj);
+		htab_write hw(sublist);
 
-		zval_own temp(sublist);
+		hw.push_back(zip); 
+		hw.push_back(store);
 
-		rarr.set(key,temp);
+		store = sublist;
+
+		rarr.set(key,store);
 
 	}
 	else if (zip.isArray())
 	{
-		htab_ptr sublist(zip);
-		sublist.push_back(robj);
+		// Add to list of objects, add object
+		htab_write sublist(zip);
+		sublist.push_back(store);
 	}
 
 	return;
 }
 
-void RouteSet::debug_info(HashTable *ht)
+void RouteSet::debug_info(htab_write hw)
 {
-	htab_ptr hw(ht);
+	hw.set(route_data.cc_fixed, fixed_);
 
-	hw.set(cc_fixed, fixed_);
+	hw.set(route_data.cc_vary, vary_);
 
-	hw.set(cc_vary, vary_);
-
-	hw.set(cc_file, file_);
+	hw.set(route_data.cc_file, file_);
 
 }
 
-zstr_own 
-RouteSet::routeUrl(zstr_ptr name, htab_ptr params)
+zstr_mgr 
+RouteSet::routeUrl(zstr_user name, htab_read params)
 {
-	zstr_own result;
+	zstr_mgr result;
 
-	zobj_ptr route = getRoute(name);
+	zobj_mgr route = getRoute(name);
 
 	if (!route.isNull())
 	{
@@ -250,7 +250,7 @@ PHP_METHOD(Wcc_RouteSet, __serialize)
 
 	RouteSet* cobj = zval_toc<RouteSet>(ZEND_THIS);
 
-	htab_own ret = cobj->serialize();
+	htab_mgr ret = cobj->serialize();
 	ret.move_zv(return_value);
 }
 
@@ -262,7 +262,7 @@ PHP_METHOD(Wcc_RouteSet, __unserialize)
 	Z_PARAM_ARRAY(data)
 	ZEND_PARSE_PARAMETERS_END();
 
-	htab_ptr hw(Z_ARR_P(data));
+	htab_read hw(Z_ARR_P(data));
 
 	RouteSet*   cobj = zval_toc<RouteSet>(ZEND_THIS);
 
@@ -279,10 +279,7 @@ PHP_METHOD(Wcc_RouteSet, setFile)
 	ZEND_PARSE_PARAMETERS_END();
 
 	RouteSet* cobj = zval_toc<RouteSet>(ZEND_THIS);
-
-	cobj->file_.set(name);
-
-	return;
+	cobj->setFile(name);
 }
 
 PHP_METHOD(Wcc_RouteSet, getFile)
@@ -290,8 +287,9 @@ PHP_METHOD(Wcc_RouteSet, getFile)
 	ZEND_PARSE_PARAMETERS_NONE();
 	
 	RouteSet* cobj = zval_toc<RouteSet>(ZEND_THIS);
+	zstr_user file = cobj->getFile();
 
-	cobj->file_.return_zv(return_value);
+	file.return_zv(return_value);
 }
 
 PHP_METHOD(Wcc_RouteSet, getFixed)
@@ -299,8 +297,9 @@ PHP_METHOD(Wcc_RouteSet, getFixed)
 	ZEND_PARSE_PARAMETERS_NONE();
 	
 	RouteSet* cobj = zval_toc<RouteSet>(ZEND_THIS);
+	htab_read fixed =cobj->getFixed();
 
-	cobj->fixed_.return_zv(return_value);
+	fixed.return_zv(return_value);
 }
 
 PHP_METHOD(Wcc_RouteSet, getVary)
@@ -309,7 +308,9 @@ PHP_METHOD(Wcc_RouteSet, getVary)
 	
 	RouteSet* cobj = zval_toc<RouteSet>(ZEND_THIS);
 
-	cobj->vary_.return_zv(return_value);
+	htab_read vary = cobj->getVary();
+
+	vary.return_zv(return_value);
 }
 
 PHP_METHOD(Wcc_RouteSet, addRouteList)
@@ -333,14 +334,15 @@ PHP_METHOD(Wcc_RouteSet, addRoute)
 	zval 	*robj;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_OBJECT_OF_CLASS(robj, route_mgr.classEntry())
+		Z_PARAM_OBJECT_OF_CLASS(robj, Route::omg.classEntry())
 	ZEND_PARSE_PARAMETERS_END();
 
 	RouteSet* cobj = zval_toc<RouteSet>(ZEND_THIS);
 
 	//showmem("addRoutes", ZEND_THIS);
 
-	cobj->addRoute(zval_toc<Route>(robj));
+
+	cobj->addRoute(robj);
 
 }
 
@@ -355,9 +357,9 @@ PHP_METHOD(Wcc_RouteSet, getRoute)
 	RouteSet* cobj = zval_toc<RouteSet>(ZEND_THIS);
 
 	//showmem("addRoutes", ZEND_THIS);
-	zobj_ptr robj = cobj->getRoute(name);
+	zobj_mgr robj = cobj->getRoute(name);
 
-	robj.return_zv(return_value);
+	robj.move_zv(return_value);
 
 }
 
@@ -375,13 +377,13 @@ PHP_METHOD(Wcc_RouteSet, routeUrl)
 	RouteSet* cobj = zval_toc<RouteSet>(ZEND_THIS);
 
 	//showmem("addRoutes", ZEND_THIS);
-	htab_ptr plist;
+	htab_read plist;
 	if (params) {
 		plist = params;
 	}
-	zstr_own robj = cobj->routeUrl(name, plist);
+	zstr_mgr robj = cobj->routeUrl(name, plist);
 
-	robj.return_zv(return_value);
+	robj.move_zv(return_value);
 
 }
 
@@ -393,7 +395,7 @@ PHP_MINIT_FUNCTION(wcc_routeset_d)
 
 	RouteSet::omg.classEntry(ce);
 
-	class_init cval(ce);
+	class_data cval(ce);
 
 	cval.add_constant("ARG_S", ARG_S);
 

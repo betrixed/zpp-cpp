@@ -224,6 +224,11 @@ zobj_user::call(zstr_user method,
     return caller.call_fn();
 }
 
+zobj_user::zobj_user(const zval_user& rc)
+{
+    obj_ = rc.zobject();
+}
+
 }; // namespace
 #endif
 //zobj_user.cpp
