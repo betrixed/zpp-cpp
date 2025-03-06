@@ -1,5 +1,5 @@
-#ifndef route_match_h
-#define route_match_h
+#ifndef ROUTE_MATCH_H
+#define ROUTE_MATCH_H
 
 #ifndef ZPP_BASE_H
 #include "zpp/base.h"
@@ -21,7 +21,7 @@ protected:
 	void set_tuple14(htab_read tg);
 	htab_mgr fetchArgs();
 
-	Route*    testRoute(zval_user robj);
+	Route*    testRoute(zobj_user robj);
 
 	Route*    firstMatch(zval_user wrap);
 public:
@@ -49,12 +49,38 @@ public:
 
 	static zval_mgr call_method(zobj_user obj, zstr_user method, htab_read args);
 
+	//public function __construct(string $uri, int $verb_flag, mixed $ajax_flag);
+	void construct(zstr_user uri, int verbs, int ajax);
+
+	//public function setCallInfo(string $obclass, string $obmethod, array $args) : void;
+
+	void setCallInfo(zstr_user obclass, zstr_user obmethod, zval_user args);
 
 	virtual void debug_info(htab_write di) override;
 
-	zobj_user getMatch()
+	zobj_user getMatch() const
 	{
 		return route_;
+	}
+
+	htab_read getErrors() const
+	{
+		return errors_;
+	}
+
+	zstr_user getUri() const
+	{
+		return uri_;
+	}
+
+	htab_read getRoles() const
+	{
+		return roles_;
+	}
+
+	htab_read getObjArgs() const
+	{
+		return ob_args_;
 	}
 
 	bool find_route(RouteSet* routes);
@@ -63,6 +89,20 @@ public:
 	void setModuleName(zend_string* s)
 	{
 		module_name_ = s;
+	}
+	zstr_user getModuleName() const
+	{
+		return module_name_;
+	}
+
+	zstr_user getObjClass() const
+	{
+		return ob_class_;
+	}
+
+	zstr_user getObjMethod() const
+	{
+		return ob_method_;
 	}
 
 	bool prepare_call();

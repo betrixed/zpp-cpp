@@ -5,6 +5,11 @@
 #include "fn_call.h"
 #endif
 
+extern "C" {
+#include <Zend/zend_closures.h>
+};
+
+
 namespace zpp {
 
 const zobj_user& 
@@ -94,15 +99,6 @@ zobj_user::callable(zval* arg1)
     return result;
 }
 
-zval_mgr
-zobj_user::call(zstr_user method)
-{
-    fn_call fn;
-
-    fn.set_fci(obj_, method);
-
-    return fn.call_fn();
-}
 
 zval_mgr
 zobj_user::callable(zval* arg1, zval* arg2)
@@ -190,6 +186,27 @@ zobj_user::call(zstr_user method,
 }
 
 zval_mgr
+zobj_user::call(zstr_user method)
+{
+    fn_call fn;
+
+    fn.set_fci(obj_, method);
+
+    return fn.call_fn();
+}
+
+
+zval_mgr
+zobj_user::call(zstr_user method, HashTable* args)
+{
+    fn_call fn;
+
+    fn.set_fci(obj_, method, args);
+
+    return fn.call_fn();
+}
+
+zval_mgr
 zobj_user::call(zstr_user method, 
             zval*  arg1, zval*  arg2, zval*  arg3)
 {
@@ -227,6 +244,69 @@ zobj_user::call(zstr_user method,
 zobj_user::zobj_user(const zval_user& rc)
 {
     obj_ = rc.zobject();
+}
+
+bool 
+zobj_user::instanceof(zend_class_entry *ce)
+{
+    if (!obj_)
+        return false;
+    if (ce == obj_->ce)
+        return true;
+    return instanceof_function_slow(obj_->ce, ce);
+}
+
+
+bool 
+zobj_user::method_exists(zstr_user method)
+{
+    if (!obj_)
+        return false;
+
+    zend_class_entry* ce = obj_->ce;
+    zstr_user method_name(method);
+    zstr_mgr lcname_str = method_name.to_lower();
+
+   
+    zend_function*  func = (zend_function*) zend_hash_find_ptr(&ce->function_table, lcname_str);
+
+    if (func) {
+        return true;
+    }
+    //C-macro below needs zend_string*
+    zend_string* lcname = lcname_str;
+
+
+    zend_object* temp = obj_;
+
+    func = obj_->handlers->get_method(&temp, lcname, nullptr); // why not use lowercased string?
+
+    if (func != nullptr) 
+    {
+        bool result = true;
+        if (func->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE) 
+        {
+            // Returns true for the fake Closure's __invoke 
+            result = (func->common.scope == zend_ce_closure
+                && zend_string_equals_literal_ci(lcname, ZEND_INVOKE_FUNC_NAME));
+
+            zend_string_release_ex(func->common.function_name, 0);
+            zend_free_trampoline(func);
+        }
+        return result;
+    }
+    // didn't make it
+    return false;
+}
+
+zobj_user::zobj_user(zval* zp)
+{
+    if (!zp)
+    {
+        obj_ = nullptr;
+        return;
+    }
+    obj_ = zval_user(zp).zobject();
 }
 
 }; // namespace

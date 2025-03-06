@@ -1,7 +1,11 @@
 #ifndef HTAB_READ_CPP
 #define HTAB_READ_CPP
 
-// clean this zval of its reference counted value and reinitialize
+#ifndef ZSTR_MGR_H
+#include "zstr_mgr.h"
+#endif
+
+
 #ifndef HTAB_READ_H
 #include "htab_read.h"
 #endif
@@ -13,6 +17,7 @@
 #ifndef WC_PREG_H
 #include "preg.h"
 #endif
+
 
 namespace zpp {
 
@@ -67,6 +72,30 @@ htab_read::apply_all(fn_zval fn)
 	}
 	zend_hash_apply(ht_, fn);
 }
+
+ zstr_mgr 
+ htab_read::print_kv(const char* label) const
+ {
+	htab_walk walk;
+	zstr_buffer  ss;
+
+	auto key = walk.key();
+	auto value = walk.value();
+	if (!label) {
+		label = "array";
+	}
+	ss << label << " : [";
+
+	for(walk.start(ht_) ; walk.ok(); walk.next())
+	{
+		zstr_mgr skey(key.to_zstr());
+		zstr_mgr vkey(value.to_zstr());
+		ss << zstr_user(skey) << " => " << zstr_user(vkey) << ", \n";
+	}
+	ss << "],\n";
+	return zstr_mgr(ss.zstr());
+}
+
 
 
 zstr_mgr

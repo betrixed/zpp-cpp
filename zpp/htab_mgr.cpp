@@ -170,14 +170,22 @@ htab_mgr::empty_array()
 
 void htab_mgr::init()
 {
-	if (ht_)
+	HashTable* empty = (HashTable*) &zend_empty_array;
+	if (ht_ && (ht_ != empty))
 	{
 		lose();
 	}
-	ht_ = empty_array();
+	ht_ = empty;
 	//ht_ = (HashTable*) &zend_empty_array;
 }
 
+bool 
+htab_mgr::isEmpty() const 
+{ 
+	return  (!ht_) 
+			|| (ht_ == &zend_empty_array) 
+			|| (zend_array_count(ht_) == 0); 
+}
 
 void htab_mgr::reset()
 {
@@ -296,16 +304,7 @@ htab_empty::htab_empty()
 {
 	ht_ = htab_mgr::empty_array();
 }
-/*
-const htab_mgr& 
-htab_init::operator=(zval *v)
-{
-	lose();
-	zval_user(v).zarray();
-	own();
-	return *this;
-}
-*/
+
 
 }; // namespace
 //htab_mgr.cpp

@@ -205,6 +205,13 @@ void htab_write::set(zend_string* key, zval* val)
 		update(key,val);
 }
 
+void
+htab_write::set(zstr_user key, const zstr_mgr& value)
+{
+	zval_mgr temp(value);
+	update(key, temp);
+}
+
 void 
 htab_write::set(zend_string* key, zend_string* value)
 {

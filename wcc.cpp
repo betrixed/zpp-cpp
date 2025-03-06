@@ -52,6 +52,7 @@ extern "C" {
 #include "src/target.cpp"
 #include "src/route.cpp"
 #include "src/route_set.cpp"
+#include "src/route_match.cpp"
 
 //#include "src/zpp/all.cpp"
 
@@ -239,8 +240,10 @@ PHP_MINIT(wcc_pair_d)(INIT_FUNC_ARGS_PASSTHRU);
 
 #ifdef ROUTE_MATCH_CPP
 	PHP_MINIT(route_match_d)(INIT_FUNC_ARGS_PASSTHRU);
+#endif
 
-	PHP_MINIT(wcc_route_add)(INIT_FUNC_ARGS_PASSTHRU);
+#ifdef ROUTE_ADD_CPP
+PHP_MINIT(wcc_route_add)(INIT_FUNC_ARGS_PASSTHRU);
 #endif
 
 #ifdef ICACHE_CPP

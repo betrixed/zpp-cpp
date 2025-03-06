@@ -7,6 +7,8 @@
 
 namespace zpp {
 
+    class zstr_mgr;
+
     class htab_write : public htab_read 
     {
     protected:
@@ -64,7 +66,10 @@ namespace zpp {
         }
 
         void push_back(const zval_mgr& zo);
-
+        void push_back(zstr_mgr sm)
+        {
+            push_back((zend_string*)sm);
+        }
         void push_back(const char* s, std::size_t slen);
 
         void set(zend_string* key, zval* value);
@@ -73,7 +78,11 @@ namespace zpp {
         void set(zend_string* key, int value);
         void set(zend_string* key, double value);
         
+        //To avoid cast to zend_string* 
+        void set(zstr_user key, const zstr_mgr& value);
+
         void set(zval_user key, zval_user value);
+
         void set(zend_long idx, zval_user value);
 
         void set(zend_string* key, HashTable* value);

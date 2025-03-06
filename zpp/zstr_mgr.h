@@ -11,7 +11,8 @@ namespace zpp {
 
 	class zstr_user;
 	class zval_mgr;
-
+	class zstr_buffer;
+	
 	class ZPP_EXPORT zstr_mgr {
 	protected:
 	    zend_string* s;
@@ -56,6 +57,8 @@ namespace zpp {
 	        rc.s = nullptr;
 	    }
 
+	    zstr_mgr(zstr_buffer&& m);
+
 	    bool ok() const {
 	    	return (s);
 	    }
@@ -66,12 +69,16 @@ namespace zpp {
 	    
 	    void decref();
 	    void addref();
+	    void init();
 	    
 	    size_t size() const;
-	    
+	    const char* data() const;
+
 	    const zstr_mgr& operator=(const zstr_mgr& rc);
 	    const zstr_mgr& operator=(zend_string* rc);
 	    const zstr_mgr& operator=(zval* rc);
+		 
+		const zstr_mgr& operator=(zstr_buffer&& m);
 
 	    zstr_mgr& operator=(zval_mgr&& rc);
 	    zstr_mgr& operator=(zstr_mgr&& rc);

@@ -30,7 +30,8 @@ namespace zpp {
 
 		zobj_user(const zval_user& rc);
 		
-
+		zobj_user(zval* zp);
+		
 		operator zend_object* () const { return (zend_object*) obj_; }
 
 		const zobj_user& operator=(zend_object* rc);
@@ -58,6 +59,8 @@ namespace zpp {
 		//! calling methods
 		zval_mgr call(zstr_user method);
 
+		zval_mgr call(zstr_user method, HashTable* args);
+
 		zval_mgr call(zstr_user method, zval* arg1);
 
 		zval_mgr call(zstr_user method, 
@@ -68,6 +71,9 @@ namespace zpp {
 
 		zval_mgr call(zstr_user method, 
 	        zval* arg1, zval* arg2, zval* arg3, zval* arg4);
+
+		bool instanceof(zend_class_entry *ce);
+		bool method_exists(zstr_user method);
 
 	};
 };

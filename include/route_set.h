@@ -68,14 +68,6 @@ public:
 };
 
 
-#define ARG_S  "_arg"
-#define FUN_S  "_fun"
-#define FUNX_S "_fnx"
-#define HITS_S "_hit"
-#define MOD_S  "_mod"
-#define NSP_S  "_nsp"
-#define OBJ_S  "_obj"
-#define OBJX_S "_obx"
-#define ROLE_S "_rol"
+
 
 #endif

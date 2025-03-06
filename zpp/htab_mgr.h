@@ -11,9 +11,9 @@ namespace zpp {
     protected:
         HashTable* ht_;
 
-        void init();
-        void own();
-        void lose();
+        
+        void  own();
+        void  lose();
         static bool cowop(HashTable*& inout);
 
         friend class htab_read;
@@ -58,9 +58,12 @@ namespace zpp {
         const htab_mgr& operator=(zval* zv);
 
         void  decref();
+        void  init();
+        void  reset();
+        void  move_zv(zval* return_value);
 
-        void reset();
-        void move_zv(zval* return_value);
+        bool isNull() const { return !(ht_); }
+        bool isEmpty() const;
 
         operator HashTable* () const { return (HashTable*) ht_; }
 

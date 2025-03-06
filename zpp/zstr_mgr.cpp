@@ -79,6 +79,10 @@ zstr_mgr::operator=(zstr_mgr&& rc)
     return *this;
 }
 
+ const char* zstr_mgr::data() const
+ {
+ 	return zstr_user(*this).data();
+ }
 
 const zstr_mgr& 
 zstr_mgr::operator=(zend_string* rc)
@@ -109,6 +113,14 @@ zstr_mgr::operator=(const zstr_mgr& rc)
 	return *this;
 }
 
+void zstr_mgr::init()
+{
+	zend_string* empty = zend_empty_string;
+	if (s && (s != empty)) {
+		lose();
+	}
+	s = empty;
+}
 void zstr_mgr::adopt(zend_string* rc)
 {
 	if (s != rc)
@@ -191,7 +203,23 @@ zstr_empty::zstr_empty() {
 	s = zend_empty_string;
 }
 
+const zstr_mgr& 
+zstr_mgr::operator=(zstr_buffer&& m)
+{
+	if (s == m.s)
+	{
+		return *this;
+	}
+	lose();
+	s = m.zstr(); // zstr_buffer cleared by this, refcount==1
 
+	return *this;
+}
+
+zstr_mgr::zstr_mgr(zstr_buffer&& m)
+{
+	s = m.zstr();// zstr_buffer cleared by this, refcount==1
+}
 
 };
 

@@ -8,17 +8,25 @@
 
 extern "C" {
 #include "ext/standard/url.h"
+#include <Zend/zend_closures.h>
 };
 
 
-
+#ifndef ROUTE_MATCH_H
 #include "route_match.h"
+#endif
 
 #ifndef WCC_ROUTE_H
 #include "route.h"
 #endif
 
+#ifndef ROUTE_SET_H
 #include "route_set.h"
+#endif
+
+#ifndef REFLECT_CACHE_H
+#include "reflect_cache.h"
+#endif
 
 #include <string.h>
 
@@ -33,58 +41,76 @@ namespace wcc
 
 using namespace wcc;
 
+class RouteMatch_init : public state_init {
+public:
+	RouteMatch_init() : state_init() {}
 
+	zstr_intern cc_route_obj;
+	zstr_intern cc_match_args;
+	zstr_intern cc_roles;
+	zstr_intern cc_ob_args;
+	zstr_intern cc_errors;
 
-static const char* const cc_route_obj = "route";
-static const char* const cc_match_args = "match_args";
-static const char* const cc_roles = "roles";
-static const char* const cc_ob_args = "ob_args";
-static const char* const cc_errors = "errors";
+	zstr_intern cc_uri;
+	zstr_intern cc_module_name;
+	zstr_intern cc_ob_class;
+	zstr_intern cc_ob_method;
 
-static const char* const cc_uri = "uri";
-static const char* const cc_module_name = "module_name";
-static const char* const cc_ob_class = "ob_class";
-static const char* const cc_ob_method = "ob_method";
+	zstr_intern cc_verb_flag;
+	zstr_intern cc_ajax_flag;
+	zstr_intern cc_route_id;
 
-static const char* const cc_verb_flag = "verb";
-static const char* const cc_ajax_flag = "ajax";
-static const char* const cc_route_id = "route_id";
+	virtual void init()
+	{
+		cc_route_obj = "route";
+		cc_match_args = "match_args";
+		cc_roles = "roles";
+		cc_ob_args = "ob_args";
+		cc_errors = "errors";
+
+		cc_uri = "uri";
+		cc_module_name = "module_name";
+		cc_ob_class = "ob_class";
+		cc_ob_method = "ob_method";
+
+		cc_verb_flag = "verb";
+		cc_ajax_flag = "ajax";
+		cc_route_id = "route_id";
+	}
+};
+
+RouteMatch_init RM_data;
+
 
 
 void
-RouteMatch::debug_info(HashTable *ht)
+RouteMatch::debug_info(htab_write hw)
 {
-	htab_ptr  hw(ht);
-
-	hw.set(cc_route_obj, route_);
-	hw.set(cc_match_args, match_args_);
-	hw.set(cc_roles, roles_);
-	hw.set(cc_ob_args, ob_args_);
-	hw.set(cc_errors, errors_);
-	hw.set(cc_uri, uri_);
-	hw.set(cc_module_name, module_name_);
-	hw.set(cc_ob_class, ob_class_);
-	hw.set(cc_ob_method, ob_method_);
-	hw.set(cc_verb_flag, verb_flag_);
-	hw.set(cc_ajax_flag, ajax_flag_);
+	hw.set(RM_data.cc_route_obj, route_);
+	hw.set(RM_data.cc_match_args, match_args_);
+	hw.set(RM_data.cc_roles, roles_);
+	hw.set(RM_data.cc_ob_args, ob_args_);
+	hw.set(RM_data.cc_errors, errors_);
+	hw.set(RM_data.cc_uri, uri_);
+	hw.set(RM_data.cc_module_name, module_name_);
+	hw.set(RM_data.cc_ob_class, ob_class_);
+	hw.set(RM_data.cc_ob_method, ob_method_);
+	hw.set(RM_data.cc_verb_flag, (int)verb_flag_);
+	hw.set(RM_data.cc_ajax_flag, (int)ajax_flag_);
 }
 
 Route*    
-RouteMatch::testRoute(zend_object* zobj)
+RouteMatch::testRoute(zobj_user ro)
 {
-	if (!(zobj  && route_mgr .myType(zobj))) {
-		if (zobj) {
-			zend_string* p = zend_std_get_class_name(zobj);
-			zstr_ptr classname(p);
-			zend_throw_error(zend_ce_exception, "testRoute Error: Not route object %s\n",  classname.cstr());
-		}
-		else {
-			zend_throw_error(zend_ce_exception, "testRoute Error: Null object\n");
-		}
+
+	if (!Route::omg.myType(ro)) 
+	{
+		zstr_user classname(zend_std_get_class_name(ro));
+		zend_throw_error(zend_ce_exception, "testRoute Error: Not route object %s\n",  classname.data());
 		return nullptr;
 	}
 
-	Route* robj =  zobj_toc<Route>(zobj);
+	Route* robj =  zobj_toc<Route>(ro);
 
 	if ( ((verb_flag_ & robj->verbs_) != 0) && ((ajax_flag_ & robj->ajax_) != 0) ) 
 	{
@@ -95,7 +121,7 @@ RouteMatch::testRoute(zend_object* zobj)
 }
 
 Route*  
-RouteMatch::firstMatch(zval_own& wrap)
+RouteMatch::firstMatch(zval_user wrap)
 {
 	Route* robj = nullptr;
 
@@ -105,9 +131,8 @@ RouteMatch::firstMatch(zval_own& wrap)
 	}
 	else if (wrap.isArray())
 	{
-
 		htab_walk list;
-		auto& obj = list.value();
+		auto obj = list.value();
 		for(list.start(wrap.zarray()); list.ok(); list.next()) 
 		{
 			robj = testRoute(obj.zobject());
@@ -127,12 +152,12 @@ RouteMatch::firstMatch(zval_own& wrap)
 bool 
 RouteMatch::find_route(RouteSet* routeset)
 {
-	zval_own		  match;
-	Route*        robj;
+	zval_user	match;
+	Route* 		robj;
 
-	zval_own         mreturn;
+	zval_mgr	mreturn;
 
-	htab_ptr list(routeset->fixed_);
+	htab_read 	list(routeset->fixed_);
 
 	if (list.try_fetch(uri_, match)) 
 	{
@@ -140,7 +165,7 @@ RouteMatch::find_route(RouteSet* routeset)
 
 		if (robj) 
 		{
-			route_.setobj(robj->zobj());
+			route_ = robj->zobj();
 			match_args_.reset();
 			return true;
 		}
@@ -148,10 +173,10 @@ RouteMatch::find_route(RouteSet* routeset)
 
 	htab_walk walk;
 
-	auto& key = walk.key();
-	auto& rzval = walk.value();
+	auto key = walk.key();
+	auto rzval = walk.value();
 
-	for( walk.start(routeset->vary_) ; walk.ok(); walk.next())
+	for( walk.start(routeset->vary_); walk.ok(); walk.next())
 	{
 		preg rexpmatch(key.zstr());
 
@@ -161,7 +186,8 @@ RouteMatch::find_route(RouteSet* routeset)
 		{
 			robj = firstMatch(rzval);
 			if (robj) {
-				route_.setobj(robj->zobj());
+				route_ = robj->zobj();
+
 				match_args_ = rexpmatch.results();
 				//match_args_.dec_ref();
 				//showmem("match_args_", match_args_);
@@ -173,33 +199,9 @@ RouteMatch::find_route(RouteSet* routeset)
 
 }
 
-/** replace array values in ato, with afrom */ 
-void gazump_array(zval* ato, zval *afrom)
-{
-	zend_ulong   hidx;
- 
 
-	htab_ptr hto(Z_ARR_P(ato));
-	htab_ptr hfrom(Z_ARR_P(afrom));
-
-	htab_walk walk;
-	auto& key = walk.key();
-	auto& val = walk.value();
-	
-	for(walk.start(hfrom) ; walk.ok(); walk.next())
-	{
-		if (key.isString()) 
-		{
-			hto.set(key.zstr(), val);
-		}
-		else {
-			hto.set(key.zlong(), val);
-		}
-	}
-}
-
-zval_own //static
-RouteMatch::call_method(zobj_ptr obj, zstr_ptr method, htab_ptr args)
+zval_mgr //static
+RouteMatch::call_method(zobj_user obj, zstr_user method, htab_read args)
 {
 	if (args.size())
 	{
@@ -210,12 +212,12 @@ RouteMatch::call_method(zobj_ptr obj, zstr_ptr method, htab_ptr args)
 	}
 }
 
-zval_own 
-RouteMatch::invoke(htab_ptr extra, zobj_ptr before, zobj_ptr after)
+zval_mgr 
+RouteMatch::invoke(htab_read extra, zobj_user before, zobj_user after)
 {
-	zval_own result;
-	zval_own zobj;
-	zobj_own obj;
+	zval_mgr  result;
+	zval_mgr  zobj;
+	zobj_user obj;
 
 
 	if (this->prepare_call())
@@ -223,7 +225,7 @@ RouteMatch::invoke(htab_ptr extra, zobj_ptr before, zobj_ptr after)
 		if (ob_class_.size())
 		{
 			// only works for objects with zero arguments constructor
-			zobj = Wcc_ReflectCache::staticInstance(ob_class_);
+			zobj = ReflectCache::staticInstance(ob_class_);
 		}
 		else
 		{
@@ -233,16 +235,24 @@ RouteMatch::invoke(htab_ptr extra, zobj_ptr before, zobj_ptr after)
 
 		if (extra.size())
 		{
-			if (ob_args_.size())
+			htab_read hr(ob_args_);
+
+			if (hr.size())
 			{
-				ob_args_.merge(extra);
+				htab_write(ob_args_).merge(extra);
 			}
 			else {
 				ob_args_ = extra;
 			}
 		}
 
-		obj = zobj.zobject();
+		zval_user test(zobj);
+		if (!test.isObject())
+		{
+			zend_throw_exception(zend_ce_error, "RouteMatch::Invoke with no object",0);
+			return result;
+		}
+		obj = test.zobject();
 		if (obj.instanceof(zend_ce_closure))
 		{
 			// doesn't actually have methods.
@@ -252,15 +262,15 @@ RouteMatch::invoke(htab_ptr extra, zobj_ptr before, zobj_ptr after)
 			}
 			return result;
 		}
-		else if (obj.isObject()) {
-			zstr_ptr method_name;
+		else {
+			zstr_user method_name;
 
-			if (before.isObject())
+			if (before.ok())
 			{
 				Pair* ppair = zobj_toc<Pair>(before);
 
-				zval_ptr first(ppair->first());
-				zval_ptr second(ppair->second());
+				zval_user first(ppair->first());
+				zval_user second(ppair->second());
 
 				//zend_printf("Before ");
 				//showmem(" second", second);
@@ -269,11 +279,9 @@ RouteMatch::invoke(htab_ptr extra, zobj_ptr before, zobj_ptr after)
 				
 				if (method_name.size() && obj.method_exists(method_name))
 				{
-
-					htab_ptr args(second);
-
-					result = this->call_method(obj, method_name, args);
-					if (result.isFalse())
+					result = this->call_method(obj, method_name, second);
+					test = result;
+					if (test.isFalse())
 					{
 						return result;
 					}
@@ -288,19 +296,19 @@ RouteMatch::invoke(htab_ptr extra, zobj_ptr before, zobj_ptr after)
 				result_ = result;
 			}
 			
-			if (after.isObject())
+			if (after.ok())
 			{
 				Pair* ppair = zobj_toc<Pair>(after);
 
-				zval_ptr first(ppair->first());
-				zval_ptr second(ppair->second());
+				zval_user first(ppair->first());
+				zval_user second(ppair->second());
 
 				method_name = second.zstr();
 				if (method_name.size() && obj.method_exists(method_name))
 				{
-					htab_ptr args(second);
-					result = this->call_method(obj, method_name, args);
-					if (!result.isNull())
+					result = this->call_method(obj, method_name, second);
+					test = result;
+					if (!test.isNull())
 					{
 						result_ = result;
 					}
@@ -311,74 +319,78 @@ RouteMatch::invoke(htab_ptr extra, zobj_ptr before, zobj_ptr after)
 	return result;
 }
 
-/** temporary string value argument to be replaced */
-zend_string* call_url_decode(zend_string *in_str)
+zstr_mgr
+call_url_decode(zstr_user in_str)
 {
+	zstr_mgr result;
+
 	zend_string  *out_str;
-
-	out_str = zend_string_init(ZSTR_VAL(in_str), ZSTR_LEN(in_str), 0);
+	// new string buffer
+	out_str = zend_string_init(in_str.data(),in_str.size(), 0);
+	// Relies on decoded string being shorter or equal length.
 	ZSTR_LEN(out_str) = php_url_decode(ZSTR_VAL(out_str), ZSTR_LEN(out_str));
-
-	return out_str;
+	result.adopt(out_str);
+	return result;
 }
 
-void RouteMatch::set_tuple12( htab_ptr tg)
+void RouteMatch::set_tuple12( htab_read tg)
 {
-	zval_ptr mobj(tg.get(OBJ_S));
+	zval_user mobj(tg.get(route_data.OBJ_S));
 
 	//get_ht_cc(target, OBJ_S);
 
 	if (mobj.isString())
 	{
-		ob_class_ = mobj;
-		mobj = tg.get(FUN_S);
+		ob_class_ = mobj.zstr();
+		mobj = tg.get(route_data.FUN_S);
 		if (mobj.isString()) {
-			ob_method_ = mobj;
+			ob_method_ = mobj.zstr();
 		}
 	}
 	else {
 		mobj = tg.get(zend_long(0));
 		if (mobj.isString()) {
-			ob_class_ = mobj;
+			ob_class_ = mobj.zstr();
 		}
 		mobj = tg.get(1);
 		if (mobj.isString()) {
-			ob_method_ = mobj;
+			ob_method_ = mobj.zstr();
 		}
 	}
 }
 
 
 
-void RouteMatch::set_tuple14(htab_ptr tg)
+void RouteMatch::set_tuple14(htab_read tg)
 {
-	zval_ptr mobj;
+	zval_user mobj;
 	zend_ulong ct;
 
 	if (!module_name_.size() ==0 ) {
 		mobj = tg.get(zend_long(0));
 		if (mobj.isString()) {
-			module_name_ = mobj;
+			module_name_ = mobj.zstr();
 		}
 	}
 	mobj = tg.get(1);
 	if (mobj.isString()) 
 	{
-		ob_class_ = mobj;
+		ob_class_ = mobj.zstr();
 	}
 	mobj = tg.get(2);
  	if (mobj.isString()) 
 	{
-		ob_method_ = mobj;
+		ob_method_ = mobj.zstr();
 	}
 	mobj = tg.get(3);
 	if (mobj.isArray()) {
 		
-		htab_own targs(mobj);
+		htab_write targs(mobj);
+		htab_read  obargs(ob_args_);
 
-		if (ob_args_.size() > 0) 
+		if (obargs.size() > 0) 
 		{
-			targs.merge(ob_args_);
+			targs.merge(obargs);
 		}
 		ob_args_ = targs;
 	}
@@ -387,24 +399,34 @@ void RouteMatch::set_tuple14(htab_ptr tg)
 
 void RouteMatch::error_context(Route* r)
 {
-	htab_ptr errors_ht(errors_);
+	htab_write errors_ht(errors_);
 
-	errors_ht.push_back(uri_);
-	errors_ht.push_back(r->compiled_);
-	errors_ht.push_back(htab_ptr(match_args_).print_all("margs"));
-	errors_ht.push_back(htab_ptr(r->params_).print_all("params"));
+	errors_ht.push_back((zend_string*)uri_);
+	errors_ht.push_back((zend_string*)r->compiled_);
+	zstr_mgr margs = htab_read(match_args_).print_kv("margs");
+
+	errors_ht.push_back(margs);
+
+	zstr_mgr params = htab_read(r->params_).print_kv("params");
+	errors_ht.push_back(params);
 }
 
-htab_own RouteMatch::fetchArgs()
+
+htab_mgr RouteMatch::fetchArgs()
 {
-	Route* route = zobj_toc<Route>(route_.ptr());
+	htab_mgr result;
 
-	htab_ptr params_ht(route->params_);
-	htab_ptr margs_ht(match_args_);
+	Route* route = zobj_toc<Route>(route_);
 
+	htab_read params_ht(route->params_);
+	htab_read margs_ht(match_args_);
 
-	zval_own test;
-	htab_own args_ht;
+	
+
+	zval_user test;
+	
+	zstr_mgr error_msg;
+
 	
 	auto ct = params_ht.size();
 
@@ -415,59 +437,61 @@ htab_own RouteMatch::fetchArgs()
 		// params are not empty
 		long mct = margs_ht.size();
 		if (mct != ct) {
-			zstr_ptr msg(strpprintf(0, "Route matches count should be %ld", ct));
-			errors_.push_back(msg);
+			error_msg.adopt(strpprintf(0, "Route matches count should be %ld", ct));
+			htab_write(errors_).push_back(error_msg);
 			error_context(route);
 		}
 
 		htab_walk walk;
 
-		zval_own& name = walk.key();
-		zval_own& val = walk.value();
+		auto name = walk.key();
+		auto val = walk.value();
 		
 		for( walk.start(params_ht); walk.ok(); walk.next())
 		{	
 
 			if (!margs_ht.try_fetch(val,test))
 			{
-				zstr_ptr svalue(val.to_zstr());
-				zstr_ptr msg(strpprintf(0, "Null value arg# %s", svalue.data()));
-				errors_.push_back(msg);
+				zstr_mgr svalue(val.to_zstr());
+				error_msg.adopt(strpprintf(0, "Null value arg# %s", svalue.data()));
+				htab_write(errors_).push_back(error_msg);
 				error_context(route);
 			}
 			else 
 			{
+				htab_write args(result);
 				if (test.isString()) {
-					zend_string* decoded = call_url_decode(test.zstr());
-					//showstr("call_url_decode",decoded);
-					test.set(decoded);
+					zstr_mgr decoded = call_url_decode(test);
+					args.set(name,decoded);
 				}
-				args_ht.set(name,test);
+				else {
+					args.set(name,test);
+				}
 			}
 		}
 	}
 	else {
-		htab_ptr tg(route->target_.zarray());
+		htab_read tg(route->target_);
 
-		if (!tg.isNull() && tg.try_fetch(ARG_S, test) && test.isArray())
+		if ( tg.ok() && tg.try_fetch(route_data.ARG_S, test) && test.isArray())
 		{
-			args_ht = test;
+			result = test.zarray();
 		}
 	}
-	return args_ht;
+	return result;
 }
 
 bool RouteMatch::prepare_call()
 {
-	zval_own test;
+	zval_user test;
 
-	errors_.clear();
+	errors_.init();
 
-	Route* route = zobj_toc<Route>(route_.ptr());
+	Route* route = zobj_toc<Route>(route_);
 
-	zval_ptr route_target(route->target_);
+	zval_user route_target(route->target_);
 
-	zobj_ptr tg_obj(route_target.zobject());
+	zobj_user tg_obj(route_target.zobject());
 
 	if (!tg_obj.isNull())
 	{
@@ -488,35 +512,36 @@ bool RouteMatch::prepare_call()
 		}
 	}
 
-	htab_ptr tg(route_target.zarray());
+	htab_read tg(route_target.zarray());
 
-	if (tg.isNull())
+	if (!tg)
 	{
 		return false;
 	}
 
-	if (tg.try_fetch(ROLE_S, test) && test.isArray())
+	test = tg.get(route_data.ROLE_S);
+	if (test.isArray())
 	{
 		roles_ = test.zarray();
 	}
 	else {
-		roles_.clear();
+		roles_.init();
 	}
 
 	// first clean up cobj->errors
 
-	ob_args_.clear();
+	ob_args_.init();
 
-	ob_class_.lose();
-	ob_method_.lose();
+	ob_class_.init();
+	ob_method_.init();
 
 	zend_string* temp;
-	if (tg.try_fetch(MOD_S, test) && test.getStringData(&temp))
+	if (tg.try_fetch(route_data.MOD_S, test) && test.getStringData(&temp))
 	{
 		module_name_ = temp;
 	}
 	else {
-		module_name_.clear();
+		module_name_.init();
 	}
 
 	ob_args_ = this->fetchArgs();
@@ -529,37 +554,61 @@ bool RouteMatch::prepare_call()
 	else {
 		set_tuple12(tg);
 	}
+	
+	size_t clen = ob_class_.size();
+	size_t mlen = ob_method_.size();
 
-	if (ob_class_.size()==0) 
+	if (!clen || !mlen)
 	{
-		zstr_ptr msg(strpprintf(0, "Missing class name"));
-		errors_.push_back(msg);
+		htab_write etab(errors_);
+		zstr_mgr error_msg;
+
+		if (!clen)
+		{
+			error_msg.adopt(strpprintf(0, "Missing class name"));
+			etab.push_back(error_msg);
+		}
+		if (!mlen) 
+		{
+			error_msg.adopt(strpprintf(0, "Missing object method"));
+			etab.push_back(error_msg);
+		}
+
 	}
-	if (ob_method_.size()==0) 
-	{
-		zstr_ptr msg(strpprintf(0, "Missing object method"));
-		errors_.push_back(msg);
-	}
-	return (errors_.size() == 0);
+	return (errors_.isEmpty());
 }
 
 
+void RouteMatch::construct(zstr_user uri, int verbs, int ajax)
+{
+	uri_ = uri;
+	verb_flag_ = verbs;
+	ajax_flag_ = ajax;
+}
 
-
+void 
+RouteMatch::setCallInfo(zstr_user obclass, zstr_user obmethod, zval_user args)
+{
+	ob_class_ = obclass;
+	ob_method_ = obmethod;
+	ob_args_ = args.zarray();
+}
 
 PHP_METHOD(Wcc_RouteMatch, __construct)
 {
 	zend_string* uri;
+	zend_long    verbs;
+	zend_long    ajax;
 
 	RouteMatch* cobj = zval_toc<RouteMatch>(ZEND_THIS);
 
 	ZEND_PARSE_PARAMETERS_START(3, 3)
 	Z_PARAM_STR(uri)
-	Z_PARAM_LONG(cobj->verb_flag_)
-	Z_PARAM_LONG(cobj->ajax_flag_)
+	Z_PARAM_LONG(verbs)
+	Z_PARAM_LONG(ajax)
 	ZEND_PARSE_PARAMETERS_END();
 
-	cobj->uri_.set(uri);
+	cobj->construct(uri, verbs, ajax);
 
 	//zend_printf("new %d %d\n", sizeof(zval), (char*)&cobj->match_args - (char*)&cobj->route);
 
@@ -579,10 +628,7 @@ PHP_METHOD(Wcc_RouteMatch, setCallInfo)
 	Z_PARAM_ARRAY(args)
 	ZEND_PARSE_PARAMETERS_END();
 
-	cobj->ob_class_ = obclass;
-	cobj->ob_method_ = obmethod;
-	cobj->ob_args_ = zval_ptr(args);
-
+	cobj->setCallInfo(obclass, obmethod, args);
 }
 
 PHP_METHOD(Wcc_RouteMatch, getVerbName)
@@ -598,14 +644,18 @@ PHP_METHOD(Wcc_RouteMatch, getErrors)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 	RouteMatch* cobj = zval_toc<RouteMatch>(ZEND_THIS);
-	cobj->errors_.return_zv(return_value);
+
+	htab_read errors = cobj->getErrors();
+	errors.return_zv(return_value);
 }
 
 PHP_METHOD(Wcc_RouteMatch, getUri)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 	RouteMatch* cobj = zval_toc<RouteMatch>(ZEND_THIS);
-	cobj->uri_.return_zv(return_value);
+	zstr_user ret = cobj->getUri();
+
+	ret.return_zv(return_value);
 }
 
 PHP_METHOD(Wcc_RouteMatch, getVerb)
@@ -626,35 +676,42 @@ PHP_METHOD(Wcc_RouteMatch, getRoles)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 	RouteMatch* cobj = zval_toc<RouteMatch>(ZEND_THIS);
-	cobj->roles_.return_zv(return_value);
+
+	htab_read roles = cobj->getRoles();
+	roles.return_zv(return_value);
 }
 
 PHP_METHOD(Wcc_RouteMatch, getModuleName)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 	RouteMatch* cobj = zval_toc<RouteMatch>(ZEND_THIS);
-	cobj->module_name_.return_zv(return_value);
+	zstr_user name = cobj->getModuleName();
+
+	name.return_zv(return_value);
 }
 
 PHP_METHOD(Wcc_RouteMatch, getObjClass)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 	RouteMatch* cobj = zval_toc<RouteMatch>(ZEND_THIS);
-	cobj->ob_class_.return_zv(return_value);
+	zstr_user name = cobj->getObjClass();
+	name.return_zv(return_value);
 }
 
 PHP_METHOD(Wcc_RouteMatch, getObjMethod)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 	RouteMatch* cobj = zval_toc<RouteMatch>(ZEND_THIS);
-	cobj->ob_method_.return_zv(return_value);
+	zstr_user name = cobj->getObjMethod();
+	name.return_zv(return_value);
 }
 
 PHP_METHOD(Wcc_RouteMatch, getObjArgs)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 	RouteMatch* cobj = zval_toc<RouteMatch>(ZEND_THIS);
-	cobj->ob_args_.return_zv(return_value);
+	htab_read args = cobj->getObjArgs();
+	args.return_zv(return_value);
 }
 
 
@@ -690,7 +747,7 @@ PHP_METHOD(Wcc_RouteMatch, getMatch)
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	RouteMatch* cobj = zval_toc<RouteMatch>(ZEND_THIS);
-	const zobj_own& match = cobj->getMatch();
+	zobj_user match = cobj->getMatch();
 
 	return match.return_zv(return_value);
 }
@@ -743,7 +800,7 @@ ZEND_METHOD(Wcc_RouteMatch, __invoke)
 	ZEND_PARSE_PARAMETERS_END();
 
 	RouteMatch* prm = zval_toc<RouteMatch>(ZEND_THIS);
-	zval_own result = prm->invoke(extra_args,before_pair,after_pair);
+	zval_mgr result = prm->invoke(extra_args, before_pair, after_pair);
 	result.move_zv(return_value);
 }
 
@@ -761,7 +818,7 @@ ZEND_METHOD(Wcc_RouteMatch, call_method)
 	ZEND_PARSE_PARAMETERS_END();
 
 	RouteMatch* prm = zval_toc<RouteMatch>(ZEND_THIS);
-	zval_own result = prm->call_method(obj,method,args);
+	zval_mgr result = prm->call_method(obj,method,args);
 	result.move_zv(return_value);
 
 }

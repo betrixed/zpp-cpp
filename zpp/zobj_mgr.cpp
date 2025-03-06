@@ -32,6 +32,14 @@ zobj_mgr::lose()
 	obj_ = nullptr;
 }
 
+void
+zobj_mgr::init()
+{
+	if (obj_)
+	{
+		lose();
+	}	
+}
 
 void 
 zobj_mgr::adopt(base_d* cobj)
@@ -140,6 +148,14 @@ zobj_mgr::operator=(zval_mgr&& rc)
 	lose();
 	obj_ = zval_user(rc).zobject();
 	rc.init();
+	return *this;
+}
+
+const zobj_mgr& 
+zobj_mgr::operator=(zval* rc)
+{
+	lose();
+	obj_ = zval_user(rc).zobject();
 	return *this;
 }
 

@@ -64,6 +64,17 @@ void Route_init::init()
 	cc_vary = zstr_intern("vary");
 	cc_file = zstr_intern("file");
 
+	ARG_S  = zstr_intern("_arg");
+	FUN_S  = zstr_intern("_fun");
+	FUNX_S = zstr_intern("_fnx");
+	HITS_S = zstr_intern("_hit");
+	MOD_S  = zstr_intern("_mod");
+	NSP_S  = zstr_intern("_nsp");
+	OBJ_S  = zstr_intern("_obj");
+	OBJX_S = zstr_intern("_obx");
+	ROLE_S = zstr_intern("_rol");
+
+
 	htab_write rv(&route_verbs);
 
 	rv.set(GET_S, (int)html::V_GET);

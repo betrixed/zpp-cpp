@@ -48,10 +48,11 @@ namespace zpp {
 
         uint32_t size() const;
 
+        bool ok() const { return (ht_); }
 
         zval* get(zend_long idx) const;
         zval* get(zval_user key) const;
-        zval* get(zend_string* zkey) const ;
+        zval* get(zend_string* zkey) const;
 
         zval* get(const char* key) const;
         zval* get(const std::string_view& key) const;
@@ -93,7 +94,7 @@ namespace zpp {
         
         void return_zv(zval* return_value) const;
 
-
+        zstr_mgr print_kv(const char* label) const;
 
         //* return indexed array of values
         htab_mgr getValues();

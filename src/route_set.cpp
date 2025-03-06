@@ -14,7 +14,9 @@
 #include "route.h"
 #endif
 
+#ifndef ROUTE_MATCH_H
 #include "route_match.h"
+#endif
 
 #ifdef __cplusplus
 extern "C" {
@@ -30,10 +32,6 @@ extern "C" {
 namespace wcc {
  	base_obj_mgr<RouteSet> RouteSet::omg;
 
-
-static const char* cc_fixed = "fixed";
-static const char* cc_vary = "vary";
-static const char* cc_file = "file";
 
 
 RouteSet::RouteSet() 
@@ -145,7 +143,7 @@ RouteSet::getRoute(zstr_user name)
 
 	if (idx.size() > 0)
 	{
-		result = idx.get(name);
+		result = idx.get((zend_string*) name);
 	}
 	return result;
 }
@@ -397,17 +395,17 @@ PHP_MINIT_FUNCTION(wcc_routeset_d)
 
 	class_data cval(ce);
 
-	cval.add_constant("ARG_S", ARG_S);
+	cval.add_constant("ARG_S", route_data.ARG_S);
 
 
-	cval.add_constant("FUN_S", FUN_S);
-	cval.add_constant("FUNX_S", FUNX_S);
-	cval.add_constant("HITS_S", HITS_S);
-	cval.add_constant("MOD_S", MOD_S);
-	cval.add_constant("NSP_S", NSP_S);
-	cval.add_constant("OBJ_S", OBJ_S);
-	cval.add_constant("OBJX_S", OBJX_S);
-	cval.add_constant("ROLE_S", ROLE_S);
+	cval.add_constant("FUN_S", route_data.FUN_S);
+	cval.add_constant("FUNX_S", route_data.FUNX_S);
+	cval.add_constant("HITS_S", route_data.HITS_S);
+	cval.add_constant("MOD_S", route_data.MOD_S);
+	cval.add_constant("NSP_S", route_data.NSP_S);
+	cval.add_constant("OBJ_S", route_data.OBJ_S);
+	cval.add_constant("OBJX_S", route_data.OBJX_S);
+	cval.add_constant("ROLE_S", route_data.ROLE_S);
 
 	cval.add_constant("KEY", "@key");
 	cval.add_constant("ROUTES", "routes");

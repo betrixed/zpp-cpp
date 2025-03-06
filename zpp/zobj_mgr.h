@@ -51,6 +51,10 @@ namespace zpp {
 
 		const zobj_mgr& operator=(zend_object* rc);
 
+		const zobj_mgr& operator=(zval* rc);
+		
+		void init();
+
 		~zobj_mgr(){
 		    lose();
 		}
