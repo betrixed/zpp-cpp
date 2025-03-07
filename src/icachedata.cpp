@@ -57,12 +57,14 @@ zobj_mgr
 ICacheData::new_ICacheData(zstr_user key, 
 	zval_user value, zend_long ttl)
 {
+	zobj_mgr result;
 
-	ICacheData* cobj = ICacheData::omg.make_new();
+	result = ICacheData::omg.new_zobj();
+
+	ICacheData* cobj = zobj_toc<ICacheData>(result);
+
 	cobj->construct(key, value, ttl);
 
-	zobj_mgr result;
-	result.adopt(cobj);
 	return result;
 }
 

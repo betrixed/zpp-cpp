@@ -9,11 +9,19 @@
 namespace zpp {
 // Protected static function
 
+void htab_mgr::try_addref(HashTable *h)
+{
+	if (h->gc.u.type_info & GC_IMMUTABLE)
+    {
+        return;
+    }
+    h->gc.refcount++;
+}
 
 void htab_mgr::own()
 {
 	if (!ht_) return;
-	GC_TRY_ADDREF(ht_);
+	htab_mgr::try_addref(ht_);
 }
 
 HashTable* 
@@ -24,26 +32,40 @@ htab_mgr::steal()
 	return result;
 }
 
-void  
-htab_mgr::decref()
+void 
+htab_mgr::adopt(HashTable *h)
 {
-	if (!ht_ || (ht_->gc.u.type_info & GC_IMMUTABLE))
-		return;
-	int rc = GC_REFCOUNT(ht_) - 1;
-	if (!rc) {
-		zend_array_destroy(ht_);
-		ht_ = (HashTable*) nullptr;
+	if (ht_)
+		lose();
+	ht_ = h;
+}
+
+bool  
+htab_mgr::try_decref(HashTable* h)
+{
+	showarray("htab_decref", h);
+
+	if (!h || (h->gc.u.type_info & GC_IMMUTABLE))
+	{
+		zend_printf("IMMUTABLE forget\n");
+
+		return false;
 	}
-	else {
-		GC_TRY_DELREF(ht_);
+	int rct = --h->gc.refcount;
+
+	if (!rct) {
+		zend_printf("DESTROY %lx\n",h);
+		zend_array_destroy(h);
+		return true;
 	}
+	return false;
 }
 
 void htab_mgr::lose()
 {
 	if (ht_) 
 	{
-		decref();
+		try_decref(ht_);
 		ht_ = (HashTable*) nullptr;
 	}
 }
@@ -104,12 +126,14 @@ htab_mgr::operator=(const zval_mgr& zw)
 	{
 		if (p == ht_)
 			return *this;
-		decref();
+		if (ht_)
+			try_decref(ht_);
 		ht_ = p;
 		own();
 	}
 	else {
-		decref();
+		if (ht_)
+			try_decref(ht_);
 		ht_ = (HashTable*) nullptr;
 	}
 	return *this;
@@ -248,7 +272,7 @@ htab_mgr::cowop(HashTable*& inout)
 	if (GC_REFCOUNT(used) > 1) 
 	{
 	    inout = zend_array_dup(used);
-	    GC_TRY_DELREF(used); // safe to decref
+	    htab_mgr::try_decref(used);
 	    return true;
 	}
 	return false;

@@ -303,10 +303,10 @@ namespace zpp {
 			return (mydef::class_entry_->name);
 		}
 
-		static T* make_new()
+		static zend_object* make_new()
 		{
 			zend_object* nobj = mydef::znew_ex(class_entry_);
-			return mydef::cpp(nobj);
+			return nobj;
 		}
 
 		static  zobj_mgr new_zobj()
@@ -411,10 +411,14 @@ namespace zpp {
 			/* to be deleted by zend */
 			*is_temp = 1; 
 			
-			htab_mgr ret = htab_empty();
-			
-			cobj->debug_info(ret);
-			return ret.steal();
+			htab_mgr ret;
+			showarray("debug_info ret", ret);
+			htab_write hw(ret);
+			showarray("debug_info hw", hw);
+			cobj->debug_info(hw);
+			HashTable* result = ret.steal();
+			showarray("debug_info result", result);
+			return result;
 		}
 
 		static zend_object *znew_ex(
@@ -430,7 +434,7 @@ namespace zpp {
 			zend_object* zobj = (zend_object*) (bp+1); // next T*
 			pzo->set_zobj(zobj);
 			zend_object_std_init(zobj, class_type);
-			//object_properties_init(zobj, class_type);
+			object_properties_init(zobj, class_type);
 			
 #ifdef BASE_DEBUG
 			obj_count_++;

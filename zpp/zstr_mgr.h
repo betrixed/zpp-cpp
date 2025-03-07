@@ -25,6 +25,9 @@ namespace zpp {
 	    friend class zval_mgr;
 
 	public:
+
+		static void try_addref(zend_string* zs);
+		static bool try_decref(zend_string* zs);
 	    zstr_mgr() : s((zend_string*) nullptr)
 	    {   
 	    }
@@ -67,8 +70,6 @@ namespace zpp {
 	    	return !(s);
 	    }
 	    
-	    void decref();
-	    void addref();
 	    void init();
 	    
 	    size_t size() const;

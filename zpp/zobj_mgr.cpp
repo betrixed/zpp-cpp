@@ -12,14 +12,27 @@
 namespace zpp {
 
 
-void //protected
-zobj_mgr::own()
+void
+zobj_mgr::try_addref(zend_object* ob)
+{
+	ob->gc.refcount++;
+}
+
+bool
+zobj_mgr::try_delref(zend_object* ob)
+{
+	int rct = ob->gc.refcount - 1;
+	zend_object_release(ob);
+	return !(rct);	
+}
+
+void zobj_mgr::own()
 {
 	if (!obj_)
 	{
 		return;
 	}
-	obj_->gc.refcount++;
+	try_addref(obj_);
 }
 
 void //protected
@@ -28,7 +41,7 @@ zobj_mgr::lose()
 	if (!obj_) {
 		return;
 	}
-	zend_object_release(obj_);
+	try_delref(obj_);
 	obj_ = nullptr;
 }
 
@@ -42,35 +55,13 @@ zobj_mgr::init()
 }
 
 void 
-zobj_mgr::adopt(base_d* cobj)
+zobj_mgr::adopt(zend_object *zo)
 {
-	if (obj_)
-	{
-		lose();
-	}
-	obj_ = cobj->zobj();
+	lose();
+	obj_ = zo;
 }
 
-int 
-zobj_mgr::decref()
-{
-    int rc = GC_REFCOUNT(obj_)-1;
-    zend_object_release(obj_);
-    if (!rc)
-    {
-        obj_ = nullptr;
-    }
-    return rc;
-}
 
-int 
-zobj_mgr::addref()
-{
-	if (obj_) {
-    	return GC_ADDREF(obj_);
-    }
-    return 0;
-}
 
 zobj_mgr& 
 zobj_mgr::operator=(const zobj_user &rc)

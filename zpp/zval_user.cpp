@@ -148,7 +148,6 @@ size_t zval_user::size() const
 	}
 }
 
-
 /*
 * Return managed string
 */
@@ -322,6 +321,55 @@ zval_user::operator=(const zval_mgr& rc)
 	p_ = rc;
 	return *this;
 }
+
+void // protected
+zval_user::bind_string(zend_string* s)
+{
+    if (s) 
+    {
+    	ZVAL_STR(p_, s);
+    	if (!(GC_FLAGS(s) & IS_STR_INTERNED))
+    	{
+    		GC_ADDREF(s);
+	    }
+    }
+    else {
+        ZVAL_NULL(p_);
+    }
+}
+
+void // protected
+zval_user::bind_long(zend_long value)
+{
+    ZVAL_LONG(p_, value);
+}
+
+void // protected
+zval_user::bind_object(zend_object* obj)
+{
+    if (obj)
+    {
+        ZVAL_OBJ_COPY(p_, obj);
+    }
+    else {
+        ZVAL_NULL(p_);
+    }
+}
+
+void 
+zval_user::bind_array(HashTable* ht)
+{
+    if (ht) {
+        ZVAL_ARR(p_, ht);
+        showmem("bind_array",p_);
+        if ( !(ht->gc.u.type_info & GC_IMMUTABLE))
+            ht->gc.refcount++;
+    }
+    else {
+        ZVAL_NULL(p_);
+    }
+}
+
 
 };
 //zval_user.cpp

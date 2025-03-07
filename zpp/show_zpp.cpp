@@ -109,14 +109,17 @@ public:
 		}
 
 		size_t ct = zend_array_count(ht);
-
+		if (ht->gc.u.type_info & GC_IMMUTABLE) {
+			ss << "immutable ";
+		}
 		ss << std::dec << "arr(" << ct <<") " << std::setw(4) << std::hex << ht;
-		if (ht->u.flags & htab_user::COW_VIOLATE) {
+		/* if (ht->u.flags & htab_mgr::COW_VIOLATE) {
 			ss << " vcow ";
 		}
 		else {
 			ss << " cow ";
 		}
+		*/
 		ss << " gc " << GC_REFCOUNT(ht);
 
 	}

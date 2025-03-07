@@ -28,7 +28,7 @@ public:
 	Services();
 	virtual ~Services();
 	// instance
-	static zobj_user instance();
+	static zobj_user  instance();
 	static Services* cpp_global();
 
 	static zobj_user  setOne(zstr_user key, zobj_user obj);

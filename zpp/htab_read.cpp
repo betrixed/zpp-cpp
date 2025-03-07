@@ -318,7 +318,7 @@ htab_read::getValues()
 	 auto val = wk.value();
 	 for(wk.start(ht_); wk.ok(); wk.next())
 	 {
-	 		merge.append(val);
+	 		merge.push_back(val);
 	 }
 	 return result;
 }
@@ -334,7 +334,7 @@ htab_read::getKeys()
 	 auto val = wk.key();
 	 for(wk.start(ht_); wk.ok(); wk.next())
 	 {
-	 		merge.append(val);
+	 		merge.push_back(val);
 	 }
 	 return result;
 }

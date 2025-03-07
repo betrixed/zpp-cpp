@@ -17,6 +17,10 @@ namespace zpp {
 		friend class zobj_user;
 
 	public:
+
+		static void try_addref(zend_object* zo);
+		static bool try_delref(zend_object* zo);
+
 		zobj_mgr() : obj_(nullptr) {}
 
 		zobj_mgr(zend_object* rc) : obj_(rc)
@@ -36,9 +40,6 @@ namespace zpp {
 		}
 		
 		zobj_mgr(zval_mgr&& m);
-
-		int decref();
-		int addref();
 
 		bool isNull() const { return !(obj_); }
 		bool ok() const { return (obj_); }
@@ -62,7 +63,7 @@ namespace zpp {
 		/*! Special adoption to set tgo zend_object* of a new base_d,
 		 *  without increment of its reference count 
 		 */
-		void adopt(base_d* cobj);
+		void adopt(zend_object* ob);
 
 		operator zend_object*() const 
 		{

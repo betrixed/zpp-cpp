@@ -23,7 +23,9 @@ namespace zpp {
 
         static HashTable* new_array();
         static HashTable* empty_array();
-
+        static void try_addref(HashTable* h);
+        static bool try_decref(HashTable* h);
+        
         ~htab_mgr();
 
         htab_mgr() : ht_(nullptr) {}
@@ -57,13 +59,15 @@ namespace zpp {
         const htab_mgr& operator=(HashTable* htab);
         const htab_mgr& operator=(zval* zv);
 
-        void  decref();
         void  init();
         void  reset();
         void  move_zv(zval* return_value);
 
         bool isNull() const { return !(ht_); }
         bool isEmpty() const;
+
+        //! Adopt a system source hashtable with rc==1
+        void adopt(HashTable* h);
 
         operator HashTable* () const { return (HashTable*) ht_; }
 

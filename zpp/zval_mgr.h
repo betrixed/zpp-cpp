@@ -27,7 +27,7 @@ protected:
      *  and likely was freed and nullified 
      *  (unless interned string or handle)
      **/
-    bool try_decref();
+    
 
     /**
      *  Free and clear contents to null
@@ -36,15 +36,7 @@ protected:
 
     void init();
 
-	void bind_string(zend_string* s);
-
-    void bind_object(zend_object* obj);
-
-    void bind_array(HashTable* ht);
-
     void assign_ptr(zval* p);
-
-    void bind_long(zend_long value);
 
     friend class zval_user;
     friend class zstr_mgr;
@@ -53,7 +45,12 @@ protected:
     friend class htab_walk;
     
 public:
-	/** not usually called directlly */
+
+    //! Return true if contents become invalid
+    static bool try_decref(zval* p);
+
+    //! Increment reference if not interned or immutable
+    static void try_addref(zval* p);
 
 	operator zval*() const  { return (zval*) &zv_; }
 

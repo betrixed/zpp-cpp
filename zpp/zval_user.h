@@ -28,7 +28,18 @@ class zstr_mgr;
 class ZPP_EXPORT zval_user {
 protected:
     zval *p_;
+
+    friend class zval_mgr;
+
+    void bind_string(zend_string* s);
+
+    void bind_object(zend_object* obj);
+
+    void bind_array(HashTable* ht);
+
+    void bind_long(zend_long value);
 public:
+
 
     zval_user() : p_(nullptr) {}
 

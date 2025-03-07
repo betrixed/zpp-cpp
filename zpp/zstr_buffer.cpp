@@ -78,8 +78,9 @@ zstr_buffer::operator<<(zval* zv)
 		append(fx.zstr());
 	}
 	else {
-		zstr_mgr convert(fx.to_zstr());
-		convert.decref();
+		zstr_mgr convert;
+		convert.adopt(fx.to_zstr());
+
 		append((zend_string*) convert);
 	}
 	return *this;
@@ -173,6 +174,42 @@ void zstr_buffer::reset()
 		s = nullptr;
 		//init_list(0);
 	}
+}
+
+zstr_buffer& 
+zstr_buffer::operator=(const char* c)
+{
+	reset();
+	append(c, strlen(c));
+	return *this;
+}	
+
+zstr_buffer& 
+zstr_buffer::operator<<(const zstr_mgr &w)
+{
+	append((zend_string*)w);
+	return *this;
+}
+
+zstr_buffer& 
+zstr_buffer::operator<<(zstr_user w)
+{
+	append(w);
+	return *this;
+}
+
+zstr_buffer& 
+zstr_buffer::operator<<(zend_string* s)
+{
+ 	append(s);
+ 	return *this;
+}
+
+zstr_buffer& 
+zstr_buffer::operator<<(const char* c)
+{
+	append(c, strlen(c));
+	return *this;
 }
 
 };

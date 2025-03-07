@@ -16,44 +16,7 @@ zval_mgr::init()
     ZVAL_NULL(&zv_);
 }
 
-bool //protected
-zval_mgr::try_decref()
-{
-    zval* p =  &zv_;
-    if (Z_REFCOUNTED_P(p))
-    {
-        // Ready to delete?
-        if (zval_refcount_p(p) == 1)
-        {
-            auto ztype = Z_TYPE_P(p);
-            if (ztype == IS_STRING)
-            {
-                zend_string* s = Z_STR_P(p);
-                // check for IS_STR_INTERNED
-                if (GC_FLAGS(s) & IS_STR_INTERNED)
-                {
-                	return false;
-                }
-                zend_string_release(s);
-            }
-            else if (ztype == IS_REFERENCE)
-            {
-                auto zref = Z_REF_P(p);
-                zval_ptr_dtor(&zref->val);
-                efree_size(zref, sizeof(zend_reference));
-            }
-            else {
-                zval_ptr_dtor(p);
-            }
-            return true; 
-        }
-        else {
-            Z_TRY_DELREF_P(p);
-        }
-    } 
-    // contents are functionally the same;
-    return false;  
-}
+
 
 void 
 zval_mgr::make_ref()
@@ -107,49 +70,18 @@ zval_mgr::addref()
 void // protected
 zval_mgr::lose()
 {
-    try_decref();
+    try_decref(&zv_);
     init();
-}
-
-void // protected
-zval_mgr::bind_string(zend_string* s)
-{
-	ZVAL_STR(&zv_, s);
-	if (!(GC_FLAGS(s) & IS_STR_INTERNED))
-	{
-		GC_ADDREF(s);
-	}
-}
-
-void // protected
-zval_mgr::bind_long(zend_long value)
-{
-    ZVAL_LONG(&zv_, value);
-}
-
-void // protected
-zval_mgr::bind_object(zend_object* obj)
-{
-    ZVAL_OBJ_COPY(&zv_, obj);
-}
-
-void 
-zval_mgr::bind_array(HashTable* ht)
-{
-    ZVAL_ARR(&zv_, ht);
-    zval_addref_p(&zv_);
 }
 
 const zval_mgr& 
 zval_mgr::operator=(zend_long value)
 {
-    try_decref();
+    try_decref(&zv_);
     zv_ = {0};
-    bind_long(value);
+    ZVAL_LONG(&zv_, value);
     return *this;
 }
-
-
 
 zval_mgr::zval_mgr() 
 {
@@ -163,7 +95,7 @@ void zval_mgr::set_null()
 
 void zval_mgr::set_bool(bool value)
 {
-    try_decref();
+    try_decref(&zv_);
     zv_ = {0};
     ZVAL_BOOL(&zv_, value);
 }
@@ -171,7 +103,7 @@ void zval_mgr::set_bool(bool value)
 zval_mgr::zval_mgr(HashTable* ht)
 {
      init();
-     bind_array(ht);
+     zval_user(&zv_).bind_array(ht);
 }
 
 zval_mgr::zval_mgr(bool bval)
@@ -365,26 +297,26 @@ zval_mgr::zval_mgr(zstr_mgr&& rc)
 zval_mgr::zval_mgr(zend_string* rc)
 {
     init();
-    bind_string(rc);
+    zval_user(&zv_).bind_string(rc);
 }
 
 zval_mgr::zval_mgr(zend_object* rc)
 {
     init();
-    bind_object(rc);
+    zval_user(&zv_).bind_object(rc);
 }
 
 zval_mgr::zval_mgr(zend_long value)
 {
     init();
-    bind_long(value);
+    ZVAL_LONG(&zv_, value);
 }
 
 const zval_mgr& 
 zval_mgr::operator=(zend_object* rc)
 {
     lose();
-    bind_object(rc);
+    zval_user(&zv_).bind_object(rc);
     return *this;
 }
 
@@ -392,8 +324,123 @@ const zval_mgr&
 zval_mgr::operator=(HashTable* rc)
 {
     lose();
-    bind_array(rc);
+    zval_user(&zv_).bind_array(rc);
     return *this;
+}
+
+void 
+zval_mgr::try_addref(zval* p)
+{
+    
+
+    HashTable*      ht;
+    zend_object*    ob;
+
+    if (Z_REFCOUNTED_P(p))
+    {
+        auto ztype = Z_TYPE_P(p);
+        switch(ztype) {
+        case IS_STRING:
+            {
+                zend_string* s = Z_STR_P(p);;
+                if (GC_FLAGS(s) & IS_STR_INTERNED)
+                {
+                    break;
+                }
+                s->gc.refcount++;
+            }
+            break;
+        case IS_REFERENCE:
+            {   
+                zend_reference*   zref = p->value.ref;
+                zref->gc.refcount++;
+                
+            }
+            break;
+            
+        case IS_ARRAY:
+            {
+                ht = Z_ARR_P(p);
+                if (ht->gc.u.type_info & GC_IMMUTABLE)
+                {
+                    break;
+                }
+                ht->gc.refcount++;
+            }
+            break;
+        case IS_OBJECT:
+            {
+                ob = Z_OBJ_P(p);
+                ob->gc.refcount++;
+            }
+            break;
+        default:
+            {
+                GC_ADDREF(p->value.counted);
+            }
+            break;
+        }
+    }
+}
+
+bool //static. Return true if contents become invalid
+zval_mgr::try_decref(zval* p)
+{
+    if (Z_REFCOUNTED_P(p))
+    {
+        auto rct = zval_refcount_p(p);
+        auto ztype = Z_TYPE_P(p);
+        switch(ztype) {
+        case IS_STRING:
+            {
+                zend_string* s = Z_STR_P(p);
+                if (GC_FLAGS(s) & IS_STR_INTERNED)
+                {
+                    return false;
+                }
+                zend_string_release(s);
+                return (rct==1);
+            }
+            
+        case IS_REFERENCE:
+            {
+                auto zref = Z_REF_P(p);
+                if (rct == 1) 
+                {
+                    zval_ptr_dtor(&zref->val);
+                    efree_size(zref, sizeof(zend_reference));
+                    return true;
+                }
+                zref->gc.refcount--;
+                return false;
+            }
+            
+        case IS_ARRAY:
+            {
+                HashTable* ht = Z_ARR_P(p);
+                if (ht->gc.u.type_info & GC_IMMUTABLE)
+                {
+                    return false;
+                }
+                if (rct==1) 
+                {
+                    zend_array_destroy(ht);
+                    return true;
+                }
+                ht->gc.refcount--;
+            }
+           
+            return false;
+
+        case IS_OBJECT:
+            {
+                zend_object* ob = Z_OBJ_P(p);
+                zend_object_release(ob);
+                return (rct==1);
+            }
+        }
+    }
+    return false;
 }
 
 }; // namespace Php

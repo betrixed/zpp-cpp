@@ -55,13 +55,13 @@ Global&  Global::update()
     if (exists_) return *this;
 
     // avoid reference a count calamity
-    gval_.addref(); // necessary
-    name_.addref(); // also necessary
+    zval_mgr::try_addref(gval_); // necessary
+    zstr_mgr::try_addref(name_); // also necessary
     
     // make it exist in real $GLOBALS
 
     zend_symtable_update_ind(&EG(symbol_table), name_, gval_);
-
+    showmem("global exists update", gval_);
     exists_ = true;
 
     return *this;

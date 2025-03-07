@@ -41,7 +41,7 @@ public:
 	void     unserialize(htab_read htab);
 
 	void  addRouteList(zval_user list);
-	void  addRoute(zval_user route);
+	void  addRoute(zobj_user route);
 
 	zobj_mgr getRoute(zstr_user name);
 	zstr_mgr routeUrl(zstr_user name, htab_read params);

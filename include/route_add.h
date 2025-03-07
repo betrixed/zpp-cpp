@@ -8,8 +8,6 @@
 
 namespace wcc {
 
-
-
 	class RouteAdd : public base_d 
 	{
 	protected:
@@ -17,12 +15,12 @@ namespace wcc {
 		zstr_mgr module_name_;
 		zstr_mgr method_sfx_;
 		zstr_mgr url_prefix_;
-		zstr_mgr fallback_;
+		zval_mgr fallback_;
 	public:
 
 		static base_obj_mgr<RouteAdd> omg;
 
-		static zstr_mgr rex_url();
+		static zstr_user rex_url();
 		
 		virtual void debug_info(htab_write hw);
 

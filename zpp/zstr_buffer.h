@@ -47,34 +47,19 @@ class zstr_buffer : public zstr_mgr
 
 		//size_t items() const { return listct_; }
 
-		zstr_buffer& operator=(const char* c)
-		{
-			reset();
-			append(c, strlen(c));
-			return *this;
-		}	
+		
 
 		//zstr_buffer& operator<<(const bfmt& bf);
 
+		zstr_buffer& operator=(const char* c);
+
+		zstr_buffer& operator<<(const zstr_mgr &w);
 		
+		zstr_buffer& operator<<(zstr_user w);
 
-		zstr_buffer& operator<<(zstr_user w)
-		{
-			append(w);
-			return *this;
-		}
+		zstr_buffer& operator<<(zend_string* s);
 
-		zstr_buffer& operator<<(zend_string* s)
-		{
-		 	append(s);
-		 	return *this;
-		}
-
-		zstr_buffer& operator<<(const char* c)
-		{
-			append(c, strlen(c));
-			return *this;
-		}
+		zstr_buffer& operator<<(const char* c);
 		/*
 		void item_sep(char c = ',') 
 		{

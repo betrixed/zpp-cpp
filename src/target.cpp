@@ -41,11 +41,12 @@ Target::go(zstr_user cname, zstr_user fname)
 
 	zobj_mgr result;
 
-	Target* cobj = Target::omg.make_new();
+	result = Target::omg.new_zobj();
+
+	Target* cobj = zobj_toc<Target>(result);
 
 	cobj->construct(cname, fname);
 
-	result.adopt(cobj);
 	return result;
 }
 

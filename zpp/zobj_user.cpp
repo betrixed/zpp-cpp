@@ -19,6 +19,7 @@ zobj_user::operator=(zend_object* rc)
     return *this;
 }
 
+// return true if something found
 bool 
 zobj_user::property_list(htab_mgr& list)
 {
@@ -33,13 +34,23 @@ zobj_user::property_list(htab_mgr& list)
         return false;
     }
 
+    showarray("properties ptab", ptab);
+    //! second argument bool can force duplication
     ptab = zend_proptable_to_symtable(ptab,
         (obj_->ce->default_properties_count ||
          obj_->handlers != &std_object_handlers ||
          GC_IS_RECURSIVE(ptab)));
 
-    list = ptab;
- 	return true;
+    htab_mgr temp;
+
+    showarray("Duplicate ptab", ptab);
+    temp.adopt(ptab); // allow for destroy array
+
+    if (zend_array_count(ptab)) {
+        list = std::move(temp);
+        return true;
+    }
+    return false;
 }
 
 void 

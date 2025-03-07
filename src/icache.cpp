@@ -95,26 +95,25 @@ void ICache::__construct(zval_user options, zval_user services)
 	}
 }
 
-	zstr_intern expiry_key;
-	zstr_intern expire_key;
-	zstr_intern prefix_key;
-	zstr_intern key_key;
-	zstr_intern data_key;
-	zstr_intern ttl_key;
-	zstr_intern stored_key;
-	zstr_intern saved;
-	zstr_intern class_key;
-	zstr_intern service_key;
-
 
 
 void ICache::debug_info(htab_write s)
 {
+	//showarray("cached", cached_);
+
 	s.set(IC_STR.cached, cached_);
 	s.set(IC_STR.svc_cache, svc_cache_);
+	//showarray("svc_cache_", svc_cache_);
+	//showstr("prefix_", prefix_);
 	s.set(IC_STR.prefix_key, prefix_);
+
+//showarray("options_", options_);
+//showobj("services", services_);
 	s.set(IC_STR.options, options_);
+	//showobj("services", services_);
 	s.set(IC_STR.services, services_);
+	
+
 }
 
 void ICache::addLocal(zval_user pkg)

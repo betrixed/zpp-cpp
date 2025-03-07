@@ -74,6 +74,9 @@ namespace zpp {
 
 		zstr_mgr to_upper() const;
 
+		zstr_mgr trim(const char* what = (const char*) nullptr,
+		 				int mode = LRTRIM) const;
+
 		void return_zv(zval* ret);
 
 		const zstr_user& operator=(zval* rc);

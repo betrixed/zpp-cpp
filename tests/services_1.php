@@ -6,6 +6,9 @@ use Wcc\RequestGlobals;
 
 require "bootstrap.php";
 
+class EmptyTest {
+};
+
 function hide1() {
 	if (class_exists(EmptyTest::class)) {
 		$c1 = new EmptyTest();
@@ -19,7 +22,8 @@ function hide1() {
 
 	$svc = Services::instance();
 
-
+	//debug_zval_dump($svc);
+	
 	$cfg = $svc->newInstance(Config::class);
 	//$svc->setObject($cfg);
 
@@ -69,13 +73,12 @@ function hide1() {
 
 	$svc->set(
 		"emty", function(Services $svc){
-			echo "called back with service " . debug_zval_dump($svc) . PHP_EOL;
+			//echo "called back with service " . debug_zval_dump($svc) . PHP_EOL;
 			return new EmptyTest();
 		});
 
 	echo "set called" . PHP_EOL;
 
-	debug_zval_dump($svc);
 	$svc->set("config", new Config());
 
 	echo "set config" . PHP_EOL;
@@ -84,11 +87,11 @@ function hide1() {
 		$d1 = $svc->get("emty");
 
 		echo "got emty" . PHP_EOL;
-		debug_zval_dump($d1);
+		//debug_zval_dump($d1);
 		$d2 = $svc->get("config");
 		$d2->test = "property";
 
-		debug_zval_dump($d2);
+		//debug_zval_dump($d2);
 	}
 	catch (\Error $ex)
 	{
@@ -102,7 +105,7 @@ function hide1() {
 	$cfg = $ic->getService('config');
 	echo "service $cfg->test" . PHP_EOL;
 
-	debug_zval_dump($ic);
+	//debug_zval_dump($ic);
 
 }
 
@@ -144,7 +147,19 @@ function itdepends()
 	$d = null;
 }
 
-hide1();
-hide2();
-itdepends();
+//hide1();
+//hide2();
+//itdepends();
 
+$svc = Services::instance();
+//debug_zval_dump($svc);
+
+$ic = new ICache([], $svc);
+
+echo "icache" . PHP_EOL;
+//debug_zval_dump($ic);
+
+//$cfg = $ic->getService('config');
+
+
+//echo "service $cfg->test" . PHP_EOL;

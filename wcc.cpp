@@ -46,13 +46,14 @@ extern "C" {
 
 #include "zpp/base.cpp"
 
-//#define DEBUG_XTRA
+#define DEBUG_XTRA
 #include "zpp/show_zpp.cpp"
 #include "src/pair.cpp"
 #include "src/target.cpp"
 #include "src/route.cpp"
 #include "src/route_set.cpp"
 #include "src/route_match.cpp"
+#include "src/route_add.cpp"
 
 //#include "src/zpp/all.cpp"
 

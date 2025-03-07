@@ -7,6 +7,11 @@
 #ifndef ZSTR_USER_CPP
 #define ZSTR_USER_CPP
 
+
+extern "C" {
+	#include "ext/standard/php_string.h"
+};
+
 namespace zpp {
 
 const char* zstr_user::empty_zstr = "\0";
@@ -145,6 +150,18 @@ zstr_user::to_upper() const
 	{
 		result.adopt(zend_string_toupper(s));
 	}
+	return result;
+}
+
+zstr_mgr
+zstr_user::trim(const char* what, int mode) const
+{
+	zstr_mgr result;
+
+	size_t slen = what ? strlen(what) : 0;
+	// return string already has gc == 1
+	zend_string* p = php_trim(s, what, slen, mode);
+	result.adopt(p);
 	return result;
 }
 

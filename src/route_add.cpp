@@ -12,9 +12,6 @@ base_obj_mgr<RouteAdd> RouteAdd::omg;
 class RouteAddData : public state_init 
 {
 public:
-
-
-
 	zstr_intern module_name;
 	zstr_intern prefix;
 	zstr_intern method_sfx;
@@ -42,9 +39,8 @@ public:
 
 RouteAddData radata;
 
-void RouteAdd::debug_info(HashTable* ht)
+void RouteAdd::debug_info(htab_write di)
 {
-	htab_ptr di(ht);
 	di.set(radata.route_set, route_set_);
 	di.set(radata.module_name, module_name_);
 	di.set(radata.prefix, url_prefix_);
@@ -52,24 +48,25 @@ void RouteAdd::debug_info(HashTable* ht)
 	di.set(radata.fallback, fallback_);
 }
 
-void RouteAdd::construct(zobj_ptr rset)
+void RouteAdd::construct(zobj_user rset)
 {
 	if (rset.isNull())
 	{
-		route_set_ = zobj_own(RouteSet::omg.make_new());
+		route_set_ =  RouteSet::omg.new_zobj();
 	}
 	else {
 		route_set_ = rset;
 	}
 }
 
-zstr_ptr 
+zstr_user 
 RouteAdd::rex_url()
 {
 	return radata.rex_url;
 }
 
-void RouteAdd::addRoutes(htab_ptr list, zstr_ptr prefix, zstr_ptr module)
+void 
+RouteAdd::addRoutes(htab_read list, zstr_user prefix, zstr_user module)
 {
 	if (prefix.size())
 	{
@@ -78,7 +75,7 @@ void RouteAdd::addRoutes(htab_ptr list, zstr_ptr prefix, zstr_ptr module)
 			url_prefix_ = prefix;
 		}
 		else {
-			url_prefix_.lose();
+			url_prefix_.init();
 		}
 	}
 
@@ -89,55 +86,53 @@ void RouteAdd::addRoutes(htab_ptr list, zstr_ptr prefix, zstr_ptr module)
 			module_name_ = module;
 		}
 		else {
-			module_name_.lose();
+			module_name_.init();
 		}
 	}
 
 	htab_walk wk;
-	auto& value = wk.value();
+	auto value = wk.value();
 	RouteSet* rs = zobj_toc<RouteSet>(route_set_);
 
 	for(wk.start(list); wk.ok(); wk.next())
 	{
-		zobj_ptr route(value.zobject());
+		zobj_user route(value.zobject());
 		Route* r = zobj_toc<Route>(route);
 
-		zstr_ptr compiled = r->getCompiled();
+		zstr_user compiled = r->getCompiled();
 
 		if (!compiled.size()) {
 			ready(r);
 		}
-		rs->addRoute(r);
+		rs->addRoute(value);
 	}
 }
 
 
-void RouteAdd::fallback(zval_ptr backup)
+void RouteAdd::fallback(zval_user backup)
 {
 	fallback_ = backup;
 }
 
-
-const zobj_own& 
+zobj_user 
 RouteAdd::getRouteSet() const
 {
 	return route_set_;
 }
 
-
-void RouteAdd::methodSfx(zstr_ptr sfx)
+void RouteAdd::methodSfx(zstr_user sfx)
 {
 	method_sfx_ = sfx;	
 }
 
 
-void RouteAdd::module(zstr_ptr name)
+void RouteAdd::module(zstr_user name)
 {
 	module_name_ = name;
 }
 
 
-void RouteAdd::prefix(zstr_ptr start)
+void RouteAdd::prefix(zstr_user start)
 {
 	url_prefix_ = start;
 }
@@ -145,15 +140,16 @@ void RouteAdd::prefix(zstr_ptr start)
 
 void RouteAdd::ready(Route* route)
 {
-	htab_own m2((HashTable*)nullptr);
+	htab_mgr captures;
+
 	size_t   pr2;
 
 	zstr_buffer  pattern;
 	zstr_buffer  compiled;
 
-	zstr_own url(route->getPattern());
+	zstr_mgr url(route->getPattern());
 
-	zstr_ptr rex(RouteAdd::rex_url());
+	zstr_user rex(RouteAdd::rex_url());
 
 	bool slashBegins = false;
 
@@ -167,83 +163,94 @@ void RouteAdd::ready(Route* route)
 		preg   urlseg(rex,0,true); // flags=0, global=true
 		pr2 = urlseg.matches(url);
 		if (pr2) {
-			m2 = urlseg.captures();
+			captures = urlseg.captures();
 		}
 	}
 	
-	htab_ptr segs;
+	htab_mgr segs;
+
 
 	// try and prevent bad double-// without pattern reset
-	if (url_prefix_.size())
+	zstr_user prefix(url_prefix_);
+	if (prefix.size())
 	{
-		bool preslash = (url_prefix_.data()[0] == '/');
+		bool preslash = (prefix.data()[0] == '/');
 
 		if (!slashBegins) {
 			if (!preslash)
 			{
 				pattern << '/';
 			}
-			pattern << url_prefix_;
+			pattern << prefix;
 		}
 		else {
 			if (preslash) {
 				zend_printf("preslash \n");
-				pattern << url_prefix_.substr(1);
+				pattern << prefix.substr(1);
 			}
 			else {
-				pattern << url_prefix_;
+				pattern << prefix;
 			}
 		}
 	}
 	//showstr("pattern ", pattern);
-
-	if ((pr2 > 0)&&(m2.size() > 1)) {
-		segs = m2.get((int) 1);
-	}
-
-	zstr_own temp;
+	zstr_mgr temp;
 
 	temp = pattern.zstr();
 	compiled << temp; 
 	pattern << temp; // reset zstr_buffer as fresh content
 
-	htab_walk wk;
-	auto& value = wk.value();
-	zstr_own name;
-	zstr_own blob;
-	htab_own params;
+	
+	zstr_mgr name;
+	zstr_mgr blob;
+	htab_mgr params_tab;
+	htab_write params(params_tab);
 
-	if (segs.size()) 
-	{
+
+	// while allows for a break
+	while (pr2 > 0) 
+	{ 
+		htab_read m2(captures);
+
+		if (m2.size() < 2)
+		{
+			break;
+		}
+		htab_read segs = m2.get((int) 1);
+		htab_walk wk;
+		auto value = wk.value();
 
 		int   param_ix = 1;
 
 		for(wk.start(segs); wk.ok(); wk.next())
 		{
-			zstr_ptr iseg = value.zstr();
+			zstr_user useg = value.zstr();
 
-			zstr_own seg = iseg.trim();
+			zstr_mgr seg = useg.trim();
+			useg = seg;
 
-			seg = seg.to_lower();
-			int firstchar = seg.data()[0];
+			seg = useg.to_lower();
+			useg = seg;
+
+			int firstchar = useg.data()[0];
 
 			if (firstchar == ':')
 			{
-				name = seg.substr(1);
+				name = useg.substr(1);
 				zstr_buffer bb;
 				bb << '{' << name << '}'; 
 				blob = bb.zstr();
 			}
 			else if (firstchar == '{')
 			{
-				name = seg.substr(1,-1);
-				blob = seg;
+				name = useg.substr(1,-1);
+				blob = useg;
 			}
 			else {
-				name = seg;
-				blob.lose();
-				pattern << '/' << seg;
-				compiled << '/' << seg;
+				name = useg;
+				blob.init();
+				pattern << '/' << useg;
+				compiled << '/' << useg;
 			}
 
 			if (blob.size()) 
@@ -260,16 +267,16 @@ void RouteAdd::ready(Route* route)
 
 	}
 	auto pcount = params.size();
-	zstr_own cpattern;
-	zstr_own rpattern(std::move(pattern));
+	zstr_mgr cpattern;
+	zstr_mgr rpattern(std::move(pattern));
 
 	if (pcount > 0)
 	{
 		cpattern = compiled.zstr();
 		compiled << "#^" << cpattern << "$#";
 		cpattern = compiled.zstr();
-		zval_own zparams(params);
-		route->setParams(zparams);
+
+		route->setParams(params);
 	}
 	else {
 		cpattern = rpattern;
@@ -279,23 +286,26 @@ void RouteAdd::ready(Route* route)
 	route->setPattern(rpattern);
 	route->setCompiled(cpattern);
 
-	zval_own target = route->getTarget();
+	zval_user target = route->getTarget();
 	if (target.isObject()) {
-		zobj_own tobj = target.zobject();
+		zobj_user tobj = target.zobject();
+
 		if (tobj.instanceof(Target::omg.classEntry())) 
 		{
 			Target* t = zobj_toc<Target>(tobj);
-			if (method_sfx_.size() && (method_sfx_.vstr() != "<none>")) {
+			zstr_user sfx(method_sfx_);
+
+			if (sfx.size() && (sfx.vstr() != "<none>")) {
 				zstr_buffer fbuf(t->getFunc());
 
-				if (method_sfx_.vstr() == "<verb>") 
+				if (sfx.vstr() == "<verb>") 
 				{
 					fbuf << Route::getVerb(route->getVerbs());
 				}
 				else {
-					fbuf << method_sfx_;
+					fbuf << sfx;
 				}
-				zstr_own fname = fbuf.zstr();
+				zstr_mgr fname = fbuf.zstr();
 				t->setFunc(fname);
 			}
 			t->module(module_name_);
@@ -317,7 +327,7 @@ ZEND_METHOD(Wcc_RouteAdd, __construct)
 
 	RouteAdd* cobj = zval_toc<RouteAdd>(ZEND_THIS);
 
-	zobj_ptr param(rset_obj);
+	zobj_user param(rset_obj);
 
 	cobj->construct(param);	
 }
@@ -335,7 +345,7 @@ ZEND_METHOD(Wcc_RouteAdd, addRoutes)
 	Z_PARAM_STR_OR_NULL(module)
 	ZEND_PARSE_PARAMETERS_END();
 
-	zval_ptr htab(list);
+	zval_user htab(list);
 
 	RouteAdd* cobj = zval_toc<RouteAdd>(ZEND_THIS);
 	cobj->addRoutes(htab.zarray(), prefix, module);	
@@ -356,7 +366,7 @@ ZEND_METHOD(Wcc_RouteAdd, getRouteSet)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 	RouteAdd* cobj = zval_toc<RouteAdd>(ZEND_THIS);
-	const zobj_own& rset = cobj->getRouteSet();
+	zobj_user rset = cobj->getRouteSet();
 
 	rset.return_zv(return_value);
 }
@@ -399,7 +409,7 @@ ZEND_METHOD(Wcc_RouteAdd, ready)
 {
 	zval* robj;
 	ZEND_PARSE_PARAMETERS_START(1,1)
-	Z_PARAM_OBJECT_OF_CLASS(robj, route_mgr.classEntry())
+	Z_PARAM_OBJECT_OF_CLASS(robj, Route::omg.classEntry())
 	ZEND_PARSE_PARAMETERS_END();
 	RouteAdd* cobj = zval_toc<RouteAdd>(ZEND_THIS);
 	cobj->ready(zval_toc<Route>(robj));

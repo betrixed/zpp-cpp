@@ -68,9 +68,9 @@ RouteSet::unserialize(htab_read hr)
 	file_ = hr.get(route_data.cc_file);
 }
 
-void  RouteSet::addRoute(zval_user obj)
+void  RouteSet::addRoute(zobj_user obj)
 {
-	Route* ro = zval_toc<Route>(obj);
+	Route* ro = zobj_toc<Route>(obj);
 
 	if (ro->hasParams())
 	{

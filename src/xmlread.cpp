@@ -114,7 +114,7 @@ namespace wcc {
 		{
 			// ~test will decref
 			lose();
-			test.addref(); // anticipate source decref
+			zobj_mgr::try_addref(test); // anticipate source decref
 			self_ = (zend_object*) test;
 			obj_ = self_;
 

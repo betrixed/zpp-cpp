@@ -53,23 +53,27 @@ zstr_mgr::own()
 	GC_ADDREF(s);
 }
 
-void zstr_mgr::addref()
+void zstr_mgr::try_addref(zend_string* zs)
 {
-	if (GC_FLAGS(s) & IS_STR_INTERNED)
+	if (zs->gc.u.type_info & IS_STR_INTERNED)
 	{
 		return;
 	}
-	GC_ADDREF(s);
+	++zs->gc.refcount;
 }
 
-void 
-zstr_mgr::decref()
+bool zstr_mgr::try_decref(zend_string* zs)
 {
-	if (!s || (GC_FLAGS(s) & IS_STR_INTERNED)) return;
-	zend_string* p = s;
-	if (GC_REFCOUNT(s) == 1) s = nullptr;
-	zend_string_release(p);
+	if (zs->gc.u.type_info & IS_STR_INTERNED)
+	{
+		return false;
+	}
+	int rc = zs->gc.refcount-1;
+	zend_string_release(zs);
+	return !(rc);
 }
+
+
 
 zstr_mgr& 
 zstr_mgr::operator=(zstr_mgr&& rc)

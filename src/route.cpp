@@ -273,7 +273,6 @@ Route::get(zstr_user pattern, zval_user target, int ajax)
 	cobj->construct(html::V_GET, pattern, target);
 	cobj->ajax_ = ajax;
 
-	result.adopt(cobj);
 	return result;
 }
 

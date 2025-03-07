@@ -144,22 +144,29 @@ Services::cpp_global()
 	return zobj_toc<Services>(sv);
 }
 
-zobj_user 
+zobj_user
 Services::instance()
 {
 	zobj_user result;
 
-
 	Global gme = GLOBALS[Services::omg.class_name()];
 	
 	zval_user val = gme.value(); // good for while gme is around
+	showmem("read instance", val);
 
 	if (val.isNull()) {
-		gme = Services::omg.new_zobj();
+		zobj_mgr obj = Services::omg.new_zobj();
+		showobj("new return", obj);
+		gme = obj;
+		result = (zend_object*) obj;
+		showobj("as global", result);
 	}
-	result = val.zobject();
+	else
+	{
+		result = val;
+	}
 
-	//showobj("instance return", result);
+	
 	return result;
 }
 
@@ -330,14 +337,15 @@ void Services::debug_info(htab_write info)
 {
 	//showarray("debug_info-0", info);
 
-	base_d::debug_info(info);
+	//base_d::debug_info(info);
+
 	//showarray("debug_info-1", info);
-	//showstr("key data",SVC_data.active);
+	//showarray("key active_", active_);
 	info.set(SVC_data.active, active_);
 	info.set(SVC_data.defer, defer_);
 	info.set(SVC_data.instances, instances_);
 	info.set(SVC_data.throw_fail, throw_fail_);
-	info.set(SVC_data.defer_ct, defer_ct_);
+	info.set(SVC_data.defer_ct,   defer_ct_);
 	//showarray("debug_info", info);
 }
 
@@ -365,6 +373,7 @@ ZEND_METHOD(Wcc_Services, instance)
 	ZEND_PARSE_PARAMETERS_END();
 
 	zobj_user result = Services::instance();
+	showobj("after return", result);
 	result.return_zv(return_value);
 }
 
