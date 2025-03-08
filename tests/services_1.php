@@ -147,16 +147,19 @@ function itdepends()
 	$d = null;
 }
 
-//hide1();
-//hide2();
-//itdepends();
+hide1();
+hide2();
+itdepends();
 
 $svc = Services::instance();
 //debug_zval_dump($svc);
 
 $ic = new ICache([], $svc);
-
+$ic = null;
 echo "icache" . PHP_EOL;
+$svc = null;
+$svc = Services::instance();
+debug_zval_dump($svc);
 //debug_zval_dump($ic);
 
 //$cfg = $ic->getService('config');

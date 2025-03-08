@@ -25,12 +25,13 @@ public:
 	zstr_intern new_instance_args;
 	class_data  rfc_cdata;
 
+	zobj_mgr    g_reflect_cache;
 	ReflectCache_data() 
 	{
 
 	}
 
-	void init()
+	virtual void init()
 	{
 		cache_key = zstr_intern("cache");
 		construct_key = zstr_intern("__construct");
@@ -40,6 +41,15 @@ public:
 		// presume reflectionclass is configured.
 		//rfc_cdata.set(reflection_class); // this will segfault here
 		//zend_printf("ReflectCache_data::init\n");
+	}
+	virtual void init_req()
+	{
+		g_reflect_cache = ReflectCache::omg.new_zobj();
+	}
+
+	virtual void end_req()
+	{
+		g_reflect_cache.init();
 	}
 };
 
@@ -164,9 +174,11 @@ ReflectCache::newInstanceArgs(zstr_user class_name, zval_user args)
 }
 
 
-zobj_mgr 
+zobj_user
 ReflectCache::instance()
 {
+	return RFC_data.g_reflect_cache;
+	/*
 	Global gme = GLOBALS[ReflectCache::omg.class_name()];
 
 	zobj_mgr result;
@@ -179,12 +191,12 @@ ReflectCache::instance()
 	result = gme.value().zobject();
 
 	return result;
+	*/
 }
 	
 ReflectCache* ReflectCache::cpp()
 {
-	zobj_user result(ReflectCache::instance());
-	return zobj_toc<ReflectCache>(result);
+	return zobj_toc<ReflectCache>(RFC_data.g_reflect_cache);
 }
 
 void

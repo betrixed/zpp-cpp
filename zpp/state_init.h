@@ -27,12 +27,23 @@ namespace zpp {
 
         state_init();
         
+        // iterate links for module start/end
         static void init_all();
-
         static void end_all();
 
+        // iterate links for request start/end
+        static void  init_request();
+        static void  end_request();
+
+        // module init/end calls
         virtual void init();
         virtual void end();
+
+        // request init/end calls
+        virtual void init_req();
+        virtual void end_req();
+
+        // iterate links for request start/end
     };
 
     /** 

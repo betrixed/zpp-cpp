@@ -44,9 +44,10 @@ extern "C" {
 	
 };
 
-#include "zpp/base.cpp"
 
-#define DEBUG_XTRA
+//#define DEBUG_XTRA
+
+#include "zpp/base.cpp"
 #include "zpp/show_zpp.cpp"
 #include "src/pair.cpp"
 #include "src/target.cpp"
@@ -243,7 +244,7 @@ PHP_MINIT(wcc_pair_d)(INIT_FUNC_ARGS_PASSTHRU);
 	PHP_MINIT(route_match_d)(INIT_FUNC_ARGS_PASSTHRU);
 #endif
 
-#ifdef ROUTE_ADD_CPP
+#ifdef WCC_ROUTE_ADD_CPP
 PHP_MINIT(wcc_route_add)(INIT_FUNC_ARGS_PASSTHRU);
 #endif
 
@@ -277,7 +278,10 @@ PHP_RINIT_FUNCTION(wcc)
 #if defined(ZTS) && defined(COMPILE_DL_WCC)
 	ZEND_TSRMLS_CACHE_UPDATE();
 #endif
-
+#ifdef BASE_DEBUG
+	wcc::mgr_link::report();
+#endif
+	zpp::state_init::init_request();
 	return SUCCESS;
 }
 
@@ -286,6 +290,9 @@ PHP_RSHUTDOWN_FUNCTION(wcc)
 #ifdef BASE_DEBUG
 	wcc::mgr_link::report();
 #endif
+	zpp::state_init::end_request();
+
+
 
 	return SUCCESS;
 }

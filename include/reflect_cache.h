@@ -19,7 +19,7 @@ public:
 
 	static base_obj_mgr<ReflectCache> omg;
 
-	static zobj_mgr instance();
+	static zobj_user instance();
 
 	static ReflectCache* cpp();
 

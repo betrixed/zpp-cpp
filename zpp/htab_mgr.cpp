@@ -43,18 +43,13 @@ htab_mgr::adopt(HashTable *h)
 bool  
 htab_mgr::try_decref(HashTable* h)
 {
-	showarray("htab_decref", h);
-
 	if (!h || (h->gc.u.type_info & GC_IMMUTABLE))
 	{
-		zend_printf("IMMUTABLE forget\n");
-
 		return false;
 	}
 	int rct = --h->gc.refcount;
 
 	if (!rct) {
-		zend_printf("DESTROY %lx\n",h);
 		zend_array_destroy(h);
 		return true;
 	}
@@ -66,6 +61,7 @@ void htab_mgr::lose()
 	if (ht_) 
 	{
 		try_decref(ht_);
+
 		ht_ = (HashTable*) nullptr;
 	}
 }

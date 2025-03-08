@@ -33,6 +33,8 @@ namespace wcc
 		zstr_intern throw_fail;
 		zstr_intern defer_ct;
 
+		zobj_mgr	g_services;
+
 		Services_data() : state_init() {}
 
 		virtual void init() 
@@ -47,6 +49,19 @@ namespace wcc
 			 throw_fail = zstr_intern("throw_fail");
 			
 			 defer_ct = zstr_intern("defer_ct");
+		}
+
+		virtual void init_req()
+		{
+			g_services = Services::omg.new_zobj();
+		}
+
+		virtual void end_req()
+		{
+			#ifdef DEBUG_EXTRA
+				zend_printf("end_req services");
+			#endif
+			g_services.init();
 		}
 	};
 
@@ -63,9 +78,11 @@ Services::call_value(zobj_user callme)
 
 Services::~Services()
 {
-	//showmem("instances_", instances_);
-	//showmem("defer_", defer_);
-	//showmem("active_", active_);
+#ifdef DEBUG_EXTRA
+	showarray("instances_", instances_);
+	showarray("defer_", defer_);
+	showarray("active_", active_);
+#endif
 }
 
 
@@ -138,7 +155,7 @@ Services::Services()
 Services* 
 Services::cpp_global()
 {
-	zobj_user sv = Services::instance();
+	zobj_user sv = SVC_data.g_services;
 
 	//showmem("instance", sv);
 	return zobj_toc<Services>(sv);
@@ -147,6 +164,8 @@ Services::cpp_global()
 zobj_user
 Services::instance()
 {
+	return SVC_data.g_services;
+	/*
 	zobj_user result;
 
 	Global gme = GLOBALS[Services::omg.class_name()];
@@ -165,9 +184,9 @@ Services::instance()
 	{
 		result = val;
 	}
-
-	
 	return result;
+	*/
+
 }
 
 /* static */
@@ -373,7 +392,6 @@ ZEND_METHOD(Wcc_Services, instance)
 	ZEND_PARSE_PARAMETERS_END();
 
 	zobj_user result = Services::instance();
-	showobj("after return", result);
 	result.return_zv(return_value);
 }
 

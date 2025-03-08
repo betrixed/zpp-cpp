@@ -41,7 +41,9 @@
 
 #include <stdexcept>
 
-//#define BASE_DEBUG
+#ifdef DEBUG_EXTRA
+#define BASE_DEBUG
+#endif
 
 
 namespace zpp {
@@ -116,7 +118,9 @@ namespace zpp {
 
 		virtual ~base_d() 
 		{
-			//zend_printf("~base_d() %lx\n", this);
+			#ifdef BASE_DEBUG
+				zend_printf("~base_d() %lx\n", this);
+			#endif
 			if (p_zobj_) {
 				zend_object_std_dtor(p_zobj_);
 			}
@@ -220,8 +224,6 @@ namespace zpp {
 				int alive = p->debug_alive();
 				total += alive;
 				zend_printf("class: %-60s  live = %d\n", ZSTR_VAL(name), alive);
-
-
 			}
 			zend_printf("Total live = %d\n", total);
 #endif
