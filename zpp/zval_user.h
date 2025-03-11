@@ -144,12 +144,14 @@ public:
 
     void return_zv(zval* ret);
     
+    int refcount() const;
     int ztype() const {
         if (!p_)
             return 0;
         return Z_TYPE_P(p_);
     }
 
+    
     const zval_user& operator=(const zval_mgr& rc);
 
 };

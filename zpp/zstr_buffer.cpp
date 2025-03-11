@@ -13,57 +13,105 @@ zstr_buffer::init_zs(const char* c, size_t slen)
 	return zend_string_init(c, slen, 0);
 }
 
+zstr_buffer::~zstr_buffer() 
+{
+	if (s)
+	{
+		zend_string_release(s);
+		s = nullptr;
+	}
+}
 
-zstr_buffer::zstr_buffer(zval *v) : zstr_mgr()
+zstr_buffer::zstr_buffer(zval *v)
 {
 	s = zval_user(v).to_zstr();
-	a = size();
+	if (s)
+	{
+		a = ZSTR_LEN(s);
+	}
 }
 
 zstr_buffer::zstr_buffer(const std::string_view& cs) 
-		:  zstr_mgr()
 {
 	auto slen = cs.size();
 	if (slen) 
 	{
 		s = init_zs(cs.data(), slen);
+		a = slen;
 	}
-	a = size();
+	else {
+		s = nullptr;
+		a = 0;
+	}
+	
 }
 
-zstr_buffer::zstr_buffer (const char* c, size_t slen) 
-		:  zstr_mgr()
+zstr_buffer::zstr_buffer (const char* c, size_t slen)  
 {
 	if (slen)
 	{
 		s = init_zs(c, slen);
+		a = slen;
 	}
-	a = size();
+	else {
+		s = nullptr;
+		a = 0;
+	}
 }
 
 zstr_buffer::zstr_buffer (const char* c) 
-		:  zstr_mgr()
 {
 	auto slen = strlen(c);
 	if (slen)
 	{
 		s = init_zs(c, slen);
+		a = slen;
 	}
-	a = size();
+	else {
+		s = nullptr;
+		a = 0;
+	}
 }
 
-
 zstr_buffer::zstr_buffer(const std::string& cs) 
-				:  zstr_mgr()
 {
 	auto slen = cs.size();
 	if (slen) {
 		s = init_zs(cs.data(), slen);
+		a = slen;
 	}
-	a = size();
+	else {
+		s = nullptr;
+		a = 0;
+	}
+}
+
+zstr_buffer& 
+zstr_buffer::operator<<(const iform& form)
+{
+	nf_ = form;
+	return *this;
+}
+
+zstr_buffer& 
+zstr_buffer::operator<<(void* vp)
+{
+	zend_string* pf = strpprintf(0,"%lx", vp);
+	append(pf);
+	zend_string_release(pf);
+	return *this;
 }
 
 
+
+zstr_buffer& 
+zstr_buffer::operator<<(double d)
+{
+	zend_string* s = zend_double_to_str(d);
+	append(s);
+	zend_string_release(s);
+	return *this;
+}
 
 zstr_buffer& 
 zstr_buffer::operator<<(zval* zv) 
@@ -86,6 +134,20 @@ zstr_buffer::operator<<(zval* zv)
 	return *this;
 }
 
+void zstr_buffer::append(char c)
+{
+	smart_str_appendc_ex((smart_str*)this, c, 0);
+}
+
+void 
+zstr_buffer::quote_name(const char* name)
+{
+	append('"');
+	if (name)
+		append(name,strlen(name));
+	append('"');
+}
+
 void
 zstr_buffer::append(const char* c, size_t slen)
 {
@@ -98,8 +160,7 @@ zstr_buffer::append(const char* c, size_t slen)
 zstr_buffer& 
 zstr_buffer::operator<<(char c)
 {
-
-	smart_str_appendc_ex((smart_str*)this, c, 0);
+	append(c);
 	return *this;
 }
 
@@ -116,8 +177,55 @@ zstr_buffer::operator<<(const std::string_view &v)
 zstr_buffer& 
 zstr_buffer::operator<<(int iv) 
 {	
-	zstr_mgr intstr((zend_long) iv);
-	append((zend_string*)intstr);
+	const char* sfmt;
+
+	if (nf_.value_ == Numf::DEC)
+	{
+		sfmt = "%ld";
+	}
+	else {
+		sfmt = "%lx";
+	}
+	zend_string* pf = strpprintf(0,sfmt,iv);
+	append(pf);
+	zend_string_release(pf);
+	return *this;
+}
+
+zstr_buffer& 
+zstr_buffer::operator<<(long iv)
+{
+	const char* sfmt;
+
+	if (nf_.value_ == Numf::DEC)
+	{
+		sfmt = "%lu";
+	}
+	else {
+		sfmt = "%lx";
+	}
+	zend_string* pf = strpprintf(0,sfmt,iv);
+	append(pf);
+	zend_string_release(pf);
+	return *this;
+
+}
+
+zstr_buffer& 
+zstr_buffer::operator<<(size_t iv) 
+{	
+	const char* sfmt;
+
+	if (nf_.value_ == Numf::DEC)
+	{
+		sfmt = "%lu";
+	}
+	else {
+		sfmt = "%lx";
+	}
+	zend_string* pf = strpprintf(0,sfmt,iv);
+	append(pf);
+	zend_string_release(pf);
 	return *this;
 }
 
@@ -210,6 +318,28 @@ zstr_buffer::operator<<(const char* c)
 {
 	append(c, strlen(c));
 	return *this;
+}
+
+
+void 
+zstr_output::append(const char* c, size_t slen)
+{
+	zend_write(c, slen);
+}
+
+void 
+zstr_output::append(zend_string* s)
+{
+	zend_write(ZSTR_VAL(s), ZSTR_LEN(s));
+}
+
+void 
+zstr_output::append(char c)
+{
+	char temp[2];
+	temp[0] = c;
+	temp[1] = '\0';
+	zend_write(&temp[0], 1);
 }
 
 };

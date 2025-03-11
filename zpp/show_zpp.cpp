@@ -3,27 +3,270 @@
 
 // Debug dumpers
 
-#include <string>
-#include <sstream>
-#include <iomanip>
+#ifndef FOR_KEY_VALUE_H
+#include "for_key_value.h"
+#endif
+
+extern "C" {
+	#include <Zend/zend_lazy_objects.h>
+}
 
 namespace zpp {
 
-#ifdef DEBUG_XTRA
-class dump_info {
-public:
 
-	static bool run_state_;
-	std::stringstream ss;
-	int   indents_;
+zstr_mgr 
+dump_info::di_return()
+{
+	return std::move(ss);
+}
 
-	dump_info(const char *s)
-	{
-		ss << s << " ";
-		indents_ = 0;
+void 
+dump_info::object_property_dump(
+	zend_property_info *prop_info, 
+	zval *zv, 
+	zend_ulong index, 
+	zend_string *key, 
+	int level) 
+{
+	const char *prop_name, *class_name;
+
+	ss << '[';
+	if (key == NULL) 
+	{ /* numeric key */
+		ss << (int)index;
+	} 
+	else { /* string key */
+		zend_unmangle_property_name(key, &class_name, &prop_name);
+		if (class_name) {
+			if (class_name[0] == '*') {
+				ss.quote_name(prop_name);
+				ss << ":protected";
+			} else {
+				ss.quote_name(prop_name);
+				ss << ':';
+				ss.quote_name(class_name); 
+				ss << ":private";
+			}
+		} else {
+			ss.quote_name(prop_name);
+		}
+		ss << "] ";
 	}
 
-	void di_showmem(zval *m) 
+	if (prop_info && Z_TYPE_P(zv) == IS_UNDEF) {
+		zend_string *type_str = zend_type_to_string(prop_info->type);
+		ss << "uninitialized(" << type_str << ")";
+		zend_string_release(type_str);
+	} else {
+		zstr_mgr test = dump_info::dump(zv, level + 1);
+		if (test.size())
+		{
+			ss << test;
+		}
+	}
+}
+
+static const char *get_object_prefix(zend_object *obj) 
+{
+	if (EXPECTED(!zend_object_is_lazy(obj))) {
+		return "";
+	}
+
+	if (zend_object_is_lazy_proxy(obj)) {
+		return "lazy proxy ";
+	}
+
+	return "lazy ghost ";
+}
+
+void 
+dump_info::di_show_resource(zval* zu)
+{
+	const char *type_name = zend_rsrc_list_get_rsrc_type(Z_RES_P(zu));
+	if (!type_name)
+	{
+		type_name = "Unknown";
+	}
+	int gc = Z_REFCOUNT_P(zu);
+	ss << "resource " << Z_RES_P(zu)->handle << " type(" << type_name << ")" 
+		<< " refcount(" << gc << ")\n";
+}
+
+zstr_mgr // static
+dump_info::dump(zval_user val, int level)
+{
+	dump_info di;
+
+	return di.di_dump(val, level);
+}
+
+void 
+dump_info::show_properties(zend_object* zobj, HashTable* myht, int level)
+{
+	zend_long index;
+	zend_string *key;
+	zval *val;
+	ZEND_HASH_FOREACH_KEY_VAL(myht, index, key, val) 
+	{
+		zend_property_info *prop_info = NULL;
+
+		if (Z_TYPE_P(val) == IS_INDIRECT) {
+			val = Z_INDIRECT_P(val);
+			if (key) {
+				prop_info = zend_get_typed_property_info_for_slot(zobj, val);
+			}
+		}
+
+		if (!Z_ISUNDEF_P(val) || prop_info) {
+			object_property_dump(prop_info, val, index, key, level);
+		}
+	} ZEND_HASH_FOREACH_END();
+}
+
+
+zstr_mgr 
+dump_info::di_dump(zval_user zu, int level)
+{
+	zstr_mgr result;
+
+	indents_ = 0;
+
+	HashTable *myht = NULL;
+	zend_string *class_name;
+	// for each values
+	zend_long index;
+	zend_string *key;
+	zval *val;
+	int refadjust;
+	int count;
+	const char *packed;
+	for_key_value fkv;
+	bool imflag;
+
+	//zend_printf("di_dump %ld level %d\n",zu.ztype(), level);
+
+	switch (zu.ztype()) 
+	{
+	case IS_FALSE:
+		ss << "bool(false)\n";
+		break;
+	case IS_TRUE:
+		ss << "bool(true)\n";
+		break;
+	case IS_NULL:
+		ss << "NULL\n";
+		break;
+	case IS_LONG:
+		ss << "int(" << zu.zlong() << ")\n";
+		break;
+	case IS_DOUBLE:
+		ss << "float(" << zu.zdouble() << ")\n";
+		break;
+	case IS_STRING:
+		di_showstr(zu.zstr());
+		break;
+	case IS_ARRAY:
+		myht = zu.zarray();
+		refadjust = 0;
+		imflag = (GC_FLAGS(myht) & GC_IMMUTABLE);
+
+		if (!imflag) {
+			if (GC_IS_RECURSIVE(myht)) {
+				PUTS("*RECURSION*\n");
+				return di_return();
+			}
+			GC_ADDREF(myht);
+			refadjust = -1;
+			GC_PROTECT_RECURSION(myht);
+		}
+		packed = HT_IS_PACKED(myht) ? "packed " : "";
+
+		di_showarray(myht,refadjust);
+		ss << packed << "{\n";
+		
+		for (fkv.start(myht); fkv.ok(); fkv.next())
+		{
+			key = fkv.key();
+			index = fkv.index();
+			val = fkv.value();
+
+			if (key)
+			{
+				ss << '[' << key << ']';
+			}
+			else {
+				ss << '[' << index << ']';
+			}
+			ss << " => ";
+			result = dump_info::dump(val, level+1);
+			ss << result;
+			result.init();
+		}
+		
+		if (!imflag) {
+			GC_UNPROTECT_RECURSION(myht);
+			GC_DELREF(myht);
+		}
+		if (level > 1) {
+			ss << ' ' << level << ' ';
+		}
+		ss << "}\n";
+		break;
+	case IS_OBJECT: 
+	{
+		/* Check if this is already recursing on the object before calling zend_get_properties_for,
+		 * to allow infinite recursion detection to work even if classes return temporary arrays,
+		 * and to avoid the need to update the properties table in place to reflect the state
+		 * if the result won't be used. (https://github.com/php/php-src/issues/8044) */
+		zend_object *zobj = zu.zobject();
+		const char *prefix = get_object_prefix(zobj);
+		ss << prefix;
+		di_showobj(zobj);
+		ss << "test recursive = " << (int)GC_IS_RECURSIVE(zobj) << '\n';
+		if (GC_IS_RECURSIVE(zobj)) {
+				PUTS("*RECURSION*\n");
+				return di_return();
+		}
+		
+		GC_PROTECT_RECURSION(zobj);
+		ss << "is recursive = " << (int)GC_IS_RECURSIVE(zobj) << '\n';
+		myht = zend_get_properties_for(zu, ZEND_PROP_PURPOSE_DEBUG);
+
+		if (myht) 
+		{
+			show_properties(zobj, myht, level);
+			zend_release_properties(myht);
+		}
+
+		GC_UNPROTECT_RECURSION(zobj);
+		break;
+	}
+	case IS_RESOURCE: {
+		di_show_resource(zu);
+		break;
+	}
+	case IS_REFERENCE:
+		di_showref(Z_REF_P(zu));
+
+		result = dump_info::dump(Z_REFVAL_P(zu), level + 1);
+		if (result.size())
+		{
+			ss << result;
+		}
+		result.init();
+		break;
+	default:
+		ss << "UNKNOWN:0\n";
+		break;
+	}
+
+	result = std::move(ss);
+	//zend_printf("end %ld level %d\n",zu.ztype(), level);
+	return result;
+}
+
+
+	void dump_info::di_showmem(zval *m) 
 	{
 		for (int i = 0; i < indents_; i++)
 		{
@@ -74,7 +317,8 @@ public:
 
 		return;
 	}
-	void di_showstr(zend_string* p) 
+
+	void dump_info::di_showstr(zend_string* p) 
 	{
 		if (!p) {
 			ss << "p = nullptr";
@@ -83,8 +327,8 @@ public:
 		   const char* data = ZSTR_VAL(p);
 		   size_t   slen = ZSTR_LEN(p);
 
-			ss << " str(" << std::dec << slen << ") " << std::setw(4) << std::hex << p;
-			ss << " gc " << GC_REFCOUNT(p) << " ";
+			ss << " str(" << iform(Numf::DEC) << (int) slen << ") " << iform(Numf::HEX) << p;
+			ss << " gc " << (int) GC_REFCOUNT(p) << " ";
 			int gcflags = GC_FLAGS(p);
 			if ((gcflags & GC_PERSISTENT) != 0) ss << "ps ";
 			if ((gcflags & IS_STR_INTERNED) != 0) ss << "in ";
@@ -97,14 +341,15 @@ public:
 			else {
 				ss <<" *";
 			}
+			ss << '\n';
 		}
 	}
 
-	void di_showarray(HashTable* ht)
+	void dump_info::di_showarray(HashTable* ht, int refadj)
 	{
-
+		ss << ' ';
 		if (!ht) {
-			ss << "is nullptr" << std::endl;
+			ss << "is nullptr\n";
 			return;
 		}
 
@@ -112,7 +357,7 @@ public:
 		if (ht->gc.u.type_info & GC_IMMUTABLE) {
 			ss << "immutable ";
 		}
-		ss << std::dec << "arr(" << ct <<") " << std::setw(4) << std::hex << ht;
+		ss << iform(Numf::DEC) << "arr(" << ct <<") "  << iform(Numf::HEX) << ht;
 		/* if (ht->u.flags & htab_mgr::COW_VIOLATE) {
 			ss << " vcow ";
 		}
@@ -120,13 +365,13 @@ public:
 			ss << " cow ";
 		}
 		*/
-		ss << " gc " << GC_REFCOUNT(ht);
+		ss << " gc " << (size_t) GC_REFCOUNT(ht)+refadj << '\n';
 
 	}
-	void di_showdata(HashTable* ht)
+	void dump_info::di_showdata(HashTable* ht)
 	{
 		if (!ht) {
-			ss << "is nullptr" << std::endl;
+			ss << "is nullptr\n";
 			return;
 		}
 
@@ -134,7 +379,7 @@ public:
 
 		htab_walk wk;
 
-		ss << "--[ " << std::endl;
+		ss << "--[\n";
 		indents_++;
 
 		auto val = wk.value();
@@ -152,32 +397,33 @@ public:
 		}
 		indents_--;
 
-		ss << "]-- " << std::endl;
+		ss << "]--\n";
 	}
-	void di_showobj(zend_object* obj)
+	void dump_info::di_showobj(zend_object* obj)
 	{
-		ss << "obj " << std::setw(4) << std::hex << obj;
-		if (obj) {
-			ss << " gc " << std::dec << GC_REFCOUNT(obj);
-			ss << " class " << ZSTR_VAL(obj->ce->name) << std::endl;
+		ss << "obj " << iform(Numf::HEX) << obj;
+		if (obj) 
+		{
+			ss << " gc " << iform(Numf::DEC) << (size_t) GC_REFCOUNT(obj);
+			ss << " class " << ZSTR_VAL(obj->ce->name) << '\n';
 		}
 
 	}
 
-	void di_showref(zend_reference* ref)
+	void dump_info::di_showref(zend_reference* ref)
 	{
-			ss << "ref-h " << std::setw(4) << std::hex << ref << " ";
-			ss << " gc " << std::dec << GC_REFCOUNT(ref) << " ";
+			ss << "ref-h " << iform(Numf::HEX) << ref << " ";
+			ss << " gc " << iform(Numf::DEC) << (size_t) GC_REFCOUNT(ref) << " ";
 			zval* m = &ref->val;
 			di_showmem(m);
 	}
 
-	void output()
+	void dump_info::output()
 	{
-		std::string txt = ss.str();
+		zstr_mgr txt(std::move(ss));
 		zend_printf("%s\n", txt.data());
 	} 
-}; // end class
+
 
 void showmem(const char* s, zval* m)
 {
@@ -237,32 +483,6 @@ void showobj(const char* s, zend_object* obj)
 
 bool dump_info::run_state_ = false;
 
-#else
-	// to allow leaving extant trace/debug calls in source, but have them do nothing.
-	void showmem(const char* s, zval* m)
-	{
-		
-	}
-	void showstr(const char* s, zend_string* zs)
-	{
-		
-	}
-	void showarray(const char* s, HashTable* ht)
-	{
-	
-	}
-	void showobj(const char* s, zend_object* obj)
-	{
-	
-	}
-	void showdata(const char* s, HashTable* ht)
-	{
-	
-	}
-
-
-
-#endif
 }; // namespace zpp
 
 

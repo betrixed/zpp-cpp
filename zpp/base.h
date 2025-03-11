@@ -408,18 +408,22 @@ namespace zpp {
 			zend_object* object, 
 			int* is_temp)
 		{
-			T* cobj = cpp(object);
+			
 
 			/* to be deleted by zend */
 			*is_temp = 1; 
 			
 			htab_mgr ret;
-			showarray("debug_info ret", ret);
+			
+			//showobj("obj = ", object);
+			//showarray("base_debug_info", ret);
 			htab_write hw(ret);
-			showarray("debug_info hw", hw);
+			//showarray("base_debug_info write", ret);
+			T* cobj = cpp(object);
+			//zend_printf("2 T* %lx zobj %lx\n", cobj, cobj->zobj());
 			cobj->debug_info(hw);
 			HashTable* result = ret.steal();
-			showarray("debug_info result", result);
+			
 			return result;
 		}
 

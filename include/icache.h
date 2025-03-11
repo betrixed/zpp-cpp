@@ -78,7 +78,7 @@ public:
 		ttl_ = ttl;
 	}
 
-	virtual void debug_info(htab_write s);
+ 	void debug_info(htab_write s) override;
 
 
 };

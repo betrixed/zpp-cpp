@@ -11,18 +11,42 @@
 
 namespace zpp {
 
-//! Same memory layout as "smart_string"
 
-class zstr_buffer : public zstr_mgr
+enum Numf {
+	DEC,
+	HEX
+};
+
+class iform {
+public:
+	Numf value_;
+
+	iform()
+	{
+		value_ = Numf::DEC;
+	}
+
+	iform(Numf nf) : value_(nf) 
+	{
+
+	}
+};
+
+//! zstr_buffer with memory layout as "smart_string"
+	class zstr_buffer 
 	{
 	protected:
-		size_t  a;  
+		zend_string* s;
+		size_t  	 a;  
+		iform   	 nf_;
 
 		static zend_string* init_zs(const char* c, size_t slen);
 
+		friend class zstr_mgr;
+
 	public:
 
-		zstr_buffer() : zstr_mgr(), a(0) {}
+		zstr_buffer() : s(nullptr), a(0) {}
 
 		zstr_buffer(zval *v);
 
@@ -30,28 +54,27 @@ class zstr_buffer : public zstr_mgr
 
 		zstr_buffer (const std::string_view& cs);
 
-
 		zstr_buffer (const std::string& cs);
-
 
 		zstr_buffer (const char* c, size_t slen);
 
-
 		zstr_buffer (const char* c);
 
-		void append(const char* c, size_t slen);
+		virtual ~zstr_buffer();
 
-		void append(zend_string* s);
+		virtual void append(const char* c, size_t slen);
+
+		virtual void append(zend_string* s);
+
+		virtual void append(char c);
 
 		size_t len() const { return a; }
 
-		//size_t items() const { return listct_; }
-
-		
-
-		//zstr_buffer& operator<<(const bfmt& bf);
+		void quote_name(const char* name);
 
 		zstr_buffer& operator=(const char* c);
+
+		zstr_buffer& operator<<(const iform& form);
 
 		zstr_buffer& operator<<(const zstr_mgr &w);
 		
@@ -60,16 +83,16 @@ class zstr_buffer : public zstr_mgr
 		zstr_buffer& operator<<(zend_string* s);
 
 		zstr_buffer& operator<<(const char* c);
-		/*
-		void item_sep(char c = ',') 
-		{
-			sep_ = c;
-		}
-		*/
+
+		zstr_buffer& operator<<(size_t nn);
+
+		zstr_buffer& operator<<(void* vp);
+
+		zstr_buffer& operator<<(double d);
 
 		zstr_buffer& operator<<(int iv);
 
-		
+		zstr_buffer& operator<<(long iv);
 
 		zstr_buffer& operator<<(char c);
 
@@ -85,8 +108,27 @@ class zstr_buffer : public zstr_mgr
 		zend_string* zstr();
 
 		void reset(); // release string, start again
+
+		size_t size() 
+		{
+			if (s) {
+				return ZSTR_LEN(s);
+			}
+			else {
+				return 0;
+			}
+		}
 	};
 
+	class zstr_output : public zstr_buffer {
+	public:
+		virtual void append(const char* c, size_t slen);
+
+		virtual void append(zend_string* s);
+
+		virtual void append(char c);
+
+	};
 };
 
 //zstr_buffer.h

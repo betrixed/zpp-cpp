@@ -370,6 +370,14 @@ zval_user::bind_array(HashTable* ht)
     }
 }
 
+int 
+zval_user::refcount() const
+{
+	if (p_ && Z_REFCOUNTED_P(p_))
+		return Z_REFCOUNT_P(p_);
+	else
+		return 0;
+}
 
 };
 //zval_user.cpp

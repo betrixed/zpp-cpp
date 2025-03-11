@@ -62,6 +62,14 @@ htab_read::htab_read(zval* p)
 }
 **/
 
+bool  
+htab_read::has_key(zend_string* skey) const
+{
+    if (!ht_ || !skey) {
+            return false;
+    }
+    return (get(skey) != nullptr);
+}
 
 void 
 htab_read::apply_all(fn_zval fn)
@@ -76,6 +84,10 @@ htab_read::apply_all(fn_zval fn)
  zstr_mgr 
  htab_read::print_kv(const char* label) const
  {
+ 	zstr_mgr result;
+
+ 	if (!ht_)
+		return result;
 	htab_walk walk;
 	zstr_buffer  ss;
 
@@ -93,7 +105,8 @@ htab_read::apply_all(fn_zval fn)
 		ss << zstr_user(skey) << " => " << zstr_user(vkey) << ", \n";
 	}
 	ss << "],\n";
-	return zstr_mgr(ss.zstr());
+	result.adopt(ss.zstr());
+	return result;
 }
 
 
@@ -101,6 +114,11 @@ htab_read::apply_all(fn_zval fn)
 zstr_mgr
 htab_read::unhive(zstr_user subj)
 {
+	zstr_mgr result;
+
+	if (!ht_)
+		return result;
+
 	preg sfind("#@([a-zA-Z][\\w\\d]*)#", preg::OFFSET_CAPTURE, true);
 
 	int ct = sfind.matches(subj);
@@ -147,7 +165,8 @@ htab_read::unhive(zstr_user subj)
 		return std::move(result);
 	}
 	else {
-		return zstr_mgr(subj);
+		result = subj;
+		return result;
 	}
 }
 
@@ -205,12 +224,16 @@ htab_read::print_all(const char* label)
 zval* 
 htab_read::get(zend_long idx) const
 {
+	if (!ht_)
+		return nullptr;
 	return zend_hash_index_find(ht_, idx);
 }
 
 zval*  
 htab_read::get(zend_string* zkey) const
 {
+	if (!ht_)
+		return nullptr;
 	return zend_hash_find(ht_, zkey);
 }
 
@@ -218,7 +241,8 @@ zval*
 htab_read::get(const std::string_view& key) const
 {
 	//zend_printf("get:string_view %s %d\n", key.data(), key.size());
-
+	if (!ht_)
+		return nullptr;
 	zstr_temp skey(key.data(), key.size());
 	//showstr("get string_view&", skey);
 
@@ -228,6 +252,8 @@ htab_read::get(const std::string_view& key) const
 zval* 
 htab_read::get(const char* key) const
 {
+	if (!ht_)
+		return nullptr;
 	zstr_temp skey(key);
 	return zend_hash_find(ht_, skey);
 }
@@ -235,12 +261,16 @@ htab_read::get(const char* key) const
 zval* 
 htab_read::get(zval_user key) const
 {
+	if (!ht_)
+		return nullptr;
 	return get(key);
 }
 
 zval* 
 htab_read::get(zval* key) const
 {
+	if (!ht_)
+		return nullptr;
 	uint8_t ktype = Z_TYPE_P(key);
 
 	if (ktype == IS_STRING) {
@@ -255,6 +285,8 @@ htab_read::get(zval* key) const
 
 bool htab_read::try_fetch(zend_long key, zval_user& store) const
 {
+	if (!ht_)
+		return false;
 	zval* temp = zend_hash_index_find(ht_, key);
 	if (temp) 
 	{
@@ -266,11 +298,15 @@ bool htab_read::try_fetch(zend_long key, zval_user& store) const
 
 bool htab_read::has_index(zend_long key) const
 {
+	if (!ht_)
+		return false;
 	return (zend_hash_index_find(ht_, key) != nullptr);
 }
 
 bool htab_read::try_fetch(zval_user key, zval_user& store) const
 {
+	if (!ht_)
+		return false;
 	if (key.isString())
 	{
 		return try_fetch(key.zstr(), store);
@@ -286,7 +322,8 @@ bool htab_read::try_fetch(zval_user key, zval_user& store) const
 bool htab_read::try_fetch(zend_string* key, zval_user& store) const
 {
 	//showstr("try_fetch zs key", key);
-
+	if (!ht_)
+		return false;
 	zval* temp = zend_hash_find(ht_, key);
 	if (temp) {
 		//showmem("found ", temp);
@@ -312,6 +349,8 @@ htab_mgr
 htab_read::getValues()
 {
 	 htab_mgr result;
+	 if (!ht_)
+		return result;
 	 htab_write merge(result);
 
 	 htab_walk wk;
@@ -328,6 +367,8 @@ htab_mgr
 htab_read::getKeys()
 {
 	 htab_mgr result;
+	 if (!ht_)
+		return result;
 	 htab_write merge(result);
 
 	 htab_walk wk;

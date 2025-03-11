@@ -15,7 +15,7 @@
 
 namespace wcc {
  	
-base_obj_mgr<Route> Route::omg;
+Route::RouteMgr Route::omg;
 
 Route_init route_data;
 
@@ -141,7 +141,7 @@ void Route_init::init_ce(zend_class_entry* ce)
 }
 
 
-void RouteMgr::init_class_fn()
+void Route::RouteMgr::init_class_fn()
 {
 	base_obj_mgr::init_class_fn();
 	route_data.init_ce(class_entry_);
@@ -260,6 +260,9 @@ Route::construct(int verbs, zstr_user pattern, zval_user target)
 	verbs_ = verbs;
 	pattern_ = pattern;
 	target_ = target;
+
+	showmem("target", target_);
+	showstr("pattern", pattern_);
 }
 
 zobj_mgr //static
@@ -268,11 +271,13 @@ Route::get(zstr_user pattern, zval_user target, int ajax)
 	zobj_mgr result;
 
 	result = Route::omg.new_zobj();
+
+
 	Route* cobj = zobj_toc<Route>(result);
 
 	cobj->construct(html::V_GET, pattern, target);
 	cobj->ajax_ = ajax;
-
+	showobj("new Route", result);
 	return result;
 }
 
@@ -322,6 +327,7 @@ Route::getVerbInt(zstr_user sverb)
 void 
 Route::name(zstr_user name)
 {
+	showstr("Route::name", name);
 	id_ = name;
 }
 

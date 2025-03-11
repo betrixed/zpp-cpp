@@ -259,9 +259,11 @@ htab_mgr::htab_mgr(htab_mgr&& m)
 bool //static
 htab_mgr::cowop(HashTable*& inout)
 {
+	//printf("cowop %lx\n", inout);
 	HashTable* used = inout;
 	if (used == nullptr) 
 	{
+		//printf("new array\n", inout);
 		inout = zend_new_array(HT_MIN_SIZE);
 		return true;
 	}

@@ -80,10 +80,7 @@ namespace zpp {
         }
         bool  has_index(zend_long key) const;
 
-        bool  has_key(zend_string* skey) const
-        {
-                return (get(skey) != nullptr);
-        }
+        bool  has_key(zend_string* skey) const;
 
         bool  has_key(zval_user skey) const;
         

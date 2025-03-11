@@ -11,6 +11,7 @@ namespace zpp {
 void 
 htab_write::giveback(zval* mgr)
 {
+	//printf("htab_write giveback\n");
 	zval_user test(mgr);
 	HashTable* h = test.zarray();
 	if (!h)
@@ -34,6 +35,7 @@ htab_write::giveback(zval* mgr)
 htab_write::htab_write(htab_mgr& mgr)
 {
 	// ensure both mgr, and write have same array rc==1
+	//printf("htab_write htab_mgr& mgr\n");
 	htab_mgr::cowop(mgr.ht_);
 	ht_ = mgr.ht_;
 }
@@ -51,6 +53,7 @@ htab_write::htab_write(zval_user mgr)
 
 htab_write::htab_write(HashTable* h)
 {
+	//printf("htab_write HashTable*\n");
 	ht_ = h;
 }
 

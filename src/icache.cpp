@@ -99,7 +99,7 @@ void ICache::__construct(zval_user options, zval_user services)
 
 void ICache::debug_info(htab_write s)
 {
-	//showarray("cached", cached_);
+	//zend_printf("debug_info write %lx\n", (HashTable*)s);
 
 	s.set(IC_STR.cached, cached_);
 	s.set(IC_STR.svc_cache, svc_cache_);

@@ -1,22 +1,24 @@
 <?php
 namespace Wc;
 
-use Wcc\{Route,RouteMatch,RouteSet,Services};
+use Wcc\{Route,RouteMatch,RouteSet,Services, Target};
 
-
-$wc_source_dir = "/home/michael/www/hub/private/wc/src/Wc";
-
-require $wc_source_dir . "/autoload.php";
+require "bootstrap.php";
 
 
 
 $route = new Route(Route::GET_I, "/index.php", ["default", "Home", "indexGET"]);
 echo "Made Route" . PHP_EOL;
 
+$r2 = Route::get("/target", Target::go(EmptyTest::class, "func"))->name("default");
+echo "Made Route r2" . PHP_EOL;
 echo print_r($route, true) . PHP_EOL;
 
 $rset = new RouteSet();
-$rset->addRoutes([$route]);
+
+$radd = new RouteAdd($rset);
+
+$radd->addRoutes([$route, $r2]);
 
 echo " rset = " . print_r($rset,true) . PHP_EOL;
 

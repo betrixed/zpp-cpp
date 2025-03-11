@@ -45,7 +45,7 @@ extern "C" {
 };
 
 
-//#define DEBUG_XTRA
+#define DEBUG_XTRA
 
 #include "zpp/base.cpp"
 #include "zpp/show_zpp.cpp"

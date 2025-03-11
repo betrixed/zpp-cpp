@@ -5,7 +5,7 @@
 #include <sstream>
 
 
-using namespace wcc;
+using namespace zpp;
 
 /**
  * route_extract_paramsstring( string $s): array 
@@ -189,6 +189,21 @@ PHP_FUNCTION(Wcc_route_extract_params)
 }
 */
 
+/* 
+ *	Emulate debug_zval_dump, except accumulate.
+ *	
+ */
+
+
+zstr_mgr 
+zpp_dump(zval_user zu, int level)
+{
+
+	return dump_info::dump(zu, level);
+}
+
+
+
 /** Only does one character seperator */
 void phiz_uncamel(zval* return_value, const zend_string *src, const zend_string *sep)
 {
@@ -288,6 +303,17 @@ void phiz_camel(zval* return_value, const zend_string *src, const zend_string *s
 	} else {
 		RETURN_EMPTY_STRING();
 	}
+}
+
+PHP_FUNCTION(Wcc_debug_zpp_dump) 
+{
+	zval* value;
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ZVAL(value)
+	ZEND_PARSE_PARAMETERS_END();
+
+	zstr_mgr result = zpp_dump(zval_user(value), 0);
+	result.move_zv(return_value);
 }
 
 PHP_FUNCTION(Wcc_str_uncamel) {

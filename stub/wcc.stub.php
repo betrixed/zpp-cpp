@@ -262,6 +262,8 @@ final class Services {
 
 };
 
+function debug_zpp_dump(mixed $val) : string {}
+
 function init_globals() : void {}
 
 //function route_extract_params(string $s): array {}

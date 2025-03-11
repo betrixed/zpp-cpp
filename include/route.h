@@ -46,12 +46,16 @@ public:
 	// matched values of reg-expression
 	htab_mgr 	 params_;
 
+	class RouteMgr : public base_obj_mgr<Route> {
+	public:
 
+		virtual void init_class_fn(); 
+	};
 
 	Route();
 	virtual ~Route();
 
-	static base_obj_mgr<Route> omg;
+	static RouteMgr omg;
 
 	virtual void debug_info(htab_write hw);
 
@@ -119,11 +123,7 @@ public:
 	void __unserialize(htab_read htab);
 };
 
-class RouteMgr : public base_obj_mgr<Route> {
-public:
 
-	virtual void init_class_fn(); 
-};
 
 //typedef std::vector<zstr_perm> HttpVerbNames;
 //typedef std::map<zstr_perm, int, MapComparator > HttpVerbBits;
