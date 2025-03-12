@@ -262,7 +262,7 @@ final class Services {
 
 };
 
-function debug_zpp_dump(mixed $val) : string {}
+function debug_zpp_dump(mixed $val) : null | string {}
 
 function init_globals() : void {}
 

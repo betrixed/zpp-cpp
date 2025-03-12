@@ -19,7 +19,7 @@ for_key_value::start(HashTable* ht)
 	int elemSize = ZEND_HASH_ELEMENT_SIZE(ht_); //16 + {0|1}*(4) 16:Packed, 20:Not packed
 	idx_ = 0;
 	key_ = nullptr;
-	zptr_ = ZEND_HASH_ELEMENT_EX(ht_, idx_, elemSize);
+	next_ = ZEND_HASH_ELEMENT_EX(ht_, idx_, elemSize);
 	count_  = ht_->nNumUsed - idx_ + 1; // count_ is subtracted first in next()
 
 	return next();
@@ -46,15 +46,17 @@ for_key_value::next()
 	}
 	if (isPacked_)
 	{
-		++zptr_;
+		zptr_ = next_;
+		++next_;
 		h_ = idx_;
 		idx_++;
 	}
 	else {
-		Bucket* bkt = (Bucket*) zptr_;
-		zptr_ = &(bkt+1)->val;
+		zptr_ = next_;
+		Bucket* bkt = (Bucket*) next_;
 		h_ = bkt->h;
 		key_ = bkt->key;
+		next_ = &((bkt+1)->val);
 		//* No indirect yet for zptr_ in for this usage 
 	}
 	return true;

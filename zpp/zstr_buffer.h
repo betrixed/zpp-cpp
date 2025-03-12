@@ -32,21 +32,67 @@ public:
 	}
 };
 
-//! zstr_buffer with memory layout as "smart_string"
-	class zstr_buffer 
-	{
+	class zstr_output {
 	protected:
-		zend_string* s;
-		size_t  	 a;  
 		iform   	 nf_;
+	public:
+		virtual void append(const char* c, size_t slen);
+
+		virtual void append(char c);
+
+		virtual ~zstr_output() {}
+
+		void append(zend_string* s);
+
+		zstr_output& operator<<(const iform& form);
+
+		zstr_output& operator<<(const zstr_mgr &w);
+		
+		zstr_output& operator<<(zstr_user w);
+
+		zstr_output& operator<<(zend_string* s);
+
+		zstr_output& operator<<(const char* c);
+
+		zstr_output& operator<<(size_t nn);
+
+		zstr_output& operator<<(void* vp);
+
+		zstr_output& operator<<(double d);
+
+		zstr_output& operator<<(int iv);
+
+		zstr_output& operator<<(long iv);
+
+		zstr_output& operator<<(char c);
+
+		zstr_output& operator<<(const std::string_view &v);
+
+		zstr_output& operator<<(zval* zv);
+
+		void quote_name(const char* name);
+	};
+
+//! zstr_buffer with memory layout as "smart_string"
+	class zstr_buffer : public zstr_output {
+	protected:
+		smart_str    buf;
 
 		static zend_string* init_zs(const char* c, size_t slen);
 
 		friend class zstr_mgr;
 
+		void initbuf()
+		{
+			buf.s = nullptr;
+			buf.a = 0;
+		}
+
+		void lose();
+
 	public:
 
-		zstr_buffer() : s(nullptr), a(0) {}
+		zstr_buffer();
 
 		zstr_buffer(zval *v);
 
@@ -64,43 +110,13 @@ public:
 
 		virtual void append(const char* c, size_t slen);
 
-		virtual void append(zend_string* s);
-
 		virtual void append(char c);
 
-		size_t len() const { return a; }
-
-		void quote_name(const char* name);
+		size_t capacity() const { return buf.a; }
 
 		zstr_buffer& operator=(const char* c);
 
-		zstr_buffer& operator<<(const iform& form);
-
-		zstr_buffer& operator<<(const zstr_mgr &w);
 		
-		zstr_buffer& operator<<(zstr_user w);
-
-		zstr_buffer& operator<<(zend_string* s);
-
-		zstr_buffer& operator<<(const char* c);
-
-		zstr_buffer& operator<<(size_t nn);
-
-		zstr_buffer& operator<<(void* vp);
-
-		zstr_buffer& operator<<(double d);
-
-		zstr_buffer& operator<<(int iv);
-
-		zstr_buffer& operator<<(long iv);
-
-		zstr_buffer& operator<<(char c);
-
-		zstr_buffer& operator<<(const std::string_view &v);
-
-		// requires non-inline
-		zstr_buffer& operator<<(zval* zv);
-
 		// Finalize, 0-terminate, return std::string copy, 
 		std::string str();
 
@@ -111,8 +127,8 @@ public:
 
 		size_t size() 
 		{
-			if (s) {
-				return ZSTR_LEN(s);
+			if (buf.s) {
+				return ZSTR_LEN(buf.s);
 			}
 			else {
 				return 0;
@@ -120,15 +136,7 @@ public:
 		}
 	};
 
-	class zstr_output : public zstr_buffer {
-	public:
-		virtual void append(const char* c, size_t slen);
-
-		virtual void append(zend_string* s);
-
-		virtual void append(char c);
-
-	};
+	
 };
 
 //zstr_buffer.h

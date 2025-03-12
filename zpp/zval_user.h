@@ -40,6 +40,18 @@ protected:
     void bind_long(zend_long value);
 public:
 
+    static zval* real_zval(zval* zv)
+    {
+        switch(Z_TYPE_P(zv)) {
+            case IS_REFERENCE:
+                zv = Z_REFVAL_P(zv);
+                break;
+            case IS_INDIRECT:
+                zv = zv->value.zv; 
+                break;  
+        }
+        return zv;
+    }
 
     zval_user() : p_(nullptr) {}
 

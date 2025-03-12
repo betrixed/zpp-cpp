@@ -9,13 +9,31 @@
 namespace zpp {
 // Protected static function
 
-void htab_mgr::try_addref(HashTable *h)
+void //static
+htab_mgr::try_addref(HashTable *h)
 {
 	if (h->gc.u.type_info & GC_IMMUTABLE)
     {
         return;
     }
     h->gc.refcount++;
+}
+
+
+bool  //static
+htab_mgr::try_decref(HashTable* h)
+{
+	if (!h || (h->gc.u.type_info & GC_IMMUTABLE))
+	{
+		return false;
+	}
+	int rct = --h->gc.refcount;
+
+	if (!rct) {
+		zend_hash_destroy(h);
+		return true;
+	}
+	return false;
 }
 
 void htab_mgr::own()
@@ -40,21 +58,6 @@ htab_mgr::adopt(HashTable *h)
 	ht_ = h;
 }
 
-bool  
-htab_mgr::try_decref(HashTable* h)
-{
-	if (!h || (h->gc.u.type_info & GC_IMMUTABLE))
-	{
-		return false;
-	}
-	int rct = --h->gc.refcount;
-
-	if (!rct) {
-		zend_array_destroy(h);
-		return true;
-	}
-	return false;
-}
 
 void htab_mgr::lose()
 {

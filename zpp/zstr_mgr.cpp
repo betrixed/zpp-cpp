@@ -210,10 +210,6 @@ zstr_empty::zstr_empty() {
 const zstr_mgr& 
 zstr_mgr::operator=(zstr_buffer&& m)
 {
-	if (s == m.s)
-	{
-		return *this;
-	}
 	lose();
 	s = m.zstr(); // zstr_buffer cleared by this, refcount==1
 

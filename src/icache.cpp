@@ -110,6 +110,14 @@ void ICache::debug_info(htab_write s)
 //showarray("options_", options_);
 //showobj("services", services_);
 	s.set(IC_STR.options, options_);
+
+	/*if (options_.isEmpty())
+	{
+		s.setnull(IC_STR.options);
+	}
+	else {
+		s.set(IC_STR.options, options_);
+	}*/
 	//showobj("services", services_);
 	s.set(IC_STR.services, services_);
 	
@@ -437,7 +445,9 @@ ZEND_METHOD(Wcc_ICache, __construct)
 		options_z.empty_array();
 		options = options_z;
 	}
-
+	else {
+		showmem("construct icache", options);
+	}
 	if (!services_obj) {
 		services_z = Services::instance();
 		services_obj = services_z;

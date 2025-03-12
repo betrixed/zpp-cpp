@@ -7,94 +7,89 @@ extern "C" {
 
 namespace zpp {
 
-zend_string* 
+
+zstr_buffer::zstr_buffer()
+{
+	initbuf();
+}
+
+zend_string* //static
 zstr_buffer::init_zs(const char* c, size_t slen)
 {
 	return zend_string_init(c, slen, 0);
 }
 
+void
+zstr_buffer::lose()
+{
+	if (buf.s)
+	{
+		smart_str_free(&buf);
+		initbuf();
+	}
+}
+
 zstr_buffer::~zstr_buffer() 
 {
-	if (s)
-	{
-		zend_string_release(s);
-		s = nullptr;
-	}
+	lose();
 }
 
 zstr_buffer::zstr_buffer(zval *v)
 {
-	s = zval_user(v).to_zstr();
-	if (s)
-	{
-		a = ZSTR_LEN(s);
-	}
+	initbuf();
+	zstr_mgr temp = zval_user(v).to_zstr();
+	zend_string* s = temp;
+
+	append(ZSTR_VAL(s), ZSTR_LEN(s));
 }
 
 zstr_buffer::zstr_buffer(const std::string_view& cs) 
 {
+	initbuf();
 	auto slen = cs.size();
 	if (slen) 
 	{
-		s = init_zs(cs.data(), slen);
-		a = slen;
-	}
-	else {
-		s = nullptr;
-		a = 0;
-	}
-	
+		append(cs.data(), slen);
+	}	
 }
 
 zstr_buffer::zstr_buffer (const char* c, size_t slen)  
 {
+	initbuf();
 	if (slen)
 	{
-		s = init_zs(c, slen);
-		a = slen;
-	}
-	else {
-		s = nullptr;
-		a = 0;
+		append(c, slen);
 	}
 }
 
 zstr_buffer::zstr_buffer (const char* c) 
 {
+	initbuf();
 	auto slen = strlen(c);
 	if (slen)
 	{
-		s = init_zs(c, slen);
-		a = slen;
-	}
-	else {
-		s = nullptr;
-		a = 0;
+		append(c, slen);
 	}
 }
 
 zstr_buffer::zstr_buffer(const std::string& cs) 
 {
+	initbuf();
 	auto slen = cs.size();
 	if (slen) {
-		s = init_zs(cs.data(), slen);
-		a = slen;
-	}
-	else {
-		s = nullptr;
-		a = 0;
+		append(cs.data(), slen);
 	}
 }
 
-zstr_buffer& 
-zstr_buffer::operator<<(const iform& form)
+zstr_output& 
+zstr_output::operator<<(const iform& form)
 {
 	nf_ = form;
 	return *this;
 }
 
-zstr_buffer& 
-zstr_buffer::operator<<(void* vp)
+zstr_output& 
+zstr_output::operator<<(void* vp)
 {
 	zend_string* pf = strpprintf(0,"%lx", vp);
 	append(pf);
@@ -104,8 +99,8 @@ zstr_buffer::operator<<(void* vp)
 
 
 
-zstr_buffer& 
-zstr_buffer::operator<<(double d)
+zstr_output& 
+zstr_output::operator<<(double d)
 {
 	zend_string* s = zend_double_to_str(d);
 	append(s);
@@ -113,8 +108,8 @@ zstr_buffer::operator<<(double d)
 	return *this;
 }
 
-zstr_buffer& 
-zstr_buffer::operator<<(zval* zv) 
+zstr_output& 
+zstr_output::operator<<(zval* zv) 
 {
 	if (!zv) {
 		return *this;
@@ -136,11 +131,11 @@ zstr_buffer::operator<<(zval* zv)
 
 void zstr_buffer::append(char c)
 {
-	smart_str_appendc_ex((smart_str*)this, c, 0);
+	smart_str_appendc_ex(&buf, c, 0);
 }
 
 void 
-zstr_buffer::quote_name(const char* name)
+zstr_output::quote_name(const char* name)
 {
 	append('"');
 	if (name)
@@ -154,18 +149,18 @@ zstr_buffer::append(const char* c, size_t slen)
 	if (!c || !slen) {
 		return;
 	}
-	smart_str_appendl_ex((smart_str*)(this), c, slen, 0);
+	smart_str_appendl_ex(&buf, c, slen, 0);
 }
 
-zstr_buffer& 
-zstr_buffer::operator<<(char c)
+zstr_output& 
+zstr_output::operator<<(char c)
 {
 	append(c);
 	return *this;
 }
 
-zstr_buffer& 
-zstr_buffer::operator<<(const std::string_view &v) 
+zstr_output& 
+zstr_output::operator<<(const std::string_view &v) 
 {
 	size_t slen = v.length();
 	if (slen > 0) {
@@ -174,8 +169,8 @@ zstr_buffer::operator<<(const std::string_view &v)
 	return *this;
 }
 
-zstr_buffer& 
-zstr_buffer::operator<<(int iv) 
+zstr_output& 
+zstr_output::operator<<(int iv) 
 {	
 	const char* sfmt;
 
@@ -192,8 +187,8 @@ zstr_buffer::operator<<(int iv)
 	return *this;
 }
 
-zstr_buffer& 
-zstr_buffer::operator<<(long iv)
+zstr_output& 
+zstr_output::operator<<(long iv)
 {
 	const char* sfmt;
 
@@ -211,8 +206,8 @@ zstr_buffer::operator<<(long iv)
 
 }
 
-zstr_buffer& 
-zstr_buffer::operator<<(size_t iv) 
+zstr_output& 
+zstr_output::operator<<(size_t iv) 
 {	
 	const char* sfmt;
 
@@ -230,7 +225,7 @@ zstr_buffer::operator<<(size_t iv)
 }
 
 void
-zstr_buffer::append(zend_string* s) 
+zstr_output::append(zend_string* s) 
 {
 	if (!s) {
 		return;
@@ -269,52 +264,30 @@ zstr_buffer::endnull() {
 }
 */
 
-void zstr_buffer::reset()
-{
-	if (s) {
-		if (a != 0)
-		{
-			// TODO : logic error, need to finalize? 
-			// to stop zend API complaint.
-			zstr();
-		}
-		zend_string_release(s);
-		s = nullptr;
-		//init_list(0);
-	}
-}
 
-zstr_buffer& 
-zstr_buffer::operator=(const char* c)
-{
-	reset();
-	append(c, strlen(c));
-	return *this;
-}	
-
-zstr_buffer& 
-zstr_buffer::operator<<(const zstr_mgr &w)
+zstr_output& 
+zstr_output::operator<<(const zstr_mgr &w)
 {
 	append((zend_string*)w);
 	return *this;
 }
 
-zstr_buffer& 
-zstr_buffer::operator<<(zstr_user w)
+zstr_output& 
+zstr_output::operator<<(zstr_user w)
 {
 	append(w);
 	return *this;
 }
 
-zstr_buffer& 
-zstr_buffer::operator<<(zend_string* s)
+zstr_output& 
+zstr_output::operator<<(zend_string* s)
 {
  	append(s);
  	return *this;
 }
 
-zstr_buffer& 
-zstr_buffer::operator<<(const char* c)
+zstr_output& 
+zstr_output::operator<<(const char* c)
 {
 	append(c, strlen(c));
 	return *this;
@@ -328,12 +301,6 @@ zstr_output::append(const char* c, size_t slen)
 }
 
 void 
-zstr_output::append(zend_string* s)
-{
-	zend_write(ZSTR_VAL(s), ZSTR_LEN(s));
-}
-
-void 
 zstr_output::append(char c)
 {
 	char temp[2];
@@ -341,6 +308,20 @@ zstr_output::append(char c)
 	temp[1] = '\0';
 	zend_write(&temp[0], 1);
 }
+
+void zstr_buffer::reset()
+{
+	lose();
+}
+
+zstr_buffer& 
+zstr_buffer::operator=(const char* c)
+{
+	lose();
+	append(c, strlen(c));
+	return *this;
+}	
+
 
 };
 //zstr_buffer.cpp

@@ -45,7 +45,7 @@ extern "C" {
 };
 
 
-#define DEBUG_XTRA
+#define DEBUG_EXTRA
 
 #include "zpp/base.cpp"
 #include "zpp/show_zpp.cpp"
@@ -154,7 +154,7 @@ PHP_MSHUTDOWN_FUNCTION(wcc)
 
 	zpp::state_init::end_all();
 
-#ifdef DEBUG_XTRA
+#ifdef DEBUG_EXTRA
 	dump_info::run_state_ = false;
 #endif
 	return (zend_result) SUCCESS;
@@ -162,7 +162,7 @@ PHP_MSHUTDOWN_FUNCTION(wcc)
 
 PHP_MINIT_FUNCTION(wcc)
 {
-#ifdef DEBUG_XTRA
+#ifdef DEBUG_EXTRA
 	dump_info::run_state_ = true;
 #endif
 

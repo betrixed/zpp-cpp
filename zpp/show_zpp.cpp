@@ -14,12 +14,6 @@ extern "C" {
 namespace zpp {
 
 
-zstr_mgr 
-dump_info::di_return()
-{
-	return std::move(ss);
-}
-
 void 
 dump_info::object_property_dump(
 	zend_property_info *prop_info, 
@@ -29,6 +23,7 @@ dump_info::object_property_dump(
 	int level) 
 {
 	const char *prop_name, *class_name;
+	indent(level);
 
 	ss << '[';
 	if (key == NULL) 
@@ -58,11 +53,7 @@ dump_info::object_property_dump(
 		ss << "uninitialized(" << type_str << ")";
 		zend_string_release(type_str);
 	} else {
-		zstr_mgr test = dump_info::dump(zv, level + 1);
-		if (test.size())
-		{
-			ss << test;
-		}
+		di_dump(zv, level + 1);
 	}
 }
 
@@ -97,7 +88,15 @@ dump_info::dump(zval_user val, int level)
 {
 	dump_info di;
 
-	return di.di_dump(val, level);
+	di.di_dump(val, level);
+
+
+	return zstr_mgr();
+}
+
+dump_info::dump_info(const char* s)
+{
+	ss << s << ' ';
 }
 
 void 
@@ -106,31 +105,37 @@ dump_info::show_properties(zend_object* zobj, HashTable* myht, int level)
 	zend_long index;
 	zend_string *key;
 	zval *val;
-	ZEND_HASH_FOREACH_KEY_VAL(myht, index, key, val) 
+	for_key_value fkv;
+	indent(level);
+	ss << "{\n";
+	for(fkv.start(myht); fkv.ok(); fkv.next())
 	{
-		zend_property_info *prop_info = NULL;
+		zend_property_info *prop_info = nullptr;
+
+		zval* val = fkv.value();
+		zend_string* key = fkv.key();
 
 		if (Z_TYPE_P(val) == IS_INDIRECT) {
+			zend_printf("property is INDIRECT\n");
 			val = Z_INDIRECT_P(val);
-			if (key) {
+			/*if (key) {
 				prop_info = zend_get_typed_property_info_for_slot(zobj, val);
-			}
+			}*/
 		}
 
 		if (!Z_ISUNDEF_P(val) || prop_info) {
-			object_property_dump(prop_info, val, index, key, level);
+			object_property_dump(prop_info, val, index, key, level+1);
 		}
-	} ZEND_HASH_FOREACH_END();
+	}
+	indent(level);
+	ss << "} " << level << " list ";
+
 }
 
 
-zstr_mgr 
+void 
 dump_info::di_dump(zval_user zu, int level)
 {
-	zstr_mgr result;
-
-	indents_ = 0;
-
 	HashTable *myht = NULL;
 	zend_string *class_name;
 	// for each values
@@ -144,7 +149,7 @@ dump_info::di_dump(zval_user zu, int level)
 	bool imflag;
 
 	//zend_printf("di_dump %ld level %d\n",zu.ztype(), level);
-
+	
 	switch (zu.ztype()) 
 	{
 	case IS_FALSE:
@@ -172,16 +177,20 @@ dump_info::di_dump(zval_user zu, int level)
 
 		if (!imflag) {
 			if (GC_IS_RECURSIVE(myht)) {
-				PUTS("*RECURSION*\n");
-				return di_return();
+				ss << "*RECURSION of Array*\n";
+				return;
 			}
 			GC_ADDREF(myht);
 			refadjust = -1;
 			GC_PROTECT_RECURSION(myht);
 		}
+		else {
+			ss << " Immutable Array ";
+		}
 		packed = HT_IS_PACKED(myht) ? "packed " : "";
 
 		di_showarray(myht,refadjust);
+		indent(level);
 		ss << packed << "{\n";
 		
 		for (fkv.start(myht); fkv.ok(); fkv.next())
@@ -189,7 +198,7 @@ dump_info::di_dump(zval_user zu, int level)
 			key = fkv.key();
 			index = fkv.index();
 			val = fkv.value();
-
+			indent(level+1);
 			if (key)
 			{
 				ss << '[' << key << ']';
@@ -198,19 +207,15 @@ dump_info::di_dump(zval_user zu, int level)
 				ss << '[' << index << ']';
 			}
 			ss << " => ";
-			result = dump_info::dump(val, level+1);
-			ss << result;
-			result.init();
+			di_dump(val, level+1);
 		}
 		
 		if (!imflag) {
 			GC_UNPROTECT_RECURSION(myht);
 			GC_DELREF(myht);
 		}
-		if (level > 1) {
-			ss << ' ' << level << ' ';
-		}
-		ss << "}\n";
+		indent(level);
+		ss << '}' << level << '\n';
 		break;
 	case IS_OBJECT: 
 	{
@@ -220,24 +225,33 @@ dump_info::di_dump(zval_user zu, int level)
 		 * if the result won't be used. (https://github.com/php/php-src/issues/8044) */
 		zend_object *zobj = zu.zobject();
 		const char *prefix = get_object_prefix(zobj);
+
 		ss << prefix;
-		di_showobj(zobj);
-		ss << "test recursive = " << (int)GC_IS_RECURSIVE(zobj) << '\n';
+
+		
 		if (GC_IS_RECURSIVE(zobj)) {
-				PUTS("*RECURSION*\n");
-				return di_return();
+
+				ss << "*RECURSION* ";
+				di_showobj(zobj);
+				return;
 		}
 		
 		GC_PROTECT_RECURSION(zobj);
-		ss << "is recursive = " << (int)GC_IS_RECURSIVE(zobj) << '\n';
+		di_showobj(zobj);
 		myht = zend_get_properties_for(zu, ZEND_PROP_PURPOSE_DEBUG);
 
 		if (myht) 
 		{
-			show_properties(zobj, myht, level);
-			zend_release_properties(myht);
-		}
+			htab_mgr adopter;
 
+			adopter.adopt(myht);
+			//di_showdata(myht);
+			show_properties(zobj, myht, level);
+			di_showarray(myht);
+
+		}
+		ss << " unprotect ";
+		di_showobj(zobj);
 		GC_UNPROTECT_RECURSION(zobj);
 		break;
 	}
@@ -246,33 +260,31 @@ dump_info::di_dump(zval_user zu, int level)
 		break;
 	}
 	case IS_REFERENCE:
+		indent(level);
 		di_showref(Z_REF_P(zu));
-
-		result = dump_info::dump(Z_REFVAL_P(zu), level + 1);
-		if (result.size())
-		{
-			ss << result;
-		}
-		result.init();
+		di_dump(Z_REFVAL_P(zu), level + 1);
 		break;
 	default:
+		indent(level);
+		di_showmem(zu);
 		ss << "UNKNOWN:0\n";
 		break;
 	}
-
-	result = std::move(ss);
-	//zend_printf("end %ld level %d\n",zu.ztype(), level);
-	return result;
 }
+
+void dump_info::indent(int ct)
+{
+	for (int i = 0; i < ct; i++)
+	{
+		ss << "  ";
+	}
+}	
 
 
 	void dump_info::di_showmem(zval *m) 
 	{
-		for (int i = 0; i < indents_; i++)
-		{
-			ss << "  ";
-		}
-		ss << "zval " << m << " ";
+
+		ss << "zval " << (void*)m << " ";
 
 		int  ztype = Z_TYPE_P(m);
 
@@ -341,7 +353,6 @@ dump_info::di_dump(zval_user zu, int level)
 			else {
 				ss <<" *";
 			}
-			ss << '\n';
 		}
 	}
 
@@ -365,10 +376,10 @@ dump_info::di_dump(zval_user zu, int level)
 			ss << " cow ";
 		}
 		*/
-		ss << " gc " << (size_t) GC_REFCOUNT(ht)+refadj << '\n';
+		ss << " gc " << (size_t) GC_REFCOUNT(ht)+refadj;
 
 	}
-	void dump_info::di_showdata(HashTable* ht)
+	void dump_info::di_showdata(HashTable* ht, int level)
 	{
 		if (!ht) {
 			ss << "is nullptr\n";
@@ -378,25 +389,29 @@ dump_info::di_dump(zval_user zu, int level)
 		di_showarray(ht);
 
 		htab_walk wk;
-
+		indent(level);
 		ss << "--[\n";
-		indents_++;
 
 		auto val = wk.value();
-		auto key = wk.key();
+		auto key = wk.key();	
+
 		for(wk.start(ht); wk.ok(); wk.next())
 		{
+
+			indent(level+1);
 			ss << "key: ";
 			di_showmem(key);
+			ss << '\n';
+			indent(level+1);
 			ss << "val: ";
 			di_showmem(val);
+			ss << '\n';
 			if (val.isArray())
 			{
-				di_showdata(val.zarray());
+				di_showdata(val.zarray(), level+1);
 			}
 		}
-		indents_--;
-
+		indent(level);
 		ss << "]--\n";
 	}
 	void dump_info::di_showobj(zend_object* obj)
@@ -420,10 +435,13 @@ dump_info::di_dump(zval_user zu, int level)
 
 	void dump_info::output()
 	{
-		zstr_mgr txt(std::move(ss));
-		zend_printf("%s\n", txt.data());
+		//zstr_mgr txt(std::move(ss));
+		//zend_printf("%s\n", txt.data());
 	} 
-
+	void dump_info::endl()
+	{
+		ss << '\n';
+	}
 
 void showmem(const char* s, zval* m)
 {
@@ -431,13 +449,14 @@ void showmem(const char* s, zval* m)
 	{
 		return;
 	}
-	if (m == nullptr) {
-		zend_printf("%s passed nullptr\n", s);
+	if (s == nullptr) {
+		zend_printf("passed nullptr\n");
 		return;
 	}
 	dump_info di(s);
 	di.di_showmem(m);
-	di.output();
+	di.endl();
+	
 }
 void showstr(const char* s, zend_string* zs)
 {
@@ -480,6 +499,7 @@ void showobj(const char* s, zend_object* obj)
 	di.di_showobj(obj);
 	di.output();
 }
+
 
 bool dump_info::run_state_ = false;
 

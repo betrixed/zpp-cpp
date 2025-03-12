@@ -6,6 +6,12 @@ use Wcc\RequestGlobals;
 
 require "bootstrap.php";
 
+$etest = new EmptyTest();
+
+debug_zval_dump($etest);
+
+debug_zpp_dump($etest);
+
 function hide1() {
 	if (class_exists(EmptyTest::class)) {
 		$c1 = new EmptyTest();
@@ -156,7 +162,7 @@ $ic = new ICache([], $svc);
 echo "icache" . PHP_EOL;
 
 
-$svc->set('cache', $ic);
+//$svc->set('cache', $ic);
 
 echo 'has = ' . $svc->has('cache') . PHP_EOL;
 

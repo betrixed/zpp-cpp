@@ -30,70 +30,68 @@ zval_user::ref_type() const
     if (!p_) {
         return IS_NULL;
     }
-    zval* zv = p_;
-    ZVAL_DEREF(zv);
-    return Z_TYPE_P(zv);
+    return Z_TYPE_P(zval_user::real_zval(p_));
 }
 
 
 bool 
 zval_user::isDouble() const
 {
-    return ((p_ != nullptr) && (ref_type() == IS_DOUBLE));
+    return (p_ && (ref_type() == IS_DOUBLE));
 }
 
 bool 
 zval_user::isLong() const
 {
-    return ((p_ != nullptr) && (ref_type() == IS_LONG));
+    return (p_ && (ref_type() == IS_LONG));
 }
 
 bool 
 zval_user::isArray() const
 {
-    return ((p_ != nullptr) && (ref_type() == IS_ARRAY));
+    return (p_ && (ref_type() == IS_ARRAY));
 }
 
 
 bool 
 zval_user::isNull() const
 {
-    return ((p_ == nullptr) || (ref_type() == IS_NULL));
+    return (!(p_) || (ref_type() == IS_NULL));
 }
 
 bool 
 zval_user::isObject() const
 { 
-    return ((p_ != nullptr) && (ref_type() == IS_OBJECT));
+    return (p_ && (ref_type() == IS_OBJECT));
 }
 
 bool 
 zval_user::ok() const {
-    return ((p_ != nullptr) && (ref_type() >= IS_TRUE));
+    return (p_ && (ref_type() >= IS_TRUE));
 }
 
 bool 
 zval_user::isString() const
 {
-    return ((p_ != nullptr) && (ref_type() == IS_STRING));
+    return (p_ && (ref_type() == IS_STRING));
 }
 
 bool 
 zval_user::isTrue() const 
 {
-    return ((p_ != nullptr) && (ref_type() == IS_TRUE));
+    return (p_ && (ref_type() == IS_TRUE));
 }
 
 bool 
 zval_user::isFalse() const 
 {
-    return ((p_ == nullptr) || (ref_type() == IS_FALSE));
+    return ( !(p_) || (ref_type() == IS_FALSE));
 }
 
 bool 
 zval_user::isPointer() const
 {
-    return ((p_ == nullptr) || (ref_type() == IS_PTR));
+    return (p_ && (ref_type() == IS_PTR));
 }
 
 zend_string* 
@@ -102,9 +100,8 @@ zval_user::className() const
 	if (!p_)
 		return nullptr;
 
-	zval* zv = (zval*) p_;
+	zval* zv = zval_user::real_zval(p_);
 
-	ZVAL_DEREF(zv);
 	if (Z_TYPE_P(zv) == IS_OBJECT)
 	{
 		zend_class_entry *ce = Z_OBJCE_P(zv);
@@ -120,9 +117,7 @@ zval_user::zobject() const
 	if (!p_) {
 		return nullptr;
 	}
-	zval* zv = (zval*) p_;
-
-	ZVAL_DEREF(zv);
+	zval* zv = zval_user::real_zval(p_);
 
 	if (Z_TYPE_P(zv) != IS_OBJECT) {
 		return nullptr;
@@ -136,13 +131,13 @@ size_t zval_user::size() const
 	{
 		return 0;
 	}
-	auto ztype = Z_TYPE_P(p_);
-	switch(ztype)
+	zval* zv = zval_user::real_zval(p_);
+	switch(Z_TYPE_P(zv))
 	{
 	case IS_ARRAY:
-		return zend_array_count(Z_ARRVAL_P(p_));
+		return zend_array_count(Z_ARRVAL_P(zv));
 	case IS_STRING:
-		return ZSTR_LEN(Z_STR(*p_));
+		return ZSTR_LEN(Z_STR_P(zv));
 	default:
 		return 0;
 	}
@@ -161,15 +156,11 @@ zval_user::to_zstr() const
 		return result;
 	}
 
-	zval* zv = (zval*) p_;
-	ZVAL_DEREF(zv);
+	zval* zv = zval_user::real_zval(p_);
 
 	if (Z_TYPE_P(zv) != IS_STRING) {
 		// return a string representation
 		result.adopt(zval_get_string(zv));
-	}
-	else {
-		result = zv;
 	}
 	return result;
 }
@@ -179,8 +170,7 @@ zval_user::zstr() const
 {	
 	if (!p_)
 		return nullptr;
-	zval* zv = p_;
-	ZVAL_DEREF(zv);
+	zval* zv = zval_user::real_zval(p_);
 	if (Z_TYPE_P(zv) != IS_STRING)
 	{
 		return nullptr;
@@ -207,8 +197,7 @@ zval_user::isCallable()  const
 {
 	if (!p_)
 		return false;
-	zval* zv = p_;
-	ZVAL_DEREF(zv);
+	zval* zv = zval_user::real_zval(p_);
 	return (zend_is_callable(zv, 0, nullptr));
 }
 
@@ -230,9 +219,7 @@ zval_user::zdouble() const
 	if (!p_) {
 		return 0.0; 
 	}
-	zval* zv = (zval*) p_;
-	ZVAL_DEREF(zv);
-
+	zval* zv = zval_user::real_zval(p_);
 	if (Z_TYPE_P(zv) != IS_DOUBLE) {
 		return zval_get_double_func(zv);
 	}
@@ -246,8 +233,7 @@ zval_user::voidptr() const
 	{
 		return nullptr; 
 	}
-	zval* zv = (zval*) p_;
-	ZVAL_DEREF(zv);
+	zval* zv = zval_user::real_zval(p_);
 	if ( Z_TYPE_P(zv) != IS_PTR) {
 		return nullptr;
 	}
@@ -260,10 +246,8 @@ zval_user::zbool() const {
 	{
 		return false;
 	}
-	zval* zv = (zval*) p_;
-	ZVAL_DEREF(zv);
-	int ztype = Z_TYPE_P(zv);
-	switch(ztype) {
+	zval* zv = zval_user::real_zval(p_);
+	switch(Z_TYPE_P(zv)) {
 		case IS_TRUE: return true;
 		case IS_FALSE: return false;
 		default: {
@@ -282,11 +266,10 @@ zval_user::zlong() const
 	{
 		return 0;
 	}
-	zval* zv = (zval*)p_;
-	ZVAL_DEREF(zv);
+	zval* zv = zval_user::real_zval(p_);
 
-	int ztype = Z_TYPE_P(zv);
-	switch(ztype) {
+	switch(Z_TYPE_P(zv))
+	{
 		case IS_LONG: return Z_LVAL_P(zv);
 		case IS_TRUE: return 1;
 		case IS_FALSE: return 0;
@@ -299,8 +282,7 @@ zval_user::zarray() const
 {
 	if (!p_)
 		return nullptr;
-	zval* zv = (zval*) p_;
-	ZVAL_DEREF(zv);
+	zval* zv = zval_user::real_zval(p_);
 
 	if (Z_TYPE_P(zv) != IS_ARRAY) {
 		return nullptr;

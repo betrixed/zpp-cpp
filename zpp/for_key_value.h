@@ -22,6 +22,7 @@ protected:
 	int             h_;
 	zend_string*  	key_;
 	zval*			zptr_;
+	zval*			next_;
 public:
 	zval* 				value() const { return zptr_; }
 	zend_long       	index() const { return h_; }

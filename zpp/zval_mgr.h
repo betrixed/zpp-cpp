@@ -38,6 +38,8 @@ protected:
 
     void assign_ptr(zval* p);
 
+    void copy(zval* p);
+
     friend class zval_user;
     friend class zstr_mgr;
     friend class zobj_mgr;
@@ -45,7 +47,7 @@ protected:
     friend class htab_walk;
     
 public:
-
+    static zval_mgr EmptyArray;
     //! Return true if contents become invalid
     static bool try_decref(zval* p);
 

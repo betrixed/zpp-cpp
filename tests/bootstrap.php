@@ -45,6 +45,7 @@ $loader->addPathArray([
 $loader->register();
 
 class EmptyTest {
+    public array $empty = [];
 };
 
 

@@ -80,6 +80,8 @@ namespace zpp {
 
         void push_back(const char* s, std::size_t slen);
 
+        void setnull(zend_string* key);
+        
         void set(zend_string* key, zval* value);
         void set(zend_string* key, zend_string* value);
         void set(zend_string* key, HashTable* value);

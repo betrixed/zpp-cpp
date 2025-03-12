@@ -9,6 +9,8 @@
 
 namespace zpp {
 
+zval_mgr zval_mgr::EmptyArray = zval_mgr((HashTable*) &zend_empty_array);
+
 void 
 zval_mgr::init()
 {
@@ -57,7 +59,7 @@ zval_mgr::empty_array()
 void
 zval_mgr::addref()
 {
-    Z_TRY_ADDREF(zv_);
+    try_decref(&zv_);
     /*
     if (Z_REFCOUNTED_P(&zv_))
     {
@@ -121,20 +123,21 @@ zval_mgr::zval_mgr(bool bval)
 zval_mgr::zval_mgr(zval* zv)
 {
     init();
-    ZVAL_COPY(&zv_, zv);
+    ZVAL_COPY_VALUE(&zv_, zv);
 }
 
 zval_mgr::zval_mgr(const zval_user& rc)
 {
     init();
-    ZVAL_COPY(&zv_, rc);
+    ZVAL_COPY_VALUE(&zv_, rc);
 }
 
 const zval_mgr& 
 zval_mgr::operator=(zval* rc)
 {
     lose();
-    ZVAL_COPY(&zv_, rc);
+
+    ZVAL_COPY_VALUE(&zv_, rc);
     return *this;
 }
 
@@ -156,7 +159,7 @@ zval_mgr::zval_mgr(const zval_mgr& rc, bool byRef)
         ZVAL_DEREF(p);
     }
 
-    ZVAL_COPY(&zv_, p);
+    copy(p);
     
     if (byRef)
     {
@@ -171,8 +174,14 @@ zval_mgr::zval_mgr(zval_mgr&& m)
     m.init();
 }
 
-/** try not to collide with self */
 
+/** copy with careful addref */
+void
+zval_mgr::copy(zval *p)
+{
+    ZVAL_COPY_VALUE(&zv_, p);
+    try_addref(&zv_);
+}
 void 
 zval_mgr::assign_ptr(zval* p)
 {
@@ -192,7 +201,7 @@ zval_mgr::assign_ptr(zval* p)
 	if (p != &zv_)
 	{
 		// acquire with reference count;
-		ZVAL_COPY(&zv_, p);
+		copy(p);
 	}
 	// !!do not alter original zval pointed to
 	
@@ -214,7 +223,7 @@ zval_mgr::operator=(zval_mgr&& rc)
 	if (&rc != this)
 	{
 		lose();
-		ZVAL_COPY_VALUE(&zv_, &rc.zv_);
+		copy(&rc.zv_);
 		rc.init();
 	}
     return *this;
@@ -236,7 +245,7 @@ const zval_mgr&
 zval_mgr::operator=(const zval_mgr &rc)
 {
     lose(); 
-    ZVAL_COPY(&zv_, (zval*) &rc.zv_);
+    copy((zval*) &rc.zv_);
     return *this;
 }
 
@@ -331,8 +340,6 @@ zval_mgr::operator=(HashTable* rc)
 void 
 zval_mgr::try_addref(zval* p)
 {
-    
-
     HashTable*      ht;
     zend_object*    ob;
 

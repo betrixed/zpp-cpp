@@ -294,7 +294,6 @@ bool Services::isActive(zstr_user name)
 
 bool Services::has(zstr_user name)
 {
-
 	return (htab_read(active_).has_key(name) || htab_read(defer_).has_key(name));
 }
 
@@ -306,7 +305,17 @@ void Services::setDefer(zstr_user name, zval_user value)
 
 void  Services::set(zstr_user name, zval_user value)
 {
-	htab_write(active_).set(name, value);
+
+	zend_printf("services set %s\n", name.data());
+	zval* data = (zval*) value;
+	zend_string* key = (zend_string*) name;
+
+	showmem("services value", data);
+
+	htab_write temp(active_);
+
+	temp.set(key, data);
+	showarray("active_", active_);
 }
 
 zval_mgr  

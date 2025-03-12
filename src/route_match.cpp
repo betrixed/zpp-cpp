@@ -449,7 +449,6 @@ htab_mgr RouteMatch::fetchArgs()
 		
 		for( walk.start(params_ht); walk.ok(); walk.next())
 		{	
-
 			if (!margs_ht.try_fetch(val,test))
 			{
 				zstr_mgr svalue(val.to_zstr());
