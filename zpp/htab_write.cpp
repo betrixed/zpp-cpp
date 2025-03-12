@@ -95,16 +95,17 @@ void htab_write::push_back(HashTable* t)
 	{
 		ZVAL_NULL(&tmp);
 	}
-	else if (t == (HashTable*) &zend_empty_array)
+	else
 	{
-		ZVAL_INDIRECT(&tmp, (zval*) zval_mgr::EmptyArray);
-	}
-	else {
 		ZVAL_ARR(&tmp, t);
+		if (GC_FLAGS(t) & GC_IMMUTABLE)
+			Z_TYPE_FLAGS(tmp) = 0; // mark not reference counted
 	}
+
 	if (zend_hash_next_index_insert(ht_, &tmp))
 	{
-		zval_mgr::try_addref(&tmp);
+		if (Z_TYPE_FLAGS(tmp) != 0)
+			zval_mgr::try_addref(&tmp);
 	}
 }
 
@@ -148,7 +149,8 @@ void htab_write::push_back(zval* zv)
 {
 	if (zend_hash_next_index_insert(ht_, zv))
 	{
-		zval_mgr::try_addref(zv);
+		if (Z_TYPE_FLAGS_P(zv) != 0)
+			zval_mgr::try_addref(zv);
 	}
 }
 
@@ -244,23 +246,11 @@ void htab_write::set(zend_string* key, HashTable* t)
 	//showstr("htab_write::set  key", key);
 
 	zval tmp = {0};
-	if (!t)
-	{
-		ZVAL_NULL(&tmp);
-	}
-	else if (t == (HashTable*) &zend_empty_array)
-	{
-		showmem("empty array", zval_mgr::EmptyArray);
-		ZVAL_INDIRECT(&tmp, (zval*) zval_mgr::EmptyArray);
-		showmem("set indirect", &tmp);
-	}
-	else {
-		ZVAL_ARR(&tmp, t);
-	}
+	zval_user(&tmp).bind_array(t);
 
 	if (zend_hash_update(ht_, key, &tmp))
 	{
-		if (Z_TYPE_P(&tmp) == IS_ARRAY)
+		if (Z_REFCOUNTED(tmp))
 			htab_mgr::try_addref(t);
 	}
 	//showarray("htab_write::set  HashTable* ", value);
@@ -308,7 +298,6 @@ void htab_write::set(zend_string* key, zval* val)
 	if (zend_hash_update(ht_, key, val))
 	{
 		zval_mgr::try_addref(val);
-		showdata("try_addref ", ht_);
 	}	
 }
 
@@ -361,13 +350,12 @@ void htab_write::set(zend_long idx, zval_user value)
 void htab_write::set(zend_long idx, HashTable* value)
 {
 	zval temp = {0};
-	if (value)
-		ZVAL_ARR(&temp, value);
-	else
-		ZVAL_NULL(&temp);
+	
+	zval_user(&temp).bind_array(value);
+	
 	if (zend_hash_index_update(ht_, idx, &temp));
 	{
-		if (value)
+		if (Z_TYPE_FLAGS(temp) != 0)
 			htab_mgr::try_addref(value);
 	}
 }

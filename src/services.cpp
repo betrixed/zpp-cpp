@@ -58,9 +58,6 @@ namespace wcc
 
 		virtual void end_req()
 		{
-			#ifdef DEBUG_EXTRA
-				zend_printf("end_req services");
-			#endif
 			g_services.init();
 		}
 	};
@@ -78,11 +75,6 @@ Services::call_value(zobj_user callme)
 
 Services::~Services()
 {
-#ifdef DEBUG_EXTRA
-	showarray("instances_", instances_);
-	showarray("defer_", defer_);
-	showarray("active_", active_);
-#endif
 }
 
 
@@ -305,17 +297,12 @@ void Services::setDefer(zstr_user name, zval_user value)
 
 void  Services::set(zstr_user name, zval_user value)
 {
-
-	zend_printf("services set %s\n", name.data());
 	zval* data = (zval*) value;
 	zend_string* key = (zend_string*) name;
-
-	showmem("services value", data);
 
 	htab_write temp(active_);
 
 	temp.set(key, data);
-	showarray("active_", active_);
 }
 
 zval_mgr  
@@ -363,18 +350,14 @@ Services::setThrowFail(bool value)
 
 void Services::debug_info(htab_write info)
 {
-	//showarray("debug_info-0", info);
+	base_d::debug_info(info);
 
-	//base_d::debug_info(info);
-
-	//showarray("debug_info-1", info);
-	//showarray("key active_", active_);
 	info.set(SVC_data.active, active_);
 	info.set(SVC_data.defer, defer_);
 	info.set(SVC_data.instances, instances_);
 	info.set(SVC_data.throw_fail, throw_fail_);
 	info.set(SVC_data.defer_ct,   defer_ct_);
-	//showarray("debug_info", info);
+
 }
 
 }; // namespace wcc

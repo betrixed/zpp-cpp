@@ -150,9 +150,9 @@ function itdepends()
 	$d = null;
 }
 
-//hide1();
-//hide2();
-//itdepends();
+hide1();
+hide2();
+itdepends();
 
 $svc = Services::instance();
 //debug_zval_dump($svc);
@@ -167,7 +167,7 @@ echo "icache" . PHP_EOL;
 echo 'has = ' . $svc->has('cache') . PHP_EOL;
 
 debug_zpp_dump($ic);
-//debug_zval_dump($ic);
+debug_zval_dump($ic);
 
 //$cfg = $ic->getService('config');
 

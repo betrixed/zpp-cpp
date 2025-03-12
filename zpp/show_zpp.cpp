@@ -116,11 +116,10 @@ dump_info::show_properties(zend_object* zobj, HashTable* myht, int level)
 		zend_string* key = fkv.key();
 
 		if (Z_TYPE_P(val) == IS_INDIRECT) {
-			zend_printf("property is INDIRECT\n");
 			val = Z_INDIRECT_P(val);
-			/*if (key) {
+			if (key) {
 				prop_info = zend_get_typed_property_info_for_slot(zobj, val);
-			}*/
+			}
 		}
 
 		if (!Z_ISUNDEF_P(val) || prop_info) {
@@ -128,8 +127,7 @@ dump_info::show_properties(zend_object* zobj, HashTable* myht, int level)
 		}
 	}
 	indent(level);
-	ss << "} " << level << " list ";
-
+	ss << "} " << level << '\n';
 }
 
 
@@ -169,6 +167,7 @@ dump_info::di_dump(zval_user zu, int level)
 		break;
 	case IS_STRING:
 		di_showstr(zu.zstr());
+		endl();
 		break;
 	case IS_ARRAY:
 		myht = zu.zarray();
@@ -177,15 +176,13 @@ dump_info::di_dump(zval_user zu, int level)
 
 		if (!imflag) {
 			if (GC_IS_RECURSIVE(myht)) {
-				ss << "*RECURSION of Array*\n";
+				di_showarray(myht,refadjust);
+				ss << "*RECURSION*\n";
 				return;
 			}
 			GC_ADDREF(myht);
 			refadjust = -1;
 			GC_PROTECT_RECURSION(myht);
-		}
-		else {
-			ss << " Immutable Array ";
 		}
 		packed = HT_IS_PACKED(myht) ? "packed " : "";
 
@@ -245,13 +242,11 @@ dump_info::di_dump(zval_user zu, int level)
 			htab_mgr adopter;
 
 			adopter.adopt(myht);
-			//di_showdata(myht);
+
 			show_properties(zobj, myht, level);
-			di_showarray(myht);
 
 		}
-		ss << " unprotect ";
-		di_showobj(zobj);
+
 		GC_UNPROTECT_RECURSION(zobj);
 		break;
 	}

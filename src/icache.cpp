@@ -99,29 +99,11 @@ void ICache::__construct(zval_user options, zval_user services)
 
 void ICache::debug_info(htab_write s)
 {
-	//zend_printf("debug_info write %lx\n", (HashTable*)s);
-
 	s.set(IC_STR.cached, cached_);
 	s.set(IC_STR.svc_cache, svc_cache_);
-	//showarray("svc_cache_", svc_cache_);
-	//showstr("prefix_", prefix_);
 	s.set(IC_STR.prefix_key, prefix_);
-
-//showarray("options_", options_);
-//showobj("services", services_);
 	s.set(IC_STR.options, options_);
-
-	/*if (options_.isEmpty())
-	{
-		s.setnull(IC_STR.options);
-	}
-	else {
-		s.set(IC_STR.options, options_);
-	}*/
-	//showobj("services", services_);
 	s.set(IC_STR.services, services_);
-	
-
 }
 
 void ICache::addLocal(zval_user pkg)
@@ -445,9 +427,7 @@ ZEND_METHOD(Wcc_ICache, __construct)
 		options_z.empty_array();
 		options = options_z;
 	}
-	else {
-		showmem("construct icache", options);
-	}
+
 	if (!services_obj) {
 		services_z = Services::instance();
 		services_obj = services_z;

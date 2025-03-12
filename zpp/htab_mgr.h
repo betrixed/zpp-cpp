@@ -20,7 +20,8 @@ namespace zpp {
         friend class htab_write;
 
     public:
-
+        
+        
         static HashTable* new_array();
         static HashTable* empty_array();
         static void try_addref(HashTable* h);
@@ -64,7 +65,7 @@ namespace zpp {
         void  move_zv(zval* return_value);
 
         bool isNull() const { return !(ht_); }
-        bool isEmpty() const;
+        bool isEmpty() const; 
 
         //! Adopt a system source hashtable with rc==1
         void adopt(HashTable* h);

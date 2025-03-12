@@ -314,6 +314,9 @@ zval_user::bind_string(zend_string* s)
     	{
     		GC_ADDREF(s);
 	    }
+	    else {
+	    	Z_TYPE_FLAGS_P(p_) = 0; 
+	    }
     }
     else {
         ZVAL_NULL(p_);
@@ -343,9 +346,12 @@ zval_user::bind_array(HashTable* ht)
 {
     if (ht) {
         ZVAL_ARR(p_, ht);
-        showmem("bind_array",p_);
-        if ( !(ht->gc.u.type_info & GC_IMMUTABLE))
+        if ( !(ht->gc.u.type_info & GC_IMMUTABLE)){
             ht->gc.refcount++;
+        }
+        else { // clear 
+        	Z_TYPE_FLAGS_P(p_) = 0; 
+        }
     }
     else {
         ZVAL_NULL(p_);
