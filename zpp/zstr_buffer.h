@@ -1,77 +1,17 @@
 #ifndef ZSTR_BUFFER_H
 #define ZSTR_BUFFER_H
 
-#ifndef ZSTR_MGR_H
-#include "zstr_mgr.h"
+#ifndef ZSTR_OUTPUT_H
+#include "zstr_output.h"
 #endif
 
-#ifndef ZSTR_USER_H
-#include "zstr_user.h"
-#endif
+extern "C" {
+	#include <Zend/zend_smart_str.h>
+};
+
 
 namespace zpp {
 
-
-enum Numf {
-	DEC,
-	HEX
-};
-
-class iform {
-public:
-	Numf value_;
-
-	iform()
-	{
-		value_ = Numf::DEC;
-	}
-
-	iform(Numf nf) : value_(nf) 
-	{
-
-	}
-};
-
-	class zstr_output {
-	protected:
-		iform   	 nf_;
-	public:
-		virtual void append(const char* c, size_t slen);
-
-		virtual void append(char c);
-
-		virtual ~zstr_output() {}
-
-		void append(zend_string* s);
-
-		zstr_output& operator<<(const iform& form);
-
-		zstr_output& operator<<(const zstr_mgr &w);
-		
-		zstr_output& operator<<(zstr_user w);
-
-		zstr_output& operator<<(zend_string* s);
-
-		zstr_output& operator<<(const char* c);
-
-		zstr_output& operator<<(size_t nn);
-
-		zstr_output& operator<<(void* vp);
-
-		zstr_output& operator<<(double d);
-
-		zstr_output& operator<<(int iv);
-
-		zstr_output& operator<<(long iv);
-
-		zstr_output& operator<<(char c);
-
-		zstr_output& operator<<(const std::string_view &v);
-
-		zstr_output& operator<<(zval* zv);
-
-		void quote_name(const char* name);
-	};
 
 //! zstr_buffer with memory layout as "smart_string"
 	class zstr_buffer : public zstr_output {
@@ -123,17 +63,13 @@ public:
 		// Finalize, give away the zend_string* (result needs adoption)
 		zend_string* zstr();
 
+		// view of content
+		std::string_view vstr() const;
+
 		void reset(); // release string, start again
 
-		size_t size() 
-		{
-			if (buf.s) {
-				return ZSTR_LEN(buf.s);
-			}
-			else {
-				return 0;
-			}
-		}
+		const char* data() const;
+		size_t size() const;
 	};
 
 	

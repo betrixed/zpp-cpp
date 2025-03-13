@@ -1,7 +1,7 @@
 <?php
-namespace Wc;
+namespace Wcc;
 
-use Wcc\{Route,RouteMatch,RouteSet,Services, Target};
+use Wcc\{Route,RouteMatch,RouteSet,RouteAdd,Services, Target};
 
 require "bootstrap.php";
 
@@ -12,7 +12,8 @@ echo "Made Route" . PHP_EOL;
 
 $r2 = Route::get("/target", Target::go(EmptyTest::class, "func"))->name("default");
 echo "Made Route r2" . PHP_EOL;
-echo print_r($route, true) . PHP_EOL;
+
+
 
 $rset = new RouteSet();
 
@@ -26,7 +27,8 @@ $rm = new RouteMatch("/index.php", Route::GET_I, Route::AJAX_ALSO);
 
 echo print_r($rm, true) . PHP_EOL;
 
-if ($rset->match($rm)) {
+debug_zpp_dump($rset);
+if ($rm->findRoute($rset)) {
 	echo "OK" . PHP_EOL;
 }
 else {

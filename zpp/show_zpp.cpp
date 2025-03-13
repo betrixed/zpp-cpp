@@ -83,15 +83,23 @@ dump_info::di_show_resource(zval* zu)
 		<< " refcount(" << gc << ")\n";
 }
 
-zstr_mgr // static
+void // static
 dump_info::dump(zval_user val, int level)
 {
 	dump_info di;
 
 	di.di_dump(val, level);
 
+}
 
-	return zstr_mgr();
+void // static
+dump_info::msg_dump(const char* msg, zval_user val)
+{
+	dump_info di;
+
+	di.output(msg);
+
+	di.di_dump(val);
 }
 
 dump_info::dump_info(const char* s)
@@ -428,8 +436,9 @@ void dump_info::indent(int ct)
 			di_showmem(m);
 	}
 
-	void dump_info::output()
+	void dump_info::output(const char* msg)
 	{
+		ss << msg;
 		//zstr_mgr txt(std::move(ss));
 		//zend_printf("%s\n", txt.data());
 	} 
@@ -461,7 +470,7 @@ void showstr(const char* s, zend_string* zs)
 	}
 	dump_info di(s);
 	di.di_showstr(zs);
-	di.output();
+	di.endl();
 }
 void showarray(const char* s, HashTable* ht)
 {
@@ -471,7 +480,7 @@ void showarray(const char* s, HashTable* ht)
 	}
 	dump_info di(s);
 	di.di_showarray(ht);
-	di.output();
+	di.endl();
 }
 void showdata(const char* s, HashTable* ht)
 {
@@ -481,7 +490,8 @@ void showdata(const char* s, HashTable* ht)
 	}
 	dump_info di(s);
 	di.di_showdata(ht);
-	di.output();
+	di.endl();
+
 }
 
 void showobj(const char* s, zend_object* obj)
@@ -492,7 +502,8 @@ void showobj(const char* s, zend_object* obj)
 	}
 	dump_info di(s);
 	di.di_showobj(obj);
-	di.output();
+	di.endl();
+
 }
 
 

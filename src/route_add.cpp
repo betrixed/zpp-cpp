@@ -78,6 +78,7 @@ RouteAdd::addRoutes(htab_read list, zstr_user prefix, zstr_user module)
 			url_prefix_.init();
 		}
 	}
+	showstr("url_prefix_", url_prefix_);
 
 	if(module.size())
 	{
@@ -89,17 +90,24 @@ RouteAdd::addRoutes(htab_read list, zstr_user prefix, zstr_user module)
 			module_name_.init();
 		}
 	}
-
+	showstr("module_name_", module_name_);
 	htab_walk wk;
 	auto value = wk.value();
+	showobj("RouteSet", route_set_);
+
 	RouteSet* rs = zobj_toc<RouteSet>(route_set_);
 
+	showarray("list", list);
 	for(wk.start(list); wk.ok(); wk.next())
 	{
 		zobj_user route(value.zobject());
+
+		showobj("route", route);
+
 		Route* r = zobj_toc<Route>(route);
 
 		zstr_user compiled = r->getCompiled();
+		showstr("compiled", compiled);
 
 		if (!compiled.size()) {
 			ready(r);
@@ -166,9 +174,10 @@ void RouteAdd::ready(Route* route)
 			captures = urlseg.captures();
 		}
 	}
-	
-	htab_mgr segs;
 
+	zstr_output sink;
+
+	
 
 	// try and prevent bad double-// without pattern reset
 	zstr_user prefix(url_prefix_);
@@ -193,6 +202,8 @@ void RouteAdd::ready(Route* route)
 			}
 		}
 	}
+
+	sink << pr2 << " pattern vstr" << pattern.vstr() << '\n';
 	//showstr("pattern ", pattern);
 	zstr_mgr temp;
 
@@ -206,8 +217,6 @@ void RouteAdd::ready(Route* route)
 	htab_mgr params_tab;
 	htab_write params(params_tab);
 
-
-	// while allows for a break
 	while (pr2 > 0) 
 	{ 
 		htab_read m2(captures);
@@ -221,6 +230,7 @@ void RouteAdd::ready(Route* route)
 		auto value = wk.value();
 
 		int   param_ix = 1;
+		showdata("segs", segs);
 
 		for(wk.start(segs); wk.ok(); wk.next())
 		{
@@ -261,10 +271,8 @@ void RouteAdd::ready(Route* route)
 				pattern << '/' << blob;
 				compiled << "/([^/]*)";
 			}
-
 		}
-
-
+		break;
 	}
 	auto pcount = params.size();
 	zstr_mgr cpattern;

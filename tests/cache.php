@@ -10,6 +10,7 @@ $svc = Services::instance();
 
 $svc->set("config", new Config());
 
+debug_zpp_dump($svc);
 
 $file = "tests/routeset.sample.cache";
 
@@ -17,6 +18,7 @@ $file = "tests/routeset.sample.cache";
 
 $icd = unserialize(file_get_contents($file));
 
+debug_zpp_dump($icd);
 $file = "tests/routeset2.sample.cache";
 
 $icd = unserialize(file_get_contents($file));

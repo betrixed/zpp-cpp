@@ -30,6 +30,7 @@ protected:
     zval *p_;
 
     friend class zval_mgr;
+    friend class htab_read;
     friend class htab_write;
 
     void bind_string(zend_string* s);

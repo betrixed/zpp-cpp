@@ -340,8 +340,7 @@ bool htab_read::try_fetch(zend_string* key, zval_user& store) const
 
 void htab_read::return_zv(zval* return_value) const
 {
-	 ZVAL_ARR(return_value, ht_);
-	 Z_TRY_ADDREF_P(return_value);
+	 zval_user(return_value).bind_array(ht_);
 }
 
 //* return indexed array of values

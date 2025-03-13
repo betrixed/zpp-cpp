@@ -11,7 +11,7 @@ class dump_info {
 private:
 	zstr_output ss;
 
-	void di_dump(zval_user val, int level);
+	
 	void object_property_dump(
 		zend_property_info *prop_info, 
 		zval *zv, 
@@ -23,9 +23,11 @@ public:
 
 	static bool run_state_;
 
+	static void msg_dump(const char* msg, zval_user val);
 
-	static zstr_mgr dump(zval_user val, int level = 0);
+	static void dump(zval_user val, int level = 0);
 
+	void di_dump(zval_user val, int level = 0);
 	void indent(int ct);
 	void di_showmem(zval *m);
 	void di_showstr(zend_string* p);
@@ -34,7 +36,7 @@ public:
 	void di_showobj(zend_object* obj);
 	void di_showref(zend_reference* ref);
 	void di_show_resource(zval *r);
-	void output();
+	void output(const char* msg);
 	void endl();
 	
 	void show_properties(zend_object* zobj, HashTable* h, int level);

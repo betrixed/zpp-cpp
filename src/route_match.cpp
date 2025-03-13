@@ -102,7 +102,7 @@ RouteMatch::debug_info(htab_write hw)
 Route*    
 RouteMatch::testRoute(zobj_user ro)
 {
-
+	//showobj("testRoute ro", ro);
 	if (!Route::omg.myType(ro)) 
 	{
 		zstr_user classname(zend_std_get_class_name(ro));
@@ -114,9 +114,10 @@ RouteMatch::testRoute(zobj_user ro)
 
 	if ( ((verb_flag_ & robj->verbs_) != 0) && ((ajax_flag_ & robj->ajax_) != 0) ) 
 	{
+		//zend_printf("matched\n");
 		return robj;
 	}
-
+	//zend_printf("discarded v %ld a %ld\n", robj->verbs_, robj->ajax_);
 	return nullptr;
 }
 
@@ -161,6 +162,8 @@ RouteMatch::find_route(RouteSet* routeset)
 
 	if (list.try_fetch(uri_, match)) 
 	{
+		//showmem("fetched", match);
+
 		robj = firstMatch(match);
 
 		if (robj) 

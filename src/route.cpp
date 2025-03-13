@@ -154,7 +154,7 @@ int isRouteObject(zend_object* obj) {
 }
 
 
-Route::Route() : base_d(), verbs_(0), ajax_(0)
+Route::Route() : base_d(), verbs_(html::V_GET), ajax_(ajax::AJ_NONE)
 {
 	compiled_ = zstr_empty();
 	pattern_ = zstr_empty();
@@ -224,7 +224,7 @@ Route::__unserialize(htab_read htab)
 
 	//showmem("target_ before  ", target_);
 	target_ = htab.get(route_data.cc_target);
-
+	dump_info::msg_dump("target_ unserialize  ", target_);
 	if (htab.try_fetch(route_data.cc_verbs, temp))
 	{
 		if (temp.isLong())
@@ -260,7 +260,7 @@ Route::construct(int verbs, zstr_user pattern, zval_user target)
 	verbs_ = verbs;
 	pattern_ = pattern;
 	target_ = target;
-
+	
 	showmem("target", target_);
 	showstr("pattern", pattern_);
 }

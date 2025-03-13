@@ -123,13 +123,13 @@ zval_mgr::zval_mgr(bool bval)
 zval_mgr::zval_mgr(zval* zv)
 {
     init();
-    ZVAL_COPY_VALUE(&zv_, zv);
+    ZVAL_COPY(&zv_, zv);
 }
 
 zval_mgr::zval_mgr(const zval_user& rc)
 {
     init();
-    ZVAL_COPY_VALUE(&zv_, rc);
+    ZVAL_COPY(&zv_, rc);
 }
 
 const zval_mgr& 
@@ -137,7 +137,7 @@ zval_mgr::operator=(zval* rc)
 {
     lose();
 
-    ZVAL_COPY_VALUE(&zv_, rc);
+    ZVAL_COPY(&zv_, rc);
     return *this;
 }
 
@@ -179,8 +179,8 @@ zval_mgr::zval_mgr(zval_mgr&& m)
 void
 zval_mgr::copy(zval *p)
 {
-    ZVAL_COPY_VALUE(&zv_, p);
-    try_addref(&zv_);
+    ZVAL_COPY(&zv_, p);
+    //try_addref(&zv_);
 }
 void 
 zval_mgr::assign_ptr(zval* p)

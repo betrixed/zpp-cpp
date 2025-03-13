@@ -195,11 +195,10 @@ PHP_FUNCTION(Wcc_route_extract_params)
  */
 
 
-zstr_mgr 
+void 
 zpp_dump(zval_user zu, int level)
 {
-
-	return dump_info::dump(zu, level);
+	dump_info::dump(zu, level);
 }
 
 
@@ -312,8 +311,7 @@ PHP_FUNCTION(Wcc_debug_zpp_dump)
 		Z_PARAM_ZVAL(value)
 	ZEND_PARSE_PARAMETERS_END();
 
-	zstr_mgr result = zpp_dump(zval_user(value), 0);
-	result.move_zv(return_value);
+	zpp_dump(zval_user(value), 0);
 }
 
 PHP_FUNCTION(Wcc_str_uncamel) {

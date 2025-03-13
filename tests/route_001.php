@@ -40,6 +40,8 @@ echo "verbs " . $r->GetVerbs() . PHP_EOL;
 
 echo "Compiled " . $r->GetCompiled() . PHP_EOL;
 
+debug_zpp_dump($r);
+
 echo "Params " . print_r($r->GetParams(),true) . PHP_EOL;
 //echo "Params2 " . print_r($r->GetParams(),true) . PHP_EOL;
 //echo "Params3 " . print_r($r->GetParams(),true) . PHP_EOL;
@@ -66,7 +68,9 @@ echo "Verbs " . print_r($names,true) . PHP_EOL;
 
 //echo "Params4 " . print_r($r->GetParams(),true) . PHP_EOL;
 $data = serialize($r);
-debug_zval_dump($data);
+
+echo "Dump data - ";
+debug_zpp_dump($data);
 //echo "Serialize = " . print_r($data,true) . PHP_EOL;
 
 
@@ -75,10 +79,9 @@ $run = unserialize($data);
 
 //echo "Unserialize run 1 = " . print_r($run, true) . PHP_EOL;
 
-$run = unserialize($data);
-
 //echo "Unserialize run 2 = " . print_r($run, true) . PHP_EOL;
 
+debug_zpp_dump($run);
 echo "Params " . print_r($run->GetParams(),true) . PHP_EOL;
 
 
