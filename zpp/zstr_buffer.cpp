@@ -41,6 +41,13 @@ zstr_buffer::zstr_buffer(zval *v)
 	append(ZSTR_VAL(s), ZSTR_LEN(s));
 }
 
+zstr_buffer::zstr_buffer(zend_string* w)
+{
+	initbuf();	
+	if (w)
+		append(ZSTR_VAL(w), ZSTR_LEN(w));
+}
+
 zstr_buffer::zstr_buffer(const std::string_view& cs) 
 {
 	initbuf();

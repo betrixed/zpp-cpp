@@ -261,8 +261,8 @@ Route::construct(int verbs, zstr_user pattern, zval_user target)
 	pattern_ = pattern;
 	target_ = target;
 	
-	showmem("target", target_);
-	showstr("pattern", pattern_);
+	//showmem("target", target_);
+	//showstr("pattern", pattern_);
 }
 
 zobj_mgr //static
@@ -277,7 +277,7 @@ Route::get(zstr_user pattern, zval_user target, int ajax)
 
 	cobj->construct(html::V_GET, pattern, target);
 	cobj->ajax_ = ajax;
-	showobj("new Route", result);
+	//showobj("new Route", result);
 	return result;
 }
 
@@ -327,7 +327,7 @@ Route::getVerbInt(zstr_user sverb)
 void 
 Route::name(zstr_user name)
 {
-	showstr("Route::name", name);
+	//showstr("Route::name", name);
 	id_ = name;
 }
 

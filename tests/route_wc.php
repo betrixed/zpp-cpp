@@ -6,20 +6,23 @@ use Wcc\{Route,RouteMatch,RouteSet,RouteAdd,Services, Target};
 require "bootstrap.php";
 
 
-
-$route = new Route(Route::GET_I, "/index.php", ["default", "Home", "indexGET"]);
-echo "Made Route" . PHP_EOL;
-
-$r2 = Route::get("/target", Target::go(EmptyTest::class, "func"))->name("default");
-echo "Made Route r2" . PHP_EOL;
-
-
-
 $rset = new RouteSet();
 
 $radd = new RouteAdd($rset);
+$radd->methodSfx("<verb>");
 
-$radd->addRoutes([$route, $r2]);
+ $target = Target::go(EmptyTest::class);
+
+$list = [];
+
+$list[] = Route::get("/", $target)->name("index");
+
+$list[] = Route::get("/target", Target::go(EmptyTest::class, "target"))->name("default");
+
+$list[] = Route::get("/index.php", $target)->name("index.php");
+
+$radd->addRoutes(module:"default", list:$list);
+
 
 echo " rset = " . print_r($rset,true) . PHP_EOL;
 

@@ -70,7 +70,7 @@ RouteSet::unserialize(htab_read hr)
 
 void  RouteSet::addRoute(zobj_user obj)
 {
-	zend_printf("set::addRoute\n");
+	//zend_printf("set::addRoute\n");
 	Route* ro = zobj_toc<Route>(obj);
 
 	if (ro->hasParams())

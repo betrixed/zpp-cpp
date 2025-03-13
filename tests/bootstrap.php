@@ -46,6 +46,14 @@ $loader->register();
 
 class EmptyTest {
     public array $empty = [];
+
+    public function indexGET() : mixed {
+        return "get somthing";
+    }
+
+    public function targetGET() : mixed {
+        return "get target";
+    }
 };
 
 
