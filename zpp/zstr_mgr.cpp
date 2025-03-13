@@ -83,6 +83,14 @@ zstr_mgr::operator=(zstr_mgr&& rc)
     return *this;
 }
 
+const zstr_mgr& 
+zstr_mgr::operator=(const zstr_user& rc)
+{
+	bind(rc.s);
+	return *this;
+}
+
+
  const char* zstr_mgr::data() const
  {
  	return zstr_user(*this).data();

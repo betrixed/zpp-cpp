@@ -330,7 +330,7 @@ zval_mgr //static
 Wcc_XmlRead::fromFile(zstr_user filename)
 {
 	zobj_mgr xmlr = Wcc_XmlRead::omg.new_zobj();
-	showobj("new_zobj", xmlr);
+	//showobj("new_zobj", xmlr);
 	Wcc_XmlRead* cobj = zobj_toc<Wcc_XmlRead>(xmlr);
 	
 	return cobj->parseFile(filename);
@@ -375,7 +375,7 @@ Wcc_XmlRead::loop()
 						done_ = true;
 						continue;
 					}
-					pushClass(classname, test);
+					pushClass(classname, attrstr);
 				}
 
 			}

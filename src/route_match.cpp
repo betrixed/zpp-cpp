@@ -488,19 +488,21 @@ bool RouteMatch::prepare_call()
 	zval_user test;
 
 	errors_.init();
+	//zend_printf("prepare_call 1\n");
 
 	Route* route = zobj_toc<Route>(route_);
 
 	zval_user route_target(route->target_);
 
 	zobj_user tg_obj(route_target.zobject());
-
+	//zend_printf("prepare_call 2\n");
 	if (!tg_obj.isNull())
 	{
 		this->target_ = tg_obj;
 
 		if( tg_obj.instanceof(Target::omg.classEntry())) 
-		{
+		{	
+			//zend_printf("prepare_call 3\n");
 			Target* cobj = zobj_toc<Target>(tg_obj);
 			module_name_ = cobj->getModule();
 		 	ob_class_ = cobj->getClass();
@@ -510,6 +512,7 @@ bool RouteMatch::prepare_call()
 		}
 		else if (route_target.isCallable())
 		{
+			//zend_printf("prepare_call 4\n");
 			return true;
 		}
 	}

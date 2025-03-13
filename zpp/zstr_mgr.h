@@ -90,7 +90,7 @@ namespace zpp {
 
 	    operator zend_string*() const { return (zend_string*) s; }
 
-	    zstr_mgr& operator=(zstr_user&&	rc);
+	    const zstr_mgr& operator=(const zstr_user& rc);
 	};
 
 	class zstr_empty : public zstr_mgr
