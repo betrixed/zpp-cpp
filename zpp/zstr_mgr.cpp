@@ -211,6 +211,18 @@ zstr_intern::zstr_intern(const char* c, size_t slen)
 
 }
 
+const zstr_intern& 
+zstr_intern::operator=(const char* cp)
+{
+	auto slen = strlen(cp);
+	if (slen)
+	{
+		s = zend_string_init(cp, slen, 1);
+		s = zend_new_interned_string(s);
+	}
+	return *this;
+}
+
 zstr_empty::zstr_empty() {
 	s = zend_empty_string;
 }

@@ -123,21 +123,30 @@ zval_mgr::zval_mgr(bool bval)
 zval_mgr::zval_mgr(zval* zv)
 {
     init();
-    ZVAL_COPY(&zv_, zv);
+    if (zv) {
+        ZVAL_COPY(&zv_, zv);
+    }
 }
 
 zval_mgr::zval_mgr(const zval_user& rc)
 {
     init();
-    ZVAL_COPY(&zv_, rc);
+    if (rc.p_) {
+        ZVAL_COPY(&zv_, rc.p_);
+    }
+    
 }
 
 const zval_mgr& 
 zval_mgr::operator=(zval* rc)
 {
     lose();
-
-    ZVAL_COPY(&zv_, rc);
+    if (rc) {
+         ZVAL_COPY(&zv_, rc);
+    }
+    else {
+        ZVAL_NULL(&zv_);
+    }
     return *this;
 }
 

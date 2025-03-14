@@ -216,109 +216,111 @@ RouteMatch::call_method(zobj_user obj, zstr_user method, htab_read args)
 }
 
 zval_mgr 
-RouteMatch::invoke(htab_read extra, zobj_user before, zobj_user after)
+RouteMatch::call(htab_read extra, zobj_user before, zobj_user after)
 {
 	zval_mgr  result;
 	zval_mgr  zobj;
 	zobj_user obj;
 
-
-	if (this->prepare_call())
+	if (!ob_class_.size() || !ob_method_.size()) 
 	{
-		if (ob_class_.size())
-		{
-			// only works for objects with zero arguments constructor
-			zobj = ReflectCache::staticInstance(ob_class_);
-		}
-		else
-		{
-			zobj = target_;
-		}
-		
+		this->prepare_call();
+	}
 
-		if (extra.size())
-		{
-			htab_read hr(ob_args_);
+	if (ob_class_.size())
+	{
+		// only works for objects with zero arguments constructor
+		zobj = ReflectCache::staticInstance(ob_class_);
+	}
+	else
+	{
+		zobj = target_;
+	}
+	
 
-			if (hr.size())
-			{
-				htab_write(ob_args_).merge(extra);
-			}
-			else {
-				ob_args_ = extra;
-			}
-		}
+	if (extra.size())
+	{
+		htab_read hr(ob_args_);
 
-		zval_user test(zobj);
-		if (!test.isObject())
+		if (hr.size())
 		{
-			zend_throw_exception(zend_ce_error, "RouteMatch::Invoke with no object",0);
-			return result;
-		}
-		obj = test.zobject();
-		if (obj.instanceof(zend_ce_closure))
-		{
-			// doesn't actually have methods.
-			if (!call_spread_fn(result, zobj, ob_args_))
-			{
-				return false;
-			}
-			return result;
+			htab_write(ob_args_).merge(extra);
 		}
 		else {
-			zstr_user method_name;
-
-			if (before.ok())
-			{
-				Pair* ppair = zobj_toc<Pair>(before);
-
-				zval_user first(ppair->first());
-				zval_user second(ppair->second());
-
-				//zend_printf("Before ");
-				//showmem(" second", second);
-
-				method_name = first.zstr();
-				
-				if (method_name.size() && obj.method_exists(method_name))
-				{
-					result = this->call_method(obj, method_name, second);
-					test = result;
-					if (test.isFalse())
-					{
-						return result;
-					}
-				}
-			}
-
-			if (obj.method_exists(ob_method_))
-			{
-				// store this here in route_match object,
-				// in case an after hook needs and wants to change final returned value
-				result = this->call_method(obj, ob_method_, ob_args_);
-				result_ = result;
-			}
-			
-			if (after.ok())
-			{
-				Pair* ppair = zobj_toc<Pair>(after);
-
-				zval_user first(ppair->first());
-				zval_user second(ppair->second());
-
-				method_name = second.zstr();
-				if (method_name.size() && obj.method_exists(method_name))
-				{
-					result = this->call_method(obj, method_name, second);
-					test = result;
-					if (!test.isNull())
-					{
-						result_ = result;
-					}
-				}	
-			}	
+			ob_args_ = extra;
 		}
 	}
+
+	zval_user test(zobj);
+	if (!test.isObject())
+	{
+		zend_throw_exception(zend_ce_error, "RouteMatch::Invoke with no object",0);
+		return result;
+	}
+	obj = test.zobject();
+	if (obj.instanceof(zend_ce_closure))
+	{
+		// doesn't actually have methods.
+		if (!call_spread_fn(result, zobj, ob_args_))
+		{
+			return false;
+		}
+		return result;
+	}
+	else {
+		zstr_user method_name;
+
+		if (before.ok())
+		{
+			Pair* ppair = zobj_toc<Pair>(before);
+
+			zval_user first(ppair->first());
+			zval_user second(ppair->second());
+
+			//zend_printf("Before ");
+			//showmem(" second", second);
+
+			method_name = first.zstr();
+			
+			if (method_name.size() && obj.method_exists(method_name))
+			{
+				result = this->call_method(obj, method_name, second);
+				test = result;
+				if (test.isFalse())
+				{
+					return result;
+				}
+			}
+		}
+
+		if (obj.method_exists(ob_method_))
+		{
+			// store this here in route_match object,
+			// in case an after hook needs and wants to change final returned value
+			result = this->call_method(obj, ob_method_, ob_args_);
+			result_ = result;
+		}
+		
+		if (after.ok())
+		{
+			Pair* ppair = zobj_toc<Pair>(after);
+
+			zval_user first(ppair->first());
+			zval_user second(ppair->second());
+
+			method_name = second.zstr();
+			if (method_name.size() && obj.method_exists(method_name))
+			{
+				result = this->call_method(obj, method_name, second);
+				test = result;
+				if (!test.isNull())
+				{
+					result_ = result;
+				}
+			}	
+		}	
+	}
+
 	return result;
 }
 
@@ -789,7 +791,7 @@ PHP_METHOD(Wcc_RouteMatch, findRoute)
 
 }
 
-ZEND_METHOD(Wcc_RouteMatch, __invoke)
+ZEND_METHOD(Wcc_RouteMatch, call)
 {
 	zval* extra_args;
 	zval* before_pair;
@@ -805,11 +807,11 @@ ZEND_METHOD(Wcc_RouteMatch, __invoke)
 	ZEND_PARSE_PARAMETERS_END();
 
 	RouteMatch* prm = zval_toc<RouteMatch>(ZEND_THIS);
-	zval_mgr result = prm->invoke(extra_args, before_pair, after_pair);
+	zval_mgr result = prm->call(extra_args, before_pair, after_pair);
 	result.move_zv(return_value);
 }
 
-ZEND_METHOD(Wcc_RouteMatch, call_method)
+ZEND_METHOD(Wcc_RouteMatch, callMethod)
 {
 	zval* obj;
 	zend_string* method;

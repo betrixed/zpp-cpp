@@ -11,7 +11,6 @@ namespace zpp {
     protected:
         HashTable* ht_;
 
-        
         void  own();
         void  lose();
         static bool cowop(HashTable*& inout);

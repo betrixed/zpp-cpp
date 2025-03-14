@@ -150,9 +150,9 @@ final class RouteMatch {
 
 	public function findRoute(RouteSet $rset) : bool {}
 
-	public function __invoke(?array $extra = null,  Pair|null $before = null, Pair|null $after = null) : mixed {}
+	public function call(?array $extra = null,  Pair|null $before = null, Pair|null $after = null) : mixed {}
 
-	public function call_method(object $obj, string $method, ?array $args = null) : mixed {}
+	static public function callMethod(object $obj, string $method, ?array $args = null) : mixed {}
 
 };
 
@@ -259,6 +259,35 @@ final class Services {
 
 	public function clearObjects() : void {}
 
+
+};
+
+class ServiceAccess {
+    public function __construct(?Services $svc = null) {}
+
+    public function __destruct();
+    
+    public function __get(string $name) : mixed {}
+
+    public function __set(string $name, mixed $value) : void {}
+
+    public function __isset(string $name) : bool {}
+
+    public function __unset(string $name) : void {}
+
+    public function unset(string $name) : void {}
+    
+    public function service(string $name) : mixed {}
+
+    public function init_access() : void {}
+
+    public function getServices() : Services {}
+
+    public function hasService(string $name) : bool {}
+
+    public function setServices(Services $svc) : void {}
+
+    public function setExtender(object $obj) : void {}
 
 };
 

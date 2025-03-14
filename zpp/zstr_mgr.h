@@ -123,6 +123,8 @@ namespace zpp {
 		zstr_intern() : zstr_mgr() {}
 		zstr_intern(const char* c, size_t slen = 0);
 
+		const zstr_intern& operator=(const char* cp);
+		
 		operator zend_string*() const { return (zend_string*) s; }
 	};
 

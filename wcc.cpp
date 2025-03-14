@@ -56,6 +56,8 @@ extern "C" {
 #include "src/route_match.cpp"
 #include "src/route_add.cpp"
 
+#include "src/service_access.cpp"
+
 //#include "src/zpp/all.cpp"
 
 //#include "src/str_intern.cpp"
@@ -100,7 +102,7 @@ extern "C" {
 
 #include "src/htmlgem.cpp"
 #include "src/money_fmt.cpp"
-#include "src/service_access.cpp"
+
 #include "src/htmlplates.cpp"
 
 #include "src/search_list.cpp"
@@ -195,7 +197,7 @@ PHP_MINIT_FUNCTION(wcc)
 #endif
 
 #ifdef PLATE_ENGINE_CPP
-	PHP_MINIT(ServiceAccess_reg)(INIT_FUNC_ARGS_PASSTHRU);
+
 	PHP_MINIT(SearchList_reg)(INIT_FUNC_ARGS_PASSTHRU);
 	PHP_MINIT(Wcc_PlateEngine_reg)(INIT_FUNC_ARGS_PASSTHRU);
 	PHP_MINIT(Wcc_Plate_reg)(INIT_FUNC_ARGS_PASSTHRU);
@@ -222,6 +224,10 @@ PHP_MINIT_FUNCTION(wcc)
 #ifdef WCC_SERVICES_CPP
 PHP_MINIT(wc_services_md)(INIT_FUNC_ARGS_PASSTHRU);
 PHP_MINIT(Wcc_ReflectCache)(INIT_FUNC_ARGS_PASSTHRU);
+#endif
+
+#ifdef SERVICE_ACCESS_CPP
+	PHP_MINIT(ServiceAccess_reg)(INIT_FUNC_ARGS_PASSTHRU);
 #endif
 
 #ifdef WCC_PAIR_CPP

@@ -63,6 +63,11 @@ public:
 		return route_;
 	}
 
+	void setRoute(zobj_user ro)
+	{
+		route_ = ro;
+	}
+	
 	htab_read getErrors() const
 	{
 		return errors_;
@@ -107,7 +112,7 @@ public:
 
 	bool prepare_call();
 
-	zval_mgr invoke(htab_read extra, zobj_user before, zobj_user after);
+	zval_mgr call(htab_read extra, zobj_user before, zobj_user after);
 };
 
 

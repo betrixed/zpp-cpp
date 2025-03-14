@@ -30,6 +30,7 @@
 
 #include "htab_walk.h"
 #include "state_init.h"
+#include "class_data.h"
 
 #include "globals.h"
 
@@ -156,7 +157,7 @@ namespace zpp {
 		
 		virtual void debug_info(htab_write ht);
 
-		virtual zend_string* extender();
+		virtual zstr_user extender();
 
 		template< typename T > friend class base_obj_mgr;
 	};

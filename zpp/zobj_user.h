@@ -32,7 +32,7 @@ namespace zpp {
 		
 		zobj_user(zval* zp);
 		
-		operator zend_object* () const { return (zend_object*) obj_; }
+		
 
 		const zobj_user& operator=(zend_object* rc);
 
@@ -74,6 +74,9 @@ namespace zpp {
 
 		bool instanceof(zend_class_entry *ce);
 		bool method_exists(zstr_user method);
+
+		zend_object* operator->() const { return obj_; }
+		operator zend_object* () const { return (zend_object*) obj_; }
 
 	};
 };

@@ -18,6 +18,7 @@
 #include "htab_walk.cpp"
 #include "for_key_value.cpp"
 #include "state_init.cpp"
+#include "class_data.cpp"
 
 #include "datetime.cpp"
 #include "globals.cpp"
@@ -47,7 +48,7 @@ namespace zpp {
 		 }
 	 }
 	 
-	 zend_string* //virtual
+	 zstr_user //virtual
 	 base_d::extender()
 	 {
 	 	return zend_empty_string;
