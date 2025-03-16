@@ -67,7 +67,7 @@ namespace wcc
 zval_mgr 
 Services::call_value(zobj_user callme)
 {
-	zval_mgr self(this->zobj());
+	zval_mgr self(this);
 	// 1 argument
 	//showmem("self svc", self);
 	return callme.callable(self);

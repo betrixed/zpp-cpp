@@ -400,6 +400,22 @@ call_spread_fn(
     return callable_fn(result, callme, spread.arg_ct(), spread.arg_v());
 }
 
+
+
+FCall2::FCall2(zstr_user func)
+{
+    set_fname(func);
+}
+
+zval_mgr  
+FCall2::call(zval* arg1, zval* arg2)
+{
+    ZVAL_COPY_VALUE(&params[0], arg1);
+    ZVAL_COPY_VALUE(&params[1], arg2);
+    return call_fn();
+}
+
+
 }; // end namespace zpp
 
 

@@ -7,14 +7,26 @@
 
 namespace zpp {
 
+void 
+class_data::typed_property(
+    zstr_user name, zval_user data, 
+    zend_type datatype, int accessflag)
+{
+    zend_declare_typed_property(class_entry_,
+            name, 
+            data,
+            accessflag, 
+            /*doc_comment zend_string*/ nullptr, 
+             datatype);
+}
 
 void 
 class_data::add_constant(const char* name, const char* value)
 {
     zend_declare_class_constant_stringl(
-    class_entry_, 
-    name, strlen(name), 
-    value, strlen(value));
+        class_entry_, 
+        name, strlen(name), 
+        value, strlen(value));
 }
 
 void 

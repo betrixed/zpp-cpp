@@ -36,6 +36,11 @@ namespace wcc {
 
 		htab_mgr serialize();
 		void unserialize(htab_read htab);
+
+#ifndef BASE_ZOBJPTR
+	VIRTUAL_ZOBJPTR
+#endif		
+
 	};
 
 }; //namespace wcc

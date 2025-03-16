@@ -38,13 +38,14 @@ class ZPP_EXPORT class_data {
         void add_constant(const char* name, zend_string* zs);
         void add_constant(const char* name, zend_long value);
 
-
+        void typed_property(zstr_user name, zval_user data, 
+                        zend_type datatype, int accessflag = ZEND_ACC_PUBLIC);
         //void add_constant(const zstr_intern& name,  zval_user value, int flags = ZEND_ACC_PUBLIC);
 
 
         zval_mgr static_property(zend_string* s);
         zval_mgr static_constant(zend_string* s);
-
+  
 
         bool new_object(zobj_mgr& om);
 

@@ -16,38 +16,33 @@ extern "C" {
 
 namespace zpp {
 
-
-class Date_init : public state_init {
-public:
-	Date_init() : state_init() {}
-
-	zstr_intern formatkey;
-	zstr_intern construct_key;
-	zstr_intern settime;
-	zstr_intern diff;
-	zstr_intern date;
-	zstr_intern setdate;
-	zstr_intern strtotime;
-	zstr_intern settimezone;
-
-
-	virtual void init() 
-	{
-		strtotime = zstr_intern("strtotime");
-		construct_key = zstr_intern("__construct");
-
-		formatkey = zstr_intern("format");
-		settime = zstr_intern("settime");
-		diff = zstr_intern("diff");
-		date = zstr_intern("date");
-		setdate = zstr_intern("setdate");
-		settimezone = zstr_intern("settimezone");
-
-		
-	}
-};
-
 Date_init DTData;
+
+void Date_init::init()
+{
+	strtotime = "strtotime";
+	construct_key = "__construct";
+
+	formatkey = "format";
+	settime = "settime";
+	diff = "diff";
+	date = "date";
+	setdate = "setdate";
+	settimezone = "settimezone";
+
+	zstr_intern y_prop = "y";
+	zstr_intern m_prop = "m";
+	zstr_intern d_prop = "d";
+	zstr_intern h_prop = "h";
+	zstr_intern i_prop = "i";
+	zstr_intern s_prop = "s";
+	zstr_intern f_prop = "f";
+	zstr_intern days_prop = "days";
+	zstr_intern invert_prop = "invert";
+	zstr_intern from_string = "from_string";
+	zstr_intern date_string = "date_string";
+}
+
 
 bool
 datetime_obj::make_obj()
@@ -79,7 +74,7 @@ datetime_obj::strtotime(zval* value)
 }
 
 zstr_mgr 
-datetime_obj::reformat(zval* fmt, zval* value)
+datetime_obj::date(zstr_user fmt, zval* value)
 {
 	zstr_mgr result;
 
@@ -90,7 +85,7 @@ datetime_obj::reformat(zval* fmt, zval* value)
 		fn_call_args<2> datefmt;
 		datefmt.set_fname(DTData.date);
 		zval* pz = datefmt.argsptr();
-		ZVAL_COPY_VALUE(pz, fmt);
+		ZVAL_STR(pz, fmt);
 		ZVAL_COPY_VALUE(pz+1, timeval);
 		result = datefmt.call_fn();
 	}
@@ -197,7 +192,7 @@ datetime_obj::datetime_obj(const zval_mgr& fnret)
 	//TODO: assert is datetime object
 }
 
-zobj_mgr 
+diff_dt 
 datetime_obj::diff(datetime_obj& dtm)
 {
 
@@ -207,7 +202,7 @@ datetime_obj::diff(datetime_obj& dtm)
 
 	ZVAL_OBJ(diffobj.argsptr(),(zend_object*) dtm);
 
-	return zobj_mgr(diffobj.call_fn());
+	return diff_dt(diffobj.call_fn());
 
 }
 
@@ -242,6 +237,59 @@ timezone_obj::make_obj()
 
 }
 
+long 
+diff_dt::years()
+{
+	zval_mgr temp = zobj_user(obj_).property(DTData.y_prop);
+	return zval_user(temp).zlong();
+}
+
+long 
+diff_dt::months()
+{
+	zval_mgr temp = zobj_user(obj_).property(DTData.m_prop);
+	return zval_user(temp).zlong();
+}
+long 
+diff_dt::days()
+{
+	zval_mgr temp = zobj_user(obj_).property(DTData.d_prop);
+	return zval_user(temp).zlong();
+}
+long 
+diff_dt::hours()
+{
+	zval_mgr temp = zobj_user(obj_).property(DTData.h_prop);
+	return zval_user(temp).zlong();
+	
+}
+long 
+diff_dt::minutes()
+{
+	zval_mgr temp = zobj_user(obj_).property(DTData.i_prop);
+	return zval_user(temp).zlong();
+	
+}
+long 
+diff_dt::seconds()
+{
+	zval_mgr temp = zobj_user(obj_).property(DTData.s_prop);
+	return zval_user(temp).zlong();
+}
+
+double 
+diff_dt::fraction()
+{
+	zval_mgr temp = zobj_user(obj_).property(DTData.f_prop);
+	return zval_user(temp).zdouble();
+	
+}
+
+zval_mgr 
+diff_dt::daystotal()
+{
+	return zobj_user(obj_).property(DTData.days_prop);
+}
 
 
 

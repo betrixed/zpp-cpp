@@ -40,7 +40,9 @@ namespace wcc {
 
 		void ready(Route* route);
 
-
+#ifndef BASE_ZOBJPTR
+	VIRTUAL_ZOBJPTR
+#endif
 
 	};
 }; // namespace wcc;

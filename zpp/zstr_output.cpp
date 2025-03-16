@@ -10,10 +10,19 @@
 namespace zpp {
 
 
+fm_endl endl;
+
 zstr_output& 
 zstr_output::operator<<(const iform& form)
 {
 	nf_ = form;
+	return *this;
+}
+
+zstr_output& 
+zstr_output::operator<<(const fm_endl& el)
+{
+	append('\n');
 	return *this;
 }
 
@@ -26,6 +35,13 @@ zstr_output::operator<<(void* vp)
 	return *this;
 }
 
+void 
+zstr_output::quote_name(zend_string* name)
+{
+	append('"');
+	append(name);
+	append('"');
+}
 
 void 
 zstr_output::quote_name(const char* name)

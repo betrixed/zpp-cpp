@@ -21,9 +21,9 @@ protected:
 	void set_tuple14(htab_read tg);
 	htab_mgr fetchArgs();
 
-	Route*    testRoute(zobj_user robj);
+	zobj_user    testRoute(zobj_user robj);
 
-	Route*    firstMatch(zval_user wrap);
+	zobj_user    firstMatch(zval_user wrap);
 public:
 	zobj_mgr route_;
 	htab_mgr roles_;
@@ -113,6 +113,10 @@ public:
 	bool prepare_call();
 
 	zval_mgr call(htab_read extra, zobj_user before, zobj_user after);
+
+#ifndef BASE_ZOBJPTR
+	VIRTUAL_ZOBJPTR
+#endif
 };
 
 

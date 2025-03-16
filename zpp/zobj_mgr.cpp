@@ -61,6 +61,14 @@ zobj_mgr::adopt(zend_object *zo)
 	obj_ = zo;
 }
 
+zobj_mgr::zobj_mgr(base_d* cobj) : obj_(nullptr)
+{
+	if (cobj)
+	{
+		obj_ = cobj->vobj();
+		own();
+	}
+}
 
 
 zobj_mgr& 

@@ -11,6 +11,8 @@ namespace zpp {
 
 	class zstr_user;
 	class zval_mgr;
+	class zval_user;
+	
 	class zstr_buffer;
 	
 	class ZPP_EXPORT zstr_mgr {
@@ -50,6 +52,8 @@ namespace zpp {
 	        own();
 	    }
 
+	    zstr_mgr(const zval_user& rc);
+
 	    zstr_mgr(zval_mgr&& rc);
 
 	    zstr_mgr(zend_long ival);
@@ -83,6 +87,8 @@ namespace zpp {
 
 	    zstr_mgr& operator=(zval_mgr&& rc);
 	    zstr_mgr& operator=(zstr_mgr&& rc);
+
+	    bool isEqual(zend_string* ns);
 
 	    void move_zv(zval* ret);
 

@@ -65,6 +65,11 @@ namespace wcc {
 		void unserialize(htab_read uht);
 
 		virtual void debug_info(htab_write hw);
+
+#ifndef BASE_ZOBJPTR
+	VIRTUAL_ZOBJPTR
+#endif
+	
 };
 
 class icache_str : public state_init {

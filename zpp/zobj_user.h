@@ -48,8 +48,9 @@ namespace zpp {
 		
 
 		//! get a property value
-		zval_mgr property(zstr_user key);
-		void     property(zstr_user key, zval* value);
+		zval_mgr  property(zstr_user key);
+		void      property(zstr_user key, zval_user value);
+		zval* 	  property_get(zstr_user key, zval* ret);
 
 		bool isNull() const { return !(obj_); }
 		bool ok() const { return (obj_); }
@@ -72,11 +73,15 @@ namespace zpp {
 		zval_mgr call(zstr_user method, 
 	        zval* arg1, zval* arg2, zval* arg3, zval* arg4);
 
-		bool instanceof(zend_class_entry *ce);
-		bool method_exists(zstr_user method);
+		bool instanceof(zend_class_entry *ce) const;
+		bool method_exists(zstr_user method) const;
+		bool isDateTime() const;
 
 		zend_object* operator->() const { return obj_; }
 		operator zend_object* () const { return (zend_object*) obj_; }
+
+
+		
 
 	};
 };

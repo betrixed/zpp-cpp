@@ -29,6 +29,12 @@ namespace zpp {
 		}
 	};
 
+	class fm_endl {
+
+	};
+
+	extern fm_endl endl;
+	
 	class zstr_output {
 	protected:
 		iform   	 nf_;
@@ -42,6 +48,8 @@ namespace zpp {
 		void append(zend_string* s);
 
 		zstr_output& operator<<(const iform& form);
+
+		zstr_output& operator<<(const fm_endl& el);
 
 		zstr_output& operator<<(const zstr_mgr &w);
 		
@@ -68,6 +76,7 @@ namespace zpp {
 		zstr_output& operator<<(zval* zv);
 
 		void quote_name(const char* name);
+		void quote_name(zend_string* name);
 	};
 
 }; // namespace

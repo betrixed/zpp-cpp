@@ -161,7 +161,7 @@ namespace wcc {
 
 	zstr_mgr XmlWrap::xml_name()
 	{
-		return zstr_mgr(std::move(self_.property(XML_FNS.k_name)));
+		return zstr_mgr(self_.property(XML_FNS.k_name));
 	}
 
 	zstr_mgr

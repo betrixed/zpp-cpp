@@ -147,6 +147,11 @@ zstr_mgr::zstr_mgr(zval* copy) : s(nullptr)
 	bind(zval_user(copy).zstr());
 }
 
+zstr_mgr::zstr_mgr(const zval_user& rc)
+{
+	bind(rc.zstr());
+}
+
 zstr_mgr::zstr_mgr(zend_long ival)
 {
 	// s has rc==1
@@ -165,6 +170,19 @@ zstr_mgr::size() const
 	if (!s)
 		return 0;
 	return ZSTR_LEN(s);
+}
+
+bool 
+zstr_mgr::isEqual(zend_string* ns)
+{
+	if (!s || !ns)
+	{
+		return false;
+	}
+	if (ZSTR_LEN(s) != ZSTR_LEN(ns))
+		return false;
+
+	return (strcmp(ZSTR_VAL(s), ZSTR_VAL(ns)) == 0);
 }
 
 void 
@@ -222,6 +240,7 @@ zstr_intern::operator=(const char* cp)
 	}
 	return *this;
 }
+
 
 zstr_empty::zstr_empty() {
 	s = zend_empty_string;

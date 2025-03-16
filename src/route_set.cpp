@@ -181,7 +181,7 @@ void RouteSet::appendRoute(
 	zstr_user key, 
 	Route* myroute)
 {
-	zval_mgr store(myroute->zobj());
+	zval_mgr store(myroute);
 
 	zval_user  zip;
 

@@ -99,15 +99,17 @@ RouteMatch::debug_info(htab_write hw)
 	hw.set(RM_data.cc_ajax_flag, (int)ajax_flag_);
 }
 
-Route*    
+zobj_user   
 RouteMatch::testRoute(zobj_user ro)
 {
 	//showobj("testRoute ro", ro);
+	zobj_user result;
+
 	if (!Route::omg.myType(ro)) 
 	{
 		zstr_user classname(zend_std_get_class_name(ro));
 		zend_throw_error(zend_ce_exception, "testRoute Error: Not route object %s\n",  classname.data());
-		return nullptr;
+		return result;
 	}
 
 	Route* robj =  zobj_toc<Route>(ro);
@@ -115,20 +117,20 @@ RouteMatch::testRoute(zobj_user ro)
 	if ( ((verb_flag_ & robj->verbs_) != 0) && ((ajax_flag_ & robj->ajax_) != 0) ) 
 	{
 		//zend_printf("matched\n");
-		return robj;
+		result = std::move(ro);
 	}
 	//zend_printf("discarded v %ld a %ld\n", robj->verbs_, robj->ajax_);
-	return nullptr;
+	return result;
 }
 
-Route*  
+zobj_user
 RouteMatch::firstMatch(zval_user wrap)
 {
-	Route* robj = nullptr;
+	zobj_user result;
 
 	if (wrap.isObject())
 	{
-		return testRoute(wrap.zobject());
+		result = testRoute(wrap.zobject());
 	}
 	else if (wrap.isArray())
 	{
@@ -136,13 +138,13 @@ RouteMatch::firstMatch(zval_user wrap)
 		auto obj = list.value();
 		for(list.start(wrap.zarray()); list.ok(); list.next()) 
 		{
-			robj = testRoute(obj.zobject());
-			if (robj) {
-				return robj;
+			result = testRoute(obj.zobject());
+			if (result.ok()) {
+				return result;
 			}
 		}
 	}
-	return nullptr;
+	return result;
 }
 /** what was this doing ?
 #define PRE_EXP	"/\\G"
@@ -154,21 +156,23 @@ bool
 RouteMatch::find_route(RouteSet* routeset)
 {
 	zval_user	match;
-	Route* 		robj;
+
+	zobj_user 	robj;
 
 	zval_mgr	mreturn;
 
 	htab_read 	list(routeset->fixed_);
 
+	route_.init();
 	if (list.try_fetch(uri_, match)) 
 	{
 		//showmem("fetched", match);
 
 		robj = firstMatch(match);
 
-		if (robj) 
+		if (robj.ok()) 
 		{
-			route_ = robj->zobj();
+			route_ = robj;
 			match_args_.reset();
 			return true;
 		}
@@ -188,8 +192,8 @@ RouteMatch::find_route(RouteSet* routeset)
 		if (rexpmatch.matches(uri_) > 0)
 		{
 			robj = firstMatch(rzval);
-			if (robj) {
-				route_ = robj->zobj();
+			if (robj.ok()) {
+				route_ = robj;
 
 				match_args_ = rexpmatch.results();
 				//match_args_.dec_ref();

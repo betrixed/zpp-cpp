@@ -115,6 +115,12 @@ final class Pair {
 	public function first() : mixed {}
 
 	public function second() : mixed {}
+
+	public function key() : mixed {}
+
+	public function value() : mixed {}
+
+	public function sum() : mixed {}
 };
 
 final class RouteMatch {

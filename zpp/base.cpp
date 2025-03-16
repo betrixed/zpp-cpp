@@ -33,7 +33,7 @@ namespace zpp {
 	 void //virtual
 	 base_d::debug_info(htab_write di)
 	 {
-	 	zobj_user temp(this->zobj());
+	 	zobj_user temp(this->vobj());
 
 	 	htab_mgr plist;
 
@@ -57,11 +57,8 @@ namespace zpp {
 	 mgr_link* mgr_link::l_start_ = nullptr;
 	 mgr_link* mgr_link::l_end_ = nullptr;
 
+	
 
-	zval_mgr::zval_mgr(base_d* cobj)
-	{
-		ZVAL_OBJ(&zv_, cobj->zobj());
-	}
 };//namespace
 
 #endif

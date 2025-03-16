@@ -2,12 +2,54 @@
 #define DATE_TIME_OBJ_H
 
 namespace zpp {
+	
+	class Date_init : public state_init {
+	public:
+		Date_init() : state_init() {}
+		void init() override;
 
-class timezone_obj : public zobj_mgr {
+		zstr_intern formatkey;
+		zstr_intern construct_key;
+		zstr_intern settime;
+		zstr_intern diff;
+		zstr_intern date;
+		zstr_intern setdate;
+		zstr_intern strtotime;
+		zstr_intern settimezone;
+
+		zstr_intern y_prop;
+		zstr_intern m_prop;
+		zstr_intern d_prop;
+		zstr_intern h_prop;
+		zstr_intern i_prop;
+		zstr_intern s_prop;
+		zstr_intern f_prop;
+		zstr_intern days_prop;
+		zstr_intern invert_prop;
+		zstr_intern from_string;
+		zstr_intern date_string;
+	};
+
+	extern Date_init DTData;
+
+	class timezone_obj : public zobj_mgr {
 	protected:
 		bool make_obj();
 	public:
 		timezone_obj(zstr_user zone);
+	};
+
+
+	class diff_dt : public zobj_mgr {
+	public:
+		long years();
+		long months();
+		long days();
+		long hours();
+		long minutes();
+		long seconds();
+		double fraction();
+		zval_mgr daystotal();
 	};
 
 	class datetime_obj : public zobj_mgr {
@@ -26,7 +68,7 @@ class timezone_obj : public zobj_mgr {
 		/** Now constructor */
 		datetime_obj();
 		
-		zobj_mgr diff(datetime_obj& dtm);
+		diff_dt diff(datetime_obj& dtm);
 
 		zstr_mgr format(zstr_user dfmt);
 
@@ -36,7 +78,7 @@ class timezone_obj : public zobj_mgr {
 		void setTimeZone(zstr_user zone);
 
 		static zval_mgr  strtotime(zval* value);
-		static zstr_mgr  reformat(zval* fmt, zval* value);
+		static zstr_mgr  date(zstr_user dfmt, zval* value);
 
 	};
 }; // namespace

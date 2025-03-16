@@ -781,7 +781,7 @@ PHP_METHOD(Wcc_Route, name)
 	Route* cobj = zval_toc<Route>(ZEND_THIS);
 	cobj->name(name);
 
-	zobj_mgr result(cobj->zobj());
+	zobj_mgr result(cobj);
 	result.move_zv(return_value);
 }
 

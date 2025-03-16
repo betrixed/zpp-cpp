@@ -59,6 +59,17 @@ namespace zpp {
         void push_back(zend_string* zs);
         void push_back(zend_object* zobj);
         void push_back(zval* zv);
+
+        void push_back(const zval_mgr& zv) 
+        {
+            push_back((zval*) zv);
+        }
+
+        void push_back(zval_user zv) 
+        {
+            push_back((zval*) zv);
+        }
+        
         void push_back(HashTable* value);
 
         // try to disambiguent various elemental wrappers used all over the place.

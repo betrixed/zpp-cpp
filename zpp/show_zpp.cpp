@@ -13,6 +13,8 @@ extern "C" {
 
 namespace zpp {
 
+zstr_output dump_info::dumper_d;
+
 
 void 
 dump_info::object_property_dump(
@@ -102,7 +104,7 @@ dump_info::msg_dump(const char* msg, zval_user val)
 	di.di_dump(val);
 }
 
-dump_info::dump_info(const char* s)
+dump_info::dump_info(const char* s) : ss(dumper_d)
 {
 	ss << s << ' ';
 }

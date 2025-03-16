@@ -47,14 +47,38 @@
 #endif
 
 
+//#define BASE_ZOBJPTR
+
+#ifndef BASE_ZOBJPTR
+/* 
+	This is virtual because problem of base class needs
+	to use the sizeof(*this) of enclosing class.
+*/
+#define VIRTUAL_ZOBJPTR virtual zend_object* vobj() const \
+	{ return (zend_object*) ((char*)(this) + sizeof(*this) + sizeof(char*)); }
+#else
+#define VIRTUAL_ZOBJPTR
+#endif
+
 namespace zpp {
 
 	/**
+	 * All base_d objects have a memory overhead - 3 x pointers 
+	 * 	Of course a C++ virtual function table pointer (base virtual destructor)
+	 *  zend_object* as first member of T*.
+	 *  Pointer to *T as first negative offset from zend_object.
+	 * 
 	 * Base class for all C++ objects implemented here.
 	 * Each class should have its own base_obj_mgr<T>,
 	 * which holds its own static storage for zend_class_entry*, and
 	 * zend_object_handlers. Relies on one static instance of each base_obj_mgr<T>
 	 * being created in the .cpp implementation, as declared in the .h file.
+	 * 
+	 * Its possible, but have not tried, to create non-zobject associated 
+	 * (with nullptr for zend_object*)
+	 * using a different C++ new allocator. This won't be able to use 
+	 * zend_object properties, or management functions.
+	 * 
 	 * 
 	 * How to implement internal subclasses?
 	 * This naive plan is :-
@@ -83,8 +107,8 @@ namespace zpp {
 	 * 	   The internal memory block allocated for each T is
 	 * 	   
 	 * 	   T itself, starting at offset zero.
-	 * 	   At address of T+1  is stored pointer to beginning of memory block of T
-	 *     At address of T+2  is beginning of the zend API declared zend_object structure, 
+	 * 	   At address of sizeof(T)+1  is stored pointer to beginning of memory block of T
+	 *     At address of sizeof(T)+2  is beginning of the  zend_object std structure, 
 	 * 	   To get the *T from zend_object* , subtract sizeof(*T).
 	 * 
 	 * 	   This follows a recommendation I read, that internal extra stuff be put at negative offsets from the zend_object. 
@@ -111,25 +135,46 @@ namespace zpp {
 
 
 	class   base_d {
+	#ifdef BASE_ZOBJPTR
 	protected:
 		zend_object* p_zobj_;
+	#endif
 	public:
-
+		#ifdef BASE_ZOBJPTR
 		base_d() : p_zobj_(nullptr) {}
+		#else
+		base_d() {}
+		#endif
 
 		virtual ~base_d() 
 		{
 			#ifdef BASE_DEBUG
 				zend_printf("~base_d() %lx\n", this);
 			#endif
+			// unattached have no zend_object*
+			#ifdef BASE_ZOBJPTR
 			if (p_zobj_) {
+				#ifdef BASE_DEBUG
+				zend_printf("dtor zend object %lx\n", p_zobj_);
+				#endif
 				zend_object_std_dtor(p_zobj_);
 			}
 			p_zobj_ = nullptr;
+			#endif
 		}
 
-		zend_object* zobj() const { return p_zobj_; }
+		#ifdef BASE_ZOBJPTR
+		//! Memory vs Time-Indirection trade off. Stored pointer or call function to calculate it.
+		zend_object* vobj() const { return p_zobj_; }
 		void set_zobj(zend_object* zo) { p_zobj_ = zo; }
+		#else 
+		// This needs to be redeclared in every class
+		/* virtual zend_object* zobj() const {
+			return (zend_object*) ((char*)(this) + sizeof(*this) + sizeof(char*));
+		}*/
+		VIRTUAL_ZOBJPTR
+		#endif
+
 		/**
 		 * Assumptions of memory layout. 
 		 * Expect zend_object pointer p_zobj_
@@ -171,7 +216,7 @@ namespace zpp {
 	{
 		base_d** pp = (base_d**)(zobj);
 		T* result = static_cast<T*>( *(--pp) );
-		assert(zobj==(result->zobj()));
+		//assert(zobj==(result->zobj()));
 		return result;
 	}
 
@@ -265,7 +310,8 @@ namespace zpp {
 		 *  self_ not likely to be used, because this base_obj_mgr object has no data members 
 		 */
 		static base_obj_mgr<T>*         self_; 
-		static size_t					self_count_;		
+		static size_t					self_count_;	
+		static size_t                   sizeoft_;	
 #ifdef BASE_DEBUG			
 		static size_t					obj_count_;
 #endif
@@ -301,6 +347,11 @@ namespace zpp {
 #endif
 		};
 
+		static zend_object* zobj(T* cobj)
+		{
+			return (zend_object*)((char*)cobj + sizeof(char*) + sizeof(T));
+		}
+
 		static zend_string* name()
 		{
 			return (mydef::class_entry_->name);
@@ -330,10 +381,11 @@ namespace zpp {
 			return (zobj->ce == mydef::class_entry_);
 		}
 		
+
 #ifdef BASE_DEBUG
 		static void showptr(const char* s,  T* p)
 		{
-			zend_object* zo = p->zobj();
+			zend_object* zo = p->vobj();
 			zend_printf("%s %d: %lx p %lx ob (%ld) %s size %d ", s, obj_count_, p, zo, GC_REFCOUNT(zo), typeid(T).name()
 				, sizeof(T) + sizeof(base_d*) + sizeof(zend_object) + zend_object_properties_size(class_entry_));
 			zend_string* ex = p->extender();
@@ -349,7 +401,7 @@ namespace zpp {
 		static void z_free(zend_object* obj) 
 		{
 
-			// zend_object_std_dtor(obj) // handled by virtual ~T()
+			
 			T* tp = mydef::cpp(obj);
 			
 
@@ -361,6 +413,12 @@ namespace zpp {
 #ifdef BASE_DEBUG
 			obj_count_--;
 #endif
+			#ifndef BASE_ZOBJPTR
+				#ifdef BASE_DEBUG
+				zend_printf("dtor zend object %lx\n", obj);
+				#endif
+				zend_object_std_dtor(obj);
+			#endif
 			//efree(tp); // zend_object_alloc uses emalloc()
 
 		}
@@ -397,7 +455,7 @@ namespace zpp {
 			
 			T* cobj = zobj_toc<T>(zobj);
 #ifdef BASE_DEBUG
-			if(cobj->zobj() != zobj ) {
+			if(cobj->vobj() != zobj ) {
 				throw std::logic_error{ "zend_object* fail in cpp!" };
 			}
 #endif
@@ -439,8 +497,13 @@ namespace zpp {
 			T** bp =  (T**) (pzo+1); // next T
 			*bp = pzo;		  // self ptr
 			zend_object* zobj = (zend_object*) (bp+1); // next T*
+
+#ifdef BASE_ZOBJPTR
 			pzo->set_zobj(zobj);
+#endif
+
 			zend_object_std_init(zobj, class_type);
+			// maybe no properties are configured.
 			object_properties_init(zobj, class_type);
 			
 #ifdef BASE_DEBUG
@@ -473,6 +536,7 @@ template<typename T> base_obj_mgr<T>*  base_obj_mgr<T>::self_ = nullptr;
 template<typename T> zend_class_entry*  base_obj_mgr<T>::class_entry_ = nullptr;
 template<typename T> zend_object_handlers base_obj_mgr<T>::handlers_;
 template<typename T> size_t  base_obj_mgr<T>::self_count_ = 0;
+template<typename T> size_t  base_obj_mgr<T>::sizeoft_ = sizeof(T);
 
 #ifdef BASE_DEBUG
 template<typename T> size_t  base_obj_mgr<T>::obj_count_ = 0;

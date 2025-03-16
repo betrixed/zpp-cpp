@@ -18,8 +18,6 @@ zval_mgr::init()
     ZVAL_NULL(&zv_);
 }
 
-
-
 void 
 zval_mgr::make_ref()
 {
@@ -36,6 +34,13 @@ zval_mgr::make_ref()
         */
         ZVAL_NEW_REF(&zv_, zp);  
     }                       
+}
+
+zval_mgr::zval_mgr(base_d* cobj)
+{
+    zv_ = {0};
+    ZVAL_NULL(&zv_);
+    zval_user(&zv_).bind_object(cobj->vobj());
 }
 
 void 
@@ -73,7 +78,8 @@ void // protected
 zval_mgr::lose()
 {
     try_decref(&zv_);
-    init();
+    zv_ = {0};
+    ZVAL_NULL(&zv_);
 }
 
 const zval_mgr& 
@@ -87,7 +93,8 @@ zval_mgr::operator=(zend_long value)
 
 zval_mgr::zval_mgr() 
 {
-    init();
+    zv_ = {0};
+    ZVAL_NULL(&zv_);
 }
 
 void zval_mgr::set_null()
@@ -110,7 +117,7 @@ zval_mgr::zval_mgr(HashTable* ht)
 
 zval_mgr::zval_mgr(bool bval)
 {
-    init();
+    zv_ = {0};
     if (bval)
     {
         ZVAL_TRUE(&zv_);
@@ -122,19 +129,25 @@ zval_mgr::zval_mgr(bool bval)
 
 zval_mgr::zval_mgr(zval* zv)
 {
-    init();
+    zv_ = {0};
+
     if (zv) {
         ZVAL_COPY(&zv_, zv);
+    }
+    else {
+        ZVAL_NULL(&zv_);
     }
 }
 
 zval_mgr::zval_mgr(const zval_user& rc)
 {
-    init();
+    zv_ = {0};
     if (rc.p_) {
         ZVAL_COPY(&zv_, rc.p_);
     }
-    
+    else {
+        ZVAL_NULL(&zv_);
+    }    
 }
 
 const zval_mgr& 
@@ -153,14 +166,14 @@ zval_mgr::operator=(zval* rc)
 
  zval_mgr::zval_mgr(int value)
  {
-    init();
+    zv_ = {0};
     ZVAL_LONG(&zv_, value);
  }
 
 zval_mgr::zval_mgr(const zval_mgr& rc, bool byRef) 
 {
 
-    init();
+    zv_ = {0};
     _zval_struct *p = (_zval_struct*) rc;
 
     if (!byRef)
@@ -178,7 +191,6 @@ zval_mgr::zval_mgr(const zval_mgr& rc, bool byRef)
 
 zval_mgr::zval_mgr(zval_mgr&& m)
 {
-    init();
     ZVAL_COPY_VALUE(&zv_, &m.zv_);
     m.init();
 }
@@ -262,8 +274,16 @@ void
 zval_mgr::move_zv(zval* return_value)
 {
     ZVAL_COPY_VALUE(return_value, &zv_);
-    init();
+    zv_ = {0};
+    ZVAL_NULL(&zv_);
 }
+
+void 
+zval_mgr::return_zv(zval* return_value)
+{
+    ZVAL_COPY(return_value, &zv_);
+}
+
 
 //! mutate value
 void 

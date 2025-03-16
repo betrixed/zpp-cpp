@@ -27,6 +27,8 @@ namespace zpp {
     	{
 	        own();
     	}
+    	//! From settled cobj
+    	zobj_mgr(base_d* cobj);
     	
     	zobj_mgr(const zobj_mgr& rc) : obj_(rc.obj_)
 	    {
@@ -72,6 +74,7 @@ namespace zpp {
 
 		void move_zv(zval* ret);
 		void return_zv(zval* ret);
+
 
 		static bool new_object(zstr_user classname, zobj_mgr& host);
 	};

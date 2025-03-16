@@ -6,6 +6,7 @@
 #endif
 
 extern "C" {
+#include <ext/date/php_date.h>
 #include <Zend/zend_closures.h>
 };
 
@@ -49,6 +50,19 @@ zobj_user::property_list(htab_mgr& list)
         return true;
     }
     return false;
+}
+
+bool zobj_user::isDateTime() const
+{
+    if (!obj_)
+    {
+        return false;
+    }
+    zend_class_entry* ce = obj_->ce;
+
+    zend_class_entry* date_ce = php_date_get_interface_ce();
+
+    return instanceof_function(ce, date_ce);
 }
 
 void 
@@ -125,7 +139,7 @@ zobj_user::callable(zval* arg1, zval* arg2)
     return result;
 }
 void
-zobj_user::property(zstr_user key, zval* value)
+zobj_user::property(zstr_user key, zval_user value)
 {
     // zend_class_entry* scope = obj_->ce;
     zend_class_entry* scope = EG(fake_scope);
@@ -138,13 +152,16 @@ zobj_user::property(zstr_user key, zval* value)
     zend_update_property_ex(scope, obj_, key, value);    
 }
 
-/** get a dynamic property by name */
-zval_mgr 
+/**
+ * Get a dynamic property by name 
+ *  Relies on return value optimisation.
+ *  Also result is expected to dec reference
+ * */
+zval_mgr
 zobj_user::property(zstr_user key)
 {
     zval_mgr result;
-    zval* direct;
-    // 
+
     //amazing stuff from PHP-CPP Value::get(const har*, size_t)
  
     zend_class_entry* scope = EG(fake_scope) ? EG(fake_scope) : zend_get_executed_scope();
@@ -164,10 +181,40 @@ zobj_user::property(zstr_user key)
      *  Execution of direct & indirect indicates one may be same as the other!
      *  
      */ 
-    direct = zend_read_property_ex(scope, obj_, key, 0, (zval*)result);
+    zend_read_property_ex(scope, obj_, key, 0, result);
     return result;
 }
 
+/**
+ * explicit, use return_value
+ */
+
+zval*
+zobj_user::property_get(zstr_user key, zval* ret)
+{
+    zval_mgr result;
+
+    //amazing stuff from PHP-CPP Value::get(const har*, size_t)
+ 
+    zend_class_entry* scope = EG(fake_scope) ? EG(fake_scope) : zend_get_executed_scope();
+    
+    /**
+     *  phpinternals book php7, probably outdated.
+     *  says function can return pointer to zval  owned by object, and
+     *  this hasn't been modified by read_property.
+     * 
+     *  But the the indirect value is for temporary zvals, like returned by call to __get
+     *  and will have its reference count , which needs decrementing.
+     * 
+     *  Both work at same time, and then contain data with same reference count!!
+     *  
+     *  Not clear.
+     *  This call only wants to return one value!
+     *  Execution of direct & indirect indicates one may be same as the other!
+     *  
+     */ 
+    return zend_read_property_ex(scope, obj_, key, 0, ret);
+}
 
 zval_mgr
 zobj_user::call(zstr_user method, zval* arg1)
@@ -256,7 +303,7 @@ zobj_user::zobj_user(const zval_user& rc)
 }
 
 bool 
-zobj_user::instanceof(zend_class_entry *ce)
+zobj_user::instanceof(zend_class_entry *ce) const
 {
     if (!obj_)
         return false;
@@ -267,7 +314,7 @@ zobj_user::instanceof(zend_class_entry *ce)
 
 
 bool 
-zobj_user::method_exists(zstr_user method)
+zobj_user::method_exists(zstr_user method) const
 {
     if (!obj_)
         return false;

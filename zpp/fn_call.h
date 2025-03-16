@@ -184,6 +184,15 @@ namespace zpp {
         virtual void init();
     };
 
+
+    class FCall2 : public fn_call_args<2>
+    {
+    public:
+        FCall2(zstr_user func);
+        zval_mgr call(zval* arg1, zval* arg2);
+    };
+    
+
     extern fntable   FTAB;
     extern strtable  STAB;
 

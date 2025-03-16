@@ -7,11 +7,13 @@
 
 namespace zpp {
 
+
 class dump_info {
 private:
-	zstr_output ss;
+	zstr_output& ss;
 
-	
+	static zstr_output dumper_d;
+
 	void object_property_dump(
 		zend_property_info *prop_info, 
 		zval *zv, 
@@ -41,11 +43,11 @@ public:
 	
 	void show_properties(zend_object* zobj, HashTable* h, int level);
 
-	dump_info()
-	{
-	}
+	dump_info() : ss(dumper_d) {}
 	
 	dump_info(const char* s);
+
+	dump_info(zstr_buffer& buf) : ss(buf) {}
 };
 
 

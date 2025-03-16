@@ -120,7 +120,7 @@ public:
     zval_mgr& operator=(zval_mgr&& rc);
 
     void move_zv(zval* ret);
-    
+    void return_zv(zval* ret);
 };
 
 }; // namespace Php

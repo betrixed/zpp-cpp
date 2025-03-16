@@ -121,6 +121,11 @@ public:
 	htab_mgr __serialize();
 	
 	void __unserialize(htab_read htab);
+
+#ifndef BASE_ZOBJPTR
+	VIRTUAL_ZOBJPTR
+#endif
+	
 };
 
 

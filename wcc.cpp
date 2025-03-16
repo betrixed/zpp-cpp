@@ -58,6 +58,11 @@ extern "C" {
 
 #include "src/service_access.cpp"
 
+#include "src/money_fmt.cpp"
+
+#include "src/htmlgem.cpp"
+
+
 //#include "src/zpp/all.cpp"
 
 //#include "src/str_intern.cpp"
@@ -100,8 +105,7 @@ extern "C" {
 
 // HTMLGEM_CPP
 
-#include "src/htmlgem.cpp"
-#include "src/money_fmt.cpp"
+
 
 #include "src/htmlplates.cpp"
 
@@ -168,6 +172,8 @@ PHP_MINIT_FUNCTION(wcc)
 	dump_info::run_state_ = true;
 #endif
 
+	//so interned strings like property names
+	//are created before classes.
 	zpp::state_init::init_all();
 	
 	// init status code map
@@ -204,8 +210,11 @@ PHP_MINIT_FUNCTION(wcc)
 	PHP_MINIT(Wcc_HtmlPlates_reg)(INIT_FUNC_ARGS_PASSTHRU);
 #endif
 
-#ifdef HTMLGEM_CPP
+#ifdef MONEY_FMT_CPP
 	PHP_MINIT(Wcc_Money_reg)(INIT_FUNC_ARGS_PASSTHRU);
+#endif
+
+#ifdef HTMLGEM_CPP
 	PHP_MINIT(Wcc_HtmlGem_reg)(INIT_FUNC_ARGS_PASSTHRU);
 #endif
 

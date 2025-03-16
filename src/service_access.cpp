@@ -86,7 +86,7 @@ ServiceAccess::construct(zval_user services_obj)
 		services_ =  Services::instance();
 	}
 
-	zobj_user caller = this->zobj();
+	zobj_user caller (this);
 
 	caller.call(SAdata.init_access);
 }
@@ -163,7 +163,7 @@ ServiceAccess::nullService(zstr_user name)
 
 	zstr_mgr method(std::move(buf));
 
-	zobj_user self(this->zobj());
+	zobj_user self(this);
 	if (self.method_exists(method))
 	{
 		result = self.call(method);

@@ -12,8 +12,6 @@
 #include "globals.h"
 #endif
 
-
-
 namespace zpp {
 
 class Global;
