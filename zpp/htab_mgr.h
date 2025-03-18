@@ -33,6 +33,7 @@ namespace zpp {
         htab_mgr(htab_mgr&& m);
         htab_mgr(zval_mgr&& zw);
 
+        
         htab_mgr(const zval_user& zptr);
         
 

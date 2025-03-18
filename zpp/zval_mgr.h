@@ -17,6 +17,7 @@ namespace zpp {
 class zval_user;
 class zobj_mgr;
 class base_d;
+class zstr_mgr;
 
 class ZPP_EXPORT zval_mgr {
 protected:
@@ -106,6 +107,8 @@ public:
     const zval_mgr& operator=(const zval_user &rc);
 
     const zval_mgr& operator=(const zobj_mgr &rc);
+
+    const zval_mgr& operator=(const zstr_mgr &rc);
 
     const zval_mgr& operator=(zend_long value);
 

@@ -257,14 +257,15 @@ htab_read::get(const char* key) const
 	zstr_temp skey(key);
 	return zend_hash_find(ht_, skey);
 }
-
+/*
 zval* 
 htab_read::get(zval_user key) const
 {
 	if (!ht_)
 		return nullptr;
-	return get(key);
+	return get((zval*)key);
 }
+*/
 
 zval* 
 htab_read::get(zval* key) const

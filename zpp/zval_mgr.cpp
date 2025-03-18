@@ -238,6 +238,14 @@ zval_mgr::operator=(const zval_user &rc)
 	return *this;		
 }
 
+const zval_mgr& 
+zval_mgr::operator=(const zstr_mgr &rc)
+{
+    lose();
+    zval_user(&zv_).bind_string(rc.s);
+    return *this;
+}
+
 zval_mgr& 
 zval_mgr::operator=(zval_mgr&& rc)
 {

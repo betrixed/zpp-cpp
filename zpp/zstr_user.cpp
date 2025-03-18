@@ -16,6 +16,19 @@ namespace zpp {
 
 const char* zstr_user::empty_zstr = "\0";
 
+bool 
+zs_equal(zend_string* a, zend_string* b)
+{
+	if (!a || !b)
+	{
+		return false;
+	}
+	if (ZSTR_LEN(a) != ZSTR_LEN(b))
+		return false;
+
+	return (strcmp(ZSTR_VAL(a), ZSTR_VAL(b)) == 0);
+}
+
 zstr_user::zstr_user(const zval_user& rc)
 {
     s = rc.zstr();
@@ -164,6 +177,8 @@ zstr_user::trim(const char* what, int mode) const
 	result.adopt(p);
 	return result;
 }
+
+
 
 void zstr_user::return_zv(zval* ret)
 {

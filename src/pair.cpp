@@ -33,13 +33,13 @@ property_ptr(zend_object* zobj, zend_string* name)
 {
 	Pair* p = zobj_toc<Pair>(zobj);
 
-	if (   (PairSI.key.isEqual(name)) 
-		|| (PairSI.first.isEqual(name)))
+	if (   zs_equal(PairSI.key, name) 
+		|| zs_equal(PairSI.first, name))
 	{
 		return p->key_;
 	}
-	if (   (PairSI.value.isEqual(name))
-		|| (PairSI.second.isEqual(name)))
+	if (   zs_equal(PairSI.value, name)
+		|| zs_equal(PairSI.second, name))
 	{
 		return p->value_;
 	}

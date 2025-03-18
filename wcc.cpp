@@ -61,7 +61,7 @@ extern "C" {
 #include "src/money_fmt.cpp"
 
 #include "src/htmlgem.cpp"
-
+#include "src/search_list.cpp"
 
 //#include "src/zpp/all.cpp"
 
@@ -109,7 +109,7 @@ extern "C" {
 
 #include "src/htmlplates.cpp"
 
-#include "src/search_list.cpp"
+
 #include "src/plate_wcp.cpp"
 #include "src/plate_engine.cpp"
 */

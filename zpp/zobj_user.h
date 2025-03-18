@@ -79,10 +79,6 @@ namespace zpp {
 
 		zend_object* operator->() const { return obj_; }
 		operator zend_object* () const { return (zend_object*) obj_; }
-
-
-		
-
 	};
 };
 

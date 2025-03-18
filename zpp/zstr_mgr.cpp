@@ -147,7 +147,7 @@ zstr_mgr::zstr_mgr(zval* copy) : s(nullptr)
 	bind(zval_user(copy).zstr());
 }
 
-zstr_mgr::zstr_mgr(const zval_user& rc)
+zstr_mgr::zstr_mgr(const zval_user& rc): s(nullptr)
 {
 	bind(rc.zstr());
 }
@@ -172,18 +172,7 @@ zstr_mgr::size() const
 	return ZSTR_LEN(s);
 }
 
-bool 
-zstr_mgr::isEqual(zend_string* ns)
-{
-	if (!s || !ns)
-	{
-		return false;
-	}
-	if (ZSTR_LEN(s) != ZSTR_LEN(ns))
-		return false;
 
-	return (strcmp(ZSTR_VAL(s), ZSTR_VAL(ns)) == 0);
-}
 
 void 
 zstr_mgr::move_zv(zval* ret)

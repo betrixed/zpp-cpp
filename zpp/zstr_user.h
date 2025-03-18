@@ -79,10 +79,12 @@ namespace zpp {
 
 		void return_zv(zval* ret);
 
+		
 		const zstr_user& operator=(zval* rc);
 		
-
 	};
+
+	bool zs_equal(zend_string* a, zend_string* b);
 };
 
 

@@ -30,6 +30,7 @@ htab_mgr::try_decref(HashTable* h)
 	int rct = --h->gc.refcount;
 
 	if (!rct) {
+		//showarray("destroy", h);
 		zend_hash_destroy(h);
 		return true;
 	}
@@ -266,14 +267,19 @@ htab_mgr::cowop(HashTable*& inout)
 	HashTable* used = inout;
 	if (used == nullptr) 
 	{
-		//printf("new array\n", inout);
+		
 		inout = zend_new_array(HT_MIN_SIZE);
+		//showarray("new array", inout);
 		return true;
 	}
 	if (GC_REFCOUNT(used) > 1) 
 	{
 	    inout = zend_array_dup(used);
+
 	    htab_mgr::try_decref(used);
+
+	    //showarray("cowop after used", used);
+	    //showarray("cowop new", inout);
 	    return true;
 	}
 	return false;

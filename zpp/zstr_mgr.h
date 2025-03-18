@@ -88,8 +88,6 @@ namespace zpp {
 	    zstr_mgr& operator=(zval_mgr&& rc);
 	    zstr_mgr& operator=(zstr_mgr&& rc);
 
-	    bool isEqual(zend_string* ns);
-
 	    void move_zv(zval* ret);
 
 	    void adopt(zend_string* rc);

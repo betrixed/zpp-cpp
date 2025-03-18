@@ -51,7 +51,7 @@ namespace zpp {
         bool ok() const { return (ht_); }
 
         zval* get(zend_long idx) const;
-        zval* get(zval_user key) const;
+        //zval* get(zval_user key) const;
         zval* get(zend_string* zkey) const;
 
         zval* get(const char* key) const;
