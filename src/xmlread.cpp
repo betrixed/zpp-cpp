@@ -123,7 +123,7 @@ namespace wcc {
 			result = true;
 		}
 		else {
-			self_ = nullptr;
+			self_ = (zend_object*) nullptr;
 		}
 		return result;
 	}

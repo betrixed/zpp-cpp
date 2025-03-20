@@ -33,8 +33,6 @@ namespace zpp {
 	    zstr_mgr() : s((zend_string*) nullptr)
 	    {   
 	    }
-
-
 	    ~zstr_mgr(){
 	        lose();
 	    }

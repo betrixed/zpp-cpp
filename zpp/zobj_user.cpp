@@ -13,6 +13,44 @@ extern "C" {
 
 namespace zpp {
 
+
+const zobj_user& 
+zobj_user::operator=(zval* rc)
+{
+    if (!rc) {
+        obj_ = nullptr;
+        return *this;
+    }
+    obj_ = zval_user(rc).zobject();
+    return *this;
+
+}
+/*
+const zobj_user& 
+zobj_user::operator=(const zval_mgr& rc)
+{
+    zval_user test(rc);
+
+    if (!test.isObject()) {
+        obj_ = nullptr;
+        return *this;
+    }
+    obj_ = test.zobject();
+    return *this;
+
+}
+*/
+
+zobj_user::zobj_user(base_d* cobj)
+{
+    obj_ = cobj->vobj();
+}
+
+zobj_user::zobj_user(const zval_mgr& rc) 
+{
+    obj_ = zval_user(rc).zobject();
+}
+
 const zobj_user& 
 zobj_user::operator=(zend_object* rc)
 {

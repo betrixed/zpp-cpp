@@ -21,7 +21,8 @@ namespace zpp {
         htab_write(zval_mgr& mgr);
         htab_write(zval_user mgr);
         htab_write(HashTable* h);
-
+        htab_write(const zval* p);
+        
         htab_write(const htab_write& w)
         {
             //zend_printf("htab_write copy&\n");

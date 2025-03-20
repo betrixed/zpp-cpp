@@ -115,8 +115,6 @@ class SearchList implements IfFindLeaf {
 
 class PlateEngine {
     public static function fileComment(string $file) : string;
-
-    public function __construct();
     
     public function shareData(array $data, string|array|null $where) : void {}
 
@@ -138,8 +136,12 @@ class PlateEngine {
     /* public function getOutputClass() : ?string {}
     public function setOutputClass(string $s) : void {} */
 
-    public function make(string $name, bool $store, string|null $raw) : Plate {}
-    public function makeRaw(string $name, string $raw, bool $store=false) : Plate {}
+    public function newPlate(string $name, bool $store=false) : Plate {}
+    public function getPlate(string $name) : Plate {}
+    public function storePlate(Plate $plate) : void {}
+
+    //public function makeRaw(string $name, string $raw, bool $store=false) : Plate {}
+    
     public function mergePlateData(array $data, string $name) : void {}
 
 
@@ -150,13 +152,13 @@ class PlateEngine {
 
 
     public function shareWithAll(array $data) : void {}
-    public function store(string $name, Plate $tp) : void {}
 };
 
 
 
-class Plate extends ServiceAccess {
-    public function __construct(PlateEngine $e, string $name);
+class Plate {
+    public function __construct(string $name, PlateEngine $engine);
+
     public function getData() : array {}
     public function getContent() : string {}
     public function getPath() : ?string {}

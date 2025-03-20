@@ -57,6 +57,16 @@ htab_write::htab_write(HashTable* h)
 	ht_ = h;
 }
 
+htab_write::htab_write(const zval* p)
+{
+	if (p) {
+		ht_ = zval_user((zval*)p).zarray();
+	}
+	else {
+		ht_ = nullptr;
+	}
+}
+
 void htab_write::push_back(HashTable* t)
 {
 	zval tmp = {0};

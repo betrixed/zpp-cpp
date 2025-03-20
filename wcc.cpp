@@ -62,6 +62,8 @@ extern "C" {
 
 #include "src/htmlgem.cpp"
 #include "src/search_list.cpp"
+#include "src/plate.cpp"
+#include "src/plate_engine.cpp"
 
 //#include "src/zpp/all.cpp"
 
@@ -207,7 +209,7 @@ PHP_MINIT_FUNCTION(wcc)
 	PHP_MINIT(SearchList_reg)(INIT_FUNC_ARGS_PASSTHRU);
 	PHP_MINIT(Wcc_PlateEngine_reg)(INIT_FUNC_ARGS_PASSTHRU);
 	PHP_MINIT(Wcc_Plate_reg)(INIT_FUNC_ARGS_PASSTHRU);
-	PHP_MINIT(Wcc_HtmlPlates_reg)(INIT_FUNC_ARGS_PASSTHRU);
+	//PHP_MINIT(Wcc_HtmlPlates_reg)(INIT_FUNC_ARGS_PASSTHRU);
 #endif
 
 #ifdef MONEY_FMT_CPP

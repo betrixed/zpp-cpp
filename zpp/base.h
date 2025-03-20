@@ -209,15 +209,14 @@ namespace zpp {
 
 
 	
-	
 
 	template<typename T>
 	T* zobj_toc(zend_object* zobj)
 	{
-		base_d** pp = (base_d**)(zobj);
-		T* result = static_cast<T*>( *(--pp) );
-		//assert(zobj==(result->zobj()));
-		return result;
+		T** pp = (T**)(zobj);
+		//--pp;
+		return *--pp;
+		//assert(zo;
 	}
 
 	template<typename T>

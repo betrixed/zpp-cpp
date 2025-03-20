@@ -57,7 +57,7 @@ using namespace zpp;
 		//Offset is just sizeof(T) below
 		//also could grab zobj->ce->handlers->offset
 		//but as 3 x pointer indirect.
-		return --(T*)(zobj);
+		return --((T*)(zobj));
 	}
 
 	template<typename T>
