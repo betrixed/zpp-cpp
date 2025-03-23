@@ -63,9 +63,8 @@ public:
 	void       clearDefer();
 	void  	   clearObjects();
 	
-#ifndef BASE_ZOBJPTR
 	VIRTUAL_ZOBJPTR
-#endif	
+
 
 }; 
 

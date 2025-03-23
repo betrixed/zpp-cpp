@@ -103,9 +103,8 @@ namespace wcc {
 		void image_tag(zstr_buffer& ss, zstr_user path);
 		void figcaption_tag(zstr_buffer& ss, zstr_user text);
 
-#ifndef BASE_ZOBJPTR
 		VIRTUAL_ZOBJPTR
-#endif
+
 	}; // class
 
 

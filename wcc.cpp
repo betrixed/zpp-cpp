@@ -50,6 +50,8 @@ extern "C" {
 #include "zpp/base.cpp"
 #include "zpp/show_zpp.cpp"
 #include "src/pair.cpp"
+#include "src/config.cpp"
+
 #include "src/target.cpp"
 #include "src/route.cpp"
 #include "src/route_set.cpp"

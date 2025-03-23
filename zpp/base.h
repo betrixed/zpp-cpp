@@ -60,6 +60,7 @@
 #define VIRTUAL_ZOBJPTR
 #endif
 
+
 namespace zpp {
 
 	/**
@@ -157,7 +158,7 @@ namespace zpp {
 				#ifdef BASE_DEBUG
 				zend_printf("dtor zend object %lx\n", p_zobj_);
 				#endif
-				zend_object_std_dtor(p_zobj_);
+				//zend_object_std_dtor(p_zobj_);
 			}
 			p_zobj_ = nullptr;
 			#endif
@@ -387,10 +388,10 @@ namespace zpp {
 			zend_object* zo = p->vobj();
 			zend_printf("%s %d: %lx p %lx ob (%ld) %s size %d ", s, obj_count_, p, zo, GC_REFCOUNT(zo), typeid(T).name()
 				, sizeof(T) + sizeof(base_d*) + sizeof(zend_object) + zend_object_properties_size(class_entry_));
-			zend_string* ex = p->extender();
-			if (ex != zend_empty_string)
+			zstr_user ext = p->extender();
+			if (ext.size())
 			{
-				zend_printf("extd %s\n", ZSTR_VAL(ex));
+				zend_printf("extd %s\n", ext.data());
 			}
 			else {
 				zend_printf("\n");
@@ -412,12 +413,12 @@ namespace zpp {
 #ifdef BASE_DEBUG
 			obj_count_--;
 #endif
-			#ifndef BASE_ZOBJPTR
-				#ifdef BASE_DEBUG
-				zend_printf("dtor zend object %lx\n", obj);
-				#endif
-				zend_object_std_dtor(obj);
+
+			#ifdef BASE_DEBUG
+			zend_printf("dtor zend object %lx\n", obj);
 			#endif
+			zend_object_std_dtor(obj);
+
 			//efree(tp); // zend_object_alloc uses emalloc()
 
 		}
@@ -454,8 +455,10 @@ namespace zpp {
 			
 			T* cobj = zobj_toc<T>(zobj);
 #ifdef BASE_DEBUG
+			zend_printf(" zfree cpp %s\n", typeid(T).name());
 			if(cobj->vobj() != zobj ) {
-				throw std::logic_error{ "zend_object* fail in cpp!" };
+
+				throw std::logic_error{ " zend_object* fail in cpp!" };
 			}
 #endif
 			return cobj;

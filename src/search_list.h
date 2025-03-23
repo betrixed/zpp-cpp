@@ -46,6 +46,8 @@ namespace wcc {
 
 		htab_read getPaths();
 
+		VIRTUAL_ZOBJPTR
+
 	};
 
 	extern zend_class_entry* gIfFindLeafCE;

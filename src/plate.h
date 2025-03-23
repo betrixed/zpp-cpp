@@ -46,7 +46,7 @@ namespace wcc {
  * 
  * 
  */
-class Plate 
+class Plate : public base_d
 {
 protected:
 
@@ -96,7 +96,7 @@ public:
 		//showme();
 	}
 
-	void construct(zobj_user engine, zstr_user name);
+	void construct(zstr_user name, zobj_user engine);
 
 	void setRaw(zstr_user html)
 	{

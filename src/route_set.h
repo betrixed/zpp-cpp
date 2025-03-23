@@ -63,9 +63,8 @@ public:
 	}
 	static void  appendRoute(htab_write array, zstr_user key, Route* route);
 
-#ifndef BASE_ZOBJPTR
 	VIRTUAL_ZOBJPTR
-#endif
+
 };
 
 

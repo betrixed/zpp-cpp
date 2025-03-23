@@ -2,15 +2,21 @@
 
 namespace Wcc;
 
+use Wcc\{SearchList, Plate, PlateEngine};
+
 require "bootstrap.php";
 
 $pe = new PlateEngine();
 
-$pe->addNamedPath("a", $wcc_root . "/test");
+$slist = new SearchList();
 
-echo "added path " . PHP_EOL;
+$slist->addPath($wcc_root . "/test");
 
-$obj = $pe->make("test.phtml",false,null);
+$pe->setFinder($slist);
+
+echo "call newPlate\n";
+
+$obj = $pe->newPlate("test.phtml",false);
 
 $obj->layout("main.phtml",[]);
 
@@ -37,5 +43,3 @@ $obj = null;
 
 $pe = null;
 
-
-echo "Check Memory now" . PHP_EOL;

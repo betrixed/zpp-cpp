@@ -245,9 +245,8 @@ namespace wcc {
 		zval_mgr parse(zstr_user src);
 
 		void debug_info(htab_write ht) override;
-#ifndef BASE_ZOBJPTR
-	VIRTUAL_ZOBJPTR
-#endif	
+	
+		VIRTUAL_ZOBJPTR
 	
 	};
 

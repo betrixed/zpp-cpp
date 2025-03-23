@@ -38,9 +38,9 @@ public:
 	void clear();
 	
 	void debug_info(htab_write hw) override;
-#ifndef BASE_ZOBJPTR
+	
 	VIRTUAL_ZOBJPTR
-#endif
+	
 };
 
 

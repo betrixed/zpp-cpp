@@ -52,6 +52,8 @@ namespace wcc {
 		zstr_own render(htab_ptr options);
 
 		zstr_own renderView(htab_ptr options);
+
+		VIRTUAL_ZOBJPTR
 	};
 
 	typedef base_obj_mgr<HtmlPlates>  HtmlPlates_Mgr;

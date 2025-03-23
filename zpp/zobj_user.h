@@ -57,7 +57,9 @@ namespace zpp {
 		zval_mgr  property(zstr_user key);
 		void      property(zstr_user key, zval_user value);
 		zval* 	  property_get(zstr_user key, zval* ret);
-
+		bool      has_property(zstr_user name);
+		void      unset_property(zstr_user name);
+		
 		bool isNull() const { return !(obj_); }
 		bool ok() const { return (obj_); }
 

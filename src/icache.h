@@ -80,9 +80,8 @@ public:
 
  	void debug_info(htab_write s) override;
  	
-#ifndef BASE_ZOBJPTR
 	VIRTUAL_ZOBJPTR
-#endif
+
 
 };
 

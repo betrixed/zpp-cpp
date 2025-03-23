@@ -186,7 +186,9 @@ zobj_user::property(zstr_user key, zval_user value)
         scope = zend_get_executed_scope();
         //zend_printf("ex scope %lx\n", scope);
     }
-
+    zend_printf("zobj property ");
+    showstr("key", key);
+    
     zend_update_property_ex(scope, obj_, key, value);    
 }
 
@@ -201,7 +203,7 @@ zobj_user::property(zstr_user key)
     zval_mgr result;
 
     //amazing stuff from PHP-CPP Value::get(const har*, size_t)
- 
+    
     zend_class_entry* scope = EG(fake_scope) ? EG(fake_scope) : zend_get_executed_scope();
     
     /**
@@ -219,10 +221,42 @@ zobj_user::property(zstr_user key)
      *  Execution of direct & indirect indicates one may be same as the other!
      *  
      */ 
-    zend_read_property_ex(scope, obj_, key, 0, result);
+    showstr("zobj_user property get", key);
+
+    zval* direct = zend_read_property_ex(scope, obj_, key, 0, (zval*)result);
+    if (direct)
+    {
+        result = direct;
+        showmem("direct result", result);
+    }
     return result;
 }
 
+bool 
+zobj_user::has_property(zstr_user name)
+{
+    zend_class_entry *ce;
+    zend_property_info *property_info;
+
+    if (obj_)
+    {
+        return false;
+    }
+    ce = obj_->ce;
+    property_info = (zend_property_info *) zend_hash_find_ptr(&ce->properties_info, name);
+    if (property_info != nullptr && (
+            !(property_info->flags & ZEND_ACC_PRIVATE) || property_info->ce == ce)
+        ) 
+    {
+        return true;
+    }
+    
+    if ((obj_->handlers->has_property)(obj_, name, 2, NULL))
+    {
+        return true;
+    }
+    return false;
+}
 /**
  * explicit, use return_value
  */
@@ -232,7 +266,8 @@ zobj_user::property_get(zstr_user key, zval* ret)
 {
     zval_mgr result;
 
-    //amazing stuff from PHP-CPP Value::get(const har*, size_t)
+    // I do not understand why or what scope is required, (?? private, public protected access?
+    // or what would be most permissive.
  
     zend_class_entry* scope = EG(fake_scope) ? EG(fake_scope) : zend_get_executed_scope();
     
@@ -252,6 +287,11 @@ zobj_user::property_get(zstr_user key, zval* ret)
      *  
      */ 
     return zend_read_property_ex(scope, obj_, key, 0, ret);
+}
+
+void zobj_user::unset_property(zstr_user name)
+{
+    zend_std_unset_property(obj_, name, nullptr);
 }
 
 zval_mgr

@@ -236,11 +236,36 @@ PlateEngine::render(zstr_user name, htab_read data)
 	zobj_mgr plate = getPlate(name);
 	if (!plate.ok())
 	{
-		// try finding?
-
+		plate = newPlate(name, false);
 	}
 	Plate* p = zobj_toc<Plate>(plate);
 	return  p->render(data);
+}
+zobj_mgr 
+PlateEngine::newPlate(zstr_user name, bool store)
+{
+	zobj_mgr result;
+
+	//zend_printf("newPlate fn\n");
+	result = Plate::omg.new_zobj();
+
+	zobj_user plate(result);
+	//showobj("plate zobj", plate);
+
+	fn_call_args<2> cplate;
+	cplate.set_fci(plate, STAB.construct_key);
+	zval* args = cplate.argsptr();
+	ZVAL_STR(args, name);
+	ZVAL_OBJ(args+1, this->vobj());
+	
+	cplate.call_fn();
+
+	if (store)
+	{
+		htab_write hw(stored_);
+		hw.set(name, plate);
+	}
+	return result;
 }
 
 zobj_mgr 
@@ -248,7 +273,7 @@ PlateEngine::getPlate(zstr_user name)
 {
 	zobj_mgr result;
 
-	htab_write hw(stored_);
+	htab_read hw(stored_);
 
 	zobj_user test = hw.get(name);
 
@@ -445,7 +470,7 @@ ZEND_METHOD(Wcc_PlateEngine, newPlate)
 	zend_string* name;
 	bool         store = false;
 
-	ZEND_PARSE_PARAMETERS_START(2, 3)
+	ZEND_PARSE_PARAMETERS_START(1, 2)
 	Z_PARAM_STR(name)
 	Z_PARAM_OPTIONAL
 	Z_PARAM_BOOL(store)

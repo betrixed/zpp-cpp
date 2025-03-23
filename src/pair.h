@@ -95,9 +95,8 @@ using namespace zpp;
 	public:
 		static Pair_omg omg;
 		
-#ifndef BASE_ZOBJPTR
-	VIRTUAL_ZOBJPTR
-#endif
+		VIRTUAL_ZOBJPTR
+
 
 	};
 

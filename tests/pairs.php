@@ -40,34 +40,6 @@ function test_a()
 	return $itime;
 }
 
-function test_d()
-{
-	$count = 1000;
-
-	$c = new ConfigStd();
-
-	$c->key = 123;
-	$c->value = 2345;
-
-	echo print_r($c, true) . PHP_EOL;
-	$result = ($c->key + $c->value) / $c->key;
-	echo "sum dynamic properties = " . $result . PHP_EOL;
-	
-	$start = microtime(true);
-
-	for($ix = 0; $ix < $count; $ix++)
-	{
-		$result = ($c->key + $c->value) / $c->key;
-	}
-
-	$end = microtime(true);
-
-	$itime = (($end - $start) / $count) * 1000_000.0;
-	echo "iter = " . chop($itime) . PHP_EOL;
-	echo "----------------------------" . PHP_EOL;
-	return $itime;
-}
-
 function test_b()
 {
 	$count = 1000;
@@ -112,6 +84,36 @@ function test_c()
 	echo "----------------------------" . PHP_EOL;
 	return $itime;
 }
+
+
+function test_d()
+{
+	$count = 1000;
+
+	$c = new Config();
+
+	$c->key = 123;
+	$c->value = 2345;
+
+	echo print_r($c, true) . PHP_EOL;
+	$result = ($c->key + $c->value) / $c->key;
+	echo "sum dynamic properties = " . $result . PHP_EOL;
+	
+	$start = microtime(true);
+
+	for($ix = 0; $ix < $count; $ix++)
+	{
+		$result = ($c->key + $c->value) / $c->key;
+	}
+
+	$end = microtime(true);
+
+	$itime = (($end - $start) / $count) * 1000_000.0;
+	echo "iter = " . chop($itime) . PHP_EOL;
+	echo "----------------------------" . PHP_EOL;
+	return $itime;
+}
+
 
 function test_e()
 {
@@ -276,7 +278,7 @@ row("use locals set once", $e/$e, $e/$a);
 row("declared properties fetch", $a/$e, $a/$a);
 
 row("one function call", $c/$e, $c/$a);
-row("dynamic properties (stdClass)", $d/$e, $d/$a);
+row("dynamic properties (Config)", $d/$e, $d/$a);
 
 row("Use local array", $g/$e, $g/$a);
 row("Use objects declared array", $i/$e, $i/$a);

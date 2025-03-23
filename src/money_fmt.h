@@ -40,9 +40,7 @@ namespace wcc {
 
 		zstr_user language() const;
 
-#ifndef BASE_ZOBJPTR
 		VIRTUAL_ZOBJPTR
-#endif
 	};
 
 	

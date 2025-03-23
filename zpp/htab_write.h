@@ -29,9 +29,7 @@ namespace zpp {
             ht_ = w.ht_;
         }
 
-        bool isNull() {
-            return (ht_ == nullptr);
-        }
+
 
         const htab_write& operator=(const zval* p);
         

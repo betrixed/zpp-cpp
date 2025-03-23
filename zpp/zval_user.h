@@ -167,7 +167,14 @@ public:
         return Z_TYPE_P(p_);
     }
 
-    
+    /** 
+     * This will be a mistake, for zval_mgr returned from a function.
+     * zval_user data = some_func(); where declared as zval_mgr some_func();
+     * 
+     * as the temporary zval_mgr will disappear, leaving zval_user with a
+     * dangling pointer to its zval* memory.
+     * 
+     */
     const zval_user& operator=(const zval_mgr& rc);
 
 };

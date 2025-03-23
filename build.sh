@@ -9,7 +9,7 @@ do
 echo $f
 done
 
-
+make ./stub/config_arginfo.h
 make ./stub/wcc_arginfo.h
 make ./stub/xmlread_arginfo.h
 make ./stub/icache_arginfo.h

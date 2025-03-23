@@ -134,10 +134,12 @@ void Plate::debug_info(htab_write d)
 
 }
 
-void Plate::construct(zobj_user engine, zstr_user name)
+void Plate::construct(zstr_user name, zobj_user engine)
 {	
 
 	//ServiceAccess::construct(Wcc_Services::instance());
+	
+	//zend_printf("Plate::construct\n");
 	
 	engine_ = engine;
 	
@@ -348,6 +350,10 @@ zstr_mgr
 Plate::insert(zstr_user name, htab_read data)
 {
 	PlateEngine* pe = zobj_toc<PlateEngine>(engine_);
+	if (data.isNull())
+	{
+		data = data_;
+	}
 	return pe->render(name, data);
 }
 
@@ -475,13 +481,13 @@ ZEND_METHOD(Wcc_Plate, __construct)
 	zend_class_entry* ece = PlateEngine::omg.classEntry();
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
-	Z_PARAM_OBJECT_OF_CLASS(engine, ece)
 	Z_PARAM_STR(name)
+	Z_PARAM_OBJECT_OF_CLASS(engine, ece)
 	ZEND_PARSE_PARAMETERS_END();
 
 	auto cobj = zval_toc<Plate>(ZEND_THIS);
 
-	cobj->construct(engine, name);
+	cobj->construct(name, engine);
 }
 
 ZEND_METHOD(Wcc_Plate, getPublish)

@@ -47,9 +47,9 @@ namespace wcc {
 		void setExtender(zobj_user obj);
 
 		zval_mgr nullService(zstr_user name);
-#ifndef BASE_ZOBJPTR
-	VIRTUAL_ZOBJPTR
-#endif
+
+		VIRTUAL_ZOBJPTR
+
 	};
 
 };//namespace

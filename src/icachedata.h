@@ -66,9 +66,7 @@ namespace wcc {
 
 		virtual void debug_info(htab_write hw);
 
-#ifndef BASE_ZOBJPTR
-	VIRTUAL_ZOBJPTR
-#endif
+		VIRTUAL_ZOBJPTR
 	
 };
 

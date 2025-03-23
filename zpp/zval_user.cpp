@@ -164,6 +164,9 @@ zval_user::to_zstr() const
 		// return a string representation
 		result.adopt(zval_get_string(zv));
 	}
+	else {
+		result = Z_STR_P(zv);
+	}
 	return result;
 }
 

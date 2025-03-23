@@ -48,6 +48,10 @@ namespace zpp {
 
         uint32_t size() const;
 
+        bool isNull() 
+        {
+            return (ht_ == nullptr);
+        }
         bool ok() const { return (ht_); }
 
         zval* get(zend_long idx) const;

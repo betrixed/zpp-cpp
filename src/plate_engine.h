@@ -81,6 +81,8 @@ class Plate; // forward
 
 		friend class Plate;
 
+		VIRTUAL_ZOBJPTR
+
 	};
 
 	extern zend_class_entry* gIfLoadHtmlCE;
