@@ -173,7 +173,9 @@ namespace wcc {
 	{	
 		ZVAL_STR(getattribute_.argsptr(), name);
 
-		return getattribute_.call_fn();
+		zval_mgr attr =  getattribute_.call_fn();
+		//showmem("attribute ", attr);
+		return zstr_mgr(zval_user(attr));
 	}
 
 	zval_mgr
@@ -227,7 +229,6 @@ constexpr std::string_view root_tag = "root";
 constexpr std::string_view a_tag = "a";
 
 constexpr std::string_view s_tag = "s";
-
 constexpr std::string_view i_tag = "i";
 constexpr std::string_view f_tag = "f";
 constexpr std::string_view n_tag = "_n";
@@ -472,15 +473,18 @@ Wcc_XmlRead::tagsTable()
 zobj_mgr
 Wcc_XmlRead::newRoot(zstr_user cname)
 {
-	//showstr("newRoot - ", cname);
+
+	zobj_mgr result;
 
 	if (cname.size() > 0)
 	{
-		return class_data::create_object(cname);
+		result = ReflectCache::staticInstance(cname);
 	}
 	else {
-		return  class_data::std_object();
+		result =  class_data::std_object();
 	}
+	showobj("newRoot - ", result);
+	return result;
 }
 
 void Wcc_XmlRead::attach_ds(DStack* ds)
@@ -507,7 +511,7 @@ Wcc_XmlRead::pushRoot(zstr_user key)
 	zstr_mgr cname = xml_.get_attribute(XML_FNS.k_c);
 
 	zval_mgr newroot;
-	//zend_printf("pushRoot stack size=%ld\n", ix);
+	//showstr("pushRoot c=", cname);
 	if (stacked_ == 0) {
 		if (!addRoot_.isNull()) {
 			newroot = addRoot_;
@@ -525,9 +529,10 @@ Wcc_XmlRead::pushRoot(zstr_user key)
 
 void Wcc_XmlRead::pushClass(zstr_user classname, zstr_user key)
 {
-	zval_mgr newroot(class_data::create_object(classname));
+	zobj_mgr newroot = ReflectCache::staticInstance(classname);
+	zval_mgr store(newroot);
 
-	attach_ds(new DStack(key, newroot, XC_OBJECT));
+	attach_ds(new DStack(key, store, XC_OBJECT));
 }
 
 void Wcc_XmlRead::popStack()

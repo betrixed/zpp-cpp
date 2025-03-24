@@ -1,21 +1,15 @@
 <?php
 use Wcc\{
-	CacheAll,
+    CacheAll,
     Config,
     Dos,
-    ReflectCache,
-    Services,
-    XmlWrite,
+    Services
+
 };
 
-use Wcd\{
-    IDriver,
-    IScript,
-    IBuild,
-    IServer
-};
+use Wcc\Cache\SFile;
 
-
+use Wcd\IServer;
 
 $basedir = dirname(__DIR__);
 chdir($basedir);
@@ -36,13 +30,10 @@ $cfg->addArray([
 
 echo "Config " . print_r($cfg, true) . PHP_EOL;
 
-$cache_cfg = require("tests/cache_config.php");
 $services->setObject($cfg, Config::class);
 $services->set('config',$cfg);
 $services->set('dos', new Dos());
 
-$cache_all = new CacheAll($cache_cfg);
-$services->set('cache_all', $cache_all);
 
 $loader = $services->get('loader');
 
@@ -65,6 +56,51 @@ $servers->config($dbconfig);
 
 $dbalias = "db1";
 $servers->setAlias("default", $dbalias);
+
+
+
+$cache = new CacheAll
+([
+    'delete_expired' => 60*10,
+    'expired_key' => 'pcan_delete_expired',
+    'fast_cache' => "file_cache", 
+    'default_cache' => 'file_cache',
+    "defaults" => [
+        'prefix' => "unit-test",
+        'expire' => 60*60*24,
+        'defer_write' => true,
+    ],
+]);
+
+
+$cache->createCache
+(    
+    service_key:"file_cache", 
+    class_name:SFile::class, 
+    options: [
+        'cache_dir' => $cfg->cache_dir . "/sfile",
+        'dirtree' => false,
+        'expire' => 60*60*40,            
+    ]
+);
+
+$cache->createCache
+(    
+    service_key:"sess_cache", 
+    class_name:SFile::class, 
+    options: [
+        'cache_dir' => $cfg->cache_dir . "/session",
+        'dirtree' => false,
+        'expire' => 60*30, 
+        'defer_write' => false,
+    ]
+);
+
+$services->set('cache_all', $cache);
+
+$cfg->cache_all = $cache;
+
+
 
 require "php/Asserts.php";
 require "php/Runner.php";

@@ -111,7 +111,6 @@ void ICache::addLocal(zval_user pkg)
 	htab_write hw(cached_);
 
 	ICacheData* icd = zval_toc<ICacheData>(pkg);
-
 	hw.set(icd->getKey(), pkg);
 }
 
@@ -632,7 +631,7 @@ ZEND_METHOD(Wcc_ICache, getCached)
 	ZEND_PARSE_PARAMETERS_END();
 
 	auto cobj = zval_toc<ICache>(ZEND_THIS);
-	zval_mgr result = cobj->getService(key);
+	zval_mgr result = cobj->getCached(key);
 	result.move_zv(return_value);
 }
 

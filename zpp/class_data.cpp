@@ -97,7 +97,7 @@ zobj_mgr//static
 class_data::create_object(zstr_user classname)
 {
     class_data temp(classname);
-
+    showstr("create_object", classname);
     zobj_mgr result;
 
     temp.new_object(result);

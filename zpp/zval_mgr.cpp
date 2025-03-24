@@ -49,7 +49,7 @@ zval_mgr::new_array()
     lose();
     HashTable* ht = htab_mgr::new_array();
     // added with rc == 1 
-    ZVAL_ARR(&zv_, ht);   
+    zval_user(&zv_).bind_array(ht);  
 }
 
 void 
@@ -57,7 +57,9 @@ zval_mgr::empty_array()
 {
     lose();
     // zend_empty_array has rc == 2 
-    ZVAL_ARR(&zv_, (zend_array*) &zend_empty_array);   
+    zval_user(&zv_).bind_array((zend_array*) &zend_empty_array);
+
+
 }
 
 
