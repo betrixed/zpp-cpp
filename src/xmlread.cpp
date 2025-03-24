@@ -99,7 +99,6 @@ namespace wcc {
 	}
 
 	
-
 	bool XmlWrap::newobj()
 	{
 		lose();
@@ -155,13 +154,18 @@ namespace wcc {
 	}
 
 	zval_mgr XmlWrap::xml_name_zval()
-	{;
-		return self_.property(XML_FNS.k_name);
+	{
+		zval_mgr result;
+		self_.property_get(XML_FNS.k_name, result);
+		return result;
 	}
 
 	zstr_mgr XmlWrap::xml_name()
 	{
-		return zstr_mgr(self_.property(XML_FNS.k_name));
+		zval test = {0};
+
+		zval* name = self_.property_get(XML_FNS.k_name, &test);
+		return zstr_mgr(name);
 	}
 
 	zstr_mgr
@@ -190,16 +194,20 @@ namespace wcc {
 	{
 
 		zval_mgr result = read_.call_fn();
-
 		zval_user test(result);
 
-		return (test.ztype() == IS_TRUE) ? true : false;
+		return test.isTrue();
 	}
 
 	int XmlWrap::nodeType()
 	{
-		zval_mgr nodetype = self_.property(XML_FNS.k_nodeType);
-		return zval_user(nodetype).zlong();
+		zval test = {0};
+
+		zval* data = self_.property_get(XML_FNS.k_nodeType, &test);
+		if (data)
+			return zval_user(&test).zlong();
+		else
+			return 0;
 	}
 
 };
@@ -354,6 +362,7 @@ Wcc_XmlRead::loop()
 			{
 				zstr_mgr tag = xml_.xml_name();
 				zstr_user tagstr(tag);
+
 
 				//zend_printf("tag = %s\n", tagstr.data());
 

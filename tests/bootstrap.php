@@ -27,7 +27,10 @@ function show_versions()
 
     echo "wcc $version, xdebug $xdebug\n";    
 }
-
+function boolstr(bool $value) : string
+{
+    return $value ? "true" : "false";
+}
 
 if (!class_exists(Finder::class)) {
 	require $wcc_root . DIRECTORY_SEPARATOR . "Finder.php";
