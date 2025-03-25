@@ -70,6 +70,7 @@ class Plate; // forward
 		zobj_mgr 	getPlate(zstr_user name);
 		void		storePlate(zobj_user plate);
 
+
 		//zobj_mgr makeRaw(zstr_user name, zstr_user raw, bool store = false);
 
 		zstr_mgr render(zstr_user name, htab_read data);

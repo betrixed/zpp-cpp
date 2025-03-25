@@ -14,5 +14,9 @@ libtool
 *arginfo.h
 .libs/**
 run-tests.php
-
+/nbproject/*
 /nbproject/private/
+/tests/_data/schema.*
+/tests/_models/**
+rdebug.sh
+dump.*

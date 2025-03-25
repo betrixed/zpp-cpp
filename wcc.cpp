@@ -51,6 +51,7 @@ extern "C" {
 #include "zpp/show_zpp.cpp"
 #include "src/pair.cpp"
 #include "src/config.cpp"
+#include "src/hmap.cpp"
 
 #include "src/target.cpp"
 #include "src/route.cpp"
@@ -204,6 +205,10 @@ PHP_MINIT_FUNCTION(wcc)
 
 #ifdef WCC_CONFIG_CPP
 	PHP_MINIT(Wcc_Config_reg)(INIT_FUNC_ARGS_PASSTHRU);
+#endif
+
+#ifdef WCC_HMAP_CPP
+	PHP_MINIT(Wcc_Hmap_reg)(INIT_FUNC_ARGS_PASSTHRU);
 #endif
 
 #ifdef PLATE_ENGINE_CPP

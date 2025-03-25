@@ -1,0 +1,92 @@
+<?php
+namespace Wcc;
+
+require "bootstrap.php";
+
+use ArrayAccess;
+use stdClass;
+use Wcd\IStore;
+
+$values = ["key1" => "test-1", 
+	        "key2" => "test-2", 
+			"key3" => "test-3"];
+
+$cfg = new Hmap($values);
+
+//$cfg = new stdClass();
+
+$text1 = "Hidden value \"@key2\" inside";
+
+$cfg->values = $values;
+
+$cfg->values["extra"] = "more";
+
+echo "set property 2\n";
+
+$cfg->{"0123"} = $text1;
+
+$cfg->{100} = "One Hundred";
+$cfg->{200} = "Two Hundred";
+
+$cfg->set("a100", "one dollar");
+
+$getdef = $cfg->getornot("not there", 1000);
+
+echo "Get or not " . $getdef . PHP_EOL;
+
+$getdef = $cfg->getornot("a100", 1000);
+
+echo "expect get = " . $getdef . PHP_EOL;
+
+echo "cfg = "; 
+debug_zpp_dump($cfg);
+
+$cfg->property = "Rentier class";
+
+echo "set property : " . $cfg->property . PHP_EOL;
+
+
+echo "Has Property " . boolstr($cfg->has("property")) . PHP_EOL;
+
+$cfg->text1 = $cfg->unhive($text1) . PHP_EOL;
+
+echo "unhived " . $cfg->text1;
+
+if (class_implements($cfg, "ArrayAccess"))
+{
+	$cfg[100] = $text1;
+
+	$cfg[0] = "Zero index key";
+
+	$cfg["zero"] = 1000.001;
+
+	echo "not zero = " . $cfg["zero"] . PHP_EOL;
+
+
+	$cfg[100] = $text1;
+
+	echo "cfg = " . print_r($cfg,true) . PHP_EOL;
+
+	unset($cfg[0]);
+
+	unset($cfg["property"]);
+}
+
+$data = ["k1" => "stuff1", "k2" => "stuff2"];
+
+$cfg->odata = $data;
+
+$cfg->odata["k3"] = "New Stuff";
+
+$cfg->name = "Property Hmap";
+
+$vars = $cfg->subset(["key1", "key2"]);
+
+echo "subset = " . print_r($vars,true) . PHP_EOL;
+//$cfg->setName("Primary Hmap");
+
+$istore = new IStore();
+
+
+echo "istore = " . print_r($istore,true) . PHP_EOL;
+

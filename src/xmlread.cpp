@@ -483,7 +483,7 @@ Wcc_XmlRead::newRoot(zstr_user cname)
 	else {
 		result =  class_data::std_object();
 	}
-	showobj("newRoot - ", result);
+	//showobj("newRoot - ", result);
 	return result;
 }
 
