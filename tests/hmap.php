@@ -9,7 +9,10 @@ use Wcd\IStore;
 
 $values = ["key1" => "test-1", 
 	        "key2" => "test-2", 
-			"key3" => "test-3"];
+			"key3" => "test-3",
+		     150 => "xvalue",
+		     "float" => 222.5343
+		];
 
 $cfg = new Hmap($values);
 
@@ -26,7 +29,7 @@ echo "set property 2\n";
 $cfg->{"0123"} = $text1;
 
 $cfg->{100} = "One Hundred";
-$cfg->{200} = "Two Hundred";
+$cfg->{100} = "Two Hundred";
 
 $cfg->set("a100", "one dollar");
 
@@ -37,15 +40,15 @@ echo "Get or not " . $getdef . PHP_EOL;
 $getdef = $cfg->getornot("a100", 1000);
 
 echo "expect get = " . $getdef . PHP_EOL;
+$cfg->property = "Rentier class";
+$cfg->twice = "Rentier class";
+$cfg->twice = "twice";
 
 echo "cfg = "; 
 debug_zpp_dump($cfg);
 
-$cfg->property = "Rentier class";
 
 echo "set property : " . $cfg->property . PHP_EOL;
-
-
 echo "Has Property " . boolstr($cfg->has("property")) . PHP_EOL;
 
 $cfg->text1 = $cfg->unhive($text1) . PHP_EOL;
@@ -61,7 +64,6 @@ if (class_implements($cfg, "ArrayAccess"))
 	$cfg["zero"] = 1000.001;
 
 	echo "not zero = " . $cfg["zero"] . PHP_EOL;
-
 
 	$cfg[100] = $text1;
 
@@ -90,3 +92,28 @@ $istore = new IStore();
 
 echo "istore = " . print_r($istore,true) . PHP_EOL;
 
+
+echo "istore = " . print_r($cfg->toArray(),true) . PHP_EOL;
+
+
+$ch = new Hmap($cfg->toArray());
+$ch->name = "Hmap Property name";
+
+$ch->set('name', "Function set name");
+$ch->key1 = "Child dynamic value for key1";
+
+echo "Declared property name: " . $ch->name . PHP_EOL;
+echo "Dynamic property name: " . $ch->get('name') . PHP_EOL;
+
+debug_zpp_dump($ch);
+
+$data = serialize($ch);
+
+echo "serialized " . $data .PHP_EOL;
+
+$obj = unserialize($data);
+
+
+debug_zpp_dump($obj);
+
+echo "unserialized name " . $obj->name . PHP_EOL;

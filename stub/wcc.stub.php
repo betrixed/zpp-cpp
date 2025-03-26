@@ -18,12 +18,11 @@ class Finder {
 	// properties
 	public function getNSPaths() : array {}
 
-	public function getClassPaths()  : array {}
+	public function getClassPaths() : array {}
 
 	public function getFolders() : array {}
 
-	// return list - success(bool), and path(string) if true
-	public function find(string $cname) : false|string {}
+	public function find(string $cname) : null|string {}
 
 };
 

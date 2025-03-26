@@ -106,6 +106,7 @@ htab_mgr::htab_mgr(const zval_user& zptr)
 	if (ht_) own();
 }
 
+
 htab_mgr::htab_mgr(zval* p)
 {
 	if (p) {
@@ -116,6 +117,16 @@ htab_mgr::htab_mgr(zval* p)
 		ht_ = nullptr;
 	}
 }
+
+htab_mgr::htab_mgr(const htab_mgr& c)
+{
+	ht_ = c.ht_;
+	if (ht_)
+	{
+		own();
+	}
+}
+
 
 const htab_mgr& 
 htab_mgr::operator=(const zval_mgr& zw)

@@ -49,99 +49,98 @@ extern "C" {
 
 #include "zpp/base.cpp"
 #include "zpp/show_zpp.cpp"
-#include "src/pair.cpp"
-#include "src/config.cpp"
-#include "src/hmap.cpp"
 
-#include "src/target.cpp"
-#include "src/route.cpp"
-#include "src/route_set.cpp"
-#include "src/route_match.cpp"
-#include "src/route_add.cpp"
+#include "wcc/pair.cpp"
+#include "wcc/config.cpp"
+#include "wcc/hmap.cpp"
 
-#include "src/service_access.cpp"
+#include "wcc/target.cpp"
+#include "wcc/route.cpp"
+#include "wcc/route_set.cpp"
+#include "wcc/route_match.cpp"
+#include "wcc/route_add.cpp"
 
-#include "src/money_fmt.cpp"
+#include "wcc/service_access.cpp"
 
-#include "src/htmlgem.cpp"
-#include "src/search_list.cpp"
-#include "src/plate.cpp"
-#include "src/plate_engine.cpp"
+#include "wcc/money_fmt.cpp"
 
-//#include "src/zpp/all.cpp"
+#include "wcc/htmlgem.cpp"
+#include "wcc/search_list.cpp"
+#include "wcc/plate.cpp"
+#include "wcc/plate_engine.cpp"
 
-//#include "src/str_intern.cpp"
+#include "wcc/finder.cpp"
 
  //SQL_IPART_CPP
-//#include "src/sql_ipart.cpp"
-//#include "src/sql_isql.cpp"
+//#include "wcc/sql_ipart.cpp"
+//#include "wcc/sql_isql.cpp"
 
 
 //TOML_PHP_CPP
-//#include "src/toml_php.cpp"
-//#include "src/daytime.cpp"
+//#include "wcc/toml_php.cpp"
+//#include "wcc/daytime.cpp"
 
 /* // TOML_STREAM_CPP
-#include "src/ucode8.cpp"
-#include "src/str8_obj.cpp"
-#include "src/toml_stream.cpp"
+#include "wcc/ucode8.cpp"
+#include "wcc/str8_obj.cpp"
+#include "wcc/toml_stream.cpp"
 
 */
 
 //GLOBAL_RESPONSE_CPP
- //#include "src/global_response.cpp"
- //#include "src/headers_response.cpp"
+ //#include "wcc/global_response.cpp"
+ //#include "wcc/headers_response.cpp"
 
 
 
 
 //FILTER_WCF_CPP // not actually used much, so not included
-//#include "src/filter_wcf.cpp"
+//#include "wcc/filter_wcf.cpp"
 
 
-//#include "src/wcc_config.cpp" // not adequatedly functional
+//#include "wcc/wcc_config.cpp" // not adequatedly functional
 
 // REQUEST_GLOBALS_CPP
 
 /*
-#include "src/request_globals.cpp"
-#include "src/file_upload.cpp"
+#include "wcc/request_globals.cpp"
+#include "wcc/file_upload.cpp"
 
 
 // HTMLGEM_CPP
 
 
 
-#include "src/htmlplates.cpp"
+#include "wcc/htmlplates.cpp"
 
 
-#include "src/plate_wcp.cpp"
-#include "src/plate_engine.cpp"
+#include "wcc/plate_wcp.cpp"
+#include "wcc/plate_engine.cpp"
 */
 
 //WCC_SERVICES_CPP
-#include "src/reflect_cache.cpp"
-#include "src/services.cpp"
+#include "wcc/reflect_cache.cpp"
+#include "wcc/services.cpp"
 
 #define XMLREAD_CODE
 
 #ifdef XMLREAD_CODE
-#include "src/xmlread.cpp"
+#include "wcc/xmlread.cpp"
 #endif
 
  //ICACHE_DATA_CPP
-#include "src/icachedata.cpp"
-#include "src/icache.cpp"
+#include "wcc/icachedata.cpp"
+#include "wcc/icache.cpp"
 
 /*
-#include "src/reflect_cache.cpp"
-#include "src/finder.cpp"
-#include "src/target.cpp"
+#include "wcc/reflect_cache.cpp"
 
-#include "src/route_set.cpp"
+#include "wcc/target.cpp"
 
-#include "src/route_match.cpp"
-#include "src/route_add.cpp"
+#include "wcc/route_set.cpp"
+
+#include "wcc/route_match.cpp"
+#include "wcc/route_add.cpp"
 
 */
 #include "zpp/strfns.cpp"

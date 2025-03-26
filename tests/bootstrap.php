@@ -49,6 +49,9 @@ $loader->register();
 
 class EmptyTest {
     public array $empty = [];
+    public $key;
+    public $value;
+
 
     public function indexGET() : mixed {
         return "get somthing";
@@ -57,6 +60,8 @@ class EmptyTest {
     public function targetGET() : mixed {
         return "get target";
     }
+
+
 };
 
 

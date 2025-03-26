@@ -3,6 +3,7 @@
 namespace Wcc;
 
 use DS\Pair as dspair;
+use DS\Map as map;
 
 require "bootstrap.php";
 
@@ -148,14 +149,14 @@ function test_f()
 {
 	$count = 1000;
 
-	$c = new Config();
+	$c = new Hmap();
 
 	$c->key = 123;
 	$c->value = 2345;
 
 	echo print_r($c, true) . PHP_EOL;
 	$result = ($c->key + $c->value) / $c->key;
-	echo "Config array magic properties = " . $result . PHP_EOL;
+	echo "Zend object dynamic propertites = " . $result . PHP_EOL;
 	
 	$start = microtime(true);
 
@@ -216,7 +217,7 @@ function test_h()
 
 	echo print_r($c, true) . PHP_EOL;
 	$result = ($c->data["key"] + $c->data["value"]) / $c->data["key"];
-	echo "objects  array dynamic property = " . $result . PHP_EOL;
+	echo "Extend stdClass = " . $result . PHP_EOL;
 	
 	$start = microtime(true);
 
@@ -238,13 +239,40 @@ function test_i()
 	$count = 1000;
 
 	$c = new EmptyTest();
-
-	$d = ["key" => 123, "value"=> 2345];
-
-	$c->empty = $d;
+	$c->key = 123;
+	$c->value = 2345;
 
 	echo print_r($c, true) . PHP_EOL;
-	$result = ($c->empty["key"] + $c->empty["value"]) / $c->empty["key"];
+	$result = ($c->key + $c->value) / $c->key;
+	echo "objects declared properties = " . $result . PHP_EOL;
+	
+	$start = microtime(true);
+
+	for($ix = 0; $ix < $count; $ix++)
+	{
+		//$temp = $c->empty;
+		$result = ($c->key + $c->value) / $c->key;
+		//$result = ($temp["key"] + $temp["value"]) / $temp["key"];
+	}
+
+	$end = microtime(true);
+
+	$itime = (($end - $start) / $count) * 1000_000.0;
+	echo "iter = " . chop($itime) . PHP_EOL;
+	echo "----------------------------" . PHP_EOL;
+	return $itime;
+}
+
+function test_j()
+{
+	$count = 1000;
+
+	$c = new Map();
+	$c['key'] = 123;
+	$c['value'] = 2345;
+
+	echo print_r($c, true) . PHP_EOL;
+	$result = ($c['key'] + $c['value']) / $c['key'];
 	echo "objects declared array = " . $result . PHP_EOL;
 	
 	$start = microtime(true);
@@ -252,7 +280,7 @@ function test_i()
 	for($ix = 0; $ix < $count; $ix++)
 	{
 		//$temp = $c->empty;
-		$result = ($c->empty["key"] + $c->empty["value"]) / $c->empty["key"];
+		$result = ($c['key'] + $c['value']) / $c['key'];
 		//$result = ($temp["key"] + $temp["value"]) / $temp["key"];
 	}
 
@@ -273,15 +301,17 @@ $f = test_f();
 $g = test_g();
 $h = test_h();
 $i = test_i();
+$j = test_j();
 
-row("use locals set once", $e/$e, $e/$a);
-row("declared properties fetch", $a/$e, $a/$a);
+row("use locals set once (e)", $e/$e, $e/$a);
+row("DS\\Pair declared properties (a)", $a/$e, $a/$a);
+row("EmptyTest declared properties (i)", $i/$e, $i/$a);
+row("Wcc\Pair call sum() (c)", $c/$e, $c/$a);
+row("Wcc\\Config dynamic properties", $d/$e, $d/$a);
 
-row("one function call", $c/$e, $c/$a);
-row("dynamic properties (Config)", $d/$e, $d/$a);
+row("Use local array (g)", $g/$e, $g/$a);
 
-row("Use local array", $g/$e, $g/$a);
-row("Use objects declared array", $i/$e, $i/$a);
-row("Use objects dynamic array", $h/$e, $h/$a);
-row("read_property handler call", $b/$e, $b/$a);
-row("use magic method (__get)", $f/$e, $f/$a);
+row("Extend stdClass (h)", $h/$e, $h/$a);
+row("Wcc\Pair property (b)", $b/$e, $b/$a);
+row("Hmap property handler (f)", $f/$e, $f/$a);
+row("DS\\Map  (j)", $j/$e, $j/$a);

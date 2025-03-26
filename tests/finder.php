@@ -3,7 +3,7 @@ namespace Wcc;
 require "bootstrap.php";
 
 
-$test = "Wcc\\Config";
+$test = "Wcc\\ConfigStd";
 
 //$loader->addClass($test, "Wcc/Config.php");
 

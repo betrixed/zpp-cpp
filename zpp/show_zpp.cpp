@@ -170,10 +170,10 @@ dump_info::di_dump(zval_user zu, int level)
 		ss << "NULL\n";
 		break;
 	case IS_LONG:
-		ss << "int(" << zu.zlong() << ")\n";
+		ss << "int: " << zu.zlong() << "\n";
 		break;
 	case IS_DOUBLE:
-		ss << "float(" << zu.zdouble() << ")\n";
+		ss << "dval: " << zu.zdouble() << "\n";
 		break;
 	case IS_STRING:
 		di_showstr(zu.zstr());
@@ -289,49 +289,51 @@ void dump_info::indent(int ct)
 	void dump_info::di_showmem(zval *m) 
 	{
 
-		ss << "zval " << (void*)m << " ";
+		ss << "zval(0x" << (void*)m << ") ";
 
 		int  ztype = Z_TYPE_P(m);
 
-		if (ztype == IS_STRING) {
+		switch(ztype) {
+		case IS_STRING:
 			di_showstr(Z_STR_P(m));
 			return;
-		}
-		if (ztype == IS_ARRAY) {
+		case IS_ARRAY:
 			di_showarray(Z_ARR_P(m));
 			return;
-		}
-		else if (ztype == IS_OBJECT) 
-		{
+		case IS_OBJECT:
 			di_showobj(Z_OBJ_P(m));
 			return;
-		}
-		if (ztype == IS_LONG) 
-		{
-			ss << "is long = " << Z_LVAL_P(m);
-		}
-		else if (ztype == IS_NULL) {
-			ss << "is null";
-		}
-		else  if (ztype == IS_TRUE) {
-			ss << "++ TRUE ++ ";
-		}
-		else  if (ztype == IS_FALSE) {
-			ss  << "** FALSE ** ";
-		}
-		else if (ztype == IS_INDIRECT) 
-		{
-			ss  << "--> INDIRECT ";
-		}
-		else if (ztype == IS_REFERENCE)
-		{
+		case IS_LONG:
+			ss << "long: " << iform(Numf::DEC) << m->value.lval;
+			return;
+		case IS_DOUBLE: 
+			ss << m->value.dval;
+			return;
+		case IS_NULL:
+			ss << "NULL";
+			return;
+		case IS_TRUE:
+			ss << "bool: true";
+			return;
+		case IS_FALSE:
+			ss  << "bool: false";
+			return;
+		case IS_INDIRECT:
+			ss  << "INDIRECT --> ";
+			di_showmem(m->value.zv);
+			return;
+		case IS_REFERENCE:
 			di_showref(Z_REF_P(m));
+			return;
+		case IS_UNDEF:
+			ss << "UNDEFINED 0";
+			return;
+		case IS_RESOURCE:
+			ss << "RESOURCE: 0x" << iform(Numf::HEX) << (long)m->value.res;
+			return;
+		default:
+			ss << "other type # " << ztype;
 		}
-		else
-		{
-			ss << "type # " << ztype;
-		}
-
 		return;
 	}
 
@@ -344,7 +346,7 @@ void dump_info::indent(int ct)
 		   const char* data = ZSTR_VAL(p);
 		   size_t   slen = ZSTR_LEN(p);
 
-			ss << " str(" << iform(Numf::DEC) << (int) slen << ") " << iform(Numf::HEX) << p;
+			ss << " str(" << iform(Numf::DEC) << (int) slen << ") " << iform(Numf::HEX) << (void*)p;
 			ss << " gc " << (int) GC_REFCOUNT(p) << " ";
 			int gcflags = GC_FLAGS(p);
 			if ((gcflags & GC_PERSISTENT) != 0) ss << "ps ";
@@ -365,7 +367,7 @@ void dump_info::indent(int ct)
 	{
 		ss << ' ';
 		if (!ht) {
-			ss << "is nullptr\n";
+			ss << "NULL\n";
 			return;
 		}
 
@@ -373,7 +375,7 @@ void dump_info::indent(int ct)
 		if (ht->gc.u.type_info & GC_IMMUTABLE) {
 			ss << "immutable ";
 		}
-		ss << iform(Numf::DEC) << "arr(" << ct <<") "  << iform(Numf::HEX) << ht;
+		ss << iform(Numf::DEC) << "arr(" << ct <<") 0x"  << iform(Numf::HEX) << ht;
 		/* if (ht->u.flags & htab_mgr::COW_VIOLATE) {
 			ss << " vcow ";
 		}

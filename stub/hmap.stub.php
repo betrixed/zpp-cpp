@@ -6,7 +6,7 @@
 namespace Wcc;
 
 
-class Hmap # stdClass # implements ArrayAccess 
+final class Hmap # stdClass # implements ArrayAccess 
 {
 	public function __construct(?array $values=null);
 
@@ -27,6 +27,12 @@ class Hmap # stdClass # implements ArrayAccess
 	public function toArray() : array {}
 
 	public function unhive(string $key) : string {}
+
+	public function __serialize() : array {}
+
+	public function __unserialize(array $data) : void {}
+	
+	public function clear() : void {}
 	
 /*
 	public function __get(string $name) : mixed {}
