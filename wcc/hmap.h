@@ -5,18 +5,27 @@
 #include "zpp/base.h"
 #endif
 
+#define HMAP_DIMENSIONS
+
 namespace wcc {
 
 class Hmap : public base_d {
 public:
+	//! Object handlers to install
 	static ZEND_RESULT_CODE count_elements(zend_object* object, zend_long* count);
 	static zval* 	read_property(zend_object* object, zend_string* name, int type, void** cache_slot, zval* rv);
 	static zval* 	write_property(zend_object* object, zend_string* name, zval *value, void** cache_slot);
 	static int  	has_property(zend_object* object, zend_string* name, int has_set_exists, void** cache_slot);
 	static void  	unset_property(zend_object* object, zend_string* name, void **cache_slot);
 	static zval* 	get_property_ptr_ptr(zend_object* object, zend_string* name, int type, void** cache_slot);
-	
 	static HashTable* get_properties_for(zend_object* obj, zend_prop_purpose purpose);
+
+#ifdef HMAP_DIMENSIONS
+	static zval* read_dimension(zend_object* obj, zval* offset, int type, zval* return_value);
+	static void  write_dimension(zend_object* obj, zval* offset, zval* set_value);
+	static void  unset_dimension(zend_object* object, zval* unset);
+	static int   has_dimension(zend_object* object, zval* offset, int check_empty);
+#endif
 
 	//static HashTable* get_properties(zend_object* object);
 	class Hmap_Mgr : public base_obj_mgr<Hmap>
@@ -41,12 +50,12 @@ public:
 
 			hand.get_debug_info = nullptr;
 
-			/*
+#ifdef HMAP_DIMENSIONS
 			hand.read_dimension = Hmap::read_dimension;
 			hand.write_dimension = Hmap::write_dimension;
 			hand.has_dimension = Hmap::has_dimension;
 			hand.unset_dimension = Hmap::unset_dimension;
-			*/
+#endif
 			
 			/*
 			
@@ -65,8 +74,6 @@ public:
 
 	static Hmap_Mgr omg;
 	
-protected:
-	htab_empty data_;
 
 	
 
@@ -87,9 +94,12 @@ protected:
 	static HashTable* get_gc(zend_object* obj, zval **gc_data, int *gc_data_count);
 		*/
 public:
-
+	htab_empty data_;
 	//void debug_info(htab_write hw) override;
 	
+	//! Create a new Hmap constructed witn HashTable/zend_array
+	static zobj_mgr fromArray(zval_user init);
+
 	void construct(htab_read values);
 
 	/** Avoid warning for missing property */
@@ -129,6 +139,14 @@ public:
 	void      clear();
 
 	VIRTUAL_ZOBJPTR
+
+	static htab_read map_htab(zobj_mgr mobj) 
+	{
+		Hmap* hmap = zobj_toc<Hmap>(mobj);
+		return hmap->data_;
+	}
+
+
 };
 
 

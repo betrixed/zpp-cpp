@@ -12,7 +12,8 @@
 #endif
 
 extern "C" {
-#include "Zend/zend_alloc.h"    
+    #include "Zend/zend_alloc.h"
+    #include "ext/json/php_json.h"   
 };
 
 namespace zpp {
@@ -293,15 +294,53 @@ rawurlencode(zstr_user s)
 
 }
 
+zstr_mgr 
+ucwords(zstr_user s)
+{
+    fn_call_args<1>  fn;
+    ZVAL_STR(fn.argsptr(), s);
+    fn.set_fci(nullptr, STAB.ucwords, nullptr);
+    return fn.call_fn();
+}
+
+zstr_mgr
+strtr(zstr_user s, zstr_user from, zstr_user to)
+{
+    fn_call_args<3>  fn;
+    zval* ap = fn.argsptr();
+
+    ZVAL_STR(ap, s);
+    ZVAL_STR(ap+1, from);
+    ZVAL_STR(ap+2, to);
+
+    fn.set_fci(nullptr, STAB.strtr, nullptr);
+    return fn.call_fn();
+}
+
+zval_mgr 
+json_decode(zstr_user str, bool asArray,  int flags)
+{
+    if (asArray)
+    {
+        flags |= PHP_JSON_OBJECT_AS_ARRAY;
+    }
+    zval_mgr result;
+
+    //zend_result check = 
+    php_json_decode_ex(result, str.data(), str.size(), flags, 512);
+
+    return result;
+}
+
 void  // virtual
 fntable::init()
 {        
     //zend_printf("fntable init\n");
 
-    s_extension_loaded = zstr_intern("extension_loaded");
-    s_function_exists = zstr_intern("function_exists");
-    s_preg_quote = zstr_intern("preg_quote");
-    s_file_get_contents = zstr_intern("file_get_contents");
+    s_extension_loaded = "extension_loaded";
+    s_function_exists = "function_exists";
+    s_preg_quote = "preg_quote";
+    s_file_get_contents = "file_get_contents";
 
     extension_loaded.set_fname(s_extension_loaded);
     function_exists.set_fname(s_function_exists);
@@ -312,16 +351,18 @@ fntable::init()
 void  // virtual
 strtable::init()
 {
-    construct_key = zstr_intern("__construct");
-    mb_detect_order = zstr_intern("mb_detect_order");
-    mb_detect_encoding = zstr_intern("mb_detect_encoding");
-    setdate = zstr_intern("setdate");
-    settime = zstr_intern("settime");
-    diff = zstr_intern("diff");
-    date = zstr_intern("date");
-    strtotime = zstr_intern("strtotime");
-    addcslashes = zstr_intern("addcslashes");
-    rawurlencode = zstr_intern("rawurlencode");
+    construct_key = "__construct";
+    mb_detect_order = "mb_detect_order";
+    mb_detect_encoding = "mb_detect_encoding";
+    setdate = "setdate";
+    settime = "settime";
+    diff = "diff";
+    date = "date";
+    strtotime = "strtotime";
+    addcslashes = "addcslashes";
+    rawurlencode = "rawurlencode";
+    strtr = "strtr";
+    ucwords = "ucwords";
 
 }
 

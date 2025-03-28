@@ -70,6 +70,9 @@ extern "C" {
 #include "wcc/plate_engine.cpp"
 
 #include "wcc/finder.cpp"
+#include "wcc/request_globals.cpp"
+#include "wcc/file_upload.cpp"
+
 
  //SQL_IPART_CPP
 //#include "wcc/sql_ipart.cpp"

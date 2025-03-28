@@ -12,7 +12,8 @@
 #endif
 
 extern "C" {
-	#include "ext/standard/php_math.h"
+	#include <ext/standard/php_math.h>
+	#include <ext/standard/base64.h>
 };
 
 namespace zpp {
@@ -247,6 +248,31 @@ zstr_mgr::operator=(zstr_buffer&& m)
 zstr_mgr::zstr_mgr(zstr_buffer&& m)
 {
 	s = m.zstr();// zstr_buffer cleared by this, refcount==1
+}
+
+
+zstr_mgr 
+zstr_mgr::base64_decode(const unsigned char* c, size_t slen)
+{
+	zstr_mgr result;
+
+	zend_string* d = php_base64_decode(c, slen);
+
+	result.adopt(d);
+
+	return result;
+}
+
+zstr_mgr 
+zstr_mgr::base64_encode(const unsigned char* c, size_t slen)
+{
+	zstr_mgr result;
+
+	zend_string* d = php_base64_encode(c, slen);
+
+	result.adopt(d);
+
+	return result;
 }
 
 };

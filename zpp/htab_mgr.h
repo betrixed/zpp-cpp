@@ -25,6 +25,10 @@ namespace zpp {
         static HashTable* empty_array();
         static void try_addref(HashTable* h);
         static bool try_decref(HashTable* h);
+
+
+        static void set_global(zstr_user key, zval_user value);
+        static zval_user  get_global(zstr_user key);
         
         ~htab_mgr();
 

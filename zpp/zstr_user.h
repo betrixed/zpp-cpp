@@ -77,14 +77,22 @@ namespace zpp {
 		zstr_mgr trim(const char* what = (const char*) nullptr,
 		 				int mode = LRTRIM) const;
 
+		zstr_mgr strtr(const char* from, const char* to) const;
+		
+		int find(char c, size_t pos=0) const;
+
 		void return_zv(zval* ret);
 
+		bool starts_with(zstr_user match);
 		
 		const zstr_user& operator=(zval* rc);
+
+
 		
 	};
 
-	bool zs_equal(zend_string* a, zend_string* b);
+	int zs_cmp(zend_string* a, zend_string* b);
+	int zs_cmp_ci(zend_string* a, zend_string* b);
 };
 
 

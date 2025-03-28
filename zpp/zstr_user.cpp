@@ -7,6 +7,9 @@
 #ifndef ZSTR_USER_CPP
 #define ZSTR_USER_CPP
 
+#ifndef FN_CALL_H
+#include "fn_call.h"
+#endif
 
 extern "C" {
 	#include "ext/standard/php_string.h"
@@ -16,17 +19,60 @@ namespace zpp {
 
 const char* zstr_user::empty_zstr = "\0";
 
-bool 
-zs_equal(zend_string* a, zend_string* b)
+int 
+zs_cmp(zend_string* a, zend_string* b)
 {
-	if (!a || !b)
+	if (!a && !b)
 	{
-		return false;
+		return 0;
 	}
-	if (ZSTR_LEN(a) != ZSTR_LEN(b))
-		return false;
+	if (!a) {
+		return -1;
+	}
+	if (!b) {
+		return 1;
+	}
+	const char* ap = ZSTR_VAL(a);
+	const char* bp = ZSTR_VAL(b);
 
-	return (strcmp(ZSTR_VAL(a), ZSTR_VAL(b)) == 0);
+	for (;; ap++, bp++) {
+        int d = *ap - *bp;
+        if (d != 0 || !*ap)
+            return d;
+    }
+    return 0;
+}
+
+int zs_cmp_ci(zend_string* a, zend_string* b)
+{
+	if (!a && !b)
+	{
+		return 0;
+	}
+	if (!a) {
+		return -1;
+	}
+	if (!b) {
+		return 1;
+	}
+	const char* ap = ZSTR_VAL(a);
+	const char* bp = ZSTR_VAL(b);
+
+	for (;; ap++, bp++) {
+        int d = tolower((unsigned char)*ap) - tolower((unsigned char)*bp);
+        if (d != 0 || !*ap)
+            return d;
+    }
+    return 0;
+}
+
+// call php for its well-tested complex implementation
+zstr_mgr
+zstr_user::strtr(const char* from, const char* to) const
+{
+	zstr_temp fstr(from);
+	zstr_temp tstr(to);
+	return zpp::strtr(s, fstr, tstr);
 }
 
 zstr_user::zstr_user(const zval_user& rc)
@@ -142,6 +188,40 @@ zstr_user::substr(int offset, int len) const
 
 	 //showstr("substr", result);
 	 return result;
+}
+
+bool 
+zstr_user::starts_with(zstr_user match)
+{
+	size_t mlen = match.size();
+	if (size() < mlen)
+	{
+		return false;
+	}
+	std::string_view mb = match.vstr();
+	return (this->subview(0,mlen) == mb);
+}
+
+int 
+zstr_user::find(char c, size_t pos) const
+{
+	if (!s) {
+		return -1;
+	}
+
+	const char* p = ZSTR_VAL(s) + pos;
+	const char* lim = p + ZSTR_LEN(s);
+	int ix = int(pos);
+	while(p < lim)
+	{
+		if (*p == c)
+		{
+			return ix;
+		}
+		p++;
+		ix++;
+	}
+	return -1;
 }
 
 zstr_mgr

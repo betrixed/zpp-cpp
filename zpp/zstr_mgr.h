@@ -93,6 +93,9 @@ namespace zpp {
 	    operator zend_string*() const { return (zend_string*) s; }
 
 	    const zstr_mgr& operator=(const zstr_user& rc);
+
+	    static zstr_mgr base64_decode(const unsigned char* c, size_t slen);
+	    static zstr_mgr base64_encode(const unsigned char* c, size_t slen);
 	};
 
 	class zstr_empty : public zstr_mgr

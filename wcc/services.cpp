@@ -9,10 +9,6 @@
 #include "zpp/fn_call.h"
 #endif
 
-#ifndef GLOBALS_H
-#include "globals.h"
-#endif
-
 #ifndef REFLECT_CACHE_H
 #include "reflect_cache.h"
 #endif

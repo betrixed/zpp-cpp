@@ -162,35 +162,65 @@ Hmap::get_properties_for(zend_object* object, zend_prop_purpose purpose)
 	return nullptr;
 }
 
+zobj_mgr
+Hmap::fromArray(zval_user htab)
+{
+	zobj_mgr result = Hmap::omg.new_zobj();
+	Hmap* cobj = zobj_toc<Hmap>(result);
+	cobj->construct(htab.zarray());
+	return result;
+}
 
-
-#ifdef CONFIG_DIMENSIONS
+#ifdef HMAP_DIMENSIONS
 zval* 
 Hmap::read_dimension(zend_object* obj, zval* offset, int type, zval* return_value)
 {
-	return zobj_user(obj).property_get(offset, return_value);
+	Hmap* cobj = zobj_toc<Hmap>(obj);
+	htab_read look(cobj->data_);
+	if (look.isNull())
+	{
+		return nullptr;
+	}
+	return look.get(offset);
 }
 
 void 
 Hmap::write_dimension(zend_object* obj, zval* offset, zval* set_value)
 {
-	//showmem("write dimension offset", offset);
-	Config* cobj = zobj_toc<Hmap>(obj);
-	cobj->set(zval_user(offset), zval_user(set_value));
-
-	//zobj_user(obj).property(offset, set_value);
+	Hmap* cobj = zobj_toc<Hmap>(obj);
+	htab_write hw(cobj->data_);
+	hw.set(offset, set_value);
 }
 
 int  
 Hmap::has_dimension(zend_object* object, zval* offset, int check_empty)
 {
-	return zobj_user(object).has_property(offset);
+	Hmap* cobj = zobj_toc<Hmap>(object);
+	htab_read look(cobj->data_);
+	if (look.isNull())
+	{
+		return false;
+	}
+	zval* check = look.get(offset);
+	if (!check) {
+		return 0;
+	}
+	if (check_empty)
+	{
+		if (zval_user(check).ok())
+		{
+			return 1;
+		}
+	}
+	return 1;
 }
 
 void  
 Hmap::unset_dimension(zend_object* object, zval* unset)
 {
-	return zobj_user(object).unset_property(unset);
+	Hmap* cobj = zobj_toc<Hmap>(object);
+	htab_write hw(cobj->data_);
+	hw.unset(unset);
 }
 #endif
 

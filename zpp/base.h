@@ -32,8 +32,6 @@
 #include "state_init.h"
 #include "class_data.h"
 
-#include "globals.h"
-
 #include "zstr_buffer.h"
 
 #include "datetime.h"

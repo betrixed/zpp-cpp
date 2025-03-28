@@ -138,8 +138,10 @@ namespace zpp {
     zstr_mgr mb_detect_order(const zval_mgr& encoding);
     zstr_mgr mb_detect_encoding(zstr_user str, const zval_mgr& encodings, bool strict = false );
     zstr_mgr rawurlencode(zstr_user s);
+    zstr_mgr strtr(zstr_user subj, zstr_user from, zstr_user to);
+    zstr_mgr ucwords(zstr_user subj);
 
-    
+    zval_mgr json_decode(zstr_user str, bool asArray, int flags = 0);
 
     /** 
      *  zend_string passed to set_fname
@@ -178,6 +180,8 @@ namespace zpp {
         zstr_intern  strtotime;
         zstr_intern  addcslashes;
         zstr_intern  rawurlencode;
+        zstr_intern  strtr;
+        zstr_intern  ucwords;
 
 
         

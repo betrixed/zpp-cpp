@@ -1158,7 +1158,7 @@ HtmlGem::select_list(zval_user pset)
 				out << HTG.begintag << HTG.optionkey;
 				outAttr(out, HTG.valuekey, option_key);
 
-				if (zs_equal(suse, option_key)) {
+				if (!zs_cmp(suse, option_key)) {
 					out << " selected>";
 				}
 				else {

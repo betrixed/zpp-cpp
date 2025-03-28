@@ -101,6 +101,10 @@ public:
 
     bool isObject() const;
 
+    /** A not empty value. Not quite the same as !empty($xx)
+     * Not UNDEFINED, NULL or FALSE.
+     * NON-empty array or string. All LONG or DOUBLE are considered NOT empty!
+     */
     bool ok() const;
 
     bool isString() const;

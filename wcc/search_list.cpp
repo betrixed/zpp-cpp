@@ -68,7 +68,7 @@ SearchList::hasPath(zstr_user name)
 	{
 		--pcount;
 		zstr_user test = hr.get(pcount);
-		if (zs_equal(test,name))
+		if (!zs_cmp(test,name))
 		{
 			return true;
 		}

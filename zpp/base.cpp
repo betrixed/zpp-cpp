@@ -21,8 +21,7 @@
 #include "class_data.cpp"
 
 #include "datetime.cpp"
-#include "globals.cpp"
-#include "global.cpp"
+
 #include "zstr_output.cpp"
 #include "zstr_buffer.cpp"
 #include "fn_call.cpp"

@@ -18,7 +18,7 @@ class for_key_value : public htab_mgr {
 protected:
 	bool       		isPacked_;
 	int        		count_; // countdown, and ok condition
-	size_t     		idx_;
+	size_t     		idx_;   
 	int             h_;
 	zend_string*  	key_;
 	zval*			zptr_;

@@ -4,6 +4,7 @@ namespace Wcc;
 
 use DS\Pair as dspair;
 use DS\Map as map;
+use ArrayObject;
 
 require "bootstrap.php";
 
@@ -292,6 +293,40 @@ function test_j()
 	return $itime;
 }
 
+function test_k()
+{
+	$count = 1000;
+
+	$c = new ArrayObject([],  ArrayObject::ARRAY_AS_PROPS);
+	//$c->key = 123;
+	//$c->value = 2345;
+
+	$c['key'] = 123;
+	$c['value'] = 2345;
+
+	echo print_r($c, true) . PHP_EOL;
+	//$result = ($c->key + $c->value) / $c->key;
+	$result = ($c['key'] + $c['value']) / $c['key'];
+	echo "objects declared properties = " . $result . PHP_EOL;
+	
+	$start = microtime(true);
+
+	for($ix = 0; $ix < $count; $ix++)
+	{
+		//$temp = $c->empty;
+		//$result = ($c->key + $c->value) / $c->key;
+		$result = ($c['key'] + $c['value']) / $c['key'];
+		//$result = ($temp["key"] + $temp["value"]) / $temp["key"];
+	}
+
+	$end = microtime(true);
+
+	$itime = (($end - $start) / $count) * 1000_000.0;
+	echo "iter = " . chop($itime) . PHP_EOL;
+	echo "----------------------------" . PHP_EOL;
+	return $itime;
+}
+
 $a = test_a();
 $b = test_b();
 $c = test_c();
@@ -302,6 +337,7 @@ $g = test_g();
 $h = test_h();
 $i = test_i();
 $j = test_j();
+$k = test_k();
 
 row("use locals set once (e)", $e/$e, $e/$a);
 row("DS\\Pair declared properties (a)", $a/$e, $a/$a);
@@ -315,3 +351,4 @@ row("Extend stdClass (h)", $h/$e, $h/$a);
 row("Wcc\Pair property (b)", $b/$e, $b/$a);
 row("Hmap property handler (f)", $f/$e, $f/$a);
 row("DS\\Map  (j)", $j/$e, $j/$a);
+row("ArrayObject  (k)", $k/$e, $k/$a);
