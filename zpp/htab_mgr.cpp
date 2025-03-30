@@ -26,12 +26,17 @@ htab_mgr::set_global(zstr_user key, zval_user value)
 zval_user  
 htab_mgr::get_global(zstr_user key)
 {
-	return zval_user(zend_hash_find_ind(&EG(symbol_table), key));
+
+	zval_user result = zval_user(zend_hash_find_ind(&EG(symbol_table), key));
+	//showmem("get_global", result);
+	return result;
 }
 
 void //static
 htab_mgr::try_addref(HashTable *h)
 {
+	if (!h)
+		return;
 	if (h->gc.u.type_info & GC_IMMUTABLE)
     {
         return;

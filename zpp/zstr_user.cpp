@@ -202,6 +202,28 @@ zstr_user::starts_with(zstr_user match)
 	return (this->subview(0,mlen) == mb);
 }
 
+
+int  
+zstr_user::find(const std::string_view& needle, size_t pos) const
+{
+	if (!s) {
+		return -1;
+	}
+	size_t   slen = ZSTR_LEN(s);
+	size_t   nlen = needle.length();
+
+	// if pos + nlen > slen, then cannot be found
+
+	if ((pos + nlen) > slen) {
+		return -1;
+	}
+
+	const char* p = ZSTR_VAL(s) + pos;
+	std::string_view haystack(p, slen-pos);
+	size_t result = haystack.find(needle, pos);
+	return (result == std::string_view::npos) ? -1 : (int) result;
+}
+
 int 
 zstr_user::find(char c, size_t pos) const
 {
@@ -222,6 +244,39 @@ zstr_user::find(char c, size_t pos) const
 		ix++;
 	}
 	return -1;
+}
+
+int 
+zstr_user::rfind(char c, size_t pos) const
+{
+	if (!s) {
+		return -1;
+	}
+
+	const char* pfirst = ZSTR_VAL(s);
+	size_t slen = ZSTR_LEN(s);
+
+	if (pos >= slen) {
+		pos = slen-1;
+	}
+	const char* plast = pfirst + pos;
+
+	while(plast >= pfirst)
+	{
+		if (*plast == c)
+		{
+			return (int)pos;
+		}
+		plast--;
+		pos--;
+	}
+	return -1;
+}
+
+bool
+zstr_user::contains(zstr_user needle)
+{
+	return strpos(needle) >= 0;
 }
 
 zstr_mgr
@@ -258,7 +313,13 @@ zstr_user::trim(const char* what, int mode) const
 	return result;
 }
 
+int
+zstr_user::strpos(zstr_user needle)
+{
+	std::string_view nview(needle.vstr());
 
+	return find(nview,0);
+}
 
 void zstr_user::return_zv(zval* ret)
 {
@@ -271,6 +332,7 @@ zstr_user::operator=(zval* rc)
 	s = zval_user(rc).zstr();
 	return *this;
 }
+
 
 };
 //zstr_user.cpp

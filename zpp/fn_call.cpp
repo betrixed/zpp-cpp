@@ -183,6 +183,17 @@ file_content::call(zstr_user path, int offset, size_t len)
     return zstr_mgr(call_fn());
 }
 
+zval_mgr
+PathInfo::call(zstr_user path, int flags)
+{
+    zval* pz = argsptr();
+    ZVAL_STR(pz, path);
+    ZVAL_LONG(pz+1, flags);
+    return call_fn();
+}
+
+
+
 zstr_mgr 
 preg_quote(zstr_user expr, zstr_user delimiter)
 {
@@ -242,6 +253,7 @@ bool extension_loaded(zstr_user name)
 {
     return FTAB.extension_loaded.call(name);
 }
+
 
 
 bool extnloaded::call(zstr_user name)
@@ -341,11 +353,14 @@ fntable::init()
     s_function_exists = "function_exists";
     s_preg_quote = "preg_quote";
     s_file_get_contents = "file_get_contents";
-
+    s_pathinfo = "pathinfo";
+    
     extension_loaded.set_fname(s_extension_loaded);
     function_exists.set_fname(s_function_exists);
     preg_quote.set_fname(s_preg_quote);
     file_get_contents.set_fname(s_file_get_contents);
+    pathinfo.set_fname(s_pathinfo);
+
 }
 
 void  // virtual
@@ -363,6 +378,9 @@ strtable::init()
     rawurlencode = "rawurlencode";
     strtr = "strtr";
     ucwords = "ucwords";
+
+
+
 
 }
 

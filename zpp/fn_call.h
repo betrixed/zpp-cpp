@@ -105,11 +105,12 @@ namespace zpp {
         }
     };
 
+
 // prepared function call table
     
     /**
-     * Awkward, since I have never used more than 
-     * one argument for file_get_contents.
+     * Awkward, since I have never before used more than 
+     * one argument with file_get_contents.
      * 
      * skip resource - context(null), and use_include path(false)
      */ 
@@ -117,6 +118,20 @@ namespace zpp {
     public:
         zstr_mgr call(zstr_user path, 
             int offset = 0, size_t len = 0);
+    };
+
+    class PathInfo : public fn_call_args<2> 
+    {
+    public:
+        enum {
+            DIRNAME = 1,
+            BASENAME = 2,
+            EXTENSION = 4,
+            FILENAME = 8,
+            ALL = DIRNAME + BASENAME + EXTENSION + FILENAME
+        };
+
+        zval_mgr call(zstr_user path, int flags);
     };
 
     class extnloaded : public fn_call_args<1> {
@@ -143,6 +158,8 @@ namespace zpp {
 
     zval_mgr json_decode(zstr_user str, bool asArray, int flags = 0);
 
+
+
     /** 
      *  zend_string passed to set_fname
      *  MUST be defined prior to the fci_args
@@ -158,11 +175,13 @@ namespace zpp {
         zstr_intern  s_file_get_contents;
         zstr_intern  s_extension_loaded;
         zstr_intern  s_preg_quote;
+        zstr_intern  s_pathinfo;
 
         extnloaded    extension_loaded;
         fnexists      function_exists;
         pregquote     preg_quote;
         file_content  file_get_contents;
+        PathInfo      pathinfo;
 
         virtual void init();
 
@@ -182,7 +201,6 @@ namespace zpp {
         zstr_intern  rawurlencode;
         zstr_intern  strtr;
         zstr_intern  ucwords;
-
 
         
         virtual void init();

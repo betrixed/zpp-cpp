@@ -49,6 +49,11 @@ namespace zpp {
 	        s = mgr.s;
 	    }
 
+	    zstr_user(const zstr_intern& zs)
+	    {
+	    	s = zs.s;
+	    }
+
 	    operator zend_string*() const { return (zend_string*) s; }
 
 		const char* data() const;
@@ -80,13 +85,18 @@ namespace zpp {
 		zstr_mgr strtr(const char* from, const char* to) const;
 		
 		int find(char c, size_t pos=0) const;
+		int rfind(char c, size_t pos = INT_MAX) const;
+		int find(const std::string_view& needle, size_t pos) const;
+
+		int strpos(zstr_user needle);
+		
+		bool contains(zstr_user needle);
 
 		void return_zv(zval* ret);
 
 		bool starts_with(zstr_user match);
 		
 		const zstr_user& operator=(zval* rc);
-
 
 		
 	};

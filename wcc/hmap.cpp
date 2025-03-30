@@ -162,7 +162,7 @@ Hmap::get_properties_for(zend_object* object, zend_prop_purpose purpose)
 	return nullptr;
 }
 
-zobj_mgr
+zobj_mgr // static
 Hmap::fromArray(zval_user htab)
 {
 	zobj_mgr result = Hmap::omg.new_zobj();
@@ -297,6 +297,7 @@ Hmap::debug_info(htab_write hw)
 void 
 Hmap::construct(htab_read values)
 {
+	//showarray("Hmap::construct", values);
 	if (values.size() > 0)
 	{
 		(htab_mgr&) data_ = values;

@@ -52,6 +52,8 @@ namespace wcc {
 			htab_read tmp_names, htab_read sizes,
 			htab_read errors, zstr_user prefix);
 
+		htab_read readServer();
+
 	public:
 
 		enum {
@@ -63,6 +65,11 @@ namespace wcc {
 		virtual void debug_info(htab_write di);
 		
 		void construct();
+
+		zobj_user getPost();
+		zobj_user getQuery();
+		zobj_user getServer();
+
 		zobj_mgr makeFile(htab_read data, zstr_user name);
 
 		void setAuthCallback(zval_user callback);
@@ -105,12 +112,11 @@ namespace wcc {
 
 		int getPort();
 
-		zval_user getPost();
-		zval_user getQuery();
+
 		
 		zstr_mgr getRawBody();
 
-		zstr_mgr getScheme();
+		zstr_user getScheme();
 
 		zstr_mgr getServerAddress();
 
@@ -234,11 +240,49 @@ namespace wcc {
 		zstr_intern    HTTP_HOST;
 		zstr_intern    SERVER_NAME;
 		zstr_intern    SERVER_ADDR;
+		zstr_intern    SERVER_PORT;
+		zstr_intern    REQUEST_URI;
 
-		virtual void init();
+		zstr_intern    HTTP_ACCEPT_LANGUAGE;
+		zstr_intern    REQUEST_METHOD;
+		zstr_intern    X_HTTP_METHOD_OVERRIDE;
+
+
+		zstr_intern    _method;
+		zstr_intern    php_input;
+		zstr_intern    HTTPS;
+		zstr_intern    https;
+		zstr_intern    http;
+		zstr_intern    off_key;
+		zstr_intern    localhost;
+
+		zstr_intern    HTTP_X_REQUESTED_WITH;
+		zstr_intern    HTTP_USER_AGENT;
+		zstr_intern    XMLHttpRequest;
+		zstr_intern    HTTP_SOAPACTION;
+		zstr_intern    soap_mime;
+
+		zstr_intern    gethostbyname;
+		zstr_intern    finfo_open;
+		zstr_intern    finfo_file;
+		zstr_intern    finfo_close;	
+		zstr_intern    is_uploaded_file;
+		zstr_intern    move_uploaded_file;
+		
+
+
+		void init() override;
 	};
 
 	extern request_init RQit;
+
+
+	zstr_mgr gethostbyname(zstr_user str);
+    zval_mgr finfo_open(int infoflags);
+    zval_mgr finfo_file(zval_mgr& finfo, zstr_user path);
+    zval_mgr finfo_close(zval_mgr& finfo);
+    bool is_uploaded_file(zstr_user path);
+    bool move_uploaded_file(zstr_user from, zstr_user to);
 };
 
 #endif

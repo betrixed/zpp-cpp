@@ -249,6 +249,7 @@ dump_info::di_dump(zval_user zu, int level)
 
 		if (myht) 
 		{
+			//showarray("obj properties", myht);
 			htab_mgr adopter;
 
 			adopter.adopt(myht);
@@ -291,6 +292,9 @@ void dump_info::indent(int ct)
 
 		ss << "zval(0x" << (void*)m << ") ";
 
+		if (!m) {
+			return;
+		}
 		int  ztype = Z_TYPE_P(m);
 
 		switch(ztype) {
