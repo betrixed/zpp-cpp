@@ -3,6 +3,7 @@
 namespace Wcc;
 
 use Wcc\RequestGlobals;
+use Wc\Link\LoginHelper;
 
 require "bootstrap.php";
 
@@ -171,5 +172,7 @@ debug_zval_dump($ic);
 
 //$cfg = $ic->getService('config');
 
+$helper = new LoginHelper();
 
+debug_zpp_dump($helper);
 //echo "service $cfg->test" . PHP_EOL;

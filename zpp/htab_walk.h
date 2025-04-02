@@ -16,9 +16,6 @@ namespace zpp {
         zval_mgr key_;
         zval_mgr value_;
 
-        zval_user keyptr_;
-        zval_user valptr_;
-
     	htab_read  wrap_;
 
         HashPosition iterate_ = 0;
@@ -48,6 +45,8 @@ namespace zpp {
 
         bool start(HashTable* ht);
 
+        bool rewind();
+        
         bool next();
 
         bool prev();
@@ -59,14 +58,15 @@ namespace zpp {
 
         zval_user key()
         {
-        	return keyptr_;
+        	return key_;
         }
 
         zval_user value() 
         {
-        	return valptr_;
+        	return value_;
         }
 
+        void lose(); // invalidate currently assigned values
     private:
         
         bool getdata();

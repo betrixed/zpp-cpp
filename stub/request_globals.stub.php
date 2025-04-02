@@ -122,8 +122,10 @@ final class RequestGlobals
 
     public function setAuthCallback(mixed $callback) : void {}
 
-    public function &getPost() : array {}
+    public function getPost() : Hmap {}
 
-    public function &getQuery() : array {}
+    public function getQuery() : Hmap {}
+
+    public function getServer() : Hmap {}
    
 };

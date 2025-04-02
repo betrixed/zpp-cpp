@@ -19,6 +19,8 @@ public:
 
 	virtual void debug_info(htab_write hw) const;
 
+	virtual ~Finder();
+	
 	void addFolder(zstr_user fsdir);
 	void addPath(zstr_user nsroot, zstr_user fspath);
 

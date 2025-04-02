@@ -41,38 +41,38 @@ void Route_init::init()
 	//route_verbs.reset();
 	zend_hash_init(&route_verbs, 10, NULL, ZVAL_PTR_DTOR,1);
 	zend_hash_init(&verb_names, 10, NULL, ZVAL_PTR_DTOR,1);
-	GET_S = zstr_intern("GET");
-	POST_S = zstr_intern("POST");
-	PUT_S = zstr_intern("PUT");
-	PATCH_S = zstr_intern("PATCH");
-	OPTIONS_S = zstr_intern("OPTIONS");
-	DELETE_S = zstr_intern("DELETE");
-	HEAD_S = zstr_intern("HEAD");
-	CONNECT_S = zstr_intern("CONNECT");
-	TRACE_S = zstr_intern("TRACE");
-	PURGE_S = zstr_intern("PURGE");
+	GET_S = "GET";
+	POST_S = "POST";
+	PUT_S = "PUT";
+	PATCH_S = "PATCH";
+	OPTIONS_S = "OPTIONS";
+	DELETE_S = "DELETE";
+	HEAD_S = "HEAD";
+	CONNECT_S = "CONNECT";
+	TRACE_S = "TRACE";
+	PURGE_S = "PURGE";
 
-	cc_verbs   = zstr_intern("verbs");
-	cc_ajax = zstr_intern("ajax");
-	cc_params = zstr_intern("params");
-	cc_compiled = zstr_intern("compiled");
-	cc_pattern  = zstr_intern("pattern");
-	cc_target = zstr_intern("target");
-	cc_id  = zstr_intern("id");
+	cc_verbs   = "verbs";
+	cc_ajax = "ajax";
+	cc_params = "params";
+	cc_compiled = "compiled";
+	cc_pattern  = "pattern";
+	cc_target = "target";
+	cc_id  = "id";
 
-	cc_fixed =  zstr_intern("fixed");
-	cc_vary = zstr_intern("vary");
-	cc_file = zstr_intern("file");
+	cc_fixed =  "fixed";
+	cc_vary = "vary";
+	cc_file = "file";
 
-	ARG_S  = zstr_intern("_arg");
-	FUN_S  = zstr_intern("_fun");
-	FUNX_S = zstr_intern("_fnx");
-	HITS_S = zstr_intern("_hit");
-	MOD_S  = zstr_intern("_mod");
-	NSP_S  = zstr_intern("_nsp");
-	OBJ_S  = zstr_intern("_obj");
-	OBJX_S = zstr_intern("_obx");
-	ROLE_S = zstr_intern("_rol");
+	ARG_S  = "_arg";
+	FUN_S  = "_fun";
+	FUNX_S = "_fnx";
+	HITS_S = "_hit";
+	MOD_S  = "_mod";
+	NSP_S  = "_nsp";
+	OBJ_S  = "_obj";
+	OBJX_S = "_obx";
+	ROLE_S = "_rol";
 
 
 	htab_write rv(&route_verbs);

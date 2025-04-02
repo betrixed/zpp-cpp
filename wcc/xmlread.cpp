@@ -26,26 +26,26 @@ namespace zpp {
 	void xml_fns::init()
 	{
 
-		xmlreader = zstr_intern("xmlreader");
-		fromString = zstr_intern("xmlreader::fromstring");
-		open = zstr_intern("xmlreader::open");
+		xmlreader = "xmlreader";
+		fromString = "xmlreader::fromstring";
+		open = "xmlreader::open";
 
-		get_attribute = zstr_intern("getattribute");
-        read_string = zstr_intern("readstring");
-        read = zstr_intern("read");
+		get_attribute = "getattribute";
+        read_string = "readstring";
+        read = "read";
 
-		k_nodeType = zstr_intern("nodeType");//property name
-		k_name = zstr_intern("name");
-		k_c = zstr_intern("c");
-		k_k = zstr_intern("k");
-		k_close = zstr_intern("close");	
+		k_nodeType = "nodeType";//property name
+		k_name = "name";
+		k_c = "c";
+		k_k = "k";
+		k_close = "close";	
 
 		xml_file.set_fname(open);
 		xml_parse.set_fname(fromString);
 
-		reader = zstr_intern("reader");	
-		root = zstr_intern("root");	
-		tags = zstr_intern("tags");	
+		reader = "reader";	
+		root = "root";	
+		tags = "tags";	
 	}
 
 	zobj_mgr

@@ -39,12 +39,20 @@ Finder_init  FDit;
 
 using namespace zpp;
 
+Finder::~Finder()
+{
+	//zend_printf("~Finder ");
+	//showarray("nsPaths_", nsPaths_);
+}
+
 void 
 Finder::debug_info(htab_write d) const
 {
+
 	d.set(FDit.nspaths_key, nsPaths_);
 	d.set(FDit.classes_key, classes_);
 	d.set(FDit.folders_key, folders_);
+	//showarray("Finder::debug_info", d);
 }
 
 void 
@@ -63,18 +71,15 @@ Finder::addPath(zstr_user nsroot, zstr_user fspath)
 void 
 Finder::addPathArray(htab_read pathsArray)
 {
-	htab_walk wk;
-
-	auto key = wk.key();
-	auto value = wk.value();
-
+	for_key_value wk;
 	htab_write hw(nsPaths_);
 
 	for(wk.start(pathsArray); wk.ok(); wk.next())
 	{
-		hw.set(key, value);
+		hw.set(wk.key(), wk.value());
 	}
-	
+
+	//showarray("addPathArray", nsPaths_);
 }
 
 void 

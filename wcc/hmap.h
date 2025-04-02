@@ -6,6 +6,7 @@
 #endif
 
 #define HMAP_DIMENSIONS
+#define HMAP_ITERATOR
 
 namespace wcc {
 
@@ -26,6 +27,54 @@ public:
 	static void  unset_dimension(zend_object* object, zval* unset);
 	static int   has_dimension(zend_object* object, zval* offset, int check_empty);
 #endif
+
+	struct iterator {
+		// this gets zend_object_init 
+		
+		zend_object_iterator phpit;
+		htab_walk			 walk;
+		htab_mgr   			 htab;
+			    // function table managed by iterator
+		static Hmap::iterator* phmi(zend_object_iterator* zoi) {
+			return (Hmap::iterator*) zoi;
+		}
+		/*static Hmap::iterator* 
+			phmi(zend_object_iterator* zoi) {  
+				return (Hmap::iterator*)((char*)zoi - offsetof(iterator,phpit));
+			};
+		*/
+
+		iterator() {}
+
+		static zend_object_iterator_funcs  it_fntab_; 
+
+		static zend_object_iterator* create(zend_class_entry* ce, zval* zobj, int byRef);
+		// functions to slot in Zend/zend_iterators.h
+
+		/* release all resources associated with this iterator instance */
+		static void  it_dtor(zend_object_iterator *iter);
+
+		/* check for end of iteration (FAILURE or SUCCESS if data is valid) */
+		static zend_result  it_valid(zend_object_iterator *iter);
+
+		/* fetch the item data for the current element */
+		static zval* it_get_data(zend_object_iterator *iter);
+
+		/* get current key for data, if not auto-increment integer key */
+		static void  it_get_key(zend_object_iterator *iter, zval *key);
+
+		/* move to next key/value position */
+		static void  it_forward(zend_object_iterator *iter);
+
+		/* rewind to start of data (optional, may be NULL) */
+		static void  it_rewind(zend_object_iterator *iter);
+
+		/* invalidate current value/key (optional, may be NULL) */
+		static void  it_invalidate(zend_object_iterator *iter);
+		
+		/* Expose owned values to GC. */
+		//HashTable *(*get_gc)(zend_object_iterator *iter, zval **table, int *n);
+	};
 
 	//static HashTable* get_properties(zend_object* object);
 	class Hmap_Mgr : public base_obj_mgr<Hmap>
@@ -56,18 +105,8 @@ public:
 			hand.has_dimension = Hmap::has_dimension;
 			hand.unset_dimension = Hmap::unset_dimension;
 #endif
-			
-			/*
-			
-			hand.get_gc = Hmap::get_gc;
-			hand.read_property = Hmap::read_property;
-			hand.write_property = Hmap::write_property;
-			hand.get_property_ptr_ptr = Hmap::get_property_ptr_ptr;
-			hand.has_property = Hmap::has_property;
-			hand.unset_property = Hmap::unset_property;
 
-			zend_class_entry* ce = mydef::class_entry_;
-			*/
+			mydef::class_entry_->get_iterator = Hmap::iterator::create;
 			
 		}
 	};

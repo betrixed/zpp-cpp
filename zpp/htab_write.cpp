@@ -67,20 +67,42 @@ htab_write::htab_write(const zval* p)
 	}
 }
 
-void htab_write::push_back(HashTable* t)
+// bind and set zval flags for reference counting this array
+void // static 
+htab_write::array_bind(zval* tmp, HashTable* t)
 {
-	zval tmp = {0};
 	if (!t)
 	{
-		ZVAL_NULL(&tmp);
+		ZVAL_NULL(tmp);
 	}
 	else
 	{
-		ZVAL_ARR(&tmp, t);
+		ZVAL_ARR(tmp, t);
 		if (GC_FLAGS(t) & GC_IMMUTABLE)
-			Z_TYPE_FLAGS(tmp) = 0; // mark not reference counted
+			Z_TYPE_FLAGS_P(tmp) = 0; // mark as not reference counted
 	}
+}
 
+void // static 
+htab_write::string_bind(zval* tmp, zend_string* s)
+{
+	if (s) 
+    {
+    	ZVAL_STR(tmp, s);
+    	if ((GC_FLAGS(s) & IS_STR_INTERNED))
+    	{
+    		Z_TYPE_FLAGS_P(tmp) = 0; 
+	    }
+    }
+    else {
+        ZVAL_NULL(tmp);
+    }
+}
+
+void htab_write::push_back(HashTable* t)
+{
+	zval tmp = {0};
+	array_bind(&tmp, t);
 	if (zend_hash_next_index_insert(ht_, &tmp))
 	{
 		if (Z_TYPE_FLAGS(tmp) != 0)
@@ -91,12 +113,7 @@ void htab_write::push_back(HashTable* t)
 void htab_write::push_back(zend_string* zs)
 {
 	zval tmp = {0};
-	if (zs)
-	{
-		zval_user(&tmp).bind_string(zs);
-	}
-	else
-		ZVAL_NULL(&tmp);
+	string_bind(&tmp,zs);
 
 	if (zend_hash_next_index_insert(ht_, &tmp))
 	{
@@ -170,13 +187,7 @@ htab_write::set(zval* key, zval* value)
 void htab_write::set(zval* key, zend_string* value)
 {
 	zval temp = {0};
-	if (value)
-	{
-		zval_user(&temp).bind_string(value);
-	}
-	else
-		ZVAL_NULL(&temp);
-
+	string_bind(&temp, value);
 	set(key, &temp);
 }
 
@@ -195,11 +206,10 @@ void htab_write::set(zend_string* key, HashTable* t)
 	//showstr("htab_write::set  key", key);
 
 	zval tmp = {0};
-	zval_user(&tmp).bind_array(t);
-
+	array_bind(&tmp, t);
 	if (zend_hash_update(ht_, key, &tmp))
-	{
-		if (Z_REFCOUNTED(tmp))
+	{	 
+		 if (Z_REFCOUNTED(tmp)) 
 			htab_mgr::try_addref(t);
 	}
 	//showarray("htab_write::set  HashTable* ", value);
@@ -302,8 +312,7 @@ void htab_write::set(zend_long idx, zval_user value)
 void htab_write::set(zend_long idx, HashTable* value)
 {
 	zval temp = {0};
-	
-	zval_user(&temp).bind_array(value);
+	array_bind(&temp,value);
 	
 	if (zend_hash_index_update(ht_, idx, &temp));
 	{

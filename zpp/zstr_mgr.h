@@ -14,6 +14,7 @@ namespace zpp {
 	class zval_user;
 	
 	class zstr_buffer;
+	class zstr_temp;
 	
 	class ZPP_EXPORT zstr_mgr {
 	protected:
@@ -33,10 +34,8 @@ namespace zpp {
 	    zstr_mgr() : s((zend_string*) nullptr)
 	    {   
 	    }
-	    ~zstr_mgr(){
-	        lose();
-	    }
-	    
+		~zstr_mgr();
+
 	    zstr_mgr(zend_string* p) : s(p)
 	    {
 	        own();
@@ -85,6 +84,7 @@ namespace zpp {
 
 	    zstr_mgr& operator=(zval_mgr&& rc);
 	    zstr_mgr& operator=(zstr_mgr&& rc);
+	    zstr_mgr& operator=(zstr_temp&& rc);
 
 	    void move_zv(zval* ret);
 

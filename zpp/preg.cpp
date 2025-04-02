@@ -101,6 +101,7 @@ preg::preg(const char* expr, int flags, bool global)
 	:  pce_(nullptr),global_(global),flags_(flags)
 {
 	regexp_ = std::move(zstr_temp(expr));
+	showstr("regexp_",regexp_);
 }
 
 preg::preg(zstr_user expr, int flags, bool global)

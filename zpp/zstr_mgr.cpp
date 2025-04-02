@@ -27,6 +27,8 @@ zstr_mgr::lose()
 		return;
 	}
 	zend_string_release(p);
+
+
 }
 
 void 
@@ -37,6 +39,9 @@ zstr_mgr::bind(zend_string* rc)
         lose();
         s = rc;
         own();
+    }
+    else {
+    	//showstr("bind same", s);
     }
 }
 
@@ -75,11 +80,31 @@ bool zstr_mgr::try_decref(zend_string* zs)
 }
 
 
+zstr_mgr& 
+zstr_mgr::operator=(zstr_temp&& rc)
+{
+
+    zend_string* p = rc.s;
+    if (p != s)
+    {
+    	lose();
+    }
+    s = p;
+    //showstr("operator= zstr_temp&&", s);
+    rc.s = nullptr;
+    return *this;
+}
 
 zstr_mgr& 
 zstr_mgr::operator=(zstr_mgr&& rc)
 {
-    bind(rc.s);
+
+    zend_string* p = rc.s;
+    if (p != s)
+    {
+    	lose();
+    }
+    //showstr("operator= &&", s);
     rc.s = nullptr;
     return *this;
 }
@@ -123,6 +148,7 @@ const zstr_mgr&
 zstr_mgr::operator=(const zstr_mgr& rc)
 {
 	bind(rc.s);
+	//showstr("operator= &", s);
 	return *this;
 }
 
@@ -174,6 +200,11 @@ zstr_mgr::size() const
 }
 
 
+zstr_mgr::~zstr_mgr()
+{
+	//showstr("~zstr_mgr", s);
+    lose();
+}
 
 void 
 zstr_mgr::move_zv(zval* ret)
@@ -204,6 +235,8 @@ zstr_temp::zstr_temp(const char* c, size_t slen)
 		slen = strlen(c);
 	}
 	s = zend_string_init(c, slen, 0);
+	showstr("zstr_temp", s);
+
 }
 
 zstr_intern::zstr_intern(const char* c, size_t slen)

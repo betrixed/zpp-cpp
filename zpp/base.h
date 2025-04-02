@@ -398,11 +398,7 @@ namespace zpp {
 #endif
 		static void z_free(zend_object* obj) 
 		{
-
-			
 			T* tp = mydef::cpp(obj);
-			
-
 #ifdef BASE_DEBUG			
 			showptr("z_free", tp);
 #endif
@@ -453,10 +449,12 @@ namespace zpp {
 			
 			T* cobj = zobj_toc<T>(zobj);
 #ifdef BASE_DEBUG
-			zend_printf(" zfree cpp %s\n", typeid(T).name());
-			if(cobj->vobj() != zobj ) {
-
-				throw std::logic_error{ " zend_object* fail in cpp!" };
+			zend_printf(" cpp %s\n", typeid(T).name());
+			zend_object* myobj = cobj->vobj();
+			if(myobj != zobj ) {
+				showobj("myobj", myobj);
+				showobj("zobj", zobj);
+				//throw std::logic_error{ " zend_object* fail in cpp!" };
 			}
 #endif
 			return cobj;
@@ -507,8 +505,12 @@ namespace zpp {
 			object_properties_init(zobj, class_type);
 			
 #ifdef BASE_DEBUG
+			zend_printf("class type %s\n", ZSTR_VAL(class_type->name));
 			obj_count_++;
-			showptr("znew_ex", pzo);
+			showptr("pzo ",pzo);
+
+
+			showobj("znew_ex", zobj);
 #endif
 			
 

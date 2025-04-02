@@ -68,6 +68,7 @@ extern "C" {
 #include "wcc/search_list.cpp"
 #include "wcc/plate.cpp"
 #include "wcc/plate_engine.cpp"
+#include "wcc/htmlplates.cpp"
 
 #include "wcc/finder.cpp"
 #include "wcc/request_globals.cpp"
@@ -114,7 +115,6 @@ extern "C" {
 
 
 
-#include "wcc/htmlplates.cpp"
 
 
 #include "wcc/plate_wcp.cpp"
@@ -218,7 +218,8 @@ PHP_MINIT_FUNCTION(wcc)
 	PHP_MINIT(SearchList_reg)(INIT_FUNC_ARGS_PASSTHRU);
 	PHP_MINIT(Wcc_PlateEngine_reg)(INIT_FUNC_ARGS_PASSTHRU);
 	PHP_MINIT(Wcc_Plate_reg)(INIT_FUNC_ARGS_PASSTHRU);
-	//PHP_MINIT(Wcc_HtmlPlates_reg)(INIT_FUNC_ARGS_PASSTHRU);
+	PHP_MINIT(Wcc_HtmlPlates_reg)(INIT_FUNC_ARGS_PASSTHRU);
+	
 #endif
 
 #ifdef MONEY_FMT_CPP
@@ -313,12 +314,12 @@ PHP_RINIT_FUNCTION(wcc)
 
 PHP_RSHUTDOWN_FUNCTION(wcc)
 {
+
+	zpp::state_init::end_request();
+
 #ifdef BASE_DEBUG
 	wcc::mgr_link::report();
 #endif
-	zpp::state_init::end_request();
-
-
 
 	return SUCCESS;
 }

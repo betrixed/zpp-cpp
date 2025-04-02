@@ -19,7 +19,7 @@ zobj_mgr::try_addref(zend_object* ob)
 }
 
 bool
-zobj_mgr::try_delref(zend_object* ob)
+zobj_mgr::try_decref(zend_object* ob)
 {
 	int rct = ob->gc.refcount - 1;
 	zend_object_release(ob);
@@ -41,7 +41,7 @@ zobj_mgr::lose()
 	if (!obj_) {
 		return;
 	}
-	try_delref(obj_);
+	try_decref(obj_);
 	obj_ = nullptr;
 }
 

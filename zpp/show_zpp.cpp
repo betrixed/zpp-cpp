@@ -115,9 +115,11 @@ dump_info::show_properties(zend_object* zobj, HashTable* myht, int level)
 	zend_long index;
 	zend_string *key;
 	zval *val;
-	for_key_value fkv;
+
 	indent(level);
 	ss << "{\n";
+
+	for_key_value fkv;
 	for(fkv.start(myht); fkv.ok(); fkv.next())
 	{
 		zend_property_info *prop_info = nullptr;
@@ -137,24 +139,74 @@ dump_info::show_properties(zend_object* zobj, HashTable* myht, int level)
 		}
 	}
 	indent(level);
+
 	ss << "} " << level << '\n';
 }
 
+
+void dump_info::array_sub(HashTable* myht, int level)
+{
+	int refadjust;
+	bool imflag;
+	const char *packed;
+
+	for_key_value fkv;
+	zend_long index;
+	zend_string *key;
+	zval *val;
+
+	refadjust = 0;
+	imflag = (GC_FLAGS(myht) & GC_IMMUTABLE);
+
+	if (!imflag) 
+	{
+		if (GC_IS_RECURSIVE(myht)) {
+			di_showarray(myht,refadjust);
+			ss << "*RECURSION*\n";
+			return;
+		}
+		GC_ADDREF(myht);
+		refadjust = -1;
+		GC_PROTECT_RECURSION(myht);
+	}
+	packed = HT_IS_PACKED(myht) ? "packed " : "";
+
+	di_showarray(myht,refadjust);
+	indent(level);
+	ss << packed << "{\n";
+	
+	for (fkv.start(myht); fkv.ok(); fkv.next())
+	{
+		key = fkv.key();
+		index = fkv.index();
+		val = fkv.value();
+		indent(level+1);
+		if (key)
+		{
+			ss << '[' << key << ']';
+		}
+		else {
+			ss << '[' << index << ']';
+		}
+		ss << " => ";
+		di_dump(val, level+1);
+	}
+	
+	if (!imflag) {
+		GC_UNPROTECT_RECURSION(myht);
+		GC_DELREF(myht);
+	}
+
+	indent(level);
+	ss << '}' << level << '\n';
+}
 
 void 
 dump_info::di_dump(zval_user zu, int level)
 {
 	HashTable *myht = NULL;
-	zend_string *class_name;
+	//zend_string *class_name;
 	// for each values
-	zend_long index;
-	zend_string *key;
-	zval *val;
-	int refadjust;
-	int count;
-	const char *packed;
-	for_key_value fkv;
-	bool imflag;
 
 	//zend_printf("di_dump %ld level %d\n",zu.ztype(), level);
 	
@@ -180,49 +232,7 @@ dump_info::di_dump(zval_user zu, int level)
 		endl();
 		break;
 	case IS_ARRAY:
-		myht = zu.zarray();
-		refadjust = 0;
-		imflag = (GC_FLAGS(myht) & GC_IMMUTABLE);
-
-		if (!imflag) {
-			if (GC_IS_RECURSIVE(myht)) {
-				di_showarray(myht,refadjust);
-				ss << "*RECURSION*\n";
-				return;
-			}
-			GC_ADDREF(myht);
-			refadjust = -1;
-			GC_PROTECT_RECURSION(myht);
-		}
-		packed = HT_IS_PACKED(myht) ? "packed " : "";
-
-		di_showarray(myht,refadjust);
-		indent(level);
-		ss << packed << "{\n";
-		
-		for (fkv.start(myht); fkv.ok(); fkv.next())
-		{
-			key = fkv.key();
-			index = fkv.index();
-			val = fkv.value();
-			indent(level+1);
-			if (key)
-			{
-				ss << '[' << key << ']';
-			}
-			else {
-				ss << '[' << index << ']';
-			}
-			ss << " => ";
-			di_dump(val, level+1);
-		}
-		
-		if (!imflag) {
-			GC_UNPROTECT_RECURSION(myht);
-			GC_DELREF(myht);
-		}
-		indent(level);
-		ss << '}' << level << '\n';
+		array_sub(zu.zarray(), level);
 		break;
 	case IS_OBJECT: 
 	{
@@ -255,9 +265,7 @@ dump_info::di_dump(zval_user zu, int level)
 			adopter.adopt(myht);
 
 			show_properties(zobj, myht, level);
-
 		}
-
 		GC_UNPROTECT_RECURSION(zobj);
 		break;
 	}

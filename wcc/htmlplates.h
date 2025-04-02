@@ -1,12 +1,13 @@
 #ifndef HTML_PLATES_H
 #define HTML_PLATES_H
 
-#ifndef SERVICE_ACCESS_H
-#include "service_access.h"
+#ifndef WCC_SERVICES_H
+#include "services.h"
 #endif
 
 namespace wcc {
 
+using namespace zpp;
 	/**
 	 * Implements an up to 3 tier nested 
 	 * templates, from inner to outer. 
@@ -20,45 +21,37 @@ namespace wcc {
 
 	class HtmlPlates : public base_d {
 	protected:
-		htab_own levels_;
-		htab_own values_;
-		zobj_own model_;
-		zstr_own model_svc_;
-		zobj_own services_;
-
-		Wcc_Services* svc_ptr() {
-			return zobj_toc<Wcc_Services>(services_.ptr());
-		}
+		htab_mgr levels_;
+		htab_mgr values_;
+		zobj_mgr model_;
+		zstr_mgr model_svc_;
 	public:
-		static const char* class_name;
+		static base_obj_mgr<HtmlPlates> omg;
 
-		virtual void debug_info(HashTable *ht);
+		virtual void debug_info(htab_write hw);
 
-		void construct(zstr_ptr model_id);
+		void construct(zstr_user model_id);
 
 		void initValues();
 
 		/**
 		 * Push from inner to outer
 		 */
-		void pushLevel(zstr_ptr name);
+		void pushLevel(zstr_user name);
 
-		zobj_own getModel();
+		zobj_mgr getModel();
 
-		void setModel(zobj_ptr model);
+		void setModel(zobj_user model);
 
-		void mergeData(htab_ptr items);
+		void mergeData(htab_read items);
 
-		zstr_own render(htab_ptr options);
+		zstr_mgr render(htab_read options);
 
-		zstr_own renderView(htab_ptr options);
+		zstr_mgr renderView(htab_write options);
 
 		VIRTUAL_ZOBJPTR
 	};
 
-	typedef base_obj_mgr<HtmlPlates>  HtmlPlates_Mgr;
-
-	extern HtmlPlates_Mgr htmlplates_mgr;
 }; //namespace
 //htmlplates.h
 #endif

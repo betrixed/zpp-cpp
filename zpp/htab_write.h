@@ -13,10 +13,10 @@ namespace zpp {
     {
     protected:
         void giveback(zval* mgr);
-
+        // Mark zval type flags if reference counted or not
+        static void array_bind(zval* tmp, HashTable* ht);
+        static void string_bind(zval* tmp, zend_string* s);
     public:
-        // for use in child classes
-
         htab_write(htab_mgr& mgr);
         htab_write(zval_mgr& mgr);
         htab_write(zval_user mgr);
@@ -25,7 +25,6 @@ namespace zpp {
         
         htab_write(const htab_write& w)
         {
-            //zend_printf("htab_write copy&\n");
             ht_ = w.ht_;
         }
 
@@ -33,25 +32,10 @@ namespace zpp {
 
         const htab_write& operator=(const zval* p);
         
-        //zstr_mgr print_all(const char* label = nullptr);
-
         
         void merge(HashTable* src);
 
         void clear();
-
-        /** direct HashTable update methods 
-        zval* update(zend_long idx, zval* val);
-        zval* update(zend_string* key, zval* val);
-        */
-
-        /** direct HashTable removal methods 
-        bool remove(zend_long idx);
-        bool remove(zend_string* key);
-        */
-        /** direct HashTable index append 
-        zval* append(zval* pz);
-        */
 
 
         /** indirect methods which call direct methods */
@@ -71,18 +55,11 @@ namespace zpp {
         
         void push_back(HashTable* value);
 
-        // try to disambiguent various elemental wrappers used all over the place.
-        
-        //void push_back(const zval_user ptr);
-        //void push_back(const zstr_user bs);
-        //void push_back(const zobj_user bs);
-
         void push_back(const zstr_intern& si)
         {
             push_back((zend_string*) si);
         }
 
-        //void push_back(const zval_mgr& zo);
         void push_back(zstr_mgr sm)
         {
             push_back((zend_string*)sm);

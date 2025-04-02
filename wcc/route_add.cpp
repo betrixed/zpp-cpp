@@ -17,23 +17,28 @@ public:
 	zstr_intern method_sfx;
 	zstr_intern fallback;
 	zstr_intern route_set;
+	
+	zstr_intern none_tag;
+	zstr_intern verb_tag;
+
 	zstr_intern rex_url;
 
 	RouteAddData() : state_init() {}
 
 	virtual void init()
 	{
-		module_name = zstr_intern("module_name");
-		prefix = zstr_intern("prefix");
-		method_sfx = zstr_intern("method_sfx");
-		fallback = zstr_intern("fallback");
-		route_set = zstr_intern("route_set");
+		module_name = "module_name";
+		prefix = "prefix";
+		method_sfx = "method_sfx";
+		fallback = "fallback";
+		route_set = "route_set";
+		none_tag = "<none>";
+		verb_tag = "<verb>";
 
-		rex_url = zstr_intern(
+		rex_url = 
 			R"x(/\/?()x"
 			R"x(:?[\w\d])x" R"x([_\-\.\w\d]*)x" R"x(|{\w)x" R"x([_\-\.\w\d]*)x" R"x(}|\s+$)x"
-			R"x()/mi)x"
-		);
+			R"x()/mi)x";
 	}
 };
 
@@ -70,7 +75,7 @@ RouteAdd::addRoutes(htab_read list, zstr_user prefix, zstr_user module)
 {
 	if (prefix.size())
 	{
-		if (prefix.vstr() != "<none>")
+		if (zs_cmp_ci(prefix, radata.none_tag) != 0) 
 		{
 			url_prefix_ = prefix;
 		}
@@ -82,7 +87,7 @@ RouteAdd::addRoutes(htab_read list, zstr_user prefix, zstr_user module)
 
 	if(module.size())
 	{
-		if (module.vstr() != "<none>")
+		if (zs_cmp_ci(module,radata.none_tag) != 0)
 		{
 			module_name_ = module;
 		}
@@ -304,10 +309,10 @@ void RouteAdd::ready(Route* route)
 			Target* t = zobj_toc<Target>(tobj);
 			zstr_user sfx(method_sfx_);
 
-			if (sfx.size() && (sfx.vstr() != "<none>")) {
+			if (sfx.size() && (zs_cmp_ci(sfx, radata.none_tag)!=0)) {
 				zstr_buffer fbuf(t->getFunc());
 
-				if (sfx.vstr() == "<verb>") 
+				if (zs_cmp_ci(sfx, radata.verb_tag) == 0) 
 				{
 					fbuf << Route::getVerb(route->getVerbs());
 				}

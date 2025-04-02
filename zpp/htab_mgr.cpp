@@ -6,10 +6,9 @@
 #include "htab_mgr.h"
 #endif
 
+//#define HTAB_SHOW_MEMORY
 namespace zpp {
 // Protected static function
-
-
 //! static, set value in _GLOBALS table
 void 
 htab_mgr::set_global(zstr_user key, zval_user value)
@@ -52,13 +51,18 @@ htab_mgr::try_decref(HashTable* h)
 	{
 		return false;
 	}
-	int rct = --h->gc.refcount;
-
+	int rct =  h->gc.refcount-1;
 	if (!rct) {
-		//showarray("destroy", h);
-		zend_hash_destroy(h);
+		#ifdef HTAB_SHOW_MEMORY
+		showarray("destroy", h);
+		#endif
+		/* zend_hash_destroy did 
+		   not do a complete job 
+		*/
+		zend_array_destroy(h);
 		return true;
 	}
+	h->gc.refcount--;
 	return false;
 }
 
@@ -95,8 +99,13 @@ void htab_mgr::lose()
 	}
 }
 
+htab_empty::~htab_empty()
+{
+	//zend_printf("~htab_empty %lx\n", ht_);
+}
 htab_mgr::~htab_mgr()
 {
+	//zend_printf("~htab_mgr  %lx\n", ht_);
 	if (ht_) {
 		lose();
 	}
@@ -305,7 +314,10 @@ htab_mgr::cowop(HashTable*& inout)
 	{
 		
 		inout = zend_new_array(HT_MIN_SIZE);
-		//showarray("new array", inout);
+		#ifdef HTAB_SHOW_MEMORY
+		showarray("new array", inout);
+		#endif
+
 		return true;
 	}
 	if (GC_REFCOUNT(used) > 1) 
@@ -315,7 +327,10 @@ htab_mgr::cowop(HashTable*& inout)
 	    htab_mgr::try_decref(used);
 
 	    //showarray("cowop after used", used);
-	    //showarray("cowop new", inout);
+	    #ifdef HTAB_SHOW_MEMORY
+	    showarray("cowop new", inout);
+	    #endif
+	    
 	    return true;
 	}
 	return false;

@@ -33,11 +33,11 @@ public:
 
 	virtual void init()
 	{
-		cache_key = zstr_intern("cache");
-		construct_key = zstr_intern("__construct");
-		reflection_class = zstr_intern("reflectionclass");
-		new_instance = zstr_intern("newinstance");
-		new_instance_args = zstr_intern("newinstanceargs");
+		cache_key = "cache";
+		construct_key = "__construct";
+		reflection_class = "reflectionclass";
+		new_instance = "newinstance";
+		new_instance_args = "newinstanceargs";
 		// presume reflectionclass is configured.
 		//rfc_cdata.set(reflection_class); // this will segfault here
 		//zend_printf("ReflectCache_data::init\n");

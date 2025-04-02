@@ -9,15 +9,11 @@ namespace zpp {
 
 htab_walk::htab_walk(): key_(), iterate_(0), ok_(false) 
 {  
-    keyptr_ = key_;
-    valptr_ = value_;
 }
         
 htab_walk::htab_walk(const htab_walk &c)
     : key_(c.key_), value_(c.value_), wrap_(c.wrap_), iterate_(c.iterate_)
 { 
-    keyptr_ = key_;
-    valptr_ = value_;
 }
 
 bool htab_walk::start(HashTable* ht)
@@ -26,6 +22,7 @@ bool htab_walk::start(HashTable* ht)
 
     if (ht)
     {
+        // zval_user are reset by invalid
     	ok_ = true;
         iterate_ = 0;
 
@@ -40,6 +37,10 @@ bool htab_walk::start(HashTable* ht)
     }
 }
 
+bool htab_walk::rewind()
+{
+    return start(wrap_);
+}
 
 bool htab_walk::next()
 {
@@ -91,9 +92,13 @@ bool htab_walk::getdata()
     // read in the current key
     // key can be ZVAL_STR_COPY of key, may require decref later
 
-    zend_hash_get_current_key_zval_ex(ht, key_, &iterate_);
+
+    zend_hash_get_current_key_zval_ex(ht, (zval*)key_, &iterate_);
+
     zend_string* keystr;
-    if (keyptr_.getStringData(&keystr))
+    zval_user vkey(key_);
+
+    if (vkey.getStringData(&keystr))
     {
         const char* zero = ZSTR_VAL(keystr);
         /* 
@@ -107,7 +112,7 @@ bool htab_walk::getdata()
     }
 
     // if the key is set to NULL, it means that the object is not at a valid position
-    if (keyptr_.isNull()) 
+    if (vkey.isNull()) 
     {
     	return invalid();
     }
@@ -123,6 +128,11 @@ bool htab_walk::getdata()
     return true;
 }
 
+void htab_walk::lose()
+{
+    key_.lose();
+    value_.lose();
+}
 /**
  *  Invalidate the iterator
  *  @return bool

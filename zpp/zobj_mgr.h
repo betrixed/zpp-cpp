@@ -19,7 +19,7 @@ namespace zpp {
 	public:
 
 		static void try_addref(zend_object* zo);
-		static bool try_delref(zend_object* zo);
+		static bool try_decref(zend_object* zo);
 
 		zobj_mgr() : obj_(nullptr) {}
 

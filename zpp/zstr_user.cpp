@@ -285,7 +285,12 @@ zstr_user::to_lower() const
 	zstr_mgr result;
 	if (s)
 	{
-		result.adopt(zend_string_tolower(s));
+		zend_string* p = zend_string_tolower(s);
+		if (p == s)
+		{
+			zstr_mgr::try_decref(p);
+		}
+		result.adopt(p);	
 	}
 	return result;
 }
@@ -296,7 +301,12 @@ zstr_user::to_upper() const
 	zstr_mgr result;
 	if (s)
 	{
-		result.adopt(zend_string_toupper(s));
+		zend_string* p = zend_string_toupper(s);
+		if (p == s)
+		{
+			zstr_mgr::try_decref(p);
+		}
+		result.adopt(p);	
 	}
 	return result;
 }
@@ -307,9 +317,15 @@ zstr_user::trim(const char* what, int mode) const
 	zstr_mgr result;
 
 	size_t slen = what ? strlen(what) : 0;
-	// return string already has gc == 1
-	zend_string* p = php_trim(s, what, slen, mode);
-	result.adopt(p);
+
+	if (s) {
+		zend_string* p = php_trim(s, what, slen, mode);
+		if (p == s)
+		{
+			zstr_mgr::try_decref(p);
+		}
+		result.adopt(p);
+	}
 	return result;
 }
 

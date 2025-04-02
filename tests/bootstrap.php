@@ -27,6 +27,7 @@ function show_versions()
 
     echo "wcc $version, xdebug $xdebug\n";    
 }
+
 function boolstr(bool $value) : string
 {
     return $value ? "true" : "false";
@@ -43,10 +44,12 @@ $loader->addPathArray([
     "Wcc" => "php/Wcc",
     "Wcd" => "php/Wcd",
     "Wcf" => "php/Wcf",
+    "Wc" => "php/Wc"
 ]);
 
 $loader->register();
 
+/*
 class EmptyTest {
     public array $empty = [];
     public $key;
@@ -63,6 +66,7 @@ class EmptyTest {
 
 
 };
+*/
 
 
 

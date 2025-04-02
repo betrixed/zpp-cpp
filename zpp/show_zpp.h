@@ -21,6 +21,8 @@ private:
 		zend_string *key, 
 		int level);
 
+	void array_sub(HashTable* ht, int level);
+	
 public:
 
 	static bool run_state_;

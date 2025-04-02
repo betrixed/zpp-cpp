@@ -10,198 +10,203 @@
 #endif
 
 #ifndef PLATE_WCP_H
-#include "plate_wcp.h"
+#include "plate.h"
 #endif
 
 namespace wcc {
 
-	HtmlPlates_Mgr htmlplates_mgr;
+using namespace zpp;
+	
+base_obj_mgr<HtmlPlates>	HtmlPlates::omg;
 
-	const char* HtmlPlates::class_name = "Wcc\\HtmlPlates";
+class HP_init : public state_init 
+{
+public:
+	HP_init() : state_init() {}
+
+	zstr_intern  view_model;
+	zstr_intern  model_svc;
+	zstr_intern  model_key;
+	zstr_intern  model_var;
+
+	zstr_intern  values_key;
+	zstr_intern  level_key;
+	zstr_intern  views_key;
+	zstr_intern  view_key;
+	zstr_intern  final_key;
+	zstr_intern  engine_key;
+	zstr_intern  raw_key;
+
+	void init() override {
+		view_model = "view_model";
+		model_svc = "model_svc";
+		model_key = "model";
+		model_var = "m";
+		values_key = "values";
+		level_key = "level";
+		views_key = "views";
+		view_key = "view";
+		final_key = "final";
+		engine_key = "engine";
+		raw_key = "raw";
+	}
 };
 
+HP_init HPit;
 
-using namespace wcc;
-
-
-void HtmlPlates::construct(zstr_ptr model_id)
+void HtmlPlates::construct(zstr_user model_id)
 {
 	if (!model_id.isNull()) {
 		model_svc_ = model_id;
 	}
 	else {
-		model_svc_ = "view_model";
+		model_svc_ = HPit.view_model;
 	}
-	//showobj("htmlplates construct", this->zobj());
-	services_ = Wcc_Services::instance();
 }
 
-void HtmlPlates::debug_info(HashTable *ht)
+void HtmlPlates::debug_info(htab_write di)
 {
-	htab_ptr di(ht);
-
-	di.set(wis->valuekey, values_);
-	di.set(wis->level_key, levels_);
-	di.set("model_svc", model_svc_);
-	di.set("model", model_);
+	di.set(HPit.values_key, values_);
+	di.set(HPit.level_key, levels_);
+	di.set(HPit.model_svc, model_svc_);
+	di.set(HPit.model_key, model_);
 
 }
 
 void HtmlPlates::initValues()
 {
-	zval_own mtemp(getModel());
-	values_.set("m", mtemp);
-	values_.set(wis->view_key, this->zobj());
+	zval_mgr mtemp(getModel());
+	htab_write hw(values_);
+
+	hw.set(HPit.model_var, mtemp);
+	hw.set(HPit.view_key, this->vobj());
 }
 
 /**
  * Push from inner to outer
  */
-void HtmlPlates::pushLevel(zstr_ptr name)
+void HtmlPlates::pushLevel(zstr_user name)
 {
-	levels_.push_back(name);
+	htab_write(levels_).push_back(name);
 }
 
-zobj_own HtmlPlates::getModel()
+zobj_mgr 
+HtmlPlates::getModel()
 {
 	if (model_.isNull()) {
-		//showstr("getModel ", model_svc_);
-		Wcc_Services* sv = svc_ptr();
 
-		//showobj("Wcc_Services*", sv->zobj());
+		model_ = Services::service( model_svc_);
 
-		model_ = sv->get( model_svc_);
-
-		//showobj("model_", model_);
-
-		if (model_.isNull())
+		if (zobj_user(model_).isNull())
 		{
-			model_ = zobj_own("Wcc\\Config");
+			model_ = Config::make(htab_read());
 		}
 	}
 	return  model_;
 }
 
-void HtmlPlates::setModel(zobj_ptr model)
+void HtmlPlates::setModel(zobj_user model)
 {
 	model_ = model;
-	values_.set("m", model);
+	htab_write(values_).set(HPit.model_var, model);
 }
 
-void HtmlPlates::mergeData(htab_ptr items)
+void HtmlPlates::mergeData(htab_read items)
 {
-	values_.merge(items);
+	htab_write(values_).merge(items);
 }
 
-zstr_own HtmlPlates::renderView(htab_ptr options) 
+zstr_mgr
+HtmlPlates::renderView(htab_write options) 
 {
-	options.set(wis->final_key, false);
+	options.set(HPit.final_key, false);
 	return render(options);
 }
 
-zstr_own HtmlPlates::render(htab_ptr options) 
+zstr_mgr HtmlPlates::render(htab_read options) 
 {
 	initValues();
+	zstr_mgr result;
 
-	zval_ptr isfinal = options[wis->final_key];
+	zval_user isfinal = options.get(HPit.final_key);
 
 	if (isfinal.isTrue()) {
-		svc_ptr()->get(wis->final_key);
+		Services::service(HPit.final_key);
 	}
 
-	zval_ptr views = options["views"];
+	zval_user views = options.get(HPit.views_key);
 
 	if (!views.isNull())
 	{
 		if (views.isArray())
 		{
-			htab_walk hw;
-			auto& val = hw.value();
-			for(hw.start(views.zarray()); hw.ok(); hw.next())
+			for_key_value fkv;
+			htab_write hw(levels_);
+			for(fkv.start(views.zarray()); fkv.ok(); fkv.next())
 			{
-				levels_.push_back(val);
+				hw.push_back(fkv.value());
 			}
 		}
 	}
 
-	zobj_own engine = svc_ptr()->get(wis->engine_key);
+	zobj_mgr engine = Services::service(HPit.engine_key);
 	//showobj("render call", engine);
-	Wcc_PlateEngine* pe = nullptr;
+	
+	PlateEngine* pe = nullptr;
 	if (!engine.isNull()) {
-		 pe = zobj_toc<Wcc_PlateEngine>(engine.ptr());
-		 pe->shareWithAll(zval_own(values_));
+		 pe = zobj_toc<PlateEngine>(engine);
+		 pe->shareWithAll(values_);
 	}
 	else {
-		zend_throw_error(zend_ce_exception, "Plate engine not assigned\n");
+		zend_throw_error(zend_ce_exception, "PlateEngine service required\n");
+		return result;
 	}
 
 	htab_walk pw;
-	auto& pname = pw.value();
+	auto pname = pw.value();
 
+	zval_user raw = options.get(HPit.raw_key);
 
-	zval_ptr raw = options["raw"];
-	zend_string* raw_val;
-	bool hasData = raw.getStringData(&raw_val);
-	if (!hasData)
-	{
-		raw_val = (zend_string*) nullptr;
-	}
 	int  ct = 0;
 
-	zobj_own   inner_obj; // ownership stored here
-	zobj_own   pobj;
+	zobj_mgr   inner_obj; // ownership stored here
+	zobj_mgr   pobj;
 
-	Wcc_Plate*  inner_ptr = (Wcc_Plate*) nullptr;
-	Wcc_Plate*  prev_ptr = (Wcc_Plate*) nullptr;
+	Plate*  inner_ptr = (Plate*) nullptr;
+	Plate*  prev_ptr = (Plate*) nullptr;
 
 	for (pw.start(levels_); pw.ok(); pw.next(), ct++)
 	{
-		zstr_ptr s = pname.zstr();
+		zstr_user s = pname.zstr();
 
-		//showstr("pname walk", s);
 		if (!ct) {
-			inner_obj = pe->make(s, false, raw_val);
-			inner_ptr = zobj_toc<Wcc_Plate>(inner_obj);
-
-			raw_val = (zend_string*) nullptr;
+			inner_obj = pe->newPlate(s, false);
+			inner_ptr = zobj_toc<Plate>(inner_obj);
+			if (raw.size())
+			{
+				inner_ptr->setRaw(raw);
+			}
 			prev_ptr = inner_ptr;
 		}
 		else {
-			prev_ptr->setLayoutLeaf(s);
-			// ownship stored in engine.
-			//pobj.lose();
-			pobj = pe->make(s, true, raw_val);
-			prev_ptr = zobj_toc<Wcc_Plate>(pobj);
+			prev_ptr->setLayout(s);
+			pobj = pe->newPlate(s, true);
+			prev_ptr = zobj_toc<Plate>(pobj);
 		}
-		//showobj("inner", inner);
-		//showobj("previous", previous);
+
 	}
 	
-	zstr_own result = inner_ptr->render(htab_ptr());
-	inner_ptr->clean();
-
-	pobj.lose();
-	inner_obj.lose();
+	result = inner_ptr->render(htab_read());
 
 	pe->clearPlates();
-	
 
-	// break services reference
-	// svc_ptr()->unset(wis->engine_key);
+	// break this circular reference to self
+	htab_write(values_).unset(HPit.view_key); 
 
-	// inner was not stored in plateEngine
-	
-
-	// break circular reference to self
-	values_.unset(wis->view_key); 
-
-	//showobj("end render", this->zobj());
-	//showobj("inner", inner);
-	//showobj("previous", previous);
 	return result;
 }
 
-
+}; // namespace wcc;
 
 ZEND_METHOD(Wcc_HtmlPlates, __construct)
 {
@@ -221,7 +226,7 @@ ZEND_METHOD(Wcc_HtmlPlates, getModel)
 	ZEND_PARSE_PARAMETERS_END();
 
 	auto cobj = zval_toc<HtmlPlates>(ZEND_THIS);
-	zobj_own result = cobj->getModel();
+	zobj_mgr result = cobj->getModel();
 	result.move_zv(return_value);
 }
 
@@ -246,7 +251,7 @@ ZEND_METHOD(Wcc_HtmlPlates, setModel)
 
 	auto cobj = zval_toc<HtmlPlates>(ZEND_THIS);
 
-	cobj->setModel(zobj_ptr(object));
+	cobj->setModel(zobj_user(object));
 }
 
 ZEND_METHOD(Wcc_HtmlPlates, mergeData)
@@ -259,7 +264,7 @@ ZEND_METHOD(Wcc_HtmlPlates, mergeData)
 
 	auto cobj = zval_toc<HtmlPlates>(ZEND_THIS);
 
-	cobj->mergeData(htab_ptr(data));
+	cobj->mergeData(zval_user(data).zarray());
 }
 
 ZEND_METHOD(Wcc_HtmlPlates, renderView)
@@ -272,7 +277,9 @@ ZEND_METHOD(Wcc_HtmlPlates, renderView)
 
 	auto cobj = zval_toc<HtmlPlates>(ZEND_THIS);
 
-	zstr_own result = cobj->renderView(htab_ptr(options));
+	zval_mgr options_copy(options);
+
+	zstr_mgr result = cobj->renderView(zval_user(options_copy));
 	result.move_zv(return_value);
 
 }
@@ -288,7 +295,7 @@ ZEND_METHOD(Wcc_HtmlPlates, render)
 	auto cobj = zval_toc<HtmlPlates>(ZEND_THIS);
 
 	//showmem("render options", options);
-	zstr_own result = cobj->render(htab_ptr(options));
+	zstr_mgr result = cobj->render(zval_user(options).zarray());
 	result.move_zv(return_value);
 	
 }
@@ -298,7 +305,7 @@ PHP_MINIT_FUNCTION(Wcc_HtmlPlates_reg)
 {
 	auto ce = register_class_Wcc_HtmlPlates();
 
-	htmlplates_mgr.classEntry(ce);
+	HtmlPlates::omg.classEntry(ce);
 
 	return SUCCESS;
 }

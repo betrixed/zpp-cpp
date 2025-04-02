@@ -31,7 +31,6 @@ namespace zpp {
         static zval_user  get_global(zstr_user key);
         
         ~htab_mgr();
-
         htab_mgr() : ht_(nullptr) {}
 
         htab_mgr(htab_mgr&& m);
@@ -84,6 +83,7 @@ namespace zpp {
     class htab_empty : public htab_mgr {
     public:
         htab_empty();
+        ~htab_empty();
     };
 
 

@@ -6,8 +6,9 @@
 #endif
 
 extern "C" {
-	#include <Zend/zend_attributes.h>
+  #include <Zend/zend_attributes.h>
   #include <Zend/zend_interfaces.h>
+  #include <Zend/zend_iterators.h>
 }
 
 #ifndef HMAP_ARGINFO_H
@@ -36,7 +37,99 @@ namespace wcc {
 		}
 	};
 
+
 Hmap_init HMAPit;
+
+// static function table instance
+zend_object_iterator_funcs 
+Hmap::iterator::it_fntab_ = {
+	it_dtor,
+	it_valid,
+	it_get_data,
+	it_get_key,
+	it_forward,
+	it_rewind,
+	it_invalidate,
+	nullptr
+}; 
+
+zend_object_iterator* //static
+Hmap::iterator::create(zend_class_entry* ce, zval* zobj, int byref)
+{
+	Hmap::iterator *iterator = (Hmap::iterator*) emalloc(sizeof(Hmap::iterator));
+
+	zend_iterator_init((zend_object_iterator*) &iterator->phpit);
+	
+	zend_object* hmo = Z_OBJ_P(zobj);
+	ZVAL_OBJ_COPY(&iterator->phpit.data, hmo);
+
+	iterator->phpit.funcs = &it_fntab_;
+
+	Hmap* cobj = zobj_toc<Hmap>(hmo);
+
+	iterator->htab = cobj->toArray(); // refcount++
+	iterator->walk.start(iterator->htab);
+
+	return &iterator->phpit; 
+}
+
+void //static - undo creation work
+Hmap::iterator::it_dtor(zend_object_iterator *iter)
+{
+	zend_object* obj = Z_OBJ_P(&iter->data);
+	zobj_mgr::try_decref(obj);
+	Hmap::iterator* mem = phmi(iter);
+	// clean up walker
+	mem->htab.~htab_mgr();
+	mem->walk.~htab_walk();
+	efree(mem);
+}
+
+
+zend_result //static
+Hmap::iterator::it_valid(zend_object_iterator *iter)
+{
+	
+	Hmap::iterator *iterator = phmi(iter);
+	zend_result result = iterator->walk.ok() ? SUCCESS : FAILURE;
+	return result;
+
+}
+
+zval * //static
+Hmap::iterator::it_get_data(zend_object_iterator *iter)
+{
+	Hmap::iterator *iterator = phmi(iter);
+	return iterator->walk.value();
+}
+
+void //static
+Hmap::iterator::it_get_key(zend_object_iterator *iter, zval *key)
+{
+	Hmap::iterator *iterator = phmi(iter);
+	ZVAL_COPY(key, iterator->walk.key());
+}
+
+void //static
+Hmap::iterator::it_forward(zend_object_iterator *iter)
+{
+	Hmap::iterator *iterator = phmi(iter);
+	iterator->walk.next();
+}
+
+void  //static
+Hmap::iterator::it_rewind(zend_object_iterator *iter)
+{
+	Hmap::iterator *iterator = phmi(iter);
+	iterator->walk.rewind();
+}
+
+void  //static
+Hmap::iterator::it_invalidate(zend_object_iterator *iter)
+{
+	Hmap::iterator *iterator = phmi(iter);
+	iterator->walk.lose();
+}
 
 zval* 
 Hmap::get_property_ptr_ptr(zend_object* object, zend_string* name, 
@@ -80,7 +173,9 @@ Hmap::write_property(zend_object* object, zend_string* name, zval* value, void**
 	//if (!zend_std_has_property(object, name, ZEND_PROPERTY_EXISTS, cache_slot)) 
 	//{
 		Hmap* cobj = zobj_toc<Hmap>(object);
+		
 		htab_write hw(cobj->data_);
+
 		zval* result = zend_hash_update(hw, name, value);
 		if (Z_TYPE_FLAGS_P(result) != 0)
 		{
@@ -104,7 +199,7 @@ Hmap::has_property(zend_object* object, zend_string* name, int has_set_exists, v
 	htab_read look(cobj->data_);
 	if (look.isNull())
 	{
-		return false;
+		  return false;
 	}
 	return look.has_key(name);
 }
@@ -157,6 +252,7 @@ Hmap::get_properties_for(zend_object* object, zend_prop_purpose purpose)
 	case ZEND_PROP_PURPOSE_GET_OBJECT_VARS:	
 		HashTable* ht = (HashTable*) look;
 		htab_mgr::try_addref(ht);
+		//showarray("look", ht);
 		return ht;
 	}
 	return nullptr;
@@ -448,6 +544,12 @@ Hmap::addArray(htab_read data)
 	}
 }
 
+zend_long 
+Hmap::count() const
+{
+		return htab_read(data_).size();
+}
+
 htab_read 
 Hmap::toArray()
 {
@@ -545,6 +647,9 @@ Hmap::unserialize(htab_read htab)
 	*/
 
 	(htab_mgr&)data_ = htab;
+
+
+	//showarray("after unserialize", data_);
 }
 
 void
@@ -681,6 +786,13 @@ ZEND_METHOD(Wcc_Hmap, subset)
 	temp.move_zv(return_value);
 }
 
+
+ZEND_METHOD(Wcc_Hmap, getIterator)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+	zend_create_internal_iterator_zval(return_value, ZEND_THIS);
+}
+
 ZEND_METHOD(Wcc_Hmap, addArray)
 {
 	zval* elist;
@@ -720,7 +832,7 @@ ZEND_METHOD(Wcc_Hmap, unhive)
 	result.move_zv(return_value);
 }
 
-/*
+
 ZEND_METHOD(Wcc_Hmap, offsetGet)
 {
 	zval* key;
@@ -779,8 +891,6 @@ ZEND_METHOD(Wcc_Hmap, offsetUnset)
 }
 
 
-
-
 ZEND_METHOD(Wcc_Hmap, count)
 {
 	ZEND_PARSE_PARAMETERS_START(0,0)
@@ -788,11 +898,8 @@ ZEND_METHOD(Wcc_Hmap, count)
 
 	auto cobj = zval_toc<Hmap>(ZEND_THIS);
 
-	
 	RETURN_LONG(cobj->count());
 }
-
-*/
 
 ZEND_METHOD(Wcc_Hmap, __serialize)
 {
@@ -828,14 +935,27 @@ ZEND_METHOD(Wcc_Hmap, clear)
 
 	cobj->clear();
 }
+/*
+ZEND_METHOD(Wcc_Hmap, __wakeup)
+{
+		ZEND_PARSE_PARAMETERS_NONE();
+
+}
+*/
 
 PHP_MINIT_FUNCTION(Wcc_Hmap_reg)
 {
 	//auto ce = register_class_Wcc_Hmap(zend_ce_arrayaccess, zend_ce_countable);
 	//zend_standard_class_def
-	auto ce = register_class_Wcc_Hmap();
+	auto ce = register_class_Wcc_Hmap(
+		//zend_ce_iterator
+		//zend_ce_arrayaccess, 
+		//zend_ce_countable
+		);
+
 	Hmap::omg.classEntry(ce);
 
+	//zend_printf("registered hmap\n");
 	return SUCCESS;
 }
 

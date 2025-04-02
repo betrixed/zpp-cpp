@@ -28,22 +28,22 @@ icache_str IC_STR;
 void
 icache_str::init()
 {
-	expiry_key = zstr_intern("expiry");
-	expire_key = zstr_intern("expire");
-	prefix_key = zstr_intern("prefix");
-	key_key = zstr_intern("key");
-	data_key = zstr_intern("data");
-	ttl_key = zstr_intern("ttl");
-	stored_key = zstr_intern("stored");
-	saved = zstr_intern("saved");
-	class_key = zstr_intern("class");
-	service_key = zstr_intern("service");
+	expiry_key = "expiry";
+	expire_key = "expire";
+	prefix_key = "prefix";
+	key_key = "key";
+	data_key = "data";
+	ttl_key = "ttl";
+	stored_key = "stored";
+	saved = "saved";
+	class_key = "class";
+	service_key = "service";
 
-	cached = zstr_intern("cached");
-	svc_cache = zstr_intern("svc_cache");
-	options = zstr_intern("options");
-	services = zstr_intern("services");
-	ttl = zstr_intern("ttl");
+	cached = "cached";
+	svc_cache = "svc_cache";
+	options = "options";
+	services = "services";
+	ttl = "ttl";
 }
 
 void 

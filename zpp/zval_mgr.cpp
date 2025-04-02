@@ -134,6 +134,7 @@ zval_mgr::zval_mgr(zval* zv)
     zv_ = {0};
 
     if (zv) {
+        // destructor will try to decref.
         ZVAL_COPY(&zv_, zv);
     }
     else {

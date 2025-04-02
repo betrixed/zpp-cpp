@@ -36,15 +36,15 @@ namespace wcc
 		virtual void init() 
 		{
 			
-			 active = zstr_intern("active");
+			 active = "active";
 			
-			 defer = zstr_intern("defer");
+			 defer = "defer";
 			
-			 instances = zstr_intern("instances");
+			 instances = "instances";
 			
-			 throw_fail = zstr_intern("throw_fail");
+			 throw_fail = "throw_fail";
 			
-			 defer_ct = zstr_intern("defer_ct");
+			 defer_ct = "defer_ct";
 		}
 
 		virtual void init_req()
@@ -54,6 +54,7 @@ namespace wcc
 
 		virtual void end_req()
 		{
+			//zend_printf("end_req Services_data\n");
 			g_services.init();
 		}
 	};

@@ -18,10 +18,10 @@ public:
 	TargetData() : state_init() {}
 
 	virtual void init() {
-		class_name = zstr_intern("class_name");
-		method = zstr_intern("func_name");
-		module = zstr_intern("module_name");
-		index = zstr_intern("index");
+		class_name = "class_name";
+		method = "func_name";
+		module = "module_name";
+		index = "index";
 	}
 };
 

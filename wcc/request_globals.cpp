@@ -831,10 +831,11 @@ RequestGlobals::getHttpHost()
 		// regulations want lowercase
 		result = host.trim();
 		//showstr("after trim", host);
-		result = zstr_user(result).to_lower();
+		host = result;
+		result = host.to_lower();
 
 		host = result;
-		//showstr("after lower", host);
+
 		//showstr("host2", host);
 		if (host.find(':') >= 0) 
 		{
@@ -850,7 +851,7 @@ RequestGlobals::getHttpHost()
 		preg rex2("/[a-z0-9-]+\\.?/");
 
 		zstr_mgr test = rex2.replace("", host); 
-		//showstr("test empty", test);
+		showstr("test empty", test);
 		if (test.size() > 0) 
 		{
 			zend_throw_error(zend_ce_exception, "Invalid host %s", host.data());
@@ -1774,6 +1775,18 @@ ZEND_METHOD(Wcc_RequestGlobals, getQuery)
 
 	RequestGlobals* cobj = zval_toc<RequestGlobals>(ZEND_THIS);
 	zobj_user result = cobj->getQuery();
+	//showmem("getQuery result", result);
+	result.return_zv(return_value);
+
+}
+
+ZEND_METHOD(Wcc_RequestGlobals, getServer)
+{
+	ZEND_PARSE_PARAMETERS_START(0, 0)
+	ZEND_PARSE_PARAMETERS_END();
+
+	RequestGlobals* cobj = zval_toc<RequestGlobals>(ZEND_THIS);
+	zobj_user result = cobj->getServer();
 	//showmem("getQuery result", result);
 	result.return_zv(return_value);
 

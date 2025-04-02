@@ -5,8 +5,9 @@
  */
 namespace Wcc;
 
+// stdClass # implements ArrayAccess 
 
-final class Hmap # stdClass # implements ArrayAccess 
+final class Hmap //implements IteratorAggregate
 {
 	public function __construct(?array $values=null);
 
@@ -28,31 +29,25 @@ final class Hmap # stdClass # implements ArrayAccess
 
 	public function unhive(string $key) : string {}
 
+	public function clear() : void {}
+
+	public function getIterator():  Iterator {}
+
+	public function count() : int {}
+
+	public function offsetExists(mixed $offset) : bool {}
+
+	public function offsetGet(mixed $offset) : mixed {}
+
+	public function offsetSet(mixed $offset, mixed $value) : void {}
+
+	public function offsetUnset(mixed $offset) : void {}
+
 	public function __serialize() : array {}
 
 	public function __unserialize(array $data) : void {}
-	
-	public function clear() : void {}
-	
-/*
-	public function __get(string $name) : mixed {}
 
-	public function __set(string $name, mixed $value) : void {}
-
-	public function __isset(string $name) : bool {}
-
-	public function __unset(string $name) : void {}
-
-	public function offsetExists(mixed $index) : bool {}
-
-    public function offsetGet(mixed $index) : mixed {}
-
-    public function offsetSet(mixed $index, mixed $value) : void {}
-
-    public function offsetUnset(mixed $index) : void {}
-
- 	public function count() : int {}
-*/
+	//public function __wakeup(): void {}
 
 
 };
