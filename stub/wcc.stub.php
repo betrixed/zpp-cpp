@@ -29,7 +29,7 @@ class Finder {
 
 class Target {
 	public function __construct(
-		string $class, string $func);
+		string $class, string $func = "index");
 
 	public function getClass() : string {}
 
@@ -39,7 +39,7 @@ class Target {
 
 	public function setFunc(string $name) : void {}
 
-	public function module(?string $name) : Target {}
+	public function setModule(?string $name) : Target {}
 
 	public function __serialize() : array {}
 
@@ -69,7 +69,7 @@ final class  Route {
 
 	public function setCompiled(string $s) : void {}
 	
-	public function getCompiled() : string {}
+	public function getCompiled() : ?string {}
 
 	public function getVerbs() : int {}
 
@@ -162,26 +162,38 @@ final class RouteMatch {
 };
 
 final class RouteSet {
-
-	public function addRouteList(array $list) : void {}
-
 	public function addRoute(Route $obj) : void {}
+
+	public function addRoutes(array $list,?string $prefix = null, 
+		?string $module = null) : void {}
+
+	public function compile(Route $obj) : void {}
+
+	public function getFile() : string|null {}
 
 	public function getFixed(): array {}
 
+	public function getRoute(string $name) : ?Route {}
+
     public function getVary(): array {}
+
+    public function methodSfx(?string $sfx) : void {}
+
+    public function module(?string $name = null, bool $prefix = true) : void {}
+
+    public function notFound(mixed $target) : void {}
+
+    public function prefix(?string $prefix) : void {}
+
+    static public function rex_url() : string {}
+
+    public function routeUrl(string $name, array $params) : ?string {}
 
     public function setFile(string $fname) : void {}
   
-    public function getFile() : string|null {}
-
     public function __serialize() : array {}
 
 	public function __unserialize(array $data) : void {}
-
-	public function getRoute(string $name) : ?Route {}
-
-	public function routeUrl(string $name, array $params) : ?string {}
 
 };
 
@@ -202,28 +214,6 @@ final class ReflectCache {
 	public function getReflect(string $cname) : \ReflectionClass {}
 
 	public function clear() : void {}
-
-};
-
-
-class RouteAdd {
-	public function __construct(?RouteSet $rset = null);
-
-	public function addRoutes(array $list, 
-		?string $prefix = null, 
-		?string $module = null) : void {}
-
-	public function fallback(mixed $target) : void {}
-
-	public function getRouteSet() : RouteSet {}
-
-	public function methodSfx(?string $sfx = null) : void {}
-
-	public function module(?string $name = null) : void {}
-
-	public function prefix(?string $name = null) : void {}
-
-	public function ready(Route $route) : void {}
 
 };
 
@@ -305,5 +295,7 @@ function init_globals() : void {}
 function str_camel(string $s, string $seperate = "_"): string {}
 
 function str_uncamel(string $s, string $seperate = "_"): string {}
+
+function str_intern(string $s) : string {}
 
 function test_wcc(mixed& $test) : mixed {} 

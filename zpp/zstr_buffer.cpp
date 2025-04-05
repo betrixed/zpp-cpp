@@ -5,6 +5,11 @@
 
 namespace zpp {
 
+void zstr_buffer::initbuf()
+{
+	buf.s = nullptr;
+	buf.a = 0;
+}
 
 zstr_buffer::zstr_buffer()
 {
@@ -32,23 +37,25 @@ zstr_buffer::~zstr_buffer()
 	lose();
 }
 
-zstr_buffer::zstr_buffer(zval *v)
+zstr_buffer::zstr_buffer(zval *v) : zstr_output()
 {
 	initbuf();
 	zstr_mgr temp = zval_user(v).to_zstr();
 	zend_string* s = temp;
-
-	append(ZSTR_VAL(s), ZSTR_LEN(s));
+	if (s) {
+		append(ZSTR_VAL(s), ZSTR_LEN(s));
+	}
 }
 
-zstr_buffer::zstr_buffer(zend_string* w)
+zstr_buffer::zstr_buffer(zend_string* w) : zstr_output()
 {
 	initbuf();	
-	if (w)
+	if (w) {
 		append(ZSTR_VAL(w), ZSTR_LEN(w));
+	}
 }
 
-zstr_buffer::zstr_buffer(const std::string_view& cs) 
+zstr_buffer::zstr_buffer(const std::string_view& cs) : zstr_output()
 {
 	initbuf();
 	auto slen = cs.size();
@@ -58,7 +65,7 @@ zstr_buffer::zstr_buffer(const std::string_view& cs)
 	}	
 }
 
-zstr_buffer::zstr_buffer (const char* c, size_t slen)  
+zstr_buffer::zstr_buffer (const char* c, size_t slen) : zstr_output() 
 {
 	initbuf();
 	if (slen)
@@ -67,7 +74,7 @@ zstr_buffer::zstr_buffer (const char* c, size_t slen)
 	}
 }
 
-zstr_buffer::zstr_buffer (const char* c) 
+zstr_buffer::zstr_buffer (const char* c) : zstr_output()
 {
 	initbuf();
 	auto slen = strlen(c);
@@ -77,7 +84,7 @@ zstr_buffer::zstr_buffer (const char* c)
 	}
 }
 
-zstr_buffer::zstr_buffer(const std::string& cs) 
+zstr_buffer::zstr_buffer(const std::string& cs) : zstr_output()
 {
 	initbuf();
 	auto slen = cs.size();
@@ -89,6 +96,7 @@ zstr_buffer::zstr_buffer(const std::string& cs)
 void zstr_buffer::append(char c)
 {
 	smart_str_appendc_ex(&buf, c, 0);
+	
 }
 
 
@@ -155,11 +163,15 @@ zstr_buffer::str()
 // extract returns final zend string reallocated
 // with null terminator, and also nulls the internal 
 // zend_string s.
+// result will need to be "adopted"
 
 zend_string*
 zstr_buffer::zstr()
 {
-	return smart_str_extract_ex(&buf, 0);
+	if (buf.s)
+		return smart_str_extract_ex(&buf, 0);
+	else 
+		return zend_empty_string;
 }
 // this doesn't seem to be useful.
 /*

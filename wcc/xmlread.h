@@ -71,18 +71,19 @@ namespace wcc {
 	using namespace zpp;
 
 	/**
-	 * intended for single parse, throw away use.
+	 * intended for single parse.
+	 * mixed in with Wcc_XmlRead
 	 */
 
-	class  XmlWrap : public zobj_mgr 
+	class  XmlWrap
 	{
 	protected:
 		fn_call_args<1> getattribute_;
 		fn_call   readstring_;
 		fn_call   read_;
 		bool      fileOpen_;
-		zstr_mgr  hold_;
-		zobj_user self_;
+		zstr_mgr  hold_; // filename or xml data
+		zobj_mgr  self_; // XmlReader::Object
 
 		bool adopt_xmlobj(zobj_mgr& test);
 	public:
@@ -92,7 +93,6 @@ namespace wcc {
 		bool fromFile(zstr_user path);
 		bool fromString(zstr_user xml);
 		void fn_setup();
-		bool newobj();
 
 		zstr_mgr  xml_name();
 
@@ -106,6 +106,14 @@ namespace wcc {
 		int		  nodeType();
 		void      closeFile();
 
+		bool      ok() {
+			return self_.ok();
+		}
+
+		zobj_user xml() 
+		{
+			return self_;
+		}
 		operator zobj_user* () {
 			return (zobj_user*)(this);
 		}
@@ -141,6 +149,18 @@ namespace wcc {
 
 		public:
 
+			void* operator new(size_t size)
+			{
+				//zend_printf("new DStack %ld\n",size);
+				return emalloc(size);
+			}
+
+			void operator delete(void* ptr)
+			{
+				//zend_printf("delete DStack %lx\n",ptr);
+				efree(ptr);
+			}
+
 			zval_mgr  ref_; // storage always a zval
 			zstr_mgr  key_; // key must always be a string
 			int       kind_; // object / packed array / keyed array
@@ -150,12 +170,13 @@ namespace wcc {
 
 			~DStack()
 			{
-				//showstr("~Stack key", key_);
 				//showmem("~Stack ref", ref_);
 			}
 			DStack(zstr_user k, const zval_mgr& val, int eval)
-			         : ref_(val), key_(k), kind_(eval) 
+			         : kind_(eval) 
 			{
+				key_ = k;
+				ref_ = val;
 				//showstr("+Stack key", key_);
 				//showmem("+Stack ref", ref_);
 			}

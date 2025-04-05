@@ -57,6 +57,7 @@ zstr_mgr::own()
 		return;
 	}
 	GC_ADDREF(s);
+	//showstr("zstr own ", s);
 }
 
 void zstr_mgr::try_addref(zend_string* zs)
@@ -104,6 +105,7 @@ zstr_mgr::operator=(zstr_mgr&& rc)
     {
     	lose();
     }
+    s = p;
     //showstr("operator= &&", s);
     rc.s = nullptr;
     return *this;
@@ -169,23 +171,23 @@ void zstr_mgr::adopt(zend_string* rc)
 	}
 }
 
-zstr_mgr::zstr_mgr(zval* copy) : s(nullptr)
+zstr_mgr::zstr_mgr(zval* copy) : zstr_user()
 {
 	bind(zval_user(copy).zstr());
 }
 
-zstr_mgr::zstr_mgr(const zval_user& rc): s(nullptr)
+zstr_mgr::zstr_mgr(const zval_user& rc): zstr_user()
 {
 	bind(rc.zstr());
 }
 
-zstr_mgr::zstr_mgr(zend_long ival)
+zstr_mgr::zstr_mgr(zend_long ival) : zstr_user()
 {
 	// s has rc==1
     s = _php_math_longtobase(ival,10);
 }
 
-zstr_mgr::zstr_mgr(zval_mgr&& rc): s(nullptr)
+zstr_mgr::zstr_mgr(zval_mgr&& rc): zstr_user()
 {
 	s = zval_user(rc).zstr();
 	rc.init();
@@ -235,7 +237,7 @@ zstr_temp::zstr_temp(const char* c, size_t slen)
 		slen = strlen(c);
 	}
 	s = zend_string_init(c, slen, 0);
-	showstr("zstr_temp", s);
+	//showstr("zstr_temp", s);
 
 }
 
@@ -251,6 +253,7 @@ zstr_intern::zstr_intern(const char* c, size_t slen)
 	//showstr("interned s",p);
 
 }
+
 
 const zstr_intern& 
 zstr_intern::operator=(const char* cp)
@@ -273,8 +276,8 @@ const zstr_mgr&
 zstr_mgr::operator=(zstr_buffer&& m)
 {
 	lose();
+	//zend_printf("zstr_buffer size %ld, capacity %ld\n", m.size(), m.capacity());
 	s = m.zstr(); // zstr_buffer cleared by this, refcount==1
-
 	return *this;
 }
 

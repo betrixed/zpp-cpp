@@ -214,7 +214,8 @@ namespace zpp {
 	{
 		T** pp = (T**)(zobj);
 		//--pp;
-		return *--pp;
+		// pointer below start of zend_object
+		return *(--pp); 
 		//assert(zo;
 	}
 
@@ -325,11 +326,12 @@ namespace zpp {
 			handlers_.offset = sizeof(T) + sizeof(base_d*);
 			handlers_.get_debug_info = mydef::base_debug_info; // can be set later?
 			handlers_.clone_obj = nullptr; //cloning not supported
-			handlers_.dtor_obj  = zend_objects_destroy_object;
+			//handlers_.dtor_obj  = mydef::zobj_destroy;
+			handlers_.dtor_obj  = mydef::z_destroy;
 			handlers_.free_obj  = mydef::z_free;
 
 			#ifdef BASE_DEBUG	
-				showstr("init_class_fn", class_entry_->name);
+				//showstr("init_class_fn", class_entry_->name);
 			#endif
 		}
 
@@ -365,8 +367,8 @@ namespace zpp {
 		{
 			// setup object with handlers
 			zobj_mgr result;
-			result.adopt(mydef::make_new());
-			//showobj("new_zobj", result);
+			result = mydef::make_new();
+			//showobj("new_zobj()", result);
 			return result;
 		}
 
@@ -378,7 +380,20 @@ namespace zpp {
 		{
 			return (zobj->ce == mydef::class_entry_);
 		}
-		
+		static void z_destroy(zend_object* zobj)
+		{
+			#ifdef BASE_DEBUG		
+			zend_printf("z_destroy zobj = %lx class %s\n", zobj, ZSTR_VAL(zobj->ce->name));	
+			#endif
+			T* tp = mydef::cpp(zobj);
+
+			tp->~T(); 
+
+			zend_objects_destroy_object(zobj);
+			#ifdef BASE_DEBUG
+			obj_count_--;
+			#endif
+		}
 
 #ifdef BASE_DEBUG
 		static void showptr(const char* s,  T* p)
@@ -398,23 +413,12 @@ namespace zpp {
 #endif
 		static void z_free(zend_object* obj) 
 		{
-			T* tp = mydef::cpp(obj);
+			// object is now dead.
+			T* tp = zobj_toc<T>(obj);
 #ifdef BASE_DEBUG			
-			showptr("z_free", tp);
+			zend_printf("z_free %lx\n", tp);
 #endif
-
-			tp->~T(); 	
-#ifdef BASE_DEBUG
-			obj_count_--;
-#endif
-
-			#ifdef BASE_DEBUG
-			zend_printf("dtor zend object %lx\n", obj);
-			#endif
-			zend_object_std_dtor(obj);
-
-			//efree(tp); // zend_object_alloc uses emalloc()
-
+			efree(tp);
 		}
 
 		// establish self pointer
@@ -449,11 +453,11 @@ namespace zpp {
 			
 			T* cobj = zobj_toc<T>(zobj);
 #ifdef BASE_DEBUG
-			zend_printf(" cpp %s\n", typeid(T).name());
+			zend_printf(" cpp %lx %s C++ size %d\n", cobj, typeid(T).name(), 
+				sizeof(T) );
 			zend_object* myobj = cobj->vobj();
 			if(myobj != zobj ) {
-				showobj("myobj", myobj);
-				showobj("zobj", zobj);
+				zend_printf("vobj() mistake zobj=%lx, vobj=%lx\n", zobj, myobj);
 				//throw std::logic_error{ " zend_object* fail in cpp!" };
 			}
 #endif

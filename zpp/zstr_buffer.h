@@ -22,11 +22,7 @@ namespace zpp {
 
 		friend class zstr_mgr;
 
-		void initbuf()
-		{
-			buf.s = nullptr;
-			buf.a = 0;
-		}
+		void initbuf();
 
 		void lose();
 

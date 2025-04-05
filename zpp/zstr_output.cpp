@@ -107,10 +107,10 @@ zstr_output::operator<<(int iv)
 
 	if (nf_.value_ == Numf::DEC)
 	{
-		sfmt = "%ld";
+		sfmt = "%d";
 	}
 	else {
-		sfmt = "%lx";
+		sfmt = "%x";
 	}
 	zend_string* pf = strpprintf(0,sfmt,iv);
 	append(pf);

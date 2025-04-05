@@ -19,11 +19,26 @@ Route::RouteMgr Route::omg;
 
 Route_init route_data;
 
+/* This helps for a clean valgrind report */
+void freehtmemory(HashTable* ht)
+{
+	bool persistent = GC_FLAGS(ht) & IS_ARRAY_PERSISTENT;
+	void* ptr = HT_GET_DATA_ADDR(ht);
+	//zend_printf("Free HashTable Data %lx, persistent=%d\n", ptr, persistent);
+
+	pefree(ptr, persistent);
+}
 
 void Route_init::end() 
 {
-	zend_hash_clean(&route_verbs);
-	zend_hash_clean(&verb_names);
+
+	freehtmemory(&verb_names);
+	freehtmemory(&route_verbs);
+	
+
+	//showarray("route_verbs", &route_verbs);
+	//showarray("verb_names", &verb_names);
+
 	/*
 	showarray("route_verbs", route_verbs);
 	route_verbs.lose();
@@ -35,12 +50,17 @@ void Route_init::end()
 	*/
 }
 
+void Route_init::nodestroy(zval* val)
+{
+	// Allow zend to clean up zstr_intern
+}
 void Route_init::init() 
 {
 
-	//route_verbs.reset();
-	zend_hash_init(&route_verbs, 10, NULL, ZVAL_PTR_DTOR,1);
-	zend_hash_init(&verb_names, 10, NULL, ZVAL_PTR_DTOR,1);
+	//10 items, 16 slots is enough?
+
+	zend_hash_init(&route_verbs, 16, NULL, nodestroy,1);
+	zend_hash_init(&verb_names, 16, NULL, nodestroy,1);
 	GET_S = "GET";
 	POST_S = "POST";
 	PUT_S = "PUT";
@@ -59,10 +79,6 @@ void Route_init::init()
 	cc_pattern  = "pattern";
 	cc_target = "target";
 	cc_id  = "id";
-
-	cc_fixed =  "fixed";
-	cc_vary = "vary";
-	cc_file = "file";
 
 	ARG_S  = "_arg";
 	FUN_S  = "_fun";
@@ -88,11 +104,12 @@ void Route_init::init()
 	rv.set(TRACE_S, (int)html::V_TRACE);
 	rv.set(PURGE_S, (int)html::V_PURGE);
 
+	//zend_printf("route_verbs table size %d, used %d\n", route_verbs.nTableSize, route_verbs.nNumUsed);
 	//verb_names.reset();
 
 	htab_write p2(&verb_names);
 
-	// Order of enum values. (power of 2)
+	// Push in ascending order (powers of 2)
 	p2.push_back(GET_S); 
 	p2.push_back(POST_S);
 	p2.push_back(PUT_S);
@@ -104,6 +121,8 @@ void Route_init::init()
 	p2.push_back(TRACE_S);
 	p2.push_back(PURGE_S);	
 	
+	//showarray("verbs",rv);
+	//showarray("names", p2);
 }
 
 void Route_init::init_ce(zend_class_entry* ce)
@@ -260,9 +279,6 @@ Route::construct(int verbs, zstr_user pattern, zval_user target)
 	verbs_ = verbs;
 	pattern_ = pattern;
 	target_ = target;
-	
-	//showmem("target", target_);
-	//showstr("pattern", pattern_);
 }
 
 zobj_mgr //static
@@ -271,13 +287,11 @@ Route::get(zstr_user pattern, zval_user target, int ajax)
 	zobj_mgr result;
 
 	result = Route::omg.new_zobj();
-
-
+	//showobj("new Route zobj", result);
 	Route* cobj = zobj_toc<Route>(result);
 
 	cobj->construct(html::V_GET, pattern, target);
 	cobj->ajax_ = ajax;
-	//showobj("new Route", result);
 	return result;
 }
 
@@ -493,6 +507,10 @@ PHP_METHOD(Wcc_Route, get)
 
 	zobj_mgr obj = Route::get(pattern, target, ajax);
 	obj.move_zv(return_value);
+	//needs a reference boost
+	//zval_mgr::try_addref(return_value);
+	
+
 }
 
 //static
@@ -512,6 +530,8 @@ PHP_METHOD(Wcc_Route, post)
 
 	zobj_mgr obj = Route::post(pattern, target, ajax);
 	obj.move_zv(return_value);
+	//needs a reference boost
+	//zval_mgr::try_addref(return_value);
 }
 
 //static
@@ -781,8 +801,7 @@ PHP_METHOD(Wcc_Route, name)
 	Route* cobj = zval_toc<Route>(ZEND_THIS);
 	cobj->name(name);
 
-	zobj_mgr result(cobj);
-	result.move_zv(return_value);
+	ZVAL_COPY_VALUE(return_value, ZEND_THIS);
 }
 
 PHP_METHOD(Wcc_Route, routeUrl)

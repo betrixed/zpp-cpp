@@ -150,7 +150,9 @@ Finder::find(zstr_user cname)
 
 					test_path = std::move(namebuf);
 
+
 					test = test_path;
+					//showstr("test path", test);
 					if (std::filesystem::exists(test.vstr())) 
 					{
 						result = std::move(test_path);
@@ -177,8 +179,9 @@ Finder::find(zstr_user cname)
 			test_path = std::move(namebuf);
 			
 			test = test_path;
-
+			//showstr("test path", test);
 			if (std::filesystem::exists(test.vstr())) {
+				//showstr("exists", test);
 				result = std::move(test_path);
 				return result;
 			}

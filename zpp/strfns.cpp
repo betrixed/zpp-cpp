@@ -201,7 +201,10 @@ zpp_dump(zval_user zu, int level)
 	dump_info::dump(zu, level);
 }
 
-
+zstr_mgr str_intern(zstr_user s)
+{
+	return zstr_intern(s.data());
+}
 
 /** Only does one character seperator */
 void phiz_uncamel(zval* return_value, const zend_string *src, const zend_string *sep)
@@ -245,10 +248,10 @@ void phiz_uncamel(zval* return_value, const zend_string *src, const zend_string 
 		}
 		marker++;
 	}
-	smart_str_0(&uncamel_str);
 
 	if (uncamel_str.s) {
-		RETURN_STR(uncamel_str.s);
+		zend_string* result = smart_str_extract(&uncamel_str);
+		RETURN_STR(result);
 	} else {
 		RETURN_EMPTY_STRING();
 	}
@@ -295,10 +298,9 @@ void phiz_camel(zval* return_value, const zend_string *src, const zend_string *s
 		}
 	}
 
-	smart_str_0(&camel_str);
-
 	if (camel_str.s) {
-		RETURN_STR(camel_str.s);
+		zend_string* result = smart_str_extract(&camel_str);
+		RETURN_STR(result);
 	} else {
 		RETURN_EMPTY_STRING();
 	}
@@ -340,6 +342,17 @@ PHP_FUNCTION(Wcc_str_camel) {
 	phiz_camel(return_value, src, sep );
 }
 
+PHP_FUNCTION(Wcc_str_intern)
+{
+	zend_string* src = NULL;
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+	Z_PARAM_STR(src)
+	ZEND_PARSE_PARAMETERS_END();
+
+	zstr_mgr value = str_intern(src);
+
+	value.move_zv(return_value);
+}
 /*
 static zval_mgr global_ref(const char* gname)
 {

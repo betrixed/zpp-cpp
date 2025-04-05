@@ -18,12 +18,21 @@ zobj_mgr::try_addref(zend_object* ob)
 	ob->gc.refcount++;
 }
 
-bool
+bool // static
 zobj_mgr::try_decref(zend_object* ob)
 {
-	int rct = ob->gc.refcount - 1;
-	zend_object_release(ob);
-	return !(rct);	
+	auto& rct = ob->gc.refcount;
+	if (rct==1) 
+	{
+		//showobj("RELEASE obj", ob);
+		zend_object_release(ob);
+		return true;
+	}
+	else {
+		rct--;
+		//showobj("ROAMING obj", ob);
+	}
+	return false;	
 }
 
 void zobj_mgr::own()
@@ -61,15 +70,32 @@ zobj_mgr::adopt(zend_object *zo)
 	obj_ = zo;
 }
 
-zobj_mgr::zobj_mgr(base_d* cobj) : obj_(nullptr)
+zobj_mgr::zobj_mgr(base_d* cobj) : zobj_user()
 {
 	if (cobj)
 	{
+
 		obj_ = cobj->vobj();
-		own();
+		zend_printf("zobj_mgr: new base*d %lx ", cobj);
+		showobj(" vobj= ", obj_);
 	}
 }
 
+zobj_mgr::zobj_mgr(zend_object* rc) : zobj_user(rc)
+{
+    own();
+}
+
+zobj_mgr::zobj_mgr(const zobj_mgr& rc) : zobj_user(rc.obj_)
+{
+    own();
+}
+
+
+zobj_mgr::zobj_mgr(zobj_mgr&& rc) : zobj_user(rc.obj_)
+{
+    rc.obj_ = nullptr;
+}
 
 zobj_mgr& 
 zobj_mgr::operator=(const zobj_user &rc)
@@ -135,7 +161,7 @@ zobj_mgr::return_zv(zval* ret)
 		ZVAL_NULL(ret);
 }
 
-zobj_mgr::zobj_mgr(zval_mgr&& m)
+zobj_mgr::zobj_mgr(zval_mgr&& m) 
 {
 	obj_ = zval_user(m).zobject();
 	m.init();
@@ -155,6 +181,17 @@ zobj_mgr::operator=(zval* rc)
 {
 	lose();
 	obj_ = zval_user(rc).zobject();
+	own();
+	return *this;
+}
+
+zobj_mgr& 
+zobj_mgr::operator=(const zval_user& zv)
+{
+	lose();
+	obj_ = zv.zobject();
+	own();
+	showobj("ZVAL_USER& ", obj_);
 	return *this;
 }
 

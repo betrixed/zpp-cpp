@@ -83,7 +83,6 @@ RouteAdd::addRoutes(htab_read list, zstr_user prefix, zstr_user module)
 			url_prefix_.init();
 		}
 	}
-	//showstr("url_prefix_", url_prefix_);
 
 	if(module.size())
 	{
@@ -95,19 +94,19 @@ RouteAdd::addRoutes(htab_read list, zstr_user prefix, zstr_user module)
 			module_name_.init();
 		}
 	}
-	//showstr("module_name_", module_name_);
+	showstr("module_name_", module_name_);
 	htab_walk wk;
 	auto value = wk.value();
-	//showobj("RouteSet", route_set_);
+	showobj("RouteSet", route_set_);
 
 	RouteSet* rs = zobj_toc<RouteSet>(route_set_);
 
-	//showdata("list", list);
+	showdata("list", list);
 	for(wk.start(list); wk.ok(); wk.next())
 	{
 		zobj_user route(value.zobject());
 
-		//showobj("route", route);
+		showobj("route", route);
 
 		Route* r = zobj_toc<Route>(route);
 
@@ -119,6 +118,7 @@ RouteAdd::addRoutes(htab_read list, zstr_user prefix, zstr_user module)
 		}
 		rs->addRoute(value);
 	}
+	zend_printf("Routes added\n" );
 }
 
 
@@ -160,11 +160,8 @@ void RouteAdd::ready(Route* route)
 	zstr_buffer  pattern;
 	zstr_buffer  compiled;
 
-	//zval_mgr robj(route->zobj());
-
-	//dump_info::msg_dump("ready route", robj);
-
 	zstr_mgr url(route->getPattern());
+	showstr("url", url);
 
 	zstr_user rex(RouteAdd::rex_url());
 
@@ -177,19 +174,26 @@ void RouteAdd::ready(Route* route)
 		pr2 = 0;
 	}
 	else {
-		preg   urlseg(rex,0,true); // flags=0, global=true
+		zend_printf("Try matches ");
+		showstr("rex", rex);
+		preg   urlseg(rex, 0, true); // flags=0, global=true
 		pr2 = urlseg.matches(url);
 		if (pr2) {
 			captures = urlseg.captures();
+			//showdata("captures", captures);
+		}
+		else {
+			zend_printf("No matches\n");
 		}
 	}
 
-	
 	// try and prevent bad double-// without pattern reset
 	zstr_user prefix(url_prefix_);
+
 	if (prefix.size())
 	{
 		bool preslash = (prefix.data()[0] == '/');
+		zend_printf("preslash %d slashBegins %d\n", preslash, slashBegins);
 
 		if (!slashBegins) {
 			if (!preslash)
@@ -210,10 +214,12 @@ void RouteAdd::ready(Route* route)
 	}
 	//zstr_output sink;
 	//sink << pr2 << " pattern vstr" << pattern.vstr() << '\n';
-	//showstr("pattern ", pattern);
+
 	zstr_mgr temp;
 
-	temp = pattern.zstr();
+	temp = std::move(pattern);
+	showstr("pattern", temp);
+
 	compiled << temp; 
 	pattern << temp; // reset zstr_buffer as fresh content
 
@@ -255,7 +261,7 @@ void RouteAdd::ready(Route* route)
 				name = useg.substr(1);
 				zstr_buffer bb;
 				bb << '{' << name << '}'; 
-				blob = bb.zstr();
+				blob = std::move(bb);
 			}
 			else if (firstchar == '{')
 			{
@@ -286,9 +292,9 @@ void RouteAdd::ready(Route* route)
 
 	if (pcount > 0)
 	{
-		cpattern = compiled.zstr();
+		cpattern = std::move(compiled);
 		compiled << "#^" << cpattern << "$#";
-		cpattern = compiled.zstr();
+		cpattern = std::move(compiled);
 
 		route->setParams(params);
 	}
@@ -319,7 +325,8 @@ void RouteAdd::ready(Route* route)
 				else {
 					fbuf << sfx;
 				}
-				zstr_mgr fname = fbuf.zstr();
+				zstr_mgr fname = std::move(fbuf);
+				showstr("fname", fname);
 				t->setFunc(fname);
 			}
 			t->module(module_name_);
@@ -384,6 +391,8 @@ ZEND_METHOD(Wcc_RouteAdd, getRouteSet)
 
 	rset.return_zv(return_value);
 }
+
+
 
 ZEND_METHOD(Wcc_RouteAdd, methodSfx)
 {

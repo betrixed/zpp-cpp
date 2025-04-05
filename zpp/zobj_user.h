@@ -1,9 +1,7 @@
 #ifndef ZOBJ_USER_H
 #define ZOBJ_USER_H
 
-#ifndef ZOBJ_MGR_H
-#include "zobj_mgr.h"
-#endif
+
 
 #ifndef ZVAL_MGR_H
 #include "zval_mgr.h"
@@ -12,13 +10,14 @@
 namespace zpp {
 
 	class htab_mgr;
-	
+	class zobj_mgr;
+
 	class zobj_user {
 	protected:
 		zend_object* obj_;
 
 		friend class zobj_mgr;
-
+		
 	public:
 		zobj_user() : obj_(nullptr) {}
 
@@ -26,7 +25,7 @@ namespace zpp {
 
 		zobj_user(const zobj_user& rc) : obj_(rc.obj_) {}
 
-		zobj_user(const zobj_mgr& rc) : obj_(rc.obj_) {}
+		zobj_user(const zobj_mgr& rc);
 
 		zobj_user(const zval_mgr& rc);
 

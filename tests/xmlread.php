@@ -6,11 +6,12 @@ use Exception;
 
 require __DIR__ . "/bootstrap.php";
 
-$data = XmlRead::fromFile("tests/assets_full.xml");
+$data = XmlRead::fromFile("tests/assets.xml");
 if (empty($data))
 {
     throw new Exception("File read error");
 }
+
 //$d = new \DateTime("now");
 //echo "Time now " . $d->format("D M Y") . PHP_EOL;
 
@@ -25,6 +26,7 @@ echo "cfg property = " . $cfg->property1 . PHP_EOL;
 
 $rd = new XmlRead();
 
+debug_zval_dump($rd);
 
 function test() : mixed {
 
@@ -38,7 +40,7 @@ function test() : mixed {
 		echo "parseFile = " . intval($result) . PHP_EOL;
 	}
 
-	echo debug_zval_dump($result) . "\n";
+	//echo debug_zval_dump($result) . "\n";
 	/**
 	$s = file_get_contents("tests/test.xml");
 	$f2 = $rd->parse($s);
@@ -54,7 +56,7 @@ function test() : mixed {
 	return $result;
 }
 
-$data = test();
+//$data = test();
 
 
 $start = microtime(true);
@@ -80,6 +82,7 @@ show_versions();
 
 testavg(10, "Warm up");
 testavg(200, "Final");
+
 
 
 

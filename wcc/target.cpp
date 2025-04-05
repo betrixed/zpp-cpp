@@ -17,15 +17,17 @@ public:
 
 	TargetData() : state_init() {}
 
-	virtual void init() {
+	void init() override
+	{
 		class_name = "class_name";
-		method = "func_name";
+		method = "method_name";
 		module = "module_name";
 		index = "index";
 	}
 };
 
 TargetData target_data;
+
 base_obj_mgr<Target> Target::omg;
 
 void Target::debug_info(htab_write di)
@@ -38,7 +40,6 @@ void Target::debug_info(htab_write di)
 zobj_mgr 
 Target::go(zstr_user cname, zstr_user fname)
 {
-
 	zobj_mgr result;
 
 	result = Target::omg.new_zobj();
@@ -46,7 +47,8 @@ Target::go(zstr_user cname, zstr_user fname)
 	Target* cobj = zobj_toc<Target>(result);
 
 	cobj->construct(cname, fname);
-
+	//zval_mgr temp(result);
+	//dump_info::msg_dump("target go ", temp);
 	return result;
 }
 
@@ -55,13 +57,28 @@ void
 Target::construct(zstr_user cname, zstr_user fname)
 {
 	class_ = cname;
-	if (fname.isNull() || fname.size()==0)
+	if (!fname.size())
 	{
 		func_ = target_data.index;
 	}
 	else { 
 		func_ = fname;
 	}
+	//showobj("target construct ", vobj());
+
+}
+
+zobj_mgr
+Target::copy()
+{
+	zobj_mgr result = Target::omg.new_zobj();
+
+	Target* cobj = zobj_toc<Target>( result );
+
+	cobj->construct(this->class_, this->func_);
+	cobj->setModule(this->module_);
+
+	return result;
 }
 
 zstr_user 
@@ -87,7 +104,7 @@ void Target::setFunc(zstr_user name)
 	func_ = name;
 }
 
-void Target::module(zstr_user name)
+void Target::setModule(zstr_user name)
 {
 	module_ = name;
 }
@@ -141,8 +158,12 @@ ZEND_METHOD(Wcc_Target, go)
 	ZEND_PARSE_PARAMETERS_END();
 
 	zobj_mgr obj = Target::go(cname, func);
-
+	//TODO: why needs a ref boost?
 	obj.move_zv(return_value);
+	//showobj("obj after move,", obj);
+	//showmem("return_value after move,", return_value);
+	//zval_mgr::try_addref(return_value);
+
 }
 
 ZEND_METHOD(Wcc_Target, getClass)
@@ -192,7 +213,7 @@ ZEND_METHOD(Wcc_Target, setFunc)
 }
 
 
-ZEND_METHOD(Wcc_Target, module)
+ZEND_METHOD(Wcc_Target, setModule)
 {
 	zend_string* module_name;
 
@@ -201,7 +222,10 @@ ZEND_METHOD(Wcc_Target, module)
 	ZEND_PARSE_PARAMETERS_END();
 	
 	Target* cobj = zval_toc<Target>(ZEND_THIS);
-	cobj->module(module_name);	
+	cobj->setModule(module_name);	
+
+	// Return this Target Object (in ZEND_THIS);
+	ZVAL_COPY(return_value, ZEND_THIS);
 }
 
 

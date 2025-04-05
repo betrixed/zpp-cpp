@@ -52,6 +52,11 @@ namespace zpp {
         {
             push_back((zval*) zv);
         }
+
+        void push_back(zstr_user su)
+        {
+            push_back((zend_string*) su);
+        }
         
         void push_back(HashTable* value);
 

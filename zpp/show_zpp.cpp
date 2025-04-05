@@ -395,7 +395,11 @@ void dump_info::indent(int ct)
 			ss << " cow ";
 		}
 		*/
-		ss << " gc " << (size_t) GC_REFCOUNT(ht)+refadj;
+		ss << " gc " << (size_t) GC_REFCOUNT(ht)+refadj << ' ';
+		/*if (refadj)
+		{
+			ss << iform(Numf::DEC) << "(" << (int) refadj << ")";
+		}*/
 
 	}
 	void dump_info::di_showdata(HashTable* ht, int level)

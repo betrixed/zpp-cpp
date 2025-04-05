@@ -29,10 +29,55 @@ extern "C" {
 
 #endif
 
+
+
 namespace wcc {
  	base_obj_mgr<RouteSet> RouteSet::omg;
 
+class RouteSetData : public state_init 
+{
+public:
+	zstr_intern module_name;
+	zstr_intern prefix;
+	zstr_intern method_sfx;
+	zstr_intern fallback;
+	zstr_intern route_set;
+	
+	zstr_intern none_tag;
+	zstr_intern verb_tag;
+	zstr_intern forward_slash;
 
+	zstr_intern rex_url;
+
+	zstr_intern cc_fixed;
+	zstr_intern cc_vary;
+	zstr_intern cc_file;
+
+	RouteSetData() : state_init() {}
+
+	virtual void init()
+	{
+		module_name = "module_name";
+		prefix = "prefix";
+		method_sfx = "method_sfx";
+		fallback = "fallback";
+		route_set = "route_set";
+		none_tag = "<none>";
+		verb_tag = "<verb>";
+		forward_slash = "/";
+
+		cc_fixed = "fixed";
+		cc_vary = "vary";
+		cc_file = "file";
+
+		rex_url = 
+			R"x(/\/?()x" R"x(:?[\w\d])x" R"x([_\-\.\w\d]*)x" 
+			R"x(|{\w)x" R"x([_\-\.\w\d]*)x" R"x(}|\s+$)x"
+			R"x()/mi)x";
+	}
+};
+
+RouteSetData radata;
 
 RouteSet::RouteSet() 
 {	
@@ -43,6 +88,44 @@ RouteSet::~RouteSet()
 {	
 }
 
+zstr_user 
+RouteSet::rex_url()
+{
+	return radata.rex_url;
+}
+
+void RouteSet::module(zstr_user name)
+{
+	if(name.size())
+	{
+		if (zs_cmp_ci(name,radata.none_tag) != 0)
+		{
+			module_name_ = name;
+		}
+		else {
+			module_name_.init();
+		}
+	}
+}
+void RouteSet::notFound(zval_user target)
+{
+	notFound_ = target;
+}
+
+void RouteSet::prefix(zstr_user prefix)
+{
+	if (prefix.size())
+	{
+		if (zs_cmp_ci(prefix, radata.none_tag) != 0) 
+		{
+			prefix_ = prefix;
+		}
+		else {
+			prefix_.init();
+		}
+	}
+}
+
 htab_mgr RouteSet::serialize()
 {
 	htab_mgr result;
@@ -50,12 +133,12 @@ htab_mgr RouteSet::serialize()
 	htab_write hw(result);
 
 	//showarray("fixed 1", fixed_);
-	hw.set(route_data.cc_fixed, fixed_);
+	hw.set(radata.cc_fixed, fixed_);
 	//showarray("fixed 2", fixed_);
 
-	hw.set(route_data.cc_vary, vary_);
+	hw.set(radata.cc_vary, vary_);
 
-	hw.set(route_data.cc_file, file_);
+	hw.set(radata.cc_file, file_);
 
 	return result;
 }
@@ -63,15 +146,17 @@ htab_mgr RouteSet::serialize()
 void     
 RouteSet::unserialize(htab_read hr)
 {
-	fixed_ = hr.get(route_data.cc_fixed);
-	vary_ = hr.get(route_data.cc_vary);
-	file_ = hr.get(route_data.cc_file);
+	fixed_ = hr.get(radata.cc_fixed);
+	vary_ = hr.get(radata.cc_vary);
+	file_ = hr.get(radata.cc_file);
 }
 
 void  RouteSet::addRoute(zobj_user obj)
 {
 	//zend_printf("set::addRoute\n");
 	Route* ro = zobj_toc<Route>(obj);
+	zval_mgr zobj(obj);
+	//dump_info::msg_dump("addRoute",zobj);
 
 	if (ro->hasParams())
 	{
@@ -150,26 +235,47 @@ RouteSet::getRoute(zstr_user name)
 }
 
 
-void  RouteSet::addRouteList(zval_user list)
+void  RouteSet::addRouteList(htab_read list, zstr_user prefix, zstr_user module)
 {
-	//showmem(" list: ", list);
+	this->prefix(prefix);
+
+	this->module(module);
+
+	//showarray(" list: ", list);
 	htab_walk walk;
 
 	int loopct = 0;
 
 	auto route = walk.value();
 	
-	for(walk.start(list.zarray()); walk.ok(); walk.next())
+
+	for(walk.start(list); walk.ok(); walk.next())
 	{
 		//zend_printf("rlist iterate ");
 		//showmem(" route: ", (zval*) route);
 		loopct++;
 		if (route.isObject())
 		{
+			//showmem("add route", route);
 			zobj_user obj = route.zobject();
+			
+
 			if (!Route::omg.myType(obj))
 				continue;
-			this->addRoute(route);
+
+			Route* cobj = zobj_toc<Route>(obj);
+
+			zstr_user compiled = cobj->getCompiled();
+
+			bool ok = compiled.size();
+
+			if (!ok) {
+				ok = compile(cobj);
+			}
+			if (ok)
+			{
+				this->addRoute(obj);
+			}
 		}
 
 	}
@@ -219,12 +325,24 @@ void RouteSet::appendRoute(
 
 void RouteSet::debug_info(htab_write hw)
 {
-	hw.set(route_data.cc_fixed, fixed_);
+	hw.set(radata.cc_fixed, fixed_);
 
-	hw.set(route_data.cc_vary, vary_);
+	hw.set(radata.cc_vary, vary_);
 
-	hw.set(route_data.cc_file, file_);
+	hw.set(radata.cc_file, file_);
 
+	hw.set(radata.module_name, module_name_);
+
+	hw.set(radata.prefix, prefix_);
+
+	hw.set(radata.method_sfx, method_sfx_);
+
+	hw.set(radata.fallback, notFound_);
+}
+
+void RouteSet::methodSfx(zstr_user name)
+{
+	method_sfx_ = name;
 }
 
 zstr_mgr 
@@ -239,6 +357,251 @@ RouteSet::routeUrl(zstr_user name, htab_read params)
 		result = zobj_toc<Route>(route)->routeUrl(params);
 	}
 	return result;
+}
+
+
+void
+RouteSet::copy_target(Route* route)
+{
+	zval_mgr target_val = route->getTarget();
+	zval_user target(target_val);
+
+	//showstr("route name", route->id_);
+	
+	if (target.isObject()) 
+	{
+		zobj_mgr tobj(target);
+		zobj_user init_tobj(tobj);
+
+		if (init_tobj.instanceof( Target::omg.classEntry() )) 
+		{			
+			bool modifyTarget = false;
+
+			Target* tcobj = zobj_toc<Target>(init_tobj);
+
+			zstr_user test = tcobj->getModule();
+			zstr_mgr target_module;
+
+			if (!test.size())
+			{
+				target_module = this->module_name_;
+				modifyTarget = true;
+			}
+			else {
+				target_module = test;
+			}
+
+			test =  tcobj->getFunc();
+			zstr_mgr target_method;
+			if (test.size())
+			{
+				//? else TODO: throw exception?
+				target_method = test;
+			}
+			zstr_mgr suffix;
+			test = this->method_sfx_;
+			// Use of "<none>" to signify no suffix
+			if ( test.size() 
+				  && (zs_cmp_ci(test, radata.none_tag)==0)) 
+			{
+				suffix = zstr_empty();
+			}
+			else {
+				suffix = test;
+			}
+
+			test = suffix;
+			if (test.size()) 
+			{
+				//replace "<verb>" tag with actual verb for suffix
+				if (zs_cmp_ci(test, radata.verb_tag)==0) 
+				{
+					suffix = Route::getVerb(route->getVerbs());
+					test = suffix;
+				}
+				zstr_user fn_stub(target_method);
+				if (test.size() && !fn_stub.ends_with(test))
+				{
+					zstr_buffer fbuf(fn_stub);
+					fbuf << test;
+					target_method = std::move(fbuf);
+					modifyTarget = true;
+				}
+			}
+
+			if (modifyTarget)
+			{
+				zobj_mgr ntobj = tcobj->copy();
+				Target* nt = zobj_toc<Target>(ntobj);
+				nt->setModule(target_module);
+				nt->setFunc(target_method);
+
+				zval_mgr new_target(ntobj);
+
+				route->setTarget(new_target);
+
+
+			}
+
+		}
+
+
+	}
+	//showmem("old target", target_val);
+}
+
+bool 
+RouteSet::compile(Route* route)
+{
+	htab_mgr captures;
+	int   pr2;
+
+	zstr_mgr url(route->getPattern());
+	zstr_user rex(RouteSet::rex_url());
+
+	bool slashBegins = false;
+	
+	zstr_mgr init_pattern;
+	if ((url.size()==1) && (url.data()[0] == '/'))
+	{
+		init_pattern = radata.forward_slash;
+
+		slashBegins = true;
+		pr2 = 0;
+	}
+	else {
+		//showstr("rex", rex);
+		preg   urlseg(rex, 0, true); // flags=0, global=true
+		pr2 = urlseg.matches(url);
+		if (pr2) {
+			captures = urlseg.captures();
+		}
+		
+	}
+	
+	// try and prevent bad double-// without pattern reset
+	zstr_user prefix(prefix_);
+
+	if (prefix.size())
+	{
+		bool preslash = (prefix.data()[0] == '/');
+		zstr_buffer buf(init_pattern);
+
+		if (!slashBegins) {
+
+			if (!preslash)
+			{
+				buf << '/';
+			}
+			buf << prefix;
+		}
+		else {
+			if (preslash) {
+				//zend_printf("preslash \n");
+				zstr_mgr temp = prefix.substr(1);
+				buf << temp;
+			}
+			else {
+				buf << prefix;
+			}
+		}
+		init_pattern = std::move(buf);
+		showstr("init_pattern", init_pattern);
+	}
+	//zstr_output sink;
+	//sink << pr2 << " pattern vstr" << pattern.vstr() << '\n';
+
+	zstr_buffer  pattern(init_pattern);
+	zstr_buffer  compiled;
+
+	zstr_mgr name;
+	zstr_mgr blob;
+	htab_mgr params_tab;
+	htab_write params(params_tab);
+
+	while (pr2 > 0) 
+	{ 
+
+		htab_read m2(captures);
+
+		if (m2.size() < 2)
+		{
+			break;
+		}
+		htab_read segs = m2.get((int) 1);
+		htab_walk wk;
+		auto value = wk.value();
+
+		int   param_ix = 1;
+
+		for(wk.start(segs); wk.ok(); wk.next())
+		{
+			zstr_mgr useg = value.zstr();
+			useg = useg.trim();
+			if (!useg.size())
+			{
+				zend_throw_error(zend_ce_error,"Route has bad URL segment %s",url.data());
+				return false;
+				continue;
+				//?? ERROR return false
+			}
+
+			useg = useg.to_lower();
+
+
+			int firstchar = useg.data()[0];
+
+			if (firstchar == ':')
+			{
+				name = useg.substr(1);
+				zstr_buffer bb;
+				bb << '{' << name << '}'; 
+				blob = std::move(bb);
+			}
+			else if (firstchar == '{')
+			{
+				name = useg.substr(1,-1);
+				blob = useg;
+			}
+			else {
+				name = useg;
+				blob.init();
+				pattern << '/' << useg;
+				compiled << '/' << useg;
+			}
+
+			if (blob.size()) 
+			{
+				params.set(name, param_ix);
+				param_ix++;
+
+				pattern << '/' << blob;
+				compiled << "/([^/]*)";
+			}
+		}
+		break;
+	}
+	auto pcount = params.size();
+	zstr_mgr cpattern;
+	zstr_mgr rpattern(std::move(pattern));
+
+	if (pcount > 0)
+	{
+		cpattern = std::move(compiled);
+		compiled << "#^" << cpattern << "$#";
+		cpattern = std::move(compiled);
+		route->setParams(params);
+	}
+	else {
+		cpattern = rpattern;
+	}
+
+	route->setPattern(rpattern);
+	route->setCompiled(cpattern);
+
+	copy_target(route);
+
+	return true;
 }
 
 }; // end namespace wcc - @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
@@ -312,19 +675,23 @@ PHP_METHOD(Wcc_RouteSet, getVary)
 	vary.return_zv(return_value);
 }
 
-PHP_METHOD(Wcc_RouteSet, addRouteList)
+PHP_METHOD(Wcc_RouteSet, addRoutes)
 {
-	zval 	*list;
+	zval* list;
+	zend_string* prefix = nullptr;
+	zend_string* module = nullptr;
 
-	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_ARRAY(list)
+	ZEND_PARSE_PARAMETERS_START(1,3)
+	Z_PARAM_ARRAY(list);
+	Z_PARAM_OPTIONAL
+	Z_PARAM_STR_OR_NULL(prefix)
+	Z_PARAM_STR_OR_NULL(module)
 	ZEND_PARSE_PARAMETERS_END();
 
+	zval_user htab(list);
+
 	RouteSet* cobj = zval_toc<RouteSet>(ZEND_THIS);
-
-	//showmem("addRoutes", ZEND_THIS);
-
-	cobj->addRouteList(list);
+	cobj->addRouteList(htab.zarray(), prefix, module);	
 
 }
 
@@ -362,6 +729,60 @@ PHP_METHOD(Wcc_RouteSet, getRoute)
 
 }
 
+ZEND_METHOD(Wcc_RouteSet, module)
+{
+	zend_string* name = nullptr;
+	ZEND_PARSE_PARAMETERS_START(0,1)
+	Z_PARAM_OPTIONAL
+	Z_PARAM_STR_OR_NULL(name);
+	ZEND_PARSE_PARAMETERS_END();
+	RouteSet* cobj = zval_toc<RouteSet>(ZEND_THIS);
+	cobj->module(name);	
+}
+
+ZEND_METHOD(Wcc_RouteSet, methodSfx)
+{
+	zend_string* sfx = nullptr;
+	ZEND_PARSE_PARAMETERS_START(0,1)
+	Z_PARAM_OPTIONAL
+	Z_PARAM_STR_OR_NULL(sfx);
+	ZEND_PARSE_PARAMETERS_END();
+	RouteSet* cobj = zval_toc<RouteSet>(ZEND_THIS);
+	cobj->methodSfx(sfx);
+}
+
+ZEND_METHOD(Wcc_RouteSet, notFound)
+{
+	zval* target;
+	ZEND_PARSE_PARAMETERS_START(1,1)
+	Z_PARAM_ZVAL(target);
+	ZEND_PARSE_PARAMETERS_END();
+
+	RouteSet* cobj = zval_toc<RouteSet>(ZEND_THIS);
+	cobj->notFound(target);
+}
+
+ZEND_METHOD(Wcc_RouteSet, prefix)
+{
+	zend_string* name = nullptr;
+	ZEND_PARSE_PARAMETERS_START(0,1)
+	Z_PARAM_OPTIONAL
+	Z_PARAM_STR_OR_NULL(name);
+	ZEND_PARSE_PARAMETERS_END();
+	RouteSet* cobj = zval_toc<RouteSet>(ZEND_THIS);
+	cobj->prefix(name);	
+	
+}
+
+ZEND_METHOD(Wcc_RouteSet, rex_url)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	zstr_user rex = RouteSet::rex_url();
+
+	rex.return_zv(return_value);
+}
+
 PHP_METHOD(Wcc_RouteSet, routeUrl)
 {
 	zend_string*	name;
@@ -386,6 +807,15 @@ PHP_METHOD(Wcc_RouteSet, routeUrl)
 
 }
 
+ZEND_METHOD(Wcc_RouteSet, compile)
+{
+	zval* robj;
+	ZEND_PARSE_PARAMETERS_START(1,1)
+	Z_PARAM_OBJECT_OF_CLASS(robj, Route::omg.classEntry())
+	ZEND_PARSE_PARAMETERS_END();
+	RouteSet* cobj = zval_toc<RouteSet>(ZEND_THIS);
+	cobj->compile(zval_toc<Route>(robj));
+}
 
 PHP_MINIT_FUNCTION(wcc_routeset_d)
 {

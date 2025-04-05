@@ -2,10 +2,6 @@
 namespace Wcc;
 use ReflectionClass;
 
-function boolstr(bool $v) : string
-{
-	return $v ? "True" : "False";
-}
 
 require "bootstrap.php";
 

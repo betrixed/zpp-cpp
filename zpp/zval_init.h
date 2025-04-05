@@ -12,9 +12,7 @@ namespace zpp
 	struct zval_init {
 	    zval zv_;
 
-	    void init() { zv_ = {0}; ZVAL_NULL(&zv_); }
-
-	    zval_init() { init(); }
+	    zval_init() { zv_ = {0};  }
 
 	    operator zval*() const { return (zval*) &zv_; }
 	};

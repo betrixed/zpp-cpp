@@ -72,13 +72,13 @@ union_values(htab_read list1, htab_read list2)
 /**
  * Calling this moves the result array.
  * Call only once for each iteration.
- */ 
+ 
 htab_mgr  
 preg::captures()
 {
 	return htab_mgr(std::move(result_));
 }
-
+*/ 
 zstr_mgr  
 preg::capture(size_t ix)
 {
@@ -100,8 +100,8 @@ preg::capture(size_t ix)
 preg::preg(const char* expr, int flags, bool global)
 	:  pce_(nullptr),global_(global),flags_(flags)
 {
-	regexp_ = std::move(zstr_temp(expr));
-	showstr("regexp_",regexp_);
+	regexp_ =  zstr_temp(expr);
+	//showstr("regexp_",regexp_);
 }
 
 preg::preg(zstr_user expr, int flags, bool global)
@@ -111,6 +111,7 @@ preg::preg(zstr_user expr, int flags, bool global)
 
 preg::~preg() {
 	if (pce_ != nullptr) {
+		//zend_printf("Release PCE %lx\n", pce_);
 	    php_pcre_pce_decref(pce_);
 	}
 }
@@ -118,19 +119,19 @@ preg::~preg() {
 pcre_cache_entry*  
 preg::pce()
 {
-	if (pce_ == nullptr) {
-
-		zstr_user rex(regexp_);
-
-		pce_ = pcre_get_compiled_regex_cache(rex);
-		php_pcre_pce_incref(pce_);
+	if (pce_ == nullptr) 
+	{
+		pce_ = pcre_get_compiled_regex_cache(regexp_);
+		
 		if (pce_ == nullptr)
 		{
 			//exception
-			zend_printf("Unable to compile regular expression %s\n", 
-				rex.data(),0);
-			return 0;
+			zend_throw_error(zend_ce_error, "Unable to compile regular expression %s\n", 
+			     zstr_user(regexp_).data(), 0);
+			return nullptr;
 		}
+		//zend_printf("Hold PCE %lx\n", pce_);
+		php_pcre_pce_incref(pce_);
 	};
 	return pce_;
 }
@@ -142,8 +143,9 @@ preg::splits(zstr_user data, int limit)
 	/*PHPAPI void  php_pcre_split_impl(  
 	 pcre_cache_entry *pce, zend_string *subject_str, zval *return_value,
 	 zend_long limit_val, zend_long flags);*/
-
-	php_pcre_split_impl(pce(), data, retval, limit, flags_);
+	pcre_cache_entry* cre = pce();
+	if (cre)
+		php_pcre_split_impl(cre, data, retval, limit, flags_);
 
 	return retval;
 }
@@ -152,22 +154,42 @@ int
 preg::matches(zstr_user subject, zend_long offset) 
 {
 	result_.set_null();
-	count_.set_null();
+
+	zval_mgr ret_val;
 
 	int isglobal = global_ ? 1 : 0;
 
+	pcre_cache_entry* cre = pce();
+	if (!cre)
+	{
+		return 0;
+	}
+
 #if PHP_VERSION_ID >= 80400
-    //PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, zend_string *subject_str, zval *return_value,
-	// zval *subpats, bool global, zend_long flags, zend_off_t start_offset)
-	php_pcre_match_impl(pce(), subject, count_, result_,
+/**
+   PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, 
+   	zend_string *subject_str, zval *return_value,
+	zval *subpats, bool global, zend_long flags, zend_off_t start_offset)
+*/
+	php_pcre_match_impl(cre, subject, ret_val, result_,
 		 isglobal,  flags_,  /*offset*/ offset);
 
 #else
 	int useflags = (flags_ == 0) ? 0 : 1;
-	php_pcre_match_impl(pce(), subject, count_, result_,
+	php_pcre_match_impl(cre, subject, ret_val, result_,
 		 isglobal,  useflags,  flags_,  /*offset*/ offset);
 #endif
-	return zval_user(count_).zlong();
+	zval_user test(ret_val);
+
+	count_ = test.isLong() ? test.zlong() : 0;
+
+	test = result_;
+
+	if (!test.isArray())
+	{
+		count_ = 0;
+	}
+	return count_;
 }
 
 

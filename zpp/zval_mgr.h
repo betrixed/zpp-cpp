@@ -7,11 +7,6 @@
 #ifndef ZVAL_MGR_H
 #define ZVAL_MGR_H
 
-#ifndef ZVAL_INIT_H
-#include "zval_init.h"
-#endif
-
-
 namespace zpp {
 
 class zval_user;

@@ -38,8 +38,8 @@ namespace zpp {
 	protected:
 		pcre_cache_entry* pce_;
 		zstr_mgr      	  regexp_;
-		zval_mgr          count_;
 		zval_mgr          result_; //hold result, array of matches
+		zend_long         count_;
 		bool          	  global_; //match all
 		int			 	  flags_;
 
@@ -75,17 +75,18 @@ namespace zpp {
 		}
 
 		zstr_mgr  replace_callback(preg_callback& callback, zstr_user subject);
+		
 		zstr_mgr  replace(const char* rv, zstr_user subject);
 
 		zstr_user regex() const {
 			return regexp_;
 		}
 		zstr_mgr  capture(size_t ix);
-		htab_mgr  captures();
+		htab_read  captures(){ return htab_read(result_); };
 		
 		zval_mgr& results() { return result_; }
 
-		htab_read  array() { return htab_read(result_); }
+		//htab_read  array() { return htab_read(result_); }
 
 	};
 

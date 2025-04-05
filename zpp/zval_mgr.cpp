@@ -50,6 +50,8 @@ zval_mgr::new_array()
     HashTable* ht = htab_mgr::new_array();
     // added with rc == 1 
     zval_user(&zv_).bind_array(ht);  
+    htab_mgr::try_decref(ht); // because new primary mgr
+    //showmem("new_array", &zv_);
 }
 
 void 
@@ -58,8 +60,6 @@ zval_mgr::empty_array()
     lose();
     // zend_empty_array has rc == 2 
     zval_user(&zv_).bind_array((zend_array*) &zend_empty_array);
-
-
 }
 
 
@@ -179,12 +179,10 @@ zval_mgr::zval_mgr(const zval_mgr& rc, bool byRef)
     zv_ = {0};
     _zval_struct *p = (_zval_struct*) rc;
 
-    if (!byRef)
-    {
-        ZVAL_DEREF(p);
-    }
+    zval_mgr::try_decref(&zv_);
 
-    copy(p);
+    //  Does addref count
+    ZVAL_COPY(&zv_, &rc.zv_);
     
     if (byRef)
     {
@@ -219,16 +217,13 @@ zval_mgr::assign_ptr(zval* p)
 		return;
 	}
 
-	ZVAL_DEREF(p);
-	
 	// ?? danger of losing with self assign??
 	if (p != &zv_)
 	{
-		// acquire with reference count;
-		copy(p);
+		// copy add reference count;
+		ZVAL_COPY(&zv_, p);
 	}
-	// !!do not alter original zval pointed to
-	
+
 }
 
 const zval_mgr& 
@@ -255,7 +250,7 @@ zval_mgr::operator=(zval_mgr&& rc)
 	if (&rc != this)
 	{
 		lose();
-		copy(&rc.zv_);
+        ZVAL_COPY_VALUE(&zv_, &rc.zv_);
 		rc.init();
 	}
     return *this;
@@ -276,8 +271,8 @@ zval_mgr::operator=(const zobj_mgr &rc)
 const zval_mgr& 
 zval_mgr::operator=(const zval_mgr &rc)
 {
-    lose(); 
-    copy((zval*) &rc.zv_);
+    try_decref(&zv_); 
+    ZVAL_COPY(&zv_ , &rc.zv_);
     return *this;
 }
 
@@ -475,15 +470,14 @@ zval_mgr::try_decref(zval* p)
                     return true;
                 }
                 ht->gc.refcount--;
+                //zend_printf("new rct %d for %lx\n", rct-1, ht);
             }
            
             return false;
 
         case IS_OBJECT:
             {
-                zend_object* ob = Z_OBJ_P(p);
-                zend_object_release(ob);
-                return (rct==1);
+                return zobj_mgr::try_decref(Z_OBJ_P(p));
             }
         }
     }

@@ -99,6 +99,7 @@ public:
 	{
 		return compiled_;
 	}
+	
 	zstr_user getPattern() const
 	{
 		return pattern_;
@@ -108,6 +109,11 @@ public:
 		return target_;
 	}
 
+	void setTarget(zval_user tg)
+	{
+		target_ = tg;
+	}
+	
 	void setPattern(zstr_user p)
 	{
 		pattern_ = p;
@@ -154,10 +160,6 @@ public:
 	zstr_intern cc_target;
 	zstr_intern cc_id;
 
-	zstr_intern cc_fixed;
-	zstr_intern cc_vary;
-	zstr_intern cc_file;
-
 	// values for RouteSet
 	zstr_intern ARG_S;
 	zstr_intern FUN_S;
@@ -178,7 +180,7 @@ public:
 	HashTable  route_verbs;
 	HashTable  verb_names;
 
-
+	static void nodestroy(zval* val);
 
 	//Route_init() : route_verbs((HashTable*)nullptr), verb_names((HashTable*)nullptr) {}
 

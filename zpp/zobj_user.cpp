@@ -10,6 +10,9 @@ extern "C" {
 #include <Zend/zend_closures.h>
 };
 
+#ifndef ZVAL_INIT_H
+#include "zval_init.h"
+#endif
 
 namespace zpp {
 
@@ -40,6 +43,10 @@ zobj_user::operator=(const zval_mgr& rc)
 
 }
 */
+
+zobj_user::zobj_user(const zobj_mgr& rc) : obj_(rc.obj_)
+{
+}
 
 zobj_user::zobj_user(base_d* cobj)
 {

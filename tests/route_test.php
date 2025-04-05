@@ -1,12 +1,8 @@
 <?php
 namespace Wcc;
 
-function boolstr(bool $v) : string
-{
-	return $v ? "True" : "False";
-}
-$pattern = "/:module/:controller/:action/test/url";
 
+$pattern = "/:module/:controller/:action/test/url";
 
 $target = ["_obj" => "TestIndex", "_mth" => "IndexGet"];
 
@@ -20,8 +16,6 @@ $p1 = $r->GetPattern();
 echo "Compiled " . $r->GetCompiled() . PHP_EOL;
 
 echo "Params " . print_r($r->GetParams(),true) . PHP_EOL;
-
-
 
 echo "Verb Int " . Route::GetVerbInt("GET") . PHP_EOL;
 

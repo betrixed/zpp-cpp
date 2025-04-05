@@ -85,6 +85,16 @@ zstr_user::zstr_user(zval* p)
 	s = zval_user(p).zstr();
 }
 
+zstr_user::zstr_user(const zstr_mgr& mgr)
+{
+    s = mgr.s;
+}
+
+zstr_user::zstr_user(const zstr_intern& zs)
+{
+	s = zs.s;
+}
+
 const char* 
 zstr_user::data() const
 {
@@ -186,15 +196,15 @@ zstr_user::substr(int offset, int len) const
 
 	 zstr_temp result(text.data(), text.size());
 
-	 //showstr("substr", result);
-	 return result;
+	 showstr("substr", result);
+	 return std::move(result);
 }
 
 bool 
-zstr_user::starts_with(zstr_user match)
+zstr_user::starts_with(zstr_user match) const
 {
 	size_t mlen = match.size();
-	if (size() < mlen)
+	if (!mlen || size() < mlen)
 	{
 		return false;
 	}
@@ -202,6 +212,19 @@ zstr_user::starts_with(zstr_user match)
 	return (this->subview(0,mlen) == mb);
 }
 
+bool 
+zstr_user::ends_with(zstr_user match) const
+{
+	size_t mlen = match.size();
+	size_t mysize = size();
+	if (!mlen || mysize < mlen)
+	{
+		return false;
+	}
+	std::string_view mb = match.vstr();
+	std::string_view endslice = this->subview(mysize-mlen, mlen);
+	return (endslice == mb);
+}
 
 int  
 zstr_user::find(const std::string_view& needle, size_t pos) const
@@ -319,7 +342,9 @@ zstr_user::trim(const char* what, int mode) const
 	size_t slen = what ? strlen(what) : 0;
 
 	if (s) {
+		//showstr("pre-trimmed", s);
 		zend_string* p = php_trim(s, what, slen, mode);
+		//showstr("trimmed", p);
 		if (p == s)
 		{
 			zstr_mgr::try_decref(p);

@@ -7,6 +7,10 @@
 #ifndef ZSTR_MGR_H
 #define ZSTR_MGR_H
 
+#ifndef ZSTR_USER_H
+#include "zstr_user.h"
+#endif
+
 namespace zpp {
 
 	class zstr_user;
@@ -16,9 +20,9 @@ namespace zpp {
 	class zstr_buffer;
 	class zstr_temp;
 	
-	class ZPP_EXPORT zstr_mgr {
+	class zstr_mgr  : public zstr_user
+	{
 	protected:
-	    zend_string* s;
 
 	    void own();
 	    void lose();
@@ -31,23 +35,29 @@ namespace zpp {
 
 		static void try_addref(zend_string* zs);
 		static bool try_decref(zend_string* zs);
-	    zstr_mgr() : s((zend_string*) nullptr)
-	    {   
-	    }
+
 		~zstr_mgr();
 
-	    zstr_mgr(zend_string* p) : s(p)
+	    zstr_mgr() : zstr_user()
+	    {   
+	    }
+		
+	    zstr_mgr(zend_string* p) : zstr_user(p)
+	    {
+	        own();
+	    }
+
+		zstr_mgr(zstr_mgr&& rc) : zstr_user(rc.s)
+	    {
+	        rc.s = nullptr;
+	    }
+
+		zstr_mgr(const zstr_mgr& rc) : zstr_user(rc.s)
 	    {
 	        own();
 	    }
 
 	    zstr_mgr(zval* copy);
-
-	    zstr_mgr(const zstr_mgr& rc)
-	    {
-	        s = rc.s;
-	        own();
-	    }
 
 	    zstr_mgr(const zval_user& rc);
 
@@ -55,12 +65,6 @@ namespace zpp {
 
 	    zstr_mgr(zend_long ival);
 	    
-	    zstr_mgr(zstr_mgr&& rc)
-	    {
-	        s = rc.s;
-	        rc.s = nullptr;
-	    }
-
 	    zstr_mgr(zstr_buffer&& m);
 
 	    bool ok() const {
@@ -127,6 +131,11 @@ namespace zpp {
 	public:
 		zstr_intern() : zstr_mgr() {}
 		zstr_intern(const char* c, size_t slen = 0);
+
+		~zstr_intern() { 
+			// let PHP take care of it
+			s = nullptr; 
+		}
 
 		const zstr_intern& operator=(const char* cp);
 		

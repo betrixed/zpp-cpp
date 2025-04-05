@@ -92,31 +92,29 @@ namespace wcc {
 		if (fileOpen_)
 		{
 			fileOpen_ = false;
-			hold_ = (zend_string*) nullptr;
-			((zobj_user*)(this))->call(XML_FNS.k_close);
-			lose();
+			hold_.init();
+
+			self_.call(XML_FNS.k_close);
+			//showobj("closeFile", self_);
+			self_.init();
 		}
 	}
 
-	
+	/*
 	bool XmlWrap::newobj()
 	{
-		lose();
-		obj_ = class_data::create_object(XML_FNS.xmlreader);
+		self_ = class_data::create_object(XML_FNS.xmlreader);
+
 		return true;
 	}
+	*/
 
 	bool XmlWrap::adopt_xmlobj(zobj_mgr& test)
 	{
 		bool result = false;
 		if (test.ok())
 		{
-			// ~test will decref
-			lose();
-			zobj_mgr::try_addref(test); // anticipate source decref
-			self_ = (zend_object*) test;
-			obj_ = self_;
-
+			self_ = std::move(test);
 			fn_setup();
 			fileOpen_ = true;
 			result = true;
@@ -131,14 +129,15 @@ namespace wcc {
 	{
 		
 		hold_ = xml;
+
 		zobj_mgr test(XML_FNS.xml_parse.call(xml));
+		//showobj("fromString", test);
 
 		return adopt_xmlobj(test);
 	}
 	
 	bool XmlWrap::fromFile(zstr_user path)
 	{
-		lose();
 		hold_ = path;
 
 		zobj_mgr test(XML_FNS.xml_file.call(path));
@@ -148,9 +147,12 @@ namespace wcc {
 
 	void XmlWrap::fn_setup()
 	{
-		getattribute_.set_fci(obj_, XML_FNS.get_attribute);
-		readstring_.set_fci(obj_, XML_FNS.read_string);
-		read_.set_fci(obj_, XML_FNS.read);
+		getattribute_.set_fci(self_, XML_FNS.get_attribute);
+
+		readstring_.set_fci(self_, XML_FNS.read_string);
+		
+		read_.set_fci(self_, XML_FNS.read);
+
 	}
 
 	zval_mgr XmlWrap::xml_name_zval()
@@ -165,7 +167,15 @@ namespace wcc {
 		zval test = {0};
 
 		zval* name = self_.property_get(XML_FNS.k_name, &test);
-		return zstr_mgr(name);
+		zstr_mgr result(name);
+		/* This pathway was found to leak
+		  and value appears to be disposable.
+		*/
+		zstr_mgr::try_decref(result);
+
+		//showmem("zval_name", &test);
+		//showstr("xml_name", result);
+		return result;
 	}
 
 	zstr_mgr
@@ -181,7 +191,9 @@ namespace wcc {
 	zval_mgr
 	XmlWrap::xml_str_zval()
 	{
-		return readstring_.call_fn();
+		zval_mgr result = readstring_.call_fn();
+		//showmem("readstring", result);
+		return result;
 	}
 
 	/**
@@ -194,11 +206,8 @@ namespace wcc {
 
 	bool XmlWrap::read()
 	{
-
 		zval_mgr result = read_.call_fn();
-		zval_user test(result);
-
-		return test.isTrue();
+		return zval_user(result).isTrue();
 	}
 
 	int XmlWrap::nodeType()
@@ -206,8 +215,9 @@ namespace wcc {
 		zval test = {0};
 
 		zval* data = self_.property_get(XML_FNS.k_nodeType, &test);
-		if (data)
+		if (data) {
 			return zval_user(&test).zlong();
+		}
 		else
 			return 0;
 	}
@@ -255,13 +265,16 @@ void
 Wcc_XmlRead::clean()
 {
 	// root_ is path_[0]
-	if (!xml_.isNull())
+	if ( xml_.ok())
 	{
+		//zend_printf("close file\n");
 		xml_.closeFile();
 	}
-	auto ct = stacked_;
+	int ct = stacked_;
 	stacked_ = 0;
+	//zend_printf("stacked %d\n",ct);
 	while (ct > 0) {
+		
 		ct--;
 		DStack* last = top_;
 		if (last) {
@@ -315,11 +328,11 @@ Wcc_XmlRead::parse(zstr_user src)
 	if (!openstring(src))
 	{
 		zstr_mgr line(src.substr(0,40));
-		zstr_user test(line);
 
-		zend_throw_error(zend_ce_error, "XMLReader::XML fail for '%s'", test.data());
+		zend_throw_error(zend_ce_error, "XMLReader::XML fail for '%s'", line.data());
 		return result;
 	}
+	zend_printf("opened string stream\n");
 	result = loop();
 	return result;
 }
@@ -351,7 +364,7 @@ Wcc_XmlRead::loop()
 	zval_mgr result;
 	done_ = false;
 
-	//showobj("loop", xml_);
+	result.set_bool(false);
 
 	while(!done_ && xml_.read())
 	{
@@ -361,27 +374,19 @@ Wcc_XmlRead::loop()
 		switch(ntype) {
 			case Xntype::ELEMENT:
 			{
-				zstr_mgr tag = xml_.xml_name();
-				zstr_user tagstr(tag);
+				zstr_mgr tagstr = xml_.xml_name();
+				//showstr("tagstr", tagstr);
 
-
-				//zend_printf("tag = %s\n", tagstr.data());
-
-				zstr_mgr attr = xml_.get_attribute(XML_FNS.k_k);
-				zstr_user attrstr(attr);
-
-				//zend_printf("k = %s\n", attr.data());
+				zstr_mgr attrstr = xml_.get_attribute(XML_FNS.k_k);
 
 				bool result = tag_start(tagstr, attrstr);
 
 				if (!result) {
-					//zstr_make<false> name(tag);
-					zstr_mgr classname = htab_read(tag_objs_).get((zend_string*)tag);
-					zstr_user test(classname);
 
-					if (test.isNull()) {
-						zstr_user tag_str(tag);
-						zend_throw_error(zend_ce_exception, "Unmapped tag %s", tag_str.data());
+					zstr_mgr classname = htab_read(tag_objs_).get(tagstr);
+
+					if (classname.isNull()) {
+						zend_throw_error(zend_ce_exception, "Unmapped tag %s", tagstr.data());
 						done_ = true;
 						continue;
 					}
@@ -394,7 +399,7 @@ Wcc_XmlRead::loop()
 			{
 				zstr_mgr tag = xml_.xml_name();
 				tag_end(tag);
-				//zend_printf("exit tag_end\n");
+				//showstr("exit tag", tag);
 			}
 			break;
 		case 0:
@@ -405,6 +410,7 @@ Wcc_XmlRead::loop()
 	}
 	if (root_ && !stacked_) {
 		result = std::move(root_->ref_);
+		//showmem("root ref", result);
 		delete root_;
 		root_ = nullptr;
 	}
@@ -429,6 +435,7 @@ Wcc_XmlRead::parseFile(zstr_user filename)
 		zend_throw_error(zend_ce_error, "XMLRead open fail for %s", filename.data());
 		return result;
 	}
+	//zend_printf("opened file %s\n", filename.data());
 
 	result = loop();
 
@@ -507,7 +514,6 @@ void Wcc_XmlRead::attach_ds(DStack* ds)
 void 
 Wcc_XmlRead::pushRoot(zstr_user key)
 {
-
 	zstr_mgr cname = xml_.get_attribute(XML_FNS.k_c);
 
 	zval_mgr newroot;
@@ -529,7 +535,11 @@ Wcc_XmlRead::pushRoot(zstr_user key)
 
 void Wcc_XmlRead::pushClass(zstr_user classname, zstr_user key)
 {
+
 	zobj_mgr newroot = ReflectCache::staticInstance(classname);
+
+	//showobj("newroot", newroot);
+
 	zval_mgr store(newroot);
 
 	attach_ds(new DStack(key, store, XC_OBJECT));
@@ -611,16 +621,16 @@ void Wcc_XmlRead::tag_end(zstr_user tag)
 
 void Wcc_XmlRead::pushTable(int kind, zstr_user key) 
 {
-	//Php::out << "pushTable: " << kind << " " << key << std::endl;
-	//zend_printf("Push Table\n");
+	
+	//zend_printf("Push Table kind = %d\n", kind);
 	zval_mgr data;
 
-	data.new_array();
+	data.empty_array(); //refcount == 2
+
+	//showmem("new array", data);
 
 	//zend_printf("Pushtable at size = %ld, kind = %ld\n", ix, kind);
 	attach_ds(new DStack(key, data, kind));
-
-	//showmem("new array", data);
 }
 
 void Wcc_XmlRead::throwKey(zstr_user key)
@@ -638,8 +648,8 @@ void Wcc_XmlRead::throwNoKey()
 void Wcc_XmlRead::debug_info(htab_write s)
 {
 	//zval_mgr temp(xml_);
-	s.set( XML_FNS.reader, xml_);
 
+	s.set( XML_FNS.reader, xml_.xml());
 	zval_mgr temp;
 
 	if (top_) {
@@ -657,9 +667,9 @@ void Wcc_XmlRead::setValue(const zval_mgr& value,  zstr_user key)
 		done_ = true;
 		return;
 	}
-	
 	DStack *ds = top_;
 	zval_user  ref(ds->ref_);
+	
 
 	switch(ds->kind_) {
 	case XC_OBJECT: // current anchor is object, so assign property
@@ -669,6 +679,7 @@ void Wcc_XmlRead::setValue(const zval_mgr& value,  zstr_user key)
 			}
 			zobj_user obj(ref.zobject());
 			// property style set
+
 			obj.property(key, value); 
 		}
 		break;
@@ -680,6 +691,9 @@ void Wcc_XmlRead::setValue(const zval_mgr& value,  zstr_user key)
 			}
 
 			htab_write hw(ref);
+			//showstr("set array key", key);
+			//showmem("value", value);
+			//showarray("ref", hw);
 			hw.set(key, value);
 		}
 		break;
@@ -691,6 +705,8 @@ void Wcc_XmlRead::setValue(const zval_mgr& value,  zstr_user key)
 				throwKey(key);
 			}
 			htab_write hw(ref);
+			//showmem("array", ref);
+			//showmem("push value", value);
 			hw.push_back(value);
 		}
 		break;
@@ -722,9 +738,9 @@ void Wcc_XmlRead::setNull(zstr_user key)
 
 void Wcc_XmlRead::setString(zstr_user key)
 {
-	//zval_mgr sval = xml_.xml_str_zval();
+	zval_mgr sval = xml_.xml_str_zval();
 	//showmem("setString", sval);
-	setValue(xml_.xml_str_zval(), key);
+	setValue(sval, key);
 	nextEnd();
 }
 

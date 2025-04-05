@@ -58,7 +58,6 @@ extern "C" {
 #include "wcc/route.cpp"
 #include "wcc/route_set.cpp"
 #include "wcc/route_match.cpp"
-#include "wcc/route_add.cpp"
 
 #include "wcc/service_access.cpp"
 

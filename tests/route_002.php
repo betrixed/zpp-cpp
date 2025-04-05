@@ -7,10 +7,6 @@ require "bootstrap.php";
 
 echo "route_002.php" . PHP_EOL;
 
-function boolstr(bool $v) : string
-{
-	return $v ? "True" : "False";
-}
 
 
 
@@ -24,6 +20,7 @@ echo "parse " . $testfile . PHP_EOL;
 
 $rdata = $rparser->parseRaw($routes_input);
 
+echo "route data " . print_f($rdata,true) . PHP_EOL;
 $serdata = serialize($rdata);
 
 $rdata = unserialize($serdata);

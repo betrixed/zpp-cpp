@@ -49,7 +49,7 @@ $loader->addPathArray([
 
 $loader->register();
 
-/*
+
 class EmptyTest {
     public array $empty = [];
     public $key;
@@ -66,7 +66,7 @@ class EmptyTest {
 
 
 };
-*/
+
 
 
 

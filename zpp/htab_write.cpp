@@ -6,6 +6,8 @@
 #include "htab_mgr.h"
 #endif
 
+//#define HTAB_SHOW_MEMORY
+
 namespace zpp {
 
 void 
@@ -21,14 +23,20 @@ htab_write::giveback(zval* mgr)
 		*mgr = {0};
 
 		h = zend_new_array(HT_MIN_SIZE);
+		#ifdef HTAB_SHOW_MEMORY
+		showarray("giveback", h);
+		#endif
+
 		//comes with refcount ==1
-		ZVAL_ARR(mgr, h);
+		
 	}
 	else if (htab_mgr::cowop(h))
 	{
-		//write back with rc == 1
-		ZVAL_ARR(mgr, h);
+		#ifdef HTAB_SHOW_MEMORY
+		zend_printf("cowop array %lx to zval %lx\n", h, mgr);	
+		#endif
 	}
+	ZVAL_ARR(mgr, h);
 	ht_ = h;
 }
 
@@ -76,10 +84,13 @@ htab_write::array_bind(zval* tmp, HashTable* t)
 		ZVAL_NULL(tmp);
 	}
 	else
-	{
+	{	
+		
 		ZVAL_ARR(tmp, t);
 		if (GC_FLAGS(t) & GC_IMMUTABLE)
+		{
 			Z_TYPE_FLAGS_P(tmp) = 0; // mark as not reference counted
+		}
 	}
 }
 
@@ -256,8 +267,9 @@ void htab_write::set(zend_string* key, zval* val)
 	//showmem("htab_write::set zval*", val);
 	if (zend_hash_update(ht_, key, val))
 	{
-		if (Z_TYPE_FLAGS_P(val) != 0)
+		if (Z_TYPE_FLAGS_P(val) != 0) {
 			zval_mgr::try_addref(val);
+		}
 	}	
 }
 
@@ -276,16 +288,13 @@ htab_write::set(zend_string* key, zend_string* value)
 	//showstr("htab_write::set key", key);
 	//showstr("htab_write::set value", value);
 	zval temp = {0};
-	if (value)
-	{
-		zval_user(&temp).bind_string(value);
-	}
-	else
-		ZVAL_NULL(&temp);
+	string_bind(&temp, value);
 	if (zend_hash_update(ht_, key, &temp))
 	{
 		if (Z_TYPE_FLAGS(temp) != 0)
+		{
 			zstr_mgr::try_addref(value);
+		}
 	}
 }
 
@@ -317,7 +326,9 @@ void htab_write::set(zend_long idx, HashTable* value)
 	if (zend_hash_index_update(ht_, idx, &temp));
 	{
 		if (Z_TYPE_FLAGS(temp) != 0)
+		{
 			htab_mgr::try_addref(value);
+		}
 	}
 }
 

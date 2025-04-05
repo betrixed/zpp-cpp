@@ -11,8 +11,9 @@ namespace zpp {
 
 	class zstr_mgr;
 	class zval_user;
+	class zstr_intern;
 
-	class ZPP_EXPORT zstr_user {
+	class zstr_user {
 	protected:
 	    zend_string* s;
 
@@ -44,15 +45,9 @@ namespace zpp {
 	    //! Can't declare inline here
 	    zstr_user(const zval_user& rc);
 
-	    zstr_user(const zstr_mgr& mgr)
-	    {
-	        s = mgr.s;
-	    }
+	    zstr_user(const zstr_mgr& mgr);
 
-	    zstr_user(const zstr_intern& zs)
-	    {
-	    	s = zs.s;
-	    }
+	    zstr_user(const zstr_intern& zs);
 
 	    operator zend_string*() const { return (zend_string*) s; }
 
@@ -94,7 +89,9 @@ namespace zpp {
 
 		void return_zv(zval* ret);
 
-		bool starts_with(zstr_user match);
+		bool starts_with(zstr_user match) const;
+
+		bool ends_with(zstr_user match) const;
 		
 		const zstr_user& operator=(zval* rc);
 

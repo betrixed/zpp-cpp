@@ -41,7 +41,7 @@ if ($rm->findRoute($rset))
     echo "Fetched what? " . gettype($second) . PHP_EOL;
     
     debug_zval_dump($before);
-    $result =  $rm(extra:null, before:$before, after:null);
+    $result =  $rm->call(extra:null, before:$before, after:null);
     
     
 }

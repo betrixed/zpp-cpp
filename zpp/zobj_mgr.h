@@ -1,50 +1,39 @@
 #ifndef ZOBJ_MGR_H
 #define ZOBJ_MGR_H
 
+#ifndef ZOBJ_USER_H
+#include "zobj_user.h"
+#endif
+
 namespace zpp {
 
 	class zobj_user;
 	class base_d;
 
-	class zobj_mgr {
+	class zobj_mgr : public zobj_user {
 	protected:
-		zend_object* obj_;
-
 		void own();
 
 		void lose();
 
-		friend class zobj_user;
 
 	public:
 
 		static void try_addref(zend_object* zo);
 		static bool try_decref(zend_object* zo);
 
-		zobj_mgr() : obj_(nullptr) {}
+		zobj_mgr() : zobj_user() {}
 
-		zobj_mgr(zend_object* rc) : obj_(rc)
-    	{
-	        own();
-    	}
+		zobj_mgr(zend_object* rc);
+
     	//! From settled cobj
     	zobj_mgr(base_d* cobj);
     	
-    	zobj_mgr(const zobj_mgr& rc) : obj_(rc.obj_)
-	    {
-	        own();
-	    }
+    	zobj_mgr(const zobj_mgr& rc);
 
-
-	    zobj_mgr(zobj_mgr&& rc) : obj_(rc.obj_)
-		{
-		    rc.obj_ = nullptr;
-		}
+	    zobj_mgr(zobj_mgr&& rc);
 		
 		zobj_mgr(zval_mgr&& m);
-
-		bool isNull() const { return !(obj_); }
-		bool ok() const { return (obj_); }
 
 		zobj_mgr& operator=(const zobj_user &rc);
 
@@ -52,6 +41,8 @@ namespace zpp {
 
 		zobj_mgr& operator=(zval_mgr&& rc);
 
+		zobj_mgr& operator=(const zval_user& zv);
+		
 		const zobj_mgr& operator=(zend_object* rc);
 
 		const zobj_mgr& operator=(zval* rc);
