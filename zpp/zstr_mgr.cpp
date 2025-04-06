@@ -27,8 +27,7 @@ zstr_mgr::lose()
 		return;
 	}
 	zend_string_release(p);
-
-
+	
 }
 
 void 

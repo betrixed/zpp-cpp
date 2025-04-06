@@ -7,6 +7,7 @@
 #endif
 
 //#define HTAB_SHOW_MEMORY
+
 namespace zpp {
 // Protected static function
 //! static, set value in _GLOBALS table
@@ -308,29 +309,29 @@ htab_mgr::htab_mgr(htab_mgr&& m)
 bool //static
 htab_mgr::cowop(HashTable*& inout)
 {
-	//printf("cowop %lx\n", inout);
+	//printf("cowop& %lx\n", &inout);
 	HashTable* used = inout;
-	if (used == nullptr) 
+	if ( (used == nullptr)
+	   ||(used == const_cast<HashTable*>(&zend_empty_array)))
 	{
-		
-		inout = zend_new_array(HT_MIN_SIZE);
+		//zend_printf("New Array\n");
+		HashTable* newht = htab_mgr::new_array();
 		#ifdef HTAB_SHOW_MEMORY
-		showarray("new array", inout);
+		showarray("new array", newht);
 		#endif
-
+		inout = newht;
 		return true;
 	}
 	if (GC_REFCOUNT(used) > 1) 
 	{
-	    inout = zend_array_dup(used);
-
-	    htab_mgr::try_decref(used);
-
-	    //showarray("cowop after used", used);
-	    #ifdef HTAB_SHOW_MEMORY
-	    showarray("cowop new", inout);
-	    #endif
-	    
+		// updates not allowed, 
+		// make a copy with rc == 1
+		inout = zend_array_dup(used);
+		//#ifdef HTAB_SHOW_MEMORY
+		zend_printf("ARRAY DUPLICATE %lx of ", inout);
+		showarray("used", used);
+		//#endif	
+		htab_mgr::try_decref(used);
 	    return true;
 	}
 	return false;

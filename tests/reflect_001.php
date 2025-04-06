@@ -5,8 +5,8 @@ use ReflectionClass;
 
 echo "Start test" . PHP_EOL;
 
-init_globals();
-echo "init_globals() returned" . PHP_EOL;
+//init_globals();
+//echo "init_globals() returned" . PHP_EOL;
 $rc2 = ReflectCache::instance();
 
 
@@ -32,7 +32,7 @@ function unsetglobals() : void
 }
 function showglobals() : void
 {
-	debug_zval_dump($GLOBALS);
+	//debug_zval_dump($GLOBALS);
 }
 
 //ReflectCache::instance();
@@ -46,8 +46,6 @@ $rc2 = null;
 unsetglobals();
 
 
-
-
 $rc2 = ReflectCache::instance();
 
 $rc1 = &$rc2;
@@ -58,4 +56,5 @@ $a2 = &$a1;
 
 $a2[] = "orange";
 $a2[] = "banana";
-showglobals();
+unsetglobals();
+//showglobals();

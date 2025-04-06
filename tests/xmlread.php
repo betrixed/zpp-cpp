@@ -6,11 +6,50 @@ use Exception;
 
 require __DIR__ . "/bootstrap.php";
 
-$data = XmlRead::fromFile("tests/assets.xml");
-if (empty($data))
+
+$rd = new XmlRead();
+
+
+/*
+$config = ReflectCache::staticInstance("Wcc\\Config");
+
+$config->test = [];
+
+$config->test["one"] = "One Value";
+
+debug_zpp_dump($config);
+
+$config = null;
+
+echo "DIES NOW\n"; return;
+*/
+function testone()
 {
-    throw new Exception("File read error");
+	$data = XmlRead::fromFile("tests/assets.xml");
+	if (empty($data))
+	{
+	    throw new Exception("File read error");
+	}
+	//debug_zpp_dump($data);
+
+	/*
+	$hmap = $data["assets"];
+
+	debug_zpp_dump($hmap->toArray());
+	*/
+	$data = null;
+
+	//echo "DIE NOW\n";
+	//die;
 }
+
+testone();
+testone();
+
+//echo "DIE NOW\n";
+//return;
+//testone();
+
 
 //$d = new \DateTime("now");
 //echo "Time now " . $d->format("D M Y") . PHP_EOL;
@@ -26,7 +65,7 @@ echo "cfg property = " . $cfg->property1 . PHP_EOL;
 
 $rd = new XmlRead();
 
-debug_zval_dump($rd);
+//debug_zval_dump($rd);
 
 function test() : mixed {
 
@@ -39,6 +78,8 @@ function test() : mixed {
 	if (is_bool($result)) {
 		echo "parseFile = " . intval($result) . PHP_EOL;
 	}
+
+	//unset($result["assets"]);
 
 	//echo debug_zval_dump($result) . "\n";
 	/**
@@ -56,7 +97,14 @@ function test() : mixed {
 	return $result;
 }
 
-//$data = test();
+$data = test();
+debug_zpp_dump($data);
+//echo "DIES NOW\n"; return;
+
+
+
+$data = null;
+
 
 
 $start = microtime(true);
@@ -78,11 +126,11 @@ function testavg(int $ct, string $msg) {
 	echo $msg . ": " . number_format($total,0) . " microsecs per iteration ($ct)" . PHP_EOL;
 }
 
-show_versions();
+
 
 testavg(10, "Warm up");
 testavg(200, "Final");
-
+show_versions();
 
 
 

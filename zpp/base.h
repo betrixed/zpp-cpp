@@ -45,7 +45,7 @@
 #endif
 
 
-//#define BASE_ZOBJPTR
+#define BASE_ZOBJPTR
 
 #ifndef BASE_ZOBJPTR
 /* 
@@ -106,11 +106,12 @@ namespace zpp {
 	 * 	   The internal memory block allocated for each T is
 	 * 	   
 	 * 	   T itself, starting at offset zero.
-	 * 	   At address of sizeof(T)+1  is stored pointer to beginning of memory block of T
+	 * 	   At address of sizeof(T)+1  is stored pointer back to  T+0 block.
 	 *     At address of sizeof(T)+2  is beginning of the  zend_object std structure, 
 	 * 	   To get the *T from zend_object* , subtract sizeof(*T).
 	 * 
-	 * 	   This follows a recommendation I read, that internal extra stuff be put at negative offsets from the zend_object. 
+	 * 	   Internal extra stuff be put at negative offsets from the zend_object. 
+	 * 	   Derived classes add class properties on to the end of the zend_object.
 	 * 		
 	 * 	   This is done in base_obj_mgr<T>::cpp(zend_object*)
 	 *     As a check, the value of the same zend_object* should match that stored at the beginning of T.
@@ -151,12 +152,13 @@ namespace zpp {
 				zend_printf("~base_d() %lx\n", this);
 			#endif
 			// unattached have no zend_object*
+			// Does this allow C++ objects to co-delete their zend_object?
 			#ifdef BASE_ZOBJPTR
 			if (p_zobj_) {
 				#ifdef BASE_DEBUG
 				zend_printf("dtor zend object %lx\n", p_zobj_);
 				#endif
-				//zend_object_std_dtor(p_zobj_);
+				zend_object_std_dtor(p_zobj_);
 			}
 			p_zobj_ = nullptr;
 			#endif
@@ -165,7 +167,7 @@ namespace zpp {
 		#ifdef BASE_ZOBJPTR
 		//! Memory vs Time-Indirection trade off. Stored pointer or call function to calculate it.
 		zend_object* vobj() const { return p_zobj_; }
-		void set_zobj(zend_object* zo) { p_zobj_ = zo; }
+		void set_vobj(zend_object* zo) { p_zobj_ = zo; }
 		#else 
 		// This needs to be redeclared in every class
 		/* virtual zend_object* zobj() const {
@@ -186,9 +188,41 @@ namespace zpp {
 		 * This seems unlikely to be true for zend_object* created elsewhere.
 		 * 
 		 */ 
-		void* operator new(std::size_t msize,  zend_class_entry *class_type) 
+		void* operator new(std::size_t msize,  zend_class_entry *ce) 
 		{
-			return zend_object_alloc(msize + sizeof(base_d*) + sizeof(zend_object) , class_type);
+			/* ?why?  function zend_object_properties_size return type size_t
+			  which can be a weird (negative 2s comp) of a size_t?
+			  Because first zval of properties table is at the (sized) end of this struct.
+			  No properties , NULL properties, imples zend_object will be one zval smaller (16 bytes)
+			struct _zend_object {
+				zend_refcounted_h gc;
+				uint32_t          handle; // TODO: may be removed ???
+				uint32_t          extra_flags; // OBJ_EXTRA_FLAGS()
+				zend_class_entry *ce;
+				const zend_object_handlers *handlers;
+				HashTable        *properties;
+				zval              properties_table[1]; // first storage space of class properties
+			} 
+				Unless space for access guards required as well
+
+				The properties_count is unknown for derived classes.
+			*/
+			// psize can be negative
+			long psize = sizeof(zval) * (ce->default_properties_count -
+						((ce->ce_flags & ZEND_ACC_USE_GUARDS) ? 0 : 1));
+
+			// No default properties, so no zend_alloc_object
+			// Offset will always be sizeof(T) + sizeof (base_d*)
+			size_t neg_space = msize + sizeof(base_d*);
+			size_t alloc = neg_space + sizeof(zend_object) + psize;
+
+			#ifdef BASE_DEBUG
+			zend_printf("neg_space: %ld, properties: %ld, all %ld for %s\n", 
+					neg_space, psize, alloc, ZSTR_VAL(ce->name));
+			#endif
+			void* space = emalloc(alloc);
+			memset(space, 0, neg_space);
+			return space;
 		}
 
 
@@ -311,6 +345,8 @@ namespace zpp {
 		static base_obj_mgr<T>*         self_; 
 		static size_t					self_count_;	
 		static size_t                   sizeoft_;	
+		static size_t                   neg_space_;
+
 #ifdef BASE_DEBUG			
 		static size_t					obj_count_;
 #endif
@@ -327,14 +363,13 @@ namespace zpp {
 			handlers_.get_debug_info = mydef::base_debug_info; // can be set later?
 			handlers_.clone_obj = nullptr; //cloning not supported
 			//handlers_.dtor_obj  = mydef::zobj_destroy;
-			handlers_.dtor_obj  = mydef::z_destroy;
+			handlers_.dtor_obj  = zend_objects_destroy_object;
 			handlers_.free_obj  = mydef::z_free;
 
 			#ifdef BASE_DEBUG	
 				//showstr("init_class_fn", class_entry_->name);
 			#endif
 		}
-
 
 	public:
 
@@ -367,7 +402,7 @@ namespace zpp {
 		{
 			// setup object with handlers
 			zobj_mgr result;
-			result = mydef::make_new();
+			result.adopt(mydef::make_new());
 			//showobj("new_zobj()", result);
 			return result;
 		}
@@ -380,20 +415,25 @@ namespace zpp {
 		{
 			return (zobj->ce == mydef::class_entry_);
 		}
+		/*
 		static void z_destroy(zend_object* zobj)
 		{
+
+			// destroy any dynamic properties
+			T* tp = mydef::cpp(zobj);
+
+			//zend_object_std_dtor(zobj);
+
+			// causes memory leaks
+			
 			#ifdef BASE_DEBUG		
 			zend_printf("z_destroy zobj = %lx class %s\n", zobj, ZSTR_VAL(zobj->ce->name));	
 			#endif
-			T* tp = mydef::cpp(zobj);
-
-			tp->~T(); 
+			
 
 			zend_objects_destroy_object(zobj);
-			#ifdef BASE_DEBUG
-			obj_count_--;
-			#endif
 		}
+		*/
 
 #ifdef BASE_DEBUG
 		static void showptr(const char* s,  T* p)
@@ -415,9 +455,13 @@ namespace zpp {
 		{
 			// object is now dead.
 			T* tp = zobj_toc<T>(obj);
-#ifdef BASE_DEBUG			
-			zend_printf("z_free %lx\n", tp);
+#ifdef BASE_DEBUG	
+			obj_count_--;
+			zend_printf("z_free %lx for %s %lx\n", tp, 
+							ZSTR_VAL(obj->ce->name), obj);
 #endif
+			tp->~T();
+			//* 
 			efree(tp);
 		}
 
@@ -428,11 +472,12 @@ namespace zpp {
 	            throw std::logic_error{ "Instance exists already!" };
 	         }
 	         self_count_++;
-	         base_obj_mgr<T>::self_ = this;
+	         mydef::self_ = this;
 		}
 		static zend_class_entry* classEntry() {
 			return mydef::class_entry_;
 		}
+
 
 		static void classEntry(zend_class_entry* zce)
 		{
@@ -441,7 +486,9 @@ namespace zpp {
 				throw std::logic_error("zend_class_entry cannot be 0\n");
 			}
 			mydef::class_entry_ = zce;
+
 			mydef::self_->init_class_fn();
+			
 		}
 
 		static zend_object_handlers& handlers() {
@@ -492,8 +539,6 @@ namespace zpp {
 			zend_class_entry *class_type )
 		{
 			
-
-		//pzo = static_cast<pz_route> (zend_object_alloc(sizeof(wcc_route_d), class_type));
 			T* pzo = new (class_type) T();
 
 			T** bp =  (T**) (pzo+1); // next T
@@ -501,7 +546,7 @@ namespace zpp {
 			zend_object* zobj = (zend_object*) (bp+1); // next T*
 
 #ifdef BASE_ZOBJPTR
-			pzo->set_zobj(zobj);
+			pzo->set_vobj(zobj);
 #endif
 
 			zend_object_std_init(zobj, class_type);
@@ -511,10 +556,8 @@ namespace zpp {
 #ifdef BASE_DEBUG
 			zend_printf("class type %s\n", ZSTR_VAL(class_type->name));
 			obj_count_++;
-			showptr("pzo ",pzo);
-
-
-			showobj("znew_ex", zobj);
+			showptr("cobj ",pzo);
+			showobj("zobj", zobj);
 #endif
 			
 
@@ -543,6 +586,7 @@ template<typename T> zend_class_entry*  base_obj_mgr<T>::class_entry_ = nullptr;
 template<typename T> zend_object_handlers base_obj_mgr<T>::handlers_;
 template<typename T> size_t  base_obj_mgr<T>::self_count_ = 0;
 template<typename T> size_t  base_obj_mgr<T>::sizeoft_ = sizeof(T);
+template<typename T> size_t  base_obj_mgr<T>::neg_space_ = sizeof(T) + sizeof(base_d*);
 
 #ifdef BASE_DEBUG
 template<typename T> size_t  base_obj_mgr<T>::obj_count_ = 0;

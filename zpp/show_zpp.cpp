@@ -22,7 +22,7 @@ dump_info::object_property_dump(
 	zval *zv, 
 	zend_ulong index, 
 	zend_string *key, 
-	int level) 
+	int level, int refadj) 
 {
 	const char *prop_name, *class_name;
 	indent(level);
@@ -55,7 +55,7 @@ dump_info::object_property_dump(
 		ss << "uninitialized(" << type_str << ")";
 		zend_string_release(type_str);
 	} else {
-		di_dump(zv, level + 1);
+		di_dump(zv, level + 1, refadj);
 	}
 }
 
@@ -90,7 +90,7 @@ dump_info::dump(zval_user val, int level)
 {
 	dump_info di;
 
-	di.di_dump(val, level);
+	di.di_dump(val, level, -1);
 
 }
 
@@ -104,19 +104,21 @@ dump_info::msg_dump(const char* msg, zval_user val)
 	di.di_dump(val);
 }
 
-dump_info::dump_info(const char* s) : ss(dumper_d)
+dump_info::dump_info(const char* s) : ss(dumper_d), total_(0)
 {
 	ss << s << ' ';
 }
 
 void 
-dump_info::show_properties(zend_object* zobj, HashTable* myht, int level)
+dump_info::show_properties(zend_object* zobj, HashTable* myht, int level, int refadj)
 {
 	zend_long index;
 	zend_string *key;
 	zval *val;
 
 	indent(level);
+	total_ += htab_read(myht).size();
+
 	ss << "{\n";
 
 	for_key_value fkv;
@@ -135,7 +137,7 @@ dump_info::show_properties(zend_object* zobj, HashTable* myht, int level)
 		}
 
 		if (!Z_ISUNDEF_P(val) || prop_info) {
-			object_property_dump(prop_info, val, index, key, level+1);
+			object_property_dump(prop_info, val, index, key, level+1, refadj);
 		}
 	}
 	indent(level);
@@ -171,8 +173,10 @@ void dump_info::array_sub(HashTable* myht, int level)
 	}
 	packed = HT_IS_PACKED(myht) ? "packed " : "";
 
-	di_showarray(myht,refadjust);
+
 	indent(level);
+
+	total_ += htab_read(myht).size();
 	ss << packed << "{\n";
 	
 	for (fkv.start(myht); fkv.ok(); fkv.next())
@@ -202,7 +206,7 @@ void dump_info::array_sub(HashTable* myht, int level)
 }
 
 void 
-dump_info::di_dump(zval_user zu, int level)
+dump_info::di_dump(zval_user zu, int level, int refadj)
 {
 	HashTable *myht = NULL;
 	//zend_string *class_name;
@@ -232,7 +236,9 @@ dump_info::di_dump(zval_user zu, int level)
 		endl();
 		break;
 	case IS_ARRAY:
-		array_sub(zu.zarray(), level);
+		myht = zu.zarray();
+		di_showarray(myht,refadj);
+		array_sub(myht, level);
 		break;
 	case IS_OBJECT: 
 	{
@@ -264,7 +270,7 @@ dump_info::di_dump(zval_user zu, int level)
 
 			adopter.adopt(myht);
 
-			show_properties(zobj, myht, level);
+			show_properties(zobj, myht, level, -1);
 		}
 		GC_UNPROTECT_RECURSION(zobj);
 		break;
@@ -284,6 +290,11 @@ dump_info::di_dump(zval_user zu, int level)
 		ss << "UNKNOWN:0\n";
 		break;
 	}
+
+	if (level==0)
+	{
+		ss << iform(Numf::DEC) << "Total = " << (int) total_ << " items\n";
+	}
 }
 
 void dump_info::indent(int ct)
@@ -298,7 +309,7 @@ void dump_info::indent(int ct)
 	void dump_info::di_showmem(zval *m) 
 	{
 
-		ss << "zval(0x" << (void*)m << ") ";
+		ss << "zval(0x" << (void*)m << ") +" << Z_TYPE_FLAGS_P(m) << ' ';
 
 		if (!m) {
 			return;

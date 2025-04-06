@@ -36,10 +36,14 @@ zval_mgr::make_ref()
     }                       
 }
 
+zval_mgr::~zval_mgr()
+{
+    zval_mgr::try_decref(&zv_);
+}
+
 zval_mgr::zval_mgr(base_d* cobj)
 {
     zv_ = {0};
-    ZVAL_NULL(&zv_);
     zval_user(&zv_).bind_object(cobj->vobj());
 }
 
@@ -113,7 +117,7 @@ void zval_mgr::set_bool(bool value)
 
 zval_mgr::zval_mgr(HashTable* ht)
 {
-     init();
+     zv_ = {0};
      zval_user(&zv_).bind_array(ht);
 }
 
@@ -132,7 +136,6 @@ zval_mgr::zval_mgr(bool bval)
 zval_mgr::zval_mgr(zval* zv)
 {
     zv_ = {0};
-
     if (zv) {
         // destructor will try to decref.
         ZVAL_COPY(&zv_, zv);
@@ -432,7 +435,8 @@ zval_mgr::try_decref(zval* p)
     {
         auto rct = zval_refcount_p(p);
         auto ztype = Z_TYPE_P(p);
-        switch(ztype) {
+        switch(ztype) 
+        {
         case IS_STRING:
             {
                 zend_string* s = Z_STR_P(p);
@@ -459,18 +463,20 @@ zval_mgr::try_decref(zval* p)
             
         case IS_ARRAY:
             {
+
                 HashTable* ht = Z_ARR_P(p);
+                //showarray("try_decref", ht);
                 if (ht->gc.u.type_info & GC_IMMUTABLE)
                 {
                     return false;
                 }
-                if (rct==1) 
+                if (rct<=1) 
                 {
                     zend_array_destroy(ht);
                     return true;
                 }
-                ht->gc.refcount--;
-                //zend_printf("new rct %d for %lx\n", rct-1, ht);
+                rct = GC_DELREF(ht);
+                //zend_printf("new rct %d for %lx\n", rct, ht);
             }
            
             return false;

@@ -7,9 +7,6 @@ require "bootstrap.php";
 
 $cname = Response::class;
 
-
-
-
 try {
 	$obj = Services::getOne($cname);
 

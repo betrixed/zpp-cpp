@@ -49,7 +49,10 @@ public:
 
 	virtual void end_req()
 	{
+		//zend_printf("ReflectCache_data  ");
+		//showobj("end_req", g_reflect_cache);
 		g_reflect_cache.init();
+
 	}
 };
 

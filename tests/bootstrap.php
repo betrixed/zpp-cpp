@@ -39,14 +39,15 @@ if (!class_exists(Finder::class)) {
 	
 require $wcc_root . DIRECTORY_SEPARATOR . "Loader.php";
 
-$loader = new Loader("");
-$loader->addPathArray([
+$finder = new Finder();
+$finder->addPathArray([
     "Wcc" => "php/Wcc",
     "Wcd" => "php/Wcd",
     "Wcf" => "php/Wcf",
     "Wc" => "php/Wc"
 ]);
 
+$loader = new Loader("", $finder);
 $loader->register();
 
 

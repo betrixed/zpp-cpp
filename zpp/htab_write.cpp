@@ -15,6 +15,7 @@ htab_write::giveback(zval* mgr)
 {
 	//printf("htab_write giveback\n");
 	zval_user test(mgr);
+	//showmem("giveback zval", test);
 	HashTable* h = test.zarray();
 	if (!h)
 	{
@@ -26,12 +27,12 @@ htab_write::giveback(zval* mgr)
 		#ifdef HTAB_SHOW_MEMORY
 		showarray("giveback", h);
 		#endif
-
 		//comes with refcount ==1
 		
 	}
-	else if (htab_mgr::cowop(h))
+	else 
 	{
+		htab_mgr::cowop(h);
 		#ifdef HTAB_SHOW_MEMORY
 		zend_printf("cowop array %lx to zval %lx\n", h, mgr);	
 		#endif
@@ -269,6 +270,7 @@ void htab_write::set(zend_string* key, zval* val)
 	{
 		if (Z_TYPE_FLAGS_P(val) != 0) {
 			zval_mgr::try_addref(val);
+			//showmem("try_addref zval*", val);
 		}
 	}	
 }

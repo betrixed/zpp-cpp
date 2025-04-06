@@ -1,8 +1,22 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <pdoc>
+    <!--
+    <xtag>
+        <cfg>Wcc\Hmap</cfg>
+    </xtag>
+-->
     <tb>
+        <a k='src_paths'>
+            <s>@site_leaf/web</s>
+            <s>@wc_leaf/web</s>
+        </a>
+        <s k='assetCache'>/pcan/cache</s> 
         <tb k="assets">
-            <s k="name">/css/form-format.css</s>
+            <tb k="form-format">
+                <a k='css'>
+                    <s>/css/form-format.css</s>
+                </a>
+            </tb>
         </tb>
     </tb>
 </pdoc>

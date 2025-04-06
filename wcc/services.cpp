@@ -50,11 +50,13 @@ namespace wcc
 		virtual void init_req()
 		{
 			g_services = Services::omg.new_zobj();
+			//showobj("new g_services", g_services);
 		}
 
 		virtual void end_req()
 		{
-			//zend_printf("end_req Services_data\n");
+			//zend_printf("end_req Services_data ");
+			//showobj("g_services", g_services);
 			g_services.init();
 		}
 	};

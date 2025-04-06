@@ -21,16 +21,16 @@ zobj_mgr::try_addref(zend_object* ob)
 bool // static
 zobj_mgr::try_decref(zend_object* ob)
 {
-	auto& rct = ob->gc.refcount;
+	auto rct = GC_REFCOUNT(ob);
 	if (rct==1) 
 	{
-		//showobj("RELEASE obj", ob);
+		showobj("RELEASE obj", ob);
 		zend_object_release(ob);
 		return true;
 	}
 	else {
-		rct--;
-		//showobj("ROAMING obj", ob);
+		GC_DELREF(ob);
+		showobj("ROAMING obj", ob);
 	}
 	return false;	
 }

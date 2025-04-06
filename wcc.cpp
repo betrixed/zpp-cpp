@@ -152,11 +152,7 @@ PHP_FUNCTION(Wcc_init_globals)
 	ZEND_PARSE_PARAMETERS_START(0, 0)
    ZEND_PARSE_PARAMETERS_END();
 
-	zobj_mgr wrap;
-	printf("init_globals\n");
 
-	wrap = ReflectCache::instance();
-	showobj("zval_own new_wrap", wrap);
 
 }
 
@@ -304,9 +300,7 @@ PHP_RINIT_FUNCTION(wcc)
 #if defined(ZTS) && defined(COMPILE_DL_WCC)
 	ZEND_TSRMLS_CACHE_UPDATE();
 #endif
-#ifdef BASE_DEBUG
-	wcc::mgr_link::report();
-#endif
+
 	zpp::state_init::init_request();
 	return SUCCESS;
 }

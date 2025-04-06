@@ -144,9 +144,6 @@ namespace wcc {
 			DStack*   ds_prev_;
 
 			friend class Wcc_XmlRead;
-
-			
-
 		public:
 
 			void* operator new(size_t size)
@@ -168,18 +165,9 @@ namespace wcc {
 
 			DStack() : kind_(XC_EMPTY), ds_next_(nullptr), ds_prev_(nullptr) {}
 
-			~DStack()
-			{
-				//showmem("~Stack ref", ref_);
-			}
-			DStack(zstr_user k, const zval_mgr& val, int eval)
-			         : kind_(eval) 
-			{
-				key_ = k;
-				ref_ = val;
-				//showstr("+Stack key", key_);
-				//showmem("+Stack ref", ref_);
-			}
+			~DStack();
+
+			DStack(zstr_user k, const zval_mgr& val, int eval);
 
 			/*DStack& operator=(DStack&& m)
 			{
@@ -216,19 +204,19 @@ namespace wcc {
 		DStack  *top_;
 		size_t  stacked_;
 
-		bool tag_start(zstr_user tag, zstr_user val);
-		void tag_end(zstr_user tag);
+		bool 	tag_start(zstr_user tag, zstr_user val);
+		void 	tag_end(zstr_user tag);
 
-		void throwKey(zstr_user key);
-		void throwNoKey();
+		void 	throwKey(zstr_user key);
+		void 	throwNoKey();
 
-		void       nextEnd();
+		void    nextEnd();
 
 
-		void	   tagsTable();
-		void 	   attach_ds(DStack* ds);
+		void	tagsTable();
+		void 	attach_ds(DStack* ds);
 
-		void       pushRoot(zstr_user classname);
+		void    pushRoot(zstr_user classname);
 		void       pushClass(zstr_user classname, zstr_user val);
 		void 	   pushTable(int kind, zstr_user val);
 
@@ -237,7 +225,7 @@ namespace wcc {
 
 		void      setEmptyArray(zstr_user key);
 
-		void      setValue(const zval_mgr& val, zstr_user key);
+		void      setValue(zval_user val, zstr_user key);
 
 		void      setBool(zstr_user key);
 		void      setInteger(zstr_user key);

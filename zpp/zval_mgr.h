@@ -59,10 +59,7 @@ public:
     zval_mgr(zval* zv);
     
 
-    ~zval_mgr()
-    {
-        lose();
-    }
+    ~zval_mgr();
 
     zval_mgr(zend_string* rc);
 

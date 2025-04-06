@@ -11,6 +11,7 @@ namespace zpp {
 class dump_info {
 private:
 	zstr_output& ss;
+	size_t       total_;
 
 	static zstr_output dumper_d;
 
@@ -19,7 +20,8 @@ private:
 		zval *zv, 
 		zend_ulong index, 
 		zend_string *key, 
-		int level);
+		int level,
+		int refadj = 0);
 
 	void array_sub(HashTable* ht, int level);
 	
@@ -31,7 +33,7 @@ public:
 
 	static void dump(zval_user val, int level = 0);
 
-	void di_dump(zval_user val, int level = 0);
+	void di_dump(zval_user val, int level = 0, int refadj=0);
 	void indent(int ct);
 	void di_showmem(zval *m);
 	void di_showstr(zend_string* p);
@@ -43,13 +45,13 @@ public:
 	void output(const char* msg);
 	void endl();
 	
-	void show_properties(zend_object* zobj, HashTable* h, int level);
+	void show_properties(zend_object* zobj, HashTable* h, int level, int refadj=0);
 
-	dump_info() : ss(dumper_d) {}
+	dump_info() : ss(dumper_d), total_(0) {}
 	
 	dump_info(const char* s);
 
-	dump_info(zstr_buffer& buf) : ss(buf) {}
+	dump_info(zstr_buffer& buf) : ss(buf), total_(0) {}
 };
 
 
