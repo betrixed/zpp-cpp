@@ -66,9 +66,13 @@ namespace wcc {
 		
 		void construct();
 
-		zobj_user getPost();
-		zobj_user getQuery();
-		zobj_user getServer();
+		zobj_user post();
+		zobj_user query();
+		zobj_user server();
+
+		htab_read getPost();
+		htab_read getQuery();
+		htab_read getServer();
 
 		zobj_mgr makeFile(htab_read data, zstr_user name);
 

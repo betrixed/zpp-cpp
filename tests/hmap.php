@@ -16,6 +16,12 @@ $values = ["key1" => "test-1",
 
 $cfg = new Hmap($values);
 
+foreach($cfg as $key => $value)
+{
+    echo "iterator $key => $value\n";
+}
+
+//echo "STOP NOW !!\n"; return;
 //$cfg = new stdClass();
 
 $text1 = "Hidden value \"@key2\" inside";

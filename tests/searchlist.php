@@ -26,7 +26,7 @@ function localfn() {
 		}
 	);
 
-	$list = new SearchList("plates", ["tests/views", "tests/more_views"]);
+	$list = new SearchList(["tests/views", "tests/more_views"]);
 
 	$path = $list->findLeaf("main", ["phtml"]);
 
@@ -34,7 +34,7 @@ function localfn() {
 
 	$engine = $svc->get("engine");
 
-	$engine->setPaths($list);
+	$engine->setFinder($list);
 	$engine->setExtensions(["phtml"]);
 	$engine->shareWithAll(["title" => "SearchList"]);
 

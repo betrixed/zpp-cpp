@@ -504,7 +504,7 @@ RouteSet::compile(Route* route)
 			}
 		}
 		init_pattern = std::move(buf);
-		showstr("init_pattern", init_pattern);
+		//showstr("init_pattern", init_pattern);
 	}
 	//zstr_output sink;
 	//sink << pr2 << " pattern vstr" << pattern.vstr() << '\n';

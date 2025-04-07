@@ -35,7 +35,9 @@ namespace zpp {
          {
             return ok_;
          }
-         
+        
+        /** restore original empty state */
+        void init();
 
         htab_walk *clone()
         {
@@ -58,15 +60,16 @@ namespace zpp {
 
         zval_user key()
         {
-        	return key_;
+            return key_;
         }
 
         zval_user value() 
         {
         	return value_;
         }
-
-        void lose(); // invalidate currently assigned values
+        // release current key and value
+        void release(); 
+        bool invalid(); // reset array internal position pointer.
     private:
         
         bool getdata();
@@ -75,7 +78,7 @@ namespace zpp {
          *  Invalidate the iterator
          *  @return bool
          */
-        bool invalid();
+       
     };
 }; // namespace zpp
 

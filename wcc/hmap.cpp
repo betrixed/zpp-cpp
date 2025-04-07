@@ -18,6 +18,7 @@ extern "C" {
 }
 #endif
 
+
 namespace wcc {
 	Hmap::Hmap_Mgr Hmap::omg;
 
@@ -27,6 +28,8 @@ namespace wcc {
 	class Hmap_init : public state_init {
 	public:
 		Hmap_init() : state_init() {}
+                
+
 
 		zstr_intern data_key;
 		zstr_intern obj_key;
@@ -42,7 +45,8 @@ Hmap_init HMAPit;
 
 // static function table instance
 zend_object_iterator_funcs 
-Hmap::iterator::it_fntab_ = {
+
+HmapIterator::it_fntab_ = {
 	it_dtor,
 	it_valid,
 	it_get_data,
@@ -53,82 +57,106 @@ Hmap::iterator::it_fntab_ = {
 	nullptr
 }; 
 
-zend_object_iterator* //static
-Hmap::iterator::create(zend_class_entry* ce, zval* zobj, int byref)
+
+void* HmapIterator::operator new(size_t count) 
 {
-	Hmap::iterator *iterator = (Hmap::iterator*) emalloc(sizeof(Hmap::iterator));
+    //zend_printf("operator new for HmapIterator\n");
+    void* p = emalloc(count);
+    memset(p, 0, sizeof(zend_object_iterator));
+    
+    return p;
+}
+void HmapIterator::operator delete(void* ptr) {
+    // Let PHP to call efree(ptr):
+}
+
+HmapIterator::HmapIterator() : walk(), htab()
+{
+}
+zend_object_iterator* //static
+HmapIterator::create(zend_class_entry* ce, zval* zobj, int byref)
+{
+        
+	HmapIterator* iterator = new HmapIterator();
 
 	zend_iterator_init((zend_object_iterator*) &iterator->phpit);
 	
 	zend_object* hmo = Z_OBJ_P(zobj);
+        
+        // bump reference holder for iterated object
 	ZVAL_OBJ_COPY(&iterator->phpit.data, hmo);
 
 	iterator->phpit.funcs = &it_fntab_;
 
 	Hmap* cobj = zobj_toc<Hmap>(hmo);
 
-	iterator->htab = cobj->toArray(); // refcount++
+        // refcount++ iterated source HashTable
+	iterator->htab = cobj->toArray(); 
 	iterator->walk.start(iterator->htab);
 
 	return &iterator->phpit; 
 }
 
 void //static - undo creation work
-Hmap::iterator::it_dtor(zend_object_iterator *iter)
+HmapIterator::it_dtor(zend_object_iterator *iter)
 {
-	zend_object* obj = Z_OBJ_P(&iter->data);
-	zobj_mgr::try_decref(obj);
-	Hmap::iterator* mem = phmi(iter);
-	// clean up walker
-	mem->htab.~htab_mgr();
-	mem->walk.~htab_walk();
-	efree(mem);
+	//zend_object* obj = Z_OBJ_P(&iter->data);
+	//zobj_mgr::try_decref(obj);
+	HmapIterator *iterator = phmi(iter);
+        iterator->walk.init();
+        iterator->htab.init();
+        
+	zval_ptr_dtor(&iterator->phpit.data);
+        
+        // leave memory freeing to zend.
 }
 
 
 zend_result //static
-Hmap::iterator::it_valid(zend_object_iterator *iter)
+HmapIterator::it_valid(zend_object_iterator *iter)
 {
 	
-	Hmap::iterator *iterator = phmi(iter);
+	HmapIterator *iterator = phmi(iter);
 	zend_result result = iterator->walk.ok() ? SUCCESS : FAILURE;
 	return result;
 
 }
 
 zval * //static
-Hmap::iterator::it_get_data(zend_object_iterator *iter)
+HmapIterator::it_get_data(zend_object_iterator *iter)
 {
-	Hmap::iterator *iterator = phmi(iter);
+	HmapIterator *iterator = phmi(iter);
 	return iterator->walk.value();
 }
 
 void //static
-Hmap::iterator::it_get_key(zend_object_iterator *iter, zval *key)
+HmapIterator::it_get_key(zend_object_iterator *iter, zval *key)
 {
-	Hmap::iterator *iterator = phmi(iter);
+	HmapIterator *iterator = phmi(iter);
 	ZVAL_COPY(key, iterator->walk.key());
 }
 
 void //static
-Hmap::iterator::it_forward(zend_object_iterator *iter)
+HmapIterator::it_forward(zend_object_iterator *iter)
 {
-	Hmap::iterator *iterator = phmi(iter);
+	HmapIterator *iterator = phmi(iter);
 	iterator->walk.next();
 }
 
 void  //static
-Hmap::iterator::it_rewind(zend_object_iterator *iter)
+HmapIterator::it_rewind(zend_object_iterator *iter)
 {
-	Hmap::iterator *iterator = phmi(iter);
+	HmapIterator *iterator = phmi(iter);
 	iterator->walk.rewind();
 }
 
 void  //static
-Hmap::iterator::it_invalidate(zend_object_iterator *iter)
+HmapIterator::it_invalidate(zend_object_iterator *iter)
 {
-	Hmap::iterator *iterator = phmi(iter);
-	iterator->walk.lose();
+	HmapIterator* mem = phmi(iter);
+	// clean up walker, refcount--;
+        // lose any reference to current key and value
+        mem->walk.release();
 }
 
 zval* 

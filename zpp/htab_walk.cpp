@@ -83,10 +83,17 @@ bool htab_walk::prev()
     return prev(); // recurse
 }
 
+void htab_walk::init()
+  {
+     invalid();
+     wrap_ = nullptr;
+     iterate_ = 0;
+     ok_ = false;
+  }
 
 bool htab_walk::getdata()
 {
-	HashTable* ht = wrap_;
+    HashTable* ht = wrap_;
 
     key_.lose();
     // read in the current key
@@ -128,7 +135,8 @@ bool htab_walk::getdata()
     return true;
 }
 
-void htab_walk::lose()
+
+void htab_walk::release()
 {
     key_.lose();
     value_.lose();
@@ -139,18 +147,17 @@ void htab_walk::lose()
  */
 bool htab_walk::invalid()
 {
-	HashTable* ht = wrap_;
-	ok_ = false;
-
-	if (ht)
-	{
-    // Move 1 past end
-    	zend_hash_internal_pointer_end_ex(ht, &iterate_);
-    	zend_hash_move_forward_ex(ht, &iterate_);
-    }
     key_.lose();
     value_.lose();
-
+	
+    ok_ = false;
+    HashTable* ht = wrap_;
+    if (ht)
+    {
+    // Move 1 past end
+        zend_hash_internal_pointer_end_ex(ht, &iterate_);
+        zend_hash_move_forward_ex(ht, &iterate_);
+    }
     return false;
 }
 

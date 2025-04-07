@@ -52,6 +52,10 @@ namespace zpp {
         {
             return (ht_ == nullptr);
         }
+
+        void init() {
+            ht_ = nullptr;
+        }
         bool ok() const { return (ht_); }
 
         zval* get(zend_long idx) const;

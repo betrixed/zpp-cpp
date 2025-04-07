@@ -1341,21 +1341,39 @@ RequestGlobals::numFiles(bool onlySuccess)
 }
 
 zobj_user
-RequestGlobals::getPost()
+RequestGlobals::post()
 {
 	return post_;
 }
 
 zobj_user 
-RequestGlobals::getQuery()
+RequestGlobals::query()
 {
 	return request_;
 }
 
 zobj_user
-RequestGlobals::getServer()
+RequestGlobals::server()
 {
 	return server_;
+}
+
+htab_read
+RequestGlobals::getPost()
+{
+	return Hmap::map_htab(post_);
+}
+
+htab_read 
+RequestGlobals::getQuery()
+{
+	return Hmap::map_htab(request_);
+}
+
+htab_read
+RequestGlobals::getServer()
+{
+	return Hmap::map_htab(server_);
 }
 
 void 
@@ -1757,13 +1775,48 @@ ZEND_METHOD(Wcc_RequestGlobals, getHttpHost)
 
 }
 
+ZEND_METHOD(Wcc_RequestGlobals, post)
+{
+	ZEND_PARSE_PARAMETERS_START(0, 0)
+	ZEND_PARSE_PARAMETERS_END();
+
+	RequestGlobals* cobj = zval_toc<RequestGlobals>(ZEND_THIS);
+	zobj_user result = cobj->post();
+	result.return_zv(return_value);
+
+}
+
+ZEND_METHOD(Wcc_RequestGlobals, query)
+{
+	ZEND_PARSE_PARAMETERS_START(0, 0)
+	ZEND_PARSE_PARAMETERS_END();
+
+	RequestGlobals* cobj = zval_toc<RequestGlobals>(ZEND_THIS);
+	zobj_user result = cobj->query();
+	//showmem("getQuery result", result);
+	result.return_zv(return_value);
+
+}
+
+ZEND_METHOD(Wcc_RequestGlobals, server)
+{
+	ZEND_PARSE_PARAMETERS_START(0, 0)
+	ZEND_PARSE_PARAMETERS_END();
+
+	RequestGlobals* cobj = zval_toc<RequestGlobals>(ZEND_THIS);
+	zobj_user result = cobj->server();
+	//showmem("getQuery result", result);
+	result.return_zv(return_value);
+
+}
+
 ZEND_METHOD(Wcc_RequestGlobals, getPost)
 {
 	ZEND_PARSE_PARAMETERS_START(0, 0)
 	ZEND_PARSE_PARAMETERS_END();
 
 	RequestGlobals* cobj = zval_toc<RequestGlobals>(ZEND_THIS);
-	zobj_user result = cobj->getPost();
+	htab_read result = cobj->getPost();
 	result.return_zv(return_value);
 
 }
@@ -1774,7 +1827,7 @@ ZEND_METHOD(Wcc_RequestGlobals, getQuery)
 	ZEND_PARSE_PARAMETERS_END();
 
 	RequestGlobals* cobj = zval_toc<RequestGlobals>(ZEND_THIS);
-	zobj_user result = cobj->getQuery();
+	htab_read result = cobj->getQuery();
 	//showmem("getQuery result", result);
 	result.return_zv(return_value);
 
@@ -1786,7 +1839,7 @@ ZEND_METHOD(Wcc_RequestGlobals, getServer)
 	ZEND_PARSE_PARAMETERS_END();
 
 	RequestGlobals* cobj = zval_toc<RequestGlobals>(ZEND_THIS);
-	zobj_user result = cobj->getServer();
+	htab_read result = cobj->getServer();
 	//showmem("getQuery result", result);
 	result.return_zv(return_value);
 
