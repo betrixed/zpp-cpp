@@ -175,6 +175,8 @@ int isRouteObject(zend_object* obj) {
 
 Route::Route() : base_d(), verbs_(html::V_GET), ajax_(ajax::AJ_NONE)
 {
+	id_ = zstr_empty();
+	//showstr("Route name", id_);
 	compiled_ = zstr_empty();
 	pattern_ = zstr_empty();
 	params_ = htab_empty();
@@ -292,6 +294,7 @@ Route::get(zstr_user pattern, zval_user target, int ajax)
 
 	cobj->construct(html::V_GET, pattern, target);
 	cobj->ajax_ = ajax;
+
 	return result;
 }
 
@@ -324,11 +327,13 @@ Route::methods(int verbs, zstr_user pattern, zval_user target, int ajax)
 }
 	
 
-zend_long 
+zend_long //static
 Route::getVerbInt(zstr_user sverb)
 {
 	zstr_mgr verbstr = sverb.to_upper();
+
 	htab_read hr(&route_data.route_verbs);
+
 	zval_user test;
 
 	if (hr.try_fetch(verbstr,test))
@@ -506,8 +511,10 @@ PHP_METHOD(Wcc_Route, get)
 	ZEND_PARSE_PARAMETERS_END();
 
 	zobj_mgr obj = Route::get(pattern, target, ajax);
+	
 	obj.move_zv(return_value);
-	//needs a reference boost
+	//Static call doesn't need a reference boost?
+	//showmem("static::get", return_value);
 	//zval_mgr::try_addref(return_value);
 	
 
@@ -641,21 +648,15 @@ PHP_METHOD(Wcc_Route, getParams)
 PHP_METHOD(Wcc_Route, GetVerbInt) 
 {
 	zend_string*	verb;
-	long vlen;
-	zend_string* key;
-	zval  *zv_find = NULL;
-	zval_mgr test;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 	Z_PARAM_STR(verb)
 	ZEND_PARSE_PARAMETERS_END();
 
-	vlen = ZSTR_LEN(verb);
+	size_t vlen = ZSTR_LEN(verb);
+	zend_long result = Route::getVerbInt(verb);
 
-	if (vlen > 0) {
-		RETURN_LONG(Route::getVerbInt(verb));
-	}
-	RETURN_LONG(0);
+	RETURN_LONG(result);
 }
 
 //static
@@ -801,7 +802,12 @@ PHP_METHOD(Wcc_Route, name)
 	Route* cobj = zval_toc<Route>(ZEND_THIS);
 	cobj->name(name);
 
-	ZVAL_COPY_VALUE(return_value, ZEND_THIS);
+	//Non-static (method) call
+	// and PHP needs reference count boost (for some reason)
+	ZVAL_COPY(return_value, ZEND_THIS);
+	//showmem("ZEND_THIS", ZEND_THIS);
+	//showmem("return_value", return_value);
+
 }
 
 PHP_METHOD(Wcc_Route, routeUrl)

@@ -294,6 +294,9 @@ bool htab_read::try_fetch(zend_long key, zval_user& store) const
 		store = temp;
 		return true;
 	}
+	else {
+		store.init();
+	}
 	return false;
 }
 
@@ -316,6 +319,7 @@ bool htab_read::try_fetch(zval_user key, zval_user& store) const
 	{
 		return try_fetch(key.zlong(), store);
 	}
+	store.init();
 	return false;
 }
 
@@ -332,6 +336,9 @@ bool htab_read::try_fetch(zend_string* key, zval_user& store) const
 		
 		//showmem("copied ", store);
 		return true;
+	}
+	else {
+		store.init();
 	}
 	//zend_printf("not found\n");
 	return false;

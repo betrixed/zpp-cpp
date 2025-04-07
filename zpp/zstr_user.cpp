@@ -196,7 +196,7 @@ zstr_user::substr(int offset, int len) const
 
 	 zstr_temp result(text.data(), text.size());
 
-	 showstr("substr", result);
+	 //showstr("substr", result);
 	 return std::move(result);
 }
 
@@ -309,10 +309,6 @@ zstr_user::to_lower() const
 	if (s)
 	{
 		zend_string* p = zend_string_tolower(s);
-		if (p == s)
-		{
-			zstr_mgr::try_decref(p);
-		}
 		result.adopt(p);	
 	}
 	return result;
@@ -325,10 +321,6 @@ zstr_user::to_upper() const
 	if (s)
 	{
 		zend_string* p = zend_string_toupper(s);
-		if (p == s)
-		{
-			zstr_mgr::try_decref(p);
-		}
 		result.adopt(p);	
 	}
 	return result;
@@ -342,13 +334,7 @@ zstr_user::trim(const char* what, int mode) const
 	size_t slen = what ? strlen(what) : 0;
 
 	if (s) {
-		//showstr("pre-trimmed", s);
 		zend_string* p = php_trim(s, what, slen, mode);
-		//showstr("trimmed", p);
-		if (p == s)
-		{
-			zstr_mgr::try_decref(p);
-		}
 		result.adopt(p);
 	}
 	return result;

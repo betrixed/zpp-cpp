@@ -8,23 +8,23 @@ require "bootstrap.php";
 
 function init_test()
 {
-$now = new DateTime();
-debug_zpp_dump($now);
+	$now = new DateTime();
+	debug_zpp_dump($now);
 
-$str1 = (string) $now->format("Y-M-jS");
+	$str1 = (string) $now->format("Y-M-jS");
 
-$data = ["today" => $str1];
+	$data = ["today" => $str1];
 
-debug_zpp_dump($str1);
+	debug_zpp_dump($str1);
 
-$str2 = str_camel("today_only_test");
-$str3 = str_uncamel($str2);
+	$str2 = str_camel("today_only_test");
+	$str3 = str_uncamel($str2);
 
-debug_zpp_dump($str2);
-debug_zpp_dump($str3);
+	debug_zpp_dump($str2);
+	debug_zpp_dump($str3);
 
-$str4 = str_intern($str1);
-debug_zpp_dump($str4);
+	$str4 = str_intern($str1);
+	debug_zpp_dump($str4);
 }
 
 //init_test();
@@ -32,24 +32,35 @@ debug_zpp_dump($str4);
 //$targ1 = Target::go(EmptyTest::class, "target");
 //$r1 = Route::get( "/target", Target::go(EmptyTest::class, "target"))->name("default");
 $s = "STRING " . EmptyTest::class;
-debug_zpp_dump($s);
+
 
 
 $targ1 = Target::go(EmptyTest::class, "target");
+debug_zpp_dump($targ1);
+
+
 echo "make route\n";
 $r1 = Route::get( "/target", $targ1)->name("default");
+debug_zpp_dump($r1);
 
+//0
 $list[] = $r1;
 
 
-$target = Target::go(EmptyTest::class);
+//echo "DIE_NOW\n"; return;
+
+
+$target = Target::go(EmptyTest::class,"indexGET");
+$target->setModule("default");
 /*
 $route = new Route(Route::GET_I, "/", $target);
 $route->name("index");
 */
 $route = Route::get("/", $target)->name("index");
+//1
 $list[] = $route;
 
+//2
 $list[] = Route::get("/index.php", $target)->name("index.php");
 
 echo "make routeset\n";

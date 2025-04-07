@@ -44,7 +44,8 @@ $finder->addPathArray([
     "Wcc" => "php/Wcc",
     "Wcd" => "php/Wcd",
     "Wcf" => "php/Wcf",
-    "Wc" => "php/Wc"
+    "Wc" => "php/Wc",
+    "voku\helper" => "php/voku/helper"
 ]);
 
 $loader = new Loader("", $finder);

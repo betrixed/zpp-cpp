@@ -439,8 +439,6 @@ RouteSet::copy_target(Route* route)
 				zval_mgr new_target(ntobj);
 
 				route->setTarget(new_target);
-
-
 			}
 
 		}

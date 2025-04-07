@@ -327,10 +327,10 @@ htab_mgr::cowop(HashTable*& inout)
 		// updates not allowed, 
 		// make a copy with rc == 1
 		inout = zend_array_dup(used);
-		//#ifdef HTAB_SHOW_MEMORY
+		#ifdef HTAB_SHOW_MEMORY
 		zend_printf("ARRAY DUPLICATE %lx of ", inout);
 		showarray("used", used);
-		//#endif	
+		#endif	
 		htab_mgr::try_decref(used);
 	    return true;
 	}

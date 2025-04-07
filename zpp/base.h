@@ -460,9 +460,10 @@ namespace zpp {
 			zend_printf("z_free %lx for %s %lx\n", tp, 
 							ZSTR_VAL(obj->ce->name), obj);
 #endif
-			tp->~T();
-			//* 
-			efree(tp);
+			tp->~T(); // this will call all C++ member destructors.
+			// Documentation on handlers says do not deallocate memory 
+			// (PHP Internals book, php7) efree(tp);
+			
 		}
 
 		// establish self pointer

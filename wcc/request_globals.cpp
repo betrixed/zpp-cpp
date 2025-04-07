@@ -851,7 +851,7 @@ RequestGlobals::getHttpHost()
 		preg rex2("/[a-z0-9-]+\\.?/");
 
 		zstr_mgr test = rex2.replace("", host); 
-		showstr("test empty", test);
+		//showstr("test empty", test);
 		if (test.size() > 0) 
 		{
 			zend_throw_error(zend_ce_exception, "Invalid host %s", host.data());

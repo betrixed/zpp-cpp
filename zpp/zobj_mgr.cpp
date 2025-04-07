@@ -24,13 +24,13 @@ zobj_mgr::try_decref(zend_object* ob)
 	auto rct = GC_REFCOUNT(ob);
 	if (rct==1) 
 	{
-		showobj("RELEASE obj", ob);
+		//showobj("RELEASE obj", ob);
 		zend_object_release(ob);
 		return true;
 	}
 	else {
 		GC_DELREF(ob);
-		showobj("ROAMING obj", ob);
+		//showobj("ROAMING obj", ob);
 	}
 	return false;	
 }
@@ -68,6 +68,7 @@ zobj_mgr::adopt(zend_object *zo)
 {
 	lose();
 	obj_ = zo;
+	//showobj("Adopted", obj_);
 }
 
 zobj_mgr::zobj_mgr(base_d* cobj) : zobj_user()
@@ -145,6 +146,7 @@ zobj_mgr::move_zv(zval* ret)
 	if (obj_)
 	{
 		ZVAL_OBJ(ret, obj_); 
+		//Z_TYPE_FLAGS_P(ret) = 0; // Not allowed to dereference
 		obj_ = nullptr;// give up ownership privilege
 	}
 	else {
@@ -156,7 +158,10 @@ void
 zobj_mgr::return_zv(zval* ret)
 {
 	if (obj_)
+	{
 		ZVAL_OBJ_COPY(ret, obj_);
+		//Z_TYPE_FLAGS_P(ret) = 0;
+	}
 	else
 		ZVAL_NULL(ret);
 }

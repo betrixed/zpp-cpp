@@ -20,7 +20,7 @@ echo "parse " . $testfile . PHP_EOL;
 
 $rdata = $rparser->parseRaw($routes_input);
 
-echo "route data " . print_f($rdata,true) . PHP_EOL;
+echo "route data " . print_r($rdata,true) . PHP_EOL;
 $serdata = serialize($rdata);
 
 $rdata = unserialize($serdata);

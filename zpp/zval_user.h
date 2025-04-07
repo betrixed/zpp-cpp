@@ -171,6 +171,10 @@ public:
         return Z_TYPE_P(p_);
     }
 
+    void init()
+    {
+        p_ = nullptr;
+    }
     /** 
      * This will be a mistake, for zval_mgr returned from a function.
      * zval_user data = some_func(); where declared as zval_mgr some_func();
