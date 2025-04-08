@@ -85,6 +85,8 @@ public:
         return *this;
     }
 
+    void setbool(bool value);
+    
     // dereference if necessary
     zval_user referent();
 

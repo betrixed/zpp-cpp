@@ -12,7 +12,8 @@
 #endif
 
 extern "C" {
-	#include "ext/standard/php_string.h"
+	#include <ext/standard/php_string.h>
+	#include <ext/json/php_json.h>
 };
 
 namespace zpp {
@@ -360,6 +361,32 @@ zstr_user::operator=(zval* rc)
 	return *this;
 }
 
+
+zstr_mgr //static
+zstr_user::json_encode(zval_user value, int flags)
+{
+	//(smart_str *buf, zval *val, int options);
+	// TODO: consider options flags
+	zstr_mgr result;
+
+	smart_str buf = {0};
+
+	zend_result zret = php_json_encode(&buf, value, flags);
+
+	if (zret == SUCCESS)
+	{
+		result.adopt(smart_str_extract_ex(&buf,0));
+		return result;
+	}
+	else {
+		//TODO: Check JSON_G(error_code) ? Partial result
+		if (buf.s != nullptr)
+		{
+			smart_str_free(&buf);
+		}
+		return result;
+	}
+}
 
 };
 //zstr_user.cpp

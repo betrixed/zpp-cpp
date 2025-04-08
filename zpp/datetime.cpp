@@ -186,9 +186,9 @@ void datetime_obj::setTimeZone(zstr_user zone)
 	temp.call(DTData.settimezone, zval_mgr(tz));
 }
 
-datetime_obj::datetime_obj(const zval_mgr& fnret)
+datetime_obj::datetime_obj(zobj_mgr fnret)
 {
-	obj_ = zval_user(fnret).zobject();
+	obj_ = fnret;
 	//TODO: assert is datetime object
 }
 

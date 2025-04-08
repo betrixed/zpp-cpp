@@ -380,6 +380,12 @@ zval_user::bind_array(HashTable* ht)
     }
 }
 
+void zval_user::setbool(bool value)
+{
+    *p_ = {0};
+    ZVAL_BOOL(p_, value);
+}
+
 int 
 zval_user::refcount() const
 {

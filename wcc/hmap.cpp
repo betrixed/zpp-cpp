@@ -20,7 +20,7 @@ extern "C" {
 
 
 namespace wcc {
-	Hmap::Hmap_Mgr Hmap::omg;
+	Hmap_mgr<Hmap> Hmap::omg;
 
 	using namespace zpp;
 
@@ -160,7 +160,7 @@ HmapIterator::it_invalidate(zend_object_iterator *iter)
 }
 
 zval* 
-Hmap::get_property_ptr_ptr(zend_object* object, zend_string* name, 
+Hmap_php::get_property_ptr_ptr(zend_object* object, zend_string* name, 
 				int type, void** cache_slot)
 {
 	//if (!zend_std_has_property(object, name, ZEND_PROPERTY_EXISTS, cache_slot)) {
@@ -178,7 +178,7 @@ Hmap::get_property_ptr_ptr(zend_object* object, zend_string* name,
 
 
 zval* 	
-Hmap::read_property(zend_object* object, zend_string* name, int type, 
+Hmap_php::read_property(zend_object* object, zend_string* name, int type, 
 						void** cache_slot, zval* rv)
 {
 	//if (!zend_std_has_property(object, name, ZEND_PROPERTY_EXISTS, cache_slot)) 
@@ -196,7 +196,7 @@ Hmap::read_property(zend_object* object, zend_string* name, int type,
 }
 
 zval* 	
-Hmap::write_property(zend_object* object, zend_string* name, zval* value, void** cache_slot)
+Hmap_php::write_property(zend_object* object, zend_string* name, zval* value, void** cache_slot)
 {
 	//if (!zend_std_has_property(object, name, ZEND_PROPERTY_EXISTS, cache_slot)) 
 	//{
@@ -215,7 +215,7 @@ Hmap::write_property(zend_object* object, zend_string* name, zval* value, void**
 }
 
 int
-Hmap::has_property(zend_object* object, zend_string* name, int has_set_exists, void **cache_slot)
+Hmap_php::has_property(zend_object* object, zend_string* name, int has_set_exists, void **cache_slot)
 {
 	/*int result = zend_std_has_property(object, name, ZEND_PROPERTY_EXISTS, cache_slot);
 	if (result)
@@ -233,7 +233,7 @@ Hmap::has_property(zend_object* object, zend_string* name, int has_set_exists, v
 }
 
 void  
-Hmap::unset_property(zend_object* object, zend_string* name, void **cache_slot)
+Hmap_php::unset_property(zend_object* object, zend_string* name, void **cache_slot)
 {
 	/*if (zend_std_has_property(object, name, ZEND_PROPERTY_EXISTS, cache_slot))
 	{
@@ -248,7 +248,7 @@ Hmap::unset_property(zend_object* object, zend_string* name, void **cache_slot)
 
 // seems to be direct easy way to count number of properties. Maybe not needed.
 ZEND_RESULT_CODE 
-Hmap::count_elements(zend_object* object, zend_long *count)
+Hmap_php::count_elements(zend_object* object, zend_long *count)
 {
 	Hmap* cobj = zobj_toc<Hmap>(object);
 	htab_read look(cobj->data_);
@@ -266,7 +266,7 @@ Hmap::get_properties(zend_object* object)
 }
 */
 HashTable*
-Hmap::get_properties_for(zend_object* object, zend_prop_purpose purpose)
+Hmap_php::get_properties_for(zend_object* object, zend_prop_purpose purpose)
 {
 	Hmap* cobj = zobj_toc<Hmap>(object);
 	htab_read look(cobj->data_);
@@ -287,7 +287,7 @@ Hmap::get_properties_for(zend_object* object, zend_prop_purpose purpose)
 }
 
 zobj_mgr // static
-Hmap::fromArray(zval_user htab)
+Hmap::newFromArray(zval_user htab)
 {
 	zobj_mgr result = Hmap::omg.new_zobj();
 	Hmap* cobj = zobj_toc<Hmap>(result);
@@ -295,9 +295,8 @@ Hmap::fromArray(zval_user htab)
 	return result;
 }
 
-#ifdef HMAP_DIMENSIONS
 zval* 
-Hmap::read_dimension(zend_object* obj, zval* offset, int type, zval* return_value)
+Hmap_php::read_dimension(zend_object* obj, zval* offset, int type, zval* return_value)
 {
 	Hmap* cobj = zobj_toc<Hmap>(obj);
 	htab_read look(cobj->data_);
@@ -309,7 +308,7 @@ Hmap::read_dimension(zend_object* obj, zval* offset, int type, zval* return_valu
 }
 
 void 
-Hmap::write_dimension(zend_object* obj, zval* offset, zval* set_value)
+Hmap_php::write_dimension(zend_object* obj, zval* offset, zval* set_value)
 {
 	Hmap* cobj = zobj_toc<Hmap>(obj);
 	htab_write hw(cobj->data_);
@@ -317,7 +316,7 @@ Hmap::write_dimension(zend_object* obj, zval* offset, zval* set_value)
 }
 
 int  
-Hmap::has_dimension(zend_object* object, zval* offset, int check_empty)
+Hmap_php::has_dimension(zend_object* object, zval* offset, int check_empty)
 {
 	Hmap* cobj = zobj_toc<Hmap>(object);
 	htab_read look(cobj->data_);
@@ -340,83 +339,13 @@ Hmap::has_dimension(zend_object* object, zval* offset, int check_empty)
 }
 
 void  
-Hmap::unset_dimension(zend_object* object, zval* unset)
+Hmap_php::unset_dimension(zend_object* object, zval* unset)
 {
 	Hmap* cobj = zobj_toc<Hmap>(object);
 	htab_write hw(cobj->data_);
 	hw.unset(unset);
 }
-#endif
-
-
-
-/*
-HashTable* 
-Hmap::get_gc(zend_object* obj, zval** gc_data, int *gc_data_count)
-{
-
-}
-
-
-
-zval* 
-Hmap::read_dimension(zend_object* obj, zval* offset, int type, zval* return_value)
-{
-
-	zend_printf("read_dim type %d ", type);
-	showmem("ret val", return_value);
-	showmem("offset", offset);
-
-	Wcc_Hmap* cobj = zobj_toc<Hmap>(obj);
-	zval* result = cobj->get(zval_user(offset));
-
-	if ((type == BP_VAR_W || type == BP_VAR_RW || type == BP_VAR_UNSET) &&
-	  !Z_ISREF_P(result) &&
-	  EXPECTED(result != &EG(uninitialized_zval))) {
-			ZVAL_NEW_REF(result, result);
-	}
-	return result;
-}
-
-void 
-Hmap::write_dimension(zend_object* obj, zval* offset, zval* set_value)
-{
-	zend_printf("write_dim ");
-	showmem("offset", offset);
-	showmem("set val", set_value);
-	Wcc_Hmap* cobj = zobj_toc<Hmap>(obj);
-	cobj->set(zval_user(offset), zval_user(set_value));
-}
-
-
-void 
-Hmap::unset_dimension(zend_object* obj, zval* unset)
-{
-	Wcc_Hmap* cobj = zobj_toc<Hmap>(obj);
-	cobj->unset(zval_user(unset));
-}
-
-
-int  
-Hmap::has_dimension(zend_object* obj, zval* offset, int check_empty)
-{
-	zend_printf("has_dim ");
-	showmem("offset", offset);
-	Wcc_Hmap* cobj = zobj_toc<Hmap>(obj);
-	return cobj->has(zval_user(offset));
-}
-
-*/
-
-/*
-void 
-Hmap::debug_info(htab_write hw)
-{
-	// base_d::debug_info(hw);
-
-	//hw.set(HMAPit.data_key, data_);
-}
-*/
+//$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 
 void 
 Hmap::construct(htab_read values)

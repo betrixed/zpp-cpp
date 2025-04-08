@@ -7,6 +7,7 @@
 #ifndef ZSTR_USER_H
 #define ZSTR_USER_H
 
+
 namespace zpp {
 
 	class zstr_mgr;
@@ -95,7 +96,7 @@ namespace zpp {
 		
 		const zstr_user& operator=(zval* rc);
 
-		
+		static zstr_mgr json_encode(zval_user value, int flags);
 	};
 
 	int zs_cmp(zend_string* a, zend_string* b);

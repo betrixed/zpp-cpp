@@ -63,7 +63,7 @@ namespace zpp {
 		 * */
 		datetime_obj(const std::string_view& timestr);
 		datetime_obj(zstr_user zs);
-		datetime_obj(const zval_mgr& fnret); 
+		datetime_obj(zobj_mgr obj); 
 
 		/** Now constructor */
 		datetime_obj();

@@ -552,11 +552,11 @@ void RequestGlobals::debug_info(htab_write di)
 
 void RequestGlobals::construct()
 {
-	server_ = Hmap::fromArray(htab_mgr::get_global(RQit.G_SERVER));
-	get_ = Hmap::fromArray(htab_mgr::get_global(RQit.G_GET));
-	request_ = Hmap::fromArray(htab_mgr::get_global(RQit.G_REQUEST));
-	post_ = Hmap::fromArray(htab_mgr::get_global(RQit.G_POST));
-	files_ = Hmap::fromArray(htab_mgr::get_global(RQit.G_FILES));
+	server_ = Hmap::newFromArray(htab_mgr::get_global(RQit.G_SERVER));
+	get_ = Hmap::newFromArray(htab_mgr::get_global(RQit.G_GET));
+	request_ = Hmap::newFromArray(htab_mgr::get_global(RQit.G_REQUEST));
+	post_ = Hmap::newFromArray(htab_mgr::get_global(RQit.G_POST));
+	files_ = Hmap::newFromArray(htab_mgr::get_global(RQit.G_FILES));
 
 	verb_ = 0;
 	strictHost_ = true;

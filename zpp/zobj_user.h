@@ -35,7 +35,7 @@ namespace zpp {
 
 		zobj_user(base_d* cobj);
 		
-		
+		zobj_mgr clone() const;
 
 		const zobj_user& operator=(zend_object* rc);
 		const zobj_user& operator=(zval* rc);

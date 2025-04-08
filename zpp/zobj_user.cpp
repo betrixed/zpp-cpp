@@ -459,6 +459,16 @@ zobj_user::zobj_user(zval* zp)
     obj_ = zval_user(zp).zobject();
 }
 
+zobj_mgr
+zobj_user::clone() const 
+{
+    zend_object* copy = zend_objects_clone_obj(obj_);
+
+    zobj_mgr result;
+    result.adopt(copy);
+    return  result;
+}
+
 }; // namespace
 #endif
 //zobj_user.cpp
