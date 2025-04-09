@@ -20,7 +20,7 @@ public:
 	void init() override
 	{
 		class_name = "class_name";
-		method = "method_name";
+		method = "func_name";
 		module = "module_name";
 		index = "index";
 	}
