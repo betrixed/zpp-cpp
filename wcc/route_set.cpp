@@ -60,7 +60,7 @@ public:
 		module_name = "module_name";
 		prefix = "prefix";
 		method_sfx = "method_sfx";
-		fallback = "fallback";
+		fallback = "notFound";
 		route_set = "route_set";
 		none_tag = "<none>";
 		verb_tag = "<verb>";
