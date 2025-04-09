@@ -130,7 +130,7 @@ zstr_buffer::data() const {
 		return ZSTR_VAL(buf.s);
 	}
 	else {
-		return zstr_user::empty_zstr;
+		return zstr_user::empty;
 	}
 }
 
@@ -165,14 +165,29 @@ zstr_buffer::str()
 // zend_string s.
 // result will need to be "adopted"
 
-zend_string*
+zstr_mgr
 zstr_buffer::zstr()
 {
+	zstr_mgr result;
+
 	if (buf.s)
-		return smart_str_extract_ex(&buf, 0);
-	else 
-		return zend_empty_string;
+	{
+		zend_string* value = smart_str_extract_ex(&buf, 0);
+		result.adopt(value);
+	}
+	return result;
 }
+
+zend_string*
+zstr_buffer::finalize()
+{
+	if (buf.s)
+	{
+		return smart_str_extract_ex(&buf, 0);
+	}
+	return (zend_string*) nullptr;
+}
+
 // this doesn't seem to be useful.
 /*
 zstr_buffer& 
@@ -190,7 +205,7 @@ zstr_buffer::vstr() const
 		return std::string_view(ZSTR_VAL(buf.s), ZSTR_LEN(buf.s));
 	}
 	else {
-		return std::string_view(zstr_user::empty_zstr, 0);
+		return std::string_view(zstr_user::empty, 0);
 	}
 }
 };

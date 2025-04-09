@@ -126,7 +126,7 @@ class Response {
 
     public function getContent(): string {}
 
-    public function getHeaders():  Headers {}
+    public function getHeaders():  Hmap {}
 
     public function getStatusCode(): ?int {}
 

@@ -20,7 +20,7 @@ extern "C" {
 
 
 namespace wcc {
-	Hmap_mgr<Hmap> Hmap::omg;
+	Hmap_mgr Hmap::omg;
 
 	using namespace zpp;
 
@@ -563,7 +563,7 @@ Hmap::unhive(zstr_user subj)
 		if (ipos < original.size()) {
 			result << original.substr(ipos);
 		}
-		return std::move(result);
+		return result.zstr();
 	}
 	else {
 		return zstr_mgr(subj);

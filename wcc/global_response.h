@@ -15,20 +15,29 @@ namespace wcc {
 
 	using namespace zpp;
 
+	class Hmap;
+
 	class Response : public base_d {
 	protected:
 		zval_mgr events_;  // false|object|null
 		zobj_mgr headers_; // Hmap object
+		Hmap*    hmap_;    // Hmap cobj for convenience
+
 		zstr_mgr file_;
 		zstr_mgr content_;
 		zobj_mgr cookies_; // some cookies interface
 		bool     sent_;
 
 		Hmap* hdrs_obj() const {
-			return zobj_toc<Hmap>(headers_);
+			return hmap_;
 		}
 
+		fn_call_args<3>  header_fn;
+
+
 		zstr_mgr attach_name(zstr_user uri, zstr_user suffix);
+		bool send_each();
+		void make_header(zstr_user name, zstr_user value);
 
 	public:
 		static base_obj_mgr<Response> omg;
@@ -73,11 +82,18 @@ namespace wcc {
 
 		void setJsonContent(zval_user content, int jsonOptions=0);
 
-		
+		htab_write writer();
+
+        htab_read reader() const;
 
 		bool send();
 		bool sendHeaders();
 		bool isSent();
+
+		void send_header(zstr_user header, bool replace = true,
+			int response_code = 0);
+
+		bool headers_sent();
 
 		bool hasHeader(zstr_user name);
 
@@ -102,7 +118,7 @@ namespace wcc {
 
 		StatusCodeMap gStatusCodes;
 
-		zstr_intern    header_key;
+		zstr_intern    headers_key;
 		zstr_intern    file_key;
 		zstr_intern    content_key;
 		zstr_intern    cookies_key;
@@ -115,6 +131,25 @@ namespace wcc {
 		zstr_intern    readfile;
 		zstr_intern    Refresh;
 		zstr_intern    url_key;
+		zstr_intern    Content_Type;
+		zstr_intern    Location;
+		zstr_intern    Content_Length;
+		zstr_intern    HTTP_FS;
+		zstr_intern    text_html;
+		zstr_intern    eventqueue;
+		zstr_intern    DIR_SEP;
+		zstr_intern    AT_CHAR;
+		zstr_intern    fire_key;
+		zstr_intern    before_send;
+		zstr_intern    after_send;
+		zstr_intern    headers_sent;
+		zstr_intern    headerfn_key;
+		zstr_intern    Content_Description;
+		zstr_intern    Content_Transfer_Encoding;
+		zstr_intern    Content_Disposition;
+		zstr_intern    binary_key;
+		zstr_intern    file_transfer_key;
+		zstr_intern    application_stream;
 
 		void init() override;
 		void end() override;

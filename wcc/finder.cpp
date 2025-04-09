@@ -113,9 +113,8 @@ Finder::find(zstr_user cname)
 	zstr_mgr result;
 	zstr_mgr test_path;
 
-	zstr_user test = htab_read(classes_).get(cname);
-	if (test.size()) {
-		result = test;
+	result = htab_read(classes_).get(cname);
+	if (result.size()) {
 		return result;
 	}
 
@@ -124,7 +123,7 @@ Finder::find(zstr_user cname)
 	std::string_view vcname = cname.vstr();
 	zstr_mgr filepath(FDit.php_ext);
 
-	zstr_buffer namebuf;
+	zstr_buffer buf;
 
 	bool nsFound = false;
 
@@ -137,23 +136,19 @@ Finder::find(zstr_user cname)
 		if (pos == std::string_view::npos) 
 		{
 			{
-				namebuf << vcname.substr(0, epos) << filepath;
-				filepath = std::move(namebuf);
+				buf << vcname.substr(0, epos) << filepath;
+				filepath = buf.zstr();
 
 				for_key_value fwk;
 
 				for(fwk.start(folders_); fwk.ok(); fwk.next())
 				{
-					test = fwk.value();
+					buf << fwk.value() << FDit.dir_sep << filepath;
 
-					namebuf << test << FDit.dir_sep << filepath;
+					test_path = buf.zstr();
 
-					test_path = std::move(namebuf);
-
-
-					test = test_path;
 					//showstr("test path", test);
-					if (std::filesystem::exists(test.vstr())) 
+					if (std::filesystem::exists(test_path.vstr())) 
 					{
 						result = std::move(test_path);
 						return result;
@@ -163,32 +158,31 @@ Finder::find(zstr_user cname)
 			break;
 		}
 		
-		namebuf <<  FDit.dir_sep << vcname.substr(pos+1, epos-pos) << filepath;
-		filepath = std::move(namebuf);
+		buf <<  FDit.dir_sep << vcname.substr(pos+1, epos-pos) << filepath;
+		filepath = buf.zstr();
 
 		//showstr("filepath", filepath);
 
 		epos = pos - 1;
-		//zend_printf("pos %ld\n", pos);
+
 		zstr_user nspath = ns_array.get(vcname.substr(0,pos));
 
 		if (!nspath.isNull()) 
 		{
 			//showmem("nspath", nspath);
-			namebuf << nspath << filepath;
-			test_path = std::move(namebuf);
+			buf << nspath << filepath;
+			test_path = buf.zstr();
 			
-			test = test_path;
 			//showstr("test path", test);
-			if (std::filesystem::exists(test.vstr())) {
+			if (std::filesystem::exists(test_path.vstr())) {
 				//showstr("exists", test);
 				result = std::move(test_path);
-				return result;
+				break;
 			}
 		}
 		nsFound = true;
 	}
-	return false;
+	return result;
 }
 
 }; //namespace wcc

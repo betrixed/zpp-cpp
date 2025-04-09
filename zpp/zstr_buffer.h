@@ -26,6 +26,8 @@ namespace zpp {
 
 		void lose();
 
+		// for use by friends
+		zend_string* finalize();
 	public:
 
 		zstr_buffer();
@@ -50,16 +52,18 @@ namespace zpp {
 
 		size_t capacity() const { return buf.a; }
 
+		
+
 		zstr_buffer& operator=(const char* c);
 
 		
-		// Finalize, 0-terminate, return std::string copy, 
+		// Finalize, 0-terminate, return as std::string, 
 		std::string str();
 
-		// Finalize, give away the zend_string* (result needs adoption)
-		zend_string* zstr();
+		// Finalize, 0-terminate give away
+		zstr_mgr zstr();
 
-		// view of content
+		// view of content so far, does not finalize
 		std::string_view vstr() const;
 
 		void reset(); // release string, start again

@@ -183,8 +183,8 @@ PHP_MINIT_FUNCTION(wcc)
 	// init status code map
 #ifdef GLOBAL_RESPONSE_CPP
 	PHP_MINIT(Wcc_Response_reg)(INIT_FUNC_ARGS_PASSTHRU);
-	PHP_MINIT(Wcc_Headers_reg)(INIT_FUNC_ARGS_PASSTHRU);
 #endif
+	
 	//REGISTER_INI_ENTRIES();
 	//PHP_MINIT(phiz_str8)(INIT_FUNC_ARGS_PASSTHRU);
 	//PHP_MINIT(phiz_carray)(INIT_FUNC_ARGS_PASSTHRU);

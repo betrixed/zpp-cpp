@@ -805,7 +805,8 @@ void Wcc_XmlRead::setDateTime(zstr_user key)
 {
 	zval_mgr arg = xml_.xml_str_zval();
 
-	datetime_obj obj_val(arg);
+
+	datetime_obj obj_val(zval_user(arg).zstr());
 
 	//showobj("datetime", obj_val);
 	zval_mgr zw(obj_val);

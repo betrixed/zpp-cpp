@@ -13,23 +13,21 @@ extern "C" {
 #endif
 
 namespace wcc {
-	Hmap_mgr<Headers> Headers::omg;
+	Hmap_mgr Headers::omg;
 
 bool Headers::send()
 {
-	//zend_printf("headers_sent yet?\n");
+
 	zval_mgr issent = wis->headers_sent.callme();
-	//showmem("issent", issent);
 
 	if (issent.isTrue())
 	{
 		return false;
 	}
-	//zend_printf("Not sent yet\n");
 
 	htab_walk wk;
-	auto& hkey = wk.key();
-	auto& hvalue = wk.value();
+	auto hkey = wk.key();
+	auto hvalue = wk.value();
 
 	zval_mgr true_arg(true);
 

@@ -275,14 +275,14 @@ const zstr_mgr&
 zstr_mgr::operator=(zstr_buffer&& m)
 {
 	lose();
-	//zend_printf("zstr_buffer size %ld, capacity %ld\n", m.size(), m.capacity());
-	s = m.zstr(); // zstr_buffer cleared by this, refcount==1
+	// zstr_buffer cleared by this, refcount==1
+	s = m.finalize(); 
 	return *this;
 }
 
 zstr_mgr::zstr_mgr(zstr_buffer&& m)
 {
-	s = m.zstr();// zstr_buffer cleared by this, refcount==1
+	s = m.finalize();// zstr_buffer cleared by this, refcount==1
 }
 
 

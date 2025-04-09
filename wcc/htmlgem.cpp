@@ -288,7 +288,7 @@ HtmlGem::ensureIdValue(htab_write ht)
 
 	//nameval.append((int)id_add_);
 
-	result = std::move(nameval);
+	result = nameval.zstr();
 	//showstr("set id", result);
 	ht.set(HTG.idkey, result);
 	return result;

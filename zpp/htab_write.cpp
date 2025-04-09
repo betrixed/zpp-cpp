@@ -379,7 +379,7 @@ htab_mgr
 htab_write::extract(htab_read exkeys)
 {
 
-	htab_mgr 		result;
+	htab_mgr 		 result;
 	htab_write merger(result);
 	//showarray("exkeys", exkeys);
 
@@ -405,7 +405,29 @@ htab_write::extract(htab_read exkeys)
 	return result;
 }
 
+void
+htab_write::removal(htab_read exkeys)
+{
+	//showarray("exkeys", exkeys);
 
+	htab_walk wk;
+
+	auto exkey = wk.value();
+
+	for(wk.start(exkeys); wk.ok(); wk.next()) 
+	{
+		//showarray("extract from", ht_);
+		//showmem("value for key", exkey);
+
+		zval_user v2 = this->get(exkey);
+		
+		if (v2.ok()) 
+		{
+			//showmem("extract value", v2);
+			this->unset(exkey);
+		}
+	}
+}
 
 }; // namespace zpp
 

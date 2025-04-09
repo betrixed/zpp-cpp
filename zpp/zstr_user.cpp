@@ -18,7 +18,8 @@ extern "C" {
 
 namespace zpp {
 
-const char* zstr_user::empty_zstr = "\0";
+const char* zstr_user::empty = "\0";
+
 
 int 
 zs_cmp(zend_string* a, zend_string* b)
@@ -101,7 +102,7 @@ zstr_user::data() const
 {
 	if (!s)
 	{
-		return empty_zstr;
+		return empty;
 	}
 	return ZSTR_VAL(s);
 }
@@ -141,7 +142,7 @@ zstr_user::getDouble() const
 std::string 
 zstr_user::cstr() const
 {
-    const char* ps = s ? (const char*) ZSTR_VAL(s) : empty_zstr;
+    const char* ps = s ? (const char*) ZSTR_VAL(s) : empty;
 	size_t      slen = s ? ZSTR_LEN(s) : 0;
 
 	return std::string(ps, slen);
@@ -150,7 +151,7 @@ zstr_user::cstr() const
 std::string_view 
 zstr_user::vstr() const 
 {
-	const char* ps = s ? (const char*) ZSTR_VAL(s) : empty_zstr;
+	const char* ps = s ? (const char*) ZSTR_VAL(s) : empty;
 	size_t      slen = s ? ZSTR_LEN(s) : 0;
 
 	return std::string_view(ps, slen);

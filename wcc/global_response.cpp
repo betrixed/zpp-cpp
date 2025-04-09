@@ -100,7 +100,7 @@ void Response_init::init()
 		{511, "Network Authentication Required"}
 	};
 
-	header_key = "headers";
+	headers_key = "headers";
 	file_key = "file";
 	content_key = "content";
 	cookies_key = "cookies";
@@ -113,6 +113,26 @@ void Response_init::init()
 	readfile = "readfile";
 	Refresh = "Refresh";
 	url_key = "url";
+	Content_Type = "Content-Type";
+	Location = "Location";
+	Content_Length = "Content-Length";
+	HTTP_FS = "HTTP/";
+	text_html = "text/html";
+	eventqueue = "eventqueue";
+	DIR_SEP = "DIRECTORY_SEPARATOR";
+	AT_CHAR = "@";
+	fire_key = "fire";
+	before_send = "response:beforeSendHeaders";
+	after_send = "response:afterSendHeaders";
+	headers_sent = "headers_sent";
+	headerfn_key = "header";
+	Content_Description = "Content-Description";
+	Content_Transfer_Encoding = "Content-Transfer-Encoding";
+	Content_Disposition = "Content-Disposition";
+	binary_key = "binary";
+	file_transfer_key = "File Transfer";
+	application_stream = "application/octet-stream";
+
 
 }; // end initHttpCodes
 
@@ -134,7 +154,7 @@ Response_init::getHttpCodeMsg(int code)
 	return zstr_mgr();
 
 };
-};
+
 
 Response_init RSPD;
 
@@ -147,6 +167,8 @@ Response::construct(
 			zstr_user  status)
 {
 	headers_ = Hmap::omg.new_zobj();
+	hmap_ = zobj_toc<Hmap>(headers_);
+
 	zval_user(events_).setbool(false);
 	sent_ = false;
 
@@ -163,14 +185,47 @@ Response::construct(
 			setStatusCode(code.zlong(), status);
 		}
 	}
+
+	header_fn.set_fname(RSPD.headerfn_key);
+
+}
+
+void 
+Response::send_header(zstr_user header, bool replace,
+			int response_code)
+{
+	//showstr("send_header", header);
+	if (sent_)
+	{
+		return;
+	}
+	zval* args = header_fn.argsptr();
+
+	ZVAL_STR(args, header);
+	ZVAL_BOOL(args+1, replace);
+	ZVAL_LONG(args+2, response_code);
+
+	// no result expected
+	header_fn.call_fn();
+}
+
+htab_write 
+Response::writer()
+{
+	return hmap_->writer();
+}
+
+htab_read Response::reader() const
+{
+	return hmap_->reader();
 }
 
 
 void
 Response::debug_info(htab_write hw)
 {
-	// might as well reuse header_key
-	hw.set(RSPD.header_key, headers_);
+	// might as well reuse headers_key
+	hw.set(RSPD.headers_key, headers_);
 
 	hw.set(RSPD.file_key,  file_);
 
@@ -224,9 +279,9 @@ Response::setExpires(zval_user exptime)
 
 	buf << utc.format(zstr_temp("D, d M Y H:i:s")) << " GMT";
 
-	zstr_mgr time(std::move(buf));
+	zstr_mgr time = buf.zstr();
 
-	htab_write hw = hto->writer();
+	htab_write hw = writer();
 	hw.set(RSPD.Expires, time);
 }
 
@@ -306,8 +361,7 @@ Response::send()
 void 
 Response::setHeader(zstr_user key, zstr_user value)
 {
-	Hmap* hdr = hdrs_obj();
-	htab_write hw(hdr->writer());
+	htab_write hw(writer());
 
 	hw.set(key, value);
 }
@@ -315,12 +369,12 @@ Response::setHeader(zstr_user key, zstr_user value)
 void 
 Response::delay_redirect(zstr_user location, int delay)
 {
-	Hmap* hdr = hdrs_obj();
-	htab_write hw(hdr->writer());
+	htab_write hw(writer());
 
 	zstr_buffer buf;
 	buf << delay;
-	zstr_mgr delaystr(std::move(buf));
+
+	zstr_mgr delaystr(buf.zstr());
 
 	hw.set(RSPD.Refresh, delaystr);
 	hw.set(RSPD.url_key, location);
@@ -334,7 +388,7 @@ Response::delay_redirect(zstr_user location, int delay)
 		<< location << " after " << delay 
 		<< " seconds</pre></body></html>";
 
-	zstr_mgr out(std::move(buf));
+	zstr_mgr out(buf.zstr());
 	setContent(out);
 }
 
@@ -350,7 +404,7 @@ Response::sendCookies()
 	if (!cookies_.isNull())
 	{
 		zval_mgr result = cookies_.call(zstr_temp("send"));
-		return zstr_user(result).isTrue();
+		return zval_user(result).isTrue();
 	}
 	return true;
 }
@@ -363,9 +417,10 @@ Response::redirect(zstr_user location, bool external, int statusCode)
 	{
 		statusCode = 302;
 	}
-	setStatusCode(302, zstr_base());
+	setStatusCode(302, zstr_empty());
+	htab_write hw(writer());
 
-	hdrs_obj()->set(zstr_temp("Location"), location);
+	hw.set(RSPD.Location, location);
 }
 
 void 
@@ -377,18 +432,23 @@ Response::setContentType(zstr_user ctype, zstr_user charset)
 void 
 Response::resetHeaders()
 {
-	hdrs_obj()->reset();
+	htab_write hw(writer());
+	hw.clear();
 }
 
 void Response::setContentLength(int clen)
 {
-	zval_mgr temp(clen);
-	zstr_pass pass(temp.to_zstr());
-	hdrs_obj()->set(zstr_temp("Content-Length"), pass);
+	zstr_buffer buf;
+
+	buf << clen;
+	zstr_mgr pass(buf.zstr());
+	writer().set(RSPD.Content_Length, pass);
 }
 
 void 
-Response::setContentType(const std::string_view& ctype, const std::string_view& charset)
+Response::setContentType(
+	const std::string_view& ctype, 
+	const std::string_view& charset)
 {
 	zstr_buffer buf;
 	buf << ctype;
@@ -396,9 +456,11 @@ Response::setContentType(const std::string_view& ctype, const std::string_view& 
 	{
 		buf << "; charset=" << charset;
 	}
-	zstr_mgr hvalue(std::move(buf));
+	zstr_mgr hvalue(buf.zstr());
+	//showstr("hvalue", hvalue);
 
-	hdrs_obj()->set(wis->content_type, hvalue);
+	htab_write hw(writer());
+	hw.set(RSPD.Content_Type, hvalue);
 }
 
 void 
@@ -410,28 +472,37 @@ Response::setContent(zstr_user  content)
 void 
 Response::setStatusCode(int icode, zstr_user  message)
 {
-
-	Headers* hobj = hdrs_obj();
-
-	htab_ptr rawhdrs = hobj->toArray();
+	htab_read rawhdrs(reader());
 
 	htab_walk wk;
-	auto& key = wk.key();
-	auto& val = wk.value();
+	auto  key = wk.key();
+	auto  val = wk.value();
 
-	
+	htab_mgr   keylist;
+	htab_write rkeys(keylist);
+
+	std::string_view needle = RSPD.HTTP_FS.vstr();
 
 	for(wk.start(rawhdrs); wk.ok(); wk.next())
 	{
 		if (key.isString())
 		{
 			zstr_user hkey(key.zstr());
-			int xpos = hkey.find("HTTP/");
+
+			int xpos = hkey.find(needle,0);
+
 			if (xpos >= 0) {
-				hobj->remove(hkey);
+				rkeys.push_back(hkey);
 			}
 		}
 	}
+
+	htab_write hw = writer();
+	if (rkeys.size()) 
+	{
+		hw.removal(rkeys);
+	}
+
 	zstr_mgr msg;
 
 	if ((icode != 0) && (message.size()==0))
@@ -451,30 +522,25 @@ Response::setStatusCode(int icode, zstr_user  message)
 	}
 	zstr_buffer buf;
 	buf << icode << " " << msg;
-
-	zstr_mgr status(std::move(buf));
-
+	zstr_mgr status(buf.zstr());
 
 	zstr_buffer hraw;
 	hraw << "HTTP/1.1 " << status;
 
 
-	zstr_mgr rawstatus(std::move(hraw));
+	zstr_mgr rawstatus(hraw.zstr());
 
-
-	hobj->setRaw(rawstatus);
-
-	hobj->set(zstr_temp("Status"), status);
-
-
+	zval_mgr null_value;
+	hw.set(rawstatus, null_value);
+	hw.set(RSPD.Status, status);
 }
 
 void 
 Response::ajaxHtml(zstr_user  content)
 {
-	setContentType(wis->text_html, wis->utf8);
+	setContentType(RSPD.text_html, RSPD.utf8);
 	setContent(content);
-	setStatusCode(200,wis->emptystr);
+	setStatusCode(200,zstr_empty());
 }
 
 bool 
@@ -486,8 +552,8 @@ Response::hasContent()
 bool
 Response::hasHeader(zstr_user name)
 {
-	Headers* hobj = hdrs_obj();
-	return hobj->has(name);
+	htab_read rd(reader());
+	return rd.has_key(name);
 }
 
 zstr_mgr 
@@ -503,19 +569,20 @@ Response::appendContent(zstr_user  content)
 
 	buf << content_ << content;
 
-	content_ = std::move(buf.zstr());
+	content_ = buf.zstr();
 }
 
 zobj_mgr 
 Response::getEventQueue()
 {
-	if (events_.isFalse())
+	zval_user test(events_);
+
+	if (test.isFalse())
 	{
-		//zend_printf("get eventqueue\n");
-		events_ = Wcc_Services::service(zstr_temp("eventqueue"));
-		//showmem("Return Event Queue", events_);
+		events_ = Services::service(RSPD.eventqueue);
 	}
-	return std::move(events_);
+	// object or null
+	return zobj_mgr(test.zobject());
 }
 
 void 
@@ -527,41 +594,37 @@ Response::ajaxJson(zval_user  content)
 zstr_mgr // protected
 Response::attach_name(zstr_user uri, zstr_user suffix)
 {
-	zval_user DIR_SEP = zstr_base::zend_constant(wis->DIR_SEP); 
+	zval_user DIR_SEP = zval_user::php_constant(RSPD.DIR_SEP); 
 	zstr_user sDIR_SEP(DIR_SEP);
 	
-	zstr_user s_uri(uri);
+	zstr_mgr t_uri = uri.trim(sDIR_SEP.data(), zstr_user::RTRIM);
 
-	zstr_mgr t_uri = s_uri.trim(sDIR_SEP.data(), zstr_user::RTRIM);
-	zstr_temp delimiter("@");
-
-	zstr_mgr QREGEX = preg_quote(DIR_SEP, delimiter);
+	zstr_mgr QREGEX = preg_quote(DIR_SEP, RSPD.AT_CHAR);
 
 	zstr_buffer buf;
 	buf << "@[^" << QREGEX << "]+$@";
 
-	preg filename_match(buf.zstr());
+	zstr_mgr regex(buf.zstr());
+
+	preg filename_match(regex);
 
 	zstr_mgr filename;
 
 	if (filename_match.matches(t_uri))
 	{
-		htab_ptr htab = filename_match.array();
+		htab_read htab(filename_match.captures());
 		filename = htab[int(0)];
-	}
-	else {
-		filename.clear();
 	}
 
 	if (suffix.size()) {
-		QREGEX = preg_quote(suffix, delimiter);
+		QREGEX = preg_quote(suffix, RSPD.AT_CHAR);
 
 		buf << "@" << QREGEX << "$@";
 
-		zstr_mgr regex(std::move(buf));
-		zval_mgr rname = preg_replace(regex.data(), "", filename);
+		regex = buf.zstr();
+		zval_mgr rname = preg_replace(regex.data(), zstr_user::empty, filename);
 
-		filename = rname.zstr();
+		filename = zval_user(rname).zstr();
 
 	}
 	return filename;
@@ -574,15 +637,21 @@ Response::fireEvent(zstr_user eventType)
 	zobj_mgr mgr = getEventQueue();
 	zval_mgr result;
 
-	if (!mgr.isNull())
+	if (mgr.ok())
 	{
-		zval_mgr arg1(eventType);
-		zval_mgr arg2(this->zobj());
-		result = mgr.call(zstr_temp("fire"),arg1, arg2);
+		fn_call_args<2> fire;
+		fire.set_fci(mgr, RSPD.fire_key);
+
+		zval* args = fire.argsptr();
+		ZVAL_STR(args, eventType);
+		ZVAL_OBJ(args+1, this->vobj());
+
+		result = fire.call_fn();
+
 		return result;
 	}
 	
-	result.setbool(true); // pretend
+	zval_user(result).setbool(true); // pretend
 	return result;
 };
 
@@ -591,30 +660,82 @@ Response::sendHeaders()
 {
 	//zend_printf("Call getEventQueue\n");
 	zobj_mgr mgr = getEventQueue();
+	bool hasMgr =  mgr.ok();
 
 	//showobj("event mgr", mgr);
 	zval_mgr result;
 
-	bool hasMgr = !mgr.isNull();
-
 	if (hasMgr)
 	{
-		result = fireEvent(zstr_temp("response:beforeSendHeaders"));
-		if (result.isFalse())
+		result = fireEvent(RSPD.before_send);
+		if (zval_user(result).isFalse())
 		{
 			return false;
 		}
 	}
-	//zend_printf("Call headers->send\n");
 
-	bool ok = hdrs_obj()->send();
+	bool ok = this->send_each();
 
 	if (ok && hasMgr)
 	{
-		fireEvent(zstr_temp("response:afterSendHeaders"));
+		fireEvent(RSPD.after_send);
 	}
 
 	return ok;
+}
+
+bool 
+Response::send_each()
+{
+	//zend_printf("headers_sent yet?\n");
+	bool issent = headers_sent();
+
+	if (issent)
+	{
+		//zend_printf("Already sent \n");
+		return false;
+	}
+	//zend_printf("Not sent yet\n");
+
+	htab_walk wk;
+	auto hkey = wk.key();
+	auto hvalue = wk.value();
+
+	htab_read rd(reader());
+
+	std::string_view http_prefix = RSPD.HTTP_FS.vstr();
+
+	zstr_mgr hstr;
+	zstr_buffer buf;
+
+	for(wk.start(rd); wk.ok(); wk.next())
+	{
+		zstr_mgr harg = hkey.zstr();
+		if (!hvalue.isNull())
+		{
+			
+
+			buf << harg << ": " << hvalue.zstr();
+			hstr = buf.zstr();
+			//showstr("hstr 1", hstr);
+			send_header(hstr, true);
+
+		}
+		else {
+			if ( (harg.find(':') >= 0) || (harg.subview(0,5)==http_prefix))
+			{
+				send_header(harg,true);
+			}
+			else 
+			{
+				buf << harg << ": ";
+				hstr = buf.zstr();
+				//showstr("hstr 2", hstr);
+				send_header(hstr,true);
+			}
+		}
+	}
+	return true;
 }
 
 bool 
@@ -623,6 +744,32 @@ Response::isSent()
 	return sent_;
 }
 
+bool 
+Response::headers_sent()
+{
+	if (sent_)
+	{
+		return sent_;
+	}
+	fn_call hsfn;
+
+	hsfn.set_fname(RSPD.headers_sent);
+	zval_mgr result = hsfn.call_fn();
+	sent_ = zval_user(result).isTrue();
+	return sent_;
+}
+
+void Response::make_header(
+	zstr_user name,
+	zstr_user value
+	)
+{
+	zstr_buffer buf;
+
+	buf << name << ": " << value;
+	zstr_mgr raw(buf.zstr());
+	setRawHeader(raw);
+}
 
 void Response::setFileToSend(
 	zstr_user path, 
@@ -637,41 +784,47 @@ void Response::setFileToSend(
 		basePath = attachName;
 	}
 	else {
-		basePath = this->attach_name(path, zstr_base());
+		basePath = this->attach_name(path, zstr_empty());
 	}
-
-	Headers* hobj = hdrs_obj();
 
 	if (attachment) {
 
-		if (function_exists(wis->mb_detect_order))
+		if (function_exists(STAB.mb_detect_order))
 		{
 			encoding = mb_detect_encoding(basePath, mb_detect_order(zval_mgr()), true);
 		}
-		hobj->setRaw(zstr_temp("Content-Description: File Transfer"));
-		hobj->setRaw(zstr_temp("Content-Type: application/octet-stream"));
-		hobj->setRaw(zstr_temp("Content-Transfer-Encoding: binary"));
+		zval_mgr null_value;
 
-		zstr_temp disposition("Content-Disposition: attachment; filename=");
+		make_header(RSPD.Content_Description, RSPD.file_transfer_key);
+		make_header(RSPD.Content_Type, RSPD.application_stream);
+		make_header(RSPD.Content_Transfer_Encoding, RSPD.binary_key);
+
+		zstr_buffer buf;
+		zstr_mgr temp;
+
+		buf << "attachment; filename=";
+		zstr_mgr disposition(buf.zstr());
 
 		if(encoding.vstr() != "ASCII") 
 		{
 			basePath = rawurlencode(basePath);
-			zstr_buffer buf;
+			temp = encoding.to_lower();
 
 			buf << disposition << basePath
-			    << "; filename*=" << encoding.to_lower() << "''" << basePath;
+			    << "; filename*=" 
+			    << temp << "''" << basePath;
+			temp =  buf.zstr();
 
-			hobj->setRaw(buf.zstr());
+			make_header(RSPD.Content_Disposition, temp);
 		}
 		else {
 			basePath = addcslashes(basePath,zstr_temp("\15\17\\\""));
 
 			const char dquote = '"';
-			zstr_buffer buf;
 			buf << disposition << dquote << basePath << dquote;
-			
-			hobj->setRaw(buf.zstr());
+			temp = buf.zstr();
+
+			make_header(RSPD.Content_Disposition, temp);
 		}
 	}
 	file_ = path;
@@ -680,8 +833,10 @@ void Response::setFileToSend(
 void 
 Response::setRawHeader(zstr_user header)
 {
-	Headers* hobj = hdrs_obj();
-	hobj->setRaw(header);
+	htab_write hw(writer());
+	zval_mgr null_value;
+
+	hw.set(header,null_value);
 }
 
 }; // namespace wcc
@@ -710,7 +865,7 @@ ZEND_METHOD(Wcc_Response, __construct)
 		arg_code = code;
 	}
 
-	cobj->construct(content,arg_code.ptr(),status);
+	cobj->construct(content,arg_code,status);
 }
 
 ZEND_METHOD(Wcc_Response, ajaxHtml)
@@ -778,7 +933,7 @@ ZEND_METHOD(Wcc_Response, getEventQueue)
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	auto cobj = zval_toc<Response> (ZEND_THIS);
-	zval_mgr result = cobj->getEventQueue();
+	zobj_mgr result = cobj->getEventQueue();
 	result.move_zv(return_value);
 }
 
@@ -796,8 +951,8 @@ ZEND_METHOD(Wcc_Response, getHeaders)
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	auto cobj = zval_toc<Response> (ZEND_THIS);
-	zval_mgr result = cobj->getHeaders();
-	result.move_zv(return_value);	
+	zobj_user result = cobj->getHeaders();
+	result.return_zv(return_value);	
 }
 
 ZEND_METHOD(Wcc_Response, getStatusCode)

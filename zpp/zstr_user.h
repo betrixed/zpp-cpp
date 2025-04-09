@@ -21,13 +21,14 @@ namespace zpp {
 	    friend class zstr_mgr;
 
 	public:
+
+		static const char* empty;
+
 		enum {
 			LTRIM = 1,
 			RTRIM = 2,
 			LRTRIM = 3
 		};
-
-		static const char* empty_zstr;
 
 		zstr_user() : s( (zend_string*) nullptr) {}
 

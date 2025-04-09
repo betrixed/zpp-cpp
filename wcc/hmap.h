@@ -13,6 +13,7 @@ namespace wcc {
 
 class Hmap_php 
 {
+public:
 	static ZEND_RESULT_CODE count_elements(zend_object* object, zend_long* count);
 	
 	static zval* 	  read_property(zend_object* object, zend_string* name, int type, void** cache_slot, zval* rv);
@@ -76,15 +77,15 @@ public:
 };
 
 //* for maybe class inheritance of Hmap
-template <typename T> 
-class Hmap_mgr : public base_obj_mgr<T>
+class Hmap;
+
+class Hmap_mgr : public base_obj_mgr<Hmap>
 {
-public:
-
 protected:
-	typedef base_obj_mgr<T> mydef;
+	//typedef base_obj_mgr<T> mydef;
 
-	virtual void init_class_fn() {
+	void init_class_fn() override 
+	{
 	// base class
 		mydef::init_class_fn();
 
@@ -131,7 +132,7 @@ public:
 	{
 	    return htab_write(data_);
 	}
-	static Hmap_mgr<Hmap> omg;
+	static Hmap_mgr omg;
 	
 	//void debug_info(htab_write hw) override;
 	
@@ -146,14 +147,14 @@ public:
 	bool   has(zstr_user name);
 	
 	zval_mgr get(zstr_user name);
-	
+	zval_mgr get(zval_user name);
+
 	void   set(zstr_user name, zval_user value);
+	void   set(zval_user key, zval_user value);
 
 	void   unset(zstr_user name);
+	void   unset(zval_user key);
 	
-	zval_mgr get(zval_user name);
-	void   set(zval_user key, zval_user value);
-	void 	 unset(zval_user key);
 	bool   has(zval_user  key);
 
 	// for ArrayAccess interface, dimensions interface

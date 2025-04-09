@@ -187,6 +187,9 @@ public:
      */
     const zval_user& operator=(const zval_mgr& rc);
 
+    static 
+    zval_user php_constant(zstr_user name);
+
 };
 
 };

@@ -395,6 +395,12 @@ zval_user::refcount() const
 		return 0;
 }
 
+zval_user 
+zval_user::php_constant(zstr_user name)
+{
+	return zval_user(zend_get_constant(name));
+}
+
 };
 //zval_user.cpp
 #endif

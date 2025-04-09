@@ -101,6 +101,9 @@ namespace zpp {
          *  return them in new array 
          */
         htab_mgr extract(htab_read exkeys);
+
+        /** Delete the keys in the exkeys list */
+        void removal(htab_read exkeys);
     };
 
 };
