@@ -49,10 +49,8 @@ zstr_buffer::zstr_buffer(zval *v) : zstr_output()
 
 zstr_buffer::zstr_buffer(zend_string* w) : zstr_output()
 {
-	initbuf();	
-	if (w) {
-		append(ZSTR_VAL(w), ZSTR_LEN(w));
-	}
+	initbuf();
+	zstr_output::append(w);	
 }
 
 zstr_buffer::zstr_buffer(const std::string_view& cs) : zstr_output()
@@ -127,6 +125,7 @@ zstr_buffer::operator=(const char* c)
 const char* 
 zstr_buffer::data() const {
 	if (buf.s) {
+		smart_str_0((smart_str*) &buf);
 		return ZSTR_VAL(buf.s);
 	}
 	else {

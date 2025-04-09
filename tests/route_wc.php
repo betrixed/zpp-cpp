@@ -40,7 +40,7 @@ debug_zpp_dump($targ1);
 
 
 echo "make route\n";
-$r1 = Route::get( "/target", $targ1)->name("default");
+$r1 = Route::get( "/target", $targ1, Route::AJAX_ONLY)->name("default");
 debug_zpp_dump($r1);
 
 //0
@@ -77,6 +77,10 @@ debug_zpp_dump($radd);
 
 $rm = new RouteMatch("/index.php", Route::GET_I, Route::AJAX_ALSO);
 
+$rm2 = new RouteMatch("/target", Route::GET_I, Route::AJAX_ONLY);
+
+$rm3 = new RouteMatch("/admin/dash/cmd/model_cache",Route::GET_I, Route::AJAX_ONLY);
+
 //echo print_r($rm, true) . PHP_EOL;
 
 //debug_zpp_dump($rset);
@@ -88,6 +92,41 @@ else {
 }
 echo "Break " . PHP_EOL;
 
+echo "RM2 = ";
+if ($rm2->findRoute($radd))
+{
+	echo "found" . PHP_EOL;
+	$r = $rm2->getMatch();
+	echo print_r($r,true) . PHP_EOL;
+}
+else {
+	
+
+	echo "not found" . PHP_EOL;
+}
+
+$radd->addRoutes(prefix: "admin", module: "admin", list: [
+    Route::get("dash/timeout", Target::go(Dash::class, "timeout"), 
+    	Route::AJAX_ONLY)->name("dash.timeout"),
+    Route::get("dash", Target::go(Dash::class, "show"))->name("dash.show"),
+    Route::get("info", Target::go(Dash::class, "info"))->name("dash.info"),
+    Route::get("dash/cmd/:fn", Target::go(Dash::class, "cmd"), 
+    	Route::AJAX_ONLY)->name("dash.cmd")
+]);
+
+echo "RM3 ";
+$rm3->findRoute($radd);
+if ($rm3->findRoute($radd))
+{
+	echo "found" . PHP_EOL;
+	$r = $rm3->getMatch();
+	echo print_r($r,true) . PHP_EOL;
+}
+else {
+	
+
+	echo "not found" . PHP_EOL;
+}
 
 //$services = Services::instance();
 

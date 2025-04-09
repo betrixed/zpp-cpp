@@ -510,7 +510,9 @@ RouteSet::compile(Route* route)
 	//sink << pr2 << " pattern vstr" << pattern.vstr() << '\n';
 
 	zstr_buffer  pattern(init_pattern);
-	zstr_buffer  compiled;
+	zstr_buffer  compiled(init_pattern);
+
+	//zend_printf("pattern buf %s len=%d\n", pattern.data(), pattern.size());
 
 	zstr_mgr name;
 	zstr_mgr blob;

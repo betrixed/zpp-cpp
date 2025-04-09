@@ -36,10 +36,13 @@ function make_object(string $classname, string $alias): object
 $data = file_get_contents(__DIR__ . "/sglobal.json");
 
 $_SERVER = json_decode($data,true);
+$_SERVER['HTTP_X_REQUESTED_WITH'] = "XMLHttpRequest";
 
 $svc = Services::instance();
 
 $request = make_object(RequestGlobals::class, 'request');
+
+echo "IS_AJAX = " . (int) $request->isAjax() . PHP_EOL;
 
 //echo debug_zpp_dump($request) . PHP_EOL;
 
@@ -53,7 +56,7 @@ echo "URI is " . $test . PHP_EOL;
 $map = $request->getServer();
 
 
-echo $map->Count() . "----\n";
+echo count($map) . "----\n";
 
 /*
 foreach($map as $key => $value)

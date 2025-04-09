@@ -46,13 +46,11 @@ namespace zpp {
 
 		virtual ~zstr_buffer();
 
-		virtual void append(const char* c, size_t slen);
+		void append(const char* c, size_t slen) override;
 
-		virtual void append(char c);
+	    void append(char c) override;
 
 		size_t capacity() const { return buf.a; }
-
-		
 
 		zstr_buffer& operator=(const char* c);
 

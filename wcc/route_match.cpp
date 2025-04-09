@@ -185,7 +185,8 @@ RouteMatch::find_route(RouteSet* routeset)
 
 	for( walk.start(routeset->vary_); walk.ok(); walk.next())
 	{
-		preg rexpmatch(key.zstr());
+		zstr_user pattern(key);
+		preg rexpmatch(pattern);
 
 		//showmem("key", key);
 
@@ -199,6 +200,9 @@ RouteMatch::find_route(RouteSet* routeset)
 				//match_args_.dec_ref();
 				//showmem("match_args_", match_args_);
 				return true;
+			}
+			else {
+				zend_printf("Route pattern match but flags failed: %s\n", pattern.data());
 			}
 		}
 	}
