@@ -995,7 +995,7 @@ zstr_mgr glyph_out(zstr_user glyph)
 zstr_mgr 
 HtmlGem::linkTo(zval_user pset)
 {
-	htab_mgr pscopy(pset.zarray());
+	htab_mgr   pscopy(pset.zarray());
 	htab_write ps(pscopy);
 	
 	zstr_mgr href = ps.get(HTG.hrefkey);

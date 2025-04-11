@@ -34,6 +34,8 @@ public:
 	void init();
 };
 
+OBtable   OBfn;
+
 class PlateInit : public state_init {
 public:
 	PlateInit() : state_init(){}
@@ -62,7 +64,7 @@ public:
 	zstr_intern addstyle_fn;
 	zstr_intern assets_key;
 
-	virtual void init()
+	void init() override
 	{
 		engine_key = "engine";
 		name_key = "name";
@@ -77,20 +79,27 @@ public:
 		get_html = "gethtml";
 
 		content_key = "content";
-		obgetclean_fn = "obgetclean";
-		obstart_fn = "obstart";
-		obgetlevel_fn = "obgetlevel";
-		obendclean_fn = "obendclean";
-		obgetcontents_fn = "obgetcontents";
+		obgetclean_fn = "ob_get_clean";
+		obstart_fn = "ob_start";
+		obgetlevel_fn = "ob_get_level";
+		obendclean_fn = "ob_end_clean";
+		obgetcontents_fn = "ob_get_contents";
 
 		pushed_key = "pushed";
 		addstyle_fn = "addstyle";
 		assets_key = "assets";
+
+
+	}
+
+	void init_req() override
+	{
+		OBfn.init();
 	}
 };
 
 PlateInit PLD;
-OBtable   OBfn;
+
 
 void
 OBtable::init()
