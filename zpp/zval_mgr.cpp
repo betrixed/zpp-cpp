@@ -97,6 +97,15 @@ zval_mgr::operator=(zend_long value)
     return *this;
 }
 
+const zval_mgr& 
+zval_mgr::operator=(double value)
+{
+    try_decref(&zv_);
+    zv_ = {0};
+    ZVAL_DOUBLE(&zv_, value);
+    return *this;
+}
+
 zval_mgr::zval_mgr() 
 {
     zv_ = {0};

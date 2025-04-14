@@ -72,8 +72,6 @@ public:
 
 	static zobj_mgr methods(int verbs, zstr_user pattern, zval_user target, int ajax = ajax::AJ_NONE);
 
-	
-
 	void construct(int verbs, zstr_user pattern, zval_user target);
 
 	void name(zstr_user name);

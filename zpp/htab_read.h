@@ -15,7 +15,8 @@ namespace zpp {
     
     class  zval_mgr;
 
- 
+    class  htab_mgr;
+
     class  htab_read {
     protected:
         HashTable* ht_;
@@ -29,8 +30,6 @@ namespace zpp {
         htab_read() : ht_(nullptr) {}
 
         htab_read(const htab_read& rc) : ht_(rc.ht_) {}
-
-        htab_read(const htab_mgr& rc) : ht_(rc.ht_) {}
         
         htab_read(HashTable* ht);
 

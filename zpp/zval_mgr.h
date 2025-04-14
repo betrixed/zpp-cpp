@@ -93,6 +93,7 @@ public:
     void set_bool(bool value);
     void set_null();
 
+
     void new_array();
     void empty_array();
 
@@ -103,6 +104,8 @@ public:
     const zval_mgr& operator=(const zstr_mgr &rc);
 
     const zval_mgr& operator=(zend_long value);
+
+    const zval_mgr& operator=(double value);
 
     const zval_mgr& operator=(const zval_mgr &rc);
 

@@ -651,8 +651,9 @@ PHP_METHOD(Wcc_RouteMatch, getVerbName)
 	ZEND_PARSE_PARAMETERS_NONE();
 	RouteMatch* cobj = zval_toc<RouteMatch>(ZEND_THIS);
 	
+	zstr_mgr result = Route::getVerb(cobj->verb_flag_);
 
-	route_verbflag_name(cobj->verb_flag_, return_value);
+	result.move_zv(return_value);
 }
 
 PHP_METHOD(Wcc_RouteMatch, getErrors)

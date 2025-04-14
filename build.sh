@@ -17,6 +17,7 @@ make ./stub/icache_arginfo.h
 make ./stub/htmlgem_arginfo.h
 make ./stub/request_globals_arginfo.h
 make ./stub/global_response_arginfo.h
+make ./stub/toml_arginfo.h
 
 #make sqlipart_arginfo.h
 #make toml_arginfo.h

@@ -62,7 +62,7 @@ extern "C" {
 #include "wcc/service_access.cpp"
 
 #include "wcc/money_fmt.cpp"
-
+#include "toml/toml_php.cpp"
 #include "wcc/htmlgem.cpp"
 #include "wcc/search_list.cpp"
 #include "wcc/plate.cpp"

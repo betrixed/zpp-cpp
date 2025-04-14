@@ -1,16 +1,16 @@
 #ifndef HTAB_MGR_H
 #define HTAB_MGR_H
 
+#ifndef HTAB_READ_H
+#include "htab_read.h"
+#endif
 
 namespace zpp {
 
-    class htab_read;
     class htab_write;
 
-    class htab_mgr {
+    class htab_mgr : public htab_read {
     protected:
-        HashTable* ht_;
-
         void  own();
         void  lose();
         static bool cowop(HashTable*& inout);
@@ -31,7 +31,7 @@ namespace zpp {
         static zval_user  get_global(zstr_user key);
         
         ~htab_mgr();
-        htab_mgr() : ht_(nullptr) {}
+        htab_mgr() : htab_read() {}
 
         htab_mgr(htab_mgr&& m);
         htab_mgr(zval_mgr&& zw);

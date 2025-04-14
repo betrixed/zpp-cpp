@@ -19,7 +19,7 @@
 
 // zend_module_entry wcc_module_entry;
 //#define phpext_wcc_ptr &wcc_module_entry
-#define WCC_VERSION "0.4.1"
+#define WCC_VERSION "0.4.2"
 
 
 #ifdef __cplusplus
@@ -37,8 +37,5 @@ PHP_RINIT_FUNCTION(wcc);
 #ifdef __cplusplus
 };
 #endif
-
-extern int isRouteObject(zend_object* obj);
-extern void route_verbflag_name(long verb, zval* return_value);
 
 #endif	/* PHP_WCC_H */

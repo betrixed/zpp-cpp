@@ -167,12 +167,6 @@ void Route::RouteMgr::init_class_fn()
 }
 
 
-// class has base_obj_mgr zend_class_entry
-int isRouteObject(zend_object* obj) {
-	return (Route::omg.classEntry() == obj->ce) ? 1 : 0;
-}
-
-
 Route::Route() : base_d(), verbs_(html::V_GET), ajax_(ajax::AJ_NONE)
 {
 	id_ = zstr_empty();

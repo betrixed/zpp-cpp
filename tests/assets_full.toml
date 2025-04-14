@@ -1,0 +1,155 @@
+src_paths = [ "@site_leaf/web", "@wc_leaf/web" ]
+assetCache = "/pcan/cache"
+
+[assets]
+[assets.form-format]
+css = [ "/css/form-format.css" ]
+
+[assets.form]
+css = [ "/css/form.css" ]
+
+[assets.link-click]
+js = [ "/js/link_click.js" ]
+
+[assets.trix]
+css = [ "/node_modules/trix/dist/trix.css" ]
+js = [ "/node_modules/trix/dist/trix.umd.min.js" ]
+
+[assets.quill-editor]
+css = [ "/node_modules/quill/dist/quill.snow.css", "/node_modules/quill2-image-uploader/dist/quill.imageUploader.min.css" ]
+js = [ "/node_modules/quill/dist/quill.js", "/node_modules/quill2-image-uploader/dist/quill.imageUploader.min.js", "/node_modules/quill-html-edit-button/dist/quill.htmlEditButton.min.js", "/node_modules/axios/dist/axios.min.js" ]
+
+[assets.ct-editor]
+css = [ "/assets/content-tools/content-tools.min.css", "/assets/content-tools/editor.css" ]
+js = [ "/assets/content-tools/content-tools.min.js", "/assets/content-tools/editor.js" ]
+
+[assets.bulma-carousel]
+css = [ "/node_modules/bulma-carousel/dist/css/bulma-carousel.min.css" ]
+js = [ "/node_modules/bulma-carousel/dist/js/bulma-carousel.min.js" ]
+
+[assets.fontawesome]
+[assets.fontawesome.link]
+rel = "stylesheet"
+href = "https://use.fontawesome.com/releases/v5.4.1/css/all.css"
+integrity = "sha384-5sAR7xN1Nv6T6+dT2mhtzEpVJvfS3NScPQTrOxhwjIuvcA67KV2R5Jz6kr4abQsz"
+crossorigin = "anonymous"
+
+[assets.tinymce]
+requires = [ "jquery" ]
+js = [ "/node_modules/tinymce/jquery.tinymce.min.js", "/node_modules/tinymce/plugins/code/plugin.min.js" ]
+
+[assets.parsley]
+requires = [ "jquery" ]
+js = [ "/node_modules/parsleyjs/dist/parsley.min.js" ]
+
+[assets.codemirror]
+requires = [ "jquery" ]
+css = [ "/codemirror/lib/codemirror.css", "/codemirror/theme/ambiance.css" ]
+js = [ "/codemirror/lib/codemirror.js", "/codemirror/mode/xml/xml.js", "/codemirror/mode/htmlmixed/htmlmixed.js", "/codemirror/mode/javascript/javascript.js", "/codemirror/mode/css/css.js", "/codemirror/mode/clike/clike.js", "/codemirror/mode/php/php.js", "/codemirror/addon/selection/active-line.js", "/codemirror/addon/edit/matchbrackets.js" ]
+
+[assets.bulma]
+requires = [ "fontawesome" ]
+css = [ "/node_modules/bulma/css/bulma.min.css" ]
+
+[assets.simplegrid]
+css = [ "/node_modules/simplegrid/simple-grid.css" ]
+
+[assets.jquery]
+js = [ "/node_modules/jquery/dist/jquery.min.js" ]
+
+[assets.bootstrap]
+requires = [ "jquery", "fontawesome" ]
+css = [ "/node_modules/bootstrap/dist/css/bootstrap.min.css" ]
+js = [ "/node_modules/bootstrap/dist/js/bootstrap.bundle.min.js" ]
+
+[assets.cart]
+css = [ "/css/cart.css" ]
+
+[assets.stripe]
+css = [ "/css/stripe.css", "/css/cart.css" ]
+
+[assets.styles]
+css = [ "/css/many_styles.css" ]
+
+[assets.default]
+css = [ "/css/sbo.css" ]
+
+[assets.FlatPicker]
+css = [ "/node_modules/flatpickr/dist/flatpickr.min.css" ]
+js = [ "/node_modules/flatpickr/dist/flatpickr.min.js" ]
+
+[assets.Date]
+requires = [ "FlatPicker" ]
+js = [ "/js/date.js" ]
+
+[assets.DateTime]
+requires = [ "FlatPicker" ]
+js = [ "/js/datetime.js" ]
+
+[assets.jquery-form]
+requires = [ "jquery" ]
+js = [ "/node_modules/jquery-form/dist/jquery.form.min.js" ]
+
+[assets.cat-menu]
+js = [ "/js/cat_menu.js" ]
+
+[assets.cat-fetch]
+js = [ "/js/cat_fetch.js" ]
+
+[assets.imagelist]
+requires = [ "DateTime" ]
+
+[assets.imagelist.js-inline]
+source = [ "/js/imagelist.js" ]
+
+[assets.gallery-progress]
+js = [ "/js/progress.js" ]
+
+[assets.gallery-upload]
+js = [ "/js/upload.js" ]
+
+[assets.summer-edit]
+[assets.summer-edit.js-inline]
+source = [ "/js/editor.js" ]
+
+[assets.blog-edit]
+[assets.blog-edit.js-inline]
+source = [ "/js/blog.js" ]
+
+[assets.links-edit]
+js = [ "/js/links_edit.js" ]
+
+[assets.member-js]
+js = [ "/js/member.js" ]
+requires = [ "DateTime", "jquery-form" ]
+
+[assets.are-you-sure]
+js = [ "/node_modules/jquery.are-you-sure/jquery.are-you-sure.js" ]
+requires = [ "jquery" ]
+
+[assets.prep-nocaptcha]
+js = [ "/js/prep_nocaptcha.js" ]
+requires = [ "are-you-sure" ]
+
+[assets.prep-captcha]
+js = [ "/js/prep_captcha.js" ]
+requires = [ "are-you-sure" ]
+
+[assets.more-validate]
+js = [ "/node_modules/jquery-validation/dist/additional-methods.js" ]
+requires = [ "validate" ]
+
+[assets.validate]
+js = [ "/node_modules/jquery-validation/dist/jquery.validate.js" ]
+requires = [ "jquery" ]
+
+[assets.register-js]
+js = [ "/js/register.js" ]
+requires = [ "jquery-form" ]
+
+[assets.grid]
+js = [ "/node_modules/salvattore/dist/salvattore.min.js", "/js/relayout.js" ]
+
+[assets.SummerNote]
+css = [ "/node_modules/summernote/dist/summernote-lite.css" ]
+js = [ "/node_modules/summernote/dist/summernote-lite.min.js" ]
