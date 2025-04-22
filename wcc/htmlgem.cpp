@@ -301,7 +301,7 @@ HtmlGem::output(zval_user item)
 	zstr_buffer buf;
 	dump_info   di(buf);
 	di.dump(item, 0);
-	return zstr_mgr(std::move(buf));
+	return buf.zstr();
 }
 
 zstr_mgr
@@ -361,7 +361,7 @@ HtmlGem::generateTag(zstr_user tag, htab_read pset)
 		}
 	}
 	out << ">";
-	return std::move(out);
+	return out.zstr();
 }
 
 zstr_mgr 
@@ -444,7 +444,7 @@ zstr_mgr HtmlGem::label_front(htab_read ps)
 		out.quote_name(labclass);
 	}
 	out << '>';
-	return std::move(out);
+	return out.zstr();
 }
 
 zstr_mgr 
@@ -468,7 +468,7 @@ HtmlGem::in_label(htab_read ps)
 		out << HTG.blank << temp;
 	}
 	out << HTG.blank << HTG.endtag << HTG.labelkey << '>';
-	return  std::move(out);
+	return  out.zstr();
 }; 
 
 zstr_mgr HtmlGem::out_label(htab_read  ps)
@@ -498,7 +498,7 @@ zstr_mgr HtmlGem::out_label(htab_read  ps)
 		out << /*blank << */ temp;
 	}
 	//showstr("exit out_label", out);
-	return std::move(out);
+	return out.zstr();
 }; 
 
 
@@ -518,7 +518,7 @@ HtmlGem::button(zval_user pset)
 	zstr_buffer out;
 
 	out << generateTag(HTG.buttonkey, ps) << content << HTG.endtag << HTG.buttonkey << '>';
-	return  std::move(out);
+	return  out.zstr();
 }
 
 
@@ -603,7 +603,7 @@ zstr_mgr HtmlGem::checkbox(zval_user pset)
 	if (!wrapdiv.isNull()) {
 		endWrapDiv(out);
 	}
-	return  std::move(out);
+	return  out.zstr();
 }
 
 
@@ -626,7 +626,7 @@ HtmlGem::check_value(zval_user pset)
 	else {
 		out << HTG.nbspace << HTG.emptyset << HTG.nbspace;
 	}
-	return  std::move(out);
+	return  out.zstr();
 }
 
 
@@ -675,7 +675,7 @@ zstr_mgr HtmlGem::datetime_value(zval_user pset)
 
 	Value label = ps.get(HTG.labelkey);
 
-	zstr_mgr datetext(std::move(ds));
+	zstr_mgr datetext = ds.zstr();
 
 	if (!label.isNull()) {
 		ps.set(HTG.content_key, datetext);
@@ -686,7 +686,7 @@ zstr_mgr HtmlGem::datetime_value(zval_user pset)
 	}
 	out << endl;
 
-	return std::move(out);
+	return out.zstr();
 }
 
 
@@ -715,7 +715,7 @@ HtmlGem::datetime_text(zstr_user dtvalue)
 		else {
 			buf << days << " days ago";
 		}
-		return std::move(buf);
+		return buf.zstr();
 	}
 
 	return before.format(date_fmt_);
@@ -749,7 +749,7 @@ HtmlGem::text_value(zval_user pset)
 	else {
 		out << HTG.nbspace << HTG.emptyset << HTG.nbspace;
 	}
-	return std::move(out);
+	return out.zstr();
 }
 
 htab_read 
@@ -845,7 +845,7 @@ HtmlGem::inputType(zval_user pset, zstr_user itype)
 	htab_mgr ht_label = label_method(ps, label_loc);
 	htab_write ldata(ht_label);
 
-	zstr_mgr input =  (ps, atype, HTG.inputtag);
+	zstr_mgr input =  getTag(ps, atype, HTG.inputtag);
 	
 	//showstr("input tag", input);
 	if (label_loc == LabelLocate::IN_LABEL) {
@@ -864,7 +864,7 @@ HtmlGem::inputType(zval_user pset, zstr_user itype)
 	if (wuse.size()) {
 		endWrapDiv(out);
 	}
-	return std::move(out);
+	return out.zstr();
 
 }
 
@@ -910,7 +910,7 @@ HtmlGem::radio(zval_user pset)
 
 		out << HTG.nbspace << out_label(ldata);
 	}
-	return std::move(out);
+	return out.zstr();
 }
 
 zstr_mgr
@@ -989,7 +989,7 @@ zstr_mgr glyph_out(zstr_user glyph)
 	ss << glyph.vstr();
 	ss << "\"></i></span>";
 
-	return std::move(ss);
+	return ss.zstr();
 }
 
 zstr_mgr 
@@ -1053,7 +1053,7 @@ HtmlGem::linkTo(zval_user pset)
 	}
 
 	out << text << "</a>";
-	return std::move(out);
+	return out.zstr();
 }
 
 void HtmlGem::ifKeyAttr(zstr_buffer& out, zstr_user key, htab_read ps)
@@ -1170,7 +1170,7 @@ HtmlGem::select_list(zval_user pset)
 			
 		}
 	}
-	return std::move(out);
+	return out.zstr();
 }
 
 zstr_mgr
@@ -1207,7 +1207,7 @@ zstr_mgr
 	else {
 		out << select << '\n';
 	}
-	return std::move(out);
+	return out.zstr();
 }
 
 void HtmlGem::setStyle(zstr_user name, zval_user value)
@@ -1272,7 +1272,7 @@ mergeStyles(zval_user list1, zval_user list2)
 		if (ht2.size())
 			hw.merge(ht2);
 	}
-	return std::move(result);
+	return result;
 }
 
 zstr_mgr 
@@ -1288,7 +1288,7 @@ array_toStyle(htab_read slist)
 	{
 		ss << key.vstr() << ":" << value.vstr() << ";";
 	}
-	return std::move(ss);
+	return ss.zstr();
 }
 
 zstr_mgr
@@ -1361,7 +1361,7 @@ zstr_mgr HtmlGem::figure(zval_user pset)
 		}
 		out << HTG.endtag << HTG.figurekey << HTG.tagendl;
 	}
-	return std::move(out);
+	return out.zstr();
 }
 
 
@@ -1380,7 +1380,7 @@ HtmlGem::datetime(zval_user pset)
 
 	dateid << "pick" << idstr;
 
-	zstr_mgr dateid_str(std::move(dateid));
+	zstr_mgr dateid_str = dateid.zstr();
 
 	out << '<' << HTG.divkey; // level 
 
@@ -1414,7 +1414,7 @@ HtmlGem::datetime(zval_user pset)
 
 	//zend_printf("dtclass\n");
 
-	zstr_mgr dt_class_str(std::move(dtclass));
+	zstr_mgr dt_class_str = dtclass.zstr();
 
 	htab_mgr attrlist_ht;
 	htab_write attrlist(attrlist_ht);
@@ -1425,7 +1425,7 @@ HtmlGem::datetime(zval_user pset)
 
 	dtinput << dt_class_str << "-input";
 
-	zval_mgr value(std::move(dtinput));
+	zval_mgr value = dtinput.zstr();
 
 	//zend_printf("dtinput\n");
 	attrlist.set(HTG.classkey,value);
@@ -1434,7 +1434,7 @@ HtmlGem::datetime(zval_user pset)
 
 	atarg << "#" << dateid_str;
 
-	zstr_mgr atarg_str(std::move(atarg));
+	zstr_mgr atarg_str = atarg.zstr();
 
 	attrlist.set(HTG.data_target, atarg_str);
 
@@ -1483,7 +1483,7 @@ HtmlGem::datetime(zval_user pset)
 	endWrapDiv(out); // end 2
 	endWrapDiv(out); // end level-item
 	endWrapDiv(out); // end level
-	return std::move(out);
+	return out.zstr();
 }
 
 
@@ -1533,7 +1533,7 @@ HtmlGem::multiline(zval_user pset)
 	input << generateTag(HTG.textarea, ps);
 	input << value << HTG.endtag << HTG.textarea << '>';
 
-	zstr_mgr input_str(std::move(input));
+	zstr_mgr input_str = input.zstr();
 
 	//showmem("input_str", input_str);
 
@@ -1557,7 +1557,7 @@ HtmlGem::multiline(zval_user pset)
 		out << HTG.endtag << HTG.divkey << HTG.tagendl;
 	}
 
-	return std::move(out);
+	return out.zstr();
 }
 }; //namespace wcc;
 //&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&@@@@@@@@@@@@@@@@@@@@&&&&&&&&&&&&&&&&&&&&&

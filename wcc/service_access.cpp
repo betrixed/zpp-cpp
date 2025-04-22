@@ -161,7 +161,7 @@ ServiceAccess::nullService(zstr_user name)
 
 	buf << "get" << name.to_lower();
 
-	zstr_mgr method(std::move(buf));
+	zstr_mgr method = buf.zstr();
 
 	zobj_user self(this);
 	if (self.method_exists(method))

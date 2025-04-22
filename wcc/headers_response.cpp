@@ -40,7 +40,7 @@ bool Headers::send()
 
 			d2 << harg << ": " << hvalue.zstr();
 
-			zval_mgr arg1(std::move(d2));
+			zval_mgr arg1 = d2.zstr();
 			wis->header_key.callme(arg1,true_arg);
 		}
 		else {
@@ -52,7 +52,7 @@ bool Headers::send()
 			{
 				zstr_buffer  d1;
 				d1 << harg << ": ";
-				zval_mgr arg(std::move(d1));
+				zval_mgr arg = d1.zstr();
 				wis->header_key.callme(arg,true_arg);
 			}
 		}

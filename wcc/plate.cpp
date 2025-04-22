@@ -298,7 +298,7 @@ Plate::full_render(htab_read rdata)
 		buf << "<p>The template '" << name << "' could not be found</p>\n";
 		buf << engine->dumpPaths();
 
-		return std::move(buf);
+		return buf.zstr();
 	}
 
 	zobj_user loadHtml = engine->getLoadHtml();

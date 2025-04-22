@@ -151,10 +151,16 @@ zstr_buffer::size() const
 std::string 
 zstr_buffer::str()
 {
-	zend_string* xs = zstr(); // reassign buffer back here.
-	std::string result(ZSTR_VAL(xs), ZSTR_LEN(xs));
-	zend_string_release(xs);
-	return std::move(result);
+	if (buf.s)
+	{
+		zend_string* xs = smart_str_extract_ex(&buf, 0);
+		std::string result(ZSTR_VAL(xs), ZSTR_LEN(xs));
+		zend_string_release(xs);
+
+		return result;
+	}
+
+	return std::string(zstr_user::empty,0);
 }
 
 

@@ -19,7 +19,7 @@
 
 // zend_module_entry wcc_module_entry;
 //#define phpext_wcc_ptr &wcc_module_entry
-#define WCC_VERSION "0.4.2"
+#define WCC_VERSION "0.4.3"
 
 
 #ifdef __cplusplus

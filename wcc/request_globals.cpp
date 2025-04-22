@@ -434,10 +434,10 @@ RequestGlobals::resolveAuthorizationHeaders()
 					zstr_buffer basic;
 
 					basic << user << ':' << pw;
-					encoded = std::move(basic);
+					encoded = basic.zstr();
 					encoded = zstr_mgr::base64_encode((const unsigned char*) encoded.data(), encoded.size());
 					basic << "Basic " << encoded;
-					encoded  = std::move(basic);
+					encoded  = basic.zstr();
 					headers.set(RQit.Authorization, encoded);
 				}
 				else 
@@ -494,7 +494,7 @@ RequestGlobals::smoothFiles(htab_read names, htab_read types,
 		size_t idx = wk.index();
 		ss << prefix << '.' << idx;
 
-		zstr_mgr fkey(std::move(ss));
+		zstr_mgr fkey = ss.zstr();
 		zval_user name(wk.value());
 
 		if (name.isString()) 
@@ -734,7 +734,7 @@ RequestGlobals::getHeader(zstr_user header)
 	zstr_buffer buf;
 	buf << RQit.HTTP_ << name;
 
-	name = std::move(buf);
+	name = buf.zstr();
 
 	return server.get(name);
 }

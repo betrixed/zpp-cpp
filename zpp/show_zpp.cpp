@@ -393,11 +393,11 @@ void dump_info::indent(int ct)
 			ss << "NULL\n";
 			return;
 		}
-
-		size_t ct = zend_array_count(ht);
 		if (ht->gc.u.type_info & GC_IMMUTABLE) {
 			ss << "immutable ";
 		}
+		size_t ct = zend_array_count(ht);
+
 		ss << iform(Numf::DEC) << "arr(" << ct <<") 0x"  << iform(Numf::HEX) << ht;
 		/* if (ht->u.flags & htab_mgr::COW_VIOLATE) {
 			ss << " vcow ";

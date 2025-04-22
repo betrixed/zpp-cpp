@@ -161,6 +161,7 @@ namespace wcc {
 	{
 		zval_mgr result;
 		self_.property_get(XML_FNS.k_name, result);
+
 		//showmem("xml_name_zval", result);
 		return result;
 	}
@@ -384,6 +385,9 @@ Wcc_XmlRead::loop()
 
 				zstr_mgr attrstr = xml_.get_attribute(XML_FNS.k_k);
 
+				//showstr("tagstr", tagstr);
+				//showstr("attrstr", attrstr);
+
 				bool result = tag_start(tagstr, attrstr);
 
 				if (!result) {
@@ -463,9 +467,8 @@ Wcc_XmlRead::tagsTable()
 				{
 					tag = xml_.xml_name_zval();
 					value = xml_.xml_str_zval();
-					/*showmem("tagkey set", tag);
-					showmem("tagkey value", value);
-					showarray("tag_objs", tag_objs_);*/
+
+					//showarray("tag_objs", tag_objs_);*/
 					htab_write(tag_objs_).set(tag, value);	
 				}
 				break;

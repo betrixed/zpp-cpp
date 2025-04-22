@@ -217,8 +217,8 @@ void RouteAdd::ready(Route* route)
 
 	zstr_mgr temp;
 
-	temp = std::move(pattern);
-	showstr("pattern", temp);
+	temp = pattern.zstr();
+	//showstr("pattern", temp);
 
 	compiled << temp; 
 	pattern << temp; // reset zstr_buffer as fresh content
@@ -261,7 +261,7 @@ void RouteAdd::ready(Route* route)
 				name = useg.substr(1);
 				zstr_buffer bb;
 				bb << '{' << name << '}'; 
-				blob = std::move(bb);
+				blob = bb.zstr();
 			}
 			else if (firstchar == '{')
 			{
@@ -288,13 +288,13 @@ void RouteAdd::ready(Route* route)
 	}
 	auto pcount = params.size();
 	zstr_mgr cpattern;
-	zstr_mgr rpattern(std::move(pattern));
+	zstr_mgr rpattern = pattern.zstr();
 
 	if (pcount > 0)
 	{
-		cpattern = std::move(compiled);
+		cpattern = compiled.zstr();
 		compiled << "#^" << cpattern << "$#";
-		cpattern = std::move(compiled);
+		cpattern = compiled.zstr();
 
 		route->setParams(params);
 	}
@@ -325,7 +325,7 @@ void RouteAdd::ready(Route* route)
 				else {
 					fbuf << sfx;
 				}
-				zstr_mgr fname = std::move(fbuf);
+				zstr_mgr fname = fbuf.zstr();
 				showstr("fname", fname);
 				t->setFunc(fname);
 			}

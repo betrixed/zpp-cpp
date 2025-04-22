@@ -14,6 +14,8 @@ echo "multiline\n";
 
 echo $hg->multiline(["label" => "push", "name" => "test", "value" => "multiline text", "text"=>"anything"]) . PHP_EOL;
 
+ echo $hg->plainText(['name' => 'title', 'value' => 'My Title', 'size' => 80,
+                    'maxlength' => 80]);
 
 
 echo "email\n";

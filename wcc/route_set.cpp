@@ -424,7 +424,7 @@ RouteSet::copy_target(Route* route)
 				{
 					zstr_buffer fbuf(fn_stub);
 					fbuf << test;
-					target_method = std::move(fbuf);
+					target_method = fbuf.zstr();
 					modifyTarget = true;
 				}
 			}
@@ -556,7 +556,7 @@ RouteSet::compile(Route* route)
 				name = useg.substr(1);
 				zstr_buffer bb;
 				bb << '{' << name << '}'; 
-				blob = std::move(bb);
+				blob = bb.zstr();
 			}
 			else if (firstchar == '{')
 			{
@@ -583,13 +583,13 @@ RouteSet::compile(Route* route)
 	}
 	auto pcount = params.size();
 	zstr_mgr cpattern;
-	zstr_mgr rpattern(std::move(pattern));
+	zstr_mgr rpattern = pattern.zstr();
 
 	if (pcount > 0)
 	{
-		cpattern = std::move(compiled);
+		cpattern = compiled.zstr();
 		compiled << "#^" << cpattern << "$#";
-		cpattern = std::move(compiled);
+		cpattern = compiled.zstr();
 		route->setParams(params);
 	}
 	else {
