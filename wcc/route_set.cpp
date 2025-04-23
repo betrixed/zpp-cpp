@@ -791,7 +791,7 @@ PHP_METHOD(Wcc_RouteSet, routeUrl)
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_STR(name)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_ARRAY(params)
+		Z_PARAM_ARRAY_OR_NULL(params)
 	ZEND_PARSE_PARAMETERS_END();
 
 	RouteSet* cobj = zval_toc<RouteSet>(ZEND_THIS);

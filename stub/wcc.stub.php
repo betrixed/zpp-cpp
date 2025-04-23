@@ -103,7 +103,7 @@ final class  Route {
 
 	public function __unserialize(array $data) : void {}
 
-	public function routeUrl(array $params) : ?string {}
+	public function routeUrl(?array $params = null) : ?string {}
 	
 
 };
@@ -187,7 +187,7 @@ final class RouteSet {
 
     static public function rex_url() : string {}
 
-    public function routeUrl(string $name, array $params) : ?string {}
+    public function routeUrl(string $name, ?array $params = null) : ?string {}
 
     public function setFile(string $fname) : void {}
   
