@@ -289,9 +289,34 @@ Hmap_php::get_properties_for(zend_object* object, zend_prop_purpose purpose)
 zobj_mgr // static
 Hmap::newFromArray(zval_user htab)
 {
+	htab_mgr hold;
+	if (htab.isArray())
+	{
+		hold = htab.zarray(); // already owned
+	}
+	else {
+		hold.adopt(htab_mgr::new_array());// take ownership
+	}
+
+
 	zobj_mgr result = Hmap::omg.new_zobj();
 	Hmap* cobj = zobj_toc<Hmap>(result);
-	cobj->construct(htab.zarray());
+	cobj->construct(hold); // take ownership
+
+	if (hold.size() != cobj->count())
+	{
+		showdata("ARRAY TRANSFER FAIL for ", hold);
+	}
+	return result;
+}
+
+zobj_mgr  // static
+Hmap::new_hmap()
+{
+	zobj_mgr result = Hmap::omg.new_zobj();
+	Hmap* cobj = zobj_toc<Hmap>(result);
+	htab_read nullarray;
+	cobj->construct(nullarray);
 	return result;
 }
 
@@ -353,7 +378,7 @@ Hmap::construct(htab_read values)
 	//showarray("Hmap::construct", values);
 	if (values.size() > 0)
 	{
-		(htab_mgr&) data_ = values;
+		(htab_mgr&) data_ = values; // takes ownership
 		//showdata("construct ", data_);
 	}
 }

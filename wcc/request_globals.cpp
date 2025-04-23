@@ -554,7 +554,17 @@ void RequestGlobals::construct()
 {
 	server_ = Hmap::newFromArray(htab_mgr::get_global(RQit.G_SERVER));
 	get_ = Hmap::newFromArray(htab_mgr::get_global(RQit.G_GET));
-	request_ = Hmap::newFromArray(htab_mgr::get_global(RQit.G_REQUEST));
+
+	zval_user gval = htab_mgr::get_global(RQit.G_REQUEST);
+	if (gval.isArray())
+	{ 
+		request_ = Hmap::newFromArray(gval);
+	}
+	else {
+		zend_printf("Global %s not found!", RQit.G_REQUEST.data());
+		request_ = Hmap::new_hmap();
+	}
+
 	post_ = Hmap::newFromArray(htab_mgr::get_global(RQit.G_POST));
 	files_ = Hmap::newFromArray(htab_mgr::get_global(RQit.G_FILES));
 

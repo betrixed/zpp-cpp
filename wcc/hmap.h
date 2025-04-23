@@ -138,7 +138,8 @@ public:
 	
 	//! Create a new Hmap constructed witn HashTable/zend_array
 	static zobj_mgr newFromArray(zval_user init);
-
+	static zobj_mgr new_hmap();
+	
 	void construct(htab_read values);
 
 	/** Avoid warning for missing property */
