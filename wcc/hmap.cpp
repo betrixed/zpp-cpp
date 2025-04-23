@@ -295,18 +295,13 @@ Hmap::newFromArray(zval_user htab)
 		hold = htab.zarray(); // already owned
 	}
 	else {
-		hold.adopt(htab_mgr::new_array());// take ownership
+		hold.adopt(htab_mgr::empty_array());// take ownership
 	}
-
 
 	zobj_mgr result = Hmap::omg.new_zobj();
 	Hmap* cobj = zobj_toc<Hmap>(result);
-	cobj->construct(hold); // take ownership
+	cobj->construct(hold); // take ownership if not empty
 
-	if (hold.size() != cobj->count())
-	{
-		showdata("ARRAY TRANSFER FAIL for ", hold);
-	}
 	return result;
 }
 

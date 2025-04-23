@@ -555,13 +555,13 @@ void RequestGlobals::construct()
 	server_ = Hmap::newFromArray(htab_mgr::get_global(RQit.G_SERVER));
 	get_ = Hmap::newFromArray(htab_mgr::get_global(RQit.G_GET));
 
+	// Using G_REQUEST isn't recommended.
 	zval_user gval = htab_mgr::get_global(RQit.G_REQUEST);
 	if (gval.isArray())
 	{ 
 		request_ = Hmap::newFromArray(gval);
 	}
 	else {
-		zend_printf("Global %s not found!", RQit.G_REQUEST.data());
 		request_ = Hmap::new_hmap();
 	}
 
@@ -1377,7 +1377,7 @@ RequestGlobals::getPost()
 htab_read 
 RequestGlobals::getQuery()
 {
-	return Hmap::map_htab(request_);
+	return Hmap::map_htab(get_);
 }
 
 htab_read
