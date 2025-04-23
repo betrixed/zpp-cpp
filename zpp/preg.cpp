@@ -201,14 +201,23 @@ preg::replace_callback(preg_callback& callback, zstr_user subject)
 	zstr_mgr  result;
 
 	if (matches(subject) > 0) {
+
+
 		htab_read  rtab_1(result_);
+		//showdata("result_", rtab_1);
+		
+
 		zstr_user  subj(subject);
 
 		std::string_view strview = subj.vstr();
 		zstr_buffer ss;
 
+
 		zval_mgr rlist = rtab_1.get(zend_long(0));
 		htab_read replace(rlist);
+
+		zval_mgr keylist = rtab_1.get(zend_long(1));
+		htab_read keys(keylist);
 
 		uint ipos = 0;
 		size_t ct = replace.size();
@@ -217,10 +226,13 @@ preg::replace_callback(preg_callback& callback, zstr_user subject)
 		{
 			htab_read cexp(replace.get(i));
 
-			zval_user slen2 = cexp.get(zend_long(0));
+			htab_read kexp(keys.get(i));
+
+
+			zval_user strrep = cexp.get(zend_long(0));
 			zval_user soffset2 = cexp.get(zend_long(1));
 
-			size_t slen = slen2.size();
+			size_t slen = strrep.size();
 			size_t soffset = soffset2.zlong();
 			// prior text first
 
@@ -231,7 +243,7 @@ preg::replace_callback(preg_callback& callback, zstr_user subject)
 				ipos += prior_len;
 			}
 			
-			if (callback.get_replace(cexp))
+			if (callback.get_replace(kexp))
 			{
 				ss << zstr_user(callback.replace_);
 				callback.call_count_++;
@@ -253,7 +265,7 @@ preg::replace_callback(preg_callback& callback, zstr_user subject)
 			//zend_printf("empty replace result\n");
 			return result;
 		}
-		result.adopt(ss.zstr());
+		result = ss.zstr();
 		return result;
 	}
 	result = subject;

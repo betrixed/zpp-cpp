@@ -308,8 +308,11 @@ void dump_info::indent(int ct)
 
 	void dump_info::di_showmem(zval *m) 
 	{
-
-		ss << "zval(0x" << (void*)m << ") +" << Z_TYPE_FLAGS_P(m) << ' ';
+		if (!m) {
+			ss << "zval nullptr";
+			return;
+		}
+		ss << "zval 0x" << (void*)m << " + " << Z_TYPE_FLAGS_P(m) << ' ';
 
 		if (!m) {
 			return;
@@ -485,7 +488,7 @@ void showmem(const char* s, zval* m)
 		return;
 	}
 	if (s == nullptr) {
-		zend_printf("passed nullptr\n");
+		zend_printf("s is nullptr\n");
 		return;
 	}
 	dump_info di(s);

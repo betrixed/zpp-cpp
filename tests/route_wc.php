@@ -114,6 +114,11 @@ $radd->addRoutes(prefix: "admin", module: "admin", list: [
     	Route::AJAX_ONLY)->name("dash.cmd")
 ]);
 
+$radd->addRoutes(prefix: "blog", module: "blog", list: [
+	Route::get('revisions/:bid', new Target(BlogEdit::class, 'revisions'))->name("revisions.list")
+]);
+
+
 echo "RM3 ";
 $rm3->findRoute($radd);
 if ($rm3->findRoute($radd))
@@ -127,6 +132,10 @@ else {
 
 	echo "not found" . PHP_EOL;
 }
+
+$url = $radd->routeUrl("revisions.list", ['bid' => 1488]);
+
+echo "route url is " . $url . PHP_EOL;
 
 //$services = Services::instance();
 

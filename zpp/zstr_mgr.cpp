@@ -137,6 +137,14 @@ zstr_mgr::operator=(zval* rc)
 	return *this;
 }
 
+/* Use zval_user.to_zstr() instead
+const zstr_mgr& 
+zstr_mgr::operator=(const zval_user& rc)
+{
+
+}
+*/
+
 zstr_mgr& 
 zstr_mgr::operator=(zval_mgr&& rc)
 {

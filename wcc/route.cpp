@@ -373,17 +373,25 @@ public:
 	virtual bool get_replace(htab_read captures)
 	{
 		htab_read plist(params_);
+		//showdata("params_", plist);
+
 		if (call_count_ < plist.size())
 		{
-			zstr_user key = captures.get(int(1));
-			zstr_mgr value = plist.get(call_count_);
+			zstr_user key = captures.get(int(0));
+			//showstr("key", key);
+
+			//TODO: remove check for case of ordered list of values??
+			zval_user value = plist.get(call_count_);
+			//showmem("value 1", value);
 			if (value.isNull())
 			{
 				value = plist.get(key);
+				//showmem("value 2", value);
 			}
 			if (!value.isNull())
 			{
-				replace_ = value;
+				replace_ = value.to_zstr();
+
 				return true;
 			}
 			else {
@@ -405,7 +413,8 @@ Route::routeUrl(htab_read pvalues)
 		result = pattern_;
 	}
 	else {
-		preg url_params("#{([a-zA-Z][\\w\\d]*)}#");
+
+		preg url_params( R"x(#\{([a-zA-Z][\w\d]*)\}#)x" );
 
 		param_replace replace(pvalues);
 
