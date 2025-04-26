@@ -99,11 +99,13 @@ void ICache::__construct(zval_user options, zval_user services)
 
 void ICache::debug_info(htab_write s)
 {
+	base_d::debug_info(s);
 	s.set(IC_STR.cached, cached_);
 	s.set(IC_STR.svc_cache, svc_cache_);
 	s.set(IC_STR.prefix_key, prefix_);
 	s.set(IC_STR.options, options_);
 	s.set(IC_STR.services, services_);
+	s.set(IC_STR.ttl_key, (int)ttl_);
 }
 
 void ICache::addLocal(zval_user pkg)
@@ -725,7 +727,7 @@ ZEND_METHOD(Wcc_ICache, setTTL)
 {
 	zend_long     ttl = 0;
 
-	ZEND_PARSE_PARAMETERS_START(2, 3)
+	ZEND_PARSE_PARAMETERS_START(1, 1)
 	Z_PARAM_LONG(ttl)
 	ZEND_PARSE_PARAMETERS_END();
 

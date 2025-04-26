@@ -294,7 +294,7 @@ RouteMatch::call(htab_read extra, zobj_user before, zobj_user after)
 			{
 				result = this->call_method(obj, method_name, second);
 				test = result;
-				if (test.isFalse())
+				if (test.isFalse()  || test.isObject())
 				{
 					return result;
 				}
