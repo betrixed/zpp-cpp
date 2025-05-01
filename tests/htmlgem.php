@@ -60,7 +60,7 @@ echo $hg->hidden(['name' => 'args', 'value' => 'these args here']) . PHP_EOL;
 
 $id = '-id1';
 
-echo $hg->checkbox(['name' => 'op' . $id]) . PHP_EOL;
+echo $hg->checkbox(['name' => 'op' . $id, 'checked' => 1]) . PHP_EOL;
 
 $dtime = date('Y-m-d H:m:s');
 

@@ -336,7 +336,7 @@ HtmlGem::generateTag(zstr_user tag, htab_read pset)
 		zstr_mgr ws;
 
 		if (arg.isLong()) {
-			out << " " << arg.zlong();
+			out << " " << val.zstr();
 		}
 		else {
 			if (arg.isArray() || val.isArray()) {
@@ -574,7 +574,10 @@ zstr_mgr HtmlGem::checkbox(zval_user pset)
 		ps.unset(HTG.checked); 
 		//check.init(); //  check now invalid
 		if (checkval != 0) {
-			ps.push_back(HTG.checked);
+			zstr_user cval = HTG.checked;
+			//showstr("pushback", cval);
+			ps.push_back(cval);
+			//showdata("checkbox", ps);
 		}
 	}
 
