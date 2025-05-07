@@ -15,7 +15,7 @@ namespace zpp {
     * Later call tp static init_all() for runtime 
     * initialize, is in random order of being linked.
     */
-    class ZPP_EXPORT state_init {
+    class  state_init {
     protected:
         static state_init* first_;
         static state_init* last_;

@@ -2,6 +2,10 @@
 #define FOR_KEY_VALUE_H
 //for_key_value.h
 
+#ifndef PHP_EXTERN_H
+#include "php_extern.h"
+#endif
+
 #ifndef HTAB_MGR_H
 #include "htab_mgr.h"
 #endif
@@ -11,7 +15,7 @@ namespace zpp {
 /**
  * Unlike htab_walk, usage requires 
  * call of value() key() or index()
- * as values will change
+ * as values will changfor_key_valuefor_key_valuee
  * every iteration,
  */
 class for_key_value : public htab_mgr {

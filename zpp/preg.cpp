@@ -1,8 +1,22 @@
-#ifndef WC_PREG_CPP
-#define WC_PREG_CPP
+#ifndef ZPP_PREG_CPP
+#define ZPP_PREG_CPP
 
-#ifndef WC_PREG_H
-#include "wc_preg.h"
+#ifndef ZPP_PREG_H
+#include "preg.h"
+#endif
+
+
+
+#ifndef ZSTR_BUFFER_H
+#include "zstr_buffer.h"
+#endif
+
+#ifndef HTAB_MGR_H
+#include "htab_mgr.h"
+#endif
+
+#ifndef HTAB_WALK_H
+#include "htab_walk.h"
 #endif
 
 
@@ -127,7 +141,7 @@ preg::pce()
 		{
 			//exception
 			zend_throw_error(zend_ce_error, "Unable to compile regular expression %s\n", 
-			     zstr_user(regexp_).data(), 0);
+			     zstr_user(regexp_).data());
 			return nullptr;
 		}
 		//zend_printf("Hold PCE %lx\n", pce_);
@@ -201,23 +215,14 @@ preg::replace_callback(preg_callback& callback, zstr_user subject)
 	zstr_mgr  result;
 
 	if (matches(subject) > 0) {
-
-
 		htab_read  rtab_1(result_);
-		//showdata("result_", rtab_1);
-		
-
 		zstr_user  subj(subject);
 
 		std::string_view strview = subj.vstr();
 		zstr_buffer ss;
 
-
 		zval_mgr rlist = rtab_1.get(zend_long(0));
 		htab_read replace(rlist);
-
-		zval_mgr keylist = rtab_1.get(zend_long(1));
-		htab_read keys(keylist);
 
 		uint ipos = 0;
 		size_t ct = replace.size();
@@ -226,13 +231,10 @@ preg::replace_callback(preg_callback& callback, zstr_user subject)
 		{
 			htab_read cexp(replace.get(i));
 
-			htab_read kexp(keys.get(i));
-
-
-			zval_user strrep = cexp.get(zend_long(0));
+			zval_user slen2 = cexp.get(zend_long(0));
 			zval_user soffset2 = cexp.get(zend_long(1));
 
-			size_t slen = strrep.size();
+			size_t slen = slen2.size();
 			size_t soffset = soffset2.zlong();
 			// prior text first
 
@@ -243,7 +245,7 @@ preg::replace_callback(preg_callback& callback, zstr_user subject)
 				ipos += prior_len;
 			}
 			
-			if (callback.get_replace(kexp))
+			if (callback.get_replace(cexp))
 			{
 				ss << zstr_user(callback.replace_);
 				callback.call_count_++;
@@ -265,7 +267,7 @@ preg::replace_callback(preg_callback& callback, zstr_user subject)
 			//zend_printf("empty replace result\n");
 			return result;
 		}
-		result = ss.zstr();
+		result.adopt(ss.zstr());
 		return result;
 	}
 	result = subject;

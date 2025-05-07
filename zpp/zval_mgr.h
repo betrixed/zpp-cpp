@@ -7,6 +7,12 @@
 #ifndef ZVAL_MGR_H
 #define ZVAL_MGR_H
 
+#ifndef PHP_EXTERN_H
+#include "php_extern.h"
+#endif
+
+
+
 namespace zpp {
 
 class zval_user;
@@ -14,7 +20,7 @@ class zobj_mgr;
 class base_d;
 class zstr_mgr;
 
-class ZPP_EXPORT zval_mgr {
+class zval_mgr {
 protected:
     zval zv_;
 
@@ -54,8 +60,6 @@ public:
 
 	zval_mgr();
 
-    zval_mgr(base_d*);
-
     zval_mgr(zval* zv);
     
 
@@ -66,6 +70,8 @@ public:
     zval_mgr(zend_object* rc);
 
     zval_mgr(zend_long value);
+
+    zval_mgr(base_d* cobj);
 
     zval_mgr(bool value);
     

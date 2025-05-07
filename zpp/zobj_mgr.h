@@ -26,8 +26,7 @@ namespace zpp {
 
 		zobj_mgr(zend_object* rc);
 
-    	//! From settled cobj
-    	zobj_mgr(base_d* cobj);
+    	zobj_mgr(base_d* cobj); 
     	
     	zobj_mgr(const zobj_mgr& rc);
 

@@ -17,15 +17,21 @@
  *  reference counting them all.
  */
 
-#ifndef ZVAL_MGR_H
-#include "zval_mgr.h"
+#ifndef PHP_EXTERN_H
+#include "php_extern.h"
 #endif
+
+#ifndef ZSTR_USER_H
+#include "zstr_user.h"
+#endif
+
 
 namespace zpp {
 
 class zstr_mgr;
+class zval_mgr;
 
-class ZPP_EXPORT zval_user {
+class zval_user {
 protected:
     zval *p_;
 
@@ -69,10 +75,7 @@ public:
         p_ = c.p_;
     }
 
-    zval_user(const zval_mgr& mgr)
-    {
-        p_ = (zval*) mgr;
-    }
+    zval_user(const zval_mgr& mgr);
 
     operator zval*() const 
     {
@@ -187,8 +190,7 @@ public:
      */
     const zval_user& operator=(const zval_mgr& rc);
 
-    static 
-    zval_user php_constant(zstr_user name);
+    static zval_user php_constant(zstr_user name);
 
 };
 

@@ -741,7 +741,7 @@ HtmlGem::text_value(zval_user pset)
 
 	zstr_buffer out;
 
-	htab_mgr mylabel = ps.extract(keys2);
+	htab_mgr mylabel = htab_mgr::extract(keys2,ps);
 	out << out_label(mylabel);
 
 	zstr_user text = ps.get(HTG.valuekey);
@@ -772,7 +772,7 @@ htab_mgr
 HtmlGem::label_method(htab_write ps, int& labeltype)
 {
 	htab_read kist = getLabelKeys1();
-	htab_mgr  result = ps.extract(kist);
+	htab_mgr  result = htab_mgr::extract(kist, ps);
 	htab_write hw_label(result);
 
 	//showdata("hw_label", hw_label);

@@ -1,5 +1,6 @@
 #ifndef ZSTR_OUTPUT_H
 #define ZSTR_OUTPUT_H
+
 #ifndef ZSTR_MGR_H
 #include "zstr_mgr.h"
 #endif
@@ -9,6 +10,7 @@
 #endif
 
 namespace zpp {
+	
 	enum Numf {
 		DEC,
 		HEX

@@ -5,6 +5,10 @@
 #include "zobj_mgr.h"
 #endif
 
+#ifndef DATE_TIME_OBJ_H
+#include "datetime.h"
+#endif
+
 extern "C" {
 #include <ext/date/php_date.h>
 };

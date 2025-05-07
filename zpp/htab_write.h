@@ -5,9 +5,13 @@
 #include "htab_read.h"
 #endif 
 
+#ifndef ZSTR_MGR_H
+#include "zstr_mgr.h"
+#endif
+
 namespace zpp {
 
-    class zstr_mgr;
+    class zstr_intern;
 
     class htab_write : public htab_read 
     {
@@ -43,20 +47,11 @@ namespace zpp {
         void push_back(zend_object* zobj);
         void push_back(zval* zv);
 
-        void push_back(const zval_mgr& zv) 
-        {
-            push_back((zval*) zv);
-        }
+        void push_back(const zval_mgr& zv);
 
-        void push_back(zval_user zv) 
-        {
-            push_back((zval*) zv);
-        }
+        void push_back(zval_user zv);
 
-        void push_back(zstr_user su)
-        {
-            push_back((zend_string*) su);
-        }
+        void push_back(zstr_user su);
         
         void push_back(HashTable* value);
 
@@ -100,7 +95,7 @@ namespace zpp {
 		 *  string keys, unset them here, 
          *  return them in new array 
          */
-        htab_mgr extract(htab_read exkeys);
+        
 
         /** Delete the keys in the exkeys list */
         void removal(htab_read exkeys);

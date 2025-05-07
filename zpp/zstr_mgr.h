@@ -83,10 +83,7 @@ namespace zpp {
 	    const zstr_mgr& operator=(const zstr_mgr& rc);
 	    const zstr_mgr& operator=(zend_string* rc);
 	    const zstr_mgr& operator=(zval* rc);
-
-	    /* Use zval_user.to_zstr() instead */
-		//const zstr_mgr& operator=(const zval_user& rc); 
-
+		 
 		const zstr_mgr& operator=(zstr_buffer&& m);
 
 	    zstr_mgr& operator=(zval_mgr&& rc);

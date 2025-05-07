@@ -5,6 +5,10 @@
 #include "htab_read.h"
 #endif
 
+#ifndef HTAB_WRITE_H
+#include "htab_write.h"
+#endif
+
 namespace zpp {
 
     class htab_write;
@@ -77,6 +81,15 @@ namespace zpp {
 
         //! Take away, nullptr internal HashTable*, to avoid decref;
         HashTable* steal();
+
+               //* return indexed array of values
+        static htab_mgr getValues(htab_read hr);
+
+        //* return indexed array of keys
+        static htab_mgr getKeys(htab_read hr);
+
+        // extract subset using keylist with removal from original hfrom
+        static htab_mgr extract(htab_read exkeys, htab_write hfrom);
  
     };
 

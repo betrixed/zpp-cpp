@@ -7,6 +7,9 @@
 #ifndef ZSTR_USER_H
 #define ZSTR_USER_H
 
+#ifndef PHP_EXTERN_H
+#include "php_extern.h"
+#endif
 
 namespace zpp {
 

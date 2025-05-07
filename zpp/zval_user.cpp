@@ -7,8 +7,20 @@
 #ifndef ZVAL_USER_CPP
 #define ZVAL_USER_CPP
 
-#ifndef ZSTR_USER_H
-#include "zstr_user.h"
+#ifndef ZSTR_MGR_H
+#include "zstr_mgr.h"
+#endif
+
+#ifndef ZVAL_USER_H
+#include "zval_user.h"
+#endif
+
+#ifndef HTAB_READ_H
+#include "htab_read.h"
+#endif
+
+#ifndef ZVAL_MGR_H
+#include "zval_mgr.h"
 #endif
 
 namespace zpp {
@@ -160,7 +172,9 @@ size_t zval_user::size() const
 	}
 }
 
-
+zval_user::zval_user(const zval_mgr& mgr) : p_((zval*) mgr)
+{
+}
 
 /*
 * Return managed string
@@ -401,6 +415,6 @@ zval_user::php_constant(zstr_user name)
 	return zval_user(zend_get_constant(name));
 }
 
-};
+}; //namespace
 //zval_user.cpp
 #endif

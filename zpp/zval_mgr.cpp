@@ -7,6 +7,26 @@
 #ifndef ZVAL_MGR_CPP
 #define ZVAL_MGR_CPP
 
+#ifndef ZVAL_MGR_H
+#include "zval_mgr.h"
+#endif
+
+#ifndef ZVAL_USER_H
+#include "zval_user.h"
+#endif
+
+#ifndef ZSTR_MGR_H
+#include "zstr_mgr.h"
+#endif
+
+#ifndef HTAB_MGR_H
+#include "htab_mgr.h"
+#endif
+
+#ifndef ZOBJ_MGR_H
+#include "zobj_mgr.h"
+#endif
+
 namespace zpp {
 
 zval_mgr zval_mgr::EmptyArray = zval_mgr((HashTable*) &zend_empty_array);
@@ -41,11 +61,6 @@ zval_mgr::~zval_mgr()
     zval_mgr::try_decref(&zv_);
 }
 
-zval_mgr::zval_mgr(base_d* cobj)
-{
-    zv_ = {0};
-    zval_user(&zv_).bind_object(cobj->vobj());
-}
 
 void 
 zval_mgr::new_array()
@@ -130,6 +145,12 @@ zval_mgr::zval_mgr(HashTable* ht)
      zval_user(&zv_).bind_array(ht);
 }
 
+zval_mgr::zval_mgr(base_d* cobj)
+{
+    zv_ = {0};
+    zval_user(&zv_).bind_object(cobj->vobj());
+}
+
 zval_mgr::zval_mgr(bool bval)
 {
     zv_ = {0};
@@ -189,12 +210,10 @@ zval_mgr::zval_mgr(const zval_mgr& rc, bool byRef)
 {
 
     zv_ = {0};
-    _zval_struct *p = (_zval_struct*) rc;
-
-    zval_mgr::try_decref(&zv_);
+    zval *p = (zval *) rc;
 
     //  Does addref count
-    ZVAL_COPY(&zv_, &rc.zv_);
+    ZVAL_COPY(&zv_, p);
     
     if (byRef)
     {
@@ -309,7 +328,7 @@ zval_mgr::toLong()
 {
     zval* p = &zv_;
     
-    if (!Z_TYPE_P(p) != IS_LONG) {
+    if (Z_TYPE_P(p) != IS_LONG) {
         ZVAL_DEREF(p);
         zend_long value =  zval_get_long_ex(p,false);
         lose();
@@ -320,7 +339,7 @@ zval_mgr::toLong()
 void zval_mgr::toDouble()
 {
     zval* p = &zv_;
-    if (!Z_TYPE_P(p) != IS_DOUBLE) {
+    if (Z_TYPE_P(p) != IS_DOUBLE) {
         ZVAL_DEREF(p);
         double value =  zval_get_double_func(p);
         lose();

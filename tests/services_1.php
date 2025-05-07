@@ -99,7 +99,7 @@ function hide1() {
 	}
 	catch (\Error $ex)
 	{
-		echo "Service get failed " . ex.getMessage() . PHP_EOL;
+		echo "Service get failed " . $ex->getMessage() . PHP_EOL;
 	}
 
 	$ic = new ICache([], $svc);

@@ -2,21 +2,21 @@
 #define ZPP_BASE_H
 //wc_base.h
 
-#ifndef ZPP_EXPORT
-#define ZPP_EXPORT
+
+#ifndef PHP_EXTERN_H
+#include "php_extern.h"
 #endif
 
-#include "php.h"
+// ZPP_BUILD_ALL tells base.cpp to be one compile unit
+#define ZPP_BUILD_ALL
 
-#include <zend_types.h>
-#include <Zend/zend_exceptions.h>
 
-#include <string> 
-
-#include "show_zpp.h"
-
-#include "zstr_mgr.h"
 #include "zstr_user.h"
+#include "zstr_mgr.h"
+
+#include "htab_read.h"
+#include "htab_mgr.h"
+#include "htab_write.h"
 
 #include "zobj_mgr.h"
 #include "zobj_user.h"
@@ -24,13 +24,13 @@
 #include "zval_mgr.h"
 #include "zval_user.h"
 
-#include "htab_mgr.h"
-#include "htab_read.h"
-#include "htab_write.h"
 
 #include "htab_walk.h"
 #include "state_init.h"
 #include "class_data.h"
+
+#include "fn_call.h"
+#include "show_zpp.h"
 
 #include "zstr_buffer.h"
 
@@ -38,7 +38,8 @@
 
 #include "preg.h"
 
-#include <stdexcept>
+
+
 
 #ifdef DEBUG_EXTRA
 //#define BASE_DEBUG
@@ -129,7 +130,11 @@ namespace zpp {
 	 * 	   This is in the base_d::operator new() zend_object_allocate asks for - sizeof(T) + sizeof(*T) + sizeof(zend_object)
 	 *     called in base_obj_mgr<T>::znew_ex
 	 * 
-	 * 	   Other details of inheritance to cater for, include calling virtual functions of parent class where properly useful,
+	 * 	   Other de
+        void push_back(zval_user zv);
+
+        void push_back(zstr_user su);
+        tails of inheritance to cater for, include calling virtual functions of parent class where properly useful,
 	 *     eg call parent virtual debug_info, or  the function handling constructor, internal function of parent.
 	 */
 

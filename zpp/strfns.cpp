@@ -4,6 +4,11 @@
 #include <string>
 #include <sstream>
 
+#include "zstr_user.h"
+#include "zstr_mgr.h"
+#include "zval_user.h"
+#include "show_zpp.h"
+
 
 using namespace zpp;
 
@@ -213,7 +218,7 @@ void phiz_uncamel(zval* return_value, const zend_string *src, const zend_string 
 	const char *marker;
 	const char* psep;
 	int sep_len = 0;
-	unsigned int i;
+	int i;
 	int src_len;
 	char ch, sepch;
 
@@ -424,11 +429,11 @@ PHP_FUNCTION(Wcc_test_wcc)
 	htab_own scopy = gref.zarray();
 	showarray("_SERVER own", scopy);
 	
-	//* pass reference to array
+	// pass reference to array
 	zval_own htabref(scopy, true);
 	showmem("scopy ref", htabref);
 
-	//* get htab_ptr and write to the reference
+	// get htab_ptr and write to the reference
 
 	htab_ptr writer(htabref);
 

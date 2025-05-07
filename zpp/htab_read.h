@@ -5,8 +5,8 @@
 #include "zval_user.h"
 #endif
 
-#ifndef HTAB_MGR_H
-#include "htab_mgr.h"
+#ifndef ZSTR_USER_H
+#include "zstr_user.h"
 #endif
 
 typedef int fn_zval(zval*);
@@ -21,9 +21,9 @@ namespace zpp {
     protected:
         HashTable* ht_;
 
-        friend class htab_mgr;
-        friend class htab_write;
         friend class zval_mgr;
+        friend class htab_mgr;
+        
     public:
         static HashTable* make_own(HashTable* ht);
 
@@ -74,17 +74,10 @@ namespace zpp {
                 return get(zkey);
         }
 
-        zval* operator[]  (const zval_mgr& key) const
-        {
-                //zend_printf("[zval_own&]\n");
-                return get((zval*)key);
-        }
+        zval* operator[]  (const zval_mgr& key) const;
 
-        zval* operator[]  (zstr_user skey) const
-        {
-                //zend_printf("[zstr_ptr&]\n");
-                return get( (zend_string*) skey);
-        }
+        zval* operator[]  (zstr_user skey) const;
+
         bool  has_index(zend_long key) const;
 
         bool  has_key(zend_string* skey) const;
@@ -100,11 +93,7 @@ namespace zpp {
 
         zstr_mgr print_kv(const char* label) const;
 
-        //* return indexed array of values
-        htab_mgr getValues();
-
-        //* return indexed array of keys
-        htab_mgr getKeys();
+ 
 
         /**
          * Replace string segments like @valkey with

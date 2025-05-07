@@ -1,5 +1,5 @@
-#ifndef WC_PREG_H
-#define WC_PREG_H
+#ifndef ZPP_PREG_H
+#define ZPP_PREG_H
 
 
 #ifndef ZVAL_USER_H
@@ -8,6 +8,18 @@
 
 #ifndef ZSTR_USER_H
 #include "zstr_user.h"
+#endif
+
+#ifndef ZVAL_MGR_H
+#include "zval_mgr.h"
+#endif
+
+#ifndef ZSTR_MGR_H
+#include "zstr_mgr.h"
+#endif
+
+#ifndef HTAB_READ_H
+#include "htab_read.h"
 #endif
 
 extern "C" {

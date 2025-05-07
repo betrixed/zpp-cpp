@@ -2,9 +2,12 @@
 #define ZOBJ_USER_H
 
 
-
 #ifndef ZVAL_MGR_H
 #include "zval_mgr.h"
+#endif
+
+#ifndef ZSTR_USER_H
+#include "zstr_user.h"
 #endif
 
 namespace zpp {
@@ -33,7 +36,7 @@ namespace zpp {
 		
 		zobj_user(zval* zp);
 
-		zobj_user(base_d* cobj);
+		zobj_user(base_d* cobj); 
 		
 		zobj_mgr clone() const;
 

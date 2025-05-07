@@ -1,6 +1,18 @@
 #ifndef DATE_TIME_OBJ_H
 #define DATE_TIME_OBJ_H
 
+#ifndef PHP_EXTERN_H
+#include "php_extern.h"
+#endif
+
+#ifndef STATE_INIT_H
+#include "state_init.h"
+#endif
+
+#ifndef ZSTR_MGR_H
+#include "zstr_mgr.h"
+#endif
+
 namespace zpp {
 	
 	class Date_init : public state_init {

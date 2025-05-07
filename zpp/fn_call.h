@@ -7,15 +7,23 @@
 #ifndef FN_CALL_H
 #define FN_CALL_H
 
-//fn_call.h
-/* #ifndef SHOW_ZPP_H
-#include "show_zpp.h"
+#ifndef ZSTR_MGR_H
+#include "zstr_mgr.h"
 #endif
-*/
 
 #ifndef STATE_INIT_H
 #include "state_init.h"
 #endif
+
+#ifndef HTAB_READ_H
+#include "htab_read.h"
+#endif
+
+#ifndef ZVAL_MGR_H
+#include "zval_mgr.h"
+#endif
+
+
 
 namespace zpp {
 
@@ -27,7 +35,7 @@ namespace zpp {
      * Create parameter space dynamically.
      *  and copy array values starting at prefix index.
      */ 
-    class ZPP_EXPORT args_spread  {
+    class args_spread  {
         size_t              argct_;
         zval*               argv_;
     public:
@@ -43,7 +51,7 @@ namespace zpp {
     bool callable_fn(zval_mgr& result, zval_mgr& callme, int argct = 0, zval* argv = nullptr);
     bool call_spread_fn(zval_mgr& result, zval_mgr& callme, htab_read args);
 
-    class ZPP_EXPORT fn_call {
+    class fn_call {
     protected:
         // C-array of zvals arguments to call_user_fn
         size_t          argct_;

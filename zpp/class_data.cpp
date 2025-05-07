@@ -5,8 +5,22 @@
 #include "class_data.h"
 #endif
 
-namespace zpp {
+#ifndef ZVAL_USER_H
+#include "zval_user.h"
+#endif
 
+#ifndef SHOW_ZPP_H
+#include "show_zpp.h"
+#endif
+
+extern "C" {
+    #include "Zend/zend_API.h"
+    #include "Zend/zend_exceptions.h"
+}
+
+
+namespace zpp {
+/*
 void 
 class_data::typed_property(
     zstr_user name, zval_user data, 
@@ -16,10 +30,10 @@ class_data::typed_property(
             name, 
             data,
             accessflag, 
-            /*doc_comment zend_string*/ nullptr, 
+            nullptr,  //doc_comment zend_string
              datatype);
 }
-
+*/
 void 
 class_data::add_constant(const char* name, const char* value)
 {
@@ -97,7 +111,7 @@ zobj_mgr//static
 class_data::create_object(zstr_user classname)
 {
     class_data temp(classname);
-    showstr("create_object", classname);
+    //showstr("create_object", classname);
     zobj_mgr result;
 
     temp.new_object(result);

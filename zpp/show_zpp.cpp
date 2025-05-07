@@ -7,6 +7,21 @@
 #include "for_key_value.h"
 #endif
 
+#ifndef SHOW_ZPP_H
+#include "show_zpp.h"
+#endif
+
+
+#ifndef ZSTR_OUTPUT_H
+#include "zstr_output.h"
+#endif
+
+#ifndef HTAB_WALK_H
+#include "htab_walk.h"
+#endif
+
+
+
 extern "C" {
 	#include <Zend/zend_lazy_objects.h>
 }
@@ -112,7 +127,7 @@ dump_info::dump_info(const char* s) : ss(dumper_d), total_(0)
 void 
 dump_info::show_properties(zend_object* zobj, HashTable* myht, int level, int refadj)
 {
-	zend_long index;
+
 	zend_string *key;
 	zval *val;
 
@@ -126,8 +141,8 @@ dump_info::show_properties(zend_object* zobj, HashTable* myht, int level, int re
 	{
 		zend_property_info *prop_info = nullptr;
 
-		zval* val = fkv.value();
-		zend_string* key = fkv.key();
+		val = fkv.value();
+		key = fkv.key();
 
 		if (Z_TYPE_P(val) == IS_INDIRECT) {
 			val = Z_INDIRECT_P(val);
@@ -137,7 +152,7 @@ dump_info::show_properties(zend_object* zobj, HashTable* myht, int level, int re
 		}
 
 		if (!Z_ISUNDEF_P(val) || prop_info) {
-			object_property_dump(prop_info, val, index, key, level+1, refadj);
+			object_property_dump(prop_info, val, fkv.index(), key, level+1, refadj);
 		}
 	}
 	indent(level);
@@ -308,11 +323,8 @@ void dump_info::indent(int ct)
 
 	void dump_info::di_showmem(zval *m) 
 	{
-		if (!m) {
-			ss << "zval nullptr";
-			return;
-		}
-		ss << "zval 0x" << (void*)m << " + " << Z_TYPE_FLAGS_P(m) << ' ';
+
+		ss << "zval(0x" << (void*)m << ") +" << Z_TYPE_FLAGS_P(m) << ' ';
 
 		if (!m) {
 			return;
@@ -396,11 +408,11 @@ void dump_info::indent(int ct)
 			ss << "NULL\n";
 			return;
 		}
+
+		size_t ct = zend_array_count(ht);
 		if (ht->gc.u.type_info & GC_IMMUTABLE) {
 			ss << "immutable ";
 		}
-		size_t ct = zend_array_count(ht);
-
 		ss << iform(Numf::DEC) << "arr(" << ct <<") 0x"  << iform(Numf::HEX) << ht;
 		/* if (ht->u.flags & htab_mgr::COW_VIOLATE) {
 			ss << " vcow ";
@@ -488,7 +500,7 @@ void showmem(const char* s, zval* m)
 		return;
 	}
 	if (s == nullptr) {
-		zend_printf("s is nullptr\n");
+		zend_printf("passed nullptr\n");
 		return;
 	}
 	dump_info di(s);

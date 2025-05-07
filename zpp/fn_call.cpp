@@ -8,13 +8,12 @@
 #define FN_CALL_CPP
 
 #ifndef FN_CALL_H
-#include "zpp/fn_call.h"
+#include "fn_call.h"
 #endif
 
-extern "C" {
-    #include "Zend/zend_alloc.h"
-    #include "ext/json/php_json.h"   
-};
+#ifndef HTAB_WALK_H
+#include "htab_walk.h"
+#endif
 
 namespace zpp {
 
@@ -141,7 +140,7 @@ void fn_call::throw_failed()
     if (name.ok())
         zend_throw_error(zend_ce_error, "fn_call_failed for %s", name.data());
     else 
-        zend_throw_error(zend_ce_error, "fn_call_failed, no name", 0);
+        zend_throw_error(zend_ce_error, "fn_call_failed, no name");
 }
 
 bool fnexists::call(zstr_user arg)
@@ -205,7 +204,7 @@ fn_call::call_fn()
 {
     if (fci_.size==0)
     {
-        zend_throw_error(zend_ce_error,"call_fn() fci is not initialized",0);
+        zend_throw_error(zend_ce_error,"call_fn() fci is not initialized");
         return std::move(result_);
     }
     /*
@@ -273,7 +272,6 @@ zstr_mgr
 mb_detect_order(const zval_mgr& encoding)
 {
     fn_call_args<1>  fn;
-    zval* pz = fn.argsptr();
 
     fn.set_fci(nullptr, STAB.mb_detect_order, nullptr);
     ZVAL_COPY_VALUE(fn.argsptr(), encoding);
@@ -426,8 +424,6 @@ bool callable_fn(
 {
     result.set_null();
 
-    zval*    pzobj = nullptr;
-
     //showmem("argv", argv);
     //showmem("result", result);
 
@@ -440,7 +436,7 @@ bool callable_fn(
         argv) != SUCCESS)
     {
         // TODO: exception message callme toString ??
-        zend_throw_error(zend_ce_error, "Invalid callable", 0);
+        zend_throw_error(zend_ce_error, "Invalid callable");
         return false;
     }
      //showmem("result", result);

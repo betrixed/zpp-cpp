@@ -9,6 +9,10 @@
 #include "htab_read.h"
 #endif
 
+#ifndef ZVAL_MGR_H
+#include "zval_mgr.h"
+#endif
+
 namespace zpp {
 
     class htab_walk {

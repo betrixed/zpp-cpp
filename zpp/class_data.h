@@ -1,9 +1,18 @@
 #ifndef CLASS_DATA_H
 #define CLASS_DATA_H
 
+#ifndef PHP_EXTERN_H
+#include "php_extern.h"
+#endif
+
+
+#ifndef ZOBJ_MGR_H
+#include "zobj_mgr.h"
+#endif
+
 namespace zpp {
 
-class ZPP_EXPORT class_data {
+class class_data {
     protected:
         zend_class_entry* class_entry_;
 

@@ -47,7 +47,7 @@ ServiceAccess::setServices(zval_user svc)
 
 void ServiceAccess::init_access()
 {
-	/* for descendent classes */
+	/* php override for descendent classes */
 }
 
 //virtual
