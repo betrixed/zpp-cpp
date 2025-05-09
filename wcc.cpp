@@ -73,8 +73,12 @@ extern "C" {
 #include "wcc/request_globals.cpp"
 #include "wcc/file_upload.cpp"
 
-//#include "wcc/headers_response.cpp"
+
+
 #include "wcc/global_response.cpp"
+
+#include "wcd/sql_ipart.cpp"
+#include "wcd/sql_isql.cpp"
 
  //SQL_IPART_CPP
 //#include "wcc/sql_ipart.cpp"

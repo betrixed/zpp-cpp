@@ -15,6 +15,7 @@ namespace zpp {
 
 	class zstr_mgr;
 	class zval_user;
+
 	class zstr_intern;
 
 	class zstr_user {
@@ -22,7 +23,7 @@ namespace zpp {
 	    zend_string* s;
 
 	    friend class zstr_mgr;
-
+	    friend class zval_mgr;
 	public:
 
 		static const char* empty;
@@ -105,6 +106,13 @@ namespace zpp {
 
 	int zs_cmp(zend_string* a, zend_string* b);
 	int zs_cmp_ci(zend_string* a, zend_string* b);
+
+	zstr_mgr str_replace( zstr_user mstr, zstr_user rstr, zstr_user subject );
+
+	zstr_mgr str_replace(const std::string_view& match, 
+						 const std::string_view& replace,
+						 zstr_user subject);
+
 };
 
 

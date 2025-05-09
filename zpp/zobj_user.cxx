@@ -127,7 +127,7 @@ bool zobj_user::isDateTime() const
 }
 
 void 
-zobj_user::return_zv(zval* ret)
+zobj_user::return_zv(zval* ret) const
 {
     if (obj_)
         ZVAL_OBJ_COPY(ret, obj_);

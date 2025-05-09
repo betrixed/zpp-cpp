@@ -95,6 +95,11 @@ zobj_mgr::zobj_mgr(const zobj_mgr& rc) : zobj_user(rc.obj_)
     own();
 }
 
+zobj_mgr::zobj_mgr(const zval* zp)
+{
+	obj_ = zval_user(zp).zobject();
+	own();
+}
 
 zobj_mgr::zobj_mgr(zobj_mgr&& rc) : zobj_user(rc.obj_)
 {
@@ -112,6 +117,19 @@ zobj_mgr::operator=(const zobj_user &rc)
 	}
 	return *this;
 }
+
+zobj_mgr& 
+zobj_mgr::operator=(const zobj_mgr &rc)
+{
+	if (rc.obj_ != obj_)
+	{
+		lose();
+		obj_ = rc.obj_;
+		own();
+	}
+	return *this;
+}
+
 
 zobj_mgr& 
 zobj_mgr::operator=(zobj_mgr&& rc)
@@ -157,17 +175,6 @@ zobj_mgr::move_zv(zval* ret)
 	}	
 }
 
-void 
-zobj_mgr::return_zv(zval* ret)
-{
-	if (obj_)
-	{
-		ZVAL_OBJ_COPY(ret, obj_);
-		//Z_TYPE_FLAGS_P(ret) = 0;
-	}
-	else
-		ZVAL_NULL(ret);
-}
 
 zobj_mgr::zobj_mgr(zval_mgr&& m) 
 {
@@ -185,7 +192,7 @@ zobj_mgr::operator=(zval_mgr&& rc)
 }
 
 const zobj_mgr& 
-zobj_mgr::operator=(zval* rc)
+zobj_mgr::operator=(const zval* rc)
 {
 	lose();
 	obj_ = zval_user(rc).zobject();

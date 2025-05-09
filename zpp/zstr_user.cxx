@@ -389,6 +389,61 @@ zstr_user::json_encode(zval_user value, int flags)
 	}
 }
 
+
+zstr_mgr 
+str_replace(
+	zstr_user mstr, 
+	zstr_user rstr, 
+	zstr_user subject )
+{
+	return str_replace(mstr.vstr(), rstr.vstr(), subject);
+}
+
+zstr_mgr
+str_replace(
+	const std::string_view& src, 
+	const std::string_view& replace,
+	zstr_user subject)
+{
+	std::string_view s = subject.vstr();
+	
+	const size_t rlen = replace.length();
+	const size_t slen = s.length();
+
+	const size_t srclen = src.length();
+
+	size_t oklen = slen;
+	size_t pos = 0;
+
+	zstr_buffer  result;
+	while(true)
+	{
+		size_t okpos = pos;
+		pos = s.find(src, pos);
+
+		if (pos == std::string_view::npos)
+		{
+			oklen = slen - okpos;
+			if (oklen > 0) {
+				result << s.substr(okpos, oklen);
+			}
+			break;
+		}
+		else {
+			oklen = pos - okpos;
+			pos += srclen;
+			if (oklen > 0) {
+				result << s.substr(okpos, oklen);
+			}
+			if (rlen > 0)
+			{
+				result << replace;
+			}
+		}
+	}
+	return result.zstr();
+}
+
 };
 //zstr_user.cpp
 #endif

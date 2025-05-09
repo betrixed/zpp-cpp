@@ -44,7 +44,7 @@ namespace zpp {
 		const zobj_user& operator=(zval* rc);
 		//const zobj_user& operator=(const zval_mgr& rc);
 
-		void return_zv(zval* ret);
+		void return_zv(zval* ret) const;
 		
 		bool property_list(htab_mgr& mgr);
 
@@ -57,8 +57,11 @@ namespace zpp {
 
 		//! get a property value
 		zval_mgr  property(zstr_user key);
-		void      property(zstr_user key, zval_user value);
 		zval* 	  property_get(zstr_user key, zval* ret);
+
+		//! set a property value
+		void      property(zstr_user key, zval_user value);
+		
 		bool      has_property(zstr_user name);
 		void      unset_property(zstr_user name);
 		//! property-values list

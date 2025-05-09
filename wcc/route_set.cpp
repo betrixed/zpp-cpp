@@ -363,14 +363,13 @@ RouteSet::routeUrl(zstr_user name, htab_read params)
 void
 RouteSet::copy_target(Route* route)
 {
-	zval_mgr target_val = route->getTarget();
-	zval_user target(target_val);
+	zval_user target = route->getTarget();
 
 	//showstr("route name", route->id_);
 	
 	if (target.isObject()) 
 	{
-		zobj_mgr tobj(target);
+		zobj_mgr tobj(target.zobject());
 		zobj_user init_tobj(tobj);
 
 		if (init_tobj.instanceof( Target::omg.classEntry() )) 

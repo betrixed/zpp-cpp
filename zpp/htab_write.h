@@ -20,7 +20,13 @@ namespace zpp {
         // Mark zval type flags if reference counted or not
         static void array_bind(zval* tmp, HashTable* ht);
         static void string_bind(zval* tmp, zend_string* s);
+        static void object_bind(zval* temp, zend_object* obj);
+        
     public:
+        /** Each constructor may duplicate and set the HashTable* of its source,
+         *  to ensure its reference count is 1.
+         */
+
         htab_write(htab_mgr& mgr);
         htab_write(zval_mgr& mgr);
         htab_write(zval_user mgr);
@@ -86,6 +92,7 @@ namespace zpp {
 
         void set(zend_long idx, zval* value);
         void set(zend_long idx, HashTable* value);
+        void set(zend_long idx, zend_object* value);
 
         bool unset(zend_long idx);
         bool unset(zend_string* key);

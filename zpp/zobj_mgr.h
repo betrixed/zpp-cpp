@@ -34,7 +34,11 @@ namespace zpp {
 		
 		zobj_mgr(zval_mgr&& m);
 
+		zobj_mgr(const zval* zp);
+
 		zobj_mgr& operator=(const zobj_user &rc);
+
+		zobj_mgr& operator=(const zobj_mgr &rc);
 
 		zobj_mgr& operator=(zobj_mgr&& rc);
 
@@ -44,7 +48,7 @@ namespace zpp {
 		
 		const zobj_mgr& operator=(zend_object* rc);
 
-		const zobj_mgr& operator=(zval* rc);
+		const zobj_mgr& operator=(const zval* rc);
 		
 		void init();
 
@@ -63,7 +67,6 @@ namespace zpp {
 		}
 
 		void move_zv(zval* ret);
-		void return_zv(zval* ret);
 
 
 		static bool new_object(zstr_user classname, zobj_mgr& host);

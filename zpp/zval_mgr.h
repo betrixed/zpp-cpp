@@ -107,7 +107,7 @@ public:
 
     const zval_mgr& operator=(const zobj_mgr &rc);
 
-    const zval_mgr& operator=(const zstr_mgr &rc);
+    const zval_mgr& operator=(const zstr_user &rc);
 
     const zval_mgr& operator=(zend_long value);
 

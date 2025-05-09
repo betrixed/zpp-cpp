@@ -268,7 +268,7 @@ zval_mgr::operator=(const zval_user &rc)
 }
 
 const zval_mgr& 
-zval_mgr::operator=(const zstr_mgr &rc)
+zval_mgr::operator=(const zstr_user& rc)
 {
     lose();
     zval_user(&zv_).bind_string(rc.s);
@@ -371,19 +371,19 @@ zval_mgr::zval_mgr(zstr_mgr&& rc)
 
 zval_mgr::zval_mgr(zend_string* rc)
 {
-    init();
+    zv_ = {0};
     zval_user(&zv_).bind_string(rc);
 }
 
 zval_mgr::zval_mgr(zend_object* rc)
 {
-    init();
+    zv_ = {0};
     zval_user(&zv_).bind_object(rc);
 }
 
 zval_mgr::zval_mgr(zend_long value)
 {
-    init();
+    zv_ = {0};
     ZVAL_LONG(&zv_, value);
 }
 
