@@ -42,7 +42,7 @@
 
 
 #ifdef DEBUG_EXTRA
-//#define BASE_DEBUG
+#define BASE_DEBUG
 #endif
 
 
@@ -239,6 +239,10 @@ namespace zpp {
 		}
 		
 		virtual void debug_info(htab_write ht);
+
+		virtual zstr_mgr toString() const {
+			return zstr_mgr();
+		};
 
 		virtual zstr_user extender();
 

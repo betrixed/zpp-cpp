@@ -117,8 +117,7 @@ EOS;
 
     public function testSqlCache1()
     {
-        $cache_all = Services::service('cache_all');
-        $cache = $cache_all->getCache('sql_cache');
+        $cache = Services::service('sql_cache');
 
         $ct = 1000;
         $tstart = microtime(true);

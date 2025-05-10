@@ -386,6 +386,17 @@ bool htab_write::unset(zend_long idx)
 	return (zend_hash_index_del(ht_, idx) == SUCCESS);
 }
 
+void htab_write::set(zend_long idx, zval* value)
+{	
+	if (zend_hash_index_update(ht_, idx, value))
+	{
+		if (Z_TYPE_FLAGS_P(value) != 0)
+		{
+			zval_mgr::try_addref(value);
+		}
+	}
+}
+
 void
 htab_write::merge(HashTable* src)
 {

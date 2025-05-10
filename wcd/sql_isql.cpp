@@ -176,7 +176,7 @@ JoinInfo::rightTable()
 
 // add a join expression
 void 
-JoinInfo::add(zobj_user ltable, zobj_user rtable, int jtype, int logic)
+JoinInfo::add(zval_user lexp, zval_user rexp, int jtype, int logic)
 {
 	if ( (logic == JoinExpr::B_NULL) && joinExpr_.size())
 	{
@@ -186,10 +186,7 @@ JoinInfo::add(zobj_user ltable, zobj_user rtable, int jtype, int logic)
 	auto jobj = JoinExpr::omg.new_zobj();
 	JoinExpr* je = zobj_toc<JoinExpr>(jobj);
 
-	zval_mgr Larg(ltable);
-	zval_mgr Rarg(rtable);
-
-	je->construct(Larg, Rarg, jtype, logic);
+	je->construct(lexp, rexp, jtype, logic);
 
 	addExpr(jobj);
 
@@ -442,15 +439,16 @@ ISql::quoteName(zstr_user name)
 		char ic = *(name.data());
 		if ((ic == '*')||(ic == '`'))
 		{
-			result = zstr_mgr(name);
+			result = name;
 			return result;
 		}
 		zstr_buffer buf;
 		buf << '`' << name << '`';
 		result = buf.zstr();
-		return result;
 	}
-	result = SQSTR.mysql_empty;
+	else {
+		result = SQSTR.mysql_empty;
+	}
 	return result;
 }
 
@@ -656,8 +654,6 @@ ISql::emit(zval_user sp, Bindings* bind, zstr_user lalias, zstr_user ralias)
 {
  	SqlPartId* part = getPartObj(sp);
  	int partid = part->getPartId();
- 	//zend_printf("ISql::emit partid %ld\n", partid);
- 	//showmem("part obj", sp);
 
  	zstr_buffer buf;
  	zstr_mgr str;
@@ -667,7 +663,10 @@ ISql::emit(zval_user sp, Bindings* bind, zstr_user lalias, zstr_user ralias)
  	case SqlPartId::TA_PID:
  		{
  			TableAttr* ta = static_cast<TableAttr*>(part);
- 			buf << ta->getTable() << '.' << this->quoteName(ta->getAttr());
+ 			zstr_user ta_alias = ta->getTable();
+ 			zstr_user ta_name = ta->getAttr();
+
+ 			buf << ta_alias << '.' << this->quoteName(ta_name);
  		}
  		break;
  	case SqlPartId::LIT_PID:
@@ -680,7 +679,6 @@ ISql::emit(zval_user sp, Bindings* bind, zstr_user lalias, zstr_user ralias)
  		{
  			Expr* expr = static_cast<Expr*>(part);
  			str = expr->toString();
- 			//zend_printf("str %s\n", str.data());
  			buf << str;
  		}
  		break;
@@ -703,7 +701,6 @@ ISql::emit(zval_user sp, Bindings* bind, zstr_user lalias, zstr_user ralias)
  		throw std::runtime_error("Unmatched partid in emit");
  	}
  	
- 	//zend_printf("JE result %s\n", result.data());
  	return buf.zstr();		
 }
 
@@ -881,7 +878,7 @@ ISql::insert(Bindings& bind)
 
 	buf << ' ' << this->quoteName(icol->getName());
 
-	htab_read sql_insert;
+	htab_mgr sql_insert;
 
 	if (!bind.getArray(ISql::SQL_INSERT, sql_insert))
 	{
@@ -915,7 +912,7 @@ ISql::insert(Bindings& bind)
     	zval_mgr dtext = self.call(SQSTR.valuesdefault);
 		buf << ' ' << zval_user(dtext).zstr() << ' ';
     }
-	htab_read rettab;
+	htab_mgr rettab;
 	zval_user  valset;
 	if (bind.getArray(ISql::SQL_RETURN, rettab))
 	{
@@ -968,7 +965,7 @@ ISql::insert(Bindings& bind)
 				extract_params(rowbind, params, pset);
 				multirow.push_back(pset);
 			}
-			ret_params = multirow;
+			ret_params_mgr = multirow;
 		}
 
 	}
@@ -978,7 +975,7 @@ ISql::insert(Bindings& bind)
 
 	if (ret_params.size())
 	{
-		plist->setValues(ret_params);
+		plist->setValues(ret_params_mgr);
 	}
 	if (rettab.size())
 	{
@@ -1061,8 +1058,6 @@ ISql::fromJT(Bindings& bind, JoinTables* jt)
 			{
 				JoinExpr* jex = zval_toc<JoinExpr>(jexp_obj);
 				name = jex->emit(jix, &bind, l_alias, r_alias );
-				//zend_printf("expr %s\n",name.data());
-				//zend_printf("buflen %ld, %ld\n", buf.size(), buf.len());
 				buf << name;
 			}
 		}
@@ -1607,14 +1602,14 @@ Bindings::getJoins()
 }
 
 bool
-Bindings::getArray(int key, htab_read& value)
+Bindings::getArray(int key, htab_mgr& value)
 {
 	zval_user result;
 	if (data_.try_fetch(key, result))
 	{
 		if (result.isArray())
 		{
-			htab_read array(result.zarray());
+			htab_mgr array(result.zarray());
 			if (array.size())
 			{
 				value = array;
@@ -1945,7 +1940,9 @@ ZEND_METHOD(Wcd_Sql_JoinTables, addJoin)
 	ZEND_PARSE_PARAMETERS_END();
 	JoinTables* cobj = zval_toc<JoinTables>(ZEND_THIS);
 
-	cobj->addJoin(jinfo);
+	zobj_mgr obj = cobj->addJoin(jinfo);
+
+	obj.move_zv(return_value);
 }
 
 /* public function addResult(TableAttr $attr) : void {} */
@@ -2576,10 +2573,10 @@ ZEND_METHOD(Wcd_Sql_Bindings, getArray)
 	ZEND_PARSE_PARAMETERS_END();
 
 	Bindings* cobj = zval_toc<Bindings>(ZEND_THIS);
-	htab_read result;
+	htab_mgr result;
 	if (cobj->getArray(key, result))
 	{
-		result.return_zv(return_value);
+		result.move_zv(return_value);
 	}
 	else {
 		RETVAL_NULL();

@@ -80,7 +80,7 @@ $cache->createCache
     options: [
         'cache_dir' => $cfg->cache_dir . "/sfile",
         'dirtree' => false,
-        'expire' => 60*60*40,            
+        'expire' => 60*60*40            
     ]
 );
 
@@ -92,7 +92,7 @@ $cache->createCache
         'cache_dir' => $cfg->cache_dir . "/session",
         'dirtree' => false,
         'expire' => 60*30, 
-        'defer_write' => false,
+        'defer_write' => false
     ]
 );
 

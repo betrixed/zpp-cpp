@@ -230,6 +230,8 @@ JoinExpr::emit(int ix, Bindings* bind,
 {
 
 	zstr_buffer sqlbuf;
+	zstr_mgr    temp;
+
 	const char blank = ' ';
 
 	ISql* isql = zobj_toc<ISql>(bind->isql());
@@ -241,21 +243,22 @@ JoinExpr::emit(int ix, Bindings* bind,
 	}
 
 	zval_user L_attr(lattr_);
-
 	if (!L_attr.isNull())
 	{
 		sqlbuf << blank;
 		if (L_attr.isObject())
 		{
-			sqlbuf << isql->emit(L_attr, bind, Lalias, Ralias); 
+			temp = isql->emit(L_attr, bind, Lalias, Ralias); 
 		}
 		else if (L_attr.isString())
 		{
-			sqlbuf << Lalias << '.' << isql->quoteName(L_attr.zstr());
+			temp = isql->quoteName(L_attr.zstr());
+			sqlbuf << Lalias << '.';
 		}
 		else {
-			sqlbuf << L_attr.to_zstr();
+			temp = L_attr.to_zstr();
 		}
+		sqlbuf << temp; 
 	}
 
 	if (op_ < OP_NOP)
@@ -264,20 +267,23 @@ JoinExpr::emit(int ix, Bindings* bind,
 	}
 
 	zval_user R_attr(rattr_);
+
 	if (!R_attr.isNull())
-	{
+	{	
 		sqlbuf << blank;
 		if (R_attr.isObject()) 
 		{
-			sqlbuf << isql->emit(R_attr,  bind, Lalias, Ralias); 
+			temp = isql->emit(R_attr,  bind, Lalias, Ralias); 
 		}
 		else if (R_attr.isString())
 		{
-			sqlbuf << Ralias << '.' << isql->quoteName(R_attr.zstr());
+			temp = isql->quoteName(R_attr.zstr());
+			sqlbuf << Ralias << '.';
 		}
 		else {
-			sqlbuf << R_attr.to_zstr();
+			temp = R_attr.to_zstr();
 		}
+		sqlbuf << temp;
 	}
 	return sqlbuf.zstr();
 }
@@ -497,6 +503,16 @@ void TableAttr::debug_info(htab_write di)
 	di.set(SQSTR.attr, attr_);
 
 }
+
+zstr_mgr 
+TableAttr::toString() const
+{
+	zstr_buffer buf;
+
+	buf << table_ << '.' << attr_;
+	return buf.zstr();
+}
+
 
 //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 

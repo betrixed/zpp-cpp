@@ -48,7 +48,7 @@ namespace wcc {
 
 		void construct(zobj_user ltable, const zobj_user rtable, int jtype=J_INNER);
 
-		void add(zobj_user ltable, zobj_user rtable, int jtype=J_INNER, int logic = JoinExpr::B_NULL);
+		void add(zval_user lexp, zval_user rexp, int jtype=J_INNER, int logic = JoinExpr::B_NULL);
 
 		void addExpr(zobj_user jexpr);
 
@@ -315,7 +315,7 @@ namespace wcc {
 
 		zobj_mgr getJoins();
 
-		bool getArray(int key, htab_read& value);
+		bool getArray(int key, htab_mgr& value);
 
 		const htab_mgr& getData()
 		{

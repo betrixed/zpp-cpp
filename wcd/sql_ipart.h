@@ -151,6 +151,7 @@ namespace wcc {
 		SqlPartId(int id) {
 			partid_ = id;
 		}
+
 		int getPartId() 
 		{
 			return partid_;
@@ -175,7 +176,7 @@ namespace wcc {
 
 		void construct(zstr_user val);
 
-		zstr_user toString() const { return expr_; }
+		zstr_mgr toString() const override { return expr_; }
 	};
 
 	class Bindings;
@@ -250,13 +251,7 @@ namespace wcc {
 
 		void construct(zstr_user t, zstr_user a);
 
-		zstr_mgr toString()
-		{
-			zstr_buffer buf;
-
-			buf << table_ << '.' << attr_;
-			return buf.zstr();
-		}
+		zstr_mgr toString() const override;
 
 
 		zstr_user getTable() const
@@ -307,7 +302,7 @@ namespace wcc {
 
 		zval_user getValue() const { return value_; }
 
-		zstr_mgr toString() const;
+		zstr_mgr toString() const override;
 	};
 	
 	class IColumns : public SqlPartId 

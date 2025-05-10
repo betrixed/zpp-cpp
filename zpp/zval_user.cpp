@@ -330,7 +330,13 @@ zval_user::zarray() const
 void 
 zval_user::return_zv(zval* ret)
 {
-	ZVAL_COPY(ret, p_);
+	if (p_)
+	{
+		ZVAL_COPY(ret, p_);
+	}
+	else {
+		ZVAL_NULL(ret);
+	}
 }
 
 const zval_user& 
