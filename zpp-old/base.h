@@ -264,9 +264,16 @@ namespace zpp {
 	 */
 
 	class mgr_link {
+	public:
+		virtual zend_class_entry*      zend_class() = 0;
+		virtual zend_object_handlers&  obj_handlers() = 0;
 	protected:
 		static mgr_link* l_start_;
 		static mgr_link* l_end_;
+
+				// return likely targets of static customization
+
+
 #ifdef BASE_DEBUG
 		mgr_link* next_;
 
@@ -287,7 +294,6 @@ namespace zpp {
 			}
 #endif
 		}
-;
 
 		static void report() 
 		{
@@ -307,6 +313,8 @@ namespace zpp {
 			zend_printf("Total live = %d\n", total);
 #endif
 		}
+
+
 	};
 
 	/**
@@ -370,8 +378,12 @@ namespace zpp {
 				//showstr("init_class_fn", class_entry_->name);
 			#endif
 		}
-
 	public:
+		// virtual overides for mgr_link base
+		zend_class_entry* zend_class() override { return class_entry_; }
+		zend_object_handlers&  obj_handlers() override { return handlers_; }
+	
+
 
 		static size_t alive() 
 		{

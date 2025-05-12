@@ -25,6 +25,35 @@
 
 namespace zpp {
 	
+bool 
+zval_user::same(const zval_user& test) const
+{
+	zval* a = p_;
+	zval* b = test.p_;
+
+    if (a == b)
+    {
+        return true;
+    }
+    if (!a || !b) {
+        return false;
+    }
+    int mytype = Z_TYPE_P(a);
+
+    if (mytype != Z_TYPE_P(b))
+    {
+        return false;
+    }
+    
+    switch(mytype) {
+    case IS_STRING:
+        return (zs_cmp(Z_STR_P(a), Z_STR_P(b))==0);
+    default:
+        return (a->value.lval == b->value.lval);
+    }
+    
+}
+
 zval_user zval_user::referent()
 {
 	if (p_) {
@@ -383,6 +412,7 @@ zval_user::bind_object(zend_object* obj)
     }
 }
 
+
 void 
 zval_user::bind_array(HashTable* ht)
 {
@@ -419,6 +449,60 @@ zval_user
 zval_user::php_constant(zstr_user name)
 {
 	return zval_user(zend_get_constant(name));
+}
+
+
+// bind and set zval flags for reference counting this array
+void // static 
+zval_user::array_bind(zval* tmp, HashTable* t)
+{
+	if (!t)
+	{
+		ZVAL_NULL(tmp);
+	}
+	else
+	{	
+		
+		ZVAL_ARR(tmp, t);
+		if (GC_FLAGS(t) & GC_IMMUTABLE)
+		{
+			Z_TYPE_FLAGS_P(tmp) = 0; // mark as not reference counted
+		}
+	}
+}
+
+void
+zval_user::object_bind(zval* temp, zend_object* obj)
+{
+	if (!obj)
+	{
+		ZVAL_NULL(temp);
+	}
+	else
+	{	
+		ZVAL_OBJ(temp, obj);
+		if (GC_FLAGS(obj) & GC_IMMUTABLE)
+		{
+			Z_TYPE_FLAGS_P(temp) = 0; // mark as not reference counted
+		}
+	}
+}
+
+
+void // static 
+zval_user::string_bind(zval* tmp, zend_string* s)
+{
+	if (s) 
+    {
+    	ZVAL_STR(tmp, s);
+    	if ((GC_FLAGS(s) & IS_STR_INTERNED))
+    	{
+    		Z_TYPE_FLAGS_P(tmp) = 0; 
+	    }
+    }
+    else {
+        ZVAL_NULL(tmp);
+    }
 }
 
 }; //namespace

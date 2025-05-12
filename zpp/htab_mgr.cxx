@@ -383,7 +383,7 @@ htab_mgr::operator=(htab_mgr&& m)
 void htab_mgr::move_zv(zval* return_value)
 {
 	//showarray("move_zv", ht_);
-	ZVAL_ARR(return_value, ht_);
+	zval_user::array_bind(return_value, ht_);
 	ht_ = nullptr;
 }
 

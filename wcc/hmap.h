@@ -48,6 +48,7 @@ public:
  
         static zend_object_iterator_funcs  it_fntab_; 
 
+        // create instance static function
         static zend_object_iterator* create(zend_class_entry* ce, zval* zobj, int byRef);
         // functions to slot in Zend/zend_iterators.h
 
@@ -72,12 +73,37 @@ public:
         /* invalidate current value/key (optional, may be NULL) */
         static void  it_invalidate(zend_object_iterator *iter);
 
+        static void setup_mgr(mgr_link* mgr)
+        {
+        zend_object_handlers& hand = mgr->obj_handlers();
+
+	hand.count_elements = Hmap_php::count_elements;
+	hand.read_property = Hmap_php::read_property;
+	hand.write_property = Hmap_php::write_property;
+	hand.get_property_ptr_ptr = Hmap_php::get_property_ptr_ptr;
+	hand.has_property = Hmap_php::has_property;
+	hand.unset_property = Hmap_php::unset_property;
+
+	hand.get_properties_for = Hmap_php::get_properties_for;
+
+	//hand.get_debug_info = nullptr;
+
+	hand.read_dimension = Hmap_php::read_dimension;
+	hand.write_dimension = Hmap_php::write_dimension;
+	hand.has_dimension = Hmap_php::has_dimension;
+	hand.unset_dimension = Hmap_php::unset_dimension;
+           	
+	zend_class_entry* ce = mgr->zend_class();
+
+	ce->get_iterator = HmapIterator::create;
+        }
         /* Expose owned values to GC. */
         //HashTable *(*get_gc)(zend_object_iterator *iter, zval **table, int *n);
 };
 
 //* for maybe class inheritance of Hmap
 class Hmap;
+
 
 class Hmap_mgr : public base_obj_mgr<Hmap>
 {
@@ -88,28 +114,29 @@ protected:
 	{
 	// base class
 		mydef::init_class_fn();
+		HmapIterator::setup_mgr(this);
+	
+	/**
+	zend_object_handlers& hand = mydef::handlers_;
+	hand.count_elements = Hmap_php::count_elements;
+	hand.read_property = Hmap_php::read_property;
+	hand.write_property = Hmap_php::write_property;
+	hand.get_property_ptr_ptr = Hmap_php::get_property_ptr_ptr;
+	hand.has_property = Hmap_php::has_property;
+	hand.unset_property = Hmap_php::unset_property;
 
-		zend_object_handlers& hand = mydef::handlers_;
+	hand.get_properties_for = Hmap_php::get_properties_for;
 
-		hand.count_elements = Hmap_php::count_elements;
-		hand.read_property = Hmap_php::read_property;
-		hand.write_property = Hmap_php::write_property;
-		hand.get_property_ptr_ptr = Hmap_php::get_property_ptr_ptr;
-		hand.has_property = Hmap_php::has_property;
-		hand.unset_property = Hmap_php::unset_property;
+	hand.get_debug_info = nullptr;
 
-		hand.get_properties_for = Hmap_php::get_properties_for;
-
-		hand.get_debug_info = nullptr;
-
-		hand.read_dimension = Hmap_php::read_dimension;
-		hand.write_dimension = Hmap_php::write_dimension;
-		hand.has_dimension = Hmap_php::has_dimension;
-		hand.unset_dimension = Hmap_php::unset_dimension;
+	hand.read_dimension = Hmap_php::read_dimension;
+	hand.write_dimension = Hmap_php::write_dimension;
+	hand.has_dimension = Hmap_php::has_dimension;
+	hand.unset_dimension = Hmap_php::unset_dimension;
 
 
 		mydef::class_entry_->get_iterator = HmapIterator::create;
-		
+	*/	
 	}
 };
 

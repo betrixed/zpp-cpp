@@ -274,6 +274,9 @@ namespace zpp {
 	 */
 
 	class mgr_link {
+	public:
+		virtual zend_class_entry*      zend_class() = 0;
+		virtual zend_object_handlers&  obj_handlers() = 0;
 	protected:
 		static mgr_link* l_start_;
 		static mgr_link* l_end_;
@@ -382,7 +385,10 @@ namespace zpp {
 		}
 
 	public:
-
+		// virtual overides for mgr_link base
+		zend_class_entry* zend_class() override { return class_entry_; }
+		zend_object_handlers&  obj_handlers() override { return handlers_; }
+		
 		static size_t alive() 
 		{
 #ifdef BASE_DEBUG

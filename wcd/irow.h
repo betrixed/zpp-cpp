@@ -20,13 +20,34 @@ namespace wcd {
 	using namespace zpp;
 	using namespace wcc;
 
+	/** To properly inherit Hmap property access and array access, 
+	 *   also have to override own special object handlers
+	 *   with its Hmap_php static functions
+	 */
+	class IRow;
+
+	class IRow_mgr : public base_obj_mgr<IRow>
+	{
+	protected:
+		//typedef base_obj_mgr<T> mydef;
+
+		void init_class_fn() override 
+		{
+		// base class
+			mydef::init_class_fn();
+			HmapIterator::setup_mgr(this);
+		}
+	};
+
 	class IRow : public Hmap {
     protected:
     	zobj_mgr    table_model_;
     	htab_empty  original_;
     public:
 
-    	static base_obj_mgr<IRow> omg;
+    	static IRow_mgr omg;
+
+    	void debug_info(htab_write di) override;
 
     	void construct(zobj_user tmodel, zval_user data, bool exists = false);
 
@@ -40,7 +61,7 @@ namespace wcd {
 
     	bool update(bool reload = false);
 
-    	void reload();
+    	void read();
 
     	htab_mgr getDataValues(zval_user attrlist);
 

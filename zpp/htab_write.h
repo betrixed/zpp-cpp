@@ -18,9 +18,7 @@ namespace zpp {
     protected:
         void giveback(zval* mgr);
         // Mark zval type flags if reference counted or not
-        static void array_bind(zval* tmp, HashTable* ht);
-        static void string_bind(zval* tmp, zend_string* s);
-        static void object_bind(zval* temp, zend_object* obj);
+
         
     public:
         /** Each constructor may duplicate and set the HashTable* of its source,

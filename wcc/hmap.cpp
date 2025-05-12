@@ -488,20 +488,19 @@ Hmap::subsetkey(zstr_user key)
 	return result;
 }
 
+// keys as list values in data
 htab_mgr 
 Hmap::subset(htab_read data)
 {
 	htab_mgr result;
 	htab_write hw(result);
 
-	for_key_value wk;
-	zval_user vkey;
+	htab_walk wk;
 
+	auto key = wk.value();
 	for(wk.start(data); wk.ok(); wk.next())
 	{
-		vkey = wk.value();
-		zstr_mgr key(vkey.to_zstr());
-		zval_mgr value = this->get(key);
+		zval_user value = this->get(key);
 		hw.set(key, value);
 	}
 	return result;

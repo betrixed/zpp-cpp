@@ -92,63 +92,11 @@ htab_write::htab_write(const zval* p)
 	}
 }
 
-// bind and set zval flags for reference counting this array
-void // static 
-htab_write::array_bind(zval* tmp, HashTable* t)
-{
-	if (!t)
-	{
-		ZVAL_NULL(tmp);
-	}
-	else
-	{	
-		
-		ZVAL_ARR(tmp, t);
-		if (GC_FLAGS(t) & GC_IMMUTABLE)
-		{
-			Z_TYPE_FLAGS_P(tmp) = 0; // mark as not reference counted
-		}
-	}
-}
-
-void
-htab_write::object_bind(zval* temp, zend_object* obj)
-{
-	if (!obj)
-	{
-		ZVAL_NULL(temp);
-	}
-	else
-	{	
-		ZVAL_OBJ(temp, obj);
-		if (GC_FLAGS(obj) & GC_IMMUTABLE)
-		{
-			Z_TYPE_FLAGS_P(temp) = 0; // mark as not reference counted
-		}
-	}
-}
-
-
-void // static 
-htab_write::string_bind(zval* tmp, zend_string* s)
-{
-	if (s) 
-    {
-    	ZVAL_STR(tmp, s);
-    	if ((GC_FLAGS(s) & IS_STR_INTERNED))
-    	{
-    		Z_TYPE_FLAGS_P(tmp) = 0; 
-	    }
-    }
-    else {
-        ZVAL_NULL(tmp);
-    }
-}
 
 void htab_write::push_back(HashTable* t)
 {
 	zval tmp = {0};
-	array_bind(&tmp, t);
+	zval_user::array_bind(&tmp, t);
 	if (zend_hash_next_index_insert(ht_, &tmp))
 	{
 		if (Z_TYPE_FLAGS(tmp) != 0)
@@ -159,7 +107,7 @@ void htab_write::push_back(HashTable* t)
 void htab_write::push_back(zend_string* zs)
 {
 	zval tmp = {0};
-	string_bind(&tmp,zs);
+	zval_user::string_bind(&tmp,zs);
 
 	if (zend_hash_next_index_insert(ht_, &tmp))
 	{
@@ -173,7 +121,7 @@ void htab_write::push_back(zend_string* zs)
 void htab_write::push_back(zend_object* zo)
 {
 	zval tmp = {0};
-	object_bind(&tmp, zo);
+	zval_user::object_bind(&tmp, zo);
 
 	if (zend_hash_next_index_insert(ht_, &tmp))
 	{
@@ -230,7 +178,7 @@ htab_write::set(zval* key, zval* value)
 void htab_write::set(zval* key, zend_string* value)
 {
 	zval temp = {0};
-	string_bind(&temp, value);
+	zval_user::string_bind(&temp, value);
 	set(key, &temp);
 }
 
@@ -249,7 +197,7 @@ void htab_write::set(zend_string* key, HashTable* t)
 	//showstr("htab_write::set  key", key);
 
 	zval tmp = {0};
-	array_bind(&tmp, t);
+	zval_user::array_bind(&tmp, t);
 	if (zend_hash_update(ht_, key, &tmp))
 	{	 
 		 if (Z_REFCOUNTED(tmp)) 
@@ -261,7 +209,7 @@ void htab_write::set(zend_string* key, HashTable* t)
 void htab_write::set(zend_string* key, zend_object* obj)
 {
 	zval temp = {0};
-	object_bind(&temp, obj);
+	zval_user::object_bind(&temp, obj);
 
 	if (zend_hash_update(ht_, key, &temp))
 	{
@@ -318,7 +266,7 @@ htab_write::set(zend_string* key, zend_string* value)
 	//showstr("htab_write::set key", key);
 	//showstr("htab_write::set value", value);
 	zval temp = {0};
-	string_bind(&temp, value);
+	zval_user::string_bind(&temp, value);
 	if (zend_hash_update(ht_, key, &temp))
 	{
 		if (Z_TYPE_FLAGS(temp) != 0)
@@ -377,7 +325,7 @@ void htab_write::set(zend_long idx, zval_user value)
 void htab_write::set(zend_long idx, HashTable* value)
 {
 	zval temp = {0};
-	array_bind(&temp,value);
+	zval_user::array_bind(&temp,value);
 	
 	if (zend_hash_index_update(ht_, idx, &temp))
 	{
@@ -391,7 +339,7 @@ void htab_write::set(zend_long idx, HashTable* value)
 void htab_write::set(zend_long idx, zend_object* value)
 {
 	zval temp = {0};
-	object_bind(&temp,value);
+	zval_user::object_bind(&temp,value);
 	
 	if (zend_hash_index_update(ht_, idx, &temp))
 	{

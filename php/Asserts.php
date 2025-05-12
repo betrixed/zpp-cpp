@@ -157,7 +157,7 @@ class Asserts {
 	{
 		if (!empty($value))
 		{
-			throw new Exception(print_r(value,true) . " is Not Empty");
+			throw new Exception(print_r($value,true) . " is Not Empty");
 		}
 		echo ".";
 	}

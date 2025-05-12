@@ -1,7 +1,7 @@
 <?php
 
 use Wcd\Sql\{AnyModel, Model};
-use Wcd\{ITable, IModel};
+use Wcd\{IfCrud};
 
 use Wcc\{Config, Services};
 
@@ -68,24 +68,24 @@ class BaseModelTest extends Asserts {
     public function testTimeStamps() 
     {
         $obj = $this->obj;
-        $obj->setTimestamps(ITable::ALL_TS);
+        $obj->setTimestamps(IfCrud::ALL_TS);
         
         $row = $obj->newRow();
 
         $row->stampTime(date("Y-m-d H:m:s"));
         
-        $val1 = $row->getValue(ITable::CREATED_AT);
-        $val2 = $row->getValue(ITable::UPDATED_AT);
+        $val1 = $row->get(IfCrud::CREATED_AT);
+        $val2 = $row->get(IfCrud::UPDATED_AT);
         
         $this->assertIsString($val1);  
         $this->assertIsString($val2);  
         
-        $this->assertTrue($row->isDirty(ITable::CREATED_AT));
-        $this->assertTrue($row->isDirty(ITable::UPDATED_AT));
+        $this->assertTrue($row->isDirty(IfCrud::CREATED_AT));
+        $this->assertTrue($row->isDirty(IfCrud::UPDATED_AT));
         
         $this->assertTrue(count($row->getDirty()) === 2);
         
-        $row->setValue("name", "Richard III");
+        $row->set("name", "Richard III");
         
         $row->create();
     }
@@ -137,8 +137,10 @@ class BaseModelTest extends Asserts {
         $author =  Author::row(array('name' => 'Blah Blah'));
 
         $author->save();
-
-        $con =  $author->iConnect();
+        
+        $model = $author->getModel();
+        
+        $con =  $model->getConnect();
         
         $driver = $con->iDriver();
 
@@ -308,7 +310,9 @@ class BaseModelTest extends Asserts {
         $book = Book::find(1);
         $book->name = 'new name';
         $book->save();
-        $driver = $book->iConnect()->iDriver();
+        
+        $model = $book->getModel();
+        $driver = $model->getConnect()->iDriver();
         
         $query = $driver->lastSQL();
 
@@ -327,7 +331,7 @@ class BaseModelTest extends Asserts {
     
     public function test_update_attributes_undefined_property()
     {
-        $this->expectException(Exception::CLASS);
+        $this->expectException(Error::CLASS);
         $book = Book::find(1);
         $book->mergeData([
             'name' => 'new name',
@@ -364,7 +368,9 @@ class BaseModelTest extends Asserts {
     public function test_dirty_empty_after_create()
     {
         $book = $this->make_new_book_and();
-        $driver = $book->iConnect()->iDriver();
+        $model = $book->getModel();
+        
+        $driver = $model->getConnect()->iDriver();
         
         $last_sql = $driver->lastSQL();
         $this->assertTrue(strpos($last_sql, 'name') !== false);
@@ -394,7 +400,7 @@ class BaseModelTest extends Asserts {
     {
         $book = Book::first();
         $book->name = 'rivers cuomo';
-        $row = $book->reload();
+        $row = $book->read();
         $this->assertEmpty($row->getDirty());
     }
     public function test_dirty_attributes_with_mass_assignment()
@@ -412,7 +418,7 @@ class BaseModelTest extends Asserts {
         $author->save();
         $this->assertNotNull($author->created_at);
         $this->assertNotNull($author->updated_at);
-        $rec = $author->reload();
+        $rec = $author->read();
         $this->assertNotNull($rec->created_at);
         $this->assertNotNull($rec->updated_at);
     }

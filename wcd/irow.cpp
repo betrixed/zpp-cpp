@@ -16,7 +16,7 @@ namespace wcd {
 
 using namespace zpp;
 
-base_obj_mgr<IRow> IRow::omg;
+IRow_mgr IRow::omg;
 
 class IRInit : public state_init {
 public:
@@ -24,9 +24,10 @@ public:
 
 	void init() override;
 
-
+	zstr_intern  model;
+	zstr_intern  original_data;
 	zstr_intern  save_key;
-	zstr_intern  reload_key;
+	zstr_intern  read_key;
 	zstr_intern  delete_key;
 	zstr_intern  getcoldefs;
 	zstr_intern  stamptime;
@@ -35,11 +36,15 @@ public:
 
 IRInit  IRSTR;
 
+zend_class_entry* ce_iface_crud;
+
 void 
 IRInit::init()
 {
+	model = "model";
+	original_data = "original";
 	save_key = "save";
-	reload_key = "reload";
+	read_key = "read";
 	delete_key = "delete";
 	getcoldefs = "getcoldefs";
 	stamptime = "stamptime";
@@ -52,6 +57,13 @@ IRow::construct(zobj_user tmodel, zval_user data, bool exists)
 {
 	table_model_ = tmodel;
 	setData(data, exists);
+}
+
+void IRow::debug_info(htab_write di)
+{
+	Hmap::debug_info(di);
+	di.set(IRSTR.model, table_model_);
+	di.set(IRSTR.original_data, original_);
 }
 
 void 
@@ -116,10 +128,10 @@ IRow::update(bool reload)
 
 
 void 
-IRow::reload()
+IRow::read()
 {
 	zval_mgr self(vobj());
-	table_model_.call(IRSTR.reload_key, self);	
+	table_model_.call(IRSTR.read_key, self);	
 }
 
 
@@ -132,7 +144,7 @@ IRow::getDataValues(zval_user attrlist)
 	{
 		if (data_.size())
 		{
-			result = htab_mgr::subset(data_, attrlist, true);
+			result = htab_mgr::subset(attrlist, data_, true);
 		}
 	}
 	return result;
@@ -149,6 +161,7 @@ htab_mgr
 IRow::getDirty()
 {
 	htab_mgr result;
+	result = htab_mgr::empty_array();
 
 	htab_write dirty(result);
 
@@ -164,8 +177,6 @@ IRow::getDirty()
 	for(wk.start(data_); wk.ok(); wk.next())
 	{
 		zval_user orig = original_.get(skey);
-		if (	((zval*) orig) == ((zval*) dvalue) )
-			continue;
 		if (orig != dvalue) 
 		{
 			dirty.push_back(skey);
@@ -265,18 +276,21 @@ IRow::stampTime(zstr_user value, int dtflags)
 {
 	htab_mgr result;
 
+	result = htab_mgr::empty_array();
 
 	zval_mgr arg1(value);
 	zval_mgr arg2(dtflags);
 
 	zval_mgr ta_array = table_model_.call(IRSTR.stamptime, arg1, arg2);
+	
 	zval_user test(ta_array);
 
-	if (test.isArray())
+	if (test.size())
 	{
 		mergeData(test);
 		result = test.zarray();
 	}
+	
 	return result;
 }
 
@@ -292,7 +306,7 @@ ZEND_METHOD(Wcd_IRow, __construct)
 	bool  existsFlag = false;
 
 	ZEND_PARSE_PARAMETERS_START(1,3)
-	Z_PARAM_OBJECT(model);
+	Z_PARAM_OBJECT_OF_CLASS(model, ce_iface_crud);
 	Z_PARAM_OPTIONAL
 	Z_PARAM_ARRAY_OR_NULL(data)
 	Z_PARAM_BOOL(existsFlag)
@@ -362,7 +376,8 @@ ZEND_METHOD(Wcd_IRow, isDirty)
 {
 	zend_string* key;
 
-	ZEND_PARSE_PARAMETERS_START(1,1)
+	ZEND_PARSE_PARAMETERS_START(0,1)
+	Z_PARAM_OPTIONAL
 	Z_PARAM_STR_OR_NULL(key);
 	ZEND_PARSE_PARAMETERS_END();
 
@@ -387,9 +402,10 @@ ZEND_METHOD(Wcd_IRow, mergeData)
 
 ZEND_METHOD(Wcd_IRow, create)
 {
-	bool reload;
+	bool reload = false;
 
-	ZEND_PARSE_PARAMETERS_START(1,1)
+	ZEND_PARSE_PARAMETERS_START(0,1)
+	Z_PARAM_OPTIONAL
 	Z_PARAM_BOOL(reload);
 	ZEND_PARSE_PARAMETERS_END();
 
@@ -413,21 +429,22 @@ ZEND_METHOD(Wcd_IRow, exists)
 	RETURN_BOOL(cobj->exists());
 }
 
-ZEND_METHOD(Wcd_IRow, reload)
+ZEND_METHOD(Wcd_IRow, read)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	auto cobj = zval_toc<IRow>(ZEND_THIS);
-	cobj->reload();
+	cobj->read();
 	zobj_mgr rowobj = cobj->vobj();
 	rowobj.move_zv(return_value);
 }
 
 ZEND_METHOD(Wcd_IRow, save)
 {
-	bool reload;
+	bool reload = false;
 
-	ZEND_PARSE_PARAMETERS_START(1,1)
+	ZEND_PARSE_PARAMETERS_START(0,1)
+	Z_PARAM_OPTIONAL
 	Z_PARAM_BOOL(reload);
 	ZEND_PARSE_PARAMETERS_END();
 
@@ -437,9 +454,10 @@ ZEND_METHOD(Wcd_IRow, save)
 
 ZEND_METHOD(Wcd_IRow, update)
 {
-	bool reload;
+	bool reload = false;
 
-	ZEND_PARSE_PARAMETERS_START(1,1)
+	ZEND_PARSE_PARAMETERS_START(0,1)
+	Z_PARAM_OPTIONAL
 	Z_PARAM_BOOL(reload);
 	ZEND_PARSE_PARAMETERS_END();
 
@@ -471,21 +489,34 @@ ZEND_METHOD(Wcd_IRow, stampTime)
 	data.move_zv(return_value);
 }
 
+ZEND_METHOD(Wcd_IRow, getDataValues)
+{
+	zval* names;
+	ZEND_PARSE_PARAMETERS_START(1,1)
+	Z_PARAM_ARRAY(names)
+	ZEND_PARSE_PARAMETERS_END();
+
+	auto cobj = zval_toc<IRow>(ZEND_THIS);
+	htab_mgr data = cobj->getDataValues(names);
+	data.move_zv(return_value);
+
+}
 
 PHP_MINIT_FUNCTION(IRow_reg)
 {
 	//auto ce = register_class_Wcc_Hmap(zend_ce_arrayaccess, zend_ce_countable);
 	//zend_standard_class_def
+
+
+	ce_iface_crud = register_class_Wcd_IfCrud();
+
 	auto ce = register_class_Wcd_IRow(
 		Hmap::omg.classEntry()
-		//zend_ce_iterator
-		//zend_ce_arrayaccess, 
-		//zend_ce_countable
 		);
 
 	IRow::omg.classEntry(ce);
 
-	//zend_printf("registered hmap\n");
+	//zend_printf("registered IRow\n");
 	return SUCCESS;
 }
 

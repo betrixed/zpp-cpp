@@ -49,6 +49,9 @@ protected:
 
 
 public:
+    static void array_bind(zval* tmp, HashTable* ht);
+    static void string_bind(zval* tmp, zend_string* s);
+    static void object_bind(zval* temp, zend_object* obj);
 
     static zval* real_zval(zval* zv)
     {
@@ -175,7 +178,9 @@ public:
             return 0;
         return Z_TYPE_P(p_);
     }
-
+    bool same(const zval_user& test) const;
+    
+    
     void init()
     {
         p_ = nullptr;
@@ -193,6 +198,11 @@ public:
     static zval_user php_constant(zstr_user name);
 
 };
+
+bool operator!=(const zval_user& a, const zval_user& b) 
+{
+    return !a.same(b);
+}
 
 };
 

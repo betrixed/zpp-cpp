@@ -85,7 +85,7 @@ class BaseModelTest extends PHPUnit\Framework\TestCase {
         
         $this->assertTrue(count($row->getDirty()) === 2);
         
-        $row->setValue("name", "Richard III");
+        $row->set("name", "Richard III");
         
         $row->create();
     }
