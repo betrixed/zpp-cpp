@@ -90,6 +90,8 @@ namespace zpp {
 
         // extract subset using keylist with removal from original hfrom
         static htab_mgr extract(htab_read exkeys, htab_write hfrom);
+
+        static htab_mgr subset(htab_read exkeys, htab_read hfrom, bool nullmiss = false);
  
     };
 

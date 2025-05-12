@@ -111,7 +111,7 @@ namespace wcc {
 		std::vector<zstr_intern> joinstr;
 
 
-		virtual void init();
+		void init() override;
 	};
 
 

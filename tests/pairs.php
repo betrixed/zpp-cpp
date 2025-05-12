@@ -48,7 +48,7 @@ function test_b()
 	$b = new Pair(123,2345);
 
 	echo print_r($b, true) . PHP_EOL;
-	$result = ($b->key + $b->value) / $b->first;
+	$result = ($b->key + $b->value) / $b->key;
 	echo "sum property handlers = " . $result . PHP_EOL;
 
 	$start = microtime(true);

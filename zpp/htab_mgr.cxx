@@ -440,6 +440,92 @@ htab_mgr::getKeys(htab_read hr)
 	 return result;
 }
 
+
+/**
+ * This version "pulls out" the key and value
+ * from hfrom array, and returns a new array with the
+ * extracted key => value found in key list exkeys.
+ */
+htab_mgr //static
+htab_mgr::extract(htab_read exkeys, htab_write hfrom)
+{
+
+	htab_mgr result;
+
+	if (!hfrom.size())
+	{
+		return result;
+	}
+
+	htab_write merger(result);
+	//showarray("exkeys", exkeys);
+
+	htab_walk wk;
+
+	auto exkey = wk.value();
+
+	for(wk.start(exkeys); wk.ok(); wk.next()) 
+	{
+		//showarray("extract from", ht_);
+		//showmem("value for key", exkey);
+
+		zval_user v2 = hfrom.get(exkey);
+		
+		if (v2.ok())
+		{
+			//showmem("extract value", v2);
+			merger.set(exkey, v2);
+			hfrom.unset(exkey);
+		}
+	}
+	//showarray("extract result", result);
+	return result;
+}
+
+/**
+ * This version "pulls out" the key and value
+ * from hfrom array, and returns a new array with the
+ * extracted key => value found in key list exkeys.
+ */
+htab_mgr //static
+htab_mgr::subset(htab_read exkeys, htab_read hfrom, bool nullmiss)
+{
+
+	htab_mgr result;
+
+	if (!hfrom.size())
+	{
+		return result;
+	}
+
+	htab_write merger(result);
+	//showarray("exkeys", exkeys);
+
+	htab_walk wk;
+
+	auto exkey = wk.value();
+
+	for(wk.start(exkeys); wk.ok(); wk.next()) 
+	{
+		//showarray("extract from", ht_);
+		//showmem("value for key", exkey);
+
+		zval_user v2 = hfrom.get(exkey);
+		
+		if (v2.ok())
+		{
+			//showmem("extract value", v2);
+			merger.set(exkey, v2);
+		}
+		else if (nullmiss)
+		{
+			merger.set_null(exkey);
+		}
+	}
+	//showarray("extract result", result);
+	return result;
+}
+
 }; // namespace
 //htab_mgr.cpp
 #endif

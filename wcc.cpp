@@ -79,6 +79,7 @@ extern "C" {
 
 #include "wcd/sql_ipart.cpp"
 #include "wcd/sql_isql.cpp"
+#include "wcd/irow.cpp"
 
  //SQL_IPART_CPP
 //#include "wcc/sql_ipart.cpp"
@@ -297,6 +298,9 @@ PHP_MINIT(wcc_route_add)(INIT_FUNC_ARGS_PASSTHRU);
 	PHP_MINIT(SqlIPart_reg)(INIT_FUNC_ARGS_PASSTHRU);
 #endif
 
+#ifdef WCD_IROW_CPP
+	PHP_MINIT(IRow_reg)(INIT_FUNC_ARGS_PASSTHRU);
+#endif
 	return SUCCESS;
 }
 

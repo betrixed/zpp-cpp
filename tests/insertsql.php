@@ -35,11 +35,11 @@ $services->set('config',$cfg);
 $services->set('dos', new Dos());
 
 
-$loader = $services->get('loader');
+$finder = $services->get('finder');
 
 $vendor = "../hub/private/vendor";
 
-$loader->addPathArray([
+$finder->addPathArray([
     $cfg->models_namespace => $cfg->models_dir,
 ]);
 if (!file_exists($cfg->models_dir)) {
@@ -116,8 +116,7 @@ $clean = function (Services $svc)
     $svc->clearDefer();
     $svc->clearActive();
     $svc->clearObjects();
-    echo "Clean\n";
-    die;
+    echo "Cleared Services\n";
     return null;
 };
 

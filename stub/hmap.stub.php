@@ -7,7 +7,7 @@ namespace Wcc;
 
 // stdClass # implements ArrayAccess 
 
-final class Hmap //implements IteratorAggregate
+class Hmap //implements IteratorAggregate
 {
 	public function __construct(?array $values=null);
 
@@ -51,3 +51,5 @@ final class Hmap //implements IteratorAggregate
 
 
 };
+
+

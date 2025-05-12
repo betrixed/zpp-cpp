@@ -29,8 +29,6 @@ namespace wcc {
 	public:
 		Hmap_init() : state_init() {}
                 
-
-
 		zstr_intern data_key;
 		zstr_intern obj_key;
 

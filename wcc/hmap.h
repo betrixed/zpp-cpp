@@ -125,7 +125,7 @@ public:
 
 	htab_read reader() const 
 	{
-		return data_;
+            return data_;
 	}
 
 	htab_write writer()

@@ -42,7 +42,7 @@
 
 
 #ifdef DEBUG_EXTRA
-#define BASE_DEBUG
+//#define BASE_DEBUG
 #endif
 
 
@@ -221,10 +221,11 @@ namespace zpp {
 			size_t neg_space = msize + sizeof(base_d*);
 			size_t alloc = neg_space + sizeof(zend_object) + psize;
 
-			#ifdef BASE_DEBUG
-			zend_printf("neg_space: %ld, properties: %ld, all %ld for %s\n", 
+			/* #ifdef BASE_DEBUG
+			//zend_printf("neg_space: %ld, properties: %ld, all %ld for %s\n", 
 					neg_space, psize, alloc, ZSTR_VAL(ce->name));
 			#endif
+			*/
 			void* space = emalloc(alloc);
 			memset(space, 0, neg_space);
 			return space;

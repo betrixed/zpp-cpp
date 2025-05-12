@@ -85,6 +85,9 @@ namespace zpp {
         void set(zval* key, zval* value);
         void set(zval* key, zend_string* value);
         
+        void set_null(zend_string* key);
+        void set_null(zend_long idx);
+        void set_null(zval_user key);
         //To avoid cast to zend_string* 
         //void set(zstr_user key, const zstr_mgr& value);
 

@@ -21,8 +21,6 @@ public:
 	{
 		key = "key";
 		value = "value";
-		first = "first";
-		second = "second";
 	}
 };
 
@@ -33,13 +31,11 @@ property_ptr(zend_object* zobj, zend_string* name)
 {
 	Pair* p = zobj_toc<Pair>(zobj);
 
-	if ( !zs_cmp(PairSI.key, name) 
-		|| !zs_cmp(PairSI.first, name))
+	if (zs_cmp(PairSI.key, name)==0 )
 	{
 		return p->key_;
 	}
-	if (   !zs_cmp(PairSI.value, name)
-		|| !zs_cmp(PairSI.second, name))
+	if (zs_cmp(PairSI.value, name)==0)
 	{
 		return p->value_;
 	}

@@ -328,6 +328,32 @@ htab_write::set(zend_string* key, zend_string* value)
 	}
 }
 
+void 
+htab_write::set_null(zend_string* key)
+{
+	zval temp = {0};
+	ZVAL_NULL(&temp);
+	zend_hash_update(ht_, key, &temp);
+}
+
+void 
+htab_write::set_null(zend_long idx)
+{
+	zval temp = {0};
+	ZVAL_NULL(&temp);
+	zend_hash_index_update(ht_, idx, &temp);
+}
+
+void htab_write::set_null(zval_user key)
+{
+	if (key.isLong()) {
+		 return set_null(key.zlong());
+	}
+	else if (key.isString())
+	{
+		 return set_null(key.zstr());
+	}
+}
 
 bool htab_write::unset(zval_user key)
 {
@@ -423,46 +449,7 @@ htab_write::merge(HashTable* src)
 
 
 
-/**
- * This version "pulls out" the key and value
- * from hfrom array, and returns a new array with the
- * extracted key => value found in key list exkeys.
- */
-htab_mgr //static
-htab_mgr::extract(htab_read exkeys, htab_write hfrom)
-{
 
-	htab_mgr result;
-
-	if (!hfrom.size())
-	{
-		return result;
-	}
-
-	htab_write merger(result);
-	//showarray("exkeys", exkeys);
-
-	htab_walk wk;
-
-	auto exkey = wk.value();
-
-	for(wk.start(exkeys); wk.ok(); wk.next()) 
-	{
-		//showarray("extract from", ht_);
-		//showmem("value for key", exkey);
-
-		zval_user v2 = hfrom.get(exkey);
-		
-		if (v2.ok())
-		{
-			//showmem("extract value", v2);
-			merger.set(exkey, v2);
-			hfrom.unset(exkey);
-		}
-	}
-	//showarray("extract result", result);
-	return result;
-}
 
 void
 htab_write::removal(htab_read exkeys)
