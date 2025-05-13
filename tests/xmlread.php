@@ -98,7 +98,7 @@ function test() : mixed {
 }
 
 $data = test();
-debug_zpp_dump($data);
+//debug_zpp_dump($data);
 //echo "DIES NOW\n"; return;
 
 
