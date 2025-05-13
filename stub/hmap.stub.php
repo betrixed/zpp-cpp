@@ -29,7 +29,7 @@ class Hmap //implements IteratorAggregate
 
 	public function unhive(string $key) : string {}
 
-	public function clear() : void {}
+	public function assign(array $data) : void {}
 
 	public function getIterator():  Iterator {}
 

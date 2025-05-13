@@ -37,7 +37,7 @@ public:
 
 	void clear();
 	
-	void debug_info(htab_write hw) override;
+	virtual void debug_info(htab_write hw);
 	
 	VIRTUAL_ZOBJPTR
 	

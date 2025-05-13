@@ -426,8 +426,8 @@ Route::routeUrl(htab_read pvalues)
 
 
 
-static const char* start_rex = "#^";
-static const char* end_rex = "$#";
+//static const char* start_rex = "#^";
+//static const char* end_rex = "$#";
 
 
 
@@ -656,7 +656,6 @@ PHP_METHOD(Wcc_Route, GetVerbInt)
 	Z_PARAM_STR(verb)
 	ZEND_PARSE_PARAMETERS_END();
 
-	size_t vlen = ZSTR_LEN(verb);
 	zend_long result = Route::getVerbInt(verb);
 
 	RETURN_LONG(result);

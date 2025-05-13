@@ -68,15 +68,9 @@ public:
 
     zval_user() : p_(nullptr) {}
 
-    zval_user(zval* rc)
-    {
-        p_ = rc;
-    }   
+    zval_user(zval* rc) : p_(rc) {}
 
-    zval_user(const zval_user &c)
-    {
-        p_ = c.p_;
-    }
+    zval_user(const zval_user &c) : p_(c.p_) {}
 
     zval_user(const zval_mgr& mgr);
 

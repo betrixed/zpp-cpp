@@ -46,7 +46,7 @@ Finder::~Finder()
 }
 
 void 
-Finder::debug_info(htab_write d) const
+Finder::debug_info(htab_write d)
 {
 
 	d.set(FDit.nspaths_key, nsPaths_);
@@ -125,7 +125,7 @@ Finder::find(zstr_user cname)
 
 	zstr_buffer buf;
 
-	bool nsFound = false;
+	//bool nsFound = false;
 
 	htab_read ns_array(nsPaths_);
 
@@ -180,7 +180,6 @@ Finder::find(zstr_user cname)
 				break;
 			}
 		}
-		nsFound = true;
 	}
 	return result;
 }

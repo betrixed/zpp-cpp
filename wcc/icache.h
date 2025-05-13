@@ -78,7 +78,7 @@ public:
 		ttl_ = ttl;
 	}
 
- 	void debug_info(htab_write s) override;
+ 	virtual void debug_info(htab_write s);
  	
 	VIRTUAL_ZOBJPTR
 

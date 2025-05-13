@@ -73,29 +73,30 @@ public:
         /* invalidate current value/key (optional, may be NULL) */
         static void  it_invalidate(zend_object_iterator *iter);
 
-        static void setup_mgr(mgr_link* mgr)
+        static void setup_class(zend_class_entry* ce)
         {
-        zend_object_handlers& hand = mgr->obj_handlers();
+        	ce->get_iterator = HmapIterator::create;
+        }
 
-	hand.count_elements = Hmap_php::count_elements;
-	hand.read_property = Hmap_php::read_property;
-	hand.write_property = Hmap_php::write_property;
-	hand.get_property_ptr_ptr = Hmap_php::get_property_ptr_ptr;
-	hand.has_property = Hmap_php::has_property;
-	hand.unset_property = Hmap_php::unset_property;
+        static void setup_handlers(zend_object_handlers& hand)
+        {
+		hand.count_elements = Hmap_php::count_elements;
+		hand.read_property = Hmap_php::read_property;
+		hand.write_property = Hmap_php::write_property;
+		hand.get_property_ptr_ptr = Hmap_php::get_property_ptr_ptr;
+		hand.has_property = Hmap_php::has_property;
+		hand.unset_property = Hmap_php::unset_property;
 
-	hand.get_properties_for = Hmap_php::get_properties_for;
+		hand.get_properties_for = Hmap_php::get_properties_for;
 
-	//hand.get_debug_info = nullptr;
+		//hand.get_debug_info = nullptr;
 
-	hand.read_dimension = Hmap_php::read_dimension;
-	hand.write_dimension = Hmap_php::write_dimension;
-	hand.has_dimension = Hmap_php::has_dimension;
-	hand.unset_dimension = Hmap_php::unset_dimension;
-           	
-	zend_class_entry* ce = mgr->zend_class();
+		hand.read_dimension = Hmap_php::read_dimension;
+		hand.write_dimension = Hmap_php::write_dimension;
+		hand.has_dimension = Hmap_php::has_dimension;
+		hand.unset_dimension = Hmap_php::unset_dimension;
 
-	ce->get_iterator = HmapIterator::create;
+		
         }
         /* Expose owned values to GC. */
         //HashTable *(*get_gc)(zend_object_iterator *iter, zval **table, int *n);
@@ -110,45 +111,27 @@ class Hmap_mgr : public base_obj_mgr<Hmap>
 protected:
 	//typedef base_obj_mgr<T> mydef;
 
-	void init_class_fn() override 
+	virtual void init_class_fn() 
 	{
-	// base class
-		mydef::init_class_fn();
-		HmapIterator::setup_mgr(this);
-	
-	/**
-	zend_object_handlers& hand = mydef::handlers_;
-	hand.count_elements = Hmap_php::count_elements;
-	hand.read_property = Hmap_php::read_property;
-	hand.write_property = Hmap_php::write_property;
-	hand.get_property_ptr_ptr = Hmap_php::get_property_ptr_ptr;
-	hand.has_property = Hmap_php::has_property;
-	hand.unset_property = Hmap_php::unset_property;
+	mydef::init_class_fn();
 
-	hand.get_properties_for = Hmap_php::get_properties_for;
-
-	hand.get_debug_info = nullptr;
-
-	hand.read_dimension = Hmap_php::read_dimension;
-	hand.write_dimension = Hmap_php::write_dimension;
-	hand.has_dimension = Hmap_php::has_dimension;
-	hand.unset_dimension = Hmap_php::unset_dimension;
-
-
-		mydef::class_entry_->get_iterator = HmapIterator::create;
-	*/	
+	HmapIterator::setup_handlers(mydef::handlers_);
+	HmapIterator::setup_class(mydef::class_entry_);
 	}
 };
 
 
 class Hmap : public base_d {
 protected:
-	htab_empty data_;
+	htab_mgr data_;
 
 	friend class Hmap_php;
 
 public:
 	//! Object handlers to install
+	Hmap();
+	virtual ~Hmap();
+
 
 	htab_read reader() const 
 	{
@@ -167,6 +150,8 @@ public:
 	static zobj_mgr newFromArray(zval_user init);
 	static zobj_mgr new_hmap();
 	
+	virtual void debug_info(htab_write hw);
+
 	void construct(htab_read values);
 
 	/** Avoid warning for missing property */
@@ -191,6 +176,7 @@ public:
 	htab_mgr subset(htab_read data);
 
 	void   addArray(htab_read data);
+	void   assign(htab_read data);
 
 	htab_read toArray();
 
@@ -210,8 +196,6 @@ public:
 		Hmap* hmap = zobj_toc<Hmap>(mobj);
 		return hmap->reader();
 	}
-
-
 };
 
 

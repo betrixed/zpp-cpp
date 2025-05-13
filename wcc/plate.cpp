@@ -304,7 +304,7 @@ Plate::full_render(htab_read rdata)
 	zobj_user loadHtml = engine->getLoadHtml();
 
 	if (loadHtml.isNull()) {
-		zend_throw_error(zend_ce_error, "PlateEngine has no IfLoadHtml object",0);
+		zend_throw_error(zend_ce_error, "PlateEngine has no IfLoadHtml object");
 		return result;
 	}
 	zval_mgr arg1 (this->getPath());
@@ -386,7 +386,7 @@ void Plate::stop()
 {
 	if (sectionName_.isNull()) 
 	{
-		zend_throw_error(zend_ce_error,"stop() section without start()",0);
+		zend_throw_error(zend_ce_error,"stop() section without start()");
 		return;
 	}
 
@@ -420,12 +420,12 @@ void Plate::push(zstr_user name)
 void Plate::start(zstr_user name)
 {
 	if (name == PLD.content_key) {
-		zend_throw_error(zend_ce_error,"Section name 'content' is reserved",0);
+		zend_throw_error(zend_ce_error,"Section name 'content' is reserved");
 		return;
 		
 	}
 	if (sectionName_.size()) {
-		zend_throw_error(zend_ce_error,"Sections cannot be nested",0);
+		zend_throw_error(zend_ce_error,"Sections cannot be nested");
 		return;
 	}
 	
@@ -449,7 +449,7 @@ void Plate::styleEnd()
 	int levelDiff = getObLevel() - style_level_;
 	if (levelDiff != 0)
 	{
-		zend_throw_error(zend_ce_error,"StyleEnd ob_level() error",0);
+		zend_throw_error(zend_ce_error,"StyleEnd ob_level() error");
 		return;
 	}
 	zval_mgr styles = OBfn.obgetcontents.call_fn();
@@ -562,6 +562,7 @@ ZEND_METHOD(Wcc_Plate, pathExists)
 
 	auto cobj = zval_toc<Plate>(ZEND_THIS);
 	bool value = cobj->pathExists();
+	RETURN_BOOL(value);
 }
 
 

@@ -309,7 +309,7 @@ Wcc_XmlRead::openstring(zstr_user str)
 	//zend_printf("called openstring\n");
 	if (!xml_.fromString(str))
 	{
-		zend_throw_error(zend_ce_error,"Cannot open xml parser",0);
+		zend_throw_error(zend_ce_error,"Cannot open xml parser");
 		return false;
 	}
 	return true;
@@ -424,7 +424,7 @@ Wcc_XmlRead::loop()
 		root_ = nullptr;
 	}
 	else {
-		zend_printf("root_ %lx, stacked_ %d", root_, stacked_);
+		//zend_printf("root_ %lx, stacked_ %d", root_, stacked_);
 
 		result.set_bool(false);
 	}
@@ -586,7 +586,7 @@ void Wcc_XmlRead::popStack()
 		}
 	}
 	else {
-		zend_throw_error(zend_ce_error,"Pop with empty element stack",0);
+		zend_throw_error(zend_ce_error,"Pop with empty element stack");
 		done_ = true;
 	}
 	//zend_printf("exit popStack\n");
@@ -656,7 +656,7 @@ void Wcc_XmlRead::throwKey(zstr_user key)
 
 void Wcc_XmlRead::throwNoKey()
 {
-	zend_throw_error(zend_ce_error, "Need a key here k=??", 0);
+	zend_throw_error(zend_ce_error, "Need a key here k=??");
 	done_ = true;
 }
 
@@ -678,7 +678,7 @@ void Wcc_XmlRead::setValue(zval_user value,  zstr_user key)
 {
 	auto ix = stacked_;
 	if (ix == 0) {
-		zend_throw_error(zend_ce_error,"setValue on empty stack",0);
+		zend_throw_error(zend_ce_error,"setValue on empty stack");
 		done_ = true;
 		return;
 	}

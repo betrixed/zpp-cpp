@@ -244,7 +244,6 @@ RequestGlobals::getBestQuality(htab_read parts, zstr_user name)
 {
 	int i = 0;
 	double quality = 0.0;
-	double more = 0.0;
 
 	zstr_mgr  result;
 

@@ -318,13 +318,12 @@ Services::get(zstr_user name)
 		result = activate(name);
 		return  result;
 	}
-	//showmem("got active ", value);
-	int ztype = value.ztype();
+
 
 	if (value.isCallable())
 	{
 		zobj_user callme = value.zobject();
-		//showobj("callable ", callme);
+
 		result = call_value(callme);
 	}
 	else {

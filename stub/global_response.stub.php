@@ -69,7 +69,7 @@ interface IfFilter {
     ): mixed {}
 };
 
-class IfEventQueue
+interface IfEventQueue
 {
     public const int DEFAULT_PRIORITY = 100;
 

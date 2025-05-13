@@ -14,6 +14,9 @@ extern "C" {
 
 #include <filesystem>
 
+#include "daytime.cxx"
+
+
 namespace wcc {
 
 base_obj_mgr<Toml> Toml::omg;

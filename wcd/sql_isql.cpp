@@ -331,7 +331,7 @@ JoinTables::getTable(zstr_user name)
 	if (byAlias_.size())
 	{
 		htab_walk wk;
-		auto alias = wk.key();
+
 		auto tcobj = wk.value();
 
 		for(wk.start(byAlias_); wk.next(); wk.ok())
@@ -626,7 +626,7 @@ ISql::deleteSql(Bindings& bind)
 
 	zobj_mgr paramList = bind.getParamList();
 	ParamList* plist = zobj_toc<ParamList> (paramList);
-	htab_read params = plist->getParams();
+	//htab_read params = plist->getParams();
 
 	zstr_mgr sql = buf.zstr();
 	plist->setSql(sql);
@@ -860,7 +860,6 @@ ISql::insert(Bindings& bind)
 	zobj_mgr result;
 
 	zstr_buffer buf;
-	bool retval = false;
 
 	buf << "INSERT INTO";
 
@@ -916,7 +915,6 @@ ISql::insert(Bindings& bind)
 	zval_user  valset;
 	if (bind.getArray(ISql::SQL_RETURN, rettab))
 	{
-		retval = true;
 		buf << " RETURNING ";
 		valset = rettab[int(0)];
 		if (valset.isArray() && valset.size())
@@ -1001,7 +999,6 @@ ISql::fromJT(Bindings& bind, JoinTables* jt)
 	zstr_mgr tname(prime->getName());
 	zstr_mgr alias(prime->getAlias());
 
-	int ix = 0;
 	buf << ' ' << this->quoteName(tname);
 	if (alias.size())
 	{
@@ -1595,7 +1592,6 @@ Bindings::getJoins()
 	}
 
 	zobj_mgr result = JoinTables::omg.new_zobj();
-	JoinTables* jt = zobj_toc<JoinTables>(result);
 	
 	htab_write(data_).set((zend_long) ISql::SQL_FROM, result);
 	return result;

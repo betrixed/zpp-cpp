@@ -31,23 +31,28 @@ namespace wcd {
 	protected:
 		//typedef base_obj_mgr<T> mydef;
 
-		void init_class_fn() override 
+		virtual void init_class_fn() 
 		{
 		// base class
-			mydef::init_class_fn();
-			HmapIterator::setup_mgr(this);
+		mydef::init_class_fn();
+
+		HmapIterator::setup_handlers(mydef::handlers_);
+		HmapIterator::setup_class(mydef::class_entry_);
 		}
 	};
 
-	class IRow : public Hmap {
+	class IRow : public wcc::Hmap {
     protected:
     	zobj_mgr    table_model_;
-    	htab_empty  original_;
+    	htab_mgr  original_;
     public:
 
     	static IRow_mgr omg;
 
-    	void debug_info(htab_write di) override;
+    	IRow();
+    	virtual ~IRow();
+    	
+    	virtual void debug_info(htab_write di);
 
     	void construct(zobj_user tmodel, zval_user data, bool exists = false);
 

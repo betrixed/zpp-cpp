@@ -50,7 +50,14 @@ IRInit::init()
 	stamptime = "stamptime";
 }
 
+IRow::IRow() : Hmap ()
+{
+	original_ = htab_mgr::empty_array();
+}
 
+IRow::~IRow()  
+{
+}
 
 void 
 IRow::construct(zobj_user tmodel, zval_user data, bool exists)
@@ -123,7 +130,7 @@ IRow::save(bool reload)
 bool 
 IRow::update(bool reload)
 {
-	return update(reload);
+	return save(reload);
 }
 
 
@@ -374,7 +381,7 @@ ZEND_METHOD(Wcd_IRow, hasValue)
 
 ZEND_METHOD(Wcd_IRow, isDirty)
 {
-	zend_string* key;
+	zend_string* key = nullptr;
 
 	ZEND_PARSE_PARAMETERS_START(0,1)
 	Z_PARAM_OPTIONAL

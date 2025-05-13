@@ -1136,7 +1136,7 @@ HtmlGem::select_list(zval_user pset)
 			htab_walk op;
 			auto  skey = op.key();
 			auto  sval = op.value();
-			bool  selected_option = false;
+
 			zstr_mgr  selected_as_str;
 			zstr_user suse;
 
@@ -1233,7 +1233,7 @@ style_toArray(zstr_user style)
 	htab_walk wk;
 
 	auto sval = wk.value();
-	auto kval = wk.key();
+
 	for(wk.start(pairs); wk.ok(); wk.next()) 
 	{
 		std::string_view sview = sval.vstr();

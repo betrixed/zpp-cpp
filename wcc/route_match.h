@@ -56,7 +56,7 @@ public:
 
 	void setCallInfo(zstr_user obclass, zstr_user obmethod, zval_user args);
 
-	virtual void debug_info(htab_write di) override;
+	virtual void debug_info(htab_write di);
 
 	zobj_user getMatch() const
 	{

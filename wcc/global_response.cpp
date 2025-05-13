@@ -22,6 +22,11 @@ extern "C" {
 };
 #endif
 
+zend_class_entry* ce_IfEventQueue;
+zend_class_entry* ce_IfFilter;
+zend_class_entry* ce_IfEvent;
+zend_class_entry* ce_IfCipher;
+
 
 namespace wcc {
 
@@ -273,8 +278,6 @@ Response::setExpires(zval_user exptime)
 
 	utc.setTimeZone(zstr_temp("UTC"));
 
-	Hmap* hto = hdrs_obj();
-
 	zstr_buffer buf;
 
 	buf << utc.format(zstr_temp("D, d M Y H:i:s")) << " GMT";
@@ -476,7 +479,6 @@ Response::setStatusCode(int icode, zstr_user  message)
 
 	htab_walk wk;
 	auto  key = wk.key();
-	auto  val = wk.value();
 
 	htab_mgr   keylist;
 	htab_write rkeys(keylist);
@@ -512,7 +514,7 @@ Response::setStatusCode(int icode, zstr_user  message)
 
 		if (msg.size()==0)
 		{
-			zend_throw_error(zend_ce_exception, "non-standard status code %ld without message ", icode);
+			zend_throw_error(zend_ce_exception, "non-standard status code %d without message ", icode);
 			//zend_printf("Return \n");
 			return;
 		}
@@ -846,13 +848,13 @@ ZEND_METHOD(Wcc_Response, __construct)
 {
 	zend_string* content = nullptr;
 	zend_long code = 0;
-	bool  null_code;
+	bool  null_code = true;
 	zend_string* status = nullptr;
 
 	ZEND_PARSE_PARAMETERS_START(0,3)
 	Z_PARAM_OPTIONAL
 	Z_PARAM_STR_OR_NULL(content)
-	Z_PARAM_LONG_OR_NULL(code,null_code)
+	Z_PARAM_LONG_OR_NULL(code, null_code)
 	Z_PARAM_STR_OR_NULL(status)
 	ZEND_PARSE_PARAMETERS_END();
 
@@ -1200,6 +1202,10 @@ ZEND_METHOD(Wcc_Response, setStatusCode)
 
 PHP_MINIT_FUNCTION(Wcc_Response_reg)
 {
+	ce_IfEvent = register_class_Wcc_IfEvent();
+	ce_IfEventQueue = register_class_Wcc_IfEventQueue();
+	ce_IfFilter = register_class_Wcc_IfFilter();
+	ce_IfCipher = register_class_Wcc_IfCipher();
 
 	auto ce = register_class_Wcc_Response();
 

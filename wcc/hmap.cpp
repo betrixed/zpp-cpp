@@ -9,34 +9,35 @@ extern "C" {
   #include <Zend/zend_attributes.h>
   #include <Zend/zend_interfaces.h>
   #include <Zend/zend_iterators.h>
-}
+};
 
 #ifndef HMAP_ARGINFO_H
 #define HMAP_ARGINFO_H
 extern "C" {
 	#include "stub/hmap_arginfo.h"
-}
+};
+
 #endif
 
 
 namespace wcc {
-	Hmap_mgr Hmap::omg;
+Hmap_mgr Hmap::omg;
 
-	using namespace zpp;
+using namespace zpp;
 
 
-	class Hmap_init : public state_init {
-	public:
-		Hmap_init() : state_init() {}
-                
-		zstr_intern data_key;
-		zstr_intern obj_key;
+class Hmap_init : public state_init {
+public:
+	Hmap_init() : state_init() {}
+            
+	zstr_intern data_key;
+	zstr_intern obj_key;
 
-		void init() override {
-			data_key = "data";
-			obj_key = "__obj";
-		}
-	};
+	void init() override {
+		data_key = "data";
+		obj_key = "__obj";
+	}
+};
 
 
 Hmap_init HMAPit;
@@ -71,6 +72,7 @@ void HmapIterator::operator delete(void* ptr) {
 HmapIterator::HmapIterator() : walk(), htab()
 {
 }
+
 zend_object_iterator* //static
 HmapIterator::create(zend_class_entry* ce, zval* zobj, int byref)
 {
@@ -254,6 +256,7 @@ Hmap_php::count_elements(zend_object* object, zend_long *count)
 	return SUCCESS;
 }
 
+
 /*
 HashTable*
 Hmap::get_properties(zend_object* object)
@@ -267,17 +270,30 @@ HashTable*
 Hmap_php::get_properties_for(zend_object* object, zend_prop_purpose purpose)
 {
 	Hmap* cobj = zobj_toc<Hmap>(object);
-	htab_read look(cobj->data_);
+	htab_mgr look(cobj->data_);
 	switch(purpose)
 	{
 	case ZEND_PROP_PURPOSE_DEBUG:
+		{
+			htab_mgr temp_mgr;
+			htab_write  di(temp_mgr);
+
+			
+
+			cobj->debug_info(di);
+			HashTable* result = (HashTable*) temp_mgr;
+			htab_mgr::try_addref(result);
+
+			return result;
+		}
 	case ZEND_PROP_PURPOSE_ARRAY_CAST: 	
 	case ZEND_PROP_PURPOSE_SERIALIZE:
 	case ZEND_PROP_PURPOSE_VAR_EXPORT:
 	case ZEND_PROP_PURPOSE_JSON:
 	case ZEND_PROP_PURPOSE_GET_OBJECT_VARS:	
+	case _ZEND_PROP_PURPOSE_NON_EXHAUSTIVE_ENUM:
+
 		HashTable* ht = (HashTable*) look;
-		htab_mgr::try_addref(ht);
 		//showarray("look", ht);
 		return ht;
 	}
@@ -363,7 +379,16 @@ Hmap_php::unset_dimension(zend_object* object, zval* unset)
 	htab_write hw(cobj->data_);
 	hw.unset(unset);
 }
-//$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+
+
+
+Hmap::Hmap() : base_d () 
+{
+    data_ = htab_mgr::empty_array();
+}
+
+Hmap::~Hmap() 
+{}
 
 void 
 Hmap::construct(htab_read values)
@@ -431,52 +456,13 @@ Hmap::set(zstr_user name, zval_user value)
 	hw.set(name, value);
 }
 
-#ifdef CONFIG_DIMENSIONS
 
-bool   
-Hmap::has(zval_user key)
+void Hmap::debug_info(htab_write hw)
 {
-	zstr_mgr skey = key.to_zstr();
-	return has(skey);
+	// allow derived classes to override
+	base_d::debug_info(hw);
+	//di.set(HMAPit.data_key, data_);
 }
-
-void   
-Hmap::set(zval_user key, zval_user value)
-{
-	//showmem("set key", key);
-	//showmem("set value", value);
-
-	if (key.isString())
-	{
-		set(key.zstr(), value);
-	}
-	else {
-		zstr_mgr skey = key.to_zstr();
-		//showstr("set interned key", skey);
-		set(skey, value);
-	}
-}
-
-zval_mgr 
-Hmap::get(zval_user name)
-{
-	zstr_mgr skey = name.to_zstr();
-	//showstr("config get", skey);
-
-	zval_mgr result = zobj_user(this->vobj()).property(skey);
-	//showmem("config get", result);
-	return result;
-
-}
-
-void   
-Hmap::unset(zval_user key)
-{
-	zstr_mgr skey = key.to_zstr();
-	zobj_user(this->vobj()).unset_property(skey);
-}
-#endif
-
 
 htab_mgr 
 Hmap::subsetkey(zstr_user key)
@@ -516,6 +502,12 @@ Hmap::addArray(htab_read data)
 	{
 		hw.set(fkv.key(), fkv.value());
 	}
+}
+
+void
+Hmap::assign(htab_read data)
+{
+	(htab_mgr&) data_ = data;
 }
 
 zend_long 
@@ -605,25 +597,8 @@ void
 Hmap::unserialize(htab_read htab)
 {
 
-	/*
-	zobj_user self(vobj());
-
-	for_key_value wk;
-	htab_mgr properties = htab.get(HMAPit.obj_key);
-	//showdata("unserialize ", properties);
-	for(wk.start(properties); wk.ok(); wk.next())
-	{
-		zend_std_write_property(self, wk.key(), wk.value(), nullptr);
-	}
-	(htab_mgr&) data_ = htab;
-	htab_write hw(data_);
-	hw.unset(HMAPit.property_key);
-	*/
-
 	(htab_mgr&)data_ = htab;
 
-
-	//showarray("after unserialize", data_);
 }
 
 void
@@ -765,6 +740,20 @@ ZEND_METHOD(Wcc_Hmap, getIterator)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 	zend_create_internal_iterator_zval(return_value, ZEND_THIS);
+}
+
+ZEND_METHOD(Wcc_Hmap, assign)
+{
+	zval* elist;
+
+	ZEND_PARSE_PARAMETERS_START(1,1)
+	Z_PARAM_ARRAY(elist)
+	ZEND_PARSE_PARAMETERS_END();
+
+	auto cobj = zval_toc<Hmap>(ZEND_THIS);
+
+	cobj->assign(elist);
+
 }
 
 ZEND_METHOD(Wcc_Hmap, addArray)

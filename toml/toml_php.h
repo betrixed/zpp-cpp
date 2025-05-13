@@ -9,7 +9,7 @@
 #include "toml.h"
 #include "toml.c"
 #include "tomlcpp.hpp"
-#include "tomlcpp.cpp"
+#include "tomlcpp.cxx"
 #endif
 
 namespace wcc {

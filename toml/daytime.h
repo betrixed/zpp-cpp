@@ -1,8 +1,8 @@
 #ifndef DAYTIME_H
 #define DAYTIME_H
 
-#ifndef WC_BASE_H
-#include "wc_base.h"
+#ifndef ZPP_BASE_H
+#include "zpp/base.h"
 #endif
 
 
@@ -13,7 +13,9 @@ namespace wcc {
 	 * by PHP script classes.
 	 * 
 	 */ 
+	using namespace zpp;
 
+	
 	class Day24 : public base_d {
 	protected:
 		double tval_;
@@ -28,22 +30,22 @@ namespace wcc {
 
 		static base_obj_mgr<Day24> omg;
 
-		virtual void debug_info(HashTable* h);
+		virtual void debug_info(htab_write di);
 		
-		void construct(const zstr_base& sval);
+		void construct(zstr_user sval);
 
-		void str(const zstr_base& sval);
+		void str(zstr_user sval);
 		void time(long hours, long mins, double seconds);
 
 		void day(double dval);
 
 		double value() const { return tval_; }
 
-		void split(zval_ptr hours, zval_ptr mins, zval_ptr seconds);
+		void split(zval_user hours, zval_user mins, zval_user seconds);
 
-		zstr_own format(int flags);
+		zstr_mgr format(int flags);
 
-		zstr_own toString();
+		zstr_mgr toString();
 
 		static bool 		day24_time(int hours, int mins, double secs, double& ret, bool except=false);
 		static bool		 	day24_str(const char* s, long slen, double& ret, bool except=false);
@@ -52,25 +54,22 @@ namespace wcc {
 		static zend_string* day24_format(double val, int flags);
 	};
 
-
-}; //namespace wcc;
-
-
-namespace zpp {
-
-	using namespace wcc;
 	
-	class day24_obj : public zobj_own {
+	class day24_obj : public zobj_mgr {
+	protected:
+		// return un-managed object
+		static Day24* make_obj(zstr_user zs);
 	public:
-		static Day24* make_obj(const zstr_ptr& zs);
+		
+		
 	/** just creates object with time string
 	 *  Helps to have default time zone setup in php.ini
 	 *  or by a set call.
 	 * */
-	day24_obj(const zstr_ptr& zs);
-	zstr_own format(int flags);
+		day24_obj(zstr_user zs);
+		zstr_mgr format(int flags);
 	};
-}
+} // namespace
 
 
 //daytime.h

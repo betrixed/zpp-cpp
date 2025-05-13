@@ -163,8 +163,8 @@ using namespace wcc;
 
 ZEND_METHOD(Wcc_Pair, __construct)
 {
-	zval* p1;
-	zval* p2;
+	zval* p1 = nullptr;
+	zval* p2 = nullptr;
 
 	ZEND_PARSE_PARAMETERS_START(0,2)
 	Z_PARAM_OPTIONAL

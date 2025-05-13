@@ -163,7 +163,7 @@ namespace wcc {
 			int       kind_; // object / packed array / keyed array
 
 
-			DStack() : kind_(XC_EMPTY), ds_next_(nullptr), ds_prev_(nullptr) {}
+			DStack() : ds_next_(nullptr), ds_prev_(nullptr),kind_(XC_EMPTY) {}
 
 			~DStack();
 
@@ -253,7 +253,7 @@ namespace wcc {
 		zval_mgr parseFile(zstr_user filename);
 		zval_mgr parse(zstr_user src);
 
-		void debug_info(htab_write ht) override;
+		virtual void debug_info(htab_write ht);
 	
 		VIRTUAL_ZOBJPTR
 	

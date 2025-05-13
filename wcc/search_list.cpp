@@ -139,8 +139,6 @@ SearchList::findLeaf(zstr_user leaf, zval_user extensions)
 	fs::path pleaf(leaf.vstr());
 	fs::path pext = pleaf.extension();
 
-	bool hasExt = !pext.empty();
-	
 	htab_read exlist(extensions.zarray());
 	while(pcount)
 	{
@@ -169,7 +167,7 @@ SearchList::findLeaf(zstr_user leaf, zval_user extensions)
 //
 ZEND_METHOD(Wcc_SearchList, __construct)
 {
-	zval*        paths;
+	zval*        paths = nullptr;
 
 	ZEND_PARSE_PARAMETERS_START(0, 1)
 	Z_PARAM_OPTIONAL
@@ -217,7 +215,7 @@ ZEND_METHOD(Wcc_SearchList, clear)
 ZEND_METHOD(Wcc_SearchList, findLeaf)
 {
 	zend_string* leaf;
-	zval*        extensions;
+	zval*        extensions = nullptr;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 	Z_PARAM_STR(leaf)

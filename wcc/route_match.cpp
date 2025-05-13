@@ -377,7 +377,6 @@ void RouteMatch::set_tuple12( htab_read tg)
 void RouteMatch::set_tuple14(htab_read tg)
 {
 	zval_user mobj;
-	zend_ulong ct;
 
 	if (!module_name_.size() ==0 ) {
 		mobj = tg.get(zend_long(0));
@@ -450,7 +449,7 @@ htab_mgr RouteMatch::fetchArgs()
 		// params are not empty
 		long mct = margs_ht.size();
 		if (mct != ct) {
-			error_msg.adopt(strpprintf(0, "Route matches count should be %ld", ct));
+			error_msg.adopt(strpprintf(0, "Route matches count should be %u", ct));
 			htab_write(errors_).push_back(error_msg);
 			error_context(route);
 		}
@@ -770,19 +769,8 @@ PHP_METHOD(Wcc_RouteMatch, getMatch)
 
 PHP_METHOD(Wcc_RouteMatch, findRoute)
 {
-	zend_string  *uri;
-	zend_long    verb;
-	zend_long    ajax;
-	HashTable	*result;
 
 	zval*         route_set;
-
-	zval         routeval;
-	zend_string  *regexp;
-
-	pcre_cache_entry  *pce;
-
-	zval         mreturn;
 
 	zend_class_entry* rs_entry = RouteSet::omg.classEntry();
 
@@ -802,9 +790,9 @@ PHP_METHOD(Wcc_RouteMatch, findRoute)
 
 ZEND_METHOD(Wcc_RouteMatch, call)
 {
-	zval* extra_args;
-	zval* before_pair;
-	zval* after_pair;
+	zval* extra_args = nullptr;
+	zval* before_pair = nullptr;
+	zval* after_pair = nullptr;
 
 	zend_class_entry* pair_ce = Pair::omg.classEntry();
 
@@ -824,7 +812,7 @@ ZEND_METHOD(Wcc_RouteMatch, callMethod)
 {
 	zval* obj;
 	zend_string* method;
-	zval* args;
+	zval* args = nullptr;
 
 	ZEND_PARSE_PARAMETERS_START(2,3)
 	Z_PARAM_OBJECT(obj)

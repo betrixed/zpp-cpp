@@ -12,32 +12,49 @@ extern "C" {
 }
 #endif
 
-using namespace wcc;
+namespace wcc {
 
+class D24Init : public state_init {
+public:
+	D24Init() : state_init() {}
 
+	void init() override 
+	{
+		value_key = "value";
+		format_str = "format_str";
+	}
+
+	zstr_intern value_key;
+	zstr_intern format_str;
+
+};
+
+D24Init D24;
 
 Day24* //static 
-day24_obj::make_obj(const zstr_ptr& zs)
+day24_obj::make_obj(zstr_user zs)
 {
-	Day24* cobj = Day24::omg.make_new();
+
+	zend_object* obj = Day24::omg.make_new();
+
+	Day24* cobj = zobj_toc<Day24>(obj);
 	cobj->construct(zs);
 	return cobj;
 }
 
-day24_obj::day24_obj(const zstr_ptr& zs) : zobj_own()
+day24_obj::day24_obj(zstr_user zs) : zobj_mgr()
 {
 	Day24* cobj = make_obj(zs);
-	obj_ = cobj->zobj();
+	obj_ = cobj->vobj(); // internal adopt
 }
 
-zstr_own 
+zstr_mgr 
 day24_obj::format(int flags)
 {
 	Day24* cobj = zobj_toc<Day24>(obj_);
 	return cobj->format(flags);
 }
 
-namespace wcc {
 
 base_obj_mgr<Day24> omg;
 
@@ -140,7 +157,7 @@ Day24::day24_format(double val, int flags){
 }
 
 void 
-Day24::construct(const zstr_base& sval) 
+Day24::construct(zstr_user sval) 
 {
 	if (sval.isNull())
 	{
@@ -152,11 +169,8 @@ Day24::construct(const zstr_base& sval)
 }
 
 void 
-Day24::str(const zstr_base& sval) {
-	const char* derror = nullptr;
-
+Day24::str(zstr_user sval) {
 	day24_str((const char*) sval.data(), sval.size(), tval_, true);
-
 }
 
 void 
@@ -175,38 +189,43 @@ Day24::day(double dval)
 }
 
 void 
-Day24::split(zval_ptr hours, zval_ptr mins, zval_ptr seconds)
+Day24::split(zval_user hours, zval_user mins, zval_user seconds)
 {
 	int h24;
 	int m60;
 	double s60;
 
 	day24_split(tval_, &h24, &m60, &s60);
-	ZVAL_LONG(Z_REFVAL_P(hours.ptr()), h24);
-	ZVAL_LONG(Z_REFVAL_P(mins.ptr()), m60);
-	ZVAL_DOUBLE(Z_REFVAL_P(seconds.ptr()), s60);
+	ZVAL_LONG(Z_REFVAL_P(hours), h24);
+	ZVAL_LONG(Z_REFVAL_P(mins), m60);
+	ZVAL_DOUBLE(Z_REFVAL_P(seconds), s60);
 }
 
-zstr_own 
+zstr_mgr 
 Day24::format(int flags)
 {
-	return zstr_pass(day24_format(tval_,flags));
+	zstr_mgr result;
+
+	result.adopt(day24_format(tval_,flags));
+	return  result;
 }
 
-zstr_own 
+zstr_mgr 
 Day24::toString()
 {
-	return zstr_pass(day24_format(tval_, SEC_AUTO));
+	zstr_mgr result;
+	result.adopt(day24_format(tval_, SEC_AUTO));
+	return result;
 }
-}; //namespace wcc
 
-void Day24::debug_info(HashTable* h)
+
+void Day24::debug_info(htab_write di)
 {
-	htab_ptr di(h);
-
-	di.set(wis->valuekey, (double) tval_);
-	di.set(wis->format_str, this->toString());
+	di.set(D24.value_key, (double) tval_);
+	di.set(D24.format_str, this->toString());
 }
+
+};//namespace wcc
 
 using namespace wcc;
 
@@ -289,7 +308,7 @@ ZEND_METHOD(Day24, format)
 	Z_PARAM_LONG(flags)
 	ZEND_PARSE_PARAMETERS_END();
 	auto cobj = zval_toc<Day24>(ZEND_THIS);
-	zstr_own result = cobj->format(flags);
+	zstr_mgr result = cobj->format(flags);
 	result.move_zv(return_value);
 }
 ZEND_METHOD(Day24, __toString)
@@ -297,7 +316,7 @@ ZEND_METHOD(Day24, __toString)
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	auto cobj = zval_toc<Day24>(ZEND_THIS);
-	zstr_own result = cobj->toString();
+	zstr_mgr result = cobj->toString();
 	result.move_zv(return_value);
 }
 ZEND_METHOD(Day24, day24_time)
@@ -364,7 +383,9 @@ ZEND_METHOD(Day24, day24_format)
 	Z_PARAM_LONG(flags)
 	ZEND_PARSE_PARAMETERS_END();
 
-	zstr_pass result(Day24::day24_format(dval, flags));
+	zstr_mgr result;
+
+	result.adopt(Day24::day24_format(dval, flags));
 	result.move_zv(return_value);
 }
 

@@ -44,7 +44,7 @@ namespace wcc {
 
 		static zval_mgr readfile(zstr_user name);
 
-		void debug_info(htab_write hw) override;
+		virtual void debug_info(htab_write hw);
 
 		
 		void construct(

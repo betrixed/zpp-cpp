@@ -555,7 +555,7 @@ ZEND_METHOD(Wcc_ICache, getData)
 ZEND_METHOD(Wcc_ICache, getMultiple)
 {
 	zval* keys;
-	zval* noval;
+	zval* noval = nullptr;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 	Z_PARAM_ARRAY(keys)

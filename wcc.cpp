@@ -52,7 +52,7 @@ extern "C" {
 
 #include "wcc/pair.cpp"
 #include "wcc/config.cpp"
-#include "wcc/hmap.cpp"
+
 
 #include "wcc/target.cpp"
 #include "wcc/route.cpp"
@@ -79,7 +79,10 @@ extern "C" {
 
 #include "wcd/sql_ipart.cpp"
 #include "wcd/sql_isql.cpp"
+
+#include "wcc/hmap.cpp"
 #include "wcd/irow.cpp"
+
 
  //SQL_IPART_CPP
 //#include "wcc/sql_ipart.cpp"
@@ -158,9 +161,6 @@ PHP_FUNCTION(Wcc_init_globals)
 {
 	ZEND_PARSE_PARAMETERS_START(0, 0)
    ZEND_PARSE_PARAMETERS_END();
-
-
-
 }
 
 

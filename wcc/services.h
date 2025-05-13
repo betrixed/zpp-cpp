@@ -57,7 +57,7 @@ public:
 
 	void       setThrowFail(bool value);
 
-	void debug_info(htab_write ht) override;
+	virtual void debug_info(htab_write ht);
 
 	void       clearActive();
 	void       clearDefer();
