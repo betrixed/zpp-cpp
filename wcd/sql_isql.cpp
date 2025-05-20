@@ -1840,6 +1840,50 @@ void Bindings::wipe(int key)
 	}
 }
 
+zval_mgr 
+Bindings::select(zobj_user prop)
+{
+	zobj_mgr from = getJoins();
+
+	zval_mgr columns = prop.property(SQSTR.columns);
+
+	if (columns.ok())
+	{
+		JoinTables* jt = zobj_toc<JoinTables>(from);
+		zobj_mgr prime = jt->getPrime();
+		IColumns* pc = zobj_toc<IColumns>(prime);
+		pc->clear();
+		pc->add(columns);
+	}
+
+	if (from.ok())
+	{
+		aliasSelect();
+	}
+
+	ISql* sql = zobj_toc<ISql>(isql_);
+
+	zobj_mgr plist = sql->select(*this);
+
+	zval_mgr  old_fetch = db_.call(SQLSTR.getfetch);
+
+	zval_mgr  row_fetch = prop.property(SQSTR.fetch_key);
+
+	if (zval_user(old_fetch).zlong() != zval_user(row_fetch).zlong())
+	{
+		driver.call(SQSTR.setfetch, row_fetch);
+	}
+
+	zval_mgr result = connect_.call(SQLSTR.select, )
+	zval_mgr mclass;
+
+	zval_mgr model = prop.property(SQSTR.model);
+	if (model.isNull())
+	{
+		mclass = prop.property(SQSTR.modelclass);
+	}
+}
+
 
 }; // namespace wcc
 

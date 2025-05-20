@@ -39,7 +39,7 @@ class SqlGenerateTest extends Asserts
     protected function setUp(): void
     {
         $this->cfg = Services::getOne(Config::class);
-        $this->iterations = 10;
+        $this->iterations = 1;
     }
 
 

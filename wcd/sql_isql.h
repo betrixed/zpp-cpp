@@ -286,7 +286,7 @@ namespace wcc {
 		htab_mgr	data_;
 		zobj_mgr    paramList_;
 		zobj_mgr	sql_;
-		zobj_mgr    connect_;
+		zobj_mgr    db_;
 
 		void addArray(int key, zval_user value);
 
@@ -322,7 +322,7 @@ namespace wcc {
 			return data_;
 		}
 
-		
+		zval_mgr select(zobj_user prop);
 
 		/** Call setPrime of JoinTables, return JoinTables */
 		zobj_mgr primeJoin(zval_user tcol);

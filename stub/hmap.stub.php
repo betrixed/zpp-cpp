@@ -25,7 +25,7 @@ class Hmap //implements IteratorAggregate
 
 	public function addArray(array $data): void {}
 
-	public function toArray() : array {}
+	public function toArray() : ?array {}
 
 	public function unhive(string $key) : string {}
 

@@ -11,8 +11,8 @@
 #include "wcc/hmap.h"
 #endif
 
-#ifndef WCD_ITABLE_H
-#include "itable.h"
+#ifndef WCD_IMODEL_H
+#include "imodel.h"
 #endif
 
 namespace wcd {

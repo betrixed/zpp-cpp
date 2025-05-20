@@ -26,6 +26,7 @@ public:
 
 	void addPathArray(htab_read pathsArray);
 	void addClass(zstr_user cname, zstr_user fspath);
+	void addClasses(htab_read classArray);
 
 	// properties
 	htab_read getNSPaths() const;

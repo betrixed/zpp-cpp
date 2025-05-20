@@ -102,7 +102,11 @@ namespace wcc {
 		zstr_intern  orderby;
 		zstr_intern  where;
 
-		zstr_intern  getsql;
+		zstr_intern  getsql;	
+		zstr_intern  idriver;
+		zstr_intern  getfetch;
+		zstr_intern  fetch_key;
+		zstr_intern  modelclass;
 
 		zstr_intern  valuesdefault;
 		
@@ -322,12 +326,7 @@ namespace wcc {
 
 		void construct(zval_user owner);
 
-		void clear()
-		{
-			colnames_.reset();
-			expr_.reset();
-			alias_.init();
-		}
+		void clear();
 
 		zobj_user getOwner() const
 		{

@@ -15,6 +15,8 @@ class Finder {
 	public function addPathArray(array $paths) : void {}
 	public function addClass(string $cname, string $fspath) : void {}
 
+	public function addClasses(array $list) : void {}
+
 	// properties
 	public function getNSPaths() : array {}
 

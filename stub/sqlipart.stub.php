@@ -216,9 +216,6 @@ class ISql
     const int SQL_DISTINCT = 12;
     const int SQL_RENAME = 13;
 
-    const string QUOTE_SGL = "'";
-    const string QUOTE_DBL = "\"";
-
 
     public static function tableClass(string $uname) : string {}
     
@@ -284,7 +281,7 @@ class ParamList {
 };
 
 class Bindings {
-    public function __construct(ISql $gen, \Wcd\IConnect $connect);
+    public function __construct(ISql $gen, \Wcd\IfDriver $connect);
 
     public function add(int $key, mixed $value) : void {}
 
@@ -313,5 +310,7 @@ class Bindings {
     public function unset(int $key) : void {}
 
     public function wipe(int $ix = 0) : void {}
+
+    public function select(object $prop) : mixed {}
 
 };

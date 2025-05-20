@@ -68,7 +68,7 @@ class BaseModelTest extends Asserts {
     public function testTimeStamps() 
     {
         $obj = $this->obj;
-        $obj->setTimestamps(IfCrud::ALL_TS);
+        $obj->setTSFlags(IfCrud::ALL_TS);
         
         $row = $obj->newRow();
 

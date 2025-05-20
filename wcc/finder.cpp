@@ -71,15 +71,27 @@ Finder::addPath(zstr_user nsroot, zstr_user fspath)
 void 
 Finder::addPathArray(htab_read pathsArray)
 {
-	for_key_value wk;
 	htab_write hw(nsPaths_);
 
+	for_key_value wk;
 	for(wk.start(pathsArray); wk.ok(); wk.next())
 	{
 		hw.set(wk.key(), wk.value());
 	}
 
 	//showarray("addPathArray", nsPaths_);
+}
+
+void addClasses(htab_read classArray)
+{
+	
+	htab_write hw(classes_);
+
+	for_key_value wk;
+	for(wk.start(classArray); wk.ok(); wk.next())
+	{
+		hw.set(wk.key(), wk.value());
+	}
 }
 
 void 
@@ -243,6 +255,19 @@ ZEND_METHOD(Wcc_Finder, addClass)
 	auto cobj = zval_toc<Finder>(ZEND_THIS);
 
 	cobj->addClass(cname, fspath);	
+}
+
+ZEND_METHOD(Wcc_Finder, addClasses)
+{
+	zval* clist;
+
+	ZEND_PARSE_PARAMETERS_START(1,1)
+	Z_PARAM_ARRAY(clist)
+	ZEND_PARSE_PARAMETERS_END();
+
+	auto cobj = zval_toc<Finder>(ZEND_THIS);
+
+	cobj->addClasses(clist);	
 }
 
 ZEND_METHOD(Wcc_Finder, getNSPaths)

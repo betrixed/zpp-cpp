@@ -15,6 +15,8 @@ $basedir = dirname(__DIR__);
 chdir($basedir);
 
 echo "Working directory: " . $basedir . PHP_EOL;
+echo "Wcc " .  phpversion("wcc") . PHP_EOL;
+echo "XDebug " . phpversion("xdebug") . PHP_EOL;
 
 $services = require("php/Wcc/autoload.php");
 
@@ -139,6 +141,3 @@ $test = new SqlGenerateTest();
 $run->runObject($test);
 
 $services->get('die');
-
-echo "Wcc " .  phpversion("wcc") . PHP_EOL;
-echo "XDebug " . phpversion("xdebug") . PHP_EOL;

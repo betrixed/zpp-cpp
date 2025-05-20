@@ -116,6 +116,9 @@ void sql_strtab::init()
 
 	param_list = "param_list";
 	connect = "connect";
+	idriver = "idriver";
+	getfetch = "getfetch";
+	fetch_key = "fetch";
 
 	params = "params";
 	driver = "driver";
@@ -125,6 +128,8 @@ void sql_strtab::init()
 	results  = "results";
 	by_alias  = "by_alias";
 	model  = "model";
+	modelclass = "modelclass";
+	
 	joins  = "joins";
 	prime  = "prime";
 	orderby  = "orderby";
@@ -416,6 +421,13 @@ IColumns::construct(zval_user owner)
 	owner_ = owner;
 }
 
+void IColumns::clear()
+{
+	colnames_.reset();
+	expr_.reset();
+	alias_.init();
+}
+		
 void 
 IColumns::add(zval_user columns)		
 {
