@@ -82,7 +82,8 @@ Finder::addPathArray(htab_read pathsArray)
 	//showarray("addPathArray", nsPaths_);
 }
 
-void addClasses(htab_read classArray)
+void 
+Finder::addClasses(htab_read classArray)
 {
 	
 	htab_write hw(classes_);

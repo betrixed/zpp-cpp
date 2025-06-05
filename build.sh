@@ -20,6 +20,8 @@ make ./stub/global_response_arginfo.h
 make ./stub/toml_arginfo.h
 make ./stub/sqlipart_arginfo.h
 make ./stub/irow_arginfo.h
+make ./stub/ds_arginfo.h
+make ./stub/db_arginfo.h
 #make sqlipart_arginfo.h
 #make toml_arginfo.h
 #make htmlgem_arginfo.h

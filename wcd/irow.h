@@ -12,7 +12,7 @@
 #endif
 
 #ifndef WCD_IMODEL_H
-#include "imodel.h"
+#include "model.h"
 #endif
 
 namespace wcd {
@@ -87,7 +87,7 @@ namespace wcd {
 
     	void setExists();
 
-    	htab_mgr stampTime(zstr_user value, int dtflags = ITable::ALL_TS);
+    	htab_mgr stampTime(zstr_user value, int dtflags = Model::ALL_TS);
 
 	};
 

@@ -7,7 +7,15 @@
 
 #include <ctype.h>
 
-namespace wcc {
+#ifndef WCD_RUNSQL_H
+#include "runsql.h"
+#endif
+
+#ifndef WCD_MODEL_H
+#include "model.h"
+#endif
+
+namespace wcd {
 
 base_obj_mgr<ParamList> 	ParamList::omg;
 base_obj_mgr<ISql>  		ISql::omg;
@@ -1519,7 +1527,7 @@ void Bindings::debug_info(htab_write di)
 	di.set(SQSTR.data_key, data_);
 	di.set(SQSTR.param_list, paramList_);
 	di.set(SQSTR.isql, sql_);
-	di.set(SQSTR.connect, connect_);
+	di.set(SQSTR.connect, db_);
 }
 
 void Bindings::add(int key, zval_user value)
@@ -1572,7 +1580,7 @@ void
 Bindings::construct(zval_user sql, zval_user connect)
 {
 	sql_ = sql.zobject();
-	connect_ = connect.zobject();
+	db_ = connect.zobject();
 }
 
 JoinTables* 
@@ -1783,7 +1791,7 @@ Bindings::columnAlias(zobj_user tcolobj)
 
 		zval_mgr tname(tcol->getName());
 
-		zobj_mgr model = connect_.call(SQSTR.getTableModel, tname);
+		zobj_mgr model = db_.call(SQSTR.getTableModel, tname);
 
 		htab_read columns = model.call(SQSTR.getColDefs);
 
@@ -1840,12 +1848,22 @@ void Bindings::wipe(int key)
 	}
 }
 
+zstr_mgr alias_str_key(zstr_user malias)
+{
+	zstr_buffer buf;
+
+	buf << '_' << malias << '_';
+
+	return buf.zstr();
+}
+
 zval_mgr 
 Bindings::select(zobj_user prop)
 {
 	zobj_mgr from = getJoins();
 
-	zval_mgr columns = prop.property(SQSTR.columns);
+	zval_mgr columns_mgr = prop.property(SQSTR.columns);
+	zval_user columns(columns_mgr);
 
 	if (columns.ok())
 	{
@@ -1861,27 +1879,118 @@ Bindings::select(zobj_user prop)
 		aliasSelect();
 	}
 
-	ISql* sql = zobj_toc<ISql>(isql_);
+	ISql* sql = zobj_toc<ISql>(sql_);
 
 	zobj_mgr plist = sql->select(*this);
 
-	zval_mgr  old_fetch = db_.call(SQLSTR.getfetch);
-
 	zval_mgr  row_fetch = prop.property(SQSTR.fetch_key);
+	zval_mgr  old_fetch = db_.call(SQSTR.setfetch, row_fetch);
+
+	ParamList* pobj = zobj_toc<ParamList>(plist);
+
+	zval_mgr rows = RunSql::op(db_, pobj->getSql(), pobj->getValues(), true);
+
 
 	if (zval_user(old_fetch).zlong() != zval_user(row_fetch).zlong())
 	{
-		driver.call(SQSTR.setfetch, row_fetch);
+		db_.call(SQSTR.setfetch, old_fetch);
 	}
 
-	zval_mgr result = connect_.call(SQLSTR.select, )
-	zval_mgr mclass;
+	zstr_user mclass;
 
-	zval_mgr model = prop.property(SQSTR.model);
-	if (model.isNull())
+	zval_mgr model_mgr = prop.property(SQSTR.model);
+	zobj_user model(model_mgr);
+
+	if (!model.ok())
 	{
-		mclass = prop.property(SQSTR.modelclass);
+		model_mgr = prop.property(SQSTR.modelclass);
+		if (zval_user(model_mgr).isNull())
+		{
+			return rows;
+		}
 	}
+
+	htab_read hr(zval_user(rows).zarray());
+	if (hr.ok())
+	{
+		size_t rct = hr.size();
+		if (rct == 1)
+		{
+			Model* m = zobj_toc<Model>(model);
+			return (zend_object*) m->newRow(hr.get((int)0), true);
+		}
+		else if (rct == 0)
+		{
+			//empty array
+			model_mgr.set_null();
+			return model_mgr;
+		}
+	}
+	//TODO: else what?
+	// multiple rows case
+	mclass = model.className();
+
+	
+	zval_mgr  eager_load_mgr = prop.property(SQSTR.eager_load);
+	htab_read eager_load(eager_load_mgr);
+
+	zval_user rename = get(ISql::SQL_RENAME);
+
+	if (rename.isArray())
+	{
+		htab_mgr objset_mgr;
+		htab_write objset(objset_mgr);
+
+		JoinTables* fromjt = getJoinTables();
+
+		zstr_mgr table_name = fromjt->getModel();
+
+		htab_read tables = fromjt->getTables();
+
+		zobj_mgr icols = fromjt->getTable(table_name);
+
+		table_name = zobj_toc<IColumns>(icols)->getAlias();
+
+		zstr_mgr mb_id = alias_str_key(table_name);
+
+		htab_mgr alias_list_mgr;
+		htab_write alias_list(alias_list_mgr);
+
+		htab_walk w1;
+
+		auto alias_key = w1.key();
+		for(w1.start(tables); w1.ok(); w1.next())
+		{
+			if (zs_cmp(table_name, alias_key.zstr()) != 0)
+			{
+				zstr_mgr a_key = alias_str_key(alias_key);
+				alias_list.push_back(a_key);
+			}
+		}
+
+		auto r_row = w1.value();
+		htab_read relist(rename.zarray());
+
+		for(w1.start(hr); w1.ok(); w1.next())
+		{
+			zobj_mgr obj = JoinTables::rowSplit(r_row, relist);
+			zval_mgr recset = obj.property(mb_id);
+			htab_walk w2;
+			auto ai_value = w2.value();
+			// TODO: check recset ??
+			htab_write rec(recset);
+
+			for(w2.start(alias_list); w2.ok(); w2.next())
+			{
+				zstr_mgr key = ai_value.zstr();
+				rec.set(key, obj.property(key));
+			}
+			objset.push_back(rec);
+		}
+		unset(ISql::SQL_RENAME);
+		return Model::createFromResult(mclass, objset_mgr);
+	}
+	return Model::createFromResult(mclass, hr);
 }
 
 

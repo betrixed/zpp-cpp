@@ -17,7 +17,7 @@ extern "C" {
 #include "sql_isql.h"
 #endif
 
-namespace wcc {
+namespace wcd {
 
 using StrView = std::string_view;
 
@@ -118,6 +118,7 @@ void sql_strtab::init()
 	connect = "connect";
 	idriver = "idriver";
 	getfetch = "getfetch";
+	setfetch = "setfetch";
 	fetch_key = "fetch";
 
 	params = "params";
@@ -137,6 +138,7 @@ void sql_strtab::init()
 
 	getsql = "getsql";
 	valuesdefault = "valuesdefault";
+	eager_load = "eager_load";
 	
 	opstr = {
 		{"="}, {"<>"}, {">"}, {"<"}, {">="}, {"<="}, {op_like},
@@ -645,7 +647,7 @@ Param::construct(zval_user zp)
 
 }; //namespace
 
-using namespace wcc;
+using namespace wcd;
 
 ZEND_METHOD(Wcd_Sql_Literal, __construct)
 {

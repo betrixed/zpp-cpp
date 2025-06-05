@@ -9,7 +9,7 @@
 #include "sql_ipart.h"
 #endif
 
-namespace wcc {
+namespace wcd {
 
 	using namespace zpp;
 

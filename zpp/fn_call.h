@@ -27,6 +27,7 @@
 
 namespace zpp {
 
+
     /**
      *  callable_fn, for PHP "Callable"
      *  Is PHP wrap for call_user_function
@@ -191,6 +192,8 @@ namespace zpp {
         file_content  file_get_contents;
         PathInfo      pathinfo;
 
+        fn_call       get_called_class;
+        
         virtual void init();
 
     };

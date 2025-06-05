@@ -8,7 +8,7 @@
 
 #include <vector>
 
-namespace wcc {
+namespace wcd {
 
 	using namespace zpp;
 
@@ -105,10 +105,13 @@ namespace wcc {
 		zstr_intern  getsql;	
 		zstr_intern  idriver;
 		zstr_intern  getfetch;
+		zstr_intern  setfetch;
+
 		zstr_intern  fetch_key;
 		zstr_intern  modelclass;
 
 		zstr_intern  valuesdefault;
+		zstr_intern  eager_load;
 		
 		std::vector<zstr_intern> opstr;
 		std::vector<zstr_intern> boolstr;

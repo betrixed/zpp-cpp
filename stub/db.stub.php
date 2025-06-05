@@ -89,15 +89,7 @@ interface IfSqlParam {
 };
 */
 
-class IConfig {
-    public function assign(array $cfg) : void {}
-    public function get(string $key) : mixed {}
-    public function getArray() : array {}
-    public function getCharset() : string {}
-    public function getCollation() : string {}
-    public function newConnect(string $name) : IfDriver {}
-    public function newSql() : IfSql {}
-};
+
 
 class IDriver {
 
@@ -112,11 +104,11 @@ class IDriver {
 
     public function begin(): bool {}
 
-    public function bind(mixed $stmt, array $params) : mixed {};
+    public function bind(mixed $stmt, array $params) : mixed {}
 
     public function close() : void {}
 
-    public function closeStmt(mixed $stmt) : void {};
+    public function closeStmt(mixed $stmt) : void {}
 
     
 
@@ -153,7 +145,7 @@ class IDriver {
 
     public function getTableColumns(string $tableName) : array {}
 
-    public function  getTableModel(string $tableName) : Model {}
+    public function getTableModel(string $tableName) : Model {}
 
     public function getTableNames(): array {}
 
@@ -209,12 +201,9 @@ class IServer {
 
     const string DEFAULT_NAME = "default";
 
-    public static function getConnect() : IDriver {}
+    public static function Connect() : ?IDriver {}
 
     public function getConnect(string $name = IfServer::DEFAULT_NAME): ?IDriver {}
-
-
-
 };
 
 interface IfSql {
@@ -243,12 +232,12 @@ class Model implements IfCrud {
 
     public static function WithValues(array $values) : ?IRow {}
 
-    public static function __callStatic($method, $parameters) : mixed {}
+    public static function __callStatic(string $method, array $parameters) : mixed {}
 
     public static function classToTableName(string $cname): string {}
 
-    public static function createFromResult(string $mclass, $results, 
-        $eagerLoad = []) : array {}
+    public static function createFromResult(string $mclass, mixed $results, 
+        array $eagerLoad = []) : array {}
 
     public static function find(mixed $id): ?IRow {}
 
@@ -306,7 +295,7 @@ class Model implements IfCrud {
 
     
 
-    public function setName(string $name) : void
+    public function setName(string $name) : void {}
 
     public function setPKey(array $pnames) : void {}
 

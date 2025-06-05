@@ -12,6 +12,14 @@ extern "C" {
 }
 #endif
 
+#ifndef DB_ARGINFO_H
+#define DB_ARGINFO_H
+extern "C" {
+	#include "stub/db_arginfo.h"
+}
+#endif
+
+
 namespace wcd {
 
 using namespace zpp;
@@ -483,7 +491,7 @@ ZEND_METHOD(Wcd_IRow, setExists)
 ZEND_METHOD(Wcd_IRow, stampTime)
 {
 	zend_string* key;
-	zend_long    tsflags = ITable::ALL_TS;
+	zend_long    tsflags = Model::ALL_TS;
 
 	ZEND_PARSE_PARAMETERS_START(1,2)
 	Z_PARAM_STR(key);
