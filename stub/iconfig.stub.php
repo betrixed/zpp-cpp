@@ -26,3 +26,41 @@ class IConfig {
     
     public function newSql() : IfSql {}
 };
+
+class IServer {
+
+    const string DEFAULT_NAME = "default";
+
+
+    public static function Connect() : ?IDriver {}
+
+    public function __construct(string $svkey) {}
+
+    public function addConfig(IConfig $cfg, string $name = "default") : void {}
+
+    public function getConnect(string $name = IfServer::DEFAULT_NAME): ?IDriver {}
+
+    public function config(array $data) : void {}
+
+    public function getAlias() : array {}
+
+    public function getConfig(string $name) : ?IConfig {}
+
+    public function getConfigNames() : array {}
+
+    public function getConnect() : ?IDriver {}
+
+    public function getDataCache() : ?ICache {}
+
+    public function getDriverClass(string $driver): string {}
+
+    public function getDriverClasses(): array {}
+
+    public function getSqlClass(string $key): string {}
+
+    public function getSqlClasses(): array {}
+
+    public function initDone() : void {}
+
+    public function setAlias(string $alias, string $name) : void {}
+};

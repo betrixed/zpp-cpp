@@ -76,6 +76,8 @@ extern "C" {
 
 
 #include "wcc/global_response.cpp"
+#include "wcd/iconfig.cpp"
+#include "wcd/iserver.cpp"
 
 #include "wcd/sql_ipart.cpp"
 #include "wcd/sql_isql.cpp"

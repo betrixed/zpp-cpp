@@ -5,6 +5,13 @@
 #include "iconfig.h"
 #endif
 
+#ifndef ICONFIG_ARGINFO_H
+#define ICONFIG_ARGINFO_H
+extern "C" {
+#include "stub/iconfig_arginfo.h"
+}
+#endif
+
 namespace wcd {
 
 using namespace zpp;
@@ -15,7 +22,7 @@ CfgInit ICS;
 CfgInit::CfgInit() : state_init() {}
 
 void 
-CfgInit::init();
+CfgInit::init()
 {
 	msg_or = " | ";
 	k_driver = "driver";
@@ -55,14 +62,18 @@ IConfig::assign(htab_read cfg)
 	//arg.push_back(ICS.k_adapter);
 
 	zval_mgr null_val;
+	zval_mgr keys(arg);
 
-	zstr_mgr sval = getValue(arg, true, null_val);
+	zstr_mgr sval = getValue(keys, true, null_val);
 	hw.set(ICS.k_driver, sval);
 
-	arg.reset();
+	arg.clear();
+
 	arg.push_back(ICS.k_host);
 	arg.push_back(ICS.k_hostname);
-	sval = getValue(arg, false, null_val);
+
+
+	sval = getValue(keys, false, null_val);
 	hw.set(ICS.k_host, sval);
 
 }
@@ -73,7 +84,9 @@ IConfig::getValue(zval_user keys, bool required, zval_user ifnot)
 {
 	zval_mgr result;
 
-	if (keys.isString())
+	bool asString = keys.isString();
+
+	if (asString)
 	{
 		zval_user value = cfg_.get(keys.zstr());
 		if (!value.isNull())
@@ -97,29 +110,42 @@ IConfig::getValue(zval_user keys, bool required, zval_user ifnot)
 			}
 		}
 	}
+	else {
+		return result;
+	}
 	if (!required)
 	{
 		result = ifnot;
 		return result;
 	}
-	zstr_buffer msg;
+	zstr_buffer buf;
 
 	buf << "Db IConfig needs : ";
 
-	if (keys.isArray())
+	if (!asString)
 	{
 		zval_mgr cat = implode(ICS.msg_or, keys);
-		buf << cat.zstr();
+		buf << zval_user(cat).zstr();
 	}
 	else {
 		buf << keys.zstr();
 	}
 	zstr_mgr msg = buf.zstr();
-	zend_throw_error(zend_cd_error, "%s", msg.data());
+	zend_throw_error(zend_ce_error, "%s", msg.data());
 	return result;
 }
 
+void      
+IConfig::setMyKey(zstr_user key)
+{
+	mykey_ = key;
+}
 
+zstr_user 
+IConfig::getMyKey()
+{
+	return mykey_;
+}
 
 };
 

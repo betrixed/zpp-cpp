@@ -14,6 +14,9 @@ namespace wcd {
 	using namespace zpp;
 	using namespace wcc;
 
+	class IDriver;
+	class IConfig;
+
 	class IServer : public base_d {
 	protected:	
 
@@ -31,13 +34,38 @@ namespace wcd {
 
 		htab_mgr driverClasses_;
 
+
+		zobj_mgr activate(zstr_user name);
+		IConfig* needConfig(zstr_user name);
+
 	public:
+
+		static base_obj_mgr<IServer> omg;
+		
 		void construct(zstr_user svckey);
 
 		void initDone();
 
 		zobj_mgr getDataCache();
 
+		zobj_mgr getConect(zstr_user name);
+
+		static zobj_mgr Connect(zstr_user name);
+
+		zobj_mgr getConnect(zstr_user name);
+		zobj_mgr getConfig(zstr_user name);
+		
+		zstr_user getSqlClass(zstr_user dkey);
+		zstr_user getDriverClass(zstr_user dkey);
+
+		htab_read getSqlClasses();
+		htab_read getDriverClasses();
+
+		void config(htab_read data);
+
+		void addConfig(zobj_mgr iconfig, zstr_user name);
+
+		void setAlias(zstr_user alias, zstr_user name);
 
 	};
 

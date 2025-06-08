@@ -197,14 +197,7 @@ class IDriver {
 
 };
 
-class IServer {
 
-    const string DEFAULT_NAME = "default";
-
-    public static function Connect() : ?IDriver {}
-
-    public function getConnect(string $name = IfServer::DEFAULT_NAME): ?IDriver {}
-};
 
 interface IfSql {
     const int SQL_OBJ = 0;

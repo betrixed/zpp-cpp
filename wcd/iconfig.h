@@ -5,37 +5,39 @@
 #include "zpp/base.h"
 #endif
 
-#ifndef ICONFIG_ARGINFO_H
-#define ICONFIG_ARGINFO_H
-extern "C" {
-#include "iconfig_arginfo.h"
-}
-#endif
+
 
 namespace wcd {
 
 	using namespace zpp;
 	using namespace wcc;
 
-	/** To properly inherit Hmap property access and array access, 
-	 *   also have to override own special object handlers
-	 *   with its Hmap_php static functions
-	 */
-	class IConfig;
+/** To properly inherit Hmap property access and array access, 
+ *   also have to override own special object handlers
+ *   with its Hmap_php static functions
+ */
+class IConfig;
 
-	class IConfig : public base_d
-	{
-	public:
-		void assign(htab_read cfg);
-		zval_mgr getValue(zval_user keys, bool required, zval_user default);
-		
-	protected:
-		htab_mgr data_;
-		htab_mgr cfg_;
-		zstr_mgr mykey_;
+class IConfig : public base_d
+{
+public:
+	static base_obj_mgr<IConfig> omg;
+
+	void assign(htab_read cfg);
+	zval_mgr getValue(zval_user keys, bool required, zval_user ifnot);
+	
+	zstr_user getMyKey();
+	void      setMyKey(zstr_user key);
+	
+	zobj_mgr newConnect(zstr_user name);
+	
+protected:
+	htab_mgr data_;
+	htab_mgr cfg_;
+	zstr_mgr mykey_;
 
 
-	};
+};
 
 class CfgInit : public state_init {
 public:
@@ -68,5 +70,7 @@ public:
 };
 
 extern CfgInit ICS;
+
+}; // namespace wcd
 
 #endif
