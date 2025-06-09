@@ -199,9 +199,8 @@ class JoinTables {
 
 };
 
-
-class ISql 
-{
+interface IfSql {
+    const int SQL_OBJ = 0;
     const int SQL_INSERT = 1;
     const int SQL_UPDATE = 2;
     const int SQL_DELETE = 3;
@@ -216,7 +215,10 @@ class ISql
     const int SQL_DISTINCT = 12;
     const int SQL_RENAME = 13;
 
+};
 
+class ISql implements IfSql
+{
     public static function tableClass(string $uname) : string {}
     
     public function delete(Bindings $bind) : ParamList {}

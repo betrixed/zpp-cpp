@@ -13,6 +13,8 @@ namespace wcd {
 	using namespace zpp;
 	using namespace wcc;
 
+	class Bindings;
+
 	class IBuild : public base_d {
 	public:
 
@@ -22,6 +24,9 @@ namespace wcd {
 		zval_mgr aggregate(zstr_user agfn, htab_read columns);
 		zval_mgr get(htab_read columns);
 		
+		void setModel(zobj_user m);
+		Bindings& bindings();
+
 	protected:
 
 		zobj_mgr driver_;
@@ -37,6 +42,7 @@ namespace wcd {
 		int  ifetch_;
 
 
+		friend class Model;
 	};
 }; //  namespace
 

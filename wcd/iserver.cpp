@@ -92,14 +92,10 @@ IServer::initDone()
 	svc_key_.init();
 }
 
-zobj_mgr IServer::getDataCache()
+zobj_mgr 
+IServer::getDataCache()
 {
-	if (dbCache_.ok())
-	{
-		return dbCache_;
-	}
-
-	
+	return dbCache_;
 }
 
 zobj_mgr 
@@ -193,7 +189,7 @@ IServer::getConnect(zstr_user name)
 }
 
 zobj_mgr 
-IServer::Connect(zstr_user name)
+IServer::connect(zstr_user name)
 {
 	if (!name.ok())
 	{

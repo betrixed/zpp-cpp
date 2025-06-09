@@ -50,7 +50,7 @@ namespace wcd {
 
 		zobj_mgr getConect(zstr_user name);
 
-		static zobj_mgr Connect(zstr_user name);
+		static zobj_mgr connect(zstr_user name);
 
 		zobj_mgr getConnect(zstr_user name);
 		zobj_mgr getConfig(zstr_user name);
@@ -69,7 +69,7 @@ namespace wcd {
 
 	};
 
-};
+}; // namespace wcd
 
 
 

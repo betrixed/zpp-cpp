@@ -309,6 +309,10 @@ namespace wcd {
 
 		bool aliasSelect();
 
+		void limit(int limit, int offset=0);
+
+		void whereKeyValue(zval_user keys, zval_user values);
+		
 		htab_mgr columnAlias(zobj_user tcol);
 
 		JoinTables* getJoinTables();
@@ -349,6 +353,8 @@ namespace wcd {
 		void wipe(int key = 0);
 	};
 
+	extern zend_class_entry* zintf_ce_Sql_IfSql;
+	
 }; // namespace
 
 extern bool init_isql_module();

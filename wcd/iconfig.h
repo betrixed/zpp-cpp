@@ -30,7 +30,11 @@ public:
 	void      setMyKey(zstr_user key);
 	
 	zobj_mgr newConnect(zstr_user name);
+	zobj_mgr newSql();
+	zobj_mgr newDmlBuild(zobj_mgr idriver);
 	
+	zstr_mgr getDatabase();
+
 protected:
 	htab_mgr data_;
 	htab_mgr cfg_;

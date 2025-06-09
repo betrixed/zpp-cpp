@@ -197,27 +197,6 @@ class IDriver {
 
 };
 
-
-
-interface IfSql {
-    const int SQL_OBJ = 0;
-    const int SQL_INSERT = 1;
-    const int SQL_UPDATE = 2;
-    const int SQL_DELETE = 3;
-    const int SQL_SELECT = 4;
-    const int SQL_WHERE = 5;
-    const int SQL_JOIN = 6;
-    const int SQL_RETURN = 7;
-    const int SQL_FROM = 8;
-    const int SQL_ORDER = 9;
-    const int SQL_LIMIT = 10;
-    const int SQL_AGGREGATE = 11;
-    const int SQL_DISTINCT = 12;
-    const int SQL_RENAME = 13;
-
-};
-
-
 class Model implements IfCrud {
 
 

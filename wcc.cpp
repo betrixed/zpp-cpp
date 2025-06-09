@@ -78,6 +78,9 @@ extern "C" {
 #include "wcc/global_response.cpp"
 #include "wcd/iconfig.cpp"
 #include "wcd/iserver.cpp"
+#include "wcd/idriver.cpp"
+
+#include "wcd/model.cpp"
 
 #include "wcd/sql_ipart.cpp"
 #include "wcd/sql_isql.cpp"
@@ -298,6 +301,14 @@ PHP_MINIT(wcc_route_add)(INIT_FUNC_ARGS_PASSTHRU);
 
 #ifdef SQL_IPART_CPP
 	PHP_MINIT(SqlIPart_reg)(INIT_FUNC_ARGS_PASSTHRU);
+#endif
+
+#ifdef WCD_MODEL_CPP
+	PHP_MINIT(Wcd_Model_reg)(INIT_FUNC_ARGS_PASSTHRU);
+#endif
+
+#ifdef WCD_IDRIVER_CPP
+	PHP_MINIT(Wcd_IDriver_reg)(INIT_FUNC_ARGS_PASSTHRU);
 #endif
 
 #ifdef WCD_IROW_CPP

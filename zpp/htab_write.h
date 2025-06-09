@@ -51,10 +51,11 @@ namespace zpp {
         void push_back(zend_object* zobj);
         void push_back(zval* zv);
 
-        template <class... T_values>
-            void push_items(T_values... values) {
-                push_back(values...);
-            }
+        void push_items(auto&&... args)
+        {
+            for (auto s : std::initializer_list<zstr_user>{ args... })
+                push_back(s);
+        }
             
         void push_back(const zval_mgr& zv);
 

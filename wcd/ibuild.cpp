@@ -22,13 +22,19 @@ using namespace zpp;
 		isql_ = db->isql_;
 
 		bindings_ = Bindings::omg.new_zobj();
-		Bindings* bind = zobj_toc<Bindings>(bindings_);
+		Bindings& bind = zobj_toc<Bindings>(bindings_);
 
 		zval_mgr sqlmgr(isql_);
 
 		bind->construct(sqlmgr, driver);
 		bind->setParamList(params_);
 
+	}
+
+	Bindings& 
+	IBuild::bindings()
+	{
+		return *(zobj_toc<Bindings>(bindings_));
 	}
 
 	void IBuild::destruct()

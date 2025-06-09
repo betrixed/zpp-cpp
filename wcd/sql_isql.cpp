@@ -15,7 +15,16 @@
 #include "model.h"
 #endif
 
+#ifndef SQL_ARGINFO_H
+#define SQL_ARGINFO_H
+extern "C" {
+	#include "stub/sqlipart_arginfo.h"
+};
+#endif
+
 namespace wcd {
+
+zend_class_entry* zintf_ce_Sql_IfSql;
 
 base_obj_mgr<ParamList> 	ParamList::omg;
 base_obj_mgr<ISql>  		ISql::omg;
@@ -2839,11 +2848,20 @@ ZEND_METHOD(Wcd_Sql_Bindings, wipe)
 	cobj->wipe(key);
 }
 
+#ifndef DB_ARGINFO_H
+#define DB_ARGINFO_H
+extern "C" {
+     #include "stub/db_arginfo.h"
+}
+#endif
 
 bool init_isql_module()
 {
+	// need the IfSql interface
 
-	zclass_isql = register_class_Wcd_Sql_ISql();
+	zintf_ce_Sql_IfSql = register_class_Wcd_Sql_IfSql();
+
+	zclass_isql = register_class_Wcd_Sql_ISql(zintf_ce_Sql_IfSql);
 	ISql::omg.classEntry(zclass_isql);
 
 	zclass_bindings = register_class_Wcd_Sql_Bindings();

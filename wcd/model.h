@@ -36,6 +36,9 @@ protected:
 
 
 public:
+
+	static base_obj_mgr<Model> omg;
+	
 	Model();
 	virtual ~Model();
 
@@ -47,13 +50,13 @@ public:
 
 	static zval_mgr createFromResult(zstr_user classname, htab_read results);
 	
-	static zobj_mgr keyValue(zstr_user static_name, htab_read keynames, htab_read values);
+	static zobj_mgr keyValue(zstr_user static_name, zval_user keynames, zval_user values);
 
 	static zobj_mgr withValues(htab_read keyvalues);
 
-	zobj_mgr byKeyValue(htab_read keynames, htab_read values);
+	zobj_mgr byKeyValue(zval_user keynames, zval_user values);
 
-	zobj_mgr byPrimaryValue(htab_read values);
+	zobj_mgr byPrimaryValue(zstr_user values);
 
 	zobj_mgr getConnect();
 
