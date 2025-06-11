@@ -147,6 +147,15 @@ IConfig::getMyKey()
 	return mykey_;
 }
 
-};
+};//namespace
+
+using namespace wcd;
+
+PHP_MINIT_FUNCTION(Wcd_IConfig_reg)
+{
+	IConfig::omg.classEntry(register_class_Wcd_IConfig());
+
+	return SUCCESS;
+}
 
 #endif

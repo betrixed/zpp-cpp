@@ -18,6 +18,8 @@ namespace wcd {
 	class IBuild : public base_d {
 	public:
 
+		base_obj_mgr<IBuild> omg;
+
 		void construct(zval_user driver);
 		void destruct();
 
@@ -25,7 +27,11 @@ namespace wcd {
 		zval_mgr get(htab_read columns);
 		
 		void setModel(zobj_user m);
+
 		Bindings& bindings();
+
+		zval_mgr first(htab_read columns);
+		zval_mgr where(zval_user column, zstr_user operator, zval_user value, zstr_user bval);
 
 	protected:
 

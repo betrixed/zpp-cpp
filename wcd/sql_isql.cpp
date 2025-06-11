@@ -2848,6 +2848,20 @@ ZEND_METHOD(Wcd_Sql_Bindings, wipe)
 	cobj->wipe(key);
 }
 
+ZEND_METHOD(Wcd_Sql_Bindings, select)
+{
+	zval* obj;
+	ZEND_PARSE_PARAMETERS_START(1,1)
+	Z_PARAM_OBJECT(obj)
+	ZEND_PARSE_PARAMETERS_END();
+
+	Bindings* cobj = zval_toc<Bindings>(ZEND_THIS);
+	zval_mgr result = cobj->select(obj);
+
+	result.move_zv(return_value);
+}
+
+
 #ifndef DB_ARGINFO_H
 #define DB_ARGINFO_H
 extern "C" {

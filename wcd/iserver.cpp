@@ -9,6 +9,13 @@
 #include "iconfig.h"
 #endif
 
+#ifndef ICONFIG_ARGINFO_H
+#define ICONFIG_ARGINFO_H
+extern "C" {
+#include "stub/iconfig_arginfo.h"
+}
+#endif
+
 namespace wcd {
 
 base_obj_mgr<IServer> IServer::omg;
@@ -285,6 +292,11 @@ IServer::setAlias(zstr_user alias, zstr_user name)
 
 };
 
+PHP_MINIT_FUNCTION(Wcd_IServer_reg)
+{
+	IServer::omg.classEntry(register_class_Wcd_IServer());
 
+	return SUCCESS;
+}
 
 #endif

@@ -64,7 +64,14 @@ using namespace zpp;
 
 	}
 
-	zval_mgrIBuild:: get(htab_read columns)
+	zval_mgr
+	IBuild::where(zval_user column, zstr_user operator, zval_user value, zstr_user bval)
+	{
+		
+	}
+
+	zval_mgr
+	IBuild::get(htab_read columns)
 	{
 
 	}

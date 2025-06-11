@@ -32,14 +32,32 @@ namespace wcd {
 
 	zend_class_entry* zintf_ce_IfCrud;
 
-	zval_mgr Model::createFromResult(zstr_user classname, htab_read results)
+	class Model_init : public state_init {
+	public:
+		Model_init() : state_init() {}
+
+		zstr_intern findfirst;
+		zstr_intern by_str;
+		zstr_intern and_str;
+
+		void init() override {
+			findfirst = "findfirst";
+			by_str = "by";
+			and_str = "AND";
+		}
+	}
+
+	Model_init MIS;
+
+	zval_mgr 
+	Model::createFromResult(zstr_user classname, htab_read results)
 	{
 		if (results.size()==0)
 		{
 			return htab_mgr::empty_array();
 		}
 
-		zobj_user model = Services::getOne(classname);
+		
 		Model* m = zobj_toc<Model>(model);
 
 		zval_mgr rmgr;
@@ -92,7 +110,8 @@ namespace wcd {
 		return builder_me_;
 	}
 
-	zobj_mgr 
+
+	zobj_mgr  
 	Model::byKeyValue(zval_user keynames, zval_user values)
 	{
 		zobj_mgr build = getBuilderForMe();
@@ -107,12 +126,71 @@ namespace wcd {
 		return bind.select(build);	
 	}
 
-	zobj_mgr 
-	Model::keyValue(zstr_user static_class, zval_user keynames, zval_user values)
+	Model* //static
+	Model::model_instance(zstr_user classname)
 	{
 		zobj_user model = Services::getOne(static_class);
 		Model* m = zobj_toc<Model>(model);
+
+		return m;
+	}
+
+	zobj_mgr //static
+	Model::keyValue(zstr_user static_class, zval_user keynames, zval_user values)
+	{
+		
+		Model* m = Model::model_instance(static_class);
 		return m->byKeyValue(keynames, values);
+	}
+
+	zobj_mgr 
+	Model::withValues(zstr_user static_class, zval_user keyvalues)
+	{
+		Model* m = Model::model_instance(static_class);
+
+		htab_mgr kv(keyvalues.zarray());
+
+		htab_mgr keynames = htab_mgr::getKeys(kv);
+		htab_mgr values = htab_mgr::getValues(kv);
+		zval_mgr keynames_mgr(keynames);
+		zval_mgr values_mgr(values);
+		return m->byKeyValue(keynames_mgr, values_mgr);
+	}
+
+	zval_mgr 
+	Model::callStatic(zstr_user static_name, zstr_user method, zval_user params)
+	{
+		zval_mgr result;
+
+		Model* m = Model::model_instance(static_name);
+		zobj_mgr build = m->getBuilderForMe();
+		IBuild* ib = zobj_toc<IBuild>(build);
+
+		zstr_mgr mlower = method.to_lower();
+		zstr_user nullstr;
+
+		if (mlower.starts_with(MIS.findfirst)) 
+		{
+			if (mlower.size()==9) 
+			{
+				
+				zval_mgr  nullval;
+
+				ib->where(params, nullstr, nullval, MIS.and_str);
+			}
+			else {
+				zstr_mgr bystr = mlower.substr(9);
+				if (bystr.starts_with(MIS.by_str))
+				{
+					zstr_mgr column = bystr.substr(2);
+					htab_read parray(params.zarray());
+
+					zval_mgr value = p.get((int)0);
+					ib->where(column, MIS.eq_str, value, nullstr);
+
+				}
+			}
+		}
 	}
 
 }; // namespace wcd
@@ -125,13 +203,28 @@ ZEND_METHOD(Wcd_Model, KeyValue)
 	zval* values;
 
 	ZEND_PARSE_PARAMETERS_START(2,2)
-	Z_PARAM_ARRAY(keynames);
-	Z_PARAM_ARRAY(values);
+	Z_PARAM_ARRAY(keynames)
+	Z_PARAM_ARRAY(values)
 	ZEND_PARSE_PARAMETERS_END();
 
 	zend_class_entry* static_class = zend_get_called_scope(execute_data);
 
 	zobj_mgr result = Model::keyValue(static_class->name, keynames, values);
+
+	result.move_zv(return_value);
+}
+
+ZEND_METHOD(Wcd_Model, WithValues)
+{
+	zval* values;
+
+	ZEND_PARSE_PARAMETERS_START(1,1)
+	Z_PARAM_ARRAY(values)
+	ZEND_PARSE_PARAMETERS_END();
+
+	zend_class_entry* static_class = zend_get_called_scope(execute_data);
+
+	zobj_mgr result = Model::withValues(static_class->name, values);
 
 	result.move_zv(return_value);
 }

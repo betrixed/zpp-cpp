@@ -311,6 +311,14 @@ PHP_MINIT(wcc_route_add)(INIT_FUNC_ARGS_PASSTHRU);
 	PHP_MINIT(Wcd_IDriver_reg)(INIT_FUNC_ARGS_PASSTHRU);
 #endif
 
+#ifdef WCD_ISERVER_CPP
+	PHP_MINIT(Wcd_IServer_reg)(INIT_FUNC_ARGS_PASSTHRU);
+#endif
+
+#ifdef WCD_ICONFIG_CPP
+	PHP_MINIT(Wcd_IConfig_reg)(INIT_FUNC_ARGS_PASSTHRU);
+#endif
+
 #ifdef WCD_IROW_CPP
 	PHP_MINIT(IRow_reg)(INIT_FUNC_ARGS_PASSTHRU);
 #endif

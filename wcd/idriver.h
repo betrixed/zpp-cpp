@@ -14,7 +14,7 @@ namespace wcd {
 	using namespace zpp;
 	using namespace wcc;
 
-	class IDriver : base_d {
+	class IDriver : public base_d {
 
 	public:
 		static base_obj_mgr<IDriver> omg;

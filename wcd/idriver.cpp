@@ -5,6 +5,12 @@
 #include "idriver.h"
 #endif
 
+#ifndef DB_ARGINFO_H
+#define DB_ARGINFO_H
+extern "C" {
+     #include "stub/db_arginfo.h"
+}
+#endif
 
 namespace wcd {
 

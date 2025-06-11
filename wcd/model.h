@@ -35,6 +35,7 @@ protected:
 	zobj_mgr builder_me_;
 
 
+
 public:
 
 	static base_obj_mgr<Model> omg;
@@ -48,11 +49,15 @@ public:
 
 	zobj_mgr newRow(htab_read rdata, bool isSaved = false);
 
+	static Model* model_instance(zstr_user classname);
+	
 	static zval_mgr createFromResult(zstr_user classname, htab_read results);
 	
 	static zobj_mgr keyValue(zstr_user static_name, zval_user keynames, zval_user values);
 
-	static zobj_mgr withValues(htab_read keyvalues);
+	static zobj_mgr withValues(zstr_user static_name, zval_user keyvalues);
+
+	static zval_mgr callStatic(zstr_user static_name, zstr_user method, zval_user params);
 
 	zobj_mgr byKeyValue(zval_user keynames, zval_user values);
 
