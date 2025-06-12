@@ -30,8 +30,11 @@ namespace wcd {
 
 		Bindings& bindings();
 
+		zval_mgr oneRow();
+		zval_mgr allRows();
+
 		zval_mgr first(htab_read columns);
-		zval_mgr where(zval_user column, zstr_user operator, zval_user value, zstr_user bval);
+		void where(zval_user column, zstr_user bop, zval_user value, zstr_user bval);
 
 	protected:
 

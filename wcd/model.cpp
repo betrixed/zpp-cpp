@@ -36,16 +36,20 @@ namespace wcd {
 	public:
 		Model_init() : state_init() {}
 
-		zstr_intern findfirst;
+		zstr_intern find_first;
+		zstr_intern find_all;
 		zstr_intern by_str;
 		zstr_intern and_str;
+		zstr_intern eq_str;
 
 		void init() override {
-			findfirst = "findfirst";
+			find_first = "findfirst";
+			find_all = "findall";
 			by_str = "by";
 			and_str = "AND";
+			eq_str = "=";
 		}
-	}
+	};
 
 	Model_init MIS;
 
@@ -57,8 +61,7 @@ namespace wcd {
 			return htab_mgr::empty_array();
 		}
 
-		
-		Model* m = zobj_toc<Model>(model);
+		Model* m = model_instance(classname);
 
 		zval_mgr rmgr;
 		htab_write r(rmgr);
@@ -66,6 +69,7 @@ namespace wcd {
 		htab_walk wk;
 
 		auto result = wk.value();
+
 
 		for(wk.start(results); wk.ok(); wk.next())
 		{
@@ -129,7 +133,7 @@ namespace wcd {
 	Model* //static
 	Model::model_instance(zstr_user classname)
 	{
-		zobj_user model = Services::getOne(static_class);
+		zobj_user model = Services::getOne(classname);
 		Model* m = zobj_toc<Model>(model);
 
 		return m;
@@ -160,7 +164,7 @@ namespace wcd {
 	zval_mgr 
 	Model::callStatic(zstr_user static_name, zstr_user method, zval_user params)
 	{
-		zval_mgr result;
+		htab_read  parray(params.zarray());
 
 		Model* m = Model::model_instance(static_name);
 		zobj_mgr build = m->getBuilderForMe();
@@ -168,29 +172,51 @@ namespace wcd {
 
 		zstr_mgr mlower = method.to_lower();
 		zstr_user nullstr;
-
-		if (mlower.starts_with(MIS.findfirst)) 
+		zval_mgr  nullval;
+		if (mlower.starts_with(MIS.find_first)) 
 		{
 			if (mlower.size()==9) 
 			{
 				
-				zval_mgr  nullval;
+				
 
 				ib->where(params, nullstr, nullval, MIS.and_str);
+				return ib->oneRow();
 			}
 			else {
 				zstr_mgr bystr = mlower.substr(9);
 				if (bystr.starts_with(MIS.by_str))
 				{
 					zstr_mgr column = bystr.substr(2);
-					htab_read parray(params.zarray());
 
-					zval_mgr value = p.get((int)0);
-					ib->where(column, MIS.eq_str, value, nullstr);
+					zval_mgr value = parray.get((int)0);
+					zval_mgr col_mgr(column);
+					ib->where(col_mgr, MIS.eq_str, value, nullstr);
+					return ib->oneRow();
 
 				}
 			}
 		}
+		else if (zs_cmp(mlower, MIS.find_all)==0)
+		{
+			if (parray.size())
+			{
+				ib->where(params, nullstr, nullval, MIS.and_str);
+				return ib->allRows();
+			}
+			zval_mgr   result = ib->allRows();
+
+			if (zval_user(result).isObject())
+			{
+				htab_mgr rows_mgr;
+				htab_write rows(rows_mgr);
+
+				rows.push_back(result);
+				result = rows_mgr;
+			}
+			return result;
+		}
+		return 
 	}
 
 }; // namespace wcd

@@ -316,3 +316,15 @@ class Bindings {
     public function select(object $prop) : mixed {}
 
 };
+
+class Raw {
+    public function __construct(string $sql, ?\Wcd\IfDriver $connect);
+
+    public function setConnection(\Wcd\IfDriver $db) : void {}
+
+    public function getConnection() : ?\Wcd\IfDriver  {}
+
+    public function getSql() : string {}
+
+    public function execute() : void {}
+};

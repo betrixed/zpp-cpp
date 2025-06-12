@@ -283,3 +283,5 @@ class Model implements IfCrud {
     public function updatedAtName() : string {}
 
 };
+
+

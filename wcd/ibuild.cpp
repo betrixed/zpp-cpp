@@ -60,14 +60,45 @@ using namespace zpp;
 		Bindings* bind = zobj_toc<Bindings>(bindings_);
 		bind->set(ISql::SQL_AGGREGATE, args_mgr);
 
-		ifetch_ = 
+		//ifetch_ = 
 
 	}
 
-	zval_mgr
+
+	void
 	IBuild::where(zval_user column, zstr_user operator, zval_user value, zstr_user bval)
 	{
+		Bindings& bind = bindings();
+
+		if (column.isString())
+		{
+			bind.where(column, operator, value, bval);
+		}
+		if (columns.isObject())
+		{
+
+		}
+		zend_throw_error(zend_ce_error, "Where column type not supported");
+		return;
 		
+	}
+
+	zval_mgr 
+	IBuild::oneRow()
+	{
+
+	}
+
+	zval_mgr 
+	IBuild::allRows()
+	{
+
+	}
+
+	zval_mgr 
+	IBuild::first(htab_read columns)
+	{
+
 	}
 
 	zval_mgr
