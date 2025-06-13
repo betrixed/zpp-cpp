@@ -199,6 +199,17 @@ zval_mgr::operator=(zval* rc)
     return *this;
 }
 
+const zval_mgr& 
+zval_mgr::operator=(const htab_mgr &rc)
+{
+    lose();
+    HashTable* ht = rc.ht_;
+    if (ht)
+    {
+        zval_user(&zv_).bind_array(ht);
+    }
+    return *this;
+}
 
  zval_mgr::zval_mgr(int value)
  {

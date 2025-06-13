@@ -51,6 +51,8 @@ public:
 
 	static Model* model_instance(zstr_user classname);
 	
+	static zstr_mgr classToTableName(zstr_user cname);
+
 	static zval_mgr createFromResult(zstr_user classname, htab_read results);
 	
 	static zobj_mgr keyValue(zstr_user static_name, zval_user keynames, zval_user values);
@@ -59,11 +61,15 @@ public:
 
 	static zval_mgr callStatic(zstr_user static_name, zstr_user method, zval_user params);
 
+	static zobj_mgr find(zstr_user static_name, zval_user id);
+
 	zobj_mgr byKeyValue(zval_user keynames, zval_user values);
 
 	zobj_mgr byPrimaryValue(zstr_user values);
 
 	zobj_mgr getConnect();
+
+	htab_mgr getPKey();
 
 };
 

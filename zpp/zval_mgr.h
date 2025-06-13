@@ -109,6 +109,8 @@ public:
 
     const zval_mgr& operator=(const zstr_user &rc);
 
+    const zval_mgr& operator=(const htab_mgr &rc);
+
     const zval_mgr& operator=(zend_long value);
 
     const zval_mgr& operator=(double value);

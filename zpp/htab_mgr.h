@@ -91,7 +91,11 @@ namespace zpp {
         // extract subset using keylist with removal from original hfrom
         static htab_mgr extract(htab_read exkeys, htab_write hfrom);
 
+        // extract subset using keylist without removal from original hfrom
         static htab_mgr subset(htab_read exkeys, htab_read hfrom, bool nullmiss = false);
+
+        // extract values list using keylist. Missing values as null
+        static htab_mgr sublist(htab_read exkeys, htab_read hfrom);
  
     };
 

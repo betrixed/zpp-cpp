@@ -352,12 +352,14 @@ fntable::init()
     s_preg_quote = "preg_quote";
     s_file_get_contents = "file_get_contents";
     s_pathinfo = "pathinfo";
-    
+    s_call_user_func_array = "call_user_func_array";
+
     extension_loaded.set_fname(s_extension_loaded);
     function_exists.set_fname(s_function_exists);
     preg_quote.set_fname(s_preg_quote);
     file_get_contents.set_fname(s_file_get_contents);
     pathinfo.set_fname(s_pathinfo);
+    call_user_func_array.set_fname(s_call_user_func_array);
 
 }
 
@@ -455,7 +457,9 @@ call_spread_fn(
     return callable_fn(result, callme, spread.arg_ct(), spread.arg_v());
 }
 
-
+FCall2::FCall2()
+{  
+}
 
 FCall2::FCall2(zstr_user func)
 {

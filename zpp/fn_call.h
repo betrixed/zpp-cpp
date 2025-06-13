@@ -129,6 +129,7 @@ namespace zpp {
             int offset = 0, size_t len = 0);
     };
 
+
     class PathInfo : public fn_call_args<2> 
     {
     public:
@@ -168,6 +169,14 @@ namespace zpp {
     zval_mgr json_decode(zstr_user str, bool asArray, int flags = 0);
 
 
+    class FCall2 : public fn_call_args<2>
+    {
+    public:
+        FCall2();
+
+        FCall2(zstr_user func);
+        zval_mgr call(zval* arg1, zval* arg2);
+    };
 
     /** 
      *  zend_string passed to set_fname
@@ -185,13 +194,14 @@ namespace zpp {
         zstr_intern  s_extension_loaded;
         zstr_intern  s_preg_quote;
         zstr_intern  s_pathinfo;
+        zstr_intern  s_call_user_func_array;
 
         extnloaded    extension_loaded;
         fnexists      function_exists;
         pregquote     preg_quote;
         file_content  file_get_contents;
         PathInfo      pathinfo;
-
+        FCall2        call_user_func_array;
         fn_call       get_called_class;
         
         virtual void init();
@@ -218,12 +228,7 @@ namespace zpp {
     };
 
 
-    class FCall2 : public fn_call_args<2>
-    {
-    public:
-        FCall2(zstr_user func);
-        zval_mgr call(zval* arg1, zval* arg2);
-    };
+
     
 
     extern fntable   FTAB;

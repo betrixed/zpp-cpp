@@ -79,6 +79,7 @@ extern "C" {
 #include "wcd/iconfig.cpp"
 #include "wcd/iserver.cpp"
 #include "wcd/idriver.cpp"
+#include "wcd/raw.cpp"
 
 #include "wcd/model.cpp"
 
@@ -322,6 +323,11 @@ PHP_MINIT(wcc_route_add)(INIT_FUNC_ARGS_PASSTHRU);
 #ifdef WCD_IROW_CPP
 	PHP_MINIT(IRow_reg)(INIT_FUNC_ARGS_PASSTHRU);
 #endif
+
+#ifdef WCD_SQL_RAW_CPP
+	PHP_MINIT(Sql_Raw_reg)(INIT_FUNC_ARGS_PASSTHRU);
+#endif
+
 	return SUCCESS;
 }
 

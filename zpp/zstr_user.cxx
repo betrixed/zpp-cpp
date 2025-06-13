@@ -271,6 +271,55 @@ zstr_user::find(char c, size_t pos) const
 	return -1;
 }
 
+zstr_mgr 
+zstr_user::uncamel(const char* sep) const
+{
+	zstr_mgr result;	
+	if (!s) {
+		return result;
+	}
+
+	zstr_buffer buf;
+
+	const char* marker;
+	const char* psep;
+	int   sep_len;
+
+	if (!sep)
+	{
+		sep = "_-";
+		sep_len = 2;
+	}
+	else {
+		sep_len = strlen(sep);
+	}
+
+	psep = sep;
+
+	int   i, len, found = 1;
+	char ch;
+
+	marker = ZSTR_VAL(s);
+	len    = ZSTR_LEN(s);
+
+	for (i = 0; i < len; i++) {
+		ch = marker[i];
+
+		if (memchr(psep, ch, sep_len)) {
+			found = 1;
+			continue;
+		}
+		if (found == 1) {
+			buf << toupper(ch);
+			found = 0;
+		} else {
+			buf << tolower(ch);
+		}
+	}
+	result = buf.zstr();
+	return result;
+}
+
 int 
 zstr_user::rfind(char c, size_t pos) const
 {

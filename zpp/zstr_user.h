@@ -80,6 +80,8 @@ namespace zpp {
 
 		zstr_mgr to_upper() const;
 
+		zstr_mgr uncamel(const char* sep = nullptr) const;
+
 		zstr_mgr trim(const char* what = (const char*) nullptr,
 		 				int mode = LRTRIM) const;
 

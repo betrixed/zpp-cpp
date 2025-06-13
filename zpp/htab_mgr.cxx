@@ -526,6 +526,36 @@ htab_mgr::subset(htab_read exkeys, htab_read hfrom, bool nullmiss)
 	return result;
 }
 
+/**
+ * get list of values found by exkeys in hfrom. 
+ * Null in list indicates not found.
+ */
+htab_mgr //static
+htab_mgr::sublist(htab_read exkeys, htab_read hfrom)
+{
+
+	htab_mgr result;
+
+	if (!hfrom.size())
+	{
+		return result;
+	}
+
+	htab_write vlist(result);
+	//showarray("exkeys", exkeys);
+
+	htab_walk wk;
+
+	auto exkey = wk.value();
+	for(wk.start(exkeys); wk.ok(); wk.next()) 
+	{
+
+		zval_user v2 = hfrom.get(exkey);
+		vlist.push_back(v2);
+	}
+	return result;
+}
+
 }; // namespace
 //htab_mgr.cpp
 #endif

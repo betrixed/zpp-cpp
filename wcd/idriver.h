@@ -71,6 +71,7 @@ namespace wcd {
 		zobj_mgr newDmlBuild();
 		zstr_mgr param(int pno);
 
+		
 		zval_mgr prepare(zstr_user query);
 		void  	 prepareExecute(zstr_user query, htab_read values, htab_read bindTypes);
 		zval_mgr  prepareQuery(zstr_user query, htab_read values, htab_read bindTypes);

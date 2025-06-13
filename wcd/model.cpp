@@ -41,6 +41,7 @@ namespace wcd {
 		zstr_intern by_str;
 		zstr_intern and_str;
 		zstr_intern eq_str;
+		zstr_intern u_model;
 
 		void init() override {
 			find_first = "findfirst";
@@ -48,6 +49,7 @@ namespace wcd {
 			by_str = "by";
 			and_str = "AND";
 			eq_str = "=";
+			u_model = "_model";
 		}
 	};
 
@@ -122,10 +124,7 @@ namespace wcd {
 		IBuild* ib = zobj_toc<IBuild>(build);
 		Bindings&  bind = ib->bindings();
 		bind.limit(1);
-		zval_mgr keys_mgr(keynames);
-		zval_mgr vals_mgr(values);
-
-		bind.whereKeyValue(keys_mgr, vals_mgr);
+		bind.whereKeyValue(keynames, values);
 		ib->columns_.init();
 		return bind.select(build);	
 	}
@@ -216,7 +215,83 @@ namespace wcd {
 			}
 			return result;
 		}
-		return 
+		zval_mgr obj_method;
+		htab_write arg1(obj_method);
+
+		arg1.push_back(build);
+		arg1.push_back(mlower);
+		
+		return FTAB.call_user_func_array.call(obj_method, params);
+	}
+
+	zstr_mgr 
+	Model::classToTableName(zstr_user class_name)
+	{
+		zstr_mgr result(class_name);
+		int ix = result.rfind('\\');
+
+		if (ix >= 0) {
+			result = result.substr(ix+1);
+		}
+
+		result = result.uncamel();
+
+		zstr_mgr rlower = result.to_lower();
+
+		ix = rlower.strpos(MIS.u_model);
+
+		if (ix >= 0)
+		{
+			result = result.substr(0, ix);
+		}
+		return result;
+	}
+
+	zobj_mgr //static 
+	Model::find(zstr_user static_name, zval_user id)
+	{
+		
+		zobj_mgr result;
+
+		Model* m = model_instance(static_name);
+		htab_mgr pkey = m->getPKey();
+		zval_mgr pkey_mgr(pkey);
+
+		if (!pkey.size())
+		{
+			zend_throw_error(zend_ce_error,"Model without Primary key columns");
+			return result;
+		}
+
+		if (id.isArray())
+		{
+			htab_read vlist(id.zarray());
+			zval_user test = vlist.get((int)0);
+			if (test.isNull()) {
+				htab_mgr v2 = htab_mgr::sublist(pkey, vlist);
+				zval_mgr arg2(v2);
+				return m->byKeyValue(pkey_mgr, arg2);
+			}
+			return m->byKeyValue(pkey_mgr,id);
+		}
+
+
+		zval_mgr vlist_tab;
+		htab_write vlist(vlist_tab);
+		vlist.push_back(id);
+
+		return m->byKeyValue(pkey_mgr, vlist_tab);
+	}
+
+	htab_mgr 
+	Model::getPKey()
+	{
+		if (class_pkey_.ok())
+		{
+			return class_pkey_;
+		}
+		class_pkey_ = htab_mgr::empty_array();
+		return class_pkey_;
 	}
 
 }; // namespace wcd
@@ -253,6 +328,65 @@ ZEND_METHOD(Wcd_Model, WithValues)
 	zobj_mgr result = Model::withValues(static_class->name, values);
 
 	result.move_zv(return_value);
+}
+
+ZEND_METHOD(Wcd_Model, __callStatic)
+{
+	zend_string* method;
+	zval*         params;
+
+	ZEND_PARSE_PARAMETERS_START(2,2)
+	Z_PARAM_STR(method)
+	Z_PARAM_ARRAY(params)
+	ZEND_PARSE_PARAMETERS_END();
+
+	zend_class_entry* static_class = zend_get_called_scope(execute_data);
+	zval_mgr result = Model::callStatic(static_class->name, method, params);
+	result.move_zv(return_value);
+
+}
+
+ZEND_METHOD(Wcd_Model, classToTableName)
+{
+	zend_string* cname;
+
+	ZEND_PARSE_PARAMETERS_START(1,1)
+	Z_PARAM_STR(cname)
+	ZEND_PARSE_PARAMETERS_END();
+
+	zstr_mgr result = Model::classToTableName(cname);
+
+	result.move_zv(return_value);
+}
+
+ZEND_METHOD(Wcd_Model, createFromResult)
+{
+	zend_string* cname;
+	zval* results;
+
+	ZEND_PARSE_PARAMETERS_START(2,2)
+	Z_PARAM_STR(cname)
+	Z_PARAM_ARRAY(results)
+	ZEND_PARSE_PARAMETERS_END();
+
+	zval_mgr result = Model::createFromResult(cname, results);
+
+	result.move_zv(return_value);	
+}
+
+ZEND_METHOD(Wcd_Model, find)
+{
+	zval* values;
+	ZEND_PARSE_PARAMETERS_START(1,1)
+	Z_PARAM_ARRAY(values)
+	ZEND_PARSE_PARAMETERS_END();
+
+	zend_class_entry* static_class = zend_get_called_scope(execute_data);
+
+	zobj_mgr result = Model::find(static_class->name, values);
+
+	result.move_zv(return_value);	
+
 }
 
 PHP_MINIT_FUNCTION(Wcd_Model_reg)
