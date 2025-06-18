@@ -83,6 +83,23 @@ using namespace zpp;
 		
 	}
 
+	zobj_mgr 
+	IBuild::getInsertSql(htab_read columns)
+	{
+		Bindings& bind = bindings();
+		bind.wipe(ISql::SQL_INSERT);
+
+		ParamList* params = zobj_toc<ParamList>(params_);
+		params->wipe();
+		bind.add(ISql::SQL_INSERT, columns);
+
+		ISql* isql = zobj_toc<ISql>(isql_);
+
+		return isql->insert(bind);
+
+	}
+
+
 	zval_mgr 
 	IBuild::oneRow()
 	{

@@ -63,6 +63,11 @@ public:
 
 	static zobj_mgr find(zstr_user static_name, zval_user id);
 
+	static zstr_mgr getTableName(zstr_user cname);
+
+	static int importFromCSV(zstr_user static_name, zstr_user filename);
+
+
 	zobj_mgr byKeyValue(zval_user keynames, zval_user values);
 
 	zobj_mgr byPrimaryValue(zstr_user values);
@@ -70,6 +75,19 @@ public:
 	zobj_mgr getConnect();
 
 	htab_mgr getPKey();
+
+	zstr_mgr getName();
+
+	htab_mgr getColDefs();
+
+	htab_mgr getSeqDefs();
+
+	zobj_mgr getTableDef();
+
+	void sequenceMax();
+
+
+
 
 };
 

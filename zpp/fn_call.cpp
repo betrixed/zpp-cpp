@@ -84,7 +84,11 @@ fn_call::call5(zval *arg0, zval* arg1, zval* arg2, zval* arg3, zval* arg4)
 */
 
 
-
+void 
+fn_call::set_named_args(HashTable* nargs)
+{
+    fci_.named_params = nargs; 
+}
 /** reset this from the constructor information */
 void 
 fn_call::set_fci(zend_object* obj, zstr_user method, HashTable* nargs)
@@ -160,6 +164,37 @@ pregquote::call(zstr_user str, zstr_user delimiter)
 
     zval_mgr result = call_fn();
     return zstr_mgr(zval_user(result).zstr());
+}
+
+bool 
+fn_fclose::call(zval_user fres)
+{
+    ZVAL_COPY_VALUE(argsptr(), fres);
+    zval_mgr result = call_fn();
+    return zval_user(result).isTrue();
+}
+
+
+zval_mgr 
+fn_fopen::call(zstr_user path, zstr_user mode)
+{
+    zval* pz = argsptr();
+
+    ZVAL_STR(pz, (zend_string*) path);
+    ZVAL_STR(pz+1, (zend_string*) mode);
+    return call_fn();
+}
+
+fn_stripslashes::fn_stripslashes() : fn_call_args<1>()
+{
+    set_fname(STAB.stripslashes);
+}
+
+zstr_mgr 
+fn_stripslashes::call(zstr_user str)
+{
+    ZVAL_STR(argsptr(), str);
+    return zstr_mgr(call_fn());
 }
 
 zstr_mgr 
@@ -253,7 +288,10 @@ bool extension_loaded(zstr_user name)
     return FTAB.extension_loaded.call(name);
 }
 
-
+fn_fgetcsv::fn_fgetcsv() : fn_call_args<1>()
+{
+    set_fname(FTAB.s_fgetcsv);
+}
 
 bool extnloaded::call(zstr_user name)
 {
@@ -353,13 +391,21 @@ fntable::init()
     s_file_get_contents = "file_get_contents";
     s_pathinfo = "pathinfo";
     s_call_user_func_array = "call_user_func_array";
+    s_fgetcsv = "fgetcsv";
+    s_fopen = "fopen";
+    s_fclose = "fclose";
 
     extension_loaded.set_fname(s_extension_loaded);
     function_exists.set_fname(s_function_exists);
     preg_quote.set_fname(s_preg_quote);
     file_get_contents.set_fname(s_file_get_contents);
     pathinfo.set_fname(s_pathinfo);
+    fopen.set_fname(s_fopen);
+    fclose.set_fname(s_fclose);
+
     call_user_func_array.set_fname(s_call_user_func_array);
+
+    //fgetcsv.set_fname(s_fgetcsv);
 
 }
 
@@ -378,6 +424,7 @@ strtable::init()
     rawurlencode = "rawurlencode";
     strtr = "strtr";
     ucwords = "ucwords";
+    stripslashes = "stripslashes"; 
 
 
 
@@ -416,6 +463,7 @@ args_spread::~args_spread()
         efree(argv_);
     }
 }
+
 
 
 bool callable_fn(

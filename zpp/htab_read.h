@@ -94,7 +94,7 @@ namespace zpp {
         zstr_mgr print_kv(const char* label) const;
 
  
-        
+        htab_mgr slice(int offset, int length, bool preserve_keys = false);
         /**
          * Replace string segments like @valkey with
          * the text values associated with key "valkey"

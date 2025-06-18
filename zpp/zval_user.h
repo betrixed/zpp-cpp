@@ -119,6 +119,8 @@ public:
     
     bool isCallable() const;
 
+    bool isResource() const;
+
 
     /** zend_object* methods */
 

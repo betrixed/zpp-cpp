@@ -93,6 +93,10 @@ zval_user::isArray() const
     return (p_ && (ref_type() == IS_ARRAY));
 }
 
+ bool zval_user::isResource() const
+ {
+ 	return (p_ && (ref_type() == IS_RESOURCE));
+ }
 
 bool 
 zval_user::isNull() const

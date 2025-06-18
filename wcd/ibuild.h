@@ -36,6 +36,9 @@ namespace wcd {
 		zval_mgr first(htab_read columns);
 		void where(zval_user column, zstr_user bop, zval_user value, zstr_user bval);
 
+		zobj_mgr getInsertSql(htab_read columns);
+		
+
 	protected:
 
 		zobj_mgr driver_;

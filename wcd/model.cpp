@@ -28,6 +28,8 @@ extern "C" {
 }
 #endif
 
+#include <filesystem>
+
 namespace wcd {
 
 	zend_class_entry* zintf_ce_IfCrud;
@@ -42,6 +44,9 @@ namespace wcd {
 		zstr_intern and_str;
 		zstr_intern eq_str;
 		zstr_intern u_model;
+		zstr_intern r_arg;
+		zstr_intern escape_key;
+		zstr_intern escape_str;
 
 		void init() override {
 			find_first = "findfirst";
@@ -50,6 +55,10 @@ namespace wcd {
 			and_str = "AND";
 			eq_str = "=";
 			u_model = "_model";
+			r_arg = "r";
+			escape_key = "escape";
+			escape_str = "\\";
+
 		}
 	};
 
@@ -224,6 +233,12 @@ namespace wcd {
 		return FTAB.call_user_func_array.call(obj_method, params);
 	}
 
+	zstr_mgr //static
+	Model::getTableName(zstr_user cname)
+	{
+		return Model::classToTableName(cname);
+	}
+
 	zstr_mgr 
 	Model::classToTableName(zstr_user class_name)
 	{
@@ -283,6 +298,26 @@ namespace wcd {
 		return m->byKeyValue(pkey_mgr, vlist_tab);
 	}
 
+
+	htab_mgr Model::getColDefs()
+	{
+		if (class_cdefs_.ok())
+		{
+			return class_cdefs_;
+		}
+	}
+
+	zstr_mgr Model::getName()
+	{
+		if (name_.ok())
+		{
+			return name_;
+		}
+
+		name_ = Model::classToTableName(vobj()->ce->name);
+		return name_;
+	}
+
 	htab_mgr 
 	Model::getPKey()
 	{
@@ -292,6 +327,159 @@ namespace wcd {
 		}
 		class_pkey_ = htab_mgr::empty_array();
 		return class_pkey_;
+	}
+
+	int // static
+	Model::importFromCSV(zstr_user static_name, zstr_user filename)
+	{
+		if (! std::filesystem::exists(filename.vstr()) )
+		{
+			return 0;
+		}
+
+		int datarowct = -1;
+
+		Model* m = model_instance(static_name);
+
+		zstr_mgr tableName = m->getName();
+
+		zobj_mgr db = m->getConnect();
+		IDriver* driver = zobj_toc<IDriver>(db);
+
+		htab_mgr columns = m->getColDefs();
+		htab_mgr fieldNames;
+
+		bool init = false;
+		unsigned int  colcount = 0;
+
+		zobj_mgr builder = m->getBuilderForMe();
+
+		zval_mgr import_mgr = FTAB.fopen.call(filename, MIS.r_arg);
+
+		zval_user import(import_mgr);
+
+		if (import.isResource())
+		{
+			htab_mgr csv_args;
+			htab_write csv(csv_args);
+			csv.set(MIS.escape_key, MIS.escape_str);
+
+			fn_fgetcsv fgetcsv;
+			fgetcsv.set_named_args(csv_args);
+
+			fn_stripslashes stripslashes;
+			zval_mgr stmt;
+
+			while(true)
+			{
+				zval_mgr line_mgr = fgetcsv.call(import);
+				zval_user line(line_mgr); 
+				zstr_mgr  cellstr;
+
+				if (line.isFalse())
+				{
+					break;
+				}
+
+				htab_mgr values_mgr;
+
+				htab_write values(line.zarray());
+				htab_walk sw;
+
+				auto item = sw.value();
+				auto ix = sw.key();
+
+				for(sw.start(line.zarray()); sw.ok(); sw.next())
+				{
+					cellstr = stripslashes.call(item);
+					values.push_back(cellstr);
+				}
+
+				if (!init)
+				{
+					driver->begin();
+					auto values_count = values.size();
+					if (values_count) {
+						colcount = 0;
+						htab_walk wk;
+						auto vname = wk.value();
+						for(wk.start(values); wk.ok(); wk.next())
+						{
+							zval_user col = columns.get(vname);
+							if (!col.isNull()) {
+								colcount += 1;
+							}
+						}
+						if (colcount == values_count) {
+							fieldNames = values;
+						}
+					}
+					if (! fieldNames.size())
+					{
+						fieldNames = columns.slice(0, values_count);
+						datarowct = 0;
+
+					}
+					init = true;
+				}
+				if (datarowct == 0) {
+					//  prepaire for multi inserts
+					htab_mgr columns_mgr;
+					htab_write columns(columns_mgr);
+
+					for(sw.start(values); sw.ok(); sw.next())
+					{
+						zstr_mgr colname = fieldNames.get(ix);
+						columns.set(colname, item);
+					}
+					IBuild* ib = zobj_toc<IBuild>(builder);
+
+					zobj_mgr plist_mgr = ib->getInsertSql(columns_mgr);
+					ParamList* plist = zobj_toc<ParamList>(plist_mgr);
+					zstr_mgr sql = plist->getSql();
+					htab_mgr record = plist->getValues();
+
+					zval_mgr stmt = driver->prepare(sql);
+
+					driver->bind(stmt, record);
+				}
+				else if (datarowct > 0) {
+					driver->bind(stmt, values);
+				}
+				driver->execute(stmt, false, false);
+				datarowct += 1;
+			}
+
+			driver->closeStmt(stmt);
+
+			FTAB.fclose.call(import);
+
+			htab_mgr seq_defs = m->getSeqDefs();
+
+			if (seq_defs.size())
+			{
+				m->sequenceMax();
+			}
+
+			driver->commit();
+
+		}
+		return datarowct;
+	}
+
+	zobj_mgr 
+	Model::getTableDef()
+	{
+		if (class_tdef_.ok())
+		{
+			return class_tdef_;
+		}
+
+		zobj_mgr driver = getConnect();
+
+		IDriver* db = zobj_toc<IDriver>(driver);
+
+		zobj_mgr schema = db->getSchema();
 	}
 
 }; // namespace wcd
@@ -387,6 +575,16 @@ ZEND_METHOD(Wcd_Model, find)
 
 	result.move_zv(return_value);	
 
+}
+
+ZEND_METHOD(Wcd_Model, getTableName)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	zend_class_entry* static_class = zend_get_called_scope(execute_data);
+
+	zstr_mgr result = Model::getTableName(static_class->name);
+	result.move_zv(return_value);	
 }
 
 PHP_MINIT_FUNCTION(Wcd_Model_reg)

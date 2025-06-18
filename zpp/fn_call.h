@@ -73,6 +73,7 @@ namespace zpp {
         void set_fci(zend_object* obj , zstr_user method, HashTable* nargs = nullptr);
         
         void set_fname(zstr_user name);
+        void set_named_args(HashTable* nargs);
 
         void wipe() const
         {
@@ -129,6 +130,27 @@ namespace zpp {
             int offset = 0, size_t len = 0);
     };
 
+    class fn_fopen : public fn_call_args<2> {
+    public:
+        zval_mgr call(zstr_user path, zstr_user modestr);
+    };
+
+    class fn_fclose : public fn_call_args<1> {
+    public:
+        bool call(zval_user fres);
+    };
+
+    class fn_fgetcsv : public fn_call_args<1> {
+    public:
+        fn_fgetcsv();
+        zval_mgr call(zval_user file_res);
+    };
+
+    class fn_stripslashes : public fn_call_args<1> {
+    public:
+        fn_stripslashes();
+        zstr_mgr call(zstr_user name);
+    };
 
     class PathInfo : public fn_call_args<2> 
     {
@@ -144,15 +166,17 @@ namespace zpp {
         zval_mgr call(zstr_user path, int flags);
     };
 
-    class extnloaded : public fn_call_args<1> {
-    public:
-        bool call(zstr_user name);
-    };
-
     class fnexists : public fn_call_args<1> {
     public:
         bool call(zstr_user name);
     }; 
+
+   
+
+    class extnloaded : public fn_call_args<1> {
+    public:
+        bool call(zstr_user name);
+    };
 
     class pregquote : public fn_call_args<2> {
     public:
@@ -195,11 +219,17 @@ namespace zpp {
         zstr_intern  s_preg_quote;
         zstr_intern  s_pathinfo;
         zstr_intern  s_call_user_func_array;
+        zstr_intern  s_fgetcsv;
+        zstr_intern  s_fopen;
+        zstr_intern  s_fclose;
 
         extnloaded    extension_loaded;
         fnexists      function_exists;
         pregquote     preg_quote;
         file_content  file_get_contents;
+        fn_fopen      fopen;
+        fn_fclose      fclose;
+
         PathInfo      pathinfo;
         FCall2        call_user_func_array;
         fn_call       get_called_class;
@@ -222,6 +252,7 @@ namespace zpp {
         zstr_intern  rawurlencode;
         zstr_intern  strtr;
         zstr_intern  ucwords;
+        zstr_intern  stripslashes;
 
         
         virtual void init();

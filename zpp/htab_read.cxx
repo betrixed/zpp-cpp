@@ -351,7 +351,71 @@ bool htab_read::try_fetch(zend_string* key, zval_user& store) const
 	return false;
 }
 
+htab_mgr 
+htab_read::slice(int offset, int length, bool preserve_keys)
+{
+	htab_mgr result_mgr;
+	htab_write hw(result_mgr);
 
+	auto src_len = size();
+
+	if (offset < 0) {
+		offset = src_len + offset;
+	}
+
+	unsigned int pstart = offset;
+	if (length == 0)
+	{
+		length = src_len;
+	}
+	else if (length < 0) 
+	{
+		length = -length;
+		if ((unsigned int) length < src_len)
+		{
+			src_len -= length;
+		}
+	}
+	else {
+		src_len = length;
+	}
+
+	if ((unsigned int)offset > src_len)
+	{
+		return htab_mgr::empty_array();
+	}
+
+	htab_walk wk;
+	unsigned int pos = 0;
+	auto key = wk.key();
+	auto value = wk.value();
+
+	zval_mgr new_key;
+
+	for(wk.start(ht_); wk.ok(); wk.next(), pos++)
+	{
+
+	  if ((pos >= pstart) && (pos < src_len))
+	  {
+	  	int newpos = pos - pstart;
+	  	if (key.isLong())
+	  	{
+	  		if (preserve_keys)
+	  		{
+	  			new_key = key;
+	  		}
+	  		else {
+	  			new_key = (zend_long) newpos;	
+	  		}
+	  	}
+	  	else {
+			new_key = key;
+	  	}
+	  	hw.set(new_key, value);
+	  }	
+	}
+	return result_mgr;
+}
 
 void htab_read::return_zv(zval* return_value) const
 {
