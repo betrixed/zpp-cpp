@@ -12,6 +12,13 @@ extern "C" {
 }
 #endif
 
+#ifndef ICACHE_H
+#include "wcc/icache.h"
+#endif
+
+#ifndef WCC_SERVICES_H
+#include "wcc/services.h"
+#endif
 
 namespace wcd {
 
@@ -65,6 +72,40 @@ IDriver::newDmlBuild()
 {
 	IConfig* cfg = iconfig();
 	return cfg->newDmlBuild(this->vobj());
+}
+
+zobj_mgr 
+IDriver::getSchema()
+{
+	
+	ICache*  cache = nullptr;
+	zstr_mgr name;
+
+	if (schema_def_.ok())
+	{
+		return schema_def_;
+	}
+	zobj_user server_mgr = Services::getOne(IServer::omg.class_name());
+	IServer* isv = zobj_toc<IServer>(server_mgr);
+	zobj_mgr cache_mgr = isv->getDataCache();
+	if (cache_mgr.ok())
+	{
+		cache = zobj_toc<ICache>(cache_mgr);
+		name = iconfig()->getDatabase();
+		schema_def_ = cache->get(name); 
+	}
+	if (!schema_def_.ok())
+	{
+		schema_def_ = readSchema();
+		if (cache)
+		{
+			zval_mgr data(schema_def_);
+			cache->set(name, data);
+		}
+	}
+	return schema_def_;
+
+
 }
 
 zval_mgr 

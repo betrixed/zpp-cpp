@@ -44,7 +44,9 @@ public:
 	zstr_intern  sqls_key;
 	zstr_intern  drivers_key;
 	zstr_intern  db_config;
-
+	zstr_intern  cache_all;
+	zstr_intern  sql_cache;
+	zstr_intern  get_cache;
 
 	void init() override {
 
@@ -68,6 +70,10 @@ public:
 		sqls_key = "sqls";
 		drivers_key = "drivers";
 		db_config = "db-config";
+		cache_all = "cache_all";
+		sql_cache = "sql_cache";
+		get_cache = "getcache";
+
 	}
 };
 
@@ -102,6 +108,13 @@ IServer::initDone()
 zobj_mgr 
 IServer::getDataCache()
 {
+	if (dbCache_.ok())
+	{
+		return dbCache_;
+	}
+	zobj_mgr cache_all = Services::service(ISV.cache_all);
+	zval_mgr arg1(ISV.sql_cache);
+	dbCache_ = cache_all.call(ISV.get_cache, arg1);
 	return dbCache_;
 }
 

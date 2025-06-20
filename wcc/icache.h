@@ -40,7 +40,7 @@ public:
 
 	bool deleteMultiple(htab_read keys);
 
-	zval_mgr get(zstr_user key, zval_user noval);
+	zval_mgr get(zstr_user key, zval_user noval = zval_user());
 
 	zval_mgr getCached(zstr_user key);
 
@@ -65,11 +65,11 @@ public:
 
 	void setOption(zstr_user key, zval_user value);
 	
-	bool set(zstr_user key, zval_user data, zend_long ttl);
+	bool set(zstr_user key, zval_user data, zend_long ttl = 0);
 
-	zobj_mgr setCached(zstr_user key, zval_user data, zend_long ttl);
+	zobj_mgr setCached(zstr_user key, zval_user data, zend_long ttl = 0);
 
-	bool setMultiple(zval_user values, zend_long ttl);
+	bool setMultiple(zval_user values, zend_long ttl = 0);
 
 	void setServices(zval_user svc);
 

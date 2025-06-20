@@ -84,6 +84,10 @@ public:
 
 	zobj_mgr getTableDef();
 
+	zstr_mgr createAtName();
+
+	zstr_mgr updatedAtName();
+	
 	void sequenceMax();
 
 

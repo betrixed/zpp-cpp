@@ -47,6 +47,11 @@ namespace wcd {
 		zstr_intern r_arg;
 		zstr_intern escape_key;
 		zstr_intern escape_str;
+		zstr_intern gettables;
+		zstr_intern columns_str;
+		zstr_intern m_updated_at;
+		zstr_intern m_created_at;
+		zstr_intern m_datetime_type;
 
 		void init() override {
 			find_first = "findfirst";
@@ -58,7 +63,11 @@ namespace wcd {
 			r_arg = "r";
 			escape_key = "escape";
 			escape_str = "\\";
-
+			get_tables = "gettables";
+			columns_str = "columns";
+			m_updated_at = "updatedatname";
+			m_created_at = "createdatname";
+			m_datetime_type = "getdatetimetype";
 		}
 	};
 
@@ -305,6 +314,8 @@ namespace wcd {
 		{
 			return class_cdefs_;
 		}
+
+		zobj_mgr tabledef_mgr = getTableDef();
 	}
 
 	zstr_mgr Model::getName()
@@ -480,6 +491,61 @@ namespace wcd {
 		IDriver* db = zobj_toc<IDriver>(driver);
 
 		zobj_mgr schema = db->getSchema();
+
+		htab_mgr tables = schema.call(MIS.get_tables);
+
+		zstr_mgr name = getName();
+
+		class_tdef_ = tables.get(name);
+
+		htab_mgr columns = class_tdef_.property(MIS.columns_str);
+
+		htab_mgr tsf_mgr;
+		htab_write tsf(tsf_mgr);
+
+		zobj_mgr self = vobj();
+
+		zstr_mgr ts_update = self.call(MIS.m_updated_at);
+		zstr_mgr ts_create = self.call(MIS.m_created_at);
+
+		if (ts_update.size()) {
+			tsf.set(ts_update, zend_long(1));
+		}
+		if (ts_create.size()) {
+			tsf.set(ts_create, zend_long(2));
+		}
+
+		zstr_mgr stamp_type = tabledef_mgr.call(MIS.m_datetime_type);
+		timestamps_ = 0;
+
+		if (stamp_type.ok())
+		{
+			htab_walk wk;
+			auto cdef_mgr = wk.value();
+			for(wk.start(columns); wk.ok(); wk.next())
+			{
+				zobj_mgr cdef = cdef_mgr.zobject();
+				zval_mgr ftype = cdef.property(MIS.type_str);
+				zval_mgr fname = cdef.property(MIS.name_str);
+
+				if (ftype.isString() && zs_cmp_ci(ftype.zstr(),stamp_type)==0)
+				{
+				   zval_user test = tsf.get(fname.zstr());
+				   switch(test.zlong())
+				   {
+				   case 1:
+				   	timestamps_ |= UPDATE_TS;
+				     break;
+				   case 2:
+				   	timestamps_ |= CREATE_TS;
+				     break;
+				   default:
+				   	break;
+				   }	
+				}
+			}
+		}
+		return class_tdef_;
 	}
 
 }; // namespace wcd

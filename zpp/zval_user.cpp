@@ -111,26 +111,6 @@ zval_user::isObject() const
 }
 
 
-bool 
-zval_user::ok() const {
-	if (!p_)
-		return false;
-	zval* rp = zval_user::real_zval(p_);
-	int rtype = Z_TYPE_P(rp);
-    if (rtype < IS_TRUE)
-    {
-    	return false;
-    }
-    switch(rtype)
-    {
-    case IS_ARRAY:
-    	return htab_read(Z_ARR_P(rp)).size() ? true : false;
-    case IS_STRING:
-    	return zstr_user(Z_STR_P(rp)).size() ? true : false;
-    }
-    // Don't care about zero LONG or DOUBLE
-    return true;
-}
 
 bool 
 zval_user::isString() const
@@ -154,6 +134,28 @@ bool
 zval_user::isPointer() const
 {
     return (p_ && (ref_type() == IS_PTR));
+}
+
+
+bool 
+zval_user::ok() const {
+	if (!p_)
+		return false;
+	zval* rp = zval_user::real_zval(p_);
+	int rtype = Z_TYPE_P(rp);
+    if (rtype < IS_TRUE)
+    {
+    	return false;
+    }
+    switch(rtype)
+    {
+    case IS_ARRAY:
+    	return htab_read(Z_ARR_P(rp)).size() ? true : false;
+    case IS_STRING:
+    	return zstr_user(Z_STR_P(rp)).size() ? true : false;
+    }
+    // Don't care about zero LONG or DOUBLE
+    return true;
 }
 
 zend_string* 

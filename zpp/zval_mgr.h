@@ -127,6 +127,68 @@ public:
 
     void move_zv(zval* ret);
     void return_zv(zval* ret);
+
+    zend_string* zstr() const;
+
+    int   ref_type() const;
+    
+    // inlines
+
+    int   ztype() const {
+        return ZTYPE(zv_);
+    }
+
+    bool isDouble() const
+    {
+        return (ref_type() == IS_DOUBLE);
+    }
+
+    bool isLong() const
+    {
+        return (ref_type() == IS_LONG);
+    }
+
+    bool isArray() const
+    {
+        return (ref_type() == IS_ARRAY);
+    }
+
+    bool isResource() const
+    {
+        return (ref_type() == IS_RESOURCE);
+    }
+
+    bool isNull() const
+    {
+        return (ref_type() == IS_NULL);
+    }
+
+    bool isObject() const
+    { 
+        return (ref_type() == IS_OBJECT);
+    }
+
+    bool isString() const
+    {
+        return (ref_type() == IS_STRING);
+    }
+
+    bool isTrue() const 
+    {
+        return (ref_type() == IS_TRUE);
+    }
+
+    bool isFalse() const 
+    {
+        return (ref_type() == IS_FALSE);
+    }
+
+    bool isPointer() const
+    {
+        return (ref_type() == IS_PTR);
+    }
+
+   
 };
 
 }; // namespace Php

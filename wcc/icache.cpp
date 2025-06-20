@@ -355,13 +355,12 @@ ICache::setOption(zstr_user key, zval_user value)
 bool 
 ICache::set(zstr_user key, zval_user data, zend_long ttl)
 {
-	zobj_mgr icd = ICacheData::new_ICacheData(key, data, ttl);
-	htab_write(cached_).set(key, icd);
-
-	return true;
+	zobj_mgr icd = setCached(key, data, ttl);
+	return icd.ok();
 }
 
 
+// returns the ICacheData object
 zobj_mgr
 ICache::setCached(zstr_user key, zval_user data, zend_long ttl)
 {

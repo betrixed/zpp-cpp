@@ -38,6 +38,12 @@ zval_mgr::init()
     ZVAL_NULL(&zv_);
 }
 
+int   
+zval_mgr::ref_type() const
+{
+    return Z_TYPE_P(zval_user::real_zval(&zv_));
+}
+
 void 
 zval_mgr::make_ref()
 {
@@ -61,6 +67,12 @@ zval_mgr::~zval_mgr()
     zval_mgr::try_decref(&zv_);
 }
 
+
+zend_string* 
+zval_mgr::zstr()
+{
+    return zval_user(&zv_).zstr();
+}
 
 void 
 zval_mgr::new_array()
