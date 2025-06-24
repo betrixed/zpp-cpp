@@ -21,6 +21,10 @@
 #include "sql_isql.h"
 #endif
 
+#ifndef WCD_IROW_H
+#include "irow.h"
+#endif
+
 #ifndef DB_ARGINFO_H
 #define DB_ARGINFO_H
 extern "C" {
@@ -47,11 +51,14 @@ namespace wcd {
 		zstr_intern r_arg;
 		zstr_intern escape_key;
 		zstr_intern escape_str;
-		zstr_intern gettables;
+		zstr_intern get_tables;
 		zstr_intern columns_str;
 		zstr_intern m_updated_at;
 		zstr_intern m_created_at;
 		zstr_intern m_datetime_type;
+		zstr_intern type_str;
+		zstr_intern name_str;
+		zstr_intern returns_key;
 
 		void init() override {
 			find_first = "findfirst";
@@ -68,6 +75,9 @@ namespace wcd {
 			m_updated_at = "updatedatname";
 			m_created_at = "createdatname";
 			m_datetime_type = "getdatetimetype";
+			type_str = "type";
+			name_str = "name";
+			returns_key = "_ret";
 		}
 	};
 
@@ -93,11 +103,40 @@ namespace wcd {
 
 		for(wk.start(results); wk.ok(); wk.next())
 		{
-			r.push_back(m->newRow(result.zarray(), true));
+			r.push_back(m->newRow(result, true));
 		}
 
 		return rmgr;
 
+	}
+
+	zobj_mgr
+	Model::newRow(zval_user data, bool isSaved)
+	{
+		zobj_mgr result = IRow::omg.new_zobj();
+
+		IRow* irow = zobj_toc<IRow>(result);
+
+		irow->construct(vobj(), data, isSaved);
+
+		return result;
+	}
+
+	zobj_mgr//static
+	Model::row(zstr_user static_name, zval_user data)
+	{
+		Model* m = model_instance(static_name);
+		return m->newRow(data);
+	}
+
+	zobj_mgr//static
+	Model::rowSaved(zstr_user static_name, zval_user data)
+	{
+		Model* m = model_instance(static_name);
+		zobj_mgr rec = m->newRow(data);
+		IRow* irow = zobj_toc<IRow>(rec);
+		irow->create();
+		return rec;
 	}
 
 	zobj_mgr 
@@ -134,6 +173,12 @@ namespace wcd {
 		return builder_me_;
 	}
 
+	zobj_mgr
+	Model::modelBuild(zstr_user classname)
+	{
+		Model* m = model_instance(classname);
+		return m->getBuilderForMe();
+	}
 
 	zobj_mgr  
 	Model::byKeyValue(zval_user keynames, zval_user values)
@@ -316,6 +361,12 @@ namespace wcd {
 		}
 
 		zobj_mgr tabledef_mgr = getTableDef();
+
+		if (tabledef_mgr.ok())
+		{
+			class_cdefs_ = tabledef_mgr.property(MIS.columns_str);
+		}
+		return class_cdefs_;
 	}
 
 	zstr_mgr Model::getName()
@@ -509,13 +560,13 @@ namespace wcd {
 		zstr_mgr ts_create = self.call(MIS.m_created_at);
 
 		if (ts_update.size()) {
-			tsf.set(ts_update, zend_long(1));
+			tsf.set(ts_update, int(1));
 		}
 		if (ts_create.size()) {
-			tsf.set(ts_create, zend_long(2));
+			tsf.set(ts_create, int(2));
 		}
 
-		zstr_mgr stamp_type = tabledef_mgr.call(MIS.m_datetime_type);
+		zstr_mgr stamp_type = class_tdef_.call(MIS.m_datetime_type);
 		timestamps_ = 0;
 
 		if (stamp_type.ok())
@@ -546,6 +597,125 @@ namespace wcd {
 			}
 		}
 		return class_tdef_;
+	}
+
+	bool 
+	Model::save(zobj_user row_obj, bool reload)
+	{
+		if (!row_obj.ok())
+		{
+			return false;
+		}
+		IRow* irow = zobj_toc<IRow>(row_obj);
+
+		htab_mgr dirty = irow->getDirty();
+		bool wasRead = irow->exists();
+
+		zobj_mgr builder = getBuilderForMe();
+		IBuild* ibuild = zobj_toc<IBuild>(builder);
+
+		if (wasRead && (dirty.size()==0) )
+		{
+			return true;
+		}
+
+		zval_mgr pkey_mgr(getPKey());
+		htab_read pkey(pkey_mgr);
+		zval_mgr saved;
+
+		if (wasRead) {
+			// update operation
+			if (pkey.size() == 0)
+			{
+				zend_throw_error(zend_ce_error, "Update table needs a primary key");
+				return false;
+			}
+
+			htab_mgr id = irow->getDataValues(pkey_mgr);
+
+			if (id.size() == 0)
+			{
+				zend_throw_error(zend_ce_error, "Save record needs primary key values");
+				return false;
+			}
+
+			
+
+			ibuild->whereKeyValue(pkey, id);
+			saved = ibuild->update(irow, dirty);
+		}
+		else {
+			// insert operation
+			htab_read
+			data = irow->reader();
+			htab_read options = getKeyOptions();
+
+			htab_mgr pkey_refresh_mgr;
+			htab_write pkey_refresh(pkey_refresh_mgr);
+
+			htab_walk wk;
+			auto pname = wk.value();
+
+			for(wk.start(pkey); wk.ok(); wk.next())
+			{
+				
+
+				zval_user data_value = data.get(pname);
+
+				if (data_value.isNull()) 
+				{
+					zval_user pkey_options = options.get(pname);
+					if (pkey_options.isArray()) {
+						htab_read pkoption(pkey_options.zarray());
+
+						zval_user option_key = pkoption.get(MIS.returns_key);
+						int option = option_key.zlong();
+						switch(option)
+						{
+						case Crud::ID_SET:
+						case Crud::LAST_ID:
+						case Crud::ID_GEN:
+						case Crud::LAST_SEQ:
+							ibuild->setReturns(pkey);
+							pkey_refresh.set(pname, pkey_options);
+							break;
+						default:	
+							break;
+						}
+					}
+				}
+			}
+
+			saved = ibuild->insert(irow);
+
+			if (saved.isArray() && (pkey_refresh_mgr.size() > 0))
+			{
+				auto pkey_options = wk.value();
+				htab_read values(saved.zarray());
+
+				for(wk.start(pkey_refresh_mgr); wk.ok(); wk.next())
+				{
+					if (pkey_options.isArray()) {
+						htab_read pkoption(pkey_options.zarray());
+						zval_user option_key = pkoption.get(MIS.returns_key);
+						int option = option_key.zlong();
+						switch(option) {
+							case Crud::ID_SET:
+							case Crud::LAST_ID:
+							case Crud::ID_GEN:
+							case Crud::LAST_SEQ:
+								for(wk.start(pkey); wk.ok(); wk.next())
+								{
+									zval_user pvalue = values.get(pname);
+									irow->set(pname, pvalue);
+								}	
+								break;						
+						}
+					}
+					
+				}
+		}
+
 	}
 
 }; // namespace wcd
@@ -651,6 +821,61 @@ ZEND_METHOD(Wcd_Model, getTableName)
 
 	zstr_mgr result = Model::getTableName(static_class->name);
 	result.move_zv(return_value);	
+}
+
+ZEND_METHOD(Wcd_Model, importFromCSV)
+{
+	zend_string* filename;
+
+	ZEND_PARSE_PARAMETERS_START(1,1)
+	Z_PARAM_STR(filename)
+	ZEND_PARSE_PARAMETERS_END();
+
+	zend_class_entry* static_class = zend_get_called_scope(execute_data);
+
+	int icount = Model::importFromCSV(static_class->name, filename);
+	RETURN_LONG(icount);
+}
+
+ZEND_METHOD(Wcd_Model, modelBuild)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	zend_class_entry* static_class = zend_get_called_scope(execute_data);
+
+	zobj_mgr ibuild = Model::modelBuild(static_class->name);
+
+	ibuild.move_zv(return_value);
+}
+
+ZEND_METHOD(Wcd_Model, row)
+{
+	zval* data;
+
+	ZEND_PARSE_PARAMETERS_START(1,1)
+	Z_PARAM_ARRAY(data)
+	ZEND_PARSE_PARAMETERS_END();
+
+	zend_class_entry* static_class = zend_get_called_scope(execute_data);
+
+	zobj_mgr irow = Model::row(static_class->name, data);
+
+	irow.move_zv(return_value);
+}
+
+ZEND_METHOD(Wcd_Model, rowSaved)
+{
+	zval* data;
+
+	ZEND_PARSE_PARAMETERS_START(1,1)
+	Z_PARAM_ARRAY(data)
+	ZEND_PARSE_PARAMETERS_END();
+
+	zend_class_entry* static_class = zend_get_called_scope(execute_data);
+
+	zobj_mgr irow = Model::rowSaved(static_class->name, data);
+
+	irow.move_zv(return_value);
 }
 
 PHP_MINIT_FUNCTION(Wcd_Model_reg)

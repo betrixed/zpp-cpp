@@ -44,7 +44,7 @@ protected:
 
 public:
 
-    static zval* real_zval(zval* zv)
+    static zval* real_zval(const zval* zv)
     {
         switch(Z_TYPE_P(zv)) {
             case IS_REFERENCE:

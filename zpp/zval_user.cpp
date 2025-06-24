@@ -54,6 +54,20 @@ zval_user::same(const zval_user& test) const
     
 }
 
+zval* //static 
+zval_user::real_zval(const zval* zv)
+{
+    switch(Z_TYPE_P(zv)) {
+        case IS_REFERENCE:
+            zv = Z_REFVAL_P(zv);
+            break;
+        case IS_INDIRECT:
+            zv = zv->value.zv; 
+            break;  
+    }
+    return (zval*) zv;
+}
+
 zval_user zval_user::referent()
 {
 	if (p_) {

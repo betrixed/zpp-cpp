@@ -53,18 +53,7 @@ public:
     static void string_bind(zval* tmp, zend_string* s);
     static void object_bind(zval* temp, zend_object* obj);
 
-    static zval* real_zval(zval* zv)
-    {
-        switch(Z_TYPE_P(zv)) {
-            case IS_REFERENCE:
-                zv = Z_REFVAL_P(zv);
-                break;
-            case IS_INDIRECT:
-                zv = zv->value.zv; 
-                break;  
-        }
-        return zv;
-    }
+    static zval* real_zval(const zval* zv);
 
     zval_user() : p_(nullptr) {}
 

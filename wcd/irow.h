@@ -44,7 +44,7 @@ namespace wcd {
 	class IRow : public wcc::Hmap {
     protected:
     	zobj_mgr    table_model_;
-    	htab_mgr  original_;
+    	htab_mgr  	original_;
     public:
 
     	static IRow_mgr omg;

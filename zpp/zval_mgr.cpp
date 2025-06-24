@@ -41,7 +41,7 @@ zval_mgr::init()
 int   
 zval_mgr::ref_type() const
 {
-    return Z_TYPE_P(zval_user::real_zval(&zv_));
+    return Z_TYPE_P((const zval*) zval_user::real_zval(&zv_));
 }
 
 void 
@@ -69,9 +69,14 @@ zval_mgr::~zval_mgr()
 
 
 zend_string* 
-zval_mgr::zstr()
+zval_mgr::zstr() const
 {
-    return zval_user(&zv_).zstr();
+    zval* p = zval_user::real_zval(&zv_);
+    if (Z_TYPE_P(p) != IS_STRING)
+    {
+        return nullptr;
+    }
+    return Z_STR_P(p);
 }
 
 void 

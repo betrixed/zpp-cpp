@@ -135,7 +135,7 @@ public:
     // inlines
 
     int   ztype() const {
-        return ZTYPE(zv_);
+        return Z_TYPE_P(&zv_);
     }
 
     bool isDouble() const

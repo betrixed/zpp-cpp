@@ -18,6 +18,14 @@ public:
 		NO_TS = 0
 	};
 
+	enum Crud {
+		ID_SET = 0,
+	    LAST_ID = 1,
+	    LAST_SEQ = 2,
+	    ID_GEN = 4
+
+	};
+
 protected:
 
 	int  timestamps_;
@@ -47,7 +55,7 @@ public:
 
 	zobj_mgr getBuilder();
 
-	zobj_mgr newRow(htab_read rdata, bool isSaved = false);
+	zobj_mgr newRow(zval_user rdata, bool isSaved = false);
 
 	static Model* model_instance(zstr_user classname);
 	
@@ -66,6 +74,12 @@ public:
 	static zstr_mgr getTableName(zstr_user cname);
 
 	static int importFromCSV(zstr_user static_name, zstr_user filename);
+
+	static zobj_mgr modelBuild(zstr_user static_name);
+
+	static zobj_mgr row(zstr_user static_name, zval_user data);
+
+	static zobj_mgr rowSaved(zstr_user static_name, zval_user data);
 
 
 	zobj_mgr byKeyValue(zval_user keynames, zval_user values);
@@ -89,6 +103,10 @@ public:
 	zstr_mgr updatedAtName();
 	
 	void sequenceMax();
+
+	bool save(zobj_user irow, bool reload = false);
+
+	htab_mgr getKeyOptions();
 
 
 
