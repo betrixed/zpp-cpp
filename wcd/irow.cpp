@@ -285,6 +285,12 @@ IRow::setExists()
 	original_ = data_;
 }
 
+void IRow::copy(zobj_mgr recobj)
+{
+	IRow* rec = zobj_toc<IRow>(recobj);
+	data_ = rec->data_;
+	original_ = rec->original_;
+}
 
 htab_mgr 
 IRow::stampTime(zstr_user value, int dtflags)

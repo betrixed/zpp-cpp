@@ -147,7 +147,7 @@ IConfig::getMyKey()
 	return mykey_;
 }
 
-};//namespace
+};//namespace wcd
 
 using namespace wcd;
 

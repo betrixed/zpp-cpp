@@ -66,6 +66,8 @@ namespace wcd {
 
     	bool update(bool reload = false);
 
+    	void copy(zobj_mgr recobj);
+    	
     	void read();
 
     	htab_mgr getDataValues(zval_user attrlist);

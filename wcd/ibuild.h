@@ -14,6 +14,7 @@ namespace wcd {
 	using namespace wcc;
 
 	class Bindings;
+	class ISql;
 
 	class IBuild : public base_d {
 	public:
@@ -29,14 +30,20 @@ namespace wcd {
 		void setModel(zobj_user m);
 
 		Bindings& bindings();
+		ISql&     isql();
 
 		zval_mgr oneRow();
 		zval_mgr allRows();
 
 		zval_mgr first(htab_read columns);
 		void where(zval_user column, zstr_user bop, zval_user value, zstr_user bval);
+		void whereKeyValue(zval_user key, zval_user value);
 
 		zobj_mgr getInsertSql(htab_read columns);
+		zval_mgr update(zobj_user irow, htab_read dirty);
+
+		void setReturns(htab_read names);
+		zval_mgr insert(zval_user rdata);
 		
 
 	protected:

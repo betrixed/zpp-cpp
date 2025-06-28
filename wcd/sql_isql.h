@@ -312,7 +312,8 @@ namespace wcd {
 		void limit(int limit, int offset=0);
 
 		void whereKeyValue(zval_user keys, zval_user values);
-		
+		void where(zval_user column, zstr_user opstr, zval_user value, zstr_user blogic);
+
 		htab_mgr columnAlias(zobj_user tcol);
 
 		JoinTables* getJoinTables();

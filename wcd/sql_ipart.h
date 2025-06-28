@@ -81,6 +81,7 @@ namespace wcd {
 		zstr_intern  op_like;
 		zstr_intern  op_and;
 		zstr_intern  op_or;
+		zstr_intern  cmp_equal;
 
 
 		zstr_intern getTableModel;
@@ -112,6 +113,7 @@ namespace wcd {
 
 		zstr_intern  valuesdefault;
 		zstr_intern  eager_load;
+		zstr_intern  and_str;
 		
 		std::vector<zstr_intern> opstr;
 		std::vector<zstr_intern> boolstr;

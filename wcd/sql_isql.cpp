@@ -1866,6 +1866,52 @@ zstr_mgr alias_str_key(zstr_user malias)
 	return buf.zstr();
 }
 
+void 
+Bindings::where(zval_user column, zstr_user opstr, zval_user value, zstr_user blogic)
+{
+
+}
+
+void
+Bindings::whereKeyValue(zval_user key, zval_user value)
+{
+	if (key.isString() && !value.isArray())
+	{
+		where(key, SQSTR.cmp_equal, value, SQSTR.and_str);
+	}
+	if (key.isArray() && value.isArray())
+	{
+		htab_read keys(key.zarray());
+		htab_read values(value.zarray());
+
+		if (keys.size() == values.size())
+		{
+			htab_walk wk;
+			auto k = wk.key();
+			auto v = wk.value();
+
+			zval_user test = values.get(int(0));
+			if (test.isNull())
+			{
+				for(wk.start(values); wk.ok(); wk.next())
+				{
+					where(k, SQSTR.cmp_equal, v, SQSTR.and_str);
+				}
+			}
+			else {
+				int ix = 0;
+				for(wk.start(keys); wk.ok(); wk.next())
+				{
+					ix = k.zlong();
+					test = values.get(ix);
+					where(v, SQSTR.cmp_equal, test, SQSTR.and_str);
+				}
+			}
+		}
+	}
+	zend_throw_error(zend_ce_error,"whereKeyValue parameters do not match");
+}
+
 zval_mgr 
 Bindings::select(zobj_user prop)
 {

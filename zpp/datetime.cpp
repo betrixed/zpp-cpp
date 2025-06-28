@@ -45,6 +45,7 @@ void Date_init::init()
 	zstr_intern invert_prop = "invert";
 	zstr_intern from_string = "from_string";
 	zstr_intern date_string = "date_string";
+	zstr_intern now_format = "Y-m-d H:i:s";
 }
 
 
@@ -77,7 +78,7 @@ datetime_obj::strtotime(zval* value)
 	return strtotime.call_fn();
 }
 
-zstr_mgr 
+zstr_mgr //static
 datetime_obj::date(zstr_user fmt, zval* value)
 {
 	zstr_mgr result;

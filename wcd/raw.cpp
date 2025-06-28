@@ -64,7 +64,7 @@ Raw::setConnection(zobj_user driver)
 	db_ = driver;
 }
 
-};
+}; // namespaced wcd
 
 
 using namespace wcd;

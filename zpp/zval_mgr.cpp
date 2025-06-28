@@ -79,6 +79,17 @@ zval_mgr::zstr() const
     return Z_STR_P(p);
 }
 
+HashTable*   
+zval_mgr::zarray() const
+{
+    zval* p = zval_user::real_zval(&zv_);
+    if (Z_TYPE_P(p) != IS_ARRAY)
+    {
+        return nullptr;
+    }
+    return Z_ARR_P(p);
+}
+
 void 
 zval_mgr::new_array()
 {
@@ -283,6 +294,12 @@ zval_mgr::assign_ptr(zval* p)
 		ZVAL_COPY(&zv_, p);
 	}
 
+}
+
+bool 
+zval_mgr::ok() const
+{
+    return zval_user(*this).ok();
 }
 
 const zval_mgr& 

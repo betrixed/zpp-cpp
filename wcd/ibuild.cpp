@@ -31,6 +31,12 @@ using namespace zpp;
 
 	}
 
+	ISql& 
+	IBuild::isql()
+	{
+		return *(zobj_toc<ISql>(isql_));
+	}
+
 	Bindings& 
 	IBuild::bindings()
 	{
@@ -44,6 +50,57 @@ using namespace zpp;
 		params_.init();
 		bindings_.init();
 		model_.init();
+	}
+
+	void 
+	IBuild::setReturns(htab_read names)
+	{
+		Bindings& bind = bindings();
+		bind.add(ISql::SQL_RETURN, names);
+	}
+
+	zval_mgr 
+	IBuild::insert(zval_user rdata)
+	{
+		Bindings& bind = bindings();
+		bind.wipe(ISql::SQL_INSERT);
+		ParamList* plist = zobj_toc<ParamList>(params_);
+
+		plist->wipe();
+
+		zval_mgr result;
+		zobj_mgr row_mgr;
+
+		bool     is_multiple = false;
+
+		if (rdata.isArray())
+		{
+			htab_read rows(rdata.zarray());
+
+			int rowct = rows.size();
+			if (rowct > 0)
+			{
+				row_mgr = rows.get(int(0));
+			}
+			else {
+				result.set_bool(false);
+				return result;
+			}
+			is_multiple = (rowct > 1);
+
+		}
+		else if (rdata.isObject())
+		{
+			row_mgr = rdata.zobject();
+		}
+		IRow* irow = zobj_toc<IRow>(row_mgr);
+		zobj_mgr model_mgr = irow->getModel();
+
+		Model* model = zobj_toc<Model>(model_mgr);
+
+		if (model->hasTimeStamps()) {
+
+		}
 	}
 
 	zval_mgr
@@ -63,6 +120,55 @@ using namespace zpp;
 		//ifetch_ = 
 
 	}
+
+	zval_mgr 
+	IBuild::update(zobj_user irow, htab_read dirty)
+	{
+		Bindings& bind = bindings();
+
+		IRow* rowobj = zobj_toc<IRow>(irow);
+
+		if (dirty.size())
+		{
+			htab_walk wk;
+
+			auto cvalue = wk.value();
+
+			for(wk.start(dirty); wk.ok(); wk.next())
+			{
+				bind.update(cvalue, rowobj->get(cvalue));
+			}
+
+			htab_mgr ts = rowobj->stampTime(, UPDATE_TS);
+
+			if (ts.size())
+			{
+				auto column = wk.key();
+
+				for(wk.start(ts); wk.ok(); wk.next())
+				{
+					bind.update(column, cvalue);
+				}
+			}
+
+			zobj_mgr plist_mgr = isql().update(bind);
+			ParamList* plist = zobj_toc<ParamList>(plist_mgr);
+
+			zstr_mgr sql = plist->getSql();
+			htab_mgr params = plist->getValues();
+
+			return RunSql::op(db_, sql, params);
+			
+		}
+	}
+
+	void 
+	IBuild::whereKeyValue(zval_user key, zval_user value)
+	{
+		Bindings& bind = bindings();
+		bind.whereKeyValue(key, value);
+	}
+
 
 
 	void
@@ -123,6 +229,6 @@ using namespace zpp;
 	{
 
 	}
-};
+}; // namespace wcd
 
 #endif

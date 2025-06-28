@@ -40,6 +40,7 @@ namespace zpp {
 		zstr_intern invert_prop;
 		zstr_intern from_string;
 		zstr_intern date_string;
+		zstr_intern now_format;
 	};
 
 	extern Date_init DTData;

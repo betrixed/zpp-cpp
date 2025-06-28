@@ -45,7 +45,7 @@ namespace wcd {
 		zstr_intern find_first;
 		zstr_intern find_all;
 		zstr_intern by_str;
-		zstr_intern and_str;
+
 		zstr_intern eq_str;
 		zstr_intern u_model;
 		zstr_intern r_arg;
@@ -64,7 +64,7 @@ namespace wcd {
 			find_first = "findfirst";
 			find_all = "findall";
 			by_str = "by";
-			and_str = "AND";
+
 			eq_str = "=";
 			u_model = "_model";
 			r_arg = "r";
@@ -82,6 +82,11 @@ namespace wcd {
 	};
 
 	Model_init MIS;
+
+	Model::Model() : base_d()
+	{
+		timestamps_ = NO_TS;
+	}
 
 	zval_mgr 
 	Model::createFromResult(zstr_user classname, htab_read results)
@@ -108,6 +113,13 @@ namespace wcd {
 
 		return rmgr;
 
+	}
+
+	zstr_mgr 
+	Model::now() const
+	{
+		zval_mgr null_ts;
+		return datetime_obj::date(DTData.now_format, null_ts);
 	}
 
 	zobj_mgr
@@ -242,7 +254,7 @@ namespace wcd {
 				
 				
 
-				ib->where(params, nullstr, nullval, MIS.and_str);
+				ib->where(params, nullstr, nullval, SQSTR.and_str);
 				return ib->oneRow();
 			}
 			else {
@@ -263,7 +275,7 @@ namespace wcd {
 		{
 			if (parray.size())
 			{
-				ib->where(params, nullstr, nullval, MIS.and_str);
+				ib->where(params, nullstr, nullval, SQSTR.and_str);
 				return ib->allRows();
 			}
 			zval_mgr   result = ib->allRows();
@@ -600,6 +612,12 @@ namespace wcd {
 	}
 
 	bool 
+	Model::hasTimeStamps() const
+	{
+	    return (timestamps_ == NO_TS);
+	}
+
+	bool 
 	Model::save(zobj_user row_obj, bool reload)
 	{
 		if (!row_obj.ok())
@@ -623,7 +641,8 @@ namespace wcd {
 		htab_read pkey(pkey_mgr);
 		zval_mgr saved;
 
-		if (wasRead) {
+		if (wasRead) 
+		{
 			// update operation
 			if (pkey.size() == 0)
 			{
@@ -640,8 +659,8 @@ namespace wcd {
 			}
 
 			
-
-			ibuild->whereKeyValue(pkey, id);
+			zval_mgr pvalues(id);
+			ibuild->whereKeyValue(pkey_mgr, pvalues);
 			saved = ibuild->update(irow, dirty);
 		}
 		else {
@@ -665,7 +684,8 @@ namespace wcd {
 				if (data_value.isNull()) 
 				{
 					zval_user pkey_options = options.get(pname);
-					if (pkey_options.isArray()) {
+					if (pkey_options.isArray()) 
+					{
 						htab_read pkoption(pkey_options.zarray());
 
 						zval_user option_key = pkoption.get(MIS.returns_key);
@@ -686,7 +706,8 @@ namespace wcd {
 				}
 			}
 
-			saved = ibuild->insert(irow);
+			zval_mgr row_mgr(row_obj);
+			saved = ibuild->insert(row_mgr);
 
 			if (saved.isArray() && (pkey_refresh_mgr.size() > 0))
 			{
@@ -695,11 +716,13 @@ namespace wcd {
 
 				for(wk.start(pkey_refresh_mgr); wk.ok(); wk.next())
 				{
-					if (pkey_options.isArray()) {
+					if (pkey_options.isArray()) 
+					{
 						htab_read pkoption(pkey_options.zarray());
 						zval_user option_key = pkoption.get(MIS.returns_key);
 						int option = option_key.zlong();
-						switch(option) {
+						switch(option) 
+						{
 							case Crud::ID_SET:
 							case Crud::LAST_ID:
 							case Crud::ID_GEN:
@@ -714,7 +737,42 @@ namespace wcd {
 					}
 					
 				}
+			}
 		}
+
+		irow->setExists();
+
+		if (reload) {
+			zobj_mgr rec = read(irow);
+			irow->copy(rec);
+		}
+
+		return saved.ok();
+	}
+
+	zobj_mgr 
+	Model::read(zobj_user row_obj)
+	{
+		htab_mgr pkey = getPKey();
+		zobj_mgr result;
+
+		if (pkey.size())
+		{
+			IRow* irow = zobj_toc<IRow>(row_obj);
+
+			zval_mgr key_mgr(pkey);
+			
+			
+			htab_mgr pkeyid = irow->getDataValues(key_mgr);
+
+			
+			zval_mgr val_mgr(pkeyid);
+			result = byKeyValue(key_mgr, val_mgr);
+		}
+		else {
+			zend_throw_error(zend_ce_error,"No primary key for table %s", name_.data());
+		}
+		return result;
 
 	}
 

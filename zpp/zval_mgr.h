@@ -129,11 +129,14 @@ public:
     void return_zv(zval* ret);
 
     zend_string* zstr() const;
-
+    HashTable*   zarray() const;
+    
     int   ref_type() const;
     
     // inlines
 
+    bool ok() const;
+    
     int   ztype() const {
         return Z_TYPE_P(&zv_);
     }

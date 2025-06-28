@@ -98,6 +98,8 @@ void sql_strtab::init()
 
 	not_key = "not";
 	asterisk = "*";
+	and_str = "AND";
+	
 
 	basic = "basic";
 	jointype = "joinType";
@@ -109,6 +111,7 @@ void sql_strtab::init()
 	op_like = "LIKE";
 	op_and = "AND";
 	op_or = "OR";
+	cmp_equal = "=";
 
 
 	getTableModel = "getTableModel";
@@ -645,7 +648,7 @@ Param::construct(zval_user zp)
 }
 
 
-}; //namespace
+}; //namespace wcd
 
 using namespace wcd;
 

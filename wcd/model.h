@@ -49,7 +49,6 @@ public:
 	static base_obj_mgr<Model> omg;
 	
 	Model();
-	virtual ~Model();
 
 	zobj_mgr getBuilderForMe();
 
@@ -102,13 +101,17 @@ public:
 
 	zstr_mgr updatedAtName();
 	
+	bool hasTimeStamps() const;
+
 	void sequenceMax();
 
 	bool save(zobj_user irow, bool reload = false);
 
 	htab_mgr getKeyOptions();
 
+	zstr_mgr now() const;
 
+	zobj_mgr read(zobj_user irow);
 
 
 };
