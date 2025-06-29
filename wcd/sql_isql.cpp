@@ -47,7 +47,7 @@ void ParamList::debug_info(htab_write di)
 	if (!params_.isNull())
 		di.set(SQSTR.params, params_);
 	if (!ret_values_.isNull())
-		di.set(SQSTR.returns, ret_values_);
+		di.set(SQSTR.returns_str, ret_values_);
 	if (!sql_.isNull())
 		di.set(SQSTR.sql, sql_);
 	if (!val_params_.isNull())

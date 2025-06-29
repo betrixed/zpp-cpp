@@ -97,21 +97,33 @@ public:
 
 	zobj_mgr getTableDef();
 
-	zstr_mgr createAtName();
+	zstr_mgr createdAtName();
 
 	zstr_mgr updatedAtName();
 	
 	bool hasTimeStamps() const;
 
+	int getTSFlags() const;
+
+	bool exists(zobj_user rowobj);
+
 	void sequenceMax();
 
-	bool save(zobj_user irow, bool reload = false);
+	bool saveRow(zobj_user irow, bool reload = false);
+
+	bool deleteRow(zobj_user irow);
+
+	zobj_mgr readRow(zobj_user irow);
 
 	htab_mgr getKeyOptions();
 
+	htab_mgr getFieldDef(zstr_user name);
+
+	htab_mgr getForeignKey();
+
 	zstr_mgr now() const;
 
-	zobj_mgr read(zobj_user irow);
+	
 
 
 };

@@ -5,6 +5,9 @@
 #include "ibuild.h"
 #endif
 
+#ifndef SQL_PART_H
+#include "sql_ipart.h"
+#endif
 
 namespace wcd {
 using namespace zpp;
@@ -160,6 +163,78 @@ using namespace zpp;
 			return RunSql::op(db_, sql, params);
 			
 		}
+	}
+
+	void 
+	IBuild::table(zstr_user table, bool wipe=true)
+	{
+		Bindings& bind = bindings();
+
+		if (wipe)
+		{
+			bind.wipe();
+			ParamList* plist = zobj_toc<ParamList>(params_);
+			plist.wipe();
+		}
+
+		bind.add(ISql::SQL_FROM, table);
+	}
+
+	int 
+	IBuild::count(zval_user columns)
+	{
+		htab_mgr names;
+
+		if (columns.isString())
+		{
+			htab_write hw(names);
+			names.push_back(columns.zstr());
+		}
+		else columns.isArray() {
+			names = columns.zarray();
+			
+		}
+		zval_mgr result = aggregate(SQSTR.count_str, names);
+		return result.zlong();
+	}
+
+	zval_mgr 
+	IBuild::deleteRow(zobj_mgr rowobj)
+	{
+		Model* model = zobj_toc<Model>(model_);
+		IRow*  row = zobj_toc<IRow>(rowobj);
+
+		Bindings& bind = bindings();
+
+	    htab_mgr pkey = model->getPKey();
+	    int pkeyct = pkey.size();
+	    if (pkeyct)
+	    {
+	    	htab_mgr values = irow->getDataValues(pkey);
+	    	for( int ix = 0; ix < pkeyct; ix++)
+	    	{
+	    		zval_user key = pkey.get(ix);
+	    		zval_user value = values.get(ix);
+	    		bind.where(key, SQSTR.cmp_equal, value, SQSTR.and_str);
+	    	}
+	    }
+	    else {
+	    	//WHERE alread set?
+	    	zval_user wcond = bind.get(ISql::SQL_WHERE);
+	    	if (wcond.isNull())
+	    	{
+	    		zend_throw_error(zend_ce_error,"deleteRow() without primary key or where condition set");
+	    		return;
+	    	}
+	    }
+	    zobj_mgr params_mgr =  isql().delete(bind);
+	    ParamList* plist = zobj_toc<ParamList>(params_mgr);
+	    zstr_mgr sql = plist->getSql();
+	    htab_mgr params = plist->getValues();
+
+	    return RunSql::op(db_, sql, params);
+
+
 	}
 
 	void 

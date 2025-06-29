@@ -93,7 +93,12 @@ namespace wcd {
 		zstr_intern driver;
 		zstr_intern params;
 		zstr_intern sql;
-		zstr_intern returns;
+		zstr_intern returns_str;
+		zstr_intern return_str;
+		zstr_intern bind_key;
+		zstr_intern id_key;
+		zstr_intern default_key;
+		zstr_intern auto_inc;
 
 		zstr_intern  results;
 		zstr_intern  by_alias;
@@ -114,6 +119,7 @@ namespace wcd {
 		zstr_intern  valuesdefault;
 		zstr_intern  eager_load;
 		zstr_intern  and_str;
+		zstr_intern  count_str;
 		
 		std::vector<zstr_intern> opstr;
 		std::vector<zstr_intern> boolstr;

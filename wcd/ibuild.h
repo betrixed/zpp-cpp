@@ -44,7 +44,12 @@ namespace wcd {
 
 		void setReturns(htab_read names);
 		zval_mgr insert(zval_user rdata);
+
+		zval_mgr deleteRow(zobj_user rowobj);
 		
+		int count(zval_user columns);
+
+		void table(zstr_user table, bool wipe=true);
 
 	protected:
 

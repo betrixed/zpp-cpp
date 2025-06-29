@@ -59,6 +59,8 @@ namespace wcd {
 		zstr_intern type_str;
 		zstr_intern name_str;
 		zstr_intern returns_key;
+		zstr_intern get_primary_key;
+		zstr_intern fn_getseqcols;
 
 		void init() override {
 			find_first = "findfirst";
@@ -78,6 +80,9 @@ namespace wcd {
 			type_str = "type";
 			name_str = "name";
 			returns_key = "_ret";
+
+			get_primary_key = "getprimarykey";
+			fn_getseqcols = "getseqcols";
 		}
 	};
 
@@ -112,7 +117,20 @@ namespace wcd {
 		}
 
 		return rmgr;
+	}
 
+	bool 
+	Model::deleteRow(zobj_user rowobj)
+	{
+		//TODO: preconfirm exists? i.e. original_ has content
+		zobj_mgr builder = getBuilderForMe();
+		IBuild* ib = zobj_toc<IBuild>(builder);
+		return ib->deleteRow(rowobj);
+	}
+
+	int Model::getTSFlags() const
+	{
+		return timestamps_;
 	}
 
 	zstr_mgr 
@@ -364,6 +382,83 @@ namespace wcd {
 		return m->byKeyValue(pkey_mgr, vlist_tab);
 	}
 
+	htab_mgr 
+	Model::getKeyOptions()
+	{
+		htab_mgr pkey_options_mgr;
+
+		if (pkey_options_.ok())
+		{
+			pkey_options_mgr = pkey_options_;
+			return pkey_options_mgr;
+		}
+
+		htab_mgr pkey_fields = getPKey();
+
+		if (pkey_fields.size())
+		{
+			htab_write pkey_options(pkey_options_mgr);
+
+			htab_mgr cdefs = getColDefs();
+			htab_mgr seqdefs = getSeqDefs();
+
+			htab_walk wk;
+			auto pkey = wk.value();
+
+
+			for(wk.start(pkey_fields); wk.ok(); wk.next())
+			{
+				htab_mgr options_mgr;
+				htab_write options(options_mgr);
+
+				zstr_mgr key_name = pkey.zstr();
+				key_name = key_name.to_lower();
+
+				zval_user key_def = cdefs.get(key_name);
+				htab_read pkeydef = key_def.zarray();
+
+				zval_user seq_pkey = pkeydef.get(SQSTR.id_key);
+
+				if (seq_pkey.isString())
+				{
+					options.set(SQSTR.seq_key, seq_pkey);
+					options.set(SQSTR.bind_key, SQSTR.return_str);
+					options.set(SQSTR.returns_str, Crud::ID_GEN);
+				}
+				else if (seqdefs.size()) 
+				{
+					seq_pkey = seqdefs.get(key_name);
+
+					if (seq_pkey.isString())
+					{
+						options.set(SQSTR.seq_key, seq_pkey);
+						zval_user defval = pkeydef.get(SQSTR.default_key);
+						if (defval.isString())
+						{
+							htab_mgr temp_mgr;
+							htab_write temp(temp_mgr);
+
+							temp.push_back(SQSTR.default_key);
+							temp.push_back(defval);
+							options.set(SQSTR.bind_key, temp_mgr);
+						}
+						options.set(SQSTR.returns_str, Crud::LAST_SEQ);
+					}
+				}
+				else 
+				{
+					zval_user isAutoInc = pkeydef.get(SQSTR.auto_inc);
+					if (isAutoInc.ok()) 
+					{
+						options.set(SQSTR.returns_str, Crud::ID_SET);
+					}
+				}
+				pkey_options.set(key_name, options_mgr);
+			}
+			pkey_options_ = pkey_options;
+		}
+		return pkey_options_mgr;
+	}
 
 	htab_mgr Model::getColDefs()
 	{
@@ -395,12 +490,24 @@ namespace wcd {
 	htab_mgr 
 	Model::getPKey()
 	{
+		htab_mgr result;
 		if (class_pkey_.ok())
 		{
-			return class_pkey_;
+			result = class_pkey_;
+			return result;
 		}
-		class_pkey_ = htab_mgr::empty_array();
-		return class_pkey_;
+		zobj_mgr tdef = getTableDef();
+		if (tdef.ok())
+		{
+			result = tdef.call(MIS.get_primary_key);
+		}
+	
+		if (!result.ok())
+		{
+			result = htab_mgr::empty_array();
+		}
+		class_pkey_ = result;
+		return result;
 	}
 
 	int // static
@@ -618,7 +725,7 @@ namespace wcd {
 	}
 
 	bool 
-	Model::save(zobj_user row_obj, bool reload)
+	Model::saveRow(zobj_user row_obj, bool reload)
 	{
 		if (!row_obj.ok())
 		{
@@ -743,7 +850,7 @@ namespace wcd {
 		irow->setExists();
 
 		if (reload) {
-			zobj_mgr rec = read(irow);
+			zobj_mgr rec = readRow(irow);
 			irow->copy(rec);
 		}
 
@@ -751,7 +858,7 @@ namespace wcd {
 	}
 
 	zobj_mgr 
-	Model::read(zobj_user row_obj)
+	Model::readRow(zobj_user row_obj)
 	{
 		htab_mgr pkey = getPKey();
 		zobj_mgr result;
@@ -762,7 +869,7 @@ namespace wcd {
 
 			zval_mgr key_mgr(pkey);
 			
-			
+
 			htab_mgr pkeyid = irow->getDataValues(key_mgr);
 
 			
@@ -772,6 +879,84 @@ namespace wcd {
 		else {
 			zend_throw_error(zend_ce_error,"No primary key for table %s", name_.data());
 		}
+		return result;
+
+	}
+
+	bool 
+	Model::exists(zobj_user rowobj)
+	{
+		zobj_mgr builder = getBuilderForMe();
+		IBuild* ib = zobj_toc<IBuild>(builder);
+		IRow*   irow = zobj_toc<IRow>(rowobj);
+
+		zval_mgr pkey_mgr(getPKey());
+
+		zval_mgr pkeyid(irow->getDataValues(pkey_mgr));
+
+		zstr_mgr tname = getName();
+
+		ib->table(tname);
+		ib->whereKeyValue(pkey_mgr, pkeyid);
+		zval_mgr columns(SQSTR.asterisk);
+
+		int rowct = ib->count(columns);
+
+		return (rowct > 0);
+
+	}
+
+	htab_mgr 
+	Model::getFieldDef(zstr_user name)
+	{
+		htab_mgr cdefs = getColDefs();
+		htab_mgr result;
+
+		if (cdefs.size())
+		{
+			result = cdefs.get(name);
+		}
+		return result;
+	}
+
+	htab_mgr 
+	Model::getForeignKey()
+	{
+		htab_mgr pkey = getPKey();
+		zstr_mgr table = Model::getTableName(vobj()->ce->name);
+
+		htab_walk wk;
+		auto name = wk.value();
+
+		htab_mgr result;
+		htab_write hw(result);
+		zstr_buffer buf;
+
+		for(wk.start(pkey); wk.ok(); wk.next())
+		{
+			buf << table << '_' << name.zstr();
+			zstr_mgr fkey = buf.zstr();
+			hw.push_back(fkey);
+		}
+		return result;
+	}
+
+	htab_mgr 
+	Model::getSeqDefs()
+	{
+
+		htab_mgr result;
+
+		if (seq_defs_.ok())
+		{
+			result = seq_defs_;
+			return result;
+		}
+
+		zobj_mgr tdef = getTableDef();
+
+		seq_defs_ = tdef.call(MIS.fn_getseqcols);
+		result = seq_defs_;
 		return result;
 
 	}
@@ -936,6 +1121,224 @@ ZEND_METHOD(Wcd_Model, rowSaved)
 	irow.move_zv(return_value);
 }
 
+
+void 
+row_output(zend_execute_data *execute_data, zval *return_value)
+{
+	zval* data;
+	bool  reload = false;
+
+	ZEND_PARSE_PARAMETERS_START(1,2)
+	Z_PARAM_OBJECT_OF_CLASS(data, IRow::omg.classEntry())
+	Z_PARAM_OPTIONAL
+	Z_PARAM_BOOL(reload)
+	ZEND_PARSE_PARAMETERS_END();
+
+	Model* model = zval_toc<Model>(ZEND_THIS);
+
+	RETURN_BOOL(model->saveRow(data, reload));	
+}
+
+ZEND_METHOD(Wcd_Model, create)
+{
+
+	row_output(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
+
+ZEND_METHOD(Wcd_Model, save)
+{
+	row_output(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
+
+ZEND_METHOD(Wcd_Model, update)
+{
+	row_output(INTERNAL_FUNCTION_PARAM_PASSTHRU);
+}
+
+ZEND_METHOD(Wcd_Model, createdAtName)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	Model* model = zval_toc<Model>(ZEND_THIS);
+
+	zstr_mgr result = model->createdAtName();
+
+	result.move_zv(return_value);
+}
+
+ZEND_METHOD(Wcd_Model, updatedAtName)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	Model* model = zval_toc<Model>(ZEND_THIS);
+
+	zstr_mgr result = model->updatedAtName();
+
+	result.move_zv(return_value);
+}
+
+ZEND_METHOD(Wcd_Model, delete)
+{
+	zval* data;
+
+	ZEND_PARSE_PARAMETERS_START(1,1)
+	Z_PARAM_OBJECT_OF_CLASS(data, IRow::omg.classEntry())
+	ZEND_PARSE_PARAMETERS_END();
+
+	Model* model = zval_toc<Model>(ZEND_THIS);
+
+	bool result = model->deleteRow(data);
+
+	RETURN_BOOL(result);
+}
+
+ZEND_METHOD(Wcd_Model, exists)
+{
+	zval* data;
+
+	ZEND_PARSE_PARAMETERS_START(1,1)
+	Z_PARAM_OBJECT_OF_CLASS(data, IRow::omg.classEntry())
+	ZEND_PARSE_PARAMETERS_END();
+
+	Model* model = zval_toc<Model>(ZEND_THIS);
+
+	bool result = model->exists(data);
+
+	RETURN_BOOL(result);
+}
+
+ZEND_METHOD(Wcd_Model, getColDefs)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	Model* model = zval_toc<Model>(ZEND_THIS);
+
+	htab_mgr result = model->getColDefs();
+
+	result.move_zv(return_value);	
+}
+
+ZEND_METHOD(Wcd_Model, getConnect)
+{
+     ZEND_PARSE_PARAMETERS_NONE();
+
+	Model* model = zval_toc<Model>(ZEND_THIS);
+
+	zobj_mgr result = model->getConnect();
+
+	result.move_zv(return_value);	
+}
+
+ZEND_METHOD(Wcd_Model, getFieldDef)
+{
+	zend_string* data;
+
+	ZEND_PARSE_PARAMETERS_START(1,1)
+	Z_PARAM_STR(data)
+	ZEND_PARSE_PARAMETERS_END();
+
+	Model* model = zval_toc<Model>(ZEND_THIS);
+
+	htab_mgr result = model->getFieldDef(data);
+	result.move_zv(return_value);	
+
+}
+
+ZEND_METHOD(Wcd_Model, getForeignKey)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	Model* model = zval_toc<Model>(ZEND_THIS);
+
+	htab_mgr result = model->getForeignKey();
+
+	result.move_zv(return_value);	
+}
+
+
+ZEND_METHOD(Wcd_Model, getKeyOptions)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	Model* model = zval_toc<Model>(ZEND_THIS);
+
+	htab_mgr result = model->getKeyOptions();
+
+	result.move_zv(return_value);	
+}
+
+ZEND_METHOD(Wcd_Model, getName)
+{
+
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	Model* model = zval_toc<Model>(ZEND_THIS);
+
+	zstr_mgr result = model->getName();
+
+	result.move_zv(return_value);	
+}
+
+ZEND_METHOD(Wcd_Model, getPKey)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	Model* model = zval_toc<Model>(ZEND_THIS);
+
+	htab_mgr result = model->getPKey();
+
+	result.move_zv(return_value);
+}
+
+ZEND_METHOD(Wcd_Model, getSeqDefs)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	Model* model = zval_toc<Model>(ZEND_THIS);
+
+	htab_mgr result = model->getSeqDefs();
+
+	result.move_zv(return_value);
+}
+
+ZEND_METHOD(Wcd_Model, getTSFlags)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	Model* model = zval_toc<Model>(ZEND_THIS);
+
+	int result = model->getTSFlags();
+
+	RETURN_LONG(result);
+
+}
+
+ZEND_METHOD(Wcd_Model, getTableDef)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	Model* model = zval_toc<Model>(ZEND_THIS);
+
+	zobj_mgr result = model->getTableDef();
+
+	result.move_zv(return_value);
+}
+/*
+
+
+ZEND_METHOD(Wcd_Model, hasTimestamps){}
+ZEND_METHOD(Wcd_Model, newRow){}
+ZEND_METHOD(Wcd_Model, read){}
+ZEND_METHOD(Wcd_Model, setColDefs){}
+ZEND_METHOD(Wcd_Model, setKeyOptions){}
+ZEND_METHOD(Wcd_Model, setName){}
+ZEND_METHOD(Wcd_Model, setPKey){}
+ZEND_METHOD(Wcd_Model, setSeqDefs){}
+ZEND_METHOD(Wcd_Model, setTSFlags){}
+ZEND_METHOD(Wcd_Model, stampTime){}
+*/
+
+
 PHP_MINIT_FUNCTION(Wcd_Model_reg)
 {
 	zintf_ce_IfCrud = register_class_Wcd_IfCrud();
@@ -944,4 +1347,5 @@ PHP_MINIT_FUNCTION(Wcd_Model_reg)
 
 	return SUCCESS;
 }
+
 #endif

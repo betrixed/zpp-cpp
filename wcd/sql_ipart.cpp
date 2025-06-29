@@ -99,7 +99,7 @@ void sql_strtab::init()
 	not_key = "not";
 	asterisk = "*";
 	and_str = "AND";
-	
+	count_str = "COUNT";
 
 	basic = "basic";
 	jointype = "joinType";
@@ -127,7 +127,12 @@ void sql_strtab::init()
 	params = "params";
 	driver = "driver";
 	sql = "sql";
-	returns = "returns";
+	returns_str = "returns";
+	return_str = "return";
+	bind_key = "bind";
+	id_key = "identity";
+	default_key = "default";
+	auto_inc = "auto_inc";
 
 	results  = "results";
 	by_alias  = "by_alias";
