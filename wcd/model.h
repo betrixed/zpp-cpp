@@ -123,8 +123,21 @@ public:
 
 	zstr_mgr now() const;
 
-	
+	void setColDefs(htab_read options);
 
+	void setKeyOptions(htab_read options);
+
+	void setPKey(htab_read options);
+
+	void setName(zstr_user name);
+
+	void setSeqDefs(htab_read options);
+
+	void setTSFlags(int flags);
+
+	htab_mgr stampTime(zstr_user str_datetime, int flags=ALL_TS);
+	
+	
 
 };
 

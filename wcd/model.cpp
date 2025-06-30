@@ -961,6 +961,67 @@ namespace wcd {
 
 	}
 
+	void 
+	Model::setColDefs(htab_read options)
+	{
+		class_cdefs_ = options;
+	}
+
+	void 
+	Model::setKeyOptions(htab_read options)
+	{
+		pkey_options_ = options;
+	}
+
+	void 
+	Model::setPKey(htab_read options)
+	{
+		class_pkey_ = options;
+	}
+
+	void 
+	Model::setName(zstr_user name)
+	{
+		name_  = name;
+	}
+
+	void 
+	Model::setSeqDefs(htab_read options)
+	{
+		seq_defs_ = options;
+	}
+
+	void Model::setTSFlags(int flags)
+	{
+		timestamps_ = flags;
+	}
+
+	htab_mgr 
+	Model::stampTime(zstr_user str_datetime, int flags)
+	{
+		int ts = timestamps_ & flags;
+
+		htab_mgr result;
+
+		if (ts != 0) 
+		{
+			htab_write stamps(result);
+			zstr_mgr dkey;
+
+			if ((ts & CREATE_TS) != 0)
+			{
+				dkey = createdAtName();
+				stamps.set(dkey, str_datetime);
+			}
+			if ((ts & UPDATE_TS) != 0)
+			{
+				dkey = updatedAtName();
+				stamps.set(dkey, str_datetime);
+			}
+		}
+		return result;
+	}
+
 }; // namespace wcd
 
 using namespace wcd;
@@ -1323,18 +1384,145 @@ ZEND_METHOD(Wcd_Model, getTableDef)
 
 	result.move_zv(return_value);
 }
+
+ZEND_METHOD(Wcd_Model, hasTimeStamps)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	Model* model = zval_toc<Model>(ZEND_THIS);
+
+	bool result = model->hasTimeStamps();
+
+	RETURN_BOOL(result);
+}
+
+ZEND_METHOD(Wcd_Model, newRow)
+{
+	zval* rdata;
+	bool  isSaved = false;
+
+	ZEND_PARSE_PARAMETERS_START(1,2)
+	Z_PARAM_ARRAY(rdata)
+	Z_PARAM_OPTIONAL
+	Z_PARAM_BOOL(isSaved)
+	ZEND_PARSE_PARAMETERS_END();
+
+	Model* model = zval_toc<Model>(ZEND_THIS);
+
+	zobj_mgr result = model->newRow(rdata, isSaved);
+
+	result.move_zv(return_value);
+}
+
+
+ZEND_METHOD(Wcd_Model, readRow)
+{
+	zval* rdata;
+
+	ZEND_PARSE_PARAMETERS_START(1,1)
+	Z_PARAM_OBJECT_OF_CLASS(rdata, IRow::omg.classEntry())
+	ZEND_PARSE_PARAMETERS_END();
+
+	Model* model = zval_toc<Model>(ZEND_THIS);
+
+	zobj_mgr result = model->readRow(rdata);
+
+	result.move_zv(return_value);
+
+}
+
+ZEND_METHOD(Wcd_Model, setColDefs)
+{
+	zval* rdata;
+
+	ZEND_PARSE_PARAMETERS_START(1,1)
+	Z_PARAM_ARRAY(rdata)
+	ZEND_PARSE_PARAMETERS_END();
+
+	Model* model = zval_toc<Model>(ZEND_THIS);
+	model->setColDefs(rdata);
+}
+
+ZEND_METHOD(Wcd_Model, setKeyOptions)
+{
+	zval* rdata;
+
+	ZEND_PARSE_PARAMETERS_START(1,1)
+	Z_PARAM_ARRAY(rdata)
+	ZEND_PARSE_PARAMETERS_END();
+
+	Model* model = zval_toc<Model>(ZEND_THIS);
+	model->setKeyOptions(rdata);
+}
+
+ZEND_METHOD(Wcd_Model, setName)
+{
+	zend_string* sdata;
+
+	ZEND_PARSE_PARAMETERS_START(1,1)
+	Z_PARAM_STR(sdata)
+	ZEND_PARSE_PARAMETERS_END();
+
+	Model* model = zval_toc<Model>(ZEND_THIS);
+	model->setName(sdata);
+}
+
+ZEND_METHOD(Wcd_Model, setPKey)
+{
+	zval* rdata;
+
+	ZEND_PARSE_PARAMETERS_START(1,1)
+	Z_PARAM_ARRAY(rdata)
+	ZEND_PARSE_PARAMETERS_END();
+
+	Model* model = zval_toc<Model>(ZEND_THIS);
+	model->setPKey(rdata);
+}
+
+ZEND_METHOD(Wcd_Model, setSeqDefs)
+{
+	zval* rdata;
+
+	ZEND_PARSE_PARAMETERS_START(1,1)
+	Z_PARAM_ARRAY(rdata)
+	ZEND_PARSE_PARAMETERS_END();
+
+	Model* model = zval_toc<Model>(ZEND_THIS);
+	model->setSeqDefs(rdata);
+}
+
+ZEND_METHOD(Wcd_Model, setTSFlags)
+{
+	zend_long flags;
+
+	ZEND_PARSE_PARAMETERS_START(1,1)
+	Z_PARAM_LONG(flags)
+	ZEND_PARSE_PARAMETERS_END();
+
+	Model* model = zval_toc<Model>(ZEND_THIS);
+	model->setTSFlags(flags);
+}
+
+
+ZEND_METHOD(Wcd_Model, stampTime)
+{
+	zend_string* str_datetime;
+
+	zend_long flags = Model::ALL_TS;
+
+	ZEND_PARSE_PARAMETERS_START(1,2)
+	Z_PARAM_STR(str_datetime)
+	Z_PARAM_OPTIONAL
+	Z_PARAM_LONG(flags)
+	ZEND_PARSE_PARAMETERS_END();
+
+	Model* model = zval_toc<Model>(ZEND_THIS);
+	htab_mgr result = model->stampTime(str_datetime, flags);
+
+	result.move_zv(return_value);
+}
 /*
 
-
-ZEND_METHOD(Wcd_Model, hasTimestamps){}
-ZEND_METHOD(Wcd_Model, newRow){}
-ZEND_METHOD(Wcd_Model, read){}
-ZEND_METHOD(Wcd_Model, setColDefs){}
-ZEND_METHOD(Wcd_Model, setKeyOptions){}
-ZEND_METHOD(Wcd_Model, setName){}
-ZEND_METHOD(Wcd_Model, setPKey){}
-ZEND_METHOD(Wcd_Model, setSeqDefs){}
-ZEND_METHOD(Wcd_Model, setTSFlags){}
 ZEND_METHOD(Wcd_Model, stampTime){}
 */
 

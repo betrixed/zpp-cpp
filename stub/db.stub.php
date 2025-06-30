@@ -252,11 +252,11 @@ class Model implements IfCrud {
 
     public function getTableDef() : mixed {}
 
-    public function hasTimestamps() : bool {}
+    public function hasTimeStamps() : bool {}
 
     public function newRow(array $rdata = [], bool $isSaved = false) : IRow {}
 
-    public function read(IRow $row) : IRow {}
+    public function readRow(IRow $row) : IRow {}
 
     public function save(IRow $row, bool $reload = false) : bool {}
 
