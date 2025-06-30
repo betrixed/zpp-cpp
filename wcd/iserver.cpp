@@ -303,7 +303,229 @@ IServer::setAlias(zstr_user alias, zstr_user name)
 	htab_write(alias_).set(alias, name);
 }
 
+htab_read 
+IServer::getAliases()
+{
+	return alias_;
+}
+
+htab_mgr  
+IServer::getConfigNames()
+{
+	htab_mgr result = htab_mgr::getKeys(config_);
+	return result;
+}
+
 };
+
+using namespace wcd;
+
+//static zobj_mgr connect(zstr_user name);
+ZEND_METHOD(Wcd_IServer, Connect)
+{
+	zend_string* name;
+
+	ZEND_PARSE_PARAMETERS_START(1,1)
+	Z_PARAM_STR_OR_NULL(name)
+	ZEND_PARSE_PARAMETERS_END();
+
+	zobj_mgr result = IServer::connect(name);
+
+	result.move_zv(return_value);
+}
+
+
+//void construct(zstr_user svckey);
+ZEND_METHOD(Wcd_IServer, __construct)
+{
+	zend_string* name;
+
+	ZEND_PARSE_PARAMETERS_START(1,1)
+	Z_PARAM_STR_OR_NULL(name)
+	ZEND_PARSE_PARAMETERS_END();
+
+	IServer* cobj = zval_toc<IServer>(ZEND_THIS);
+	cobj->construct(name);	
+}
+
+//void addConfig(zobj_mgr iconfig, zstr_user name);
+ZEND_METHOD(Wcd_IServer, addConfig)
+{
+	zval* config;
+	zend_string* name;
+
+	ZEND_PARSE_PARAMETERS_START(2,2)
+	Z_PARAM_OBJECT_OF_CLASS(config, IConfig::omg.classEntry())
+	Z_PARAM_STR_OR_NULL(name)
+	ZEND_PARSE_PARAMETERS_END();
+
+	IServer* cobj = zval_toc<IServer>(ZEND_THIS);
+	cobj->addConfig(config, name);	
+}
+
+//zobj_mgr getConnect(zstr_user name);
+ZEND_METHOD(Wcd_IServer, getConnect)
+{
+	zend_string* name;
+
+	ZEND_PARSE_PARAMETERS_START(1,1)
+	Z_PARAM_STR_OR_NULL(name)
+	ZEND_PARSE_PARAMETERS_END();
+
+	IServer* cobj = zval_toc<IServer>(ZEND_THIS);
+
+	zobj_mgr result = cobj->getConnect(name);
+	result.move_zv(return_value);
+}
+
+//void config(htab_read data);
+ZEND_METHOD(Wcd_IServer, config)
+{
+	zval* data;
+
+	ZEND_PARSE_PARAMETERS_START(1,1)
+	Z_PARAM_ARRAY(data)
+	ZEND_PARSE_PARAMETERS_END();
+
+	IServer* cobj = zval_toc<IServer>(ZEND_THIS);
+
+	cobj->config(data);
+}
+
+//htab_read IServer::getAliases()
+ZEND_METHOD(Wcd_IServer, getAliases)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	IServer* cobj = zval_toc<IServer>(ZEND_THIS);
+
+	htab_read result = cobj->getAliases();
+
+	result.return_zv(return_value);
+}
+
+//zobj_mgr getConfig(zstr_user name);
+ZEND_METHOD(Wcd_IServer, getConfig)
+{
+	zend_string* name;
+
+	ZEND_PARSE_PARAMETERS_START(1,1)
+	Z_PARAM_STR(name)
+	ZEND_PARSE_PARAMETERS_END();
+
+	IServer* cobj = zval_toc<IServer>(ZEND_THIS);
+	zobj_mgr result = cobj->getConfig(name);	
+
+	result.move_zv(return_value);
+}
+
+ZEND_METHOD(Wcd_IServer, getConfigNames)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	IServer* cobj = zval_toc<IServer>(ZEND_THIS);
+
+	htab_mgr result = cobj->getConfigNames();
+
+	result.move_zv(return_value);
+}
+
+//zobj_mgr getDataCache();
+ZEND_METHOD(Wcd_IServer, getDataCache)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	IServer* cobj = zval_toc<IServer>(ZEND_THIS);
+
+	zobj_mgr result = cobj->getDataCache();
+
+	result.move_zv(return_value);
+}
+
+//zstr_user getDriverClass(zstr_user dkey);
+ZEND_METHOD(Wcd_IServer, getDriverClass)
+{
+	zend_string* name;
+
+	ZEND_PARSE_PARAMETERS_START(1,1)
+	Z_PARAM_STR(name)
+	ZEND_PARSE_PARAMETERS_END();
+
+	IServer* cobj = zval_toc<IServer>(ZEND_THIS);
+	zstr_user result = cobj->getDriverClass(name);	
+
+	result.return_zv(return_value);
+}
+
+//htab_read getDriverClasses();
+ZEND_METHOD(Wcd_IServer, getDriverClasses)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	IServer* cobj = zval_toc<IServer>(ZEND_THIS);
+
+	htab_read result = cobj->getDriverClasses();
+
+	result.return_zv(return_value);
+}
+
+ZEND_METHOD(Wcd_IServer, getSqlClass)
+{
+	zend_string* name;
+
+	ZEND_PARSE_PARAMETERS_START(1,1)
+	Z_PARAM_STR(name)
+	ZEND_PARSE_PARAMETERS_END();
+
+	IServer* cobj = zval_toc<IServer>(ZEND_THIS);
+	zstr_user result = cobj->getSqlClass(name);	
+
+	result.return_zv(return_value);
+}
+
+ZEND_METHOD(Wcd_IServer, getSqlClasses)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	IServer* cobj = zval_toc<IServer>(ZEND_THIS);
+
+	htab_read result = cobj->getSqlClasses();
+
+	result.return_zv(return_value);
+}
+
+//void initDone();
+ZEND_METHOD(Wcd_IServer, initDone)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	IServer* cobj = zval_toc<IServer>(ZEND_THIS);
+
+	cobj->initDone();
+}
+
+//void setAlias(zstr_user alias, zstr_user name);
+ZEND_METHOD(Wcd_IServer, setAlias)
+{
+	zend_string* alias;
+	zend_string* name;
+
+	ZEND_PARSE_PARAMETERS_START(2,2)
+	Z_PARAM_STR(alias)
+	Z_PARAM_STR(name)
+	ZEND_PARSE_PARAMETERS_END();
+
+	IServer* cobj = zval_toc<IServer>(ZEND_THIS);
+
+	cobj->setAlias(alias, name);
+}
+
+/*
+
+
+
+*/
+
 
 PHP_MINIT_FUNCTION(Wcd_IServer_reg)
 {

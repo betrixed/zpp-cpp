@@ -15,7 +15,7 @@ class IConfig {
     public function newConnect(string $name) : IfDriver {}
     public function getDriverClass() : string {}
     public function getPassword() : string {}
-    public function getUsernmae() : string {}
+    public function getUsername() : string {}
     public function getPort() : int {}
     public function getHost() : string {}
     public function getDatabase() : string {}
@@ -38,11 +38,11 @@ class IServer {
 
     public function addConfig(IConfig $cfg, string $name = "default") : void {}
 
-    public function getConnect(string $name = IfServer::DEFAULT_NAME): ?IDriver {}
+    public function getConnect(?string $name = null): ?IDriver {}
 
     public function config(array $data) : void {}
 
-    public function getAlias() : array {}
+    public function getAliases() : array {}
 
     public function getConfig(string $name) : ?IConfig {}
 

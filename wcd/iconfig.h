@@ -35,6 +35,9 @@ public:
 	
 	zstr_mgr getDatabase();
 
+	zval_mgr get(zstr_user name);
+	void     set(zstr_user name, zval_user value);
+	
 protected:
 	htab_mgr data_;
 	htab_mgr cfg_;

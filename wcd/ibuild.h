@@ -38,7 +38,8 @@ namespace wcd {
 		zval_mgr first(htab_read columns);
 		void where(zval_user column, zstr_user bop, zval_user value, zstr_user bval);
 		void whereKeyValue(zval_user key, zval_user value);
-
+		void whereRaw(zobj_user rawobj, htab_read values, zstr_user bval);
+		
 		zobj_mgr getInsertSql(htab_read columns);
 		zval_mgr update(zobj_user irow, htab_read dirty);
 

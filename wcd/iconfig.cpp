@@ -151,6 +151,42 @@ IConfig::getMyKey()
 
 using namespace wcd;
 
+//void assign(htab_read cfg);
+ZEND_METHOD(Wcd_IConfig, assign)
+{
+	zval* data;
+
+	ZEND_PARSE_PARAMETERS_START(1,1)
+	Z_PARAM_ARRAY(data)
+	ZEND_PARSE_PARAMETERS_END();
+
+	IConfig* cobj = zval_toc<IConfig>(ZEND_THIS);
+	cobj->assign(data);
+}
+
+ZEND_METHOD(Wcd_IConfig, get)
+{
+	
+}
+/*
+
+
+ZEND_METHOD(Wcd_IConfig, getArray){}
+ZEND_METHOD(Wcd_IConfig, getCharset){}
+ZEND_METHOD(Wcd_IConfig, getCollation){}
+ZEND_METHOD(Wcd_IConfig, newConnect){}
+ZEND_METHOD(Wcd_IConfig, getDriverClass){}
+ZEND_METHOD(Wcd_IConfig, getPassword){}
+ZEND_METHOD(Wcd_IConfig, getUsername){}
+ZEND_METHOD(Wcd_IConfig, getPort){}
+ZEND_METHOD(Wcd_IConfig, getHost){}
+ZEND_METHOD(Wcd_IConfig, getDatabase){}
+ZEND_METHOD(Wcd_IConfig, set){}
+ZEND_METHOD(Wcd_IConfig, getMyKey){}
+ZEND_METHOD(Wcd_IConfig, setMyKey){}
+ZEND_METHOD(Wcd_IConfig, newSql){}
+*/
+
 PHP_MINIT_FUNCTION(Wcd_IConfig_reg)
 {
 	IConfig::omg.classEntry(register_class_Wcd_IConfig());

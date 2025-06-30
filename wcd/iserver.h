@@ -66,6 +66,8 @@ namespace wcd {
 		void addConfig(zobj_mgr iconfig, zstr_user name);
 
 		void setAlias(zstr_user alias, zstr_user name);
+		htab_read getAliases();
+		htab_mgr  getConfigNames();
 
 	};
 

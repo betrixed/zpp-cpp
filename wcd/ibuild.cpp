@@ -34,6 +34,103 @@ using namespace zpp;
 
 	}
 
+	void throw_array_hole(unsigned int ix)
+	{
+		zstr_buffer buf;
+
+		buf << "Where list has missing index " << ix;
+
+		zend_throw_error(zend_ce_error, buf.data());
+	}
+
+	void where_unpack(htab_read aw)
+	{
+		auto wlen = aw.size();
+		if (wlen==0)
+		{
+			return;
+		}
+		zval_user p0 = aw.get(int(0));
+		if (p0.isNull())
+		{
+			throw_array_hole(0);
+			return;
+		}
+		zval_user p3;
+		if (wlen > 3)
+		{
+			p3 = aw.get(int(3));
+			if (p3.isNull())
+			{
+				throw_array_hole(3);
+				return;
+			}
+		}
+		zval_user p2;
+		if (wlen > 2)
+		{
+			p2 = aw.get(int(2));
+			if (p2.isNull())
+			{
+				throw_array_hole(2);
+				return;
+			}
+		}
+		zval_user p1 = aw.get(int(1));
+		if (p1.isNull()) 
+		{
+			throw_array_hole(1);
+			return;
+		}
+
+		switch(wlen)
+		{
+		case 4:
+			where(p0,p1,p2,p3);
+			break;
+		case 3:
+			where(p0,p1,p2);
+			break;
+		case 2:
+			where(p0,p1);
+			break;
+		}
+	}
+
+	void where_list(htab_read aw)
+	{
+		auto wlen = aw.size();
+
+		if (wlen==0)
+		{
+			return;
+		}
+
+		zval_user p0 = aw.get(int(0));
+
+		if (p0.isNull())
+		{
+			throw_array_hole(0);
+			return;
+		}
+		if (p0.isArray())
+		{
+			htab_walk wk;
+			auto item = wk.value();
+			for(wk.start(p0.zarray()); wk.ok(); wk.next())
+			{
+				//Only process arrays
+				if (item.isArray())
+				{
+					where_list(item.zarray());
+				}
+			}
+		}
+		else {
+			where_unpack(aw);
+		}
+	}
+
 	ISql& 
 	IBuild::isql()
 	{
@@ -247,19 +344,31 @@ using namespace zpp;
 
 
 	void
-	IBuild::where(zval_user column, zstr_user operator, zval_user value, zstr_user bval)
+	IBuild::where(zval_user column, zstr_user opcmp, zval_user value, zstr_user bval)
 	{
 		Bindings& bind = bindings();
 
 		if (column.isString())
 		{
 			bind.where(column, operator, value, bval);
+			return;
 		}
-		if (columns.isObject())
+		if (column.isArray())
 		{
-
+			where_list(column.zarray());
+			return;
 		}
-		zend_throw_error(zend_ce_error, "Where column type not supported");
+		if (column.isObject())
+		{
+			if (column.instanceof(Raw::omg.classEntry())) {
+				whereRaw(column.zobject(), opcmp, value, bval);
+				return;
+			}
+		}
+		zstr_buffer buf;
+		buf << "column type '" << zend_zval_type_name(column) << "' not supported";
+
+		zend_throw_error(zend_ce_error, buf.data());
 		return;
 		
 	}
