@@ -100,6 +100,10 @@ namespace zpp {
 
 	    static zstr_mgr base64_decode(const unsigned char* c, size_t slen);
 	    static zstr_mgr base64_encode(const unsigned char* c, size_t slen);
+
+		static zstr_mgr empty_str();
+
+
 	};
 
 	class zstr_empty : public zstr_mgr

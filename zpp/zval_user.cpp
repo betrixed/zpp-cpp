@@ -525,6 +525,7 @@ zval_user::string_bind(zval* tmp, zend_string* s)
     }
 }
 
+
 }; //namespace
 //zval_user.cpp
 #endif

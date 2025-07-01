@@ -12,6 +12,10 @@ extern "C" {
 }
 #endif
 
+#ifndef WCD_ISERVER_H
+#include "iserver.h"
+#endif
+
 namespace wcd {
 
 using namespace zpp;
@@ -29,6 +33,8 @@ CfgInit::init()
 	k_host = "host";
 	k_port = "port";
 	k_database = "database";
+	k_dbname = "dbname";
+
 	k_username = "username";
 	k_password = "password";
 	k_charset = "charset";
@@ -78,6 +84,24 @@ IConfig::assign(htab_read cfg)
 
 }
 
+zval_mgr 
+IConfig::getValue(zstr_user key, bool required, zval_user ifnot)
+{
+	zval_mgr result = cfg_.get(key);
+	if (!result.isNull())
+	{
+		return result;
+	}
+	if (!required)
+	{
+		result = ifnot;
+		return result;
+	}
+	zstr_buffer buf;
+	buf << "Db IConfig needs value for : '" << key << '\'';
+	zend_throw_error(zend_ce_error, buf.data());
+	return result;
+}
 
 zval_mgr 
 IConfig::getValue(zval_user keys, bool required, zval_user ifnot)
@@ -147,6 +171,147 @@ IConfig::getMyKey()
 	return mykey_;
 }
 
+
+zval_mgr 
+IConfig::get(zstr_user name)
+{
+	return data_.get(name);
+}
+
+void     
+IConfig::set(zstr_user name, zval_user value)
+{
+	htab_write hw(data_);
+
+	hw.set(name, value);
+}
+
+void     
+IConfig::set(zstr_user name, zstr_user value)
+{
+	htab_write hw(data_);
+
+	hw.set(name, value);
+}
+
+htab_read 
+IConfig::getArray()
+{
+	return data_;
+}
+
+zstr_mgr 
+IConfig::getCharset()
+{
+	return getValue(ICS.k_charset, false, zval_mgr::empty_str());
+}
+
+zstr_mgr 
+IConfig::getCollation()
+{
+	return getValue(ICS.k_collation, false, zval_mgr::empty_str());
+}
+
+zobj_mgr 
+IConfig::newConnect(zstr_user name)
+{
+	zstr_mgr dclass = getDriverClass();
+	zval_mgr args_mgr;
+	htab_write args(args_mgr);
+	args.push_back(vobj());
+	args.push_back(name);
+	return ReflectCache::staticInstanceArgs(dclass, args_mgr);
+}
+
+zstr_mgr 
+IConfig::stringVal(zstr_user key)
+{
+	zval_user result = data_.get(key);
+	if (result.isNull())
+	{
+		return zstr_mgr::empty_str();
+	}
+	else {
+		return result;
+	}
+}
+
+zstr_mgr
+IConfig::getDriverName()
+{
+	return stringVal(ICS.k_driver);
+}
+
+zstr_mgr
+IConfig::getDriverClass()
+{
+	zstr_mgr dname = getDriverName();
+	zobj_user servers = Services::getOne(IServer::omg.class_name());
+	IServer* sv = zobj_toc<IServer>(servers);
+	return sv->getDriverClass(dname);
+}
+
+zstr_mgr 
+IConfig::getPassword()
+{
+	return stringVal(ICS.k_password);
+}
+
+zstr_mgr 
+IConfig::getUsername()
+{
+	return stringVal(ICS.k_username);
+}
+
+int 
+IConfig::getPort()
+{
+	zval_mgr result = getValue(ICS.k_port,false,zval_mgr());
+	return result.zlong();
+}
+
+zstr_mgr 
+IConfig::getHost()
+{
+	return stringVal(ICS.k_host);
+}
+
+zstr_mgr 
+IConfig::getDatabase()
+{
+	zval_mgr list_mgr;
+	htab_write list(list_mgr);
+	list.push_items(ICS.k_dbname, ICS.k_database);
+
+	zval_mgr result = getValue(list_mgr, true, zval_mgr::empty_str());
+	return result;
+}
+
+zobj_mgr
+IConfig::newSql()
+{
+	zstr_mgr obclass = getSqlClass();
+
+	return ReflectCache::staticInstance(obclass);
+}
+
+zstr_mgr 
+IConfig::getSqlClass()
+{
+	zstr_mgr pc = stringVal(ICS.k_processor);
+	if (pc.size())
+	{
+		return pc;
+	}
+	zobj_user servers = Services::getOne(IServer::omg.class_name());
+
+	zstr_mgr dname = getDriverName();
+	IServer* sv = zobj_toc<IServer>(servers);
+	pc = sv->getSqlClass(dname);
+	set(ICS.k_processor, pc);
+	return pc;
+}
+
 };//namespace wcd
 
 using namespace wcd;
@@ -164,28 +329,185 @@ ZEND_METHOD(Wcd_IConfig, assign)
 	cobj->assign(data);
 }
 
+//zval_mgr get(zstr_user name);
 ZEND_METHOD(Wcd_IConfig, get)
 {
-	
+	zend_string* name;
+
+	ZEND_PARSE_PARAMETERS_START(1,1)
+	Z_PARAM_STR(name)
+	ZEND_PARSE_PARAMETERS_END();
+
+	IConfig* cobj = zval_toc<IConfig>(ZEND_THIS);
+	zval_mgr result = cobj->get(name);	
+
+	result.move_zv(return_value);
 }
-/*
 
+//zval_mgr get(zstr_user name);
+ZEND_METHOD(Wcd_IConfig, set)
+{
+	zend_string* name;
+	zval*        data;
 
-ZEND_METHOD(Wcd_IConfig, getArray){}
-ZEND_METHOD(Wcd_IConfig, getCharset){}
-ZEND_METHOD(Wcd_IConfig, getCollation){}
-ZEND_METHOD(Wcd_IConfig, newConnect){}
-ZEND_METHOD(Wcd_IConfig, getDriverClass){}
-ZEND_METHOD(Wcd_IConfig, getPassword){}
-ZEND_METHOD(Wcd_IConfig, getUsername){}
-ZEND_METHOD(Wcd_IConfig, getPort){}
-ZEND_METHOD(Wcd_IConfig, getHost){}
-ZEND_METHOD(Wcd_IConfig, getDatabase){}
-ZEND_METHOD(Wcd_IConfig, set){}
-ZEND_METHOD(Wcd_IConfig, getMyKey){}
-ZEND_METHOD(Wcd_IConfig, setMyKey){}
-ZEND_METHOD(Wcd_IConfig, newSql){}
-*/
+	ZEND_PARSE_PARAMETERS_START(2,2)
+	Z_PARAM_STR(name)
+	Z_PARAM_ZVAL(data)
+	ZEND_PARSE_PARAMETERS_END();
+
+	IConfig* cobj = zval_toc<IConfig>(ZEND_THIS);
+	cobj->set(name, zval_user(data));	
+}
+
+ZEND_METHOD(Wcd_IConfig, getArray)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	IConfig* cobj = zval_toc<IConfig>(ZEND_THIS);
+
+	htab_read result = cobj->getArray();
+
+	result.return_zv(return_value);
+}
+
+//zstr_mgr getCharset()
+ZEND_METHOD(Wcd_IConfig, getCharset)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	IConfig* cobj = zval_toc<IConfig>(ZEND_THIS);
+
+	zstr_mgr result = cobj->getCharset();
+
+	result.move_zv(return_value);
+}
+
+ZEND_METHOD(Wcd_IConfig, getCollation)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	IConfig* cobj = zval_toc<IConfig>(ZEND_THIS);
+
+	zstr_mgr result = cobj->getCollation();
+
+	result.move_zv(return_value);
+}
+
+ZEND_METHOD(Wcd_IConfig, newConnect)
+{
+	zend_string* name;
+
+	ZEND_PARSE_PARAMETERS_START(1,1)
+	Z_PARAM_STR(name)
+	ZEND_PARSE_PARAMETERS_END();
+
+	IConfig* cobj = zval_toc<IConfig>(ZEND_THIS);
+	zobj_mgr result = cobj->newConnect(name);	
+
+	result.move_zv(return_value);	
+}
+
+ZEND_METHOD(Wcd_IConfig, getDriverClass)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	IConfig* cobj = zval_toc<IConfig>(ZEND_THIS);
+
+	zstr_mgr result = cobj->getDriverClass();
+
+	result.move_zv(return_value);
+}
+
+ZEND_METHOD(Wcd_IConfig, getPassword)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	IConfig* cobj = zval_toc<IConfig>(ZEND_THIS);
+
+	zstr_mgr result = cobj->getPassword();
+
+	result.move_zv(return_value);
+}
+
+ZEND_METHOD(Wcd_IConfig, getUsername)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	IConfig* cobj = zval_toc<IConfig>(ZEND_THIS);
+
+	zstr_mgr result = cobj->getUsername();
+
+	result.move_zv(return_value);
+}
+
+ZEND_METHOD(Wcd_IConfig, getPort)
+{
+ 	ZEND_PARSE_PARAMETERS_NONE();
+
+	IConfig* cobj = zval_toc<IConfig>(ZEND_THIS);
+
+	zend_long result = cobj->getPort();
+
+	RETURN_LONG(result);
+}
+
+ZEND_METHOD(Wcd_IConfig, getHost)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	IConfig* cobj = zval_toc<IConfig>(ZEND_THIS);
+
+	zstr_mgr result = cobj->getHost();
+
+	result.move_zv(return_value);	
+}
+
+ZEND_METHOD(Wcd_IConfig, getDatabase)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	IConfig* cobj = zval_toc<IConfig>(ZEND_THIS);
+
+	zstr_mgr result = cobj->getDatabase();
+
+	result.move_zv(return_value);	
+}
+
+ZEND_METHOD(Wcd_IConfig, getMyKey)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	IConfig* cobj = zval_toc<IConfig>(ZEND_THIS);
+
+	zstr_user result = cobj->getMyKey();
+
+	result.return_zv(return_value);	
+}
+
+//void setMyKey(zstr_user key)
+ZEND_METHOD(Wcd_IConfig, setMyKey)
+{
+	zend_string* name;
+
+	ZEND_PARSE_PARAMETERS_START(1,1)
+	Z_PARAM_STR(name)
+	ZEND_PARSE_PARAMETERS_END();
+
+	IConfig* cobj = zval_toc<IConfig>(ZEND_THIS);
+	cobj->setMyKey(name);
+}
+
+ZEND_METHOD(Wcd_IConfig, newSql)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	IConfig* cobj = zval_toc<IConfig>(ZEND_THIS);
+
+	zobj_mgr result = cobj->newSql();
+
+	result.move_zv(return_value);
+}
+
 
 PHP_MINIT_FUNCTION(Wcd_IConfig_reg)
 {

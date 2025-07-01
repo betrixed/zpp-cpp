@@ -8,7 +8,7 @@ namespace Wcd;
 
 class IConfig {
     public function assign(array $cfg) : void {}
-    public function get(string $key) : mixed {}
+    
     public function getArray() : array {}
     public function getCharset() : string {}
     public function getCollation() : string {}
@@ -19,6 +19,8 @@ class IConfig {
     public function getPort() : int {}
     public function getHost() : string {}
     public function getDatabase() : string {}
+    
+    public function get(string $key) : mixed {}
     public function set(string $key, mixed $value): void {}
 
     public function getMyKey() : string {}

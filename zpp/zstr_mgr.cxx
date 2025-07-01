@@ -314,6 +314,12 @@ zstr_mgr::base64_encode(const unsigned char* c, size_t slen)
 	return result;
 }
 
+zstr_mgr //static
+zstr_mgr::empty_str()
+{
+	return zstr_mgr(zend_empty_string);
+}
+
 };
 
 #endif

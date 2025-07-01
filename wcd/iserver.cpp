@@ -223,13 +223,13 @@ IServer::connect(zstr_user name)
 	return s->getConnect(name);
 }
 
-zstr_user 
+zstr_mgr 
 IServer::getSqlClass(zstr_user dkey)
 {
 	return sqlClasses_.get(dkey);
 }
 
-zstr_user 
+zstr_mgr 
 IServer::getDriverClass(zstr_user dkey)
 {
 	return driverClasses_.get(dkey);
@@ -452,9 +452,9 @@ ZEND_METHOD(Wcd_IServer, getDriverClass)
 	ZEND_PARSE_PARAMETERS_END();
 
 	IServer* cobj = zval_toc<IServer>(ZEND_THIS);
-	zstr_user result = cobj->getDriverClass(name);	
+	zstr_mgr result = cobj->getDriverClass(name);	
 
-	result.return_zv(return_value);
+	result.move_zv(return_value);
 }
 
 //htab_read getDriverClasses();
@@ -478,9 +478,9 @@ ZEND_METHOD(Wcd_IServer, getSqlClass)
 	ZEND_PARSE_PARAMETERS_END();
 
 	IServer* cobj = zval_toc<IServer>(ZEND_THIS);
-	zstr_user result = cobj->getSqlClass(name);	
+	zstr_mgr result = cobj->getSqlClass(name);	
 
-	result.return_zv(return_value);
+	result.move_zv(return_value);
 }
 
 ZEND_METHOD(Wcd_IServer, getSqlClasses)

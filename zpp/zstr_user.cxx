@@ -493,6 +493,8 @@ str_replace(
 	return result.zstr();
 }
 
+
+
 };
 //zstr_user.cpp
 #endif

@@ -79,6 +79,13 @@ zval_mgr::zstr() const
     return Z_STR_P(p);
 }
 
+zend_long 
+zval_mgr::zlong() const
+{
+    zval_user result(*this);
+    return result.zlong();
+}
+
 HashTable*   
 zval_mgr::zarray() const
 {
@@ -561,6 +568,12 @@ zval_mgr::try_decref(zval* p)
         }
     }
     return false;
+}
+
+zval_mgr //static 
+zval_mgr::empty_str()
+{
+    return zval_mgr(zend_empty_string);
 }
 
 }; // namespace Php

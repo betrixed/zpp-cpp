@@ -55,8 +55,8 @@ namespace wcd {
 		zobj_mgr getConnect(zstr_user name);
 		zobj_mgr getConfig(zstr_user name);
 		
-		zstr_user getSqlClass(zstr_user dkey);
-		zstr_user getDriverClass(zstr_user dkey);
+		zstr_mgr getSqlClass(zstr_user dkey);
+		zstr_mgr getDriverClass(zstr_user dkey);
 
 		htab_read getSqlClasses();
 		htab_read getDriverClasses();

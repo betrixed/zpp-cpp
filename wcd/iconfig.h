@@ -25,6 +25,7 @@ public:
 
 	void assign(htab_read cfg);
 	zval_mgr getValue(zval_user keys, bool required, zval_user ifnot);
+	zval_mgr getValue(zstr_user key, bool required, zval_user ifnot);
 	
 	zstr_user getMyKey();
 	void      setMyKey(zstr_user key);
@@ -33,11 +34,28 @@ public:
 	zobj_mgr newSql();
 	zobj_mgr newDmlBuild(zobj_mgr idriver);
 	
-	zstr_mgr getDatabase();
-
+	
 	zval_mgr get(zstr_user name);
 	void     set(zstr_user name, zval_user value);
+	void     set(zstr_user name, zstr_user value);
 	
+	htab_read getArray();
+	zstr_mgr getCharset();
+	zstr_mgr getCollation();
+	zstr_mgr getDriverClass();
+
+	zstr_mgr stringVal(zstr_user key);
+
+	zstr_mgr getDriverName();
+	zstr_mgr getPassword();
+	zstr_mgr getUsername();
+	int      getPort();
+	zstr_mgr getHost();
+	zstr_mgr getDatabase();
+
+	zstr_mgr getSqlClass();
+
+
 protected:
 	htab_mgr data_;
 	htab_mgr cfg_;
@@ -55,6 +73,8 @@ public:
 	zstr_intern k_host;
 	zstr_intern k_port;
 	zstr_intern k_database;
+	zstr_intern k_dbname;
+
 	zstr_intern k_username;
 	zstr_intern k_password;
 	zstr_intern k_charset;

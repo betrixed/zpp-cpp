@@ -130,6 +130,7 @@ public:
 
     zend_string* zstr() const;
     HashTable*   zarray() const;
+    zend_long    zlong() const;
     
     int   ref_type() const;
     
@@ -191,7 +192,7 @@ public:
         return (ref_type() == IS_PTR);
     }
 
-   
+    static zval_mgr empty_str(); 
 };
 
 }; // namespace Php
