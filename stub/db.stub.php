@@ -284,4 +284,18 @@ class Model implements IfCrud {
 
 };
 
+class RunSql {
+    public function __construct(IDriver $db, string $sql,
+            ?array $bind=null, bool $retval = false);
+
+    static public function Op(IDriver $db, string $sql,
+            ?array $bind=null, bool $retval = false ) : mixed {}
+
+    public function operation() : mixed {}
+    
+    public function run() : mixed {}
+
+};
+
+
 

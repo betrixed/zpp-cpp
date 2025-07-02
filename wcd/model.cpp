@@ -36,6 +36,8 @@ extern "C" {
 
 namespace wcd {
 
+	base_obj_mgr<Model> Model::omg;
+	
 	zend_class_entry* zintf_ce_IfCrud;
 
 	class Model_init : public state_init {

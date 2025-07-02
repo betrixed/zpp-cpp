@@ -12,6 +12,7 @@
 namespace wcd {
 using namespace zpp;
 
+	base_obj_mgr<IBuild> IBuild::omg;
 
 	void IBuild::construct(zval_user driver)
 	{

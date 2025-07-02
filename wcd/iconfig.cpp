@@ -22,6 +22,8 @@ using namespace zpp;
 
 CfgInit ICS;
 
+base_obj_mgr<IConfig> IConfig::omg;
+
 
 CfgInit::CfgInit() : state_init() {}
 

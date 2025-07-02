@@ -16,6 +16,9 @@ namespace wcd {
 		bool      retval_;
 
 	public:
+
+		static base_obj_mgr<RunSql> omg;
+
 		void construct(zobj_user db, zstr_user sql, 
 			 zval_user bind_, bool rval_);
 

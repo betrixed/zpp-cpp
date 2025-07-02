@@ -7,6 +7,8 @@
 
 namespace wcd {
 
+	base_obj_mgr<RunSql> RunSql::omg;
+
 	void 
 	RunSql::construct(zobj_user db, zstr_user sql, 
 			 zval_user bind, bool rval)
@@ -24,5 +26,10 @@ namespace wcd {
 	}
 };
 
-
+/*
+ZEND_METHOD(Wcd_RunSql, __construct);
+ZEND_METHOD(Wcd_RunSql, Op);
+ZEND_METHOD(Wcd_RunSql, operation);
+ZEND_METHOD(Wcd_RunSql, run);
+*/
 #endif
