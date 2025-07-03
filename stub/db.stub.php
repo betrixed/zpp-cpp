@@ -153,6 +153,8 @@ class IDriver {
 
     public function iSql(): ISql {}
 
+    public function iConfig() : IConfig {}
+
     public function inTransaction(): bool {}
 
     public function isAutoCommit(): bool {}

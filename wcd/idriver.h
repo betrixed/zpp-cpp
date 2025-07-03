@@ -55,7 +55,8 @@ namespace wcd {
 		zval_mgr handle();
 
 		zobj_mgr iSql();
-
+		zobj_mgr iConfig();
+		
 		bool inTransaction();
 		bool isAutoCommit();
 		bool isConnected();

@@ -20,6 +20,10 @@ extern "C" {
 #include "wcc/services.h"
 #endif
 
+#ifndef WCD_RUNSQL_H
+#include "runsql.h"
+#endif
+
 namespace wcd {
 
 base_obj_mgr<IDriver> IDriver::omg;
@@ -36,12 +40,15 @@ public:
 	DBSInit() : state_init() {}
 		
 
-	void init() override {	
+	void init() override;
+};
+
+
+void DBSInit::init() {	
 		query_str = "query";
 		fetch_str = "fetch";
 		close_cursor = "closecursor";
 	}
-};
 
 DBSInit DBS;
 
@@ -204,6 +211,7 @@ ZEND_METHOD(Wcd_IDriver, transaction){}
 PHP_MINIT_FUNCTION(Wcd_IDriver_reg)
 {
 	IDriver::omg.classEntry(register_class_Wcd_IDriver());
+	RunSql::omg.classEntry(register_class_Wcd_Sql_RunSql());
 
 	return SUCCESS;
 }
