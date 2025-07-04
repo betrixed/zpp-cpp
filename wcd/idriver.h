@@ -21,7 +21,12 @@ namespace wcd {
 		
 		void construct(zobj_user icfg, zstr_user name);
 		void destruct();
-		void begin();
+
+		virtual void afterConnect();
+		virtual zstr_mgr serverNameFormat();
+
+		bool begin();
+		
 		void bind(zval_user stmt, htab_read params);
 		void close();
 		void closeStmt(zval_user stmt);
@@ -54,9 +59,10 @@ namespace wcd {
 
 		zval_mgr handle();
 
-		zobj_mgr iSql();
-		zobj_mgr iConfig();
+		zobj_mgr isql();
+		zobj_mgr iconfig();
 		
+
 		bool inTransaction();
 		bool isAutoCommit();
 		bool isConnected();
@@ -93,6 +99,10 @@ namespace wcd {
 
 		
 	protected:
+
+		IConfig* 	icfg();
+
+
 		zobj_mgr    icfg_;
 		zstr_mgr    cfg_name_;
 		zstr_mgr	db_name_;
@@ -108,7 +118,7 @@ namespace wcd {
 
 		zobj_mgr    schema_def_;
 
-		IConfig*    iconfig();
+		
 
 
 

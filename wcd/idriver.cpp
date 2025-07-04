@@ -35,7 +35,7 @@ public:
 	zstr_intern  query_str;
 	zstr_intern  fetch_str;
 	zstr_intern  close_cursor;
-
+	zstr_intern  pdo_prefix;
 
 	DBSInit() : state_init() {}
 		
@@ -48,22 +48,29 @@ void DBSInit::init() {
 		query_str = "query";
 		fetch_str = "fetch";
 		close_cursor = "closecursor";
+		pdo_prefix = "pdo_";
 	}
 
 DBSInit DBS;
 
 void 
-IDriver::construct(zobj_user icfg, zstr_user name)
+IDriver::construct(zobj_user icfgobj, zstr_user name)
 {
-	icfg_ = icfg;
+	icfg_ = icfgobj;
 	cfg_name_ = name;
-	IConfig* cfg = iconfig();
+	IConfig* cfg = icfg();
 	db_name_ = cfg->getDatabase();
 	isql_ = cfg->newSql();
 }
 
-IConfig*    
+zobj_mgr  
 IDriver::iconfig()
+{
+	return icfg_;
+}
+
+IConfig*    
+IDriver::icfg()
 {
 	return zobj_toc<IConfig>(icfg_);
 }
@@ -82,10 +89,82 @@ IDriver::destruct()
 	icfg_.init();
 }
 
+zstr_mgr 
+IDriver::getDSN()
+{
+	zstr_mgr dname = icfg()->getDriverName();
+	dname = dname.to_lower();
+
+	if (dname.starts_with(DBS.pdo_prefix)) {
+		dname = dname.substr(4);
+	}
+	else {
+		zend_throw_error(zend_ce_error,"PDO Driver names need to begin with 'pdo_'");
+		return dname;
+	}
+	IConfig* cfg = icfg();
+	zstr_mgr host = cfg->getHost();
+	zstr_mgr dbname = cfg->getDatabase();
+
+	zstr_buffer buf;
+
+	buf << dname << ':' << "host=" << host
+	    << ";dbname=" << dbname;
+
+	return buf.zstr();
+}
+
+htab_mgr 
+IDriver::getConnectOptions()
+{
+	htab_mgr result;
+
+	htab_write options(result);
+
+	options.push_back(PDO_ATTR_ERRMODE);
+	options.push_back(PDO_ERRMODE_EXCEPTION);
+	return result;
+}
+
+void 
+IDriver::connect()
+{
+	if (handle_.ok())
+	{
+		return;
+	}
+
+	zstr_mgr dsn = getDSN();
+
+
+}
+
+void //virtual
+IDriver::afterConnect()
+{
+
+}
+
+zval_mgr 
+IDriver::handle()
+{
+	if (handle_.ok())
+	{
+		return handle_;
+	}
+
+}
+
+bool 
+IDriver::begin()
+{
+
+}
+
 zobj_mgr 
 IDriver::newDmlBuild()
 {
-	IConfig* cfg = iconfig();
+	IConfig* cfg = icfg();
 	return cfg->newDmlBuild(this->vobj());
 }
 
@@ -106,7 +185,7 @@ IDriver::getSchema()
 	if (cache_mgr.ok())
 	{
 		cache = zobj_toc<ICache>(cache_mgr);
-		name = iconfig()->getDatabase();
+		name = icfg()->getDatabase();
 		schema_def_ = cache->get(name); 
 	}
 	if (!schema_def_.ok())
@@ -161,10 +240,28 @@ ZEND_METHOD(Wcd_IDriver, __construct)
 
 }
 
-ZEND_METHOD(Wcd_IDriver, __destruct){}
-ZEND_METHOD(Wcd_IDriver, afterConnect){}
-ZEND_METHOD(Wcd_IDriver, serverNameFormat){}
-ZEND_METHOD(Wcd_IDriver, begin){}
+ZEND_METHOD(Wcd_IDriver, __destruct)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	IDriver* db = zval_toc<IDriver>(ZEND_THIS);
+
+	db->destruct();
+}
+
+
+
+ZEND_METHOD(Wcd_IDriver, begin)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	IDriver* db = zval_toc<IDriver>(ZEND_THIS);
+
+	RETURN_BOOL(db->begin());
+
+
+}
+
 ZEND_METHOD(Wcd_IDriver, bind){}
 ZEND_METHOD(Wcd_IDriver, close){}
 ZEND_METHOD(Wcd_IDriver, closeStmt){}
@@ -186,6 +283,7 @@ ZEND_METHOD(Wcd_IDriver, getTableColumns){}
 ZEND_METHOD(Wcd_IDriver, getTableModel){}
 ZEND_METHOD(Wcd_IDriver, getTableNames){}
 ZEND_METHOD(Wcd_IDriver, handle){}
+ZEND_METHOD(Wcd_IDriver, iConfig){}
 ZEND_METHOD(Wcd_IDriver, iSql){}
 ZEND_METHOD(Wcd_IDriver, inTransaction){}
 ZEND_METHOD(Wcd_IDriver, isAutoCommit){}
@@ -211,7 +309,7 @@ ZEND_METHOD(Wcd_IDriver, transaction){}
 PHP_MINIT_FUNCTION(Wcd_IDriver_reg)
 {
 	IDriver::omg.classEntry(register_class_Wcd_IDriver());
-	RunSql::omg.classEntry(register_class_Wcd_Sql_RunSql());
+	
 
 	return SUCCESS;
 }

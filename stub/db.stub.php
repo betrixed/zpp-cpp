@@ -97,10 +97,6 @@ class IDriver {
 
     public function __destruct();
 
-    protected function afterConnect() : void {}
-
-    protected function serverNameFormat() : string {}
-
 
     public function begin(): bool {}
 
@@ -109,8 +105,6 @@ class IDriver {
     public function close() : void {}
 
     public function closeStmt(mixed $stmt) : void {}
-
-    
 
     public function commit(): bool {}
 
@@ -286,18 +280,6 @@ class Model implements IfCrud {
 
 };
 
-class RunSql {
-    public function __construct(IDriver $db, string $sql,
-            ?array $bind=null, bool $retval = false);
-
-    static public function Op(IDriver $db, string $sql,
-            ?array $bind=null, bool $retval = false ) : mixed {}
-
-    public function operation() : mixed {}
-    
-    public function run() : mixed {}
-
-};
 
 
 

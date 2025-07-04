@@ -39,6 +39,7 @@ zend_class_entry* zclass_sql_tcolumns;
 zend_class_entry* zclass_table_attr;
 zend_class_entry* zclass_join_expr;
 
+
 void sql_strtab::init() 
 {
 
@@ -1139,6 +1140,8 @@ PHP_MINIT_FUNCTION(SqlIPart_reg)
 	ce = register_class_Wcd_Sql_Param(zclass_sql_ifipart);
 	Param::omg.classEntry(ce);
 
+	RunSql::omg.classEntry(register_class_Wcd_Sql_RunSql());
+	
 	if (init_isql_module())
 	{
 		return SUCCESS;

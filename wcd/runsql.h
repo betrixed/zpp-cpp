@@ -20,12 +20,13 @@ namespace wcd {
 		static base_obj_mgr<RunSql> omg;
 
 		void construct(zobj_user db, zstr_user sql, 
-			 zval_user bind_, bool rval_);
+			 htab_read bind, bool rval = false);
 
 		zval_mgr operation();
 		zval_mgr run();
 		
-		static zval_mgr op(zobj_user db, zstr_user sql, htab_read params, bool rval = false );
+		static zval_mgr op(zobj_user db, zstr_user sql, 
+			htab_read bind, bool rval = false );
 
 	};
 };

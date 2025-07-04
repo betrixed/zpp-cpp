@@ -85,6 +85,7 @@ extern "C" {
 
 #include "wcd/sql_ipart.cpp"
 #include "wcd/sql_isql.cpp"
+#include "wcd/runsql.cpp"
 
 #include "wcc/hmap.cpp"
 #include "wcd/irow.cpp"
