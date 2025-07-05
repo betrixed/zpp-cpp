@@ -24,6 +24,10 @@ extern "C" {
 #include "runsql.h"
 #endif
 
+#ifndef PHP_PDO_DRIVER_H
+#include <ext/pdo/php_pdo_driver.h>
+#endif
+
 namespace wcd {
 
 base_obj_mgr<IDriver> IDriver::omg;
@@ -36,6 +40,12 @@ public:
 	zstr_intern  fetch_str;
 	zstr_intern  close_cursor;
 	zstr_intern  pdo_prefix;
+	zstr_intern  pdo_class;
+	zstr_intern  begin_trans;
+	zstr_intern  bind_value;
+	zstr_intern  commit_fn;
+	zstr_intern  close_cursor;
+
 
 	DBSInit() : state_init() {}
 		
@@ -49,6 +59,11 @@ void DBSInit::init() {
 		fetch_str = "fetch";
 		close_cursor = "closecursor";
 		pdo_prefix = "pdo_";
+		pdo_class = "PDO";
+		begin_trans = "begintransaction";
+		bind_value = "bindvalue";
+		commit_fn = "commit";
+		close_cursor = "closecursor";
 	}
 
 DBSInit DBS;
@@ -121,8 +136,8 @@ IDriver::getConnectOptions()
 
 	htab_write options(result);
 
-	options.push_back(PDO_ATTR_ERRMODE);
-	options.push_back(PDO_ERRMODE_EXCEPTION);
+	options.push_back((int)PDO_ATTR_ERRMODE);
+	options.push_back((int)PDO_ERRMODE_EXCEPTION);
 	return result;
 }
 
@@ -136,7 +151,24 @@ IDriver::connect()
 
 	zstr_mgr dsn = getDSN();
 
+	htab_mgr options = getConnectOptions();
 
+	IConfig* cfg = icfg();
+
+	zstr_mgr user = cfg->getUsername();
+	zstr_mgr pw = cfg->getPassword();
+
+	htab_mgr  args_mgr;
+	htab_write args(args_mgr);
+
+	args.push_back(dsn);
+	args.push_back(user);
+	args.push_back(pw);
+	args.push_back(options);
+
+	handle_ = ReflectCache::staticInstanceArgs(DBS.pdo_class, args_mgr);
+
+	afterConnect();
 }
 
 void //virtual
@@ -155,11 +187,103 @@ IDriver::handle()
 
 }
 
+int IDriver::pdo_type(unsigned int ztype)
+{
+	switch(ztype)
+	{
+	case IS_INTEGER:
+		return PDO_PARAM_INT;
+	case IS_TRUE:
+	case IS_FALSE:
+		return PDO_PARAM_BOOL;
+	case IS_STRING:
+	default:
+		return PDO_PARAM_STR;
+	}
+}
+
+void 
+Driver::close()
+{
+	handle_.init();
+}
+
+bool 
+Driver::commit()
+{
+	zobj_mgr handle = handle();
+
+	if (handle.ok())
+	{
+		zval_mgr result = handle.call(DBS.commit_fn);
+		return result.isTrue();
+	}
+	return false;
+}
+
+void 
+Driver::closeStmt(zval_user stmt)
+{
+	zobj_mgr obj(stmt);
+	obj.call(DBS.close_cursor);
+}
+
+void Driver::bind(zval_user stmt, htab_read params)
+{
+	if (params.size())
+	{
+		htab_walk wk;
+		auto val = wk.value();
+
+		fn_call_args<3> bvcall;
+
+		bvcall.set_fci(stmt, DBS.bind_value);
+		zval* args = bvcall.argsptr();
+
+		int ix = 0;
+		int bpdo = 0;
+
+		for(wk.start(stmt); wk.ok(); wk.next(), ix++)
+		{
+			if (val.isArray())
+			{
+				htab_walk wk2;
+				auto bname = wk2.key();
+				auto bval = wk2.value();
+
+				for(wk2.start(val.zarray()); wk2.ok(); wk2.next())
+				{
+	
+					ZVAL_STR(args, bname);
+					ZVAL_COPY_VALUE(args+1, bval);
+					ZVAL_LONG(args+2, pdo_type(bval.ztype()));
+					bvcall.call_fn();
+				}
+			}
+			else {
+				ZVAL_LONG(args, ix+1);
+				ZVAL_COPY_VALUE(args+1, bval);
+				ZVAL_LONG(args+2, pdo_type(val.ztype()));
+				bvcall.call_fn();
+			}
+		}
+	}
+}
+
+
 bool 
 IDriver::begin()
 {
-
+	zval_mgr handle = handle();
+	zobj_user pdo = handle.zobject();
+	if (pdo.ok())
+	{
+		zval_mgr result = pdo.call(DBS.begin_trans);
+		return result.isTrue();
+	}
+	return false;
 }
+
 
 zobj_mgr 
 IDriver::newDmlBuild()
@@ -262,11 +386,63 @@ ZEND_METHOD(Wcd_IDriver, begin)
 
 }
 
-ZEND_METHOD(Wcd_IDriver, bind){}
-ZEND_METHOD(Wcd_IDriver, close){}
-ZEND_METHOD(Wcd_IDriver, closeStmt){}
-ZEND_METHOD(Wcd_IDriver, commit){}
-ZEND_METHOD(Wcd_IDriver, connect){}
+ZEND_METHOD(Wcd_IDriver, bind)
+{
+	zval* stmt;
+	zval* params;
+
+	ZEND_PARSE_PARAMETERS_START(2,2)
+	Z_PARAM_OBJECT(stmt)
+	Z_PARAM_ARRAY(params)
+	ZEND_PARSE_PARAMETERS_END();
+
+	IDriver* db = zval_toc<IDriver>(ZEND_THIS);
+
+	db->bind(stmt, params);
+}
+
+ZEND_METHOD(Wcd_IDriver, close)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	IDriver* db = zval_toc<IDriver>(ZEND_THIS);
+
+	db->close();
+}
+
+ZEND_METHOD(Wcd_IDriver, closeStmt)
+{
+	zval* stmt;
+
+	ZEND_PARSE_PARAMETERS_START(2,2)
+	Z_PARAM_OBJECT(stmt)
+	ZEND_PARSE_PARAMETERS_END();
+
+	IDriver* db = zval_toc<IDriver>(ZEND_THIS);
+
+	db->closeStmt();
+}
+
+ZEND_METHOD(Wcd_IDriver, commit)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	IDriver* db = zval_toc<IDriver>(ZEND_THIS);
+
+	bool result = db->commit();
+	RETURN_BOOL(result);
+}
+
+ZEND_METHOD(Wcd_IDriver, connect)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	IDriver* db = zval_toc<IDriver>(ZEND_THIS);
+
+	db->connect();
+}
+
+
 ZEND_METHOD(Wcd_IDriver, escape){}
 ZEND_METHOD(Wcd_IDriver, execute){}
 ZEND_METHOD(Wcd_IDriver, fetchAllRows){}

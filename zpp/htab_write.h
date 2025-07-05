@@ -65,6 +65,8 @@ namespace zpp {
         
         void push_back(HashTable* value);
 
+        void push_back(int value);
+
         void push_back(const zstr_intern& si)
         {
             push_back((zend_string*) si);

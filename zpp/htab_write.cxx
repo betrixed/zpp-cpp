@@ -428,6 +428,12 @@ void htab_write::push_back(const zval_mgr& zv)
     push_back((zval*) zv);
 }
 
+void htab_write::push_back(int value) 
+{
+	zval_mgr temp(value);
+    push_back((zval*) temp);
+}
+
 void htab_write::push_back(zval_user zv) 
 {
     push_back((zval*) zv);

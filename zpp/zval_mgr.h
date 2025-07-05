@@ -87,7 +87,7 @@ public:
 
     zval_mgr(const zval_user& rc);
 
-    //! mutate to suggested type if necessary
+    //! mutate in place to suggested type if necessary
     void     toLong();
     void     toDouble();
     void     toString();
@@ -131,6 +131,8 @@ public:
     zend_string* zstr() const;
     HashTable*   zarray() const;
     zend_long    zlong() const;
+
+    zobj_user    zobject() const;
     
     int   ref_type() const;
     

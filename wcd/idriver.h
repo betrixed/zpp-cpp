@@ -15,7 +15,6 @@ namespace wcd {
 	using namespace wcc;
 
 	class IDriver : public base_d {
-
 	public:
 		static base_obj_mgr<IDriver> omg;
 		
@@ -25,6 +24,8 @@ namespace wcd {
 		virtual void afterConnect();
 		virtual zstr_mgr serverNameFormat();
 
+		static int pdo_type(unsigned int ztype);
+		
 		bool begin();
 		
 		void bind(zval_user stmt, htab_read params);
@@ -78,10 +79,9 @@ namespace wcd {
 		zobj_mgr newDmlBuild();
 		zstr_mgr param(int pno);
 
-		
 		zval_mgr prepare(zstr_user query);
 		void  	 prepareExecute(zstr_user query, htab_read values, htab_read bindTypes);
-		zval_mgr  prepareQuery(zstr_user query, htab_read values, htab_read bindTypes);
+		zval_mgr prepareQuery(zstr_user query, htab_read values, htab_read bindTypes);
 
 		zval_mgr query(zstr_user query, htab_read params);
 		zval_mgr querySingle(zstr_user query);
