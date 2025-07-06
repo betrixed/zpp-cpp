@@ -25,7 +25,7 @@ public:
 
 	static zobj_mgr staticInstance(zstr_user class_name);
 
-	static zobj_mgr staticInstanceArgs(zstr_user class_name, zval_user args);
+	static zobj_mgr staticInstanceArgs(zstr_user class_name, htab_read args);
 	
 	ReflectCache();
 
@@ -33,7 +33,7 @@ public:
 
 	zobj_mgr newInstance(zstr_user class_name);
 
-	zobj_mgr newInstanceArgs(zstr_user class_name, zval_user args);
+	zobj_mgr newInstanceArgs(zstr_user class_name, htab_read args);
 
 	void clear();
 	

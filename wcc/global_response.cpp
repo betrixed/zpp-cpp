@@ -624,7 +624,7 @@ Response::attach_name(zstr_user uri, zstr_user suffix)
 		buf << "@" << QREGEX << "$@";
 
 		regex = buf.zstr();
-		zval_mgr rname = preg_replace(regex.data(), zstr_user::empty, filename);
+		zval_mgr rname = preg_replace(regex, zstr_mgr::empty_str(), filename);
 
 		filename = zval_user(rname).zstr();
 

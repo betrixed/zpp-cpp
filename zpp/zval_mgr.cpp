@@ -97,15 +97,18 @@ zval_mgr::zarray() const
     return Z_ARR_P(p);
 }
 
-zobj_user    
+zend_object*    
 zval_mgr::zobject() const
 {
     zval* p = zval_user::real_zval(&zv_);
-    zobj_user result;
+    zend_object* result;
 
     if (Z_TYPE_P(p) == IS_OBJECT)
     {
         result = Z_OBJ(zv_);
+    }
+    else {
+        result = nullptr;
     }
 
     return result;

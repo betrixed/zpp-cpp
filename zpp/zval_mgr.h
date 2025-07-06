@@ -132,7 +132,7 @@ public:
     HashTable*   zarray() const;
     zend_long    zlong() const;
 
-    zobj_user    zobject() const;
+    zend_object* zobject() const;
     
     int   ref_type() const;
     

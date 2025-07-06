@@ -44,7 +44,10 @@ public:
 	zstr_intern  begin_trans;
 	zstr_intern  bind_value;
 	zstr_intern  commit_fn;
-	zstr_intern  close_cursor;
+
+	zstr_intern  quote_fn;
+	zstr_intern  regex_quoted;
+	zstr_intern  rx_cap1;
 
 
 	DBSInit() : state_init() {}
@@ -63,7 +66,10 @@ void DBSInit::init() {
 		begin_trans = "begintransaction";
 		bind_value = "bindvalue";
 		commit_fn = "commit";
-		close_cursor = "closecursor";
+
+		quote_fn = "quote";
+		regex_quoted = R"x(/^\'(.*)\'$/)x";
+		rx_cap1 = "$1";
 	}
 
 DBSInit DBS;
@@ -184,14 +190,16 @@ IDriver::handle()
 	{
 		return handle_;
 	}
+	connect();
 
+	return handle_;
 }
 
 int IDriver::pdo_type(unsigned int ztype)
 {
 	switch(ztype)
 	{
-	case IS_INTEGER:
+	case IS_LONG:
 		return PDO_PARAM_INT;
 	case IS_TRUE:
 	case IS_FALSE:
@@ -203,33 +211,36 @@ int IDriver::pdo_type(unsigned int ztype)
 }
 
 void 
-Driver::close()
+IDriver::close()
 {
-	handle_.init();
+	handle_.set_null();
 }
 
 bool 
-Driver::commit()
+IDriver::commit()
 {
-	zobj_mgr handle = handle();
+	zobj_mgr pdo = handle();
 
-	if (handle.ok())
+	if (pdo.ok())
 	{
-		zval_mgr result = handle.call(DBS.commit_fn);
+		zval_mgr result = pdo.call(DBS.commit_fn);
 		return result.isTrue();
 	}
 	return false;
 }
 
 void 
-Driver::closeStmt(zval_user stmt)
+IDriver::closeStmt(zval_user stmt)
 {
-	zobj_mgr obj(stmt);
+	zobj_user obj(stmt);
 	obj.call(DBS.close_cursor);
 }
 
-void Driver::bind(zval_user stmt, htab_read params)
+
+void IDriver::bind(zval_user stmt, htab_read params)
 {
+	zobj_user spdo(stmt);
+
 	if (params.size())
 	{
 		htab_walk wk;
@@ -237,13 +248,12 @@ void Driver::bind(zval_user stmt, htab_read params)
 
 		fn_call_args<3> bvcall;
 
-		bvcall.set_fci(stmt, DBS.bind_value);
+		bvcall.set_fci(spdo, DBS.bind_value);
 		zval* args = bvcall.argsptr();
 
 		int ix = 0;
-		int bpdo = 0;
 
-		for(wk.start(stmt); wk.ok(); wk.next(), ix++)
+		for(wk.start(params); wk.ok(); wk.next(), ix++)
 		{
 			if (val.isArray())
 			{
@@ -254,7 +264,7 @@ void Driver::bind(zval_user stmt, htab_read params)
 				for(wk2.start(val.zarray()); wk2.ok(); wk2.next())
 				{
 	
-					ZVAL_STR(args, bname);
+					ZVAL_COPY_VALUE(args, bname);
 					ZVAL_COPY_VALUE(args+1, bval);
 					ZVAL_LONG(args+2, pdo_type(bval.ztype()));
 					bvcall.call_fn();
@@ -262,7 +272,7 @@ void Driver::bind(zval_user stmt, htab_read params)
 			}
 			else {
 				ZVAL_LONG(args, ix+1);
-				ZVAL_COPY_VALUE(args+1, bval);
+				ZVAL_COPY_VALUE(args+1, val);
 				ZVAL_LONG(args+2, pdo_type(val.ztype()));
 				bvcall.call_fn();
 			}
@@ -274,14 +284,23 @@ void Driver::bind(zval_user stmt, htab_read params)
 bool 
 IDriver::begin()
 {
-	zval_mgr handle = handle();
-	zobj_user pdo = handle.zobject();
+	zobj_user pdo(handle());
 	if (pdo.ok())
 	{
 		zval_mgr result = pdo.call(DBS.begin_trans);
 		return result.isTrue();
 	}
 	return false;
+}
+
+zstr_mgr 
+IDriver::escape(zstr_user value)
+{
+	zobj_user pdo(handle());
+	zval_mgr  arg(value);
+	zstr_mgr result = pdo.call(DBS.quote_fn, arg);
+	result = preg_replace(DBS.regex_quoted, DBS.rx_cap1, result);
+	return result;
 }
 
 
@@ -414,13 +433,13 @@ ZEND_METHOD(Wcd_IDriver, closeStmt)
 {
 	zval* stmt;
 
-	ZEND_PARSE_PARAMETERS_START(2,2)
+	ZEND_PARSE_PARAMETERS_START(1,1)
 	Z_PARAM_OBJECT(stmt)
 	ZEND_PARSE_PARAMETERS_END();
 
 	IDriver* db = zval_toc<IDriver>(ZEND_THIS);
 
-	db->closeStmt();
+	db->closeStmt(stmt);
 }
 
 ZEND_METHOD(Wcd_IDriver, commit)
@@ -443,7 +462,21 @@ ZEND_METHOD(Wcd_IDriver, connect)
 }
 
 
-ZEND_METHOD(Wcd_IDriver, escape){}
+ZEND_METHOD(Wcd_IDriver, escape)
+{
+	zend_string* sval;
+
+	ZEND_PARSE_PARAMETERS_START(1,1)
+	Z_PARAM_STR(sval)
+	ZEND_PARSE_PARAMETERS_END();
+
+	IDriver* db = zval_toc<IDriver>(ZEND_THIS);
+
+	zstr_mgr result = db->escape(sval);
+
+	result.move_zv(return_value);
+}
+
 ZEND_METHOD(Wcd_IDriver, execute){}
 ZEND_METHOD(Wcd_IDriver, fetchAllRows){}
 ZEND_METHOD(Wcd_IDriver, fetchRow){}

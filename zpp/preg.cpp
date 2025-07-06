@@ -329,13 +329,33 @@ preg::replace(const char* rp, zstr_user subject)
 	return result;
 }
 
+
 zval_mgr 
-preg_replace(const char* exp, const char* replace, zstr_user input)
+reg_replace(const char* exp, const char* replace, zstr_user input)
 {
 	preg reg(exp, 0, true);
 
 	zstr_mgr rs = reg.replace(replace, input);
 	return zval_mgr(std::move(rs));
+}
+
+zstr_mgr 
+preg_replace(zstr_user rexpr, zstr_user replace, zstr_user input, int limit, size_t* rcount)
+{
+	if (rcount)
+	{
+		*rcount = 0;
+	}
+	zstr_mgr result;
+/* call the PHPAPI:  zend_string *php_pcre_replace(zend_string *regex, zend_string *subject_str, 
+ const char *subject, size_t subject_len, 
+ zend_string *replace_str, size_t limit, size_t *replace_count);
+ */
+	zend_string* zs = php_pcre_replace(rexpr, input, input.data(), input.size(), replace, limit, rcount);
+
+	result.adopt(zs);
+
+	return result;
 }
 
 zval_mgr 

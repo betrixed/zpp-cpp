@@ -104,7 +104,8 @@ namespace zpp {
 
 	zval_mgr preg_split(const char* sv, zstr_user data, int limit, int flags);
 
-	zval_mgr preg_replace(const char* exp, const char* replace, zstr_user input);
+	// zstr_user version
+	zstr_mgr preg_replace(zstr_user rexpr, zstr_user replace, zstr_user input, int limit = -1, size_t* rcount = nullptr);
 
 	zval_mgr explode(zstr_user sep,  zstr_user split, long limit = 0);
 

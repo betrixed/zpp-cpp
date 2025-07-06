@@ -147,14 +147,14 @@ ReflectCache::staticInstance(zstr_user class_name)
 }
 
 zobj_mgr //static
-ReflectCache::staticInstanceArgs(zstr_user class_name, zval_user args)
+ReflectCache::staticInstanceArgs(zstr_user class_name, htab_read args)
 {
 	auto rcobj =  ReflectCache::cpp();
 	return rcobj->newInstanceArgs(class_name, args);
 }
 
 zobj_mgr 
-ReflectCache::newInstanceArgs(zstr_user class_name, zval_user args)
+ReflectCache::newInstanceArgs(zstr_user class_name, htab_read args)
 {
 	zobj_mgr result;
 
@@ -162,7 +162,7 @@ ReflectCache::newInstanceArgs(zstr_user class_name, zval_user args)
 	if (rfc.ok())
 	{
 		fn_call_args<1> fn;
-		ZVAL_COPY_VALUE(fn.argsptr(), args);
+		ZVAL_ARR(fn.argsptr(), args);
 
 		fn.set_fci(rfc, RFC_data.new_instance_args);
 		zval_mgr recall(fn.call_fn());
