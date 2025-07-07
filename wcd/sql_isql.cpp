@@ -1336,7 +1336,7 @@ ISql::tableClass(zstr_user s)
 	return buf.zstr();
 }
 
-zstr_mgr // static 
+zstr_mgr
 ISql::entityClass(zstr_user s)
 {
 	return ISql::tableClass(s);

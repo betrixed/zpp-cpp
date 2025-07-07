@@ -22,7 +22,6 @@ namespace wcd {
 		void destruct();
 
 		virtual void afterConnect();
-		virtual zstr_mgr serverNameFormat();
 
 		static int pdo_type(unsigned int ztype);
 		
@@ -35,14 +34,14 @@ namespace wcd {
 		void connect();
 
 		zstr_mgr escape(zstr_user value);
-		zstr_mgr execute(zval_user stmt, bool close, bool fetch);
+		zval_mgr execute(zval_user stmt, bool close = true, bool fetch = false);
 
 		htab_mgr fetchAllRows(zval_user stmt, int mode);
 		zval_mgr fetchRow(zval_user stmt, int mode);
 
 		zval_mgr getAttribute(int key);
 		zval_mgr getCaseAttribute();
-		zval_mgr getColumnNames(zstr_mgr tableName);
+		htab_mgr getColumnNames(zstr_user tableName);
 		htab_mgr getConnectOptions();
 
 		zstr_mgr getDSN();
@@ -97,11 +96,13 @@ namespace wcd {
 
 		bool transaction();
 
+		zobj_mgr getTableModel(zstr_user tableName);
+
 		
 	protected:
 
-		IConfig* 	icfg();
-
+		IConfig* 	icfg_c();
+		ISql*       isql_c();
 
 		zobj_mgr    icfg_;
 		zstr_mgr    cfg_name_;
