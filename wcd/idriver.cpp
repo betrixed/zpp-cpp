@@ -24,6 +24,14 @@ extern "C" {
 #include "runsql.h"
 #endif
 
+#ifndef SQL_ISQL_H
+#include "sql_isql.h"
+#endif
+
+#ifndef WCD_MODEL_H
+#include "model.h"
+#endif
+
 #ifndef PHP_PDO_DRIVER_H
 #include <ext/pdo/php_pdo_driver.h>
 #endif
@@ -54,6 +62,13 @@ public:
 
 	zstr_intern  getattribute_fn;
 	zstr_intern  model_name_space;
+	zstr_intern  mysql_str;
+	zstr_intern  intransation_fn;
+	zstr_intern  lastinsertid_fn;
+	zstr_intern  place_holder;
+
+	zstr_intern  prepare_fn;
+	zstr_intern  error_str;
 
 	DBSInit() : state_init() {}
 		
@@ -81,6 +96,13 @@ void DBSInit::init() {
 
 		getattribute_fn = "getattribute";
 		model_name_space = "model_name_space";
+		mysql_str = "mysql";
+		intransation_fn = "intransation";
+		lastinsertid_fn = "lastinsertid";
+		place_holder = "?";
+
+		prepare_fn = "prepare";
+		error_str = "error";
 	}
 
 DBSInit DBS;
@@ -91,7 +113,7 @@ IDriver::construct(zobj_user icfgobj, zstr_user name)
 {
 	icfg_ = icfgobj;
 	cfg_name_ = name;
-	IConfig* cfg = icfg();
+	IConfig* cfg = icfg_c();
 	db_name_ = cfg->getDatabase();
 	isql_ = cfg->newSql();
 }
@@ -103,7 +125,7 @@ IDriver::iconfig()
 }
 
 IConfig*    
-IDriver::icfg()
+IDriver::icfg_c()
 {
 	return zobj_toc<IConfig>(icfg_);
 }
@@ -125,7 +147,7 @@ IDriver::destruct()
 zstr_mgr 
 IDriver::getDSN()
 {
-	zstr_mgr dname = icfg()->getDriverName();
+	zstr_mgr dname = icfg_c()->getDriverName();
 	dname = dname.to_lower();
 
 	if (dname.starts_with(DBS.pdo_prefix)) {
@@ -135,7 +157,7 @@ IDriver::getDSN()
 		zend_throw_error(zend_ce_error,"PDO Driver names need to begin with 'pdo_'");
 		return dname;
 	}
-	IConfig* cfg = icfg();
+	IConfig* cfg = icfg_c();
 	zstr_mgr host = cfg->getHost();
 	zstr_mgr dbname = cfg->getDatabase();
 
@@ -171,7 +193,7 @@ IDriver::connect()
 
 	htab_mgr options = getConnectOptions();
 
-	IConfig* cfg = icfg();
+	IConfig* cfg = icfg_c();
 
 	zstr_mgr user = cfg->getUsername();
 	zstr_mgr pw = cfg->getPassword();
@@ -226,6 +248,12 @@ void
 IDriver::close()
 {
 	handle_.set_null();
+}
+
+zstr_mgr 
+IDriver::getSqlType()
+{
+	return DBS.mysql_str;
 }
 
 bool 
@@ -315,6 +343,20 @@ IDriver::escape(zstr_user value)
 	return result;
 }
 
+bool 
+check_results(zval_user test)
+{
+	int rtype = test.ztype();
+	switch(rtype) {
+	case IS_FALSE:
+	case IS_TRUE:
+	case IS_LONG:
+	case IS_ARRAY:
+		return true;
+	}
+	zend_throw_error(zend_ce_error,"Error on fetch results");
+	return false;
+}
 zval_mgr 
 IDriver::execute(zval_user stmt, bool close, bool fetch)
 {
@@ -346,17 +388,7 @@ IDriver::execute(zval_user stmt, bool close, bool fetch)
 	if (pdo_result.isTrue()) {
 		if (fetch)
 		{
-			int rtype = result.ztype();
-			switch(rtype) {
-			case IS_FALSE:
-			case IS_TRUE:
-			case IS_LONG:
-			case IS_ARRAY:
-				break;
-			default:
-				zend_throw_error(zend_ce_error,"Error on fetch results");
-				break;
-			}
+			check_results(result);
 		}
 	}
 	else {
@@ -394,7 +426,7 @@ IDriver::fetchRow(zval_user stmt, int mode)
 zobj_mgr 
 IDriver::newDmlBuild()
 {
-	IConfig* cfg = icfg();
+	IConfig* cfg = icfg_c();
 	return cfg->newDmlBuild(this->vobj());
 }
 
@@ -415,7 +447,7 @@ IDriver::getSchema()
 	if (cache_mgr.ok())
 	{
 		cache = zobj_toc<ICache>(cache_mgr);
-		name = icfg()->getDatabase();
+		name = icfg_c()->getDatabase();
 		schema_def_ = cache->get(name); 
 	}
 	if (!schema_def_.ok())
@@ -433,13 +465,13 @@ IDriver::getSchema()
 }
 
 zstr_mgr 
-IDriver::modelClassName(zstr_mgr tableName)
+IDriver::modelClassName(zstr_user tableName)
 {
-	IConfig* cfg = icfg();
+	IConfig* cfg = icfg_c();
 
 	zstr_mgr ns = cfg->get(DBS.model_name_space);
 
-	zstr_mgr cname = isql()->entityClass(tableName);
+	zstr_mgr cname = isql_c()->entityClass(tableName);
 
 	zstr_buffer buf;
 
@@ -481,15 +513,18 @@ IDriver::querySingle(zstr_user query)
 }
 
 htab_mgr 
-IDriver::getTableColumns(zstr_mgr tableName)
+IDriver::getTableColumns(zstr_user tableName)
 {
-
+	zobj_mgr model_mgr = getTableModel(tableName);
+	Model* m = zobj_toc<Model>(model_mgr);
+	return m->getColDefs();
 }
 
 htab_mgr 
 IDriver::getColumnNames(zstr_user tableName)
 {
-
+	htab_mgr cols = getTableColumns(tableName);
+	return htab_mgr::getKeys(cols);
 }
 
 zobj_mgr 
@@ -507,6 +542,134 @@ IDriver::getTableModel(zstr_user tableName)
 		}
 	}
 	zstr_mgr modelClass = modelClassName(tableName);
+	class_data cdata(modelClass);
+	if (cdata.ok()) 
+	{
+		cdata.new_object(result);
+	}
+	else {
+		result = Model::omg.new_zobj();
+		Model* m = zobj_toc<Model>(result);
+		m->setName(tableName);	
+	}
+	if (result.ok())
+	{
+		htab_write hw(table_models_);
+		
+		hw.set(tableName, result);
+	}
+	return result;
+}
+
+zstr_mgr 
+IDriver::getDatabaseName()
+{
+	return db_name_;
+}
+
+int 
+IDriver::getFetch()
+{
+	return ifetch_;
+}
+
+zstr_mgr 
+IDriver::getSchemaClass()
+{
+	zstr_mgr stype = getSqlType();
+	stype = stype.ucfirst();
+	zstr_buffer buf;
+
+	buf << "Wcd\\Schema\\" << stype << "\\Dump";
+
+	return buf.zstr();
+}
+
+bool 
+IDriver::inTransaction()
+{
+	zobj_mgr pdo(handle());
+
+	return pdo.call(DBS.intransation_fn);
+}
+
+bool 
+IDriver::isAutoCommit()
+{
+	return false;
+}
+
+bool 
+IDriver::isConnected()
+{
+	return handle_.isObject();
+}
+
+zval_mgr 
+IDriver::lastInsertId()
+{
+	zobj_mgr pdo(handle());
+
+	return pdo.call(DBS.lastinsertid_fn);
+}
+
+zval_mgr 
+IDriver::lastSeqValue(zstr_user name)
+{
+	zstr_buffer buf;
+
+	buf << "select lastval(" << name << ")";
+	zstr_mgr  sql = buf.zstr();
+	htab_read empty;
+
+	zval_mgr srow = query(sql, empty);
+	zval_mgr result;
+	if (srow.isArray())
+	{
+		htab_read rows(srow);
+		result = rows.get(int(0));
+	}
+	return result;
+}
+
+zstr_mgr 
+IDriver::param(int pno)
+{
+	return DBS.place_holder;		
+}
+
+zval_mgr 
+IDriver::prepare(zstr_user query)
+{
+	zobj_mgr pdo(handle());
+
+	lastsql_ = query;
+	zval_mgr stmt = pdo.call(DBS.prepare_fn);
+	if (!stmt.ok())
+	{
+		zstr_mgr error = pdo.property(DBS.error_str);
+		zend_throw_error(zend_ce_error, "Prepare: %s", error.data());
+	}
+	return stmt;
+}
+
+zval_mgr 
+IDriver::query(zstr_user query, htab_read params)
+{
+	htab_read btypes;
+
+	zobj_mgr stmt = prepareQuery(query, params, btypes);
+
+	zval_mgr result = stmt.call(DBS.fetchall_fn);
+
+	stmt.call(DBS.close_cursor);
+
+	if (!check_results(result)) 
+	{
+		result.set_bool(false);
+	}
+
+	return result;
 }
 
 
@@ -699,36 +862,333 @@ ZEND_METHOD(Wcd_IDriver, getAttribute)
 
 ZEND_METHOD(Wcd_IDriver, getColumnNames)
 {
+	zend_string*   table;
 
+	ZEND_PARSE_PARAMETERS_START(1,1)
+	Z_PARAM_STR(table)
+	ZEND_PARSE_PARAMETERS_END();
+
+	IDriver* db = zval_toc<IDriver>(ZEND_THIS);	
+
+	htab_mgr result = db->getColumnNames(table);
+
+	result.move_zv(return_value);
+}
+
+ZEND_METHOD(Wcd_IDriver, getConnectOptions)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	IDriver* db = zval_toc<IDriver>(ZEND_THIS);
+
+	htab_mgr result = db->getConnectOptions();
+	result.move_zv(return_value);
+}
+
+ZEND_METHOD(Wcd_IDriver, getDSN)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	IDriver* db = zval_toc<IDriver>(ZEND_THIS);
+
+	zstr_mgr result = db->getDSN();
+	result.move_zv(return_value);
+}
+
+ZEND_METHOD(Wcd_IDriver, getDatabaseName)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	IDriver* db = zval_toc<IDriver>(ZEND_THIS);
+
+	zstr_mgr result = db->getDatabaseName();
+	result.move_zv(return_value);
+}
+
+ZEND_METHOD(Wcd_IDriver, getFetch)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	IDriver* db = zval_toc<IDriver>(ZEND_THIS);
+
+	zend_long result = db->getFetch();
+	RETURN_LONG(result);
+}
+
+//zobj_mgr getSchema()
+ZEND_METHOD(Wcd_IDriver, getSchema)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	IDriver* db = zval_toc<IDriver>(ZEND_THIS);
+
+	zobj_mgr result = db->getSchema();
+	result.move_zv(return_value);
+}
+
+ZEND_METHOD(Wcd_IDriver, getSchemaClass)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	IDriver* db = zval_toc<IDriver>(ZEND_THIS);
+
+	zstr_mgr result = db->getSchemaClass();
+	result.move_zv(return_value);
+}
+
+ZEND_METHOD(Wcd_IDriver, getTableColumns)
+{
+	zend_string*   table;
+
+	ZEND_PARSE_PARAMETERS_START(1,1)
+	Z_PARAM_STR(table)
+	ZEND_PARSE_PARAMETERS_END();
+
+	IDriver* db = zval_toc<IDriver>(ZEND_THIS);	
+
+	htab_mgr result = db->getTableColumns(table);
+
+	result.move_zv(return_value);
+}
+
+ZEND_METHOD(Wcd_IDriver, getTableModel)
+{
+	zend_string*   table;
+
+	ZEND_PARSE_PARAMETERS_START(1,1)
+	Z_PARAM_STR(table)
+	ZEND_PARSE_PARAMETERS_END();
+
+	IDriver* db = zval_toc<IDriver>(ZEND_THIS);	
+
+	zobj_mgr result = db->getTableModel(table);
+
+	result.move_zv(return_value);
+}
+
+
+ZEND_METHOD(Wcd_IDriver, getTableNames)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	IDriver* db = zval_toc<IDriver>(ZEND_THIS);
+
+	htab_mgr result = db->getTableNames();
+	result.move_zv(return_value);
+}
+
+
+ZEND_METHOD(Wcd_IDriver, handle)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	IDriver* db = zval_toc<IDriver>(ZEND_THIS);
+
+	zval_mgr result = db->handle();
+
+	result.move_zv(return_value);
+}
+
+ZEND_METHOD(Wcd_IDriver, iConfig)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	IDriver* db = zval_toc<IDriver>(ZEND_THIS);
+
+	zobj_mgr result = db->iconfig();
+
+	result.move_zv(return_value);
+}
+
+ZEND_METHOD(Wcd_IDriver, iSql)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	IDriver* db = zval_toc<IDriver>(ZEND_THIS);
+
+	zobj_mgr result = db->isql();
+
+	result.move_zv(return_value);
+}
+
+ZEND_METHOD(Wcd_IDriver, inTransaction)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	IDriver* db = zval_toc<IDriver>(ZEND_THIS);
+
+	bool result = db->inTransaction();
+
+	RETURN_BOOL(result);
+}
+
+ZEND_METHOD(Wcd_IDriver, isConnected)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	IDriver* db = zval_toc<IDriver>(ZEND_THIS);
+
+	bool result = db->isConnected();
+
+	RETURN_BOOL(result);
+}
+
+ZEND_METHOD(Wcd_IDriver, isAutoCommit)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	IDriver* db = zval_toc<IDriver>(ZEND_THIS);
+
+	bool result = db->isAutoCommit();
+
+	RETURN_BOOL(result);
+}
+
+ZEND_METHOD(Wcd_IDriver, lastInsertId)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	IDriver* db = zval_toc<IDriver>(ZEND_THIS);
+
+	zval_mgr result = db->lastInsertId();
+
+	result.move_zv(return_value);
+}
+
+ZEND_METHOD(Wcd_IDriver, lastSeqValue)
+{
+	zend_string*   seqname;
+
+	ZEND_PARSE_PARAMETERS_START(1,1)
+	Z_PARAM_STR(seqname)
+	ZEND_PARSE_PARAMETERS_END();
+
+	IDriver* db = zval_toc<IDriver>(ZEND_THIS);
+
+	zval_mgr result = db->lastSeqValue(seqname);
+
+	result.move_zv(return_value);
+}
+
+ZEND_METHOD(Wcd_IDriver, log)
+{
+
+}
+
+ZEND_METHOD(Wcd_IDriver, modelClassName)
+{
+	zend_string*   table;
+
+	ZEND_PARSE_PARAMETERS_START(1,1)
+	Z_PARAM_STR(table)
+	ZEND_PARSE_PARAMETERS_END();
+
+	IDriver* db = zval_toc<IDriver>(ZEND_THIS);	
+
+	zstr_mgr result = db->modelClassName(table);
+
+	result.move_zv(return_value);
+}
+
+ZEND_METHOD(Wcd_IDriver, newDmlBuild)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	IDriver* db = zval_toc<IDriver>(ZEND_THIS);
+
+	zobj_mgr result = db->newDmlBuild();
+
+	result.move_zv(return_value);
+}
+
+ZEND_METHOD(Wcd_IDriver, param)
+{
+	zend_long   pno;
+
+	ZEND_PARSE_PARAMETERS_START(1,1)
+	Z_PARAM_LONG(pno)
+	ZEND_PARSE_PARAMETERS_END();
+
+	IDriver* db = zval_toc<IDriver>(ZEND_THIS);	
+
+	zstr_mgr result = db->param(pno);
+
+	result.move_zv(return_value);
+}
+
+ZEND_METHOD(Wcd_IDriver, prepare)
+{
+	zend_string*   sql;
+
+	ZEND_PARSE_PARAMETERS_START(1,1)
+	Z_PARAM_STR(sql)
+	ZEND_PARSE_PARAMETERS_END();
+
+	IDriver* db = zval_toc<IDriver>(ZEND_THIS);	
+
+	zval_mgr result = db->prepare(sql);
+
+	result.move_zv(return_value);
+}
+
+ZEND_METHOD(Wcd_IDriver, prepareQuery)
+{
+	zend_string* sql;
+	zval*        pvalues = nullptr;
+	zval*        ptypes = nullptr;
+	ZEND_PARSE_PARAMETERS_START(1,3)
+	Z_PARAM_STR(sql)
+	Z_PARAM_OPTIONAL
+	Z_PARAM_ARRAY(pvalues)
+	Z_PARAM_ARRAY(ptypes)
+	ZEND_PARSE_PARAMETERS_END();
+
+	htab_mgr values(pvalues);
+	htab_mgr vtypes(ptypes);
+
+
+	IDriver* db = zval_toc<IDriver>(ZEND_THIS);	
+
+	zval_mgr result = db->prepareQuery( sql, values, vtypes);
+	result.move_zv(return_value);
+}
+
+ZEND_METHOD(Wcd_IDriver, query)
+{
+	zend_string* sql;
+	zval*        params = nullptr;
+	ZEND_PARSE_PARAMETERS_START(1,2)
+	Z_PARAM_STR(sql)
+	Z_PARAM_OPTIONAL
+	Z_PARAM_ARRAY(params)
+	ZEND_PARSE_PARAMETERS_END();
+
+	htab_mgr values(params);
+
+	IDriver* db = zval_toc<IDriver>(ZEND_THIS);	
+
+	zval_mgr result = db->query(sql, values);
+	result.move_zv(return_value);	
+}
+
+ZEND_METHOD(Wcd_IDriver, querySingle)
+{
+	zend_string* sql;
+
+	ZEND_PARSE_PARAMETERS_START(1,1)
+	Z_PARAM_STR(sql)
+	ZEND_PARSE_PARAMETERS_END();
+
+	IDriver* db = zval_toc<IDriver>(ZEND_THIS);	
+
+	zval_mgr result = db->querySingle( sql );
+	result.move_zv(return_value);	
 }
 
 /*
 
-ZEND_METHOD(Wcd_IDriver, getConnectOptions){}
-ZEND_METHOD(Wcd_IDriver, getDSN){}
-ZEND_METHOD(Wcd_IDriver, getDatabaseName){}
-ZEND_METHOD(Wcd_IDriver, getFetch){}
-ZEND_METHOD(Wcd_IDriver, getSchema){}
-ZEND_METHOD(Wcd_IDriver, getSchemaClass){}
-ZEND_METHOD(Wcd_IDriver, getTableColumns){}
-ZEND_METHOD(Wcd_IDriver, getTableModel){}
-ZEND_METHOD(Wcd_IDriver, getTableNames){}
-ZEND_METHOD(Wcd_IDriver, handle){}
-ZEND_METHOD(Wcd_IDriver, iConfig){}
-ZEND_METHOD(Wcd_IDriver, iSql){}
-ZEND_METHOD(Wcd_IDriver, inTransaction){}
-ZEND_METHOD(Wcd_IDriver, isAutoCommit){}
-ZEND_METHOD(Wcd_IDriver, isConnected){}
-ZEND_METHOD(Wcd_IDriver, lastInsertId){}
-ZEND_METHOD(Wcd_IDriver, lastSeqValue){}
-ZEND_METHOD(Wcd_IDriver, log){}
-ZEND_METHOD(Wcd_IDriver, modelClassName){}
-ZEND_METHOD(Wcd_IDriver, newDmlBuild){}
-ZEND_METHOD(Wcd_IDriver, param){}
-ZEND_METHOD(Wcd_IDriver, prepare){}
-ZEND_METHOD(Wcd_IDriver, prepareQuery){}
-ZEND_METHOD(Wcd_IDriver, query){}
-ZEND_METHOD(Wcd_IDriver, querySingle){}
+
+
 ZEND_METHOD(Wcd_IDriver, quoteName){}
 ZEND_METHOD(Wcd_IDriver, readSchema){}
 ZEND_METHOD(Wcd_IDriver, rollback){}

@@ -214,6 +214,27 @@ zstr_user::starts_with(zstr_user match) const
 	return (this->subview(0,mlen) == mb);
 }
 
+zstr_mgr
+zstr_user::ucfirst()
+{
+	zstr_mgr result;
+
+	if (size() < 1)
+	{
+		return result;
+	}
+	const unsigned char ch = ZSTR_VAL(s)[0];
+	unsigned char r = zend_toupper_ascii(ch);
+	if (r == ch) {
+		result.adopt(zend_string_copy(s));
+	} else {
+		zend_string *uc = zend_string_init(ZSTR_VAL(s), ZSTR_LEN(s), 0);
+		ZSTR_VAL(uc)[0] = r;
+		result.adopt(uc);
+	}
+	return result;
+}
+
 bool 
 zstr_user::ends_with(zstr_user match) const
 {

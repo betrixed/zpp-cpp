@@ -133,6 +133,8 @@ class IDriver {
 
     public function getFetch(): int {}
     
+    public function getSqlType() : string {}
+    
     public function getSchema(): IStore {}
     
     public function getSchemaClass(): string {}

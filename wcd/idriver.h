@@ -14,6 +14,9 @@ namespace wcd {
 	using namespace zpp;
 	using namespace wcc;
 
+	class IConfig;
+	class ISql;
+
 	class IDriver : public base_d {
 	public:
 		static base_obj_mgr<IDriver> omg;
@@ -22,6 +25,7 @@ namespace wcd {
 		void destruct();
 
 		virtual void afterConnect();
+		virtual zstr_mgr getSqlType();
 
 		static int pdo_type(unsigned int ztype);
 		
@@ -46,14 +50,16 @@ namespace wcd {
 
 		zstr_mgr getDSN();
 
+		
+
 		zstr_mgr getDatabaseName();
 
 		int getFetch();
 
 		zobj_mgr getSchema();
-		zstr_mgr getSchemeClass();
-		htab_mgr getTableColumns(zstr_mgr tableName);
-		zobj_mgr getTableMode(zstr_mgr tableName);
+		zstr_mgr getSchemaClass();
+		htab_mgr getTableColumns(zstr_user tableName);
+		zobj_mgr getTableMode(zstr_user tableName);
 
 		htab_mgr getTableNames();
 
@@ -69,11 +75,11 @@ namespace wcd {
 
 
 		zval_mgr lastInsertId();
-		zval_mgr lastSeqValue(zstr_mgr name);
+		zval_mgr lastSeqValue(zstr_user name);
 
 		void log(htab_read info);
 
-		zstr_mgr modelClassName(zstr_mgr tableName);
+		zstr_mgr modelClassName(zstr_user tableName);
 
 		zobj_mgr newDmlBuild();
 		zstr_mgr param(int pno);

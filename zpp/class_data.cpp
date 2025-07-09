@@ -97,7 +97,7 @@ bool class_data::check(const char* msg)
     if (code==SUCCESS)
     {
         //showmem("zstr_ptr new_object", &temp);
-        // The new object was created already referenced.
+        // The new object is already referenced.
 
         result = zval_user(temp).zobject();
         return true;
