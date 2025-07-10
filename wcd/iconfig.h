@@ -57,6 +57,9 @@ public:
 
 
 protected:
+
+	void set_data(zstr_user key, zval_user values, bool required, zval_user ifnot);
+	
 	htab_mgr data_;
 	htab_mgr cfg_;
 	zstr_mgr mykey_;
@@ -92,6 +95,7 @@ public:
 
 	zstr_intern k_prepare;
 	zstr_intern k_execute;
+	zstr_intern db_models_ns;
 
 	void init() override;
 };

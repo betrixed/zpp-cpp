@@ -50,8 +50,6 @@ class IServer {
 
     public function getConfigNames() : array {}
 
-    public function getConnect() : ?IDriver {}
-
     public function getDataCache() : ?ICache {}
 
     public function getDriverClass(string $driver): string {}

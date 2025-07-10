@@ -97,8 +97,8 @@ namespace wcd {
 
 		bool rollback();
 
-		void setAttribute(int key, zval_user value);
-		void setFetch(int mode);
+		bool setAttribute(int key, zval_user value);
+		int  setFetch(int mode);
 
 		bool transaction();
 

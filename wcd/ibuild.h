@@ -19,7 +19,7 @@ namespace wcd {
 	class IBuild : public base_d {
 	public:
 
-		base_obj_mgr<IBuild> omg;
+		static base_obj_mgr<IBuild> omg;
 
 		void construct(zval_user driver);
 		void destruct();

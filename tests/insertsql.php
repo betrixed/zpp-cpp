@@ -7,6 +7,8 @@ use Wcc\{
 
 };
 
+use function Wcc\debug_zpp_dump;
+
 use Wcc\Cache\SFile;
 
 use Wcd\IServer;
@@ -53,6 +55,8 @@ $dbconfig = require("tests/db_config.php");
 $servers =  new IServer('db');
 $services->setObject($servers);
 $services->set('db',$servers);
+
+//debug_zpp_dump($dbconfig);
 
 $servers->config($dbconfig);
 

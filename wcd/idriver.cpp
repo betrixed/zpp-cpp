@@ -60,6 +60,7 @@ public:
 	zstr_intern  fetchall_fn;
 	zstr_intern  rowcount_fn;
 
+
 	zstr_intern  getattribute_fn;
 	zstr_intern  model_name_space;
 	zstr_intern  mysql_str;
@@ -69,6 +70,9 @@ public:
 
 	zstr_intern  prepare_fn;
 	zstr_intern  error_str;
+	zstr_intern  readschema_fn;
+	zstr_intern  rollback_fn;
+	zstr_intern  setattribute_fn;
 
 	DBSInit() : state_init() {}
 		
@@ -103,6 +107,9 @@ void DBSInit::init() {
 
 		prepare_fn = "prepare";
 		error_str = "error";
+		readschema_fn = "readschema";
+		rollback_fn = "rollback";
+		setattribute_fn = "setattribute";
 	}
 
 DBSInit DBS;
@@ -269,6 +276,12 @@ IDriver::commit()
 	return false;
 }
 
+zstr_mgr 
+IDriver::quoteName(zstr_user name)
+{
+	return isql_c()->quoteName(name);
+}	
+
 void 
 IDriver::closeStmt(zval_user stmt)
 {
@@ -325,12 +338,13 @@ bool
 IDriver::begin()
 {
 	zobj_user pdo(handle());
+	bool result = false;
 	if (pdo.ok())
 	{
-		zval_mgr result = pdo.call(DBS.begin_trans);
-		return result.isTrue();
+		zval_mgr test = pdo.call(DBS.begin_trans);
+		result = test.isTrue();
 	}
-	return false;
+	return result;
 }
 
 zstr_mgr 
@@ -464,6 +478,20 @@ IDriver::getSchema()
 
 }
 
+zobj_mgr 
+IDriver::readSchema()
+{
+	if (!schema_def_.ok())
+	{
+		zobj_mgr sdef = ReflectCache::staticInstance(getSchemaClass());
+		zval_mgr self(vobj());
+
+		sdef.call(DBS.readschema_fn, self);
+		schema_def_ = sdef;
+	}
+	return schema_def_;
+}
+
 zstr_mgr 
 IDriver::modelClassName(zstr_user tableName)
 {
@@ -573,6 +601,14 @@ IDriver::getFetch()
 	return ifetch_;
 }
 
+int 
+IDriver::setFetch(int mode)
+{
+	int result = ifetch_;
+	ifetch_ = mode;
+	return result;
+}
+
 zstr_mgr 
 IDriver::getSchemaClass()
 {
@@ -672,6 +708,39 @@ IDriver::query(zstr_user query, htab_read params)
 	return result;
 }
 
+bool 
+IDriver::rollback()
+{
+	zobj_mgr pdo(handle());
+
+	zval_mgr result = pdo.call(DBS.rollback_fn);
+
+	return result.isTrue();
+}
+
+bool 
+IDriver::transaction()
+{
+	bool result = begin();
+
+	if (!result)
+	{
+		zend_throw_error(zend_ce_error, "Begin transaction failed");
+	}
+
+	return result;
+}
+
+bool 
+IDriver::setAttribute(int key, zval_user value)
+{
+	zobj_mgr pdo(handle());
+
+	zval_mgr arg1(key);
+	zval_mgr result = pdo.call(DBS.setattribute_fn, arg1, value);
+
+	return result.isTrue();
+}
 
 };//namespace
 
@@ -936,6 +1005,16 @@ ZEND_METHOD(Wcd_IDriver, getSchemaClass)
 	result.move_zv(return_value);
 }
 
+ZEND_METHOD(Wcd_IDriver, getSqlType)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	IDriver* db = zval_toc<IDriver>(ZEND_THIS);
+
+	zstr_mgr result = db->getSqlType();
+	result.move_zv(return_value);
+}
+
 ZEND_METHOD(Wcd_IDriver, getTableColumns)
 {
 	zend_string*   table;
@@ -1185,23 +1264,90 @@ ZEND_METHOD(Wcd_IDriver, querySingle)
 	result.move_zv(return_value);	
 }
 
-/*
+ZEND_METHOD(Wcd_IDriver, quoteName)
+{
+	zend_string* name;
 
+	ZEND_PARSE_PARAMETERS_START(1,1)
+	Z_PARAM_STR(name)
+	ZEND_PARSE_PARAMETERS_END();
 
+	IDriver* db = zval_toc<IDriver>(ZEND_THIS);	
 
-ZEND_METHOD(Wcd_IDriver, quoteName){}
-ZEND_METHOD(Wcd_IDriver, readSchema){}
-ZEND_METHOD(Wcd_IDriver, rollback){}
-ZEND_METHOD(Wcd_IDriver, setAttribute){}
-ZEND_METHOD(Wcd_IDriver, setFetch){}
-ZEND_METHOD(Wcd_IDriver, transaction){}
-*/
+	zstr_mgr result = db->quoteName( name );
+	result.move_zv(return_value);		
+}
+
+//zobj_mgr readSchema();
+ZEND_METHOD(Wcd_IDriver, readSchema)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	IDriver* db = zval_toc<IDriver>(ZEND_THIS);
+
+	zobj_mgr result = db->readSchema();
+
+	result.move_zv(return_value);
+}
+
+ZEND_METHOD(Wcd_IDriver, rollback)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	IDriver* db = zval_toc<IDriver>(ZEND_THIS);
+
+	bool result = db->rollback();
+
+	RETURN_BOOL(result);
+}
+
+//public function setAttribute(int $attkey, mixed $value)
+ZEND_METHOD(Wcd_IDriver, setAttribute)
+{
+	zend_long attkey;
+	zval*     value;
+
+	ZEND_PARSE_PARAMETERS_START(2,2)
+	Z_PARAM_LONG(attkey)
+	Z_PARAM_ZVAL(value)
+	ZEND_PARSE_PARAMETERS_END();
+
+	IDriver* db = zval_toc<IDriver>(ZEND_THIS);
+
+	bool result = db->setAttribute(attkey, value);
+
+	RETURN_BOOL(result);
+}
+//public function setFetch(int $value): int 
+ZEND_METHOD(Wcd_IDriver, setFetch)
+{
+	zend_long mode;
+	ZEND_PARSE_PARAMETERS_START(1,1)
+	Z_PARAM_LONG(mode)
+	ZEND_PARSE_PARAMETERS_END();
+
+	IDriver* db = zval_toc<IDriver>(ZEND_THIS);
+
+	zend_long result = db->setFetch(mode);
+
+	RETURN_LONG(result);
+}
+
+ZEND_METHOD(Wcd_IDriver, transaction)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	IDriver* db = zval_toc<IDriver>(ZEND_THIS);
+
+	bool result = db->transaction();
+
+	RETURN_BOOL(result);
+}
 
 PHP_MINIT_FUNCTION(Wcd_IDriver_reg)
 {
 	IDriver::omg.classEntry(register_class_Wcd_IDriver());
 	
-
 	return SUCCESS;
 }
 #endif

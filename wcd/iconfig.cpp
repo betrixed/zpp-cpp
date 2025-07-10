@@ -16,6 +16,10 @@ extern "C" {
 #include "iserver.h"
 #endif
 
+#ifndef WCD_IBUILD_H
+#include "ibuild.h"
+#endif
+
 namespace wcd {
 
 using namespace zpp;
@@ -54,36 +58,82 @@ CfgInit::init()
 
 	k_prepare = "prepare";
 	k_execute = "execute";
+	db_models_ns = "DB\\Models";
 }
 
+
+void
+IConfig::set_data(zstr_user key, zval_user values, bool required, zval_user ifnot)
+{
+	htab_write hw(data_);
+	zval_mgr dput = getValue(values, required, ifnot);
+	hw.set(key, dput);
+}
 void 
 IConfig::assign(htab_read cfg)
 {
-	htab_write hw(data_);
+	cfg_ = cfg;
+	zval_mgr null_val;
+	zval_mgr value;
 
 	htab_mgr   sarray;
-
 	htab_write arg(sarray);
 	arg.push_items(ICS.k_driver, ICS.k_adapter);
 
 	//arg.push_back(ICS.k_driver);
 	//arg.push_back(ICS.k_adapter);
 
-	zval_mgr null_val;
+
 	zval_mgr keys(arg);
 
-	zstr_mgr sval = getValue(keys, true, null_val);
-	hw.set(ICS.k_driver, sval);
+	set_data(ICS.k_driver, keys, true, null_val);
 
 	arg.clear();
+	arg.push_items(ICS.k_host,ICS.k_hostname);
+	keys = arg;
 
-	arg.push_back(ICS.k_host);
-	arg.push_back(ICS.k_hostname);
+	null_val = ICS.k_localhost;
+	set_data(ICS.k_host, keys, false, null_val);
+
+	keys = ICS.k_port;
+	null_val.set_null();
+	value = getValue(keys, false, null_val);
+	value.toLong();
+	set_data(ICS.k_port, keys, false, null_val);
+
+	arg.clear();
+	arg.push_items(ICS.k_dbname, ICS.k_database);
+	keys = arg;
+	set_data(ICS.k_dbname, keys, true, null_val);
+
+	arg.clear();
+	arg.push_items(ICS.k_username, ICS.k_user);
+	keys = arg;
+
+	null_val = zstr_mgr::empty_str();
+	set_data(ICS.k_username, keys, false, null_val);
+
+	keys = ICS.k_password;
+	set_data(ICS.k_password, keys, false,  null_val);
+
+	keys = ICS.k_charset;
+	set_data(ICS.k_charset, keys, false, null_val);
+
+	keys = ICS.k_collation;
+	set_data(ICS.k_collation, keys, false, null_val);
+
+	keys = ICS.k_processor;
+	null_val.set_null();
+	set_data(ICS.k_processor, keys, false, null_val);
+
+	keys = ICS.k_dml_class;
+	null_val = zstr_user(IBuild::omg.class_name());
+	set_data(ICS.k_dml_class, keys, false, null_val);
 
 
-	sval = getValue(keys, false, null_val);
-	hw.set(ICS.k_host, sval);
-
+	keys = ICS.k_model_ns;
+	null_val = ICS.db_models_ns;
+	set_data(ICS.k_model_ns, keys, false, null_val);
 }
 
 zval_mgr 
@@ -100,7 +150,7 @@ IConfig::getValue(zstr_user key, bool required, zval_user ifnot)
 		return result;
 	}
 	zstr_buffer buf;
-	buf << "Db IConfig needs value for : '" << key << '\'';
+	buf << "IConfig needs value for : '" << key << '\'';
 	zend_throw_error(zend_ce_error, buf.data());
 	return result;
 }

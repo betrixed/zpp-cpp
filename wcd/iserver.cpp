@@ -256,12 +256,14 @@ IServer::config(htab_read data)
 	if (clist.isArray())
 	{
 		htab_write(sqlClasses_).merge(clist.zarray());
+		showdata("sqlClasses_",sqlClasses_);
 	}
 
 	clist = data.get(ISV.drivers_key);
 	if (clist.isArray())
 	{
 		htab_write(driverClasses_).merge(clist.zarray());
+		showdata("driverClasses_",driverClasses_);
 	}
 	clist = data.get(ISV.db_config);
 	if (clist.isArray())
@@ -269,11 +271,13 @@ IServer::config(htab_read data)
 		htab_walk wk;
 		auto name = wk.key();
 		auto cfg = wk.value();
+
 		for(wk.start(clist.zarray()); wk.ok(); wk.next())
 		{
 			zobj_mgr dbc_mgr = IConfig::omg.new_zobj();
 			IConfig* dbc = zobj_toc<IConfig>(dbc_mgr);
-
+			//showmem("Name", name);
+			//showmem("Values-", cfg);
 			dbc->assign(cfg);
 			addConfig(dbc_mgr, name);
 		}
