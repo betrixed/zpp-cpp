@@ -5,6 +5,8 @@
  */
 namespace Wcd;
 
+use Wcd\Sql\{Bindings, ISql, JoinTables, ParamList};
+
 interface IfCrud
 {
     /** Both update and create time stamps */
@@ -55,39 +57,6 @@ interface IfCrud
 };
 
 
-/*
-interface IfSqlParam {
-    public function __construct(\Wcd\IDriver $gen);
-
-    public function getParams() : array {}
-
-    public function getReturns() : ?array {}
-
-    public function getSql() : ?string {}
-
-    public function getValues() : ?array {}
-
-    public function setParams(array $replace) : void {}
-
-    public function setReturns(array $replace) : void {}
-
-    public function setSql(string $sql) : void {}
-
-    public function setValues(array $replace) : void {}
-
-    public function addParam(mixed $value) : void {}
-
-    public function addParamList(array $values): string {}
-
-    public function makeList(int $start, int $count): string {}
-
-    public function paramLiteral(mixed $value) : string {}
-
-    public function useOwnValues() : void {}
-
-    public function wipe() : void {}
-};
-*/
 
 
 
@@ -195,91 +164,81 @@ class IDriver {
 
 };
 
-class Model implements IfCrud {
+class IBuild {
+    public function __construct(IDriver $db);
+
+    public function __destruct();
+
+    public function aggregate(string $func, ?array $columns = null) : mixed {}
+
+    public function allRows() : mixed {}
+
+    public function avg(string $column) : mixed {}
+
+    public function count(string|array $columns = "*") : int {}
 
 
-    public static function KeyValue(array $key, array $value): ?IRow {}
 
-    public static function WithValues(array $values) : ?IRow {}
+    public function deleteRow(IRow $row) : bool {}
 
-    public static function __callStatic(string $method, array $parameters) : mixed {}
+    public function distinct(bool $set = true): void {}
 
-    public static function classToTableName(string $cname): string {}
+    public function first(?array $columns = null) : mixed {}
 
-    public static function createFromResult(string $mclass, mixed $results, 
-        array $eagerLoad = []) : array {}
+    public function get(?array $columns = null) : mixed {}
 
-    public static function find(mixed $id): ?IRow {}
+    public function getDriver() : IDriver {}
 
-    public static function getTableName() : string {}
+    public function getBindings() : Bindings {}
 
-    public static function importFromCSV(string $fileName): int {}
+    public function getFrom() : JoinTables {}
 
-    public static function modelBuild(): IBuild {}
+    public function getInsertSql(array $columns) : ParamList {}
 
-    public static function row(array $data = []) : IRow {}
+    public function getParamList() : ParamList {}
 
-    public static function rowSaved(array $data = []) : IRow {}
-
-    public function create(IRow $row, bool $reload = false) : bool {}
-
-    public function createdAtName() : string {}
-
-    public function delete(IRow $row) : bool {}
-
-    public function exists(IRow $row): bool {}
-
-    public function getColDefs() : ?array {}
-
-    /** Important Interface properties */
-    public function getConnect(): IfDriver {}
-
-    public function getFieldDef(string $ckey) : ?array {}
-
-    public function getForeignKey(): array {}
-
-    public function getKeyOptions(): array {}
-
-    public function getName(): string {}
-
-    public function getPKey(): array {}
-
-    public function getSeqDefs(): array {}
-
-    public function getTSFlags() :  int {}
-
-    public function getTableDef() : mixed {}
-
-    public function hasTimeStamps() : bool {}
-
-    public function newRow(array $rdata = [], bool $isSaved = false) : IRow {}
-
-    public function readRow(IRow $row) : IRow {}
-
-    public function save(IRow $row, bool $reload = false) : bool {}
-
-    public function setColDefs(array $cdefs) : void {}
-
-
-    public function setKeyOptions(array $options) : void {}
+    public function getSql() : ISql {}
 
     
 
-    public function setName(string $name) : void {}
+    public function hasModel() : bool {}
 
-    public function setPKey(array $pnames) : void {}
+    public function insert(array|IRow $rows) : mixed {}
 
-    public function  setSeqDefs(array $sdefs) : void {}
+    public function limit(int $limit, int $offset = 0): void {}
 
-     public function setTSFlags(int $tsval) : void {}
+    public function now(): string {}
 
-    public function stampTime(string $stamp, 
-            int $tsflags = IfCrud::ALL_TS) : array {}
+    public function offset(int $offset): void {}
 
-    public function update(IRow $row, bool $reload = false) : bool {}
+    public function oneRow() : mixed {}
 
-    public function updatedAtName() : string {}
+    public function orderBy($column, bool $descend = false) : void {}
 
+    public function seqLastValue(string $seqname): ?int {}
+
+    public function set(string $column, mixed $value): void {}
+
+    public function setFetch(int $mode): int {}
+
+    public function setInsert(array $data) : void  {}
+
+    public function setModel(?Model $model = null, bool $bind = true): void {}
+
+    public function setModelClass(string $cname) : void {}
+
+    public function setReturns(array $names) : void {}
+
+    public function setSeqValue(int $value, array $data): ?int {}
+
+    public function table(string $table, bool $wipe = true) : void {}
+
+    public function update(IRow $row, array $dirty = []) : mixed {}
+
+    public function where(mixed $column, ?string $operator = null, 
+                        mixed $value = null, string $bval = "AND") : void {}
+
+    public function wipe(): void {}
 };
 
 
