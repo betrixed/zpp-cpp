@@ -5,7 +5,12 @@
  */
 namespace Wcd;
 
-use Wcd\Sql\{Bindings, ISql, JoinTables, ParamList};
+/*
+use Wcd\Sql\Bindings;
+use Wcd\Sql\ISql;
+use Wcd\Sql\JoinTables;
+use Wcd\Sql\ParamList;
+*/
 
 interface IfCrud
 {
@@ -173,11 +178,7 @@ class IBuild {
 
     public function allRows() : mixed {}
 
-    public function avg(string $column) : mixed {}
-
     public function count(string|array $columns = "*") : int {}
-
-
 
     public function deleteRow(IRow $row) : bool {}
 
@@ -189,17 +190,15 @@ class IBuild {
 
     public function getDriver() : IDriver {}
 
-    public function getBindings() : Bindings {}
+    public function getBindings() : Wcd\Sql\Bindings {}
 
-    public function getFrom() : JoinTables {}
+    public function getFrom() :  Wcd\Sql\JoinTables {}
 
-    public function getInsertSql(array $columns) : ParamList {}
+    public function getInsertSql(array $columns) :  Wcd\Sql\ParamList {}
 
-    public function getParamList() : ParamList {}
+    public function getParamList() :  Wcd\Sql\ParamList {}
 
-    public function getSql() : ISql {}
-
-    
+    public function getSql() :  Wcd\Sql\ISql {}
 
     public function hasModel() : bool {}
 
@@ -213,7 +212,7 @@ class IBuild {
 
     public function oneRow() : mixed {}
 
-    public function orderBy($column, bool $descend = false) : void {}
+    public function orderBy(string $column, bool $descend = false) : void {}
 
     public function seqLastValue(string $seqname): ?int {}
 

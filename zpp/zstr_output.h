@@ -69,6 +69,8 @@ namespace zpp {
 
 		zstr_output& operator<<(int iv);
 
+		zstr_output& operator<<(unsigned int iv);
+
 		zstr_output& operator<<(long iv);
 
 		zstr_output& operator<<(char c);

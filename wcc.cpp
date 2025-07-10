@@ -78,7 +78,9 @@ extern "C" {
 #include "wcc/global_response.cpp"
 #include "wcd/iconfig.cpp"
 #include "wcd/iserver.cpp"
-#include "wcd/idriver.cpp"
+#include "wcd/idriver.cpp" 
+#include "wcd/ibuild.cpp"
+
 #include "wcd/raw.cpp"
 
 #include "wcd/model.cpp"
@@ -329,6 +331,9 @@ PHP_MINIT(wcc_route_add)(INIT_FUNC_ARGS_PASSTHRU);
 	PHP_MINIT(Sql_Raw_reg)(INIT_FUNC_ARGS_PASSTHRU);
 #endif
 
+#ifdef WCD_IBUILD_CPP
+	PHP_MINIT(Wcd_IBuild_reg)(INIT_FUNC_ARGS_PASSTHRU);
+#endif
 	return SUCCESS;
 }
 

@@ -109,6 +109,24 @@ zstr_output::operator<<(const std::string_view &v)
 }
 
 zstr_output& 
+zstr_output::operator<<(unsigned int iv)
+{
+	const char* sfmt;
+
+	if (nf_.value_ == Numf::DEC)
+	{
+		sfmt = "%u";
+	}
+	else {
+		sfmt = "%x";
+	}
+	zend_string* pf = strpprintf(0,sfmt,iv);
+	append(pf);
+	zend_string_release(pf);
+	return *this;
+}
+
+zstr_output& 
 zstr_output::operator<<(int iv) 
 {	
 	const char* sfmt;

@@ -25,10 +25,10 @@
 #include "irow.h"
 #endif
 
-#ifndef DB_ARGINFO_H
-#define DB_ARGINFO_H
+#ifndef MODEL_ARGINFO_H
+#define MODEL_ARGINFO_H
 extern "C" {
-     #include "stub/db_arginfo.h"
+     #include "stub/model_arginfo.h"
 }
 #endif
 
@@ -1533,7 +1533,7 @@ PHP_MINIT_FUNCTION(Wcd_Model_reg)
 {
 	zintf_ce_IfCrud = register_class_Wcd_IfCrud();
 
-	Model::omg.classEntry(register_class_Wcd_Model(zintf_ce_IfCrud));
+	Model::omg.classEntry(register_class_Wcd_Sql_Model(zintf_ce_IfCrud));
 
 	return SUCCESS;
 }

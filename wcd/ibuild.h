@@ -37,6 +37,8 @@ namespace wcd {
 
 		zval_mgr first(htab_read columns);
 		void where(zval_user column, zstr_user bop, zval_user value, zstr_user bval);
+
+
 		void whereKeyValue(zval_user key, zval_user value);
 		void whereRaw(zobj_user rawobj, htab_read values, zstr_user bval);
 		
@@ -66,6 +68,10 @@ namespace wcd {
 
 		int  ifetch_;
 
+		void where(zval_user column, zval_user bop, zval_user value, zval_user bval);
+
+		void where_unpack(htab_read aw);
+		void where_list(htab_read aw);
 
 		friend class Model;
 	};

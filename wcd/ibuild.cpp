@@ -9,6 +9,10 @@
 #include "sql_ipart.h"
 #endif
 
+#ifndef WCD_IROW_H
+#include "irow.h"
+#endif
+
 namespace wcd {
 using namespace zpp;
 
@@ -16,22 +20,22 @@ using namespace zpp;
 
 	void IBuild::construct(zval_user driver)
 	{
-		idriver_ = driver;
+		driver_ = driver;
 		params_ = ParamList::omg.new_zobj();
 		ParamList* plist = zobj_toc<ParamList>(params_);
 
 		plist->construct(driver);
 
-		IDriver* db = zobj_toc<IDriver>(idriver_);
+		IDriver* db = zobj_toc<IDriver>(driver_);
 		isql_ = db->isql_;
 
 		bindings_ = Bindings::omg.new_zobj();
-		Bindings& bind = zobj_toc<Bindings>(bindings_);
+		Bindings& bind = *zobj_toc<Bindings>(bindings_);
 
 		zval_mgr sqlmgr(isql_);
 
-		bind->construct(sqlmgr, driver);
-		bind->setParamList(params_);
+		bind.construct(sqlmgr, driver);
+		bind.setParamList(params_);
 
 	}
 
@@ -44,7 +48,7 @@ using namespace zpp;
 		zend_throw_error(zend_ce_error, buf.data());
 	}
 
-	void where_unpack(htab_read aw)
+	void IBuild::where_unpack(htab_read aw)
 	{
 		auto wlen = aw.size();
 		if (wlen==0)
@@ -90,15 +94,15 @@ using namespace zpp;
 			where(p0,p1,p2,p3);
 			break;
 		case 3:
-			where(p0,p1,p2);
+			where(p0,p1,p2, zval_user());
 			break;
 		case 2:
-			where(p0,p1);
+			where(p0,p1, zval_user(), zval_user());
 			break;
 		}
 	}
 
-	void where_list(htab_read aw)
+	void IBuild::where_list(htab_read aw)
 	{
 		auto wlen = aw.size();
 
@@ -157,7 +161,8 @@ using namespace zpp;
 	IBuild::setReturns(htab_read names)
 	{
 		Bindings& bind = bindings();
-		bind.add(ISql::SQL_RETURN, names);
+		zval_mgr list(names);
+		bind.add(ISql::SQL_RETURN, list);
 	}
 
 	zval_mgr 
@@ -195,7 +200,7 @@ using namespace zpp;
 			row_mgr = rdata.zobject();
 		}
 		IRow* irow = zobj_toc<IRow>(row_mgr);
-		zobj_mgr model_mgr = irow->getModel();
+		zobj_user model_mgr = irow->getModel();
 
 		Model* model = zobj_toc<Model>(model_mgr);
 
@@ -212,8 +217,8 @@ using namespace zpp;
 		htab_mgr args_mgr;
 		htab_write args(args_mgr);
 
-		args.set(IBS.function_key, afgfn);
-		args.set(IBS.columns_key, columns);
+		args.set(SQSTR.function, afgfn);
+		args.set(SQSTR.columns, columns);
 
 		Bindings* bind = zobj_toc<Bindings>(bindings_);
 		bind->set(ISql::SQL_AGGREGATE, args_mgr);
@@ -342,7 +347,21 @@ using namespace zpp;
 		bind.whereKeyValue(key, value);
 	}
 
+	void
+	IBuild::where(zval_user column, zval_user opcmp, zval_user value, zval_user bval)
+	{
+		if (!value.ok())
+		{
+			value = opcmp;
+			opcmp = SQSTR.cmp_equal;
+		}
+		if (!bval.ok())
+		{
+			bval = SQSTR.and_str;
+		}
+		where(column, opcmp.zstr(), value, bval.zstr());
 
+	}
 
 	void
 	IBuild::where(zval_user column, zstr_user opcmp, zval_user value, zstr_user bval)
@@ -351,7 +370,7 @@ using namespace zpp;
 
 		if (column.isString())
 		{
-			bind.where(column, operator, value, bval);
+			bind.where(column, opcmp, value, bval);
 			return;
 		}
 		if (column.isArray())
@@ -415,5 +434,53 @@ using namespace zpp;
 
 	}
 }; // namespace wcd
+
+
+
+using namespace wcd;
+
+
+/*
+ZEND_METHOD(Wcd_IBuild, __construct);
+ZEND_METHOD(Wcd_IBuild, __destruct);
+ZEND_METHOD(Wcd_IBuild, aggregate);
+ZEND_METHOD(Wcd_IBuild, allRows);
+ZEND_METHOD(Wcd_IBuild, avg);
+ZEND_METHOD(Wcd_IBuild, count);
+ZEND_METHOD(Wcd_IBuild, deleteRow);
+ZEND_METHOD(Wcd_IBuild, distinct);
+ZEND_METHOD(Wcd_IBuild, first);
+ZEND_METHOD(Wcd_IBuild, get);
+ZEND_METHOD(Wcd_IBuild, getDriver);
+ZEND_METHOD(Wcd_IBuild, getBindings);
+ZEND_METHOD(Wcd_IBuild, getFrom);
+ZEND_METHOD(Wcd_IBuild, getInsertSql);
+ZEND_METHOD(Wcd_IBuild, getParamList);
+ZEND_METHOD(Wcd_IBuild, getSql);
+ZEND_METHOD(Wcd_IBuild, hasModel);
+ZEND_METHOD(Wcd_IBuild, insert);
+ZEND_METHOD(Wcd_IBuild, limit);
+ZEND_METHOD(Wcd_IBuild, now);
+ZEND_METHOD(Wcd_IBuild, offset);
+ZEND_METHOD(Wcd_IBuild, oneRow);
+ZEND_METHOD(Wcd_IBuild, orderBy);
+ZEND_METHOD(Wcd_IBuild, seqLastValue);
+ZEND_METHOD(Wcd_IBuild, set);
+ZEND_METHOD(Wcd_IBuild, setFetch);
+ZEND_METHOD(Wcd_IBuild, setInsert);
+ZEND_METHOD(Wcd_IBuild, setModel);
+ZEND_METHOD(Wcd_IBuild, setModelClass);
+ZEND_METHOD(Wcd_IBuild, setReturns);
+ZEND_METHOD(Wcd_IBuild, setSeqValue);
+ZEND_METHOD(Wcd_IBuild, table);
+ZEND_METHOD(Wcd_IBuild, update);
+ZEND_METHOD(Wcd_IBuild, where);
+ZEND_METHOD(Wcd_IBuild, wipe);
+*/
+
+PHP_MINIT_FUNCTION(Wcd_IBuild_reg)
+{
+	IBuild::omg.classEntry(register_class_Wcd_IBuild());
+}
 
 #endif
