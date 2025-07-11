@@ -29,8 +29,7 @@ namespace wcd {
 		
 		void setModel(zobj_user m);
 
-		Bindings& bindings();
-		ISql&     isql();
+		
 
 		zval_mgr oneRow();
 		zval_mgr allRows();
@@ -56,6 +55,10 @@ namespace wcd {
 
 	protected:
 
+		Bindings& bindings();
+		ISql&     isql();
+		IDriver&  idb();
+
 		zobj_mgr driver_;
 		zobj_mgr isql_;
 		zobj_mgr params_;
@@ -73,6 +76,7 @@ namespace wcd {
 		void where_unpack(htab_read aw);
 		void where_list(htab_read aw);
 
+		zstr_mgr now();
 		friend class Model;
 	};
 }; //  namespace

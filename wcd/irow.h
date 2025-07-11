@@ -70,7 +70,9 @@ namespace wcd {
     	
     	void read();
 
-    	htab_mgr getDataValues(zval_user attrlist);
+    	htab_read getData() const;
+
+    	htab_mgr getDataValues(htab_read attrlist);
 
     	bool hasValue(zstr_user key);
     	

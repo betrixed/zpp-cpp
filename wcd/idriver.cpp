@@ -32,9 +32,7 @@ extern "C" {
 #include "model.h"
 #endif
 
-#ifndef PHP_PDO_DRIVER_H
-#include <ext/pdo/php_pdo_driver.h>
-#endif
+
 
 namespace wcd {
 

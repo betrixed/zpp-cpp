@@ -200,6 +200,11 @@ IRow::getDirty()
 	return result;
 }
 
+htab_read 
+IRow::getData() const
+{
+	return data_;
+}
 
 bool 
 IRow::isDirty(zstr_user colname)
@@ -236,45 +241,37 @@ IRow::isDirty(zstr_user colname)
 
 
 void 
-IRow::mergeData(zval_user attrlist)
+IRow::mergeData(htab_read attrs)
 {
-	if (attrlist.isArray())
+	if (attrs.size() == 0)
 	{
-		htab_read attrs(attrlist.zarray());
+		return;
+	}
+	zval_mgr defs_zval_mgr = table_model_.call(IRSTR.getcoldefs);
+	zval_user defs_zval(defs_zval_mgr);
+	htab_mgr cdefs;
 
-		if (attrs.size() == 0)
+
+	if (defs_zval.isArray())
+	{
+		cdefs = defs_zval.zarray();
+	}
+
+	htab_write hw(data_);
+
+	htab_walk wk;
+	auto key = wk.key();
+	auto value = wk.value();
+
+	for(wk.start(attrs); wk.ok(); wk.next())
+	{
+		zstr_user cname = key.zstr();
+		if (cdefs.size() && !cdefs.has_key(cname))
 		{
+			zend_throw_error(zend_ce_error, "Unknown attribute %s", cname.data());
 			return;
-
 		}
-		zval_mgr defs_zval_mgr = table_model_.call(IRSTR.getcoldefs);
-		zval_user defs_zval(defs_zval_mgr);
-		htab_mgr cdefs;
-
-
-		if (defs_zval.isArray())
-		{
-			cdefs = defs_zval.zarray();
-		}
-
-
-		htab_write hw(data_);
-
-		htab_walk wk;
-		auto key = wk.key();
-		auto value = wk.value();
-
-
-		for(wk.start(attrs); wk.ok(); wk.next())
-		{
-			zstr_user cname = key.zstr();
-			if (cdefs.size() && !cdefs.has_key(cname))
-			{
-				zend_throw_error(zend_ce_error, "Unknown attribute %s", cname.data());
-				return;
-			}
-			hw.set(cname, value);
-		}
+		hw.set(cname, value);
 	}
 }
 
@@ -520,7 +517,6 @@ ZEND_METHOD(Wcd_IRow, getDataValues)
 	auto cobj = zval_toc<IRow>(ZEND_THIS);
 	htab_mgr data = cobj->getDataValues(names);
 	data.move_zv(return_value);
-
 }
 
 PHP_MINIT_FUNCTION(IRow_reg)

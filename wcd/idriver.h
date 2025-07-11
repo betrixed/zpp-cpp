@@ -9,6 +9,10 @@
 #include "iconfig.h"
 #endif
 
+#ifndef PHP_PDO_DRIVER_H
+#include <ext/pdo/php_pdo_driver.h>
+#endif
+
 namespace wcd {
 
 	using namespace zpp;
@@ -19,6 +23,13 @@ namespace wcd {
 
 	class IDriver : public base_d {
 	public:
+
+		enum {
+			FETCH_OBJECT = PDO_FETCH_OBJ,
+			FETCH_ASSOC = PDO_FETCH_ASSOC,
+			FETCH_NUM = PDO_FETCH_NUM,
+		};
+
 		static base_obj_mgr<IDriver> omg;
 		
 		void construct(zobj_user icfg, zstr_user name);

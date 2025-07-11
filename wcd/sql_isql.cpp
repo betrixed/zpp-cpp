@@ -1539,6 +1539,12 @@ void Bindings::debug_info(htab_write di)
 	di.set(SQSTR.connect, db_);
 }
 
+void add(int key, htab_read value)
+{
+	zval_mgr adapt(value);
+	add(key, adapt);
+}
+
 void Bindings::add(int key, zval_user value)
 {
 	switch(key)

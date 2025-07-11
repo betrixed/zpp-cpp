@@ -298,7 +298,8 @@ namespace wcd {
 		void construct(zval_user sql, zval_user connect);
 
 		void add(int key, zval_user value);
-
+		void add(int key, htab_read value);
+		
 		bool addJoinData(htab_read data);
 
 		zval_user get(int key);
@@ -321,6 +322,8 @@ namespace wcd {
 		zobj_mgr getJoins();
 
 		bool getArray(int key, htab_mgr& value);
+
+		void update(zstr_user column, zval_user value);
 
 		const htab_mgr& getData()
 		{

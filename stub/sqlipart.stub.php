@@ -311,6 +311,8 @@ class Bindings {
 
     public function unset(int $key) : void {}
 
+    public function update(string $column, mixed $value) : void {}
+
     public function wipe(int $ix = 0) : void {}
 
     public function select(object $prop) : mixed {}
