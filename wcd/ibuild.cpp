@@ -21,6 +21,13 @@
 #include "raw.h"
 #endif
 
+#ifndef DB_ARGINFO_H
+#define DB_ARGINFO_H
+extern "C" {
+     #include "stub/db_arginfo.h"
+}
+#endif
+
 namespace wcd {
 using namespace zpp;
 
@@ -56,6 +63,13 @@ using namespace zpp;
 		zend_throw_error(zend_ce_error, buf.data());
 	}
 
+	void 
+	IBuild::distinct(bool set)
+	{
+		Bindings& bind = bindings();
+		zval_mgr value(set);
+		bind.set(ISql::SQL_DISTINCT, value);
+	}
 	void IBuild::where_unpack(htab_read aw)
 	{
 		auto wlen = aw.size();
@@ -175,8 +189,7 @@ using namespace zpp;
 	IBuild::setReturns(htab_read names)
 	{
 		Bindings& bind = bindings();
-		zval_mgr list(names);
-		bind.add(ISql::SQL_RETURN, list);
+		bind.addarray(ISql::SQL_RETURN, names);
 	}
 
 	zval_mgr 
@@ -240,14 +253,12 @@ using namespace zpp;
 					temp = timeStamps;
 					irow->mergeData(temp);
 				}
-				temp = irow->getData();
-				bind.add(ISql::SQL_INSERT, temp);
+				bind.addarray(ISql::SQL_INSERT, irow->getData());
 			}
 		}
 		else {
 			// already stamped time.
-			temp = irow->getData();
-			bind.add(ISql::SQL_INSERT, temp);
+			bind.addarray(ISql::SQL_INSERT, irow->getData());
 		}
 
 		zobj_mgr plist_mgr = isql().insert(bind);
@@ -302,6 +313,8 @@ using namespace zpp;
 
 		IRow* rowobj = zobj_toc<IRow>(irow);
 
+		zval_mgr result;
+
 		if (dirty.size())
 		{
 			htab_walk wk;
@@ -331,9 +344,11 @@ using namespace zpp;
 			zstr_mgr sql = plist->getSql();
 			htab_mgr params = plist->getValues();
 
-			return RunSql::op(driver_, sql, params);
+			result = RunSql::op(driver_, sql, params);
 			
 		}
+
+		return result;
 	}
 
 	void 
@@ -348,8 +363,7 @@ using namespace zpp;
 			plist->wipe();
 		}
 
-		zval_mgr temp(table);
-		bind.add(ISql::SQL_FROM, temp);
+		bind.addstr(ISql::SQL_FROM, table);
 	}
 
 	int 
@@ -488,7 +502,7 @@ using namespace zpp;
 
 		ParamList* params = zobj_toc<ParamList>(params_);
 		params->wipe();
-		bind.add(ISql::SQL_INSERT, columns);
+		bind.addarray(ISql::SQL_INSERT, columns);
 
 		ISql* isql = zobj_toc<ISql>(isql_);
 
@@ -496,23 +510,47 @@ using namespace zpp;
 
 	}
 
+	zval_mgr
+	IBuild::get_first()
+	{
+		Bindings& bind = bindings();
+		bind.limit(1, 0);
+		zval_mgr result = bind.select(vobj());
+
+		if (result.isArray())
+		{
+			htab_read rdata(result);
+			if (rdata.size())
+			{
+				result = rdata.get(int(0));
+			}
+			else {
+				result.set_null();
+			}
+		}
+		return result;
+	}
 
 	zval_mgr 
 	IBuild::oneRow()
 	{
-
+		columns_.init();
+		return get_first();
 	}
+
 
 	zval_mgr 
 	IBuild::allRows()
 	{
-
+		columns_.init();
+		return bindings().select(vobj());
 	}
 
 	zval_mgr 
 	IBuild::first(htab_read columns)
 	{
-
+		columns_ = columns;
+		return get_first();
 	}
 
 	zval_mgr
@@ -533,7 +571,7 @@ ZEND_METHOD(Wcd_IBuild, __construct)
 	zval* dbobj;
 
 	ZEND_PARSE_PARAMETERS_START(1,1)
-	Z_PARAM_OBJECT_OF_CLASS(zval, IDriver::omg.classEntry())
+	Z_PARAM_OBJECT_OF_CLASS(dbobj, IDriver::omg.class_entry_)
 	ZEND_PARSE_PARAMETERS_END();
 
 	IBuild* cobj = zval_toc<IBuild>(ZEND_THIS);
@@ -546,12 +584,14 @@ ZEND_METHOD(Wcd_IBuild, __destruct)
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	IBuild* cobj = zval_toc<IBuild>(ZEND_THIS);
+
+	cobj->destruct();
 }
 
 ZEND_METHOD(Wcd_IBuild, aggregate)
 {
 	zend_string* func;
-	zval*        columns;
+	zval*        columns = nullptr;
 
 	ZEND_PARSE_PARAMETERS_START(1,2)
 	Z_PARAM_STR(func)
@@ -566,25 +606,199 @@ ZEND_METHOD(Wcd_IBuild, aggregate)
 	result.move_zv(return_value);
 }
 
+//public function allRows() : mixed
+ZEND_METHOD(Wcd_IBuild, allRows)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+	IBuild* cobj = zval_toc<IBuild>(ZEND_THIS);
+	zval_mgr result = cobj->allRows();
+	result.move_zv(return_value);
+}
+
+//public function count(string|array $columns = "*") : int
+ZEND_METHOD(Wcd_IBuild, count)
+{
+	HashTable* list;
+	zend_string* column;
+
+	ZEND_PARSE_PARAMETERS_START(1,1);
+	Z_PARAM_ARRAY_HT_OR_STR_OR_NULL(list, column)
+	ZEND_PARSE_PARAMETERS_END();
+
+	zval_mgr columns;
+
+	if (column)
+	{
+		columns = column;
+	}
+	else if (list)
+	{
+		columns = list;
+	}
+
+	IBuild* cobj = zval_toc<IBuild>(ZEND_THIS);
+	RETURN_LONG(cobj->count(columns));
+}
+
+//	zval_mgr deleteRow(zobj_user rowobj)
+ZEND_METHOD(Wcd_IBuild, deleteRow)
+{
+	zval* irow;
+
+	ZEND_PARSE_PARAMETERS_START(1,1);
+	Z_PARAM_OBJECT_OF_CLASS(irow, IRow::omg.class_entry_)
+	ZEND_PARSE_PARAMETERS_END();
+
+	IBuild* cobj = zval_toc<IBuild>(ZEND_THIS);
+	zval_mgr result = cobj->deleteRow(irow);
+	result.move_zv(return_value);
+}
+
+//public function distinct(bool $set = true): void
+ZEND_METHOD(Wcd_IBuild, distinct)
+{
+	bool set = true;
+	ZEND_PARSE_PARAMETERS_START(0,1)
+	Z_PARAM_OPTIONAL
+	Z_PARAM_BOOL(set)
+	ZEND_PARSE_PARAMETERS_END();
+
+	IBuild* cobj = zval_toc<IBuild>(ZEND_THIS);
+
+	cobj->distinct(set);
+}
+
+//public function first(?array $columns = null) : mixed
+ZEND_METHOD(Wcd_IBuild, first)
+{
+	HashTable* ht = nullptr;
+
+	ZEND_PARSE_PARAMETERS_START(0,1)
+	Z_PARAM_OPTIONAL
+	Z_PARAM_ARRAY_HT_OR_NULL(ht)
+	ZEND_PARSE_PARAMETERS_END();
+
+	IBuild* cobj = zval_toc<IBuild>(ZEND_THIS);
+	zval_mgr result = cobj->first(htab_read(ht));
+	result.move_zv(return_value);
+}
+
+//public function get(?array $columns = null) : mixed
+ZEND_METHOD(Wcd_IBuild, get)
+{
+	HashTable* ht = nullptr;
+
+	ZEND_PARSE_PARAMETERS_START(0,1)
+	Z_PARAM_OPTIONAL
+	Z_PARAM_ARRAY_HT_OR_NULL(ht)
+	ZEND_PARSE_PARAMETERS_END();
+
+	IBuild* cobj = zval_toc<IBuild>(ZEND_THIS);
+	zval_mgr result = cobj->get(htab_read(ht));
+	result.move_zv(return_value);
+}
+
+ZEND_METHOD(Wcd_IBuild, getDriver)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+	IBuild* cobj = zval_toc<IBuild>(ZEND_THIS);
+	zobj_mgr result = cobj->driver_;
+	result.move_zv(return_value);
+}
+
+ZEND_METHOD(Wcd_IBuild, getBindings)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+	IBuild* cobj = zval_toc<IBuild>(ZEND_THIS);
+	zobj_mgr result = cobj->bindings_;
+	result.move_zv(return_value);
+}
+
+ZEND_METHOD(Wcd_IBuild, getSql)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+	IBuild* cobj = zval_toc<IBuild>(ZEND_THIS);
+	zobj_mgr result = cobj->isql_;
+	result.move_zv(return_value);	
+}
+
+ZEND_METHOD(Wcd_IBuild, getFrom)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+	IBuild* cobj = zval_toc<IBuild>(ZEND_THIS);
+	Bindings& bind = *zobj_toc<Bindings>(cobj->bindings_);
+
+
+	zobj_user result = bind.get(ISql::SQL_FROM);
+
+	result.return_zv(return_value);
+}
+
+ZEND_METHOD(Wcd_IBuild, getInsertSql)
+{
+	HashTable* columns = nullptr;
+
+	ZEND_PARSE_PARAMETERS_START(1,1)
+	Z_PARAM_ARRAY_HT(columns)
+	ZEND_PARSE_PARAMETERS_END();
+
+	IBuild* cobj = zval_toc<IBuild>(ZEND_THIS);
+	zobj_mgr result = cobj->getInsertSql(columns);
+	result.move_zv(return_value);
+}
+
+//public function getParamList() : ?ParamList
+ZEND_METHOD(Wcd_IBuild, getParamList)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+	IBuild* cobj = zval_toc<IBuild>(ZEND_THIS);
+	zobj_mgr result = cobj->params_;
+	result.move_zv(return_value);
+}
+
+ZEND_METHOD(Wcd_IBuild, hasModel)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+	IBuild* cobj = zval_toc<IBuild>(ZEND_THIS);
+	bool result = cobj->hasModel();
+	RETURN_BOOL(result);
+}
+
+//public function insert(array|IRow $rows) : mixed
+ZEND_METHOD(Wcd_IBuild, insert)
+{
+	zval* data;
+	ZEND_PARSE_PARAMETERS_START(1,1)
+	Z_PARAM_ZVAL(data)
+	ZEND_PARSE_PARAMETERS_END();
+	
+	zval_user test(data);
+	if (test.isObject())
+	{
+		zobj_mgr irow(test.zobject());
+		if (! irow.instanceof(IRow::omg.class_entry_))
+		{
+			zend_throw_error(zend_ce_error,"Not IRow object");
+			RETURN_NULL();
+		}	
+	} 
+	else if(!test.isArray())
+	{
+		zend_throw_error(zend_ce_error,"Not an Array");
+		RETURN_NULL();
+	}
+	IBuild* cobj = zval_toc<IBuild>(ZEND_THIS);
+	zval_mgr result = cobj->insert(test);
+	result.move_zv(return_value);
+}
+
 /*
 
-;
-ZEND_METHOD(Wcd_IBuild, aggregate);
-ZEND_METHOD(Wcd_IBuild, allRows);
-ZEND_METHOD(Wcd_IBuild, avg);
-ZEND_METHOD(Wcd_IBuild, count);
-ZEND_METHOD(Wcd_IBuild, deleteRow);
-ZEND_METHOD(Wcd_IBuild, distinct);
-ZEND_METHOD(Wcd_IBuild, first);
-ZEND_METHOD(Wcd_IBuild, get);
-ZEND_METHOD(Wcd_IBuild, getDriver);
-ZEND_METHOD(Wcd_IBuild, getBindings);
-ZEND_METHOD(Wcd_IBuild, getFrom);
-ZEND_METHOD(Wcd_IBuild, getInsertSql);
-ZEND_METHOD(Wcd_IBuild, getParamList);
-ZEND_METHOD(Wcd_IBuild, getSql);
-ZEND_METHOD(Wcd_IBuild, hasModel);
-ZEND_METHOD(Wcd_IBuild, insert);
+
+
+
+
+
 ZEND_METHOD(Wcd_IBuild, limit);
 ZEND_METHOD(Wcd_IBuild, now);
 ZEND_METHOD(Wcd_IBuild, offset);
@@ -607,6 +821,8 @@ ZEND_METHOD(Wcd_IBuild, wipe);
 PHP_MINIT_FUNCTION(Wcd_IBuild_reg)
 {
 	IBuild::omg.classEntry(register_class_Wcd_IBuild());
+
+	return SUCCESS;
 }
 
 #endif

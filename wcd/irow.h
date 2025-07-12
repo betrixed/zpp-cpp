@@ -85,7 +85,7 @@ namespace wcd {
 
     	bool isDirty(zstr_user colname);
 
-    	void mergeData(zval_user attrlist);
+    	void mergeData(htab_read attrlist);
 
     	void setData(zval_user data, bool exists = false);
 

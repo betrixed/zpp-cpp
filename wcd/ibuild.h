@@ -53,11 +53,11 @@ namespace wcd {
 
 		void table(zstr_user table, bool wipe=true);
 
-	protected:
+		void distinct(bool set = true);
 
-		Bindings& bindings();
-		ISql&     isql();
-		IDriver&  idb();
+		bool hasModel() const {
+			return model_.ok();
+		}
 
 		zobj_mgr driver_;
 		zobj_mgr isql_;
@@ -69,6 +69,14 @@ namespace wcd {
 
 		htab_mgr columns_;
 
+	protected:
+
+		Bindings& bindings();
+		ISql&     isql();
+		IDriver&  idb();
+
+
+
 		int  ifetch_;
 
 		void where(zval_user column, zval_user bop, zval_user value, zval_user bval);
@@ -77,6 +85,8 @@ namespace wcd {
 		void where_list(htab_read aw);
 
 		zstr_mgr now();
+		zval_mgr get_first();
+
 		friend class Model;
 	};
 }; //  namespace

@@ -151,16 +151,13 @@ IRow::read()
 
 
 htab_mgr 
-IRow::getDataValues(zval_user attrlist)
+IRow::getDataValues(htab_read attrlist)
 {
 	htab_mgr result;
 
-	if (attrlist.isArray())
+	if (data_.size())
 	{
-		if (data_.size())
-		{
-			result = htab_mgr::subset(attrlist, data_, true);
-		}
+		result = htab_mgr::subset(attrlist, data_, true);
 	}
 	return result;
 }

@@ -1539,47 +1539,65 @@ void Bindings::debug_info(htab_write di)
 	di.set(SQSTR.connect, db_);
 }
 
-void add(int key, htab_read value)
+void 
+Bindings::addarray(int key, htab_read value)
 {
 	zval_mgr adapt(value);
-	add(key, adapt);
+	if ((key==ISql::SQL_FROM)||(key==ISql::SQL_JOIN))
+	{
+		set(key, zval_user(adapt));
+	}
+	else {
+		addToArray(key, zval_user(adapt));
+	}
+	
 }
 
-void Bindings::add(int key, zval_user value)
+void 
+Bindings::addstr(int key, zstr_user tname)
 {
-	switch(key)
+	if ((key==ISql::SQL_FROM)||(key==ISql::SQL_JOIN))
 	{
-	case ISql::SQL_FROM:
-	case ISql::SQL_JOIN:
+		zstr_mgr talias;
 
-		if (value.isString())
+		zstr_mgr  lcase = tname.to_lower();
+		int pos = lcase.find(std::string_view(" as "),0);
+		if (pos >= 0)
 		{
-			zstr_user tname = value.zstr();
-			zstr_mgr talias;
-
-			zstr_mgr  lcase = tname.to_lower();
-			int pos = lcase.find(std::string_view(" as "),0);
-			if (pos >= 0)
-			{
-				talias = tname.substr(pos+4);
-				tname = tname.substr(0, pos);
-			}
-
-			zobj_mgr tc_obj = TColumns::omg.new_zobj();
-			TColumns* tc = zobj_toc<TColumns>(tc_obj);
-
-			zval_mgr colnames(SQSTR.asterisk);
-
-			tc->construct(tname, talias, colnames);
-
-			JoinTables* joint = getJoinTables();
-			joint->setPrime(tc_obj);
+			talias = tname.substr(pos+4);
+			tname = tname.substr(0, pos);
 		}
-		return;
-	default:
-		break;
+
+		zobj_mgr tc_obj = TColumns::omg.new_zobj();
+		TColumns* tc = zobj_toc<TColumns>(tc_obj);
+
+		zval_mgr colnames(SQSTR.asterisk);
+
+		tc->construct(tname, talias, colnames);
+
+		JoinTables* joint = getJoinTables();
+		joint->setPrime(tc_obj);
 	}
-	addArray(key, value);
+	else {
+		zval_mgr temp(tname);
+		addToArray(key, temp);
+	}
+}
+
+void 
+Bindings::add(int key, zval_user value)
+{
+	if (value.isString())
+	{
+		addstr(key, value.zstr());
+		return;
+	}
+	if ((key==ISql::SQL_FROM)||(key==ISql::SQL_JOIN))
+	{
+		set(key,value);
+		return;
+	}
+	addToArray(key, value);
 }
 
 zobj_mgr
@@ -1640,7 +1658,7 @@ Bindings::getArray(int key, htab_mgr& value)
 }
 
 void 
-Bindings::addArray(int key, zval_user value)
+Bindings::addToArray(int key, zval_user value)
 {
 	zval_user listown = data_.get(key);
 

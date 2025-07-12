@@ -472,6 +472,14 @@ zval_mgr::operator=(HashTable* rc)
     return *this;
 }
 
+const zval_mgr& 
+zval_mgr::operator=(zend_string* rc)
+{
+    lose();
+    zval_user(&zv_).bind_string(rc);
+    return *this;
+}
+
 void 
 zval_mgr::try_addref(zval* p)
 {

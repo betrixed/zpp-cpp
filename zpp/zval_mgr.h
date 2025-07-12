@@ -123,6 +123,8 @@ public:
 
     const zval_mgr& operator=(HashTable* rc);
 
+    const zval_mgr& operator=(zend_string* rc);
+
     zval_mgr& operator=(zval_mgr&& rc);
 
     void move_zv(zval* ret);

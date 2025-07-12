@@ -38,7 +38,6 @@ namespace wcd {
 
 base_obj_mgr<IDriver> IDriver::omg;
 
-
 class DBSInit : public state_init {
 public:
 
