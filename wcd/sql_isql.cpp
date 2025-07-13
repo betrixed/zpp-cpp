@@ -1857,6 +1857,16 @@ Bindings::columnAlias(zobj_user tcolobj)
 	return aliased_mgr;
 }
 
+void 
+Bindings::offset(int value)
+{
+	zval_user ldata = data_.get(ISql::SQL_LIMIT);
+	htab_write hw(ldata);
+
+	hw.set(SQSTR.offset, value);
+
+	set(ISql::SQL_LIMIT, ldata);
+}
 
 void Bindings::set(int key, zval_user value)
 {
@@ -1893,7 +1903,30 @@ zstr_mgr alias_str_key(zstr_user malias)
 void 
 Bindings::where(zval_user column, zstr_user opstr, zval_user value, zstr_user blogic)
 {
+	zval_mgr args;
+	htab_write wh(args);
 
+	wh.set(SQSTR.column, column);
+
+	if (value.isNull())
+	{
+		zval_mgr valop(opstr);
+		wh.set(SQSTR.value, valop);
+		wh.set(SQSTR.operator_key, SQSTR.cmp_equal);
+	}
+	else {
+		wh.set(SQSTR.value, value);
+		wh.set(SQSTR.operator_key, opstr);
+	}
+
+	if (blogic.ok())
+	{
+		wh.set(SQSTR.boolean, blogic);
+	}
+	else {
+		wh.set(SQSTR.boolean, SQSTR.op_and);
+	}
+	add(ISql::SQL_WHERE, args);
 }
 
 void

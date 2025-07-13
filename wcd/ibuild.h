@@ -47,6 +47,9 @@ namespace wcd {
 		void setReturns(htab_read names);
 		zval_mgr insert(zval_user rdata);
 
+		void limit(int lim, int offset=0);
+		void offset(int value);
+
 		zval_mgr deleteRow(zobj_user rowobj);
 		
 		int count(zval_user columns);
@@ -58,6 +61,8 @@ namespace wcd {
 		bool hasModel() const {
 			return model_.ok();
 		}
+
+		zstr_mgr now();
 
 		zobj_mgr driver_;
 		zobj_mgr isql_;
@@ -84,7 +89,7 @@ namespace wcd {
 		void where_unpack(htab_read aw);
 		void where_list(htab_read aw);
 
-		zstr_mgr now();
+		
 		zval_mgr get_first();
 
 		friend class Model;

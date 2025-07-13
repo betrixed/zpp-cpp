@@ -366,6 +366,14 @@ using namespace zpp;
 		bind.addstr(ISql::SQL_FROM, table);
 	}
 
+	void 
+	IBuild::limit(int lim, int offset)
+	{
+		Bindings& bind = bindings();
+
+		bind.limit(lim, offset);
+	}
+
 	int 
 	IBuild::count(zval_user columns)
 	{
@@ -559,6 +567,21 @@ using namespace zpp;
 		columns_ = columns;
 		Bindings& bind = bindings();
 		return bind.select(vobj());
+	}
+
+	zstr_mgr 
+	IBuild::now()
+	{
+		datetime_obj dtime;
+
+		return dtime.format(DTData.now_format);
+	}
+
+	void IBuild::offset(int value)
+	{
+		Bindings& bind = bindings();
+
+		bind.offset(value);
 	}
 }; // namespace wcd
 
@@ -792,16 +815,52 @@ ZEND_METHOD(Wcd_IBuild, insert)
 	result.move_zv(return_value);
 }
 
+//public function limit(int $limit, int $offset = 0): void
+ZEND_METHOD(Wcd_IBuild, limit)
+{
+	zend_long limit;
+	zend_long offset=0;
+
+	ZEND_PARSE_PARAMETERS_START(1,2)
+	Z_PARAM_LONG(limit)
+	Z_PARAM_OPTIONAL
+	Z_PARAM_LONG(offset)
+	ZEND_PARSE_PARAMETERS_END();
+
+	IBuild* cobj = zval_toc<IBuild>(ZEND_THIS);
+	cobj->limit(limit,offset);
+}
+
+ZEND_METHOD(Wcd_IBuild, now)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	IBuild* cobj = zval_toc<IBuild>(ZEND_THIS);
+
+	zstr_mgr result = cobj->now();
+
+	result.move_zv(return_value);
+}
+
+//public function offset(int $offset): void
+ZEND_METHOD(Wcd_IBuild, offset)
+{
+	zend_long offset;
+
+	ZEND_PARSE_PARAMETERS_START(1,1)
+	Z_PARAM_LONG(offset)
+	ZEND_PARSE_PARAMETERS_END();
+
+	IBuild* cobj = zval_toc<IBuild>(ZEND_THIS);
+
+
+	cobj->offset(offset);
+
+}
 /*
 
 
 
-
-
-
-ZEND_METHOD(Wcd_IBuild, limit);
-ZEND_METHOD(Wcd_IBuild, now);
-ZEND_METHOD(Wcd_IBuild, offset);
 ZEND_METHOD(Wcd_IBuild, oneRow);
 ZEND_METHOD(Wcd_IBuild, orderBy);
 ZEND_METHOD(Wcd_IBuild, seqLastValue);

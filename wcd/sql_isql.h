@@ -324,6 +324,8 @@ namespace wcd {
 
 		bool getArray(int key, htab_mgr& value);
 
+		void offset(int value);
+		
 		void update(zstr_user column, zval_user value);
 
 		const htab_mgr& getData()
