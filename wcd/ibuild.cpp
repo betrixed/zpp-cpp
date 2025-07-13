@@ -577,12 +577,22 @@ using namespace zpp;
 		return dtime.format(DTData.now_format);
 	}
 
-	void IBuild::offset(int value)
+	void 
+	IBuild::offset(int value)
 	{
 		Bindings& bind = bindings();
 
 		bind.offset(value);
 	}
+
+	void 
+	IBuild::orderBy(zstr_user colname, bool descend)
+	{
+		Bindings& bind = bindings();
+
+		bind.orderBy(colname, descend);
+	}
+
 }; // namespace wcd
 
 
@@ -857,12 +867,40 @@ ZEND_METHOD(Wcd_IBuild, offset)
 	cobj->offset(offset);
 
 }
+
+ZEND_METHOD(Wcd_IBuild, oneRow)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	IBuild* cobj = zval_toc<IBuild>(ZEND_THIS);
+
+	zval_mgr result = cobj->oneRow();
+
+	result.move_zv(return_value);
+}
+
+//public function orderBy(string $column, bool $descend = false) : void
+ZEND_METHOD(Wcd_IBuild, orderBy)
+{
+	zend_string* colname;
+	bool         descend = false;
+
+	ZEND_PARSE_PARAMETERS_START(1,2)
+	Z_PARAM_STR(colname)
+	Z_PARAM_OPTIONAL
+	Z_PARAM_BOOL(descend)
+	ZEND_PARSE_PARAMETERS_END();
+
+	IBuild* cobj = zval_toc<IBuild>(ZEND_THIS);
+	cobj->orderBy(colname, descend);
+}
+
 /*
 
 
 
-ZEND_METHOD(Wcd_IBuild, oneRow);
-ZEND_METHOD(Wcd_IBuild, orderBy);
+
+
 ZEND_METHOD(Wcd_IBuild, seqLastValue);
 ZEND_METHOD(Wcd_IBuild, set);
 ZEND_METHOD(Wcd_IBuild, setFetch);

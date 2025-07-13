@@ -2105,6 +2105,18 @@ Bindings::select(zobj_user prop)
 	return Model::createFromResult(mclass, hr);
 }
 
+void 
+Bindings::orderBy(zstr_user cname, bool descend)
+{
+	zval_mgr args;
+
+	htab_write hw(args);
+
+	hw.set(SQSTR.column, cname);
+	hw.set(SQSTR.descend, descend);
+
+	add(ISql::SQL_ORDER, args);
+}
 
 }; // namespace wcc
 
