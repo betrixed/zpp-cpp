@@ -5,17 +5,10 @@
 #include "irow.h"
 #endif
 
-#ifndef IROW_ARGINFO_H
-#define IROW_ARGINFO_H
+#ifndef MODEL_ARGINFO_H
+#define MODEL_ARGINFO_H
 extern "C" {
-	#include "stub/irow_arginfo.h"
-}
-#endif
-
-#ifndef DB_ARGINFO_H
-#define DB_ARGINFO_H
-extern "C" {
-	#include "stub/db_arginfo.h"
+     #include "stub/model_arginfo.h"
 }
 #endif
 
@@ -516,23 +509,6 @@ ZEND_METHOD(Wcd_IRow, getDataValues)
 	data.move_zv(return_value);
 }
 
-PHP_MINIT_FUNCTION(IRow_reg)
-{
-	//auto ce = register_class_Wcc_Hmap(zend_ce_arrayaccess, zend_ce_countable);
-	//zend_standard_class_def
-
-
-	ce_iface_crud = register_class_Wcd_IfCrud();
-
-	auto ce = register_class_Wcd_IRow(
-		Hmap::omg.classEntry()
-		);
-
-	IRow::omg.classEntry(ce);
-
-	//zend_printf("registered IRow\n");
-	return SUCCESS;
-}
 
 //irow.cpp
 #endif

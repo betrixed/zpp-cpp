@@ -1028,7 +1028,7 @@ namespace wcd {
 
 using namespace wcd;
 
-ZEND_METHOD(Wcd_Model, KeyValue)
+ZEND_METHOD(Wcd_Sql_Model, KeyValue)
 {
 	zval* keynames;
 	zval* values;
@@ -1045,7 +1045,7 @@ ZEND_METHOD(Wcd_Model, KeyValue)
 	result.move_zv(return_value);
 }
 
-ZEND_METHOD(Wcd_Model, WithValues)
+ZEND_METHOD(Wcd_Sql_Model, WithValues)
 {
 	zval* values;
 
@@ -1060,7 +1060,7 @@ ZEND_METHOD(Wcd_Model, WithValues)
 	result.move_zv(return_value);
 }
 
-ZEND_METHOD(Wcd_Model, __callStatic)
+ZEND_METHOD(Wcd_Sql_Model, __callStatic)
 {
 	zend_string* method;
 	zval*         params;
@@ -1076,7 +1076,7 @@ ZEND_METHOD(Wcd_Model, __callStatic)
 
 }
 
-ZEND_METHOD(Wcd_Model, classToTableName)
+ZEND_METHOD(Wcd_Sql_Model, classToTableName)
 {
 	zend_string* cname;
 
@@ -1089,7 +1089,7 @@ ZEND_METHOD(Wcd_Model, classToTableName)
 	result.move_zv(return_value);
 }
 
-ZEND_METHOD(Wcd_Model, createFromResult)
+ZEND_METHOD(Wcd_Sql_Model, createFromResult)
 {
 	zend_string* cname;
 	zval* results;
@@ -1104,7 +1104,7 @@ ZEND_METHOD(Wcd_Model, createFromResult)
 	result.move_zv(return_value);	
 }
 
-ZEND_METHOD(Wcd_Model, find)
+ZEND_METHOD(Wcd_Sql_Model, find)
 {
 	zval* values;
 	ZEND_PARSE_PARAMETERS_START(1,1)
@@ -1119,7 +1119,7 @@ ZEND_METHOD(Wcd_Model, find)
 
 }
 
-ZEND_METHOD(Wcd_Model, getTableName)
+ZEND_METHOD(Wcd_Sql_Model, getTableName)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
@@ -1129,7 +1129,7 @@ ZEND_METHOD(Wcd_Model, getTableName)
 	result.move_zv(return_value);	
 }
 
-ZEND_METHOD(Wcd_Model, importFromCSV)
+ZEND_METHOD(Wcd_Sql_Model, importFromCSV)
 {
 	zend_string* filename;
 
@@ -1143,7 +1143,7 @@ ZEND_METHOD(Wcd_Model, importFromCSV)
 	RETURN_LONG(icount);
 }
 
-ZEND_METHOD(Wcd_Model, modelBuild)
+ZEND_METHOD(Wcd_Sql_Model, modelBuild)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
@@ -1154,7 +1154,7 @@ ZEND_METHOD(Wcd_Model, modelBuild)
 	ibuild.move_zv(return_value);
 }
 
-ZEND_METHOD(Wcd_Model, row)
+ZEND_METHOD(Wcd_Sql_Model, row)
 {
 	zval* data;
 
@@ -1169,7 +1169,7 @@ ZEND_METHOD(Wcd_Model, row)
 	irow.move_zv(return_value);
 }
 
-ZEND_METHOD(Wcd_Model, rowSaved)
+ZEND_METHOD(Wcd_Sql_Model, rowSaved)
 {
 	zval* data;
 
@@ -1202,23 +1202,23 @@ row_output(zend_execute_data *execute_data, zval *return_value)
 	RETURN_BOOL(model->saveRow(data, reload));	
 }
 
-ZEND_METHOD(Wcd_Model, create)
+ZEND_METHOD(Wcd_Sql_Model, create)
 {
 
 	row_output(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 
-ZEND_METHOD(Wcd_Model, save)
+ZEND_METHOD(Wcd_Sql_Model, save)
 {
 	row_output(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 
-ZEND_METHOD(Wcd_Model, update)
+ZEND_METHOD(Wcd_Sql_Model, update)
 {
 	row_output(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 
-ZEND_METHOD(Wcd_Model, createdAtName)
+ZEND_METHOD(Wcd_Sql_Model, createdAtName)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
@@ -1229,7 +1229,7 @@ ZEND_METHOD(Wcd_Model, createdAtName)
 	result.move_zv(return_value);
 }
 
-ZEND_METHOD(Wcd_Model, updatedAtName)
+ZEND_METHOD(Wcd_Sql_Model, updatedAtName)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
@@ -1240,7 +1240,7 @@ ZEND_METHOD(Wcd_Model, updatedAtName)
 	result.move_zv(return_value);
 }
 
-ZEND_METHOD(Wcd_Model, delete)
+ZEND_METHOD(Wcd_Sql_Model, delete)
 {
 	zval* data;
 
@@ -1255,7 +1255,7 @@ ZEND_METHOD(Wcd_Model, delete)
 	RETURN_BOOL(result);
 }
 
-ZEND_METHOD(Wcd_Model, exists)
+ZEND_METHOD(Wcd_Sql_Model, exists)
 {
 	zval* data;
 
@@ -1270,7 +1270,7 @@ ZEND_METHOD(Wcd_Model, exists)
 	RETURN_BOOL(result);
 }
 
-ZEND_METHOD(Wcd_Model, getColDefs)
+ZEND_METHOD(Wcd_Sql_Model, getColDefs)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
@@ -1281,7 +1281,7 @@ ZEND_METHOD(Wcd_Model, getColDefs)
 	result.move_zv(return_value);	
 }
 
-ZEND_METHOD(Wcd_Model, getConnect)
+ZEND_METHOD(Wcd_Sql_Model, getConnect)
 {
      ZEND_PARSE_PARAMETERS_NONE();
 
@@ -1292,7 +1292,7 @@ ZEND_METHOD(Wcd_Model, getConnect)
 	result.move_zv(return_value);	
 }
 
-ZEND_METHOD(Wcd_Model, getFieldDef)
+ZEND_METHOD(Wcd_Sql_Model, getFieldDef)
 {
 	zend_string* data;
 
@@ -1307,7 +1307,7 @@ ZEND_METHOD(Wcd_Model, getFieldDef)
 
 }
 
-ZEND_METHOD(Wcd_Model, getForeignKey)
+ZEND_METHOD(Wcd_Sql_Model, getForeignKey)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
@@ -1319,7 +1319,7 @@ ZEND_METHOD(Wcd_Model, getForeignKey)
 }
 
 
-ZEND_METHOD(Wcd_Model, getKeyOptions)
+ZEND_METHOD(Wcd_Sql_Model, getKeyOptions)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
@@ -1330,7 +1330,7 @@ ZEND_METHOD(Wcd_Model, getKeyOptions)
 	result.move_zv(return_value);	
 }
 
-ZEND_METHOD(Wcd_Model, getName)
+ZEND_METHOD(Wcd_Sql_Model, getName)
 {
 
 	ZEND_PARSE_PARAMETERS_NONE();
@@ -1342,7 +1342,7 @@ ZEND_METHOD(Wcd_Model, getName)
 	result.move_zv(return_value);	
 }
 
-ZEND_METHOD(Wcd_Model, getPKey)
+ZEND_METHOD(Wcd_Sql_Model, getPKey)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
@@ -1353,7 +1353,7 @@ ZEND_METHOD(Wcd_Model, getPKey)
 	result.move_zv(return_value);
 }
 
-ZEND_METHOD(Wcd_Model, getSeqDefs)
+ZEND_METHOD(Wcd_Sql_Model, getSeqDefs)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
@@ -1364,7 +1364,7 @@ ZEND_METHOD(Wcd_Model, getSeqDefs)
 	result.move_zv(return_value);
 }
 
-ZEND_METHOD(Wcd_Model, getTSFlags)
+ZEND_METHOD(Wcd_Sql_Model, getTSFlags)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
@@ -1376,7 +1376,7 @@ ZEND_METHOD(Wcd_Model, getTSFlags)
 
 }
 
-ZEND_METHOD(Wcd_Model, getTableDef)
+ZEND_METHOD(Wcd_Sql_Model, getTableDef)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
@@ -1387,7 +1387,7 @@ ZEND_METHOD(Wcd_Model, getTableDef)
 	result.move_zv(return_value);
 }
 
-ZEND_METHOD(Wcd_Model, hasTimeStamps)
+ZEND_METHOD(Wcd_Sql_Model, hasTimeStamps)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
@@ -1398,7 +1398,7 @@ ZEND_METHOD(Wcd_Model, hasTimeStamps)
 	RETURN_BOOL(result);
 }
 
-ZEND_METHOD(Wcd_Model, newRow)
+ZEND_METHOD(Wcd_Sql_Model, newRow)
 {
 	zval* rdata;
 	bool  isSaved = false;
@@ -1417,7 +1417,7 @@ ZEND_METHOD(Wcd_Model, newRow)
 }
 
 
-ZEND_METHOD(Wcd_Model, readRow)
+ZEND_METHOD(Wcd_Sql_Model, readRow)
 {
 	zval* rdata;
 
@@ -1433,7 +1433,7 @@ ZEND_METHOD(Wcd_Model, readRow)
 
 }
 
-ZEND_METHOD(Wcd_Model, setColDefs)
+ZEND_METHOD(Wcd_Sql_Model, setColDefs)
 {
 	zval* rdata;
 
@@ -1445,7 +1445,7 @@ ZEND_METHOD(Wcd_Model, setColDefs)
 	model->setColDefs(rdata);
 }
 
-ZEND_METHOD(Wcd_Model, setKeyOptions)
+ZEND_METHOD(Wcd_Sql_Model, setKeyOptions)
 {
 	zval* rdata;
 
@@ -1457,7 +1457,7 @@ ZEND_METHOD(Wcd_Model, setKeyOptions)
 	model->setKeyOptions(rdata);
 }
 
-ZEND_METHOD(Wcd_Model, setName)
+ZEND_METHOD(Wcd_Sql_Model, setName)
 {
 	zend_string* sdata;
 
@@ -1469,7 +1469,7 @@ ZEND_METHOD(Wcd_Model, setName)
 	model->setName(sdata);
 }
 
-ZEND_METHOD(Wcd_Model, setPKey)
+ZEND_METHOD(Wcd_Sql_Model, setPKey)
 {
 	zval* rdata;
 
@@ -1481,7 +1481,7 @@ ZEND_METHOD(Wcd_Model, setPKey)
 	model->setPKey(rdata);
 }
 
-ZEND_METHOD(Wcd_Model, setSeqDefs)
+ZEND_METHOD(Wcd_Sql_Model, setSeqDefs)
 {
 	zval* rdata;
 
@@ -1493,7 +1493,7 @@ ZEND_METHOD(Wcd_Model, setSeqDefs)
 	model->setSeqDefs(rdata);
 }
 
-ZEND_METHOD(Wcd_Model, setTSFlags)
+ZEND_METHOD(Wcd_Sql_Model, setTSFlags)
 {
 	zend_long flags;
 
@@ -1506,7 +1506,7 @@ ZEND_METHOD(Wcd_Model, setTSFlags)
 }
 
 
-ZEND_METHOD(Wcd_Model, stampTime)
+ZEND_METHOD(Wcd_Sql_Model, stampTime)
 {
 	zend_string* str_datetime;
 
@@ -1531,6 +1531,12 @@ ZEND_METHOD(Wcd_Model, stampTime){}
 
 PHP_MINIT_FUNCTION(Wcd_Model_reg)
 {
+	auto ce = register_class_Wcd_IRow(
+		Hmap::omg.classEntry()
+	);
+
+	IRow::omg.classEntry(ce);
+
 	zintf_ce_IfCrud = register_class_Wcd_IfCrud();
 
 	Model::omg.classEntry(register_class_Wcd_Sql_Model(zintf_ce_IfCrud));

@@ -12,6 +12,7 @@ use Wcd\Sql\JoinTables;
 use Wcd\Sql\ParamList;
 */
 
+
 interface IfCrud
 {
     /** Both update and create time stamps */
@@ -60,10 +61,6 @@ interface IfCrud
 
     public function getColDefs() : ?array {}
 };
-
-
-
-
 
 class IDriver {
 
@@ -202,7 +199,7 @@ class IBuild {
 
     public function hasModel() : bool {}
 
-    public function insert(array|IRow $rows) : mixed {}
+    public function insert(array| IRow $rows) : mixed {}
 
     public function limit(int $limit, int $offset = 0): void {}
 
@@ -222,7 +219,7 @@ class IBuild {
 
     public function setInsert(array $data) : void  {}
 
-    public function setModel(?Model $model = null, bool $bind = true): void {}
+    public function setModel(?Sql\Model $model = null, bool $bind = true): void {}
 
     public function setModelClass(string $cname) : void {}
 
@@ -242,4 +239,41 @@ class IBuild {
 
 
 
+
+class IRow extends \Wcc\Hmap {
+    public function __construct(IfCrud $m, ?array $data=null, bool $exists=false);
+
+    public function setData(array $data, bool $exists = false) : void {}
+
+    public function getData() : ?array {}
+
+    public function getDataValues(array $names) : array {}
+
+    public function getDirty() : array {}
+
+    public function getModel() : IfCrud {}
+
+    public function hasValue(string $key) : bool {}
+
+    public function isDirty(?string $colname = null) : bool {}
+
+    public function mergeData(array $data) : IRow {}
+
+    public function create(bool $reload = false) : bool {}
+
+    public function delete() : void {}
+
+    public function exists() : bool {}
+
+    public function read() : IRow {}
+
+    public function save(bool $reload = false) : bool {}
+
+    public function update(bool $reload = false) : bool {}
+
+    public function setExists() : void {}
+
+    public function stampTime(string $now, int $dtflags = IfCrud::ALL_TS) : array {}
+
+}
 
