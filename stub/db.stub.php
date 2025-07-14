@@ -48,7 +48,7 @@ interface IfCrud
     
     public function create(IRow $row, bool $reload = false) : bool {}
 
-    public function read(IRow $row) : IRow {}
+    public function readRow(IRow $row) : IRow {}
 
     public function update(IRow $row, bool $reload = false) : bool {}
 

@@ -150,6 +150,11 @@ zval_user::isPointer() const
     return (p_ && (ref_type() == IS_PTR));
 }
 
+zval_user::zval_user(const zval* rc)
+{
+    p_ = (zval*) rc;
+    //showmem("zval_user:: ", (zval*) rc);
+}   
 
 bool 
 zval_user::ok() const {

@@ -59,8 +59,20 @@ CfgInit::init()
 	k_prepare = "prepare";
 	k_execute = "execute";
 	db_models_ns = "DB\\Models";
+
+
+	 mykey = "mykey";
+	 data_str = "data";
+	 cfg_str = "cfg_";
 }
 
+void 
+IConfig::debug_info(htab_write di)
+{
+	di.set(ICS.mykey, mykey_);
+	di.set(ICS.data_str, data_);
+	di.set(ICS.cfg_str, cfg_);
+}
 
 void
 IConfig::set_data(zstr_user key, zval_user values, bool required, zval_user ifnot)

@@ -23,6 +23,8 @@ class IConfig : public base_d
 public:
 	static base_obj_mgr<IConfig> omg;
 
+	virtual void debug_info(htab_write di);
+
 	void assign(htab_read cfg);
 	zval_mgr getValue(zval_user keys, bool required, zval_user ifnot);
 	zval_mgr getValue(zstr_user key, bool required, zval_user ifnot);
@@ -96,6 +98,10 @@ public:
 	zstr_intern k_prepare;
 	zstr_intern k_execute;
 	zstr_intern db_models_ns;
+
+	zstr_intern mykey;
+	zstr_intern data_str;
+	zstr_intern cfg_str;
 
 	void init() override;
 };

@@ -41,6 +41,8 @@ namespace wcd {
 	public:
 
 		static base_obj_mgr<IServer> omg;
+
+		virtual void debug_info(htab_write di);
 		
 		void construct(zstr_user svckey);
 

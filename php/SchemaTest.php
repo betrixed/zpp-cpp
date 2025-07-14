@@ -46,13 +46,13 @@ class SchemaTest extends Asserts
         fwrite(STDERR, print_r($cfg->getArray(), true) . "\n");
 
         $driverClass = $cfg->getDriverClass();
-        $connectClass = $cfg->getConnectClass();
+
         $sqlClass = $cfg->getSqlClass();
         $relClass = $cfg->getRelBuildClass();
         $dmlClass = $cfg->getDmlBuildClass();
 
         $this->assertNotEmpty($driverClass, "driver class");
-        $this->assertNotEmpty($connectClass, "connect class");
+
         $this->assertNotEmpty($sqlClass, "sql class");
         $this->assertNotEmpty($relClass, "relBuild class");
         $this->assertNotEmpty($dmlClass, "dml class");

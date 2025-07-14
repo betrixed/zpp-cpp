@@ -48,6 +48,16 @@ public:
 	zstr_intern  sql_cache;
 	zstr_intern  get_cache;
 
+	zstr_intern  svckey_str;
+	zstr_intern  active_str;
+	zstr_intern  config_str;
+
+	zstr_intern  alias_str;
+	zstr_intern  dbcache_str;
+
+	zstr_intern  sql_classes;
+	zstr_intern  ext_classes;
+
 	void init() override {
 
 		pdo_mysql = "pdo_mysql";
@@ -74,10 +84,41 @@ public:
 		sql_cache = "sql_cache";
 		get_cache = "getcache";
 
+		svckey_str = "activekey";
+		active_str = "connect";
+		config_str = "configure";
+
+		alias_str = "alias";
+		dbcache_str = "dbcache";
+		sql_classes = "sqlClasses";
+		ext_classes = "driverClasses";
 	}
 };
 
 ISVinit ISV;
+
+void 
+IServer::debug_info(htab_write di)
+{
+	di.set(ISV.svckey_str, svc_key_);
+
+
+	di.set(ISV.active_str, active_);
+
+
+	di.set(ISV.config_str, config_);
+
+	di.set(ISV.alias_str, alias_);
+
+	di.set(ISV.dbcache_str, dbCache_);
+
+
+	di.set(ISV.sql_classes, sqlClasses_);
+
+	di.set(ISV.ext_classes, driverClasses_);
+
+}
+
 
 void 
 IServer::construct(zstr_user svckey)
@@ -145,14 +186,21 @@ IServer::activate(zstr_user name)
 zobj_mgr 
 IServer::getConfig(zstr_user name)
 {
+	//showstr("config name", name);
 	zobj_mgr result = config_.get(name);
+
 	if (!result.ok()) {
 		zstr_user alias = alias_.get(name);
+		//showstr("alias", alias);
 		if (alias.ok())
 		{
+
 			result = config_.get(alias);
+			//showobj("result alias getConfig", result);
 		}
 	}
+
+
 	return result;
 }
 
@@ -256,14 +304,12 @@ IServer::config(htab_read data)
 	if (clist.isArray())
 	{
 		htab_write(sqlClasses_).merge(clist.zarray());
-		showdata("sqlClasses_",sqlClasses_);
 	}
 
 	clist = data.get(ISV.drivers_key);
 	if (clist.isArray())
 	{
 		htab_write(driverClasses_).merge(clist.zarray());
-		showdata("driverClasses_",driverClasses_);
 	}
 	clist = data.get(ISV.db_config);
 	if (clist.isArray())
@@ -297,7 +343,7 @@ IServer::addConfig(zobj_mgr iconfig, zstr_user name)
 		return;
 	}
 
-	cfg->setMyKey(key);
+	cfg->setMyKey(name);
 	htab_write(config_).set(name, iconfig);
 }
 

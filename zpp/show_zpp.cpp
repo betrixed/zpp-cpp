@@ -499,7 +499,7 @@ void showmem(const char* s, zval* m)
 	{
 		return;
 	}
-	if (s == nullptr) {
+	if (m == nullptr || s == nullptr) {
 		zend_printf("passed nullptr\n");
 		return;
 	}

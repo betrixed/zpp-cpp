@@ -195,8 +195,11 @@ const zobj_mgr&
 zobj_mgr::operator=(const zval* rc)
 {
 	lose();
+	//showmem("operator= const zval*", (zval*)rc);
 	obj_ = zval_user(rc).zobject();
+	//showobj("obj_", obj_);
 	own();
+	//showobj("obj_", obj_);
 	return *this;
 }
 
@@ -206,7 +209,7 @@ zobj_mgr::operator=(const zval_user& zv)
 	lose();
 	obj_ = zv.zobject();
 	own();
-	//showobj("ZVAL_USER& ", obj_);
+	
 	return *this;
 }
 
