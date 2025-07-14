@@ -26,6 +26,9 @@ namespace zpp {
 
         bool ok_ = false;
     public:
+
+        static zval_mgr first(HashTable* data);
+
         htab_walk();
         htab_walk(const htab_walk& c);
         
@@ -74,6 +77,8 @@ namespace zpp {
         // release current key and value
         void release(); 
         bool invalid(); // reset array internal position pointer.
+
+
     private:
         
         bool getdata();

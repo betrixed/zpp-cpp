@@ -593,6 +593,86 @@ using namespace zpp;
 		bind.orderBy(colname, descend);
 	}
 
+	zval_mgr 
+	IBuild::seqLastValue(zstr_user seqname)
+	{
+
+		zstr_user sql = isql().seqLastValue(seqname);
+
+		zval_mgr result = RunSql::op(driver_, sql);
+
+		if (result.ok()) {
+			htab_read rows(result);
+			htab_read r1(rows.get(int(0)));
+			htab_walk wk;
+			wk.start(r1);
+			return wk.value();
+		}
+		return result;
+	}
+
+	void 
+	IBuild::set(zstr_user cname, zval_user value)
+	{
+		Bindings& bind = bindings();
+		bind.update(cname, value);	
+	}
+
+	int
+	IBuild::setFetch(int mode)
+	{
+		IDriver& db = idb();
+
+		return db.setFetch(mode);
+	}
+
+	void 
+	IBuild::setInsert(htab_read data)
+	{
+		Bindings& bind = bindings();
+		bind.addarray(ISql::SQL_INSERT, data);
+	}
+
+	void 
+	IBuild::setModel(zobj_user model, bool bind)
+	{
+		if (model.ok())
+		{
+			if (!model_.instanceof(Model::omg.class_entry_))
+			{
+				zend_throw_error(zend_ce_error, "Object not Model class");
+				return;
+			}
+		}
+		model_ = model;
+
+		if (model_.ok() && bind)
+		{
+			Model* m = zobj_toc<Model>(model);
+			zstr_mgr name = m->getName();
+			table(name);
+		}
+	}
+
+	zval_mgr 
+	IBuild::setSeqValue(int value, htab_read data)
+	{
+		zstr_mgr sql = isql().setSeqValue(value, data);
+		zval_mgr result = RunSql::op(driver_, sql);
+
+		if (result.isArray()) {
+			htab_read rows(result);
+			htab_read r1(rows.get(int(0)));
+			result = htab_walk::first(r1);
+		}
+		return result;
+	}
+
+	void IBuild::wipe()
+	{
+		bindings().wipe();
+	}
+
 }; // namespace wcd
 
 
@@ -895,25 +975,197 @@ ZEND_METHOD(Wcd_IBuild, orderBy)
 	cobj->orderBy(colname, descend);
 }
 
-/*
+//public function seqLastValue(string $seqname): ?int
+ZEND_METHOD(Wcd_IBuild, seqLastValue)
+{
+	zend_string* sname;
+	ZEND_PARSE_PARAMETERS_START(1,1)
+	Z_PARAM_STR(sname)
+	ZEND_PARSE_PARAMETERS_END();
 
+	IBuild* cobj = zval_toc<IBuild>(ZEND_THIS);
+	
+	zval_mgr result = cobj->seqLastValue(sname);
+	result.move_zv(return_value);
+}
 
+//public function set(string $column, mixed $value): void
+ZEND_METHOD(Wcd_IBuild, set)
+{
+	zend_string* cname;
+	zval*        value;
+	ZEND_PARSE_PARAMETERS_START(2,2)
+	Z_PARAM_STR(cname)
+	Z_PARAM_ZVAL(value)
+	ZEND_PARSE_PARAMETERS_END();
 
+	IBuild* cobj = zval_toc<IBuild>(ZEND_THIS);
 
+	cobj->set(cname, value);
+}
 
-ZEND_METHOD(Wcd_IBuild, seqLastValue);
-ZEND_METHOD(Wcd_IBuild, set);
-ZEND_METHOD(Wcd_IBuild, setFetch);
-ZEND_METHOD(Wcd_IBuild, setInsert);
-ZEND_METHOD(Wcd_IBuild, setModel);
-ZEND_METHOD(Wcd_IBuild, setModelClass);
-ZEND_METHOD(Wcd_IBuild, setReturns);
-ZEND_METHOD(Wcd_IBuild, setSeqValue);
-ZEND_METHOD(Wcd_IBuild, table);
-ZEND_METHOD(Wcd_IBuild, update);
-ZEND_METHOD(Wcd_IBuild, where);
-ZEND_METHOD(Wcd_IBuild, wipe);
-*/
+//public function setFetch(int $mode) : int
+ZEND_METHOD(Wcd_IBuild, setFetch)
+{
+	zend_long mode;
+
+	ZEND_PARSE_PARAMETERS_START(1,1)
+	Z_PARAM_LONG(mode)
+	ZEND_PARSE_PARAMETERS_END();
+
+	IBuild* cobj = zval_toc<IBuild>(ZEND_THIS);
+
+	mode = cobj->setFetch(mode);
+
+	RETURN_LONG(mode);
+}
+
+//public function setInsert(array $data) : void
+ZEND_METHOD(Wcd_IBuild, setInsert)
+{
+	HashTable* data;
+
+	ZEND_PARSE_PARAMETERS_START(1,1)
+	Z_PARAM_ARRAY_HT(data)
+	ZEND_PARSE_PARAMETERS_END();
+
+	IBuild* cobj = zval_toc<IBuild>(ZEND_THIS);
+
+	cobj->setInsert(data);
+}
+//public function setModel(?Model $model = null, bool $bind = true): void
+ZEND_METHOD(Wcd_IBuild, setModel)
+{
+	zval* model = nullptr;
+
+	bool  bind = true;
+
+	ZEND_PARSE_PARAMETERS_START(0,2)	
+	Z_PARAM_OPTIONAL
+	Z_PARAM_OBJECT_OR_NULL(model);
+	Z_PARAM_BOOL(bind)
+	ZEND_PARSE_PARAMETERS_END();
+
+	IBuild* cobj = zval_toc<IBuild>(ZEND_THIS);
+
+	cobj->setModel(model, bind); 	
+}
+
+//public function setModelClass(string $cname) : void
+ZEND_METHOD(Wcd_IBuild, setModelClass)
+{
+	zend_string* cname;
+
+	ZEND_PARSE_PARAMETERS_START(1,1)	
+	Z_PARAM_STR(cname)
+	ZEND_PARSE_PARAMETERS_END();
+
+	IBuild* cobj = zval_toc<IBuild>(ZEND_THIS);
+
+	cobj->modelClass_ = cname;
+}
+
+//public function setReturns(array $names) : void
+ZEND_METHOD(Wcd_IBuild, setReturns)
+{
+	HashTable* data;
+
+	ZEND_PARSE_PARAMETERS_START(1,1)
+	Z_PARAM_ARRAY_HT(data)
+	ZEND_PARSE_PARAMETERS_END();
+
+	IBuild* cobj = zval_toc<IBuild>(ZEND_THIS);
+
+	cobj->setReturns(data);
+}
+
+//public function setSeqValue(int $value, array $data): ?int
+ZEND_METHOD(Wcd_IBuild, setSeqValue)
+{
+	zend_long value;
+
+	HashTable* data;
+
+	ZEND_PARSE_PARAMETERS_START(1,1)
+	Z_PARAM_LONG(value)
+	Z_PARAM_ARRAY_HT(data)
+	ZEND_PARSE_PARAMETERS_END();
+
+	IBuild* cobj = zval_toc<IBuild>(ZEND_THIS);
+
+	zval_mgr result = cobj->setSeqValue(value, data);
+
+	result.move_zv(return_value);
+}
+
+//public function table(string $table, bool $wipe = true) : void
+ZEND_METHOD(Wcd_IBuild, table)
+{
+	zend_string* tname;
+	bool wipe = true;
+
+	ZEND_PARSE_PARAMETERS_START(1,2)
+	Z_PARAM_STR(tname)
+	Z_PARAM_OPTIONAL
+	Z_PARAM_BOOL(wipe)
+	ZEND_PARSE_PARAMETERS_END();
+
+	IBuild* cobj = zval_toc<IBuild>(ZEND_THIS);
+
+	cobj->table(tname, wipe);
+}
+
+//public function update(IRow $row, array $dirty = []) : mixed
+ZEND_METHOD(Wcd_IBuild, update)
+{
+	zval* row;
+
+	HashTable* dirty = (HashTable*) &zend_empty_array;
+
+	ZEND_PARSE_PARAMETERS_START(1,2)
+	Z_PARAM_OBJECT_OF_CLASS(row, IRow::omg.class_entry_);
+	Z_PARAM_OPTIONAL
+	Z_PARAM_ARRAY_HT(dirty)
+	ZEND_PARSE_PARAMETERS_END();
+
+	IBuild* cobj = zval_toc<IBuild>(ZEND_THIS);
+
+	zval_mgr result = cobj->update(row, dirty);
+
+	result.move_zv(return_value);
+}
+
+/* public function where(mixed $column, ?string $operator = null, 
+                        mixed $value = null, string $bval = "AND") : void */
+ZEND_METHOD(Wcd_IBuild, where)
+{
+	zval* column;
+	zend_string* opstr = nullptr;
+	zval* value = nullptr;
+	zend_string* bval = nullptr;
+
+	ZEND_PARSE_PARAMETERS_START(1,4)
+	Z_PARAM_ZVAL(column)
+	Z_PARAM_OPTIONAL
+	Z_PARAM_STR_OR_NULL(opstr)
+	Z_PARAM_ZVAL(value)
+	Z_PARAM_STR_OR_NULL(bval)
+	ZEND_PARSE_PARAMETERS_END();
+
+	IBuild* cobj = zval_toc<IBuild>(ZEND_THIS);
+
+	cobj->where(column, opstr, value, bval);
+}
+
+ZEND_METHOD(Wcd_IBuild, wipe)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	IBuild* cobj = zval_toc<IBuild>(ZEND_THIS);
+
+	cobj->wipe();
+
+}
 
 PHP_MINIT_FUNCTION(Wcd_IBuild_reg)
 {

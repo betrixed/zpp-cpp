@@ -26,10 +26,6 @@ namespace wcd {
 
 		zval_mgr aggregate(zstr_user agfn, htab_read columns);
 		zval_mgr get(htab_read columns);
-		
-		void setModel(zobj_user m);
-
-		
 
 		zval_mgr oneRow();
 		zval_mgr allRows();
@@ -65,6 +61,20 @@ namespace wcd {
 
 		zstr_mgr now();
 
+		zval_mgr seqLastValue(zstr_user seqname);
+
+		void set(zstr_user cname, zval_user value);
+
+		int setFetch(int mode);
+
+		void setInsert(htab_read data);
+
+		void setModel(zobj_user obj, bool bind = true);
+
+		zval_mgr setSeqValue(int value, htab_read data);
+
+		void wipe();
+		
 		zobj_mgr driver_;
 		zobj_mgr isql_;
 		zobj_mgr params_;

@@ -26,7 +26,7 @@ namespace wcd {
 		zval_mgr run();
 		
 		static zval_mgr op(zobj_user db, zstr_user sql, 
-			htab_read bind, bool rval = false );
+			htab_read bind = htab_read(), bool rval = false );
 
 	};
 };

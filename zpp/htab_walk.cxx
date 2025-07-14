@@ -37,6 +37,14 @@ bool htab_walk::start(HashTable* ht)
     }
 }
 
+zval_mgr // static
+htab_walk::first(HashTable* data)
+{
+    htab_walk wk;
+    wk.start(data);
+    return wk.value();
+}
+
 bool htab_walk::rewind()
 {
     return start(wrap_);

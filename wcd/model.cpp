@@ -200,7 +200,7 @@ namespace wcd {
 		if (builder_me_.ok())
 		{
 			IBuild* ib = zobj_toc<IBuild>(builder_me_);
-			ib->setModel(this->vobj());
+			ib->setModel(zobj_user(this->vobj()));
 		}
 		return builder_me_;
 	}
