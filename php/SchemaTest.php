@@ -46,20 +46,20 @@ class SchemaTest extends Asserts
         fwrite(STDERR, print_r($cfg->getArray(), true) . "\n");
 
         $driverClass = $cfg->getDriverClass();
-
+        $connectClass = $cfg->getConnectClass();
         $sqlClass = $cfg->getSqlClass();
-        $relClass = $cfg->getRelBuildClass();
+        //$relClass = $cfg->getRelBuildClass();
         $dmlClass = $cfg->getDmlBuildClass();
 
         $this->assertNotEmpty($driverClass, "driver class");
 
         $this->assertNotEmpty($sqlClass, "sql class");
-        $this->assertNotEmpty($relClass, "relBuild class");
+        //$this->assertNotEmpty($relClass, "relBuild class");
         $this->assertNotEmpty($dmlClass, "dml class");
 
+        $con = $si->getConnect("default");
+        
         $con = IServer::connect("default");
-
-        $driver = $con->iDriver();
         $type = $driver->getSqlType();
 
         $inTrans = $driver->inTransaction();
@@ -109,7 +109,7 @@ class SchemaTest extends Asserts
 
         $schema = ReflectCache::staticInstance($schema_class);
 
-        $schema->readSchema($con->iDriver());
+        $schema->readSchema($con);
 
         $schema->toFile($cfg->schema_file);
 
@@ -119,8 +119,7 @@ class SchemaTest extends Asserts
 
         $this->assertEquals($data, $schema);
 
-        $driver = $con->iDriver();
-        $inTrans = $driver->inTransaction();
+        $inTrans = $con->inTransaction();
         $this->assertFalse($inTrans);
     }
 
@@ -166,7 +165,7 @@ class SchemaTest extends Asserts
         $path = $cfg->models_dir;
 
         $result = Generate::make(
-                        $con->IDriver(),
+                        $con,
                         $path,
                         $nspace,
                         null,
@@ -182,9 +181,8 @@ class SchemaTest extends Asserts
     {
         //insert 1 rows
         $con = IServer::connect("default");
-        $driver = $con->iDriver();
 
-        $inTrans = $driver->inTransaction();
+        $inTrans = $con->inTransaction();
         $this->assertFalse($inTrans);
 
         $date = date("Y-m-d H:i:s");
@@ -206,7 +204,7 @@ class SchemaTest extends Asserts
 
         $this->assertEquals(1, $result);
 
-        $inTrans = $driver->inTransaction();
+        $inTrans = $con->inTransaction();
         $this->assertFalse($inTrans);
 
         $rows[] = $model->newRow($values[0]);
@@ -228,7 +226,7 @@ class SchemaTest extends Asserts
         $ct = $builder->count();
         $this->assertEquals(1, $ct);
 
-        $inTrans = $driver->inTransaction();
+        $inTrans = $con->inTransaction();
         $this->assertFalse($inTrans);
     }
 
@@ -237,6 +235,9 @@ class SchemaTest extends Asserts
         $con = IServer::connect("default");
 
         $builder = new IBuild($con);
+        $builder->table('test');
+        $bind = $builder->getBindings();
+        
         $result = $builder->table('test')
                 ->setFetch(IDriver::FETCH_OBJECT)
                 ->where('name', '=', 'ezDB')

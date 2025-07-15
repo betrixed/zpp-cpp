@@ -161,17 +161,29 @@ ReflectCache::newInstanceArgs(zstr_user class_name, htab_read args)
 	zobj_mgr rfc = getReflectClass(class_name);
 	if (rfc.ok())
 	{
+		showobj("RFC", rfc);
+
 		fn_call_args<1> fn;
 		ZVAL_ARR(fn.argsptr(), args);
 
+		showstr("fn name", RFC_data.new_instance_args);
+		
 		fn.set_fci(rfc, RFC_data.new_instance_args);
-		zval_mgr recall(fn.call_fn());
+		zval_mgr recall = fn.call_fn();
 		zval_user test(recall);
 
 		if (test.isObject())
 		{
 			result = test.zobject();
+			showmem("test", test);
 		}
+		else {
+			showmem("recall", recall);
+			zend_throw_error(zend_ce_error, "newInstanceArgs fail for %s", class_name.data());
+		}
+	}
+	else {
+		zend_throw_error(zend_ce_error, "No reflection class for %s", class_name.data());
 	}
 	return result;
 }

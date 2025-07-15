@@ -279,12 +279,18 @@ IConfig::getCollation()
 zobj_mgr 
 IConfig::newConnect(zstr_user name)
 {
-	zstr_mgr dclass = getDriverClass();
-	zval_mgr args_mgr;
+	zstr_mgr dclass(getDriverClass());
+	showstr("dclass", dclass);
+
+	htab_mgr args_mgr;
 	htab_write args(args_mgr);
 	args.push_back(vobj());
 	args.push_back(name);
-	return ReflectCache::staticInstanceArgs(dclass, args_mgr);
+	showdata("dclass args", args_mgr);
+
+	zobj_mgr result(ReflectCache::staticInstanceArgs(dclass, args_mgr));
+	showobj("Result ", result);
+	return result;
 }
 
 zstr_mgr 
@@ -313,6 +319,12 @@ IConfig::getDriverClass()
 	zobj_user servers = Services::getOne(IServer::omg.class_name());
 	IServer* sv = zobj_toc<IServer>(servers);
 	return sv->getDriverClass(dname);
+}
+
+zstr_mgr 
+IConfig::getDmlBuildClass()
+{
+	return stringVal(ICS.k_dml_class);
 }
 
 zstr_mgr 
@@ -456,6 +468,29 @@ ZEND_METHOD(Wcd_IConfig, getCollation)
 
 	result.move_zv(return_value);
 }
+
+ZEND_METHOD(Wcd_IConfig, getSqlClass)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	IConfig* cobj = zval_toc<IConfig>(ZEND_THIS);
+
+	zstr_mgr result = cobj->getSqlClass();
+
+	result.move_zv(return_value);
+}
+
+ZEND_METHOD(Wcd_IConfig, getDmlBuildClass)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	IConfig* cobj = zval_toc<IConfig>(ZEND_THIS);
+
+	zstr_mgr result = cobj->getDmlBuildClass();
+
+	result.move_zv(return_value);
+}
+
 
 ZEND_METHOD(Wcd_IConfig, newConnect)
 {

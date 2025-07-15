@@ -154,14 +154,14 @@ namespace zpp {
 		virtual ~base_d() 
 		{
 			#ifdef BASE_DEBUG
-				zend_printf("~base_d() %lx\n", this);
+				zend_printf("~base_d() %lx\n", (uintptr_t)this);
 			#endif
 			// unattached have no zend_object*
 			// Does this allow C++ objects to co-delete their zend_object?
 			#ifdef BASE_ZOBJPTR
 			if (p_zobj_) {
 				#ifdef BASE_DEBUG
-				zend_printf("dtor zend object %lx\n", p_zobj_);
+				zend_printf("dtor zend object %lx\n", (uintptr_t)p_zobj_);
 				#endif
 				zend_object_std_dtor(p_zobj_);
 			}
@@ -449,7 +449,7 @@ namespace zpp {
 		static void showptr(const char* s,  T* p)
 		{
 			zend_object* zo = p->vobj();
-			zend_printf("%s %d: %lx p %lx ob (%ld) %s size %d ", s, obj_count_, p, zo, GC_REFCOUNT(zo), typeid(T).name()
+			zend_printf("%s %lu: %lx p %lx ob (%u) %s size %lu ", s, obj_count_, (uintptr_t)p, (uintptr_t)zo, GC_REFCOUNT(zo), typeid(T).name()
 				, sizeof(T) + sizeof(base_d*) + sizeof(zend_object) + zend_object_properties_size(class_entry_));
 			zstr_user ext = p->extender();
 			if (ext.size())
@@ -467,8 +467,8 @@ namespace zpp {
 			T* tp = zobj_toc<T>(obj);
 #ifdef BASE_DEBUG	
 			obj_count_--;
-			zend_printf("z_free %lx for %s %lx\n", tp, 
-							ZSTR_VAL(obj->ce->name), obj);
+			zend_printf("z_free %lx for %s %lx\n", (uintptr_t)tp, 
+							ZSTR_VAL(obj->ce->name),  (uintptr_t)obj);
 #endif
 			tp->~T(); // this will call all C++ member destructors.
 			// Documentation on handlers says do not deallocate memory 
@@ -511,11 +511,11 @@ namespace zpp {
 			
 			T* cobj = zobj_toc<T>(zobj);
 #ifdef BASE_DEBUG
-			zend_printf(" cpp %lx %s C++ size %d\n", cobj, typeid(T).name(), 
+			zend_printf(" cpp %lx %s C++ size %lu\n",  (uintptr_t)cobj, typeid(T).name(), 
 				sizeof(T) );
 			zend_object* myobj = cobj->vobj();
 			if(myobj != zobj ) {
-				zend_printf("vobj() mistake zobj=%lx, vobj=%lx\n", zobj, myobj);
+				zend_printf("vobj() mistake zobj=%lx, vobj=%lx\n",  (uintptr_t)zobj,  (uintptr_t)myobj);
 				//throw std::logic_error{ " zend_object* fail in cpp!" };
 			}
 #endif

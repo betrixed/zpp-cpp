@@ -45,6 +45,7 @@ public:
 	zstr_mgr getCharset();
 	zstr_mgr getCollation();
 	zstr_mgr getDriverClass();
+	zstr_mgr getDmlBuildClass();
 
 	zstr_mgr stringVal(zstr_user key);
 

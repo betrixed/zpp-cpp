@@ -187,7 +187,7 @@ zobj_mgr
 IServer::getConfig(zstr_user name)
 {
 	//showstr("config name", name);
-	zobj_mgr result = config_.get(name);
+	zobj_mgr result(config_.get(name));
 
 	if (!result.ok()) {
 		zstr_user alias = alias_.get(name);
@@ -207,7 +207,7 @@ IServer::getConfig(zstr_user name)
 IConfig*
 IServer::needConfig(zstr_user name)
 {
-	zobj_mgr cfg = config_.get(name);
+	zobj_mgr cfg(config_.get(name));
 	if (!cfg.ok())
 	{
 		zend_throw_error(zend_ce_error,"No configuration named %s", name.data());
@@ -234,21 +234,20 @@ IServer::getConnect(zstr_user name)
 		name = ISV.default_name;
 	}
 
-	zval_mgr conn_mgr = active_.get(name);
-	zval_user conn(conn_mgr);
+	zobj_mgr conn(active_.get(name));
 
-	if (conn.isObject())
+	if (conn.ok())
 	{
-		return conn.zobject();
+		return conn;
 	}
 
 	zstr_user alias = alias_.get(name);
 	if (alias.ok())
 	{
 		conn = active_.get(alias);
-		if (conn.isObject())
+		if (conn.ok())
 		{
-			return conn.zobject();
+			return conn;
 		}
 		return activate(alias);
 	}

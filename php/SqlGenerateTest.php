@@ -75,8 +75,7 @@ class SqlGenerateTest extends Asserts
     {
         $limit = 20;
         $servers = Services::getOne(IServer::class);
-        $con = $servers->getConnect("pcanex");
-        $db = $con->iDriver();
+        $db = $servers->getConnect("pcanex");
 
         $ct = $this->iterations;
         $tstart = microtime(true);
@@ -174,9 +173,8 @@ EOS;
 
     public function testGenEx2()
     {
-        $con = IServer::connect("pcanex");
-        $db = $con->iDriver();
-
+        $db = IServer::connect("pcanex");
+     
         $sel = new Select($db);
 
         $ct =  $this->iterations;

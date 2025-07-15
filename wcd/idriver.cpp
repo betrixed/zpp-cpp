@@ -115,6 +115,9 @@ DBSInit DBS;
 void 
 IDriver::construct(zobj_user icfgobj, zstr_user name)
 {
+	showobj("cfg obj", icfgobj);
+	showstr("cfg name", name);
+
 	icfg_ = icfgobj;
 	cfg_name_ = name;
 	IConfig* cfg = icfg_c();
@@ -750,7 +753,7 @@ ZEND_METHOD(Wcd_IDriver, __construct)
 	zend_string*   name;
 
 	ZEND_PARSE_PARAMETERS_START(2,2)
-	Z_PARAM_OBJECT_OF_CLASS(config, IConfig::omg.classEntry())
+	Z_PARAM_OBJECT_OF_CLASS(config, IConfig::omg.class_entry_)
 	Z_PARAM_STR(name)
 	ZEND_PARSE_PARAMETERS_END();
 

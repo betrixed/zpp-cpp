@@ -1,7 +1,7 @@
 <?php
 
-$SQL_NS = "Wcc\\Sql\\";
-$DRIVER_NS = "Wcc\\Db\\Ext\\";
+$SQL_NS = "Wcd\\Sql\\";
+$DRIVER_NS = "Wcd\\Ext\\";
 
 return [
     "drivers" => [

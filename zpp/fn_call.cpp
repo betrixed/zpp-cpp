@@ -256,7 +256,7 @@ fn_call::call_fn()
     {
         throw_failed();
     }
-    //showmem("call_fn result", result_);
+    showmem("call_fn result", result_);
     return std::move(result_);
 }
 
