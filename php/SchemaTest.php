@@ -46,7 +46,7 @@ class SchemaTest extends Asserts
         fwrite(STDERR, print_r($cfg->getArray(), true) . "\n");
 
         $driverClass = $cfg->getDriverClass();
-        $connectClass = $cfg->getConnectClass();
+
         $sqlClass = $cfg->getSqlClass();
         //$relClass = $cfg->getRelBuildClass();
         $dmlClass = $cfg->getDmlBuildClass();
@@ -56,18 +56,16 @@ class SchemaTest extends Asserts
         $this->assertNotEmpty($sqlClass, "sql class");
         //$this->assertNotEmpty($relClass, "relBuild class");
         $this->assertNotEmpty($dmlClass, "dml class");
-
-        $con = $si->getConnect("default");
         
         $con = IServer::connect("default");
-        $type = $driver->getSqlType();
+        $type = $con->getSqlType();
 
-        $inTrans = $driver->inTransaction();
+        $inTrans = $con->inTransaction();
         $this->assertFalse($inTrans);
 
-        $tables = $driver->getTableNames();
+        $tables = $con->getTableNames();
 
-        $inTrans = $driver->inTransaction();
+        $inTrans = $con->inTransaction();
         $this->assertFalse($inTrans);
 
         if (count($tables) > 0)
@@ -75,7 +73,7 @@ class SchemaTest extends Asserts
             $isql = $con->iSql();
             foreach ($tables as $name)
             {
-                $driver->querySingle('drop table ' . $isql->quoteName($name));
+                $con->querySingle('drop table ' . $isql->quoteName($name));
             }
         }
         $app = $this->cfg;
@@ -86,15 +84,15 @@ class SchemaTest extends Asserts
         {
             $script = new IScript();
             $script->loadFile($file);
-            $script->run($driver);
+            $script->run($con);
 
             $script->clear();
         }
 
-        $tables = $driver->getTableNames();
+        $tables = $con->getTableNames();
         $this->assertTrue(is_array($tables) && (count($tables) > 0));
 
-        $inTrans = $driver->inTransaction();
+        $inTrans = $con->inTransaction();
         $this->assertFalse($inTrans);
     }
 

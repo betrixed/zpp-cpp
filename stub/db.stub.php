@@ -94,6 +94,10 @@ class IDriver {
 
     public function getAttribute(int $attkey) : mixed {}
 
+    public function getCaseAttribute(): int {}
+
+    public function setCaseAttribute(int $value) : void {}
+
     public function getColumnNames(string $tableName) : array {}
 
     public function getConnectOptions(): array {}

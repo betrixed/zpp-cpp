@@ -55,7 +55,11 @@ namespace wcd {
 		zval_mgr fetchRow(zval_user stmt, int mode);
 
 		zval_mgr getAttribute(int key);
+
 		zval_mgr getCaseAttribute();
+
+		void setCaseAttribute(int value);
+
 		htab_mgr getColumnNames(zstr_user tableName);
 		htab_mgr getConnectOptions();
 

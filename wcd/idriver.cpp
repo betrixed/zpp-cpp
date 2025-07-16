@@ -61,7 +61,7 @@ public:
 	zstr_intern  getattribute_fn;
 	zstr_intern  model_name_space;
 	zstr_intern  mysql_str;
-	zstr_intern  intransation_fn;
+	zstr_intern  intransaction_fn;
 	zstr_intern  lastinsertid_fn;
 	zstr_intern  place_holder;
 
@@ -98,7 +98,7 @@ void DBSInit::init() {
 		getattribute_fn = "getattribute";
 		model_name_space = "model_name_space";
 		mysql_str = "mysql";
-		intransation_fn = "intransation";
+		intransaction_fn = "intransaction";
 		lastinsertid_fn = "lastinsertid";
 		place_holder = "?";
 
@@ -115,9 +115,10 @@ DBSInit DBS;
 void 
 IDriver::construct(zobj_user icfgobj, zstr_user name)
 {
-	showobj("cfg obj", icfgobj);
-	showstr("cfg name", name);
-
+	//showobj("cfg obj", icfgobj);
+	//showstr("cfg name", name);
+	ifetch_ = PDO_FETCH_ASSOC;
+	
 	icfg_ = icfgobj;
 	cfg_name_ = name;
 	IConfig* cfg = icfg_c();
@@ -333,6 +334,19 @@ void IDriver::bind(zval_user stmt, htab_read params)
 	}
 }
 
+zval_mgr 
+IDriver::getCaseAttribute()
+{
+	return getAttribute(PDO_ATTR_CASE);
+}
+
+void 
+IDriver::setCaseAttribute(int value)
+{
+	zval_mgr arg(value);
+
+	setAttribute(PDO_ATTR_CASE, arg);
+}
 
 bool 
 IDriver::begin()
@@ -492,6 +506,18 @@ IDriver::readSchema()
 	return schema_def_;
 }
 
+ISql* 
+IDriver::isql_c()
+{
+	return zobj_toc<ISql>(isql_);
+}
+
+zobj_mgr 
+IDriver::isql()
+{
+	return isql_;
+}
+
 zstr_mgr 
 IDriver::modelClassName(zstr_user tableName)
 {
@@ -626,7 +652,8 @@ IDriver::inTransaction()
 {
 	zobj_mgr pdo(handle());
 
-	return pdo.call(DBS.intransation_fn);
+	zval_mgr result = pdo.call(DBS.intransaction_fn);
+	return result.isTrue();
 }
 
 bool 
@@ -680,13 +707,65 @@ IDriver::prepare(zstr_user query)
 	zobj_mgr pdo(handle());
 
 	lastsql_ = query;
-	zval_mgr stmt = pdo.call(DBS.prepare_fn);
+	zval_mgr sql(query);
+	zval_mgr stmt = pdo.call(DBS.prepare_fn, sql);
+	/** if (!stmt.ok())
+	{
+		zend_throw_error(zend_ce_error, "Prepare: %s", lastsql_.data());
+	}
+	*/
+	return stmt;
+}
+
+
+zval_mgr
+IDriver::prepareQuery(zstr_user query, htab_read values, htab_read bindTypes)
+{
+	zval_mgr stmt_mgr = prepare(query);
+
+	zobj_mgr stmt(stmt_mgr);
+
 	if (!stmt.ok())
 	{
-		zstr_mgr error = pdo.property(DBS.error_str);
-		zend_throw_error(zend_ce_error, "Prepare: %s", error.data());
+		return stmt_mgr;
 	}
-	return stmt;
+	zval_mgr test;
+	zval_mgr temp;
+
+
+	if (values.size())
+	{
+		if (values.has_index(0))
+		{
+			temp = values;
+			test = stmt.call(DBS.execute_fn, temp);
+		}
+		else {
+			htab_walk wk;
+			auto key = wk.key();
+			auto val = wk.value();
+			for(wk.start(values); wk.ok(); wk.next())
+			{
+				if (bindTypes.size())
+				{
+					temp = bindTypes.get(key);
+				}
+				else {
+					temp = (zend_long)pdo_type(val.ztype());
+				}
+				stmt.call(DBS.bind_value, val, temp);
+			}
+			test = stmt.call(DBS.execute_fn);
+		}
+	}
+	else {
+		test = stmt.call(DBS.execute_fn);
+	}
+	if (!test.ok())
+	{
+		zend_throw_error(zend_ce_error,"Statement execute failed %s", lastsql_.data());
+	}
+	return stmt_mgr;
 }
 
 zval_mgr 
@@ -927,6 +1006,30 @@ ZEND_METHOD(Wcd_IDriver, getAttribute)
 	zval_mgr result = db->getAttribute(key);
 
 	result.move_zv(return_value);
+}
+
+ZEND_METHOD(Wcd_IDriver, getCaseAttribute)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+	IDriver* db = zval_toc<IDriver>(ZEND_THIS);	
+
+	zval_mgr result = db->getCaseAttribute();
+	result.move_zv(return_value);
+}
+
+ZEND_METHOD(Wcd_IDriver, setCaseAttribute)
+{
+	zend_long value;
+
+	ZEND_PARSE_PARAMETERS_START(1,1)
+	Z_PARAM_LONG(value)
+	ZEND_PARSE_PARAMETERS_END();
+
+
+	IDriver* db = zval_toc<IDriver>(ZEND_THIS);	
+
+	db->setCaseAttribute(value);
+
 }
 
 ZEND_METHOD(Wcd_IDriver, getColumnNames)
@@ -1348,6 +1451,13 @@ PHP_MINIT_FUNCTION(Wcd_IDriver_reg)
 {
 	IDriver::omg.classEntry(register_class_Wcd_IDriver());
 	
+	class_data cval(IDriver::omg.class_entry_);
+
+	cval.add_constant("FETCH_OBJECT", PDO_FETCH_OBJ);
+	cval.add_constant("FETCH_ASSOC", PDO_FETCH_ASSOC);
+	cval.add_constant("FETCH_NUM", PDO_FETCH_NUM);
+
+
 	return SUCCESS;
 }
 #endif
