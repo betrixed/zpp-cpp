@@ -178,6 +178,9 @@ class SchemaTest extends Asserts
     public function testBuildMultiInsert()
     {
         //insert 1 rows
+        $loader = Services::service("loader");
+        $loader->setThrowNotFound(true);
+        
         $con = IServer::connect("default");
 
         $inTrans = $con->inTransaction();
@@ -191,6 +194,8 @@ class SchemaTest extends Asserts
         ];
         // 1-D
         $model_class = $con->modelClassName("test");
+        $cwd = getcwd();
+        
         $model = Services::getOne($model_class);
         $builder = $model->getBuilderForMe();
 

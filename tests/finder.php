@@ -11,6 +11,7 @@ $result = $loader->load($test);
 
 echo "Load result = " . intval($result) . PHP_EOL;
 
+
 if (empty($result))
 {
 	echo "paths " . print_r($loader->getNSPaths(), true) . PHP_EOL;

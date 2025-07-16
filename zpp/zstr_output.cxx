@@ -232,6 +232,8 @@ zstr_output::append(char c)
 	char temp[2];
 	temp[0] = c;
 	temp[1] = '\0';
+	
+
 	zend_write(&temp[0], 1);
 }
 };

@@ -59,7 +59,6 @@ public:
 
 
 	zstr_intern  getattribute_fn;
-	zstr_intern  model_name_space;
 	zstr_intern  mysql_str;
 	zstr_intern  intransaction_fn;
 	zstr_intern  lastinsertid_fn;
@@ -96,7 +95,6 @@ void DBSInit::init() {
 		rowcount_fn = "rowcount";
 
 		getattribute_fn = "getattribute";
-		model_name_space = "model_name_space";
 		mysql_str = "mysql";
 		intransaction_fn = "intransaction";
 		lastinsertid_fn = "lastinsertid";
@@ -118,7 +116,7 @@ IDriver::construct(zobj_user icfgobj, zstr_user name)
 	//showobj("cfg obj", icfgobj);
 	//showstr("cfg name", name);
 	ifetch_ = PDO_FETCH_ASSOC;
-	
+
 	icfg_ = icfgobj;
 	cfg_name_ = name;
 	IConfig* cfg = icfg_c();
@@ -523,7 +521,7 @@ IDriver::modelClassName(zstr_user tableName)
 {
 	IConfig* cfg = icfg_c();
 
-	zstr_mgr ns = cfg->get(DBS.model_name_space);
+	zstr_mgr ns = cfg->get(ICS.k_model_ns);
 
 	zstr_mgr cname = isql_c()->entityClass(tableName);
 
@@ -531,7 +529,7 @@ IDriver::modelClassName(zstr_user tableName)
 
 	if (ns.size())
 	{
-		buf << "ns" << "\\\\";
+		buf << ns << "\\";
 	}
 
 	buf << cname;

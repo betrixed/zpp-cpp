@@ -58,7 +58,7 @@ CfgInit::init()
 
 	k_prepare = "prepare";
 	k_execute = "execute";
-	db_models_ns = "DB\\Models";
+	db_models_ns = "Db\\Models";
 
 
 	 mykey = "mykey";

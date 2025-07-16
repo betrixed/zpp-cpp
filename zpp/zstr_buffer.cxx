@@ -103,8 +103,7 @@ zstr_buffer::zstr_buffer(const std::string& cs) : zstr_output()
 
 void zstr_buffer::append(char c)
 {
-	smart_str_appendc_ex(&buf, c, 0);
-	
+	smart_str_appendc_ex(&buf, c, 0);	
 }
 
 

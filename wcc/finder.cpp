@@ -21,15 +21,15 @@ public:
 	zstr_intern classes_key;
 	zstr_intern folders_key;
 	zstr_intern php_ext;
+	zstr_intern dir_sep;
 
-	char dir_sep;
 
 	void init() override 
 	{
 		nspaths_key = "nspaths";
 		classes_key = "classes";
 		folders_key = "folders";
-		dir_sep = '/';
+		dir_sep = "/";
 		php_ext = ".php";
 	}
 
@@ -125,13 +125,19 @@ Finder::find(zstr_user cname)
 {
 	zstr_mgr result;
 	zstr_mgr test_path;
+	zstr_mgr file_name;
+	zstr_mgr ns_key;
+	zstr_mgr sub_path;
 
+	showstr("Find class", cname);
 	result = htab_read(classes_).get(cname);
 	if (result.size()) {
 		return result;
 	}
 
-	size_t epos = cname.size();
+	size_t cname_len = cname.size();
+	int epos = cname_len;
+	int ipos = epos + 1;
 
 	std::string_view vcname = cname.vstr();
 	zstr_mgr filepath(FDit.php_ext);
@@ -141,15 +147,72 @@ Finder::find(zstr_user cname)
 	//bool nsFound = false;
 
 	htab_read ns_array(nsPaths_);
-
+	bool nsFound = false;
+	int loopct = 0;
 	while(true)
-	{
-		size_t pos = vcname.rfind('\\', epos);
+	{	
+		loopct++;
 
-		if (pos == std::string_view::npos) 
+		epos = ipos-2; // search for next backslash going backwards
+		if (epos < 0 || loopct > 4)
 		{
+			return result;
+		}
+		size_t bs_pos = vcname.rfind('\\', epos);
+		bool found = (bs_pos != std::string_view::npos);
+		ipos = found ? (int) bs_pos+1 : 0; // character position after bs, or 0
+
+		//zend_printf(" ipos %d epos %d\n", epos,  ipos);
+		if (!nsFound)
+		{
+			nsFound = found;
+			// first time loop
+			buf << cname.substr(ipos) << FDit.php_ext;
+			file_name = buf.zstr(); 
+			sub_path =  FDit.dir_sep;
+			//showstr("first sub_path", sub_path);
+		}
+		else {
+			int seglen = epos - ipos + 1;
+
+			
+			std::string_view seg = vcname.substr(ipos, seglen);
+
+			buf << FDit.dir_sep << seg << sub_path;
+			sub_path = buf.zstr();
+			//showstr("2nd sub_path", sub_path);
+		}
+		
+		if (nsFound) {
+			size_t keylen = found ? bs_pos : 0;
+			if (keylen) 
 			{
-				buf << vcname.substr(0, epos) << filepath;
+				ns_key = cname.substr(0,keylen);
+				//showstr("ns_key", ns_key);
+				zstr_user ns_path = ns_array.get(ns_key);
+
+				if (ns_path.ok())
+				{
+					// but what about the
+					buf << ns_path << sub_path << file_name;
+					test_path = buf.zstr();
+					
+					showstr("test path", test_path);
+					if (std::filesystem::exists(test_path.vstr())) {
+						result = std::move(test_path);
+						break;
+					}
+				}
+			}
+			else {
+
+				return result;
+			}
+		}
+
+			/*
+			if (!nsFound) {
+				buf << cname << FDit.php_ext;
 				filepath = buf.zstr();
 
 				for_key_value fwk;
@@ -160,7 +223,6 @@ Finder::find(zstr_user cname)
 
 					test_path = buf.zstr();
 
-					//showstr("test path", test);
 					if (std::filesystem::exists(test_path.vstr())) 
 					{
 						result = std::move(test_path);
@@ -168,31 +230,16 @@ Finder::find(zstr_user cname)
 					}
 				}
 			}
-			break;
-		}
+			return result;
+			*/
+
+		/* From begin of Classname, create relative path
+		  which means epos remains at end of full class name
+		 file path builds from the back
+		*/
 		
-		buf <<  FDit.dir_sep << vcname.substr(pos+1, epos-pos) << filepath;
-		filepath = buf.zstr();
 
-		//showstr("filepath", filepath);
-
-		epos = pos - 1;
-
-		zstr_user nspath = ns_array.get(vcname.substr(0,pos));
-
-		if (!nspath.isNull()) 
-		{
-			//showmem("nspath", nspath);
-			buf << nspath << filepath;
-			test_path = buf.zstr();
-			
-			//showstr("test path", test);
-			if (std::filesystem::exists(test_path.vstr())) {
-				//showstr("exists", test);
-				result = std::move(test_path);
-				break;
-			}
-		}
+		
 	}
 	return result;
 }
