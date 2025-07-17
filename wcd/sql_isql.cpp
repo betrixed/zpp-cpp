@@ -1110,6 +1110,8 @@ ISql::select_jt(Bindings& bind, JoinTables* jt)
 		}
 
 		buf << ") AS " << this->quoteName(function);
+
+		//zend_printf("Aggregate %s\n" , buf.data());
 	}
 	else 
 	{
@@ -1198,7 +1200,6 @@ ISql::select(Bindings& bind)
 	}
 
 	zval_user limit = bind.get(SQL_LIMIT);
-
 	zobj_mgr   pobj = bind.getParamList();
 
 	ParamList* plist = zobj_toc<ParamList>(pobj);
@@ -1209,7 +1210,7 @@ ISql::select(Bindings& bind)
 	}
 
 	zstr_mgr sql = buf.zstr();
-
+	//showstr("ISql select = ", sql);
 	plist->setSql(sql);
 	plist->useOwnValues();
 	return pobj;

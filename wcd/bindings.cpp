@@ -418,6 +418,8 @@ Bindings::where(zval_user column, zstr_user opstr, zval_user value, zstr_user bl
 	else {
 		wh.set(SQSTR.boolean, SQSTR.op_and);
 	}
+	wh.set(SQSTR.typekey, SQSTR.basic);
+	
 	add(ISql::SQL_WHERE, args);
 }
 

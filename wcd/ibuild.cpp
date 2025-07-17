@@ -402,6 +402,9 @@ using namespace zpp;
 		else if (columns.isArray()) {
 			names_mgr = columns.zarray();
 		}
+		else {
+			names.push_back(SQSTR.asterisk);
+		}
 		zval_mgr result = aggregate(SQSTR.count_str, names_mgr);
 		return result.zlong();
 	}
