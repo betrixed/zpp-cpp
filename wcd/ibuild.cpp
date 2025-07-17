@@ -275,10 +275,24 @@ using namespace zpp;
 			IDriver& db = idb();
 
 			int fetch = db.setFetch(IDriver::FETCH_ASSOC);
-			result = RunSql::op(driver_, sql, values, rets);
+			result = RunSql::op(driver_, sql, values, (rets.size() > 0));
 			db.setFetch(fetch);
 		}
 		return  result;
+	}
+
+	void 
+	IBuild::debug_info(htab_write di)
+	{
+		di.set(SQSTR.driver, driver_);
+		di.set(SQSTR.isql, isql_);
+		di.set(SQSTR.params, params_);
+
+		di.set(SQSTR.bind_key, bindings_);
+
+		di.set(SQSTR.model, model_);
+		di.set(SQSTR.modelclass, modelClass_);
+		di.set(SQSTR.columns, columns_);
 	}
 
 	zval_mgr
@@ -387,7 +401,6 @@ using namespace zpp;
 		}
 		else if (columns.isArray()) {
 			names_mgr = columns.zarray();
-			
 		}
 		zval_mgr result = aggregate(SQSTR.count_str, names_mgr);
 		return result.zlong();
@@ -638,7 +651,7 @@ using namespace zpp;
 	{
 		if (model.ok())
 		{
-			if (!model_.instanceof(Model::omg.class_entry_))
+			if (!model.instanceof(Model::omg.class_entry_))
 			{
 				zend_throw_error(zend_ce_error, "Object not Model class");
 				return;
@@ -646,7 +659,7 @@ using namespace zpp;
 		}
 		model_ = model;
 
-		if (model_.ok() && bind)
+		if (model.ok() && bind)
 		{
 			Model* m = zobj_toc<Model>(model);
 			zstr_mgr name = m->getName();
@@ -731,10 +744,11 @@ ZEND_METHOD(Wcd_IBuild, allRows)
 //public function count(string|array $columns = "*") : int
 ZEND_METHOD(Wcd_IBuild, count)
 {
-	HashTable* list;
-	zend_string* column;
+	HashTable* list = nullptr;
+	zend_string* column = nullptr;
 
-	ZEND_PARSE_PARAMETERS_START(1,1);
+	ZEND_PARSE_PARAMETERS_START(0,1);
+	Z_PARAM_OPTIONAL
 	Z_PARAM_ARRAY_HT_OR_STR_OR_NULL(list, column)
 	ZEND_PARSE_PARAMETERS_END();
 

@@ -386,6 +386,7 @@ check_results(zval_user test)
 zval_mgr 
 IDriver::execute(zval_user stmt, bool close, bool fetch)
 {
+	//zend_printf("execute: bool(%d)\n", fetch);
 	zobj_user sobj(stmt);
 
 	zval_mgr pdo_result = sobj.call(DBS.execute_fn);
@@ -399,6 +400,7 @@ IDriver::execute(zval_user stmt, bool close, bool fetch)
 		}
 		else {
 			result = sobj.call(DBS.rowcount_fn);
+			//showmem("RowCount", result);
 		}
 	}
 	if (close || pdo_result.isFalse())
@@ -453,7 +455,13 @@ zobj_mgr
 IDriver::newDmlBuild()
 {
 	IConfig* cfg = icfg_c();
-	return cfg->newDmlBuild(this->vobj());
+
+	zstr_mgr bclass =  cfg->getDmlBuildClass();
+
+	htab_mgr args_mgr;
+	htab_write args(args_mgr);
+	args.push_back(zobj_user(vobj()));
+	return ReflectCache::staticInstanceArgs(bclass,args);
 }
 
 zobj_mgr 

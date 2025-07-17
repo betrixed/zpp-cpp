@@ -34,7 +34,7 @@ public:
 	
 	zobj_mgr newConnect(zstr_user name);
 	zobj_mgr newSql();
-	zobj_mgr newDmlBuild(zobj_mgr idriver);
+	//zobj_mgr newDmlBuild(zobj_mgr idriver);
 	
 	
 	zval_mgr get(zstr_user name);

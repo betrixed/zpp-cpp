@@ -129,7 +129,7 @@ Finder::find(zstr_user cname)
 	zstr_mgr ns_key;
 	zstr_mgr sub_path;
 
-	showstr("Find class", cname);
+	//showstr("Find class", cname);
 	result = htab_read(classes_).get(cname);
 	if (result.size()) {
 		return result;
@@ -148,15 +148,13 @@ Finder::find(zstr_user cname)
 
 	htab_read ns_array(nsPaths_);
 	bool nsFound = false;
-	int loopct = 0;
+
 	while(true)
 	{	
-		loopct++;
-
 		epos = ipos-2; // search for next backslash going backwards
-		if (epos < 0 || loopct > 4)
+		if (epos < 0)
 		{
-			return result;
+			break;
 		}
 		size_t bs_pos = vcname.rfind('\\', epos);
 		bool found = (bs_pos != std::string_view::npos);
@@ -197,7 +195,7 @@ Finder::find(zstr_user cname)
 					buf << ns_path << sub_path << file_name;
 					test_path = buf.zstr();
 					
-					showstr("test path", test_path);
+					//showstr("test path", test_path);
 					if (std::filesystem::exists(test_path.vstr())) {
 						result = std::move(test_path);
 						break;
@@ -208,38 +206,24 @@ Finder::find(zstr_user cname)
 
 				return result;
 			}
+			// loop again
 		}
+		else {
+			// ipos == 0, root class file_name is in a folder?
+			htab_walk fwk;
+			auto folder = fwk.value();
+			for(fwk.start(folders_); fwk.ok(); fwk.next())
+			{
+				buf << folder.zstr() << FDit.dir_sep << filepath;
+				test_path = buf.zstr();
 
-			/*
-			if (!nsFound) {
-				buf << cname << FDit.php_ext;
-				filepath = buf.zstr();
-
-				for_key_value fwk;
-
-				for(fwk.start(folders_); fwk.ok(); fwk.next())
+				if (std::filesystem::exists(test_path.vstr())) 
 				{
-					buf << fwk.value() << FDit.dir_sep << filepath;
-
-					test_path = buf.zstr();
-
-					if (std::filesystem::exists(test_path.vstr())) 
-					{
-						result = std::move(test_path);
-						return result;
-					}
+					result = std::move(test_path);
+					return result;
 				}
 			}
-			return result;
-			*/
-
-		/* From begin of Classname, create relative path
-		  which means epos remains at end of full class name
-		 file path builds from the back
-		*/
-		
-
-		
+		}
 	}
 	return result;
 }

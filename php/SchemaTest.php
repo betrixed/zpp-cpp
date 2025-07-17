@@ -217,7 +217,8 @@ class SchemaTest extends Asserts
         $this->assertCount(2, $result);
 
         // now 2 records in test have name of "ezDB"
-        $builder->table('test')->where('name', 'ezDB');
+        $builder->table('test');
+        $builder->where('name', 'ezDB');
         $ct = $builder->count();
 
         $this->assertEquals(2, $ct);

@@ -21,7 +21,7 @@ class IConfig {
     public function getDatabase() : string {}
     public function getSqlClass() : string {}
     public function getDmlBuildClass() : string {}
-    
+
     public function get(string $key) : mixed {}
     public function set(string $key, mixed $value): void {}
 

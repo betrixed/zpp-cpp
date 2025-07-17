@@ -26,6 +26,7 @@ public:
 	void init() override;
 
 	zstr_intern  model;
+	zstr_intern  data_str;
 	zstr_intern  original_data;
 	zstr_intern  save_key;
 	zstr_intern  read_key;
@@ -43,8 +44,10 @@ void
 IRInit::init()
 {
 	model = "model";
+	data_str = "data";
 	original_data = "original";
 	save_key = "save";
+
 	read_key = "read";
 	delete_key = "delete";
 	getcoldefs = "getcoldefs";
@@ -69,9 +72,11 @@ IRow::construct(zobj_user tmodel, zval_user data, bool exists)
 
 void IRow::debug_info(htab_write di)
 {
-	Hmap::debug_info(di);
-	di.set(IRSTR.model, table_model_);
+	
+	di.set(IRSTR.data_str, data_);
 	di.set(IRSTR.original_data, original_);
+	di.set(IRSTR.model, table_model_);
+
 }
 
 void 

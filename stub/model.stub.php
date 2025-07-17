@@ -44,6 +44,10 @@ class Model implements \Wcd\IfCrud {
 
     public function getColDefs() : ?array {}
 
+    public function getBuilder() : \Wcd\IBuild {}
+
+    public function getBuilderForMe() : \Wcd\IBuild {}
+
     /** Important Interface properties */
     public function getConnect(): IfDriver {}
 

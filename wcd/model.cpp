@@ -1270,6 +1270,28 @@ ZEND_METHOD(Wcd_Sql_Model, exists)
 	RETURN_BOOL(result);
 }
 
+ZEND_METHOD(Wcd_Sql_Model, getBuilder)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	Model* model = zval_toc<Model>(ZEND_THIS);
+
+	zobj_mgr result = model->getBuilder();
+
+	result.move_zv(return_value);	
+}
+
+ZEND_METHOD(Wcd_Sql_Model, getBuilderForMe)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	Model* model = zval_toc<Model>(ZEND_THIS);
+
+	zobj_mgr result = model->getBuilderForMe();
+
+	result.move_zv(return_value);	
+}
+
 ZEND_METHOD(Wcd_Sql_Model, getColDefs)
 {
 	ZEND_PARSE_PARAMETERS_NONE();

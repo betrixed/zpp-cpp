@@ -21,6 +21,8 @@ namespace wcd {
 
 		static base_obj_mgr<IBuild> omg;
 
+		virtual void debug_info(htab_write di);
+		
 		void construct(zval_user driver);
 		void destruct();
 
