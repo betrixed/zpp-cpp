@@ -1,7 +1,6 @@
 <?php
 
-use Wcd\Sql\{AnyModel, Model};
-use Wcd\{IfCrud};
+use Wcd\Sql\{AnyModel, IfCrud, Model};
 
 use Wcc\{Config, Services};
 
@@ -140,9 +139,7 @@ class BaseModelTest extends Asserts {
         
         $model = $author->getModel();
         
-        $con =  $model->getConnect();
-        
-        $driver = $con->iDriver();
+        $driver =  $model->getConnect();
 
         $field = $driver->quoteName('updated_at');
         $query = $driver->lastSQL();
@@ -312,7 +309,7 @@ class BaseModelTest extends Asserts {
         $book->save();
         
         $model = $book->getModel();
-        $driver = $model->getConnect()->iDriver();
+        $driver = $model->getConnect();
         
         $query = $driver->lastSQL();
 
@@ -370,7 +367,7 @@ class BaseModelTest extends Asserts {
         $book = $this->make_new_book_and();
         $model = $book->getModel();
         
-        $driver = $model->getConnect()->iDriver();
+        $driver = $model->getConnect();
         
         $last_sql = $driver->lastSQL();
         $this->assertTrue(strpos($last_sql, 'name') !== false);

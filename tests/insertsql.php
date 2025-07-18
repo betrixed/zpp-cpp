@@ -17,6 +17,7 @@ $basedir = dirname(__DIR__);
 chdir($basedir);
 
 echo "Working directory: " . $basedir . PHP_EOL;
+echo "Php " . phpversion() . PHP_EOL;
 echo "Wcc " .  phpversion("wcc") . PHP_EOL;
 echo "XDebug " . phpversion("xdebug") . PHP_EOL;
 

@@ -28,8 +28,9 @@ class IConfig {
     public function getMyKey() : string {}
     public function setMyKey(string $value) : void {}
     
-    public function newSql() : IfSql {}
+    public function newSql() : \Wcd\Sql\IfSql {}
 };
+
 
 class IServer {
 

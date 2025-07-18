@@ -253,7 +253,7 @@ Bindings::addJoinData(htab_read data)
 	return false;
 }
 
-zval_user 
+zval*  
 Bindings::get(int key)
 {
 	return data_.get(key);
@@ -365,6 +365,23 @@ void Bindings::set(int key, zval_user value)
 	htab_write(data_).set(key, value);
 }
 
+void Bindings::set(int key, int value)
+{
+	zval_mgr wrap(value);
+	htab_write(data_).set((zend_long)key, wrap);
+}
+
+void Bindings::set(int key, const zval_mgr& value)
+{
+	htab_write(data_).set((zend_long)key, value);
+}
+
+void Bindings::set(int key, htab_read value)
+{
+	htab_write(data_).set((zend_long)key, value);
+}
+
+
 void Bindings::unset(int key)
 {
 	htab_write(data_).unset(key);
@@ -464,12 +481,11 @@ Bindings::whereKeyValue(zval_user key, zval_user value)
 }
 
 zval_mgr 
-Bindings::select(zobj_user prop)
+Bindings::select()
 {
 	zobj_mgr from = getJoins();
 
-	zval_mgr columns_mgr = prop.property(SQSTR.columns);
-	zval_user columns(columns_mgr);
+	zval_user columns = get(ISql::NAME_LIST);
 
 	if (columns.ok())
 	{
@@ -489,28 +505,39 @@ Bindings::select(zobj_user prop)
 
 	zobj_mgr plist = sql->select(*this);
 
-	zval_mgr  row_fetch = prop.property(SQSTR.fetch_key);
-	zval_mgr  old_fetch = db_.call(SQSTR.setfetch, row_fetch);
+	zval_user fetch_z = get(ISql::FETCH_AS);
+
+	int old_fetch = -1;
+	int fetch_as = fetch_z.ok() ? fetch_z.zlong() : -1;
+
+	IDriver* db = zobj_toc<IDriver>(db_);
+	if (fetch_as >= 0)
+	{
+		old_fetch = db->setFetch(fetch_as);
+	}
 
 	ParamList* pobj = zobj_toc<ParamList>(plist);
 
 	zval_mgr rows = RunSql::op(db_, pobj->getSql(), pobj->getValues(), true);
 
 
-	if (zval_user(old_fetch).zlong() != zval_user(row_fetch).zlong())
+	if (fetch_as != old_fetch)
 	{
-		db_.call(SQSTR.setfetch, old_fetch);
+		db->setFetch(old_fetch);
 	}
 
-	zstr_user mclass;
+	zstr_mgr mclass;
 
-	zval_mgr model_mgr = prop.property(SQSTR.model);
-	zobj_user model(model_mgr);
+	zval_mgr model_mgr = get(ISql::MODEL_OBJ);
+
+	zobj_user model = model_mgr.zobject();
 
 	if (!model.ok())
 	{
-		model_mgr = prop.property(SQSTR.modelclass);
-		if (zval_user(model_mgr).isNull())
+
+		mclass = get(ISql::MODEL_CLASS);
+
+		if (mclass.isNull())
 		{
 			return rows;
 		}
@@ -522,24 +549,31 @@ Bindings::select(zobj_user prop)
 		size_t rct = hr.size();
 		if (rct == 1)
 		{
+			if (!model.ok())
+			{
+				model = ReflectCache::staticInstance(mclass);
+			}
 			Model* m = zobj_toc<Model>(model);
 			return (zend_object*) m->newRow(hr.get((int)0), true);
 		}
 		else if (rct == 0)
 		{
 			//empty array
-			model_mgr.set_null();
-			return model_mgr;
+			rows.set_null();
+			return rows;
 		}
 	}
 	//TODO: else what?
 	// multiple rows case
-	mclass = model.className();
-
-	
+	if (!mclass.ok())
+	{
+		mclass = model.className();
+	}
+	/*
+	eager_load not implemented
 	zval_mgr  eager_load_mgr = prop.property(SQSTR.eager_load);
 	htab_read eager_load(eager_load_mgr);
-
+	*/
 	zval_user rename = get(ISql::SQL_RENAME);
 
 	if (rename.isArray())
@@ -779,7 +813,7 @@ ZEND_METHOD(Wcd_Sql_Bindings, set)
 	Z_PARAM_ZVAL(value)
 	ZEND_PARSE_PARAMETERS_END();
 	Bindings* cobj = zval_toc<Bindings>(ZEND_THIS);
-	cobj->set(key, value);
+	cobj->set(key, zval_user(value));
 
 }
 
@@ -837,13 +871,10 @@ ZEND_METHOD(Wcd_Sql_Bindings, wipe)
 
 ZEND_METHOD(Wcd_Sql_Bindings, select)
 {
-	zval* obj;
-	ZEND_PARSE_PARAMETERS_START(1,1)
-	Z_PARAM_OBJECT(obj)
-	ZEND_PARSE_PARAMETERS_END();
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	Bindings* cobj = zval_toc<Bindings>(ZEND_THIS);
-	zval_mgr result = cobj->select(obj);
+	zval_mgr result = cobj->select();
 
 	result.move_zv(return_value);
 }

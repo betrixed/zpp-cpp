@@ -68,7 +68,7 @@ using namespace zpp;
 	{
 		Bindings& bind = bindings();
 		zval_mgr value(set);
-		bind.set(ISql::SQL_DISTINCT, value);
+		bind.set((int) ISql::SQL_DISTINCT, value);
 	}
 	void IBuild::where_unpack(htab_read aw)
 	{
@@ -309,14 +309,20 @@ using namespace zpp;
 		Bindings& bind = bindings();
 		zval_mgr temp(args_mgr);
 		bind.set(ISql::SQL_AGGREGATE, temp);
+		bind.set(ISql::FETCH_AS, IDriver::FETCH_OBJECT);
 
 
-		columns_.init();
-		IDriver& db = idb();
-		int fetch = db.setFetch(IDriver::FETCH_OBJECT);
-		zval_mgr result = bind.select(vobj());
-		if (fetch != IDriver::FETCH_OBJECT)
-			db.setFetch(fetch);
+		zval_mgr result = bind.select();
+
+		if (result.isArray())
+		{
+			htab_read rows(result);
+			if (rows.size())
+			{
+				zobj_mgr robj = rows.get(int(0));
+				result = robj.property(agfn);
+			}
+		}
 		return result;
 	}
 
@@ -539,7 +545,7 @@ using namespace zpp;
 	{
 		Bindings& bind = bindings();
 		bind.limit(1, 0);
-		zval_mgr result = bind.select(vobj());
+		zval_mgr result = bind.select();
 
 		if (result.isArray())
 		{
@@ -566,23 +572,30 @@ using namespace zpp;
 	zval_mgr 
 	IBuild::allRows()
 	{
-		columns_.init();
-		return bindings().select(vobj());
+		return bindings().select();
 	}
 
 	zval_mgr 
 	IBuild::first(htab_read columns)
 	{
-		columns_ = columns;
+		if (columns.size())
+		{
+			Bindings& bind = bindings();
+			bind.set(ISql::NAME_LIST, columns);
+		}
 		return get_first();
 	}
 
 	zval_mgr
 	IBuild::get(htab_read columns)
 	{
-		columns_ = columns;
 		Bindings& bind = bindings();
-		return bind.select(vobj());
+		if (columns.size())
+		{
+			bind.set(ISql::NAME_LIST, columns);
+		}
+		
+		return bind.select();
 	}
 
 	zstr_mgr 

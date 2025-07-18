@@ -163,7 +163,7 @@ public:
 	zval_mgr get(zval_user name);
 
 	void   set(zstr_user name, zval_user value);
-	void   set(zval_user key, zval_user value);
+	//void   set(zval_user key, zval_user value);
 
 	void   unset(zstr_user name);
 	void   unset(zval_user key);

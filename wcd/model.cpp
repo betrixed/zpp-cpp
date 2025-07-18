@@ -220,8 +220,7 @@ namespace wcd {
 		Bindings&  bind = ib->bindings();
 		bind.limit(1);
 		bind.whereKeyValue(keynames, values);
-		ib->columns_.init();
-		return bind.select(build);	
+		return bind.select();	
 	}
 
 	Model* //static
@@ -1202,18 +1201,18 @@ row_output(zend_execute_data *execute_data, zval *return_value)
 	RETURN_BOOL(model->saveRow(data, reload));	
 }
 
-ZEND_METHOD(Wcd_Sql_Model, create)
+ZEND_METHOD(Wcd_Sql_Model, createRow)
 {
 
 	row_output(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 
-ZEND_METHOD(Wcd_Sql_Model, save)
+ZEND_METHOD(Wcd_Sql_Model, saveRow)
 {
 	row_output(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 
-ZEND_METHOD(Wcd_Sql_Model, update)
+ZEND_METHOD(Wcd_Sql_Model, updateRow)
 {
 	row_output(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
@@ -1240,7 +1239,7 @@ ZEND_METHOD(Wcd_Sql_Model, updatedAtName)
 	result.move_zv(return_value);
 }
 
-ZEND_METHOD(Wcd_Sql_Model, delete)
+ZEND_METHOD(Wcd_Sql_Model, deleteRow)
 {
 	zval* data;
 
@@ -1559,7 +1558,7 @@ PHP_MINIT_FUNCTION(Wcd_Model_reg)
 
 	IRow::omg.classEntry(ce);
 
-	zintf_ce_IfCrud = register_class_Wcd_IfCrud();
+	zintf_ce_IfCrud = register_class_Wcd_Sql_IfCrud();
 
 	Model::omg.classEntry(register_class_Wcd_Sql_Model(zintf_ce_IfCrud));
 

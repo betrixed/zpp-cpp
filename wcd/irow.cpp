@@ -46,10 +46,10 @@ IRInit::init()
 	model = "model";
 	data_str = "data";
 	original_data = "original";
-	save_key = "save";
+	save_key = "saverow";
 
-	read_key = "read";
-	delete_key = "delete";
+	read_key = "readrow";
+	delete_key = "deleterow";
 	getcoldefs = "getcoldefs";
 	stamptime = "stamptime";
 }

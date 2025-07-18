@@ -58,6 +58,9 @@ class SchemaTest extends Asserts
         $this->assertNotEmpty($dmlClass, "dml class");
         
         $con = IServer::connect("default");
+        
+        $con->connect();
+        
         $type = $con->getSqlType();
 
         $inTrans = $con->inTransaction();
@@ -226,7 +229,8 @@ class SchemaTest extends Asserts
         $builder->wipe();
 
         // 1 record in test has name of "ezDB1"
-        $builder->table('test')->where('name', 'ezDB1');
+        $builder->table('test');
+        $builder->where('name', 'ezDB1');
         $ct = $builder->count();
         $this->assertEquals(1, $ct);
 
@@ -242,10 +246,10 @@ class SchemaTest extends Asserts
         $builder->table('test');
         $bind = $builder->getBindings();
         
-        $result = $builder->table('test')
-                ->setFetch(IDriver::FETCH_OBJECT)
-                ->where('name', '=', 'ezDB')
-                ->get();
+        $builder->table('test');
+        $builder->setFetch(IDriver::FETCH_OBJECT);
+        $builder->where('name', '=', 'ezDB');
+        $result = $builder->get();
 
         $this->assertIsArray($result);
         $this->assertCount(2, $result);

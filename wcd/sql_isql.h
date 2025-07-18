@@ -242,7 +242,11 @@ namespace wcd {
 		    SQL_LIMIT = 10,
 		    SQL_AGGREGATE = 11,
 		    SQL_DISTINCT = 12,
-		    SQL_RENAME = 13
+		    SQL_RENAME = 13,
+		    FETCH_AS = 14,
+    		MODEL_OBJ = 15,
+    		MODEL_CLASS = 16,
+    		NAME_LIST = 17
 		};
 		enum {
 			QUOTE_SGL = '\'',
@@ -298,12 +302,13 @@ namespace wcd {
 		void construct(zval_user sql, zval_user connect);
 
 		void add(int key, zval_user value);
+
 		void addarray(int key, htab_read value);
 		void addstr(int key, zstr_user value);
 
 		bool addJoinData(htab_read data);
 
-		zval_user get(int key);
+		zval* get(int key);
 
 		const zobj_mgr& isql() {
 			return sql_;
@@ -335,7 +340,7 @@ namespace wcd {
 			return data_;
 		}
 
-		zval_mgr select(zobj_user prop);
+		zval_mgr select();
 
 		/** Call setPrime of JoinTables, return JoinTables */
 		zobj_mgr primeJoin(zval_user tcol);
@@ -351,7 +356,10 @@ namespace wcd {
 		}
 
 		void set(int key, zval_user value);
-		
+		void set(int key, int value);
+		void set(int key, htab_read value);
+		void set(int key, const zval_mgr& value);
+
 		void setParamList(zobj_user obj)
 		{
 			paramList_ = obj;

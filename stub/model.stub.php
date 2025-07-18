@@ -7,8 +7,42 @@ namespace Wcd\Sql;
 
 
 
+interface IfCrud
+{
+    /** Both update and create time stamps */
+    const int ALL_TS = 3;
+    /** Update timestamp flag */
+    const int UPDATE_TS = 2;
+    /** Create time stamp flag */
+    const int CREATE_TS = 1;
+    /** Default no timestamps value */
+    const int NO_TS = 0;
 
-class Model implements \Wcd\IfCrud {
+    /** Method to return identity values after insert */
+    const int ID_SET = 0; 
+    const int LAST_ID = 1;
+    const int LAST_SEQ = 2;
+    const int ID_GEN = 4;
+
+    /** array key for binding return identify value type */
+    const string RETURNS = "_ret";
+
+    /** sequence key options */
+    const string SEQ_KEY = "seq";
+    const string BIND_KEY = "bind";
+    const string DEFAULT_KEY = "default";
+    const string ID_KEY = "identity";
+    const string AUTO_INC = "auto_inc";
+
+
+    /** Auto field name for create time stamp */
+    const string CREATED_AT = "created_at";
+    /** Auto field name for update time stamp */
+    const string UPDATED_AT = "updated_at";
+    
+};
+
+class Model implements IfCrud {
 
 
     public static function KeyValue(array $key, array $value): ?\Wcd\IRow {}
@@ -34,11 +68,11 @@ class Model implements \Wcd\IfCrud {
 
     public static function rowSaved(array $data = []) : \Wcd\IRow{}
 
-    public function create(\Wcd\IRow$row, bool $reload = false) : bool {}
+    public function createRow(\Wcd\IRow$row, bool $reload = false) : bool {}
 
     public function createdAtName() : string {}
 
-    public function delete(\Wcd\IRow$row) : bool {}
+    public function deleteRow(\Wcd\IRow$row) : bool {}
 
     public function exists(\Wcd\IRow$row): bool {}
 
@@ -73,7 +107,7 @@ class Model implements \Wcd\IfCrud {
 
     public function readRow(\Wcd\IRow$row) : \Wcd\IRow{}
 
-    public function save(\Wcd\IRow$row, bool $reload = false) : bool {}
+    public function saveRow(\Wcd\IRow$row, bool $reload = false) : bool {}
 
     public function setColDefs(array $cdefs) : void {}
 
@@ -90,7 +124,7 @@ class Model implements \Wcd\IfCrud {
     public function stampTime(string $stamp, 
             int $tsflags = IfCrud::ALL_TS) : array {}
 
-    public function update(\Wcd\IRow$row, bool $reload = false) : bool {}
+    public function updateRow(\Wcd\IRow$row, bool $reload = false) : bool {}
 
     public function updatedAtName() : string {}
 
