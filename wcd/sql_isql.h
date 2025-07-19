@@ -192,22 +192,22 @@ namespace wcd {
 			sql_ = s;
 		}
 
-		const zstr_mgr& getSql() const
+		zstr_mgr& getSql() 
 		{
 			return sql_;
 		}
 
-		const htab_mgr& getReturns() const
+		htab_mgr& getReturns() 
 		{
 			return ret_values_;
 		}
 
-		const htab_mgr& getValues() const
+		htab_mgr& getValues() 
 		{
 			return val_params_;
 		}
 
-		const htab_mgr& getParams() const
+		htab_mgr& getParams() 
 		{
 			return params_;
 		}

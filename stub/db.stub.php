@@ -74,7 +74,7 @@ class IDriver {
 
     public function handle() : mixed {}
 
-    public function iSql(): ISql {}
+    public function iSql(): Sql\ISql {}
 
     public function iConfig() : IConfig {}
 
@@ -143,15 +143,15 @@ class IBuild {
 
     public function getDriver() : IDriver {}
 
-    public function getBindings() : Wcd\Sql\Bindings {}
+    public function getBindings() : Sql\Bindings {}
 
-    public function getFrom() :  Wcd\Sql\JoinTables {}
+    public function getFrom() :  Sql\JoinTables {}
 
     public function getInsertSql(array $columns) :  Wcd\Sql\ParamList {}
 
-    public function getParamList() :  Wcd\Sql\ParamList {}
+    public function getParamList() :  Sql\ParamList {}
 
-    public function getSql() :  Wcd\Sql\ISql {}
+    public function getSql() :  Sql\ISql {}
 
     public function hasModel() : bool {}
 

@@ -895,16 +895,17 @@ ISql::insert(Bindings& bind)
 	buf << ' ' << this->quoteName(icol->getName());
 
 	htab_mgr sql_insert;
-
+	// C++ pass by reference, return if set
 	if (!bind.getArray(ISql::SQL_INSERT, sql_insert))
 	{
 		zend_throw_error(zend_ce_error, "Insert table not set");
 		result = buf.zstr();
 		return result;
 	}
+	//zend_printf("insert: %s ", buf.data());
+	//showdata("insert bind", sql_insert);
 
-
-	htab_walk insert_wk;
+	htab_walk  insert_wk;
 	htab_read  rowbind;
 
 
@@ -919,6 +920,7 @@ ISql::insert(Bindings& bind)
 		{
 			pcount += rsize;
 			buf << this->insert_col_params(bind, rowbind);
+			//zend_printf("insert 2: %s\n ", buf.data());
 		}
 	}
 	if (pcount == 0)
@@ -927,13 +929,15 @@ ISql::insert(Bindings& bind)
     	zobj_mgr self(this->vobj());
     	zval_mgr dtext = self.call(SQSTR.valuesdefault);
 		buf << ' ' << zval_user(dtext).zstr() << ' ';
+		//zend_printf("insert 3: %s\n ", buf.data());
     }
 	htab_mgr rettab;
 	zval_user  valset;
 	if (bind.getArray(ISql::SQL_RETURN, rettab))
 	{
 		buf << " RETURNING ";
-		valset = rettab[int(0)];
+		valset = rettab.get(int(0));
+
 		if (valset.isArray() && valset.size())
 		{   
 			int rix=0;
@@ -950,11 +954,15 @@ ISql::insert(Bindings& bind)
 			}
 		}
 	}
-
+	
 	zobj_mgr   pobj = bind.getParamList();
+
+	//showobj("pobj", pobj);
+
 	ParamList* plist = zobj_toc<ParamList>(pobj);
 
 	htab_read params = plist->getParams();
+
 	htab_mgr   ret_params_mgr;
 	htab_write ret_params(ret_params_mgr);
 
@@ -985,15 +993,18 @@ ISql::insert(Bindings& bind)
 
 	}
 	zstr_mgr sql = buf.zstr();
+	//showstr("sql", sql);
 
 	plist->setSql(sql);
 
 	if (ret_params.size())
 	{
+		//showarray("ret_params_mgr", ret_params_mgr);
 		plist->setValues(ret_params_mgr);
 	}
 	if (rettab.size())
 	{
+		//showarray("rettab", rettab);
 		plist->setReturns(rettab);
 	}
 	//showobj("return pobj", pobj);

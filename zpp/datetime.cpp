@@ -34,18 +34,18 @@ void Date_init::init()
 	setdate = "setdate";
 	settimezone = "settimezone";
 
-	zstr_intern y_prop = "y";
-	zstr_intern m_prop = "m";
-	zstr_intern d_prop = "d";
-	zstr_intern h_prop = "h";
-	zstr_intern i_prop = "i";
-	zstr_intern s_prop = "s";
-	zstr_intern f_prop = "f";
-	zstr_intern days_prop = "days";
-	zstr_intern invert_prop = "invert";
-	zstr_intern from_string = "from_string";
-	zstr_intern date_string = "date_string";
-	zstr_intern now_format = "Y-m-d H:i:s";
+	y_prop = "y";
+	m_prop = "m";
+	d_prop = "d";
+	h_prop = "h";
+	i_prop = "i";
+	s_prop = "s";
+	f_prop = "f";
+	days_prop = "days";
+	invert_prop = "invert";
+	from_string = "from_string";
+	date_string = "date_string";
+	now_format = "Y-m-d H:i:s";
 }
 
 
@@ -178,9 +178,10 @@ datetime_obj::format(zstr_user dfmt)
 {
 	zobj_user caller(obj_);
 	zval_mgr  arg1(dfmt);
+
 	zstr_mgr result = caller.call(DTData.formatkey, arg1);
 
-	return zstr_mgr(std::move(result));
+	return result;
 }
 
 void datetime_obj::setTimeZone(zstr_user zone)

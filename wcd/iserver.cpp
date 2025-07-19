@@ -255,14 +255,9 @@ IServer::getConnect(zstr_user name)
 
 }
 
-zobj_mgr 
+zobj_mgr //static 
 IServer::connect(zstr_user name)
 {
-	if (!name.ok())
-	{
-		name = ISV.default_name;
-	}
-
 	zobj_user me = Services::getOne(IServer::omg.class_name());
 
 	IServer* s = zobj_toc<IServer>(me);
@@ -372,9 +367,10 @@ using namespace wcd;
 //static zobj_mgr connect(zstr_user name);
 ZEND_METHOD(Wcd_IServer, Connect)
 {
-	zend_string* name;
+	zend_string* name = nullptr;
 
-	ZEND_PARSE_PARAMETERS_START(1,1)
+	ZEND_PARSE_PARAMETERS_START(0,1)
+	Z_PARAM_OPTIONAL
 	Z_PARAM_STR_OR_NULL(name)
 	ZEND_PARSE_PARAMETERS_END();
 
@@ -579,6 +575,12 @@ ZEND_METHOD(Wcd_IServer, setAlias)
 PHP_MINIT_FUNCTION(Wcd_IServer_reg)
 {
 	IServer::omg.classEntry(register_class_Wcd_IServer());
+
+	/* // defined in stub - arginfo.h
+	 class_data cdata(IServer::omg.class_entry_);
+
+	cdata.add_constant("DEFAULT_NAME", ISV.default_name );
+	*/
 
 	return SUCCESS;
 }

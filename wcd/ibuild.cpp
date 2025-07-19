@@ -237,7 +237,6 @@ using namespace zpp;
 
 		if (model->hasTimeStamps()) {
 			timeStamps = irow->stampTime(now());
-
 		}
 		zval_mgr temp;
 
@@ -253,29 +252,35 @@ using namespace zpp;
 					temp = timeStamps;
 					irow->mergeData(temp);
 				}
-				bind.addarray(ISql::SQL_INSERT, irow->getData());
+				temp = irow->getData();
+				bind.addarray(ISql::SQL_INSERT, temp);
 			}
 		}
 		else {
 			// already stamped time.
-			bind.addarray(ISql::SQL_INSERT, irow->getData());
+			temp = irow->getData();
+			bind.addarray(ISql::SQL_INSERT, temp);
 		}
 
 		zobj_mgr plist_mgr = isql().insert(bind);
+		//showobj("plist_mgr", plist_mgr);
 
 		bind.wipe(ISql::SQL_INSERT);
 
 		if (plist_mgr.ok())
 		{
 			ParamList* plist = zobj_toc<ParamList>(plist_mgr);
-			const zstr_mgr& sql = plist->getSql();
-			const htab_mgr& values = plist->getValues();
-			const htab_mgr& rets = plist->getReturns();
+			zstr_mgr& sql = plist->getSql();
+			htab_mgr& values = plist->getValues();
+			htab_mgr& rets = plist->getReturns();
 
 			IDriver& db = idb();
 
 			int fetch = db.setFetch(IDriver::FETCH_ASSOC);
+
 			result = RunSql::op(driver_, sql, values, (rets.size() > 0));
+
+			//showmem("result", result);
 			db.setFetch(fetch);
 		}
 		return  result;
@@ -603,6 +608,9 @@ using namespace zpp;
 	{
 		datetime_obj dtime;
 
+		zend_printf("IBuild::now() ");
+		showstr("now_format", DTData.now_format);
+		
 		return dtime.format(DTData.now_format);
 	}
 

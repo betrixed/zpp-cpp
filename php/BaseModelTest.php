@@ -1,6 +1,6 @@
 <?php
-
-use Wcd\Sql\{AnyModel, IfCrud, Model};
+use Wcd\{IfCrud, Model};
+use Wcd\Sql\{AnyModel};
 
 use Wcc\{Config, Services};
 
