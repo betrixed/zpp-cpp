@@ -61,6 +61,7 @@ namespace zpp {
 
 		//! set a property value
 		void      property(zstr_user key, zval_user value);
+		void      property(zstr_user key, zstr_user value);
 		
 		bool      has_property(zstr_user name);
 		void      unset_property(zstr_user name);

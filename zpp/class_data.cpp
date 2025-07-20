@@ -20,7 +20,7 @@ extern "C" {
 
 
 namespace zpp {
-/*
+
 void 
 class_data::typed_property(
     zstr_user name, zval_user data, 
@@ -33,7 +33,7 @@ class_data::typed_property(
             nullptr,  //doc_comment zend_string
              datatype);
 }
-*/
+
 void 
 class_data::add_constant(const char* name, const char* value)
 {
@@ -137,6 +137,29 @@ class_data::std_object()
     return zobj_mgr(std::move(init));
 }
 
+zval_mgr 
+class_data::static_property(zend_string* s)
+{
+    zval* p = zend_read_static_property_ex(class_entry_, s, true);
+
+    return zval_mgr(p);
+}
+
+zval_mgr 
+class_data::constant_value(zend_string* s)
+{   
+    zend_class_constant *c = NULL;
+
+    c = (zend_class_constant*)zend_hash_find_ptr(CE_CONSTANTS_TABLE(class_entry_), s);
+
+    zval_mgr result;
+
+    if (c)
+    {
+        result = &c->value;
+    }
+    return result;
+}
 
 };
 

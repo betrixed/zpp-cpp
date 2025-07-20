@@ -44,7 +44,8 @@ interface IfCrud
 
 class Model implements IfCrud {
 
-
+    public ?string $name = null;
+    
     public static function KeyValue(array $key, array $value): ?IRow {}
 
     public static function WithValues(array $values) : ?IRow {}
@@ -103,7 +104,7 @@ class Model implements IfCrud {
 
     public function hasTimeStamps() : bool {}
 
-    public function newRow(array $rdata = [], bool $isSaved = false) : IRow{}
+    public function newRow(?array $rdata = null, bool $isSaved = false) : IRow{}
 
     public function readRow(IRow $row) : IRow{}
 

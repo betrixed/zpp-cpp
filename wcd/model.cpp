@@ -63,6 +63,8 @@ namespace wcd {
 		zstr_intern returns_key;
 		zstr_intern get_primary_key;
 		zstr_intern fn_getseqcols;
+		zstr_intern k_created_at;
+		zstr_intern k_updated_at;
 
 		void init() override {
 			find_first = "findfirst";
@@ -85,6 +87,8 @@ namespace wcd {
 
 			get_primary_key = "getprimarykey";
 			fn_getseqcols = "getseqcols";
+			k_created_at = "created_at";
+			k_updated_at = "updated_at";
 		}
 	};
 
@@ -143,7 +147,7 @@ namespace wcd {
 	}
 
 	zobj_mgr
-	Model::newRow(zval_user data, bool isSaved)
+	Model::newRow(htab_read data, bool isSaved)
 	{
 		zobj_mgr result = IRow::omg.new_zobj();
 
@@ -185,6 +189,17 @@ namespace wcd {
 
 	}
 
+	zstr_mgr 
+	Model::createdAtName()
+	{
+		return MIS.k_created_at;
+	}
+
+	zstr_mgr 
+	Model::updatedAtName()
+	{
+		return MIS.k_updated_at;
+	}
 
 	zobj_mgr 
 	Model::getBuilderForMe()
@@ -386,19 +401,21 @@ namespace wcd {
 	htab_mgr 
 	Model::getKeyOptions()
 	{
-		htab_mgr pkey_options_mgr;
+		htab_mgr result;
 
-		if (pkey_options_.ok())
+		result = pkey_options_;
+
+		if (result.ok())
 		{
-			pkey_options_mgr = pkey_options_;
-			return pkey_options_mgr;
+			showdata("options set", result);
+			return result;
 		}
-
+		
 		htab_mgr pkey_fields = getPKey();
-
+		showdata("pkey get", pkey_fields);
 		if (pkey_fields.size())
 		{
-			htab_write pkey_options(pkey_options_mgr);
+			htab_write pkey_options(result);
 
 			htab_mgr cdefs = getColDefs();
 			htab_mgr seqdefs = getSeqDefs();
@@ -409,6 +426,8 @@ namespace wcd {
 
 			for(wk.start(pkey_fields); wk.ok(); wk.next())
 			{
+				//zend_printf("get pkey options ");
+				showmem("pkey", pkey);
 				htab_mgr options_mgr;
 				htab_write options(options_mgr);
 
@@ -416,9 +435,9 @@ namespace wcd {
 				key_name = key_name.to_lower();
 
 				zval_user key_def = cdefs.get(key_name);
-				htab_read pkeydef = key_def.zarray();
+				zobj_mgr  pkeydef = key_def.zobject();
 
-				zval_user seq_pkey = pkeydef.get(SQSTR.id_key);
+				zval_mgr seq_pkey = pkeydef.property(SQSTR.id_key);
 
 				if (seq_pkey.isString())
 				{
@@ -433,7 +452,7 @@ namespace wcd {
 					if (seq_pkey.isString())
 					{
 						options.set(SQSTR.seq_key, seq_pkey);
-						zval_user defval = pkeydef.get(SQSTR.default_key);
+						zval_mgr defval = pkeydef.property(SQSTR.default_key);
 						if (defval.isString())
 						{
 							htab_mgr temp_mgr;
@@ -448,17 +467,21 @@ namespace wcd {
 				}
 				else 
 				{
-					zval_user isAutoInc = pkeydef.get(SQSTR.auto_inc);
+					zval_mgr isAutoInc = pkeydef.property(SQSTR.auto_inc);
 					if (isAutoInc.ok()) 
 					{
-						options.set(SQSTR.returns_str, Crud::ID_SET);
+						options.set(SQSTR.returns_str, Crud::LAST_ID);
 					}
+				}
+				if (options.size()==0)
+				{
+					options.set(SQSTR.returns_str, Crud::ID_SET);
 				}
 				pkey_options.set(key_name, options_mgr);
 			}
-			pkey_options_ = pkey_options;
+			pkey_options_ = result;
 		}
-		return pkey_options_mgr;
+		return result;
 	}
 
 	htab_mgr Model::getColDefs()
@@ -474,18 +497,24 @@ namespace wcd {
 		{
 			class_cdefs_ = tabledef_mgr.property(MIS.columns_str);
 		}
+		showdata("getColDefs", class_cdefs_);
 		return class_cdefs_;
 	}
 
 	zstr_mgr Model::getName()
 	{
-		if (name_.ok())
+		zobj_user self(vobj());
+
+		zstr_mgr result = self.property(MIS.name_str);
+
+		if (result.ok())
 		{
-			return name_;
+			return result;
 		}
 
-		name_ = Model::classToTableName(vobj()->ce->name);
-		return name_;
+		result = Model::classToTableName(self.className());
+		self.property(MIS.name_str, result);
+		return result;
 	}
 
 	htab_mgr 
@@ -495,12 +524,17 @@ namespace wcd {
 		if (class_pkey_.ok())
 		{
 			result = class_pkey_;
+			showdata("class pkey", result);
 			return result;
 		}
 		zobj_mgr tdef = getTableDef();
 		if (tdef.ok())
-		{
-			result = tdef.call(MIS.get_primary_key);
+		{	
+			zobj_mgr pkeydef = tdef.call(MIS.get_primary_key);
+			if (pkeydef.ok())
+			{
+				result = pkeydef.property(MIS.columns_str);
+			}
 		}
 	
 		if (!result.ok())
@@ -664,12 +698,17 @@ namespace wcd {
 		zobj_mgr schema = db->getSchema();
 
 		htab_mgr tables = schema.call(MIS.get_tables);
+		//showdata("tables from schema", tables);
 
 		zstr_mgr name = getName();
 
+		showstr("Table name", name);
 		class_tdef_ = tables.get(name);
 
+		showobj("TDEF", class_tdef_);
 		htab_mgr columns = class_tdef_.property(MIS.columns_str);
+
+		showdata("columns", columns);
 
 		htab_mgr tsf_mgr;
 		htab_write tsf(tsf_mgr);
@@ -698,6 +737,7 @@ namespace wcd {
 				zobj_mgr cdef = cdef_mgr.zobject();
 				zval_mgr ftype = cdef.property(MIS.type_str);
 				zval_mgr fname = cdef.property(MIS.name_str);
+
 
 				if (ftype.isString() && zs_cmp_ci(ftype.zstr(),stamp_type)==0)
 				{
@@ -893,7 +933,8 @@ namespace wcd {
 			result = byKeyValue(key_mgr, val_mgr);
 		}
 		else {
-			zend_throw_error(zend_ce_error,"No primary key for table %s", name_.data());
+			zstr_mgr name = getName();
+			zend_throw_error(zend_ce_error,"No primary key for table %s", name.data());
 		}
 		return result;
 
@@ -998,7 +1039,9 @@ namespace wcd {
 	void 
 	Model::setName(zstr_user name)
 	{
-		name_  = name;
+		zobj_mgr self(vobj());
+
+		self.property(MIS.name_str, name);
 	}
 
 	void 
@@ -1035,7 +1078,7 @@ namespace wcd {
 				stamps.set(dkey, str_datetime);
 			}
 		}
-		showarray("stampTime()", result);
+		//showarray("stampTime()", result);
 		return result;
 
 	}
@@ -1438,16 +1481,17 @@ ZEND_METHOD(Wcd_Model, hasTimeStamps)
 
 ZEND_METHOD(Wcd_Model, newRow)
 {
-	zval* rdata;
+	HashTable* 	 rdata = (HashTable*) &zend_empty_array;
 	bool  isSaved = false;
 
-	ZEND_PARSE_PARAMETERS_START(1,2)
-	Z_PARAM_ARRAY(rdata)
+	ZEND_PARSE_PARAMETERS_START(0,2)
 	Z_PARAM_OPTIONAL
+	Z_PARAM_ARRAY_HT(rdata)
 	Z_PARAM_BOOL(isSaved)
 	ZEND_PARSE_PARAMETERS_END();
 
 	Model* model = zval_toc<Model>(ZEND_THIS);
+
 
 	zobj_mgr result = model->newRow(rdata, isSaved);
 
@@ -1578,6 +1622,15 @@ PHP_MINIT_FUNCTION(Wcd_Model_reg)
 	zintf_ce_IfCrud = register_class_Wcd_IfCrud();
 
 	Model::omg.classEntry(register_class_Wcd_Model(zintf_ce_IfCrud));
+
+	/*
+	class_data  cd(Model::omg.class_entry_);
+
+	zval_mgr null_val;
+
+	zend_type dtype =  {nullptr, 0};
+	cd.typed_property(MIS.name_str, null_val, IS_STRING, ZEND_ACC_PROTECTED_SET);
+	*/
 
 	return SUCCESS;
 }

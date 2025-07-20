@@ -54,7 +54,7 @@ namespace wcd {
     	
     	virtual void debug_info(htab_write di);
 
-    	void construct(zobj_user tmodel, zval_user data, bool exists = false);
+    	void construct(zobj_user tmodel, htab_read data = htab_read(), bool exists = false);
 
     	bool create(bool reload = false);
 
@@ -87,7 +87,7 @@ namespace wcd {
 
     	void mergeData(htab_read attrlist);
 
-    	void setData(zval_user data, bool exists = false);
+    	void setData(htab_read data, bool exists = false);
 
     	void setExists();
 

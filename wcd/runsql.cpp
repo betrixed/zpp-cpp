@@ -78,8 +78,8 @@ namespace wcd {
 	zval_mgr //static 
 	RunSql::op(zobj_user db, zstr_user sql, htab_read bind, bool rval)
 	{
-		showstr("runsql", sql);
-		showarray("bind", bind);
+		//showstr("runsql", sql);
+		//showarray("bind", bind);
 		
 		zobj_mgr obj = RunSql::omg.new_zobj();
 		RunSql*  rs = zobj_toc<RunSql>(obj);

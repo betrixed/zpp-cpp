@@ -608,8 +608,8 @@ using namespace zpp;
 	{
 		datetime_obj dtime;
 
-		zend_printf("IBuild::now() ");
-		showstr("now_format", DTData.now_format);
+		//zend_printf("IBuild::now() ");
+		//showstr("now_format", DTData.now_format);
 		
 		return dtime.format(DTData.now_format);
 	}

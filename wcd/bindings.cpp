@@ -36,7 +36,7 @@ void
 Bindings::addarray(int key, htab_read value)
 {
 	zval_mgr adapt(value);
-	showarray("Add Array", value);
+	//showarray("Add Array", value);
 	if ((key==ISql::SQL_FROM)||(key==ISql::SQL_JOIN))
 	{
 		set(key, zval_user(adapt));
@@ -155,7 +155,7 @@ void
 Bindings::addToArray(int key, zval_user value)
 {
 	zval_user listown = data_.get(key);
-	zend_printf("bind key %d ", key);
+	//zend_printf("bind key %d ", key);
 	if (listown.isNull())
 	{
 		htab_mgr   list_mgr;
@@ -164,16 +164,16 @@ Bindings::addToArray(int key, zval_user value)
 		list.push_back(value);
 
 		htab_write mylist(data_);
-		showarray("new Array", list_mgr);
+		//showarray("new Array", list_mgr);
 
 		mylist.set((zend_long)key, list_mgr);
-		showdata("data_", data_);
+		//showdata("data_", data_);
 		
 	}
 	else { //? assert isArray() ?
 		htab_write vlist(listown);
 		vlist.push_back(value);
-		showmem("addToArray", listown);
+		//showmem("addToArray", listown);
 	}
 	
 }
@@ -664,6 +664,22 @@ Bindings::update(zstr_user column, zval_user value)
 	data.set(SQSTR.valuekey, value);
 
 	addarray(ISql::SQL_UPDATE, data_mgr);
+}
+
+void 
+Bindings::limit(int limit, int offset)
+{
+	htab_mgr data;
+
+	htab_write hw(data);
+
+	hw.set(SQSTR.limit, limit);
+	if (offset)
+	{
+		hw.set(SQSTR.offset, offset);
+	}
+
+	set(ISql::SQL_LIMIT, data);
 }
 
 } // namespace wcd

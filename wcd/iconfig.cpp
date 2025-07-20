@@ -282,16 +282,16 @@ zobj_mgr
 IConfig::newConnect(zstr_user name)
 {
 	zstr_mgr dclass(getDriverClass());
-	showstr("dclass", dclass);
+	//showstr("dclass", dclass);
 
 	htab_mgr args_mgr;
 	htab_write args(args_mgr);
 	args.push_back(vobj());
 	args.push_back(name);
-	showdata("dclass args", args_mgr);
+	//showdata("dclass args", args_mgr);
 
 	zobj_mgr result(ReflectCache::staticInstanceArgs(dclass, args_mgr));
-	showobj("Result ", result);
+	//showobj("Result ", result);
 	return result;
 }
 

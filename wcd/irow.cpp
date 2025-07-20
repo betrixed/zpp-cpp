@@ -64,7 +64,7 @@ IRow::~IRow()
 }
 
 void 
-IRow::construct(zobj_user tmodel, zval_user data, bool exists)
+IRow::construct(zobj_user tmodel, htab_read data, bool exists)
 {
 	table_model_ = tmodel;
 	setData(data, exists);
@@ -80,16 +80,14 @@ void IRow::debug_info(htab_write di)
 }
 
 void 
-IRow::setData(zval_user data, bool exists)
+IRow::setData(htab_read data, bool exists)
 {
-	if (data.isArray())
+	if (data.size())
 	{
-		HashTable* ht = data.zarray();
-
-		(htab_mgr&) data_ = ht;
+		data_ = data;
 		if (exists)
 		{
-			(htab_mgr&) original_ = ht;
+			original_ = data;
 		}
 	}
 	else {
@@ -315,13 +313,13 @@ using namespace wcd;
 ZEND_METHOD(Wcd_IRow, __construct)
 {
 	zval* model;
-	zval* data = nullptr;
+	HashTable* data = nullptr;
 	bool  existsFlag = false;
 
 	ZEND_PARSE_PARAMETERS_START(1,3)
 	Z_PARAM_OBJECT_OF_CLASS(model, ce_iface_crud);
 	Z_PARAM_OPTIONAL
-	Z_PARAM_ARRAY_OR_NULL(data)
+	Z_PARAM_ARRAY_HT_OR_NULL(data)
 	Z_PARAM_BOOL(existsFlag)
 
 	ZEND_PARSE_PARAMETERS_END();

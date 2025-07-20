@@ -54,7 +54,7 @@ public:
 
 	zobj_mgr getBuilder();
 
-	zobj_mgr newRow(zval_user rdata, bool isSaved = false);
+	zobj_mgr newRow(htab_read rdata, bool isSaved = false);
 
 	static Model* model_instance(zstr_user classname);
 	

@@ -199,6 +199,14 @@ zobj_user::callable(zval* arg1, zval* arg2)
         callable_failed();
     return result;
 }
+
+void zobj_user::property(zstr_user key, zstr_user value)
+{
+    zval temp = {0};
+    zval_user::string_bind(&temp, value);
+    property(key, zval_user(&temp));
+
+}
 void
 zobj_user::property(zstr_user key, zval_user value)
 {
@@ -268,7 +276,7 @@ zobj_user::property_get(zstr_user key, zval* ret)
      *  Execution of direct & indirect indicates one may be same as the other!
      *  
      */ 
-    return zend_read_property_ex(scope, obj_, key, 0, ret);
+    return zend_read_property_ex(scope, obj_, key, 1, ret);
 }
 
 
@@ -303,7 +311,7 @@ zobj_user::property(zstr_user key)
      */ 
     //showstr("zobj_user property get", key);
 
-    zval* direct = zend_read_property_ex(scope, obj_, key, 0, result);
+    zval* direct = zend_read_property_ex(scope, obj_, key, 1, result);
 
     if (direct)
     {

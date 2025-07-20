@@ -53,7 +53,7 @@ class class_data {
 
 
         zval_mgr static_property(zend_string* s);
-        zval_mgr static_constant(zend_string* s);
+        zval_mgr constant_value(zend_string* s);
   
 
         bool new_object(zobj_mgr& om);
