@@ -198,7 +198,6 @@ using namespace zpp;
 		Bindings& bind = bindings();
 		bind.wipe(ISql::SQL_INSERT);
 		ParamList* plist = zobj_toc<ParamList>(params_);
-
 		plist->wipe();
 
 		zval_mgr result;
@@ -270,9 +269,9 @@ using namespace zpp;
 		if (plist_mgr.ok())
 		{
 			ParamList* plist = zobj_toc<ParamList>(plist_mgr);
-			zstr_mgr& sql = plist->getSql();
-			htab_mgr& values = plist->getValues();
-			htab_mgr& rets = plist->getReturns();
+			zstr_user sql(plist->getSql());
+			htab_read values(plist->getValues());
+			htab_read rets(plist->getReturns());
 
 			IDriver& db = idb();
 
@@ -366,8 +365,8 @@ using namespace zpp;
 			zobj_mgr plist_mgr = isql().update(bind);
 			ParamList* plist = zobj_toc<ParamList>(plist_mgr);
 
-			zstr_mgr sql = plist->getSql();
-			htab_mgr params = plist->getValues();
+			zstr_user sql(plist->getSql());
+			htab_read params(plist->getValues());
 
 			result = RunSql::op(driver_, sql, params);
 			
@@ -455,8 +454,8 @@ using namespace zpp;
 	    ISql& sp = isql();
 	    zobj_mgr params_mgr =  sp.deleteSql(bind);
 	    ParamList* plist = zobj_toc<ParamList>(params_mgr);
-	    zstr_mgr sql = plist->getSql();
-	    htab_mgr params = plist->getValues();
+	    zstr_user sql(plist->getSql());
+	    htab_read params(plist->getValues());
 
 	    return RunSql::op(driver_, sql, params);
 
@@ -688,6 +687,13 @@ using namespace zpp;
 			Model* m = zobj_toc<Model>(model);
 			zstr_mgr name = m->getName();
 			table(name);
+
+			Bindings& bind = bindings();
+
+			zval_mgr self(vobj());
+
+			bind.set(ISql::MODEL_OBJ, self);
+			bind.set(ISql::FETCH_AS, IDriver::FETCH_ASSOC);
 		}
 	}
 

@@ -192,22 +192,22 @@ namespace wcd {
 			sql_ = s;
 		}
 
-		zstr_mgr& getSql() 
+		zstr_user getSql() 
 		{
 			return sql_;
 		}
 
-		htab_mgr& getReturns() 
+		htab_read getReturns() 
 		{
 			return ret_values_;
 		}
 
-		htab_mgr& getValues() 
+		htab_read getValues() 
 		{
 			return val_params_;
 		}
 
-		htab_mgr& getParams() 
+		htab_read getParams() 
 		{
 			return params_;
 		}

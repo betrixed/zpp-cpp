@@ -204,14 +204,14 @@ namespace wcd {
 	zobj_mgr 
 	Model::getBuilderForMe()
 	{
-		if (builder_me_.ok())
+		if (!builder_me_.ok())
 		{
-			return builder_me_;
-		}
-		zobj_mgr db_mgr = getConnect();
-		IDriver* db = zobj_toc<IDriver>(db_mgr);
+ 
+			zobj_mgr db_mgr = getConnect();
+			IDriver* db = zobj_toc<IDriver>(db_mgr);
 
-		builder_me_ = db->newDmlBuild();
+			builder_me_ = db->newDmlBuild();
+		}
 		if (builder_me_.ok())
 		{
 			IBuild* ib = zobj_toc<IBuild>(builder_me_);
@@ -276,6 +276,7 @@ namespace wcd {
 
 		Model* m = Model::model_instance(static_name);
 		zobj_mgr build = m->getBuilderForMe();
+
 		IBuild* ib = zobj_toc<IBuild>(build);
 
 		zstr_mgr mlower = method.to_lower();
@@ -285,9 +286,6 @@ namespace wcd {
 		{
 			if (mlower.size()==9) 
 			{
-				
-				
-
 				ib->where(params, nullstr, nullval, SQSTR.and_str);
 				return ib->oneRow();
 			}
@@ -394,6 +392,8 @@ namespace wcd {
 		zval_mgr vlist_tab;
 		htab_write vlist(vlist_tab);
 		vlist.push_back(id);
+		//showdata("pkey_mgr", pkey_mgr.zarray());
+		//showdata("vlist_tab", vlist_tab.zarray());
 
 		return m->byKeyValue(pkey_mgr, vlist_tab);
 	}
@@ -407,12 +407,12 @@ namespace wcd {
 
 		if (result.ok())
 		{
-			showdata("options set", result);
+			//showdata("options set", result);
 			return result;
 		}
 		
 		htab_mgr pkey_fields = getPKey();
-		showdata("pkey get", pkey_fields);
+		//showdata("pkey get", pkey_fields);
 		if (pkey_fields.size())
 		{
 			htab_write pkey_options(result);
@@ -427,7 +427,7 @@ namespace wcd {
 			for(wk.start(pkey_fields); wk.ok(); wk.next())
 			{
 				//zend_printf("get pkey options ");
-				showmem("pkey", pkey);
+				//showmem("pkey", pkey);
 				htab_mgr options_mgr;
 				htab_write options(options_mgr);
 
@@ -497,7 +497,7 @@ namespace wcd {
 		{
 			class_cdefs_ = tabledef_mgr.property(MIS.columns_str);
 		}
-		showdata("getColDefs", class_cdefs_);
+		//showdata("getColDefs", class_cdefs_);
 		return class_cdefs_;
 	}
 
@@ -524,7 +524,7 @@ namespace wcd {
 		if (class_pkey_.ok())
 		{
 			result = class_pkey_;
-			showdata("class pkey", result);
+			//showdata("class pkey", result);
 			return result;
 		}
 		zobj_mgr tdef = getTableDef();
@@ -652,8 +652,8 @@ namespace wcd {
 
 					zobj_mgr plist_mgr = ib->getInsertSql(columns_mgr);
 					ParamList* plist = zobj_toc<ParamList>(plist_mgr);
-					zstr_mgr sql = plist->getSql();
-					htab_mgr record = plist->getValues();
+					zstr_user sql(plist->getSql());
+					htab_read record(plist->getValues());
 
 					zval_mgr stmt = driver->prepare(sql);
 
@@ -702,13 +702,13 @@ namespace wcd {
 
 		zstr_mgr name = getName();
 
-		showstr("Table name", name);
+		//showstr("Table name", name);
 		class_tdef_ = tables.get(name);
 
-		showobj("TDEF", class_tdef_);
+		//showobj("TDEF", class_tdef_);
 		htab_mgr columns = class_tdef_.property(MIS.columns_str);
 
-		showdata("columns", columns);
+		//showdata("columns", columns);
 
 		htab_mgr tsf_mgr;
 		htab_write tsf(tsf_mgr);
@@ -1167,7 +1167,7 @@ ZEND_METHOD(Wcd_Model, find)
 {
 	zval* values;
 	ZEND_PARSE_PARAMETERS_START(1,1)
-	Z_PARAM_ARRAY(values)
+	Z_PARAM_ZVAL(values)
 	ZEND_PARSE_PARAMETERS_END();
 
 	zend_class_entry* static_class = zend_get_called_scope(execute_data);

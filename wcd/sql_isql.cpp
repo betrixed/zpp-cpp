@@ -159,8 +159,10 @@ ParamList::makeList(int start, int count)
 void
 ParamList::wipe()
 {
+
 	sql_.init();
 	params_.reset();
+
 	ret_values_.reset();
 	val_params_.reset();
 }
@@ -1175,7 +1177,11 @@ ISql::limit(ParamList* plist, htab_read ltab)
 	{
 		buf << " OFFSET " << plist->paramLiteral(offset_val);
 	}
-	return buf.zstr();
+
+	zstr_mgr result = buf.zstr();
+
+	showstr("limit", result);
+	return result;
 
 }
 
@@ -1198,6 +1204,11 @@ ISql::select(Bindings& bind)
 		buf << this->join(join);
 	}
 	*/
+
+	zobj_mgr   pobj = bind.getParamList();
+
+	ParamList* plist = zobj_toc<ParamList>(pobj);
+
 	zval_user where = bind.get(SQL_WHERE);
 	if (where.isArray())
 	{
@@ -1211,9 +1222,6 @@ ISql::select(Bindings& bind)
 	}
 
 	zval_user limit = bind.get(SQL_LIMIT);
-	zobj_mgr   pobj = bind.getParamList();
-
-	ParamList* plist = zobj_toc<ParamList>(pobj);
 
 	if (limit.isArray())
 	{
@@ -1221,7 +1229,8 @@ ISql::select(Bindings& bind)
 	}
 
 	zstr_mgr sql = buf.zstr();
-	//showstr("ISql select = ", sql);
+
+
 	plist->setSql(sql);
 	plist->useOwnValues();
 	return pobj;
@@ -2057,7 +2066,7 @@ ZEND_METHOD(Wcd_Sql_ParamList, getParams)
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	ParamList* cobj = zval_toc<ParamList>(ZEND_THIS);
-	const htab_mgr& htab = cobj->getParams();
+	htab_read htab = cobj->getParams();
 	htab.return_zv(return_value);
 }
 
@@ -2066,7 +2075,7 @@ ZEND_METHOD(Wcd_Sql_ParamList, getReturns)
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	ParamList* cobj = zval_toc<ParamList>(ZEND_THIS);
-	const htab_mgr& htab = cobj->getReturns();
+	htab_read htab = cobj->getReturns();
 	htab.return_zv(return_value);
 }
 
@@ -2075,8 +2084,8 @@ ZEND_METHOD(Wcd_Sql_ParamList, getSql)
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	ParamList* cobj = zval_toc<ParamList>(ZEND_THIS);
-	zstr_mgr sql = cobj->getSql();
-	sql.move_zv(return_value);
+	zstr_user sql = cobj->getSql();
+	sql.return_zv(return_value);
 }
 
 ZEND_METHOD(Wcd_Sql_ParamList, getValues)
@@ -2084,7 +2093,7 @@ ZEND_METHOD(Wcd_Sql_ParamList, getValues)
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	ParamList* cobj = zval_toc<ParamList>(ZEND_THIS);
-	const htab_mgr& htab = cobj->getValues();
+	htab_read htab = cobj->getValues();
 	htab.return_zv(return_value);
 }
 

@@ -460,7 +460,8 @@ Bindings::whereKeyValue(zval_user key, zval_user value)
 		htab_read keys(key.zarray());
 		htab_read values(value.zarray());
 
-		if (keys.size() == values.size())
+		auto kct = keys.size();
+		if ((kct > 0) && (kct == values.size()))
 		{
 			htab_walk wk;
 			auto k = wk.key();
@@ -480,9 +481,11 @@ Bindings::whereKeyValue(zval_user key, zval_user value)
 				{
 					ix = k.zlong();
 					test = values.get(ix);
+					showmem("test", test);
 					where(v, SQSTR.cmp_equal, test, SQSTR.and_str);
 				}
 			}
+			return;
 		}
 	}
 	zend_throw_error(zend_ce_error,"whereKeyValue parameters do not match");
@@ -533,7 +536,6 @@ Bindings::select()
 	{
 		db->setFetch(old_fetch);
 	}
-
 	zstr_mgr mclass;
 
 	zval_mgr model_mgr = get(ISql::MODEL_OBJ);
