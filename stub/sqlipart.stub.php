@@ -228,7 +228,7 @@ class ISql implements IfSql
 {
     public static function tableClass(string $uname) : string {}
     
-    public function delete(Bindings $bind) : ParamList {}
+    public function deleteSql(Bindings $bind) : ParamList {}
 
     public function emit(
         IfSqlPart $sp, 

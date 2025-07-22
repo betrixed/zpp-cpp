@@ -370,23 +370,34 @@ Bindings::offset(int value)
 
 void Bindings::set(int key, zval_user value)
 {
-	htab_write(data_).set(key, value);
+	htab_write hw(data_);
+
+	hw.set(key, value);
+
+	//showarray("data_zval_user", data_);
 }
 
 void Bindings::set(int key, int value)
 {
+	htab_write hw(data_);
 	zval_mgr wrap(value);
-	htab_write(data_).set((zend_long)key, wrap);
+	hw.set((zend_long)key, wrap);
+	//showarray("data_int", data_);
 }
 
 void Bindings::set(int key, const zval_mgr& value)
 {
-	htab_write(data_).set((zend_long)key, value);
+	htab_write hw(data_);
+	hw.set((zend_long)key, value);
+	//showarray("data_zval_mgr&", data_);
 }
 
 void Bindings::set(int key, htab_read value)
 {
-	htab_write(data_).set((zend_long)key, value);
+	htab_write hw(data_);
+	hw.set((zend_long)key, value);
+	//showarray("data_htab_read", data_);
+	//showdata("setdata", data_);
 }
 
 
@@ -402,6 +413,7 @@ void Bindings::wipe(int key)
 	if (key == 0)
 	{
 		hw.clear();
+		//showarray("after wipe", data_);
 	}
 	else {
 		hw.unset(key);
@@ -445,6 +457,7 @@ Bindings::where(zval_user column, zstr_user opstr, zval_user value, zstr_user bl
 	}
 	wh.set(SQSTR.typekey, SQSTR.basic);
 	
+	//showdata("where args", wh);
 	add(ISql::SQL_WHERE, args);
 }
 
@@ -466,12 +479,16 @@ Bindings::whereKeyValue(zval_user key, zval_user value)
 			htab_walk wk;
 			auto k = wk.key();
 			auto v = wk.value();
+			zend_printf("kct = %d\n", kct);
+		
 
 			zval_user test = values.get(int(0));
 			if (test.isNull())
 			{
 				for(wk.start(values); wk.ok(); wk.next())
 				{
+					showmem("key = ", k);
+					showmem("val = ", v);
 					where(k, SQSTR.cmp_equal, v, SQSTR.and_str);
 				}
 			}
@@ -479,6 +496,8 @@ Bindings::whereKeyValue(zval_user key, zval_user value)
 				int ix = 0;
 				for(wk.start(keys); wk.ok(); wk.next())
 				{
+					showmem("key = ", k);
+					showmem("val = ", v);
 					ix = k.zlong();
 					test = values.get(ix);
 					showmem("test", test);
@@ -561,8 +580,10 @@ Bindings::select()
 		{
 			if (!model.ok())
 			{
+				showstr("model class", mclass);
 				model = ReflectCache::staticInstance(mclass);
 			}
+			showobj("static model obj ", model);
 			Model* m = zobj_toc<Model>(model);
 			return (zend_object*) m->newRow(hr.get((int)0), true);
 		}

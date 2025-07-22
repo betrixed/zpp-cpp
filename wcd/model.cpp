@@ -166,7 +166,9 @@ namespace wcd {
 	Model::deleteRow(zobj_user rowobj)
 	{
 		//TODO: preconfirm exists? i.e. original_ has content
-		zobj_mgr builder = getBuilderForMe();
+		//zend_printf("deleteRow ");
+		//showobj("rowobj", rowobj);
+		zobj_mgr builder(getBuilderForMe());
 		IBuild* ib = zobj_toc<IBuild>(builder);
 		return ib->deleteRow(rowobj);
 	}
@@ -252,6 +254,7 @@ namespace wcd {
 		if (builder_me_.ok())
 		{
 			IBuild* ib = zobj_toc<IBuild>(builder_me_);
+
 			ib->setModel(zobj_user(this->vobj()));
 		}
 		return builder_me_;
@@ -272,7 +275,9 @@ namespace wcd {
 		Bindings&  bind = ib->bindings();
 		bind.limit(1);
 		bind.whereKeyValue(keynames, values);
-		return bind.select();	
+		zobj_mgr result(bind.select());
+		showobj("byKeyValue return", result);
+		return result;	
 	}
 
 	Model* //static
@@ -410,29 +415,30 @@ namespace wcd {
 		if (!pkey.size())
 		{
 			zend_throw_error(zend_ce_error,"Model without Primary key columns");
-			return result;
 		}
-
-		if (id.isArray())
+		else if (id.isArray())
 		{
 			htab_read vlist(id.zarray());
 			zval_user test = vlist.get((int)0);
 			if (test.isNull()) {
 				htab_mgr v2 = htab_mgr::sublist(pkey, vlist);
 				zval_mgr arg2(v2);
-				return m->byKeyValue(pkey_mgr, arg2);
+				result = m->byKeyValue(pkey_mgr, arg2);
 			}
-			return m->byKeyValue(pkey_mgr,id);
+			else {
+				result = m->byKeyValue(pkey_mgr,id);
+			}
 		}
-
-
-		zval_mgr vlist_tab;
-		htab_write vlist(vlist_tab);
-		vlist.push_back(id);
+		else {
+			zval_mgr vlist_tab;
+			htab_write vlist(vlist_tab);
+			vlist.push_back(id);
+			result = m->byKeyValue(pkey_mgr, vlist_tab);
+		}
 		//showdata("pkey_mgr", pkey_mgr.zarray());
 		//showdata("vlist_tab", vlist_tab.zarray());
-
-		return m->byKeyValue(pkey_mgr, vlist_tab);
+		zend_printf("Return find\n");
+		return result;
 	}
 
 	htab_mgr 
@@ -557,20 +563,20 @@ namespace wcd {
 	htab_mgr 
 	Model::getPKey()
 	{
-		zend_printf("in getPKey()\n");
+		//zend_printf("in getPKey()\n");
 		htab_mgr result;
 		if (class_pkey_.ok())
 		{
 			result = class_pkey_;
-			showdata("class pkey", result);
+			//showdata("class pkey", result);
 			return result;
 		}
 		zobj_mgr tdef = getTableDef();
 		if (tdef.ok())
 		{	
-			zend_printf("got TDEF\n");
+			//zend_printf("got TDEF\n");
 			zobj_mgr pkeydef = tdef.call(MIS.get_primary_key);
-			showobj("pkeydef:", pkeydef);
+			//showobj("pkeydef:", pkeydef);
 
 			if (pkeydef.ok())
 			{

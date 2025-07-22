@@ -632,7 +632,9 @@ ISql::deleteSql(Bindings& bind)
 
 		if (wbind.size())
 		{
-			buf << " WHERE" << this->where(bind, wbind);
+			zstr_mgr whstr(this->where(bind, wbind));
+			showstr("WHERE ", whstr);
+			buf << " WHERE" << whstr;
 		}
 	}
 
@@ -1180,7 +1182,7 @@ ISql::limit(ParamList* plist, htab_read ltab)
 
 	zstr_mgr result = buf.zstr();
 
-	showstr("limit", result);
+	//showstr("limit", result);
 	return result;
 
 }
@@ -1396,6 +1398,7 @@ ISql::where(Bindings &bind, htab_read wtab)
 
 	for(wk.start(wtab); wk.ok(); wk.next())
 	{
+		//showmem("where_zval", where_zval);
 		htab_read where_tab(where_zval.zarray());
 
 		if (wix.zlong() > 0)
@@ -1833,7 +1836,7 @@ ZEND_METHOD(Wcd_Sql_JoinTables, setPrime)
 }
 
 /* public function delete(Bindings $bind) : ParamList {} */
-ZEND_METHOD(Wcd_Sql_ISql, delete)
+ZEND_METHOD(Wcd_Sql_ISql, deleteSql)
 {
 	zval* bind;
 	ZEND_PARSE_PARAMETERS_START(1,1)

@@ -430,11 +430,15 @@ using namespace zpp;
 
 		zval_mgr null_result;
 
-		Bindings& bind = bindings();
 
-	    htab_read pkey = model->getPKey();
+		htab_read pkey = model->getPKey();
 
 	    int pkeyct = pkey.size();
+	    Bindings& bind = bindings();
+
+	    zval_mgr wh(bind.get(ISql::SQL_WHERE));
+	    //showmem("Sql wh", wh);
+
 	    if (pkeyct)
 	    {
 	    	htab_mgr values = irow->getDataValues(pkey);
@@ -442,6 +446,7 @@ using namespace zpp;
 	    	{
 	    		zval_user key = pkey.get(ix);
 	    		zval_user value = values.get(ix);
+	    		//showmem("key", key);
 	    		bind.where(key, SQSTR.cmp_equal, value, SQSTR.and_str);
 	    	}
 	    }
@@ -458,7 +463,9 @@ using namespace zpp;
 	    zobj_mgr params_mgr =  sp.deleteSql(bind);
 	    ParamList* plist = zobj_toc<ParamList>(params_mgr);
 	    zstr_user sql(plist->getSql());
+	    //showstr("delete sql", sql);
 	    htab_read params(plist->getValues());
+	    //showdata("delete params", params);
 
 	    return RunSql::op(driver_, sql, params);
 
@@ -687,15 +694,16 @@ using namespace zpp;
 
 		if (model.ok() && bind)
 		{
+			//showobj("set model", model);
 			Model* m = zobj_toc<Model>(model);
 			zstr_mgr name = m->getName();
+
+			//zend_printf("table %s\n", name.data());
 			table(name);
 
 			Bindings& bind = bindings();
-
-			zval_mgr self(vobj());
-
-			bind.set(ISql::MODEL_OBJ, self);
+			zval_mgr temp(model);
+			bind.set(ISql::MODEL_OBJ, temp);
 			bind.set(ISql::FETCH_AS, IDriver::FETCH_ASSOC);
 		}
 	}

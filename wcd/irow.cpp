@@ -108,6 +108,9 @@ void
 IRow::delete_row()
 {
 	zval_mgr self(vobj());
+	//zend_printf("IRow delete\n");
+	//showobj("table_model", table_model_);
+
 	table_model_.call(IRSTR.delete_key, self);
 }
 
