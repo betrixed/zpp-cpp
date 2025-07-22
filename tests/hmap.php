@@ -41,6 +41,7 @@ $cfg->set("a100", "one dollar");
 
 $getdef = $cfg->getornot("not there", 1000);
 
+
 echo "Get or not " . $getdef . PHP_EOL;
 
 $getdef = $cfg->getornot("a100", 1000);
@@ -123,3 +124,11 @@ $obj = unserialize($data);
 debug_zpp_dump($obj);
 
 echo "unserialized name " . $obj->name . PHP_EOL;
+
+$has = isset($ch["absent"]);
+
+echo "is set " . intval($has) . PHP_EOL;
+
+$missed = $ch->absent ?? null;
+
+echo "Missing property absent " . intval(is_null($missed)) . PHP_EOL;

@@ -4,6 +4,8 @@ use Wcd\Sql\{AnyModel};
 
 use Wcc\{Config, Services};
 
+use ErrorException;
+use Error;
 
 use Db\Models\Book;
 use Db\Models\Venue;
@@ -12,16 +14,11 @@ use Db\Models\Author;
 class AuthorWithoutKey extends Model
 {
 
-    public function getPKey(): array
+    public function __construct()
     {
-        return [];
+        $this->name = "author";
+        $this->setPKey([]);
     }
-
-    public function getName(): string
-    {
-        return "author";
-    }
-
 }
 
 class AuthorAutoMeta extends Model
@@ -113,7 +110,8 @@ class BaseModelTest extends Asserts {
 
         $rec =  AuthorWithoutKey::row(['name' => 'Bob!']);
         $this->assertTrue($rec->create());
-        $this->assertTrue(empty($rec->author_id));
+        $value = $rec->author_id ?? null;
+        $this->assertTrue(empty($value));
     }
     
     
@@ -123,7 +121,7 @@ class BaseModelTest extends Asserts {
         //$this->expectException('ActiveRecord\DatabaseException');
         //if (!$this->conn->supports_sequences())
         //throw new ActiveRecord\DatabaseException('');
-        $this->expectException(Exception::CLASS);
+        $this->expectException(Error::CLASS);
 
         $row =  AuthorWithoutKey::row(['name' => 'Joe!']);
         $this->assertTrue($row->create(true));
@@ -138,6 +136,8 @@ class BaseModelTest extends Asserts {
         $author->save();
         
         $model = $author->getModel();
+        $flags =  $model->getTSFlags();
+        $this->assertEquals($flags, IfCrud::ALL_TS);
         
         $driver =  $model->getConnect();
 

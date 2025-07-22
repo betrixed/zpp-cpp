@@ -31,7 +31,7 @@ protected:
 	int  timestamps_;
 
 	zobj_mgr db_;
-	zstr_mgr name_;
+	//zstr_mgr name_;
 	htab_mgr pkey_options_;
 	htab_mgr seq_defs_;
 	htab_mgr class_cdefs_;
@@ -80,6 +80,7 @@ public:
 
 	static zobj_mgr rowSaved(zstr_user static_name, zval_user data);
 
+	virtual void debug_info(htab_write di);
 
 	zobj_mgr byKeyValue(zval_user keynames, zval_user values);
 

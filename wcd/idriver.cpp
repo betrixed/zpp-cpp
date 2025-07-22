@@ -674,6 +674,12 @@ IDriver::isConnected()
 	return handle_.isObject();
 }
 
+zstr_mgr 
+IDriver::lastSQL() const
+{
+	return lastsql_;
+}
+
 zval_mgr 
 IDriver::lastInsertId()
 {
@@ -1254,6 +1260,17 @@ ZEND_METHOD(Wcd_IDriver, lastSeqValue)
 	IDriver* db = zval_toc<IDriver>(ZEND_THIS);
 
 	zval_mgr result = db->lastSeqValue(seqname);
+
+	result.move_zv(return_value);
+}
+
+ZEND_METHOD(Wcd_IDriver, lastSQL)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	IDriver* db = zval_toc<IDriver>(ZEND_THIS);
+
+	zstr_mgr result = db->lastSQL();
 
 	result.move_zv(return_value);
 }

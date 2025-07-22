@@ -66,6 +66,16 @@ namespace wcd {
 		zstr_intern k_created_at;
 		zstr_intern k_updated_at;
 
+		zstr_intern k_pkey_options;
+		zstr_intern k_seq_defs;
+		zstr_intern k_col_defs;
+		zstr_intern k_pkey;
+		zstr_intern k_tdef;
+		zstr_intern k_buildme;
+		zstr_intern k_driver;
+
+
+
 		void init() override {
 			find_first = "findfirst";
 			find_all = "findall";
@@ -89,6 +99,16 @@ namespace wcd {
 			fn_getseqcols = "getseqcols";
 			k_created_at = "created_at";
 			k_updated_at = "updated_at";
+
+			k_pkey_options = "pkey_options";
+			k_seq_defs = "seq_defs";
+			k_col_defs = "col_defs";
+			k_pkey = "pkey";
+			k_tdef = "table_def";
+			k_buildme = "build_me";
+			k_driver = "driver";
+
+
 		}
 	};
 
@@ -123,6 +143,23 @@ namespace wcd {
 		}
 
 		return rmgr;
+	}
+
+	void
+	Model::debug_info(htab_write di)
+	{
+
+		base_d::debug_info(di);
+		di.set(MIS.k_driver, db_);
+
+		di.set(MIS.k_pkey_options, pkey_options_);
+		di.set(MIS.k_col_defs, class_cdefs_);
+		di.set(MIS.k_pkey, class_pkey_);
+		di.set(MIS.k_tdef, class_tdef_);
+		di.set(MIS.k_buildme, builder_me_);
+
+
+
 	}
 
 	bool 
@@ -520,17 +557,21 @@ namespace wcd {
 	htab_mgr 
 	Model::getPKey()
 	{
+		zend_printf("in getPKey()\n");
 		htab_mgr result;
 		if (class_pkey_.ok())
 		{
 			result = class_pkey_;
-			//showdata("class pkey", result);
+			showdata("class pkey", result);
 			return result;
 		}
 		zobj_mgr tdef = getTableDef();
 		if (tdef.ok())
 		{	
+			zend_printf("got TDEF\n");
 			zobj_mgr pkeydef = tdef.call(MIS.get_primary_key);
+			showobj("pkeydef:", pkeydef);
+
 			if (pkeydef.ok())
 			{
 				result = pkeydef.property(MIS.columns_str);
@@ -691,6 +732,9 @@ namespace wcd {
 			return class_tdef_;
 		}
 
+		zstr_mgr name = getName();
+		//showstr("name", name);
+
 		zobj_mgr driver = getConnect();
 
 		IDriver* db = zobj_toc<IDriver>(driver);
@@ -700,9 +744,8 @@ namespace wcd {
 		htab_mgr tables = schema.call(MIS.get_tables);
 		//showdata("tables from schema", tables);
 
-		zstr_mgr name = getName();
+		 
 
-		//showstr("Table name", name);
 		class_tdef_ = tables.get(name);
 
 		//showobj("TDEF", class_tdef_);
@@ -762,7 +805,7 @@ namespace wcd {
 	bool 
 	Model::hasTimeStamps() const
 	{
-	    return (timestamps_ == NO_TS);
+	    return (timestamps_ != NO_TS);
 	}
 
 	bool 
@@ -784,14 +827,19 @@ namespace wcd {
 		{
 			return true;
 		}
-
+		// insert operation
+		//zend_printf("save-row\n");
 		zval_mgr pkey_mgr(getPKey());
+		//showmem("pkey_mgr", pkey_mgr);
+
 		htab_read pkey(pkey_mgr);
+
 		zval_mgr saved;
 
 		if (wasRead) 
 		{
 			// update operation
+			zend_printf("save-update\n");
 			if (pkey.size() == 0)
 			{
 				zend_throw_error(zend_ce_error, "Update table needs a primary key");
@@ -812,10 +860,12 @@ namespace wcd {
 			saved = ibuild->update(irow, dirty);
 		}
 		else {
-			// insert operation
-			htab_read
-			data = irow->reader();
+			zend_printf("save-create\n");
+
+			htab_read data = irow->reader();
 			htab_read options = getKeyOptions();
+
+			
 
 			htab_mgr pkey_refresh_mgr;
 			htab_write pkey_refresh(pkey_refresh_mgr);
@@ -916,8 +966,10 @@ namespace wcd {
 	zobj_mgr 
 	Model::readRow(zobj_user row_obj)
 	{
+		zend_printf("Read Row\n");
+
 		htab_mgr pkey = getPKey();
-		zobj_mgr result;
+		zobj_mgr result(row_obj);
 
 		if (pkey.size())
 		{

@@ -88,7 +88,7 @@ class IDriver {
 
     public function lastSeqValue(string $name): ?int {}
 
-    
+    public function lastSQL() : ?string {}
 
     public function log(array $info) : void {}
 

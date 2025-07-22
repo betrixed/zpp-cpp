@@ -31,12 +31,13 @@ class Asserts {
             else {
                 $xclass = get_class($x);
                 if ($classexpect === $xclass) {
-                    echo "Exception class match\n";
+                    echo "Exception class match of $xclass\n";
                 }
                 else {
-                    throw new Exception("Unexpected $xclass" . $x->getMessage());
+                    throw new Exception("Unexpected $xclass: " . $x->getMessage());
                 }
             }
+            $classexpect = null; // clear expectation
         }
 		$this->tearDown();
 	}

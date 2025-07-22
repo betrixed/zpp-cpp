@@ -119,6 +119,8 @@ namespace wcd {
 
 		zobj_mgr getTableModel(zstr_user tableName);
 
+		zstr_mgr lastSQL() const;
+		
 		
 	protected:
 

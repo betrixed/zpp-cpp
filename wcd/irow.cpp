@@ -293,7 +293,11 @@ IRow::stampTime(zstr_user value, int dtflags)
 	zval_mgr arg2(dtflags);
 
 	zval_mgr ta_array = table_model_.call(IRSTR.stamptime, arg1, arg2);
+	if (ta_array.isArray()) {
+		showdata("stampTime array", ta_array.zarray());
+	}
 	
+
 	zval_user test(ta_array);
 
 	if (test.size())

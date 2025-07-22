@@ -195,6 +195,8 @@ using namespace zpp;
 	zval_mgr 
 	IBuild::insert(zval_user rdata)
 	{
+		zend_printf("IBuild::insert\n");
+
 		Bindings& bind = bindings();
 		bind.wipe(ISql::SQL_INSERT);
 		ParamList* plist = zobj_toc<ParamList>(params_);
@@ -261,8 +263,9 @@ using namespace zpp;
 			bind.addarray(ISql::SQL_INSERT, temp);
 		}
 
+		
 		zobj_mgr plist_mgr = isql().insert(bind);
-		//showobj("plist_mgr", plist_mgr);
+		showobj("plist_mgr", plist_mgr);
 
 		bind.wipe(ISql::SQL_INSERT);
 

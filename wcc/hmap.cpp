@@ -185,11 +185,25 @@ Hmap_php::read_property(zend_object* object, zend_string* name, int type,
 	//{
 		Hmap* cobj = zobj_toc<Hmap>(object);
 		htab_read look(cobj->data_);
+
 		if (look.isNull())
 		{
+			//zend_printf("Hmap null property %lx\n", (long unsigned int)rv);
+			if (rv) { 
+				ZVAL_NULL(rv);
+			    return rv;
+			}
 			return nullptr;
 		}
-		return look.get(name);
+		zval* result = look.get(name);
+		if (!result)
+		{
+			if (rv) { 
+				ZVAL_NULL(rv);
+			    return rv;
+			}
+		}
+		return result;
 	//}
 	/** type value must be good for something? */
 	//return zend_std_read_property(object, name, type, cache_slot, rv);
@@ -437,6 +451,17 @@ Hmap::get(zstr_user name)
 	return result;
 }
 
+zval_mgr Hmap::get(zval_user key)
+{
+	zval_mgr result;
+
+	htab_read look(data_);
+	if (look.ok())
+	{
+		result = look.get(key);
+	}
+	return result;
+}
 
 ///zend_std_unset_property
 void  
