@@ -479,7 +479,7 @@ Bindings::whereKeyValue(zval_user key, zval_user value)
 			htab_walk wk;
 			auto k = wk.key();
 			auto v = wk.value();
-			zend_printf("kct = %d\n", kct);
+			//zend_printf("kct = %d\n", kct);
 		
 
 			zval_user test = values.get(int(0));
@@ -487,8 +487,8 @@ Bindings::whereKeyValue(zval_user key, zval_user value)
 			{
 				for(wk.start(values); wk.ok(); wk.next())
 				{
-					showmem("key = ", k);
-					showmem("val = ", v);
+					//showmem("key = ", k);
+					//showmem("val = ", v);
 					where(k, SQSTR.cmp_equal, v, SQSTR.and_str);
 				}
 			}
@@ -496,11 +496,11 @@ Bindings::whereKeyValue(zval_user key, zval_user value)
 				int ix = 0;
 				for(wk.start(keys); wk.ok(); wk.next())
 				{
-					showmem("key = ", k);
-					showmem("val = ", v);
+					//showmem("key = ", k);
+					//showmem("val = ", v);
 					ix = k.zlong();
 					test = values.get(ix);
-					showmem("test", test);
+					//showmem("test", test);
 					where(v, SQSTR.cmp_equal, test, SQSTR.and_str);
 				}
 			}
@@ -580,10 +580,10 @@ Bindings::select()
 		{
 			if (!model.ok())
 			{
-				showstr("model class", mclass);
+				//showstr("model class", mclass);
 				model = ReflectCache::staticInstance(mclass);
 			}
-			showobj("static model obj ", model);
+			//showobj("static model obj ", model);
 			Model* m = zobj_toc<Model>(model);
 			return (zend_object*) m->newRow(hr.get((int)0), true);
 		}

@@ -291,8 +291,9 @@ IDriver::closeStmt(zval_user stmt)
 
 void IDriver::bind(zval_user stmt, htab_read params)
 {
+	//showdata("bind ", params);
 	zobj_user spdo(stmt);
-
+	//showobj("stmt", spdo);
 	if (params.size())
 	{
 		htab_walk wk;
@@ -319,14 +320,17 @@ void IDriver::bind(zval_user stmt, htab_read params)
 					ZVAL_COPY_VALUE(args, bname);
 					ZVAL_COPY_VALUE(args+1, bval);
 					ZVAL_LONG(args+2, pdo_type(bval.ztype()));
-					bvcall.call_fn();
+					zval_mgr check = bvcall.call_fn();
 				}
 			}
 			else {
 				ZVAL_LONG(args, ix+1);
 				ZVAL_COPY_VALUE(args+1, val);
-				ZVAL_LONG(args+2, pdo_type(val.ztype()));
-				bvcall.call_fn();
+
+				int ptype = pdo_type(val.ztype());
+				ZVAL_LONG(args+2, ptype);
+				zval_mgr check = bvcall.call_fn();
+				
 			}
 		}
 	}
@@ -388,9 +392,13 @@ IDriver::execute(zval_user stmt, bool close, bool fetch)
 {
 	//zend_printf("execute: bool(%d)\n", fetch);
 	zobj_user sobj(stmt);
-
+	//showobj("Execute ", sobj);
 	zval_mgr pdo_result = sobj.call(DBS.execute_fn);
 	zval_mgr result;
+
+
+	//showmem("pdo_result", pdo_result);
+	//showstr("lastsql", lastsql_);
 
 	if (pdo_result.isTrue())
 	{
@@ -405,6 +413,13 @@ IDriver::execute(zval_user stmt, bool close, bool fetch)
 	}
 	if (close || pdo_result.isFalse())
 	{
+		/*if (pdo_result.isFalse())
+		{
+			zend_printf("pdo_result FALSE\n");
+		}
+		else {
+			zend_printf("CLOSE stmt\n");
+		}*/
 		sobj.call(DBS.close_cursor);
 		closeStmt(stmt);
 		if (isAutoCommit() && inTransaction())
@@ -422,6 +437,7 @@ IDriver::execute(zval_user stmt, bool close, bool fetch)
 	else {
 		result.set_bool(false);
 	}
+	//showobj("End Execute ", sobj);
 	return result;
 }
 

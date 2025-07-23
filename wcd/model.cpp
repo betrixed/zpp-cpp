@@ -198,14 +198,14 @@ namespace wcd {
 	}
 
 	zobj_mgr//static
-	Model::row(zstr_user static_name, zval_user data)
+	Model::row(zstr_user static_name, htab_read data)
 	{
 		Model* m = model_instance(static_name);
 		return m->newRow(data);
 	}
 
 	zobj_mgr//static
-	Model::rowSaved(zstr_user static_name, zval_user data)
+	Model::rowSaved(zstr_user static_name, htab_read data)
 	{
 		Model* m = model_instance(static_name);
 		zobj_mgr rec = m->newRow(data);
@@ -276,7 +276,7 @@ namespace wcd {
 		bind.limit(1);
 		bind.whereKeyValue(keynames, values);
 		zobj_mgr result(bind.select());
-		showobj("byKeyValue return", result);
+		//showobj("byKeyValue return", result);
 		return result;	
 	}
 
@@ -437,7 +437,7 @@ namespace wcd {
 		}
 		//showdata("pkey_mgr", pkey_mgr.zarray());
 		//showdata("vlist_tab", vlist_tab.zarray());
-		zend_printf("Return find\n");
+		//zend_printf("Return find\n");
 		return result;
 	}
 
@@ -610,6 +610,8 @@ namespace wcd {
 		IDriver* driver = zobj_toc<IDriver>(db);
 
 		htab_mgr columns = m->getColDefs();
+		//showdata("columns", columns);
+
 		htab_mgr fieldNames;
 
 		bool init = false;
@@ -645,8 +647,8 @@ namespace wcd {
 				}
 
 				htab_mgr values_mgr;
+				htab_write values(values_mgr);
 
-				htab_write values(line.zarray());
 				htab_walk sw;
 
 				auto item = sw.value();
@@ -657,7 +659,12 @@ namespace wcd {
 					cellstr = stripslashes.call(item);
 					values.push_back(cellstr);
 				}
-
+				//showdata("line values", values);
+				if (values.size() == 0)
+				{
+					//zend_printf("BREAK\n");
+					break;
+				}
 				if (!init)
 				{
 					driver->begin();
@@ -677,12 +684,13 @@ namespace wcd {
 							fieldNames = values;
 						}
 					}
-					if (! fieldNames.size())
+					if (!fieldNames.size())
 					{
 						fieldNames = columns.slice(0, values_count);
 						datarowct = 0;
-
+						//showdata("fieldnames", fieldNames);
 					}
+					
 					init = true;
 				}
 				if (datarowct == 0) {
@@ -699,19 +707,28 @@ namespace wcd {
 
 					zobj_mgr plist_mgr = ib->getInsertSql(columns_mgr);
 					ParamList* plist = zobj_toc<ParamList>(plist_mgr);
+
 					zstr_user sql(plist->getSql());
 					htab_read record(plist->getValues());
 
-					zval_mgr stmt = driver->prepare(sql);
+					//showstr("sql", sql);
+					//showdata("record", record);
+
+					stmt = driver->prepare(sql);
 
 					driver->bind(stmt, record);
+					driver->execute(stmt, false, false);
 				}
 				else if (datarowct > 0) {
 					driver->bind(stmt, values);
+					driver->execute(stmt, false, false);
 				}
-				driver->execute(stmt, false, false);
+				
 				datarowct += 1;
+				//showmem("next step", stmt);
 			}
+			//zend_printf("row ct %d ", datarowct);
+			//showmem("loop end", stmt);
 
 			driver->closeStmt(stmt);
 
@@ -725,9 +742,10 @@ namespace wcd {
 			}
 
 			driver->commit();
+			//zend_printf("ROWS %d\n", datarowct);
 
 		}
-		return datarowct;
+		return datarowct+1;
 	}
 
 	zobj_mgr 
@@ -845,7 +863,7 @@ namespace wcd {
 		if (wasRead) 
 		{
 			// update operation
-			zend_printf("save-update\n");
+			//zend_printf("save-update\n");
 			if (pkey.size() == 0)
 			{
 				zend_throw_error(zend_ce_error, "Update table needs a primary key");
@@ -866,7 +884,7 @@ namespace wcd {
 			saved = ibuild->update(irow, dirty);
 		}
 		else {
-			zend_printf("save-create\n");
+			//zend_printf("save-create\n");
 
 			htab_read data = irow->reader();
 			htab_read options = getKeyOptions();
@@ -972,7 +990,7 @@ namespace wcd {
 	zobj_mgr 
 	Model::readRow(zobj_user row_obj)
 	{
-		zend_printf("Read Row\n");
+		//zend_printf("Read Row\n");
 
 		htab_mgr pkey = getPKey();
 		zobj_mgr result(row_obj);
@@ -1273,13 +1291,15 @@ ZEND_METHOD(Wcd_Model, modelBuild)
 
 ZEND_METHOD(Wcd_Model, row)
 {
-	zval* data;
+	HashTable* data = nullptr;
 
-	ZEND_PARSE_PARAMETERS_START(1,1)
-	Z_PARAM_ARRAY(data)
+	ZEND_PARSE_PARAMETERS_START(0,1)
+	Z_PARAM_OPTIONAL
+	Z_PARAM_ARRAY_HT(data)
 	ZEND_PARSE_PARAMETERS_END();
 
 	zend_class_entry* static_class = zend_get_called_scope(execute_data);
+
 
 	zobj_mgr irow = Model::row(static_class->name, data);
 

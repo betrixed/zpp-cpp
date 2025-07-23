@@ -293,6 +293,13 @@ fn_fgetcsv::fn_fgetcsv() : fn_call_args<1>()
     set_fname(FTAB.s_fgetcsv);
 }
 
+zval_mgr 
+fn_fgetcsv::call(zval_user file_res)
+{
+    ZVAL_COPY_VALUE(argsptr(), file_res);
+    return call_fn();
+}
+
 bool extnloaded::call(zstr_user name)
 {
     ZVAL_STR(argsptr(), (zend_string*) name);

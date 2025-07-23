@@ -76,9 +76,9 @@ public:
 
 	static zobj_mgr modelBuild(zstr_user static_name);
 
-	static zobj_mgr row(zstr_user static_name, zval_user data);
+	static zobj_mgr row(zstr_user static_name, htab_read data);
 
-	static zobj_mgr rowSaved(zstr_user static_name, zval_user data);
+	static zobj_mgr rowSaved(zstr_user static_name, htab_read data);
 
 	virtual void debug_info(htab_write di);
 

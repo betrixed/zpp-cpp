@@ -633,7 +633,7 @@ ISql::deleteSql(Bindings& bind)
 		if (wbind.size())
 		{
 			zstr_mgr whstr(this->where(bind, wbind));
-			showstr("WHERE ", whstr);
+			//showstr("WHERE ", whstr);
 			buf << " WHERE" << whstr;
 		}
 	}

@@ -195,7 +195,7 @@ using namespace zpp;
 	zval_mgr 
 	IBuild::insert(zval_user rdata)
 	{
-		zend_printf("IBuild::insert\n");
+		//zend_printf("IBuild::insert\n");
 
 		Bindings& bind = bindings();
 		bind.wipe(ISql::SQL_INSERT);
@@ -265,7 +265,7 @@ using namespace zpp;
 
 		
 		zobj_mgr plist_mgr = isql().insert(bind);
-		showobj("plist_mgr", plist_mgr);
+		//showobj("plist_mgr", plist_mgr);
 
 		bind.wipe(ISql::SQL_INSERT);
 
@@ -330,6 +330,7 @@ using namespace zpp;
 				result = robj.property(agfn);
 			}
 		}
+		//showmem("aggregate result", result);
 		return result;
 	}
 
@@ -432,21 +433,22 @@ using namespace zpp;
 
 
 		htab_read pkey = model->getPKey();
+		//zend_printf("deleteRow - ");
+		//showdata("pkey", pkey);
 
 	    int pkeyct = pkey.size();
 	    Bindings& bind = bindings();
 
-	    zval_mgr wh(bind.get(ISql::SQL_WHERE));
-	    //showmem("Sql wh", wh);
 
 	    if (pkeyct)
 	    {
 	    	htab_mgr values = irow->getDataValues(pkey);
+	    	//showdata("values", values);
 	    	for( int ix = 0; ix < pkeyct; ix++)
 	    	{
 	    		zval_user key = pkey.get(ix);
-	    		zval_user value = values.get(ix);
-	    		//showmem("key", key);
+	    		zval_user value = values.get(key);
+	    		//showmem("key value", value);
 	    		bind.where(key, SQSTR.cmp_equal, value, SQSTR.and_str);
 	    	}
 	    }

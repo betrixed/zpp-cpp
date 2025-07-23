@@ -41,6 +41,8 @@ namespace wcd {
 
 		htab_mgr  params = bind_;
 
+		//showdata("bind", params);
+
 		auto pct = params.size();
 
 		if (pct)

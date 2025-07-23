@@ -23,10 +23,9 @@ class AuthorWithoutKey extends Model
 
 class AuthorAutoMeta extends Model
 {
-
-    public function getName(): string
+    public function __construct()
     {
-        return "author";
+        $this->name = "author";
     }
 
 }
