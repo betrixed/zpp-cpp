@@ -197,8 +197,6 @@ class SchemaTest extends Asserts
         ];
         // 1-D
         $model_class = $con->modelClassName("test");
-        $cwd = getcwd();
-        
         $model = Services::getOne($model_class);
         $builder = $model->getBuilderForMe();
 
