@@ -84,7 +84,7 @@ class Model implements IfCrud {
     public function getBuilderForMe() : IBuild {}
 
     /** Important Interface properties */
-    public function getConnect(): IfDriver {}
+    public function getConnect(): IDriver {}
 
     public function getFieldDef(string $ckey) : ?array {}
 

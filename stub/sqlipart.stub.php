@@ -290,7 +290,7 @@ class ParamList {
 };
 
 class Bindings {
-    public function __construct(ISql $gen, \Wcd\IfDriver $connect);
+    public function __construct(ISql $gen, \Wcd\IDriver $connect);
 
     public function add(int $key, mixed $value) : void {}
 
@@ -328,11 +328,11 @@ class Bindings {
 
 
 class Raw {
-    public function __construct(string $sql, ?\Wcd\IfDriver $connect);
+    public function __construct(string $sql, ?\Wcd\IDriver $connect);
 
-    public function setConnection(\Wcd\IfDriver $db) : void {}
+    public function setConnection(\Wcd\IDriver $db) : void {}
 
-    public function getConnection() : ?\Wcd\IfDriver  {}
+    public function getConnection() : ?\Wcd\IDriver  {}
 
     public function getSql() : string {}
 

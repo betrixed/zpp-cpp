@@ -12,7 +12,7 @@ class IConfig {
     public function getArray() : array {}
     public function getCharset() : string {}
     public function getCollation() : string {}
-    public function newConnect(string $name) : IfDriver {}
+    public function newConnect(string $name) : IDriver {}
     public function getDriverClass() : string {}
     public function getPassword() : string {}
     public function getUsername() : string {}
@@ -28,7 +28,7 @@ class IConfig {
     public function getMyKey() : string {}
     public function setMyKey(string $value) : void {}
     
-    public function newSql() : \Wcd\Sql\IfSql {}
+    public function newSql() : \Wcd\Sql\ISql {}
 };
 
 
