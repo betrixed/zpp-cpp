@@ -71,6 +71,23 @@ class SqlGenerateTest extends Asserts
          return __CLASS__ . '_2.blog_sql_test';
      }
      
+     public function testColumnsData()
+     {
+          $servers = Services::getOne(IServer::class);
+          $db = $servers->getConnect("pcanex");
+          
+          $loader = Services::service("loader");
+          $loader->setThrowNotFound(false);
+        
+          $obj = $db->getTableModel("articles");
+          
+          $names = $db->getColumnNames('articles');
+          
+          $this->assertTrue(count($names) > 0);
+          
+           $loader->setThrowNotFound(true);
+     }
+     
      public function testGenEx1()
     {
         $limit = 20;
@@ -324,4 +341,5 @@ EOS;
         }
     }
 
+    
 }

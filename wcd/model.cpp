@@ -1094,6 +1094,11 @@ namespace wcd {
 
 	}
 
+	void Model::setConnect(zobj_user db)
+	{
+		db_ = db;
+	}
+
 	void 
 	Model::setColDefs(htab_read options)
 	{
@@ -1603,6 +1608,18 @@ ZEND_METHOD(Wcd_Model, setColDefs)
 
 	Model* model = zval_toc<Model>(ZEND_THIS);
 	model->setColDefs(rdata);
+}
+
+ZEND_METHOD(Wcd_Model, setConnect)
+{
+	zval* db;
+
+	ZEND_PARSE_PARAMETERS_START(1,1)
+	Z_PARAM_OBJECT_OF_CLASS(db, IDriver::omg.class_entry_)
+	ZEND_PARSE_PARAMETERS_END();
+
+	Model* model = zval_toc<Model>(ZEND_THIS);
+	model->setConnect(db);
 }
 
 ZEND_METHOD(Wcd_Model, setKeyOptions)

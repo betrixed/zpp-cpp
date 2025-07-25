@@ -618,20 +618,25 @@ IDriver::getTableModel(zstr_user tableName)
 		}
 	}
 	zstr_mgr modelClass = modelClassName(tableName);
-	class_data cdata(modelClass);
-	if (cdata.ok()) 
+	zend_class_entry* ce = class_data::get_class(modelClass);
+
+	if (ce) 
 	{
+		class_data cdata(ce);
 		cdata.new_object(result);
 	}
 	else {
+		zend_printf("ModelClass not found %s\n", modelClass.data());
 		result = Model::omg.new_zobj();
-		Model* m = zobj_toc<Model>(result);
-		m->setName(tableName);	
 	}
 	if (result.ok())
 	{
-		htab_write hw(table_models_);
+		zobj_user self(vobj());
+		Model* m = zobj_toc<Model>(result);
+		m->setConnect(self);
+		m->setName(tableName);
 		
+		htab_write hw(table_models_);
 		hw.set(tableName, result);
 	}
 	return result;

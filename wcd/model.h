@@ -128,6 +128,8 @@ public:
 
 	void setKeyOptions(htab_read options);
 
+	void setConnect(zobj_user db);
+
 	void setPKey(htab_read options);
 
 	void setName(zstr_user name);

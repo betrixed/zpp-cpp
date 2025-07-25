@@ -74,6 +74,12 @@ bool class_data::check(const char* msg)
     set(classname);
  }
 
+zend_class_entry* //static
+class_data::get_class(zstr_user classname)
+{
+    return zend_fetch_class(classname, ZEND_FETCH_CLASS_SILENT);
+}
+
  bool 
  class_data::set(zstr_user classname)
  {

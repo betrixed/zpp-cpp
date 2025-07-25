@@ -112,6 +112,8 @@ class Model implements IfCrud {
 
     public function setColDefs(array $cdefs) : void {}
 
+    public function setConnect(IDriver $db) : void {}
+    
     public function setKeyOptions(array $options) : void {}
 
     public function setName(string $name) : void {}

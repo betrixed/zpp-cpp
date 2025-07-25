@@ -19,6 +19,8 @@ class class_data {
         bool check(const char* msg);
     public:
 
+        static zend_class_entry* get_class(zstr_user classname);
+
         static zobj_mgr create_object(zstr_user classname);
 
         static zobj_mgr std_object();
