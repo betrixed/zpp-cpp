@@ -390,7 +390,7 @@ void Plate::stop()
 		return;
 	}
 
-	zval_mgr newContent = OBfn.obgetclean.call_fn();
+	zstr_mgr newContent = OBfn.obgetclean.call_fn();
 
 	htab_write slabs(sections_);
 

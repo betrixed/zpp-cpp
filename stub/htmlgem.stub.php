@@ -30,6 +30,8 @@ class Money {
 
     public function format(mixed $value) : string {}
 
+    public function fmtValue(mixed $value) : string {}
+
     public function symbol() : string {}
 
     public function language() : string {}

@@ -61,6 +61,11 @@ zstr_output::quote_name(const char* name)
 }
 
 zstr_output& 
+zstr_output::operator<<(zval_user zv)
+{
+	return operator<<((zval*) zv);
+}
+zstr_output& 
 zstr_output::operator<<(double d)
 {
 	zend_string* s = zend_double_to_str(d);

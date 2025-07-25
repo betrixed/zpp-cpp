@@ -298,9 +298,42 @@ HtmlGem::ensureIdValue(htab_write ht)
 zstr_mgr  
 HtmlGem::output(zval_user item)
 {
+	if (item.isString())
+	{
+		return item;
+	}
+
 	zstr_buffer buf;
-	dump_info   di(buf);
-	di.dump(item, 0);
+	//zstr_mgr temp;
+
+	if (item.isArray())
+	{
+		bool first = true;
+		htab_walk wk;
+		auto k = wk.key();
+		auto v = wk.value();
+		
+
+		for(wk.start(item.zarray()); wk.ok(); wk.next())
+		{
+			if (first) {
+				first = false;
+			}
+			else {
+				buf << ',';
+			}
+			if (!k.isLong())
+			{
+				buf << '[' << k.zstr() << "]: ";
+			}
+			//temp = v.to_zstr();
+			buf << v;
+		}
+	}
+	else {
+		//temp = item.to_zstr();
+		buf << item;
+	}
 	return buf.zstr();
 }
 

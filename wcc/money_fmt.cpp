@@ -101,6 +101,12 @@ zstr_user MoneyFmt::language() const
 }
 
 zstr_mgr 
+MoneyFmt::fmtValue(zval_user value)
+{
+	return formatNoSym(value);
+}
+
+zstr_mgr 
 MoneyFmt::format(zval_user value)
 {
 	zstr_buffer result;
@@ -138,6 +144,20 @@ ZEND_METHOD(Wcc_Money, formatNoSym)
 
 	auto cobj = zval_toc<MoneyFmt>(ZEND_THIS);
 	zstr_mgr result = cobj->formatNoSym(value);
+	result.move_zv(return_value);
+
+}
+
+ZEND_METHOD(Wcc_Money, fmtValue)
+{
+	zval* value;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+	Z_PARAM_ZVAL(value)
+	ZEND_PARSE_PARAMETERS_END();
+
+	auto cobj = zval_toc<MoneyFmt>(ZEND_THIS);
+	zstr_mgr result = cobj->fmtValue(value);
 	result.move_zv(return_value);
 
 }

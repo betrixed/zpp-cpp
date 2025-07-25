@@ -55,6 +55,8 @@ namespace zpp {
 
 		zstr_output& operator<<(const zstr_mgr &w);
 		
+		zstr_output& operator<<(zval_user zval);
+
 		zstr_output& operator<<(zstr_user w);
 
 		zstr_output& operator<<(zend_string* s);

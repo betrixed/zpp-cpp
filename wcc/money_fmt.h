@@ -34,6 +34,8 @@ namespace wcc {
 
 		zstr_mgr formatNoSym(zval_user value);
 
+		zstr_mgr fmtValue(zval_user value);
+		
 		zstr_mgr format(zval_user value);
 
 		zstr_user symbol() const;
