@@ -16,7 +16,6 @@ namespace wcd {
  *   also have to override own special object handlers
  *   with its Hmap_php static functions
  */
-class IConfig;
 
 class IConfig : public base_d
 {
