@@ -148,6 +148,7 @@ void sql_strtab::init()
 	getsql = "getsql";
 	valuesdefault = "valuesdefault";
 	eager_load = "eager_load";
+	statement = "stmt";
 	
 	opstr = {
 		{"="}, {"<>"}, {">"}, {"<"}, {">="}, {"<="}, {op_like},

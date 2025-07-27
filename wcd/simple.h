@@ -6,7 +6,9 @@
 #include "zpp/base.h"
 #endif
 
-
+#ifndef WCD_IDRIVER_H
+#include "idriver.h"
+#endif
 
 namespace wcd {
 
@@ -23,23 +25,31 @@ protected:
 	zval_mgr stmt_;
 	zstr_mgr sql_;
 	zobj_mgr db_;
+
+protected:
+
+	zval_mgr send(bool rval);
 	
 public:
 
-	void construct(zobj_user db);
+	static base_obj_mgr<Simple> omg;
+	
+	virtual void debug_info(htab_write di);
+
+	void construct(zobj_user db, int fetch = IDriver::FETCH_ASSOC);
 	void destruct();
 
-	zval_mgr arrayMap(zstr_user keycol, zstr_user valcol, zstr_user table);
+	htab_mgr arrayMap(zstr_user keycol, zstr_user valcol, zstr_user table);
 
-	htab_mgr arraySet(zstr_user sql, htab_read params);
+	htab_mgr arraySet(zstr_user sql, htab_read params = htab_read());
 
 	zstr_mgr bind(zval_user value);
 
 	int exec(zstr_user sql, htab_read params);
 
-	htab_mgr firstrow(zstr_user sql, htab_read params);
+	zstr_mgr firstrow(zstr_user sql, htab_read params);
 
-	htab_mgr getRows();
+	zstr_mgr getRows();
 
 	zstr_mgr getSchemaName();
 

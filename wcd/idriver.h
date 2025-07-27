@@ -121,11 +121,11 @@ namespace wcd {
 
 		zstr_mgr lastSQL() const;
 		
-		
-	protected:
-
 		IConfig* 	icfg_c();
 		ISql*       isql_c();
+	protected:
+
+
 
 		zobj_mgr    icfg_;
 		zstr_mgr    cfg_name_;

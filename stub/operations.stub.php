@@ -6,7 +6,7 @@
 namespace Wcd\Sql;
 
 class Simple {
-	public function __construct(IDriver $db);
+	public function __construct(IDriver $db, int $fetch = -1);
 
 	public function __destruct();
 
@@ -23,7 +23,7 @@ class Simple {
 	public function firstRow(string $sql, ?array $params = null )
     : ?array {}
 
-    public function getRows() : ?array {}
+    public function getRows() : mixed {}
 
     public function getSchemaName() : string {}
 
@@ -31,7 +31,7 @@ class Simple {
 
     public function prepare(string $sql) : void {}
 
-    public function quoteName($name) : string {}
+    public function quoteName(string $name) : string {}
 
     public function returnsValues(bool $retval) : void {}
 
