@@ -6,7 +6,7 @@
 namespace Wcd\Sql;
 
 class Simple {
-	public function __construct(IDriver $db, int $fetch = -1);
+	public function __construct(IDriver $db, ?int $fetch = null);
 
 	public function __destruct();
 
@@ -29,7 +29,7 @@ class Simple {
 
     public function insert(array $values) : mixed {}
 
-    public function prepare(string $sql) : void {}
+    public function prepare(string $sql) : bool {}
 
     public function quoteName(string $name) : string {}
 

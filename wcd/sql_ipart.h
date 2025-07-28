@@ -120,6 +120,7 @@ namespace wcd {
 		zstr_intern  eager_load;
 		zstr_intern  and_str;
 		zstr_intern  count_str;
+		zstr_intern  statement;
 		
 		std::vector<zstr_intern> opstr;
 		std::vector<zstr_intern> boolstr;

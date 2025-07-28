@@ -377,7 +377,6 @@ zval_user::zarray() const
 	if (Z_TYPE_P(zv) != IS_ARRAY) {
 		return nullptr;
 	}
-
 	return Z_ARRVAL_P(zv);
 }
 

@@ -24,6 +24,7 @@
 #include "fn_call.cpp"
 #include "preg.cpp"
 
+#include "zarg_exec.cpp"
 #else
 
 #include "htab_write.h"

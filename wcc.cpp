@@ -89,7 +89,7 @@ extern "C" {
 #include "wcd/sql_isql.cpp"
 #include "wcd/bindings.cpp"
 #include "wcd/runsql.cpp"
-
+#include "wcd/simple.cpp"
 #include "wcc/hmap.cpp"
 #include "wcd/irow.cpp"
 
@@ -328,6 +328,10 @@ PHP_MINIT(wcc_route_add)(INIT_FUNC_ARGS_PASSTHRU);
 	PHP_MINIT(Sql_Raw_reg)(INIT_FUNC_ARGS_PASSTHRU);
 #endif
 
+#ifdef WCD_SIMPLE_CPP
+	PHP_MINIT(Wcd_Simple_reg)(INIT_FUNC_ARGS_PASSTHRU);
+#endif
+	
 #ifdef WCD_IBUILD_CPP
 	PHP_MINIT(Wcd_IBuild_reg)(INIT_FUNC_ARGS_PASSTHRU);
 #endif

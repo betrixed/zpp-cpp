@@ -10,6 +10,8 @@
 #include "idriver.h"
 #endif
 
+
+
 namespace wcd {
 
 	using namespace zpp;
@@ -21,7 +23,7 @@ protected:
 	bool autoclose_;
 	bool retval_;
 	int  fetch_;
-	htab_mgr values;
+	htab_mgr values_;
 	zval_mgr stmt_;
 	zstr_mgr sql_;
 	zobj_mgr db_;
@@ -45,17 +47,17 @@ public:
 
 	zstr_mgr bind(zval_user value);
 
-	int exec(zstr_user sql, htab_read params);
+	zval_mgr exec(zstr_user sql, htab_read params);
 
-	zstr_mgr firstrow(zstr_user sql, htab_read params);
+	zval_mgr firstrow(zstr_user sql, htab_read params);
 
-	zstr_mgr getRows();
+	zval_mgr getRows();
 
 	zstr_mgr getSchemaName();
 
 	zval_mgr insert(htab_read values);
 
-	zval_mgr prepare(zstr_user sql);
+	bool prepare(zstr_user sql);
 
 	zstr_mgr quoteName(zstr_user name);
 

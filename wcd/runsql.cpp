@@ -167,10 +167,5 @@ ZEND_METHOD(Wcd_Sql_RunSql, run)
 
 }
 
-/*
-ZEND_METHOD(Wcd_RunSql, __construct);
-ZEND_METHOD(Wcd_RunSql, Op);
-ZEND_METHOD(Wcd_RunSql, operation);
-ZEND_METHOD(Wcd_RunSql, run);
-*/
+
 #endif
