@@ -175,7 +175,7 @@ class IBuild {
 
     public function setInsert(array $data) : void  {}
 
-    public function setModel(?Sql\Model $model = null, bool $bind = true): void {}
+    public function setModel(?Model $model = null, bool $bind = true): void {}
 
     public function setModelClass(string $cname) : void {}
 
