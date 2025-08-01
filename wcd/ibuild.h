@@ -79,7 +79,6 @@ namespace wcd {
 		
 		zobj_mgr driver_;
 		zobj_mgr isql_;
-		zobj_mgr params_;
 		zobj_mgr bindings_;
 
 		zobj_mgr model_;

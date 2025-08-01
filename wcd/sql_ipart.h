@@ -115,7 +115,7 @@ namespace wcd {
 
 		zstr_intern  fetch_key;
 		zstr_intern  modelclass;
-
+		zstr_intern  join_tables;
 		zstr_intern  valuesdefault;
 		zstr_intern  eager_load;
 		zstr_intern  and_str;

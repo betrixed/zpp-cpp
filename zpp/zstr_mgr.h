@@ -57,6 +57,11 @@ namespace zpp {
 	        own();
 	    }
 
+	    zstr_mgr(const zstr_user& su) : zstr_user(su.s)
+	    {
+	    	own();
+	    }
+
 	    zstr_mgr(zval* copy);
 
 	    zstr_mgr(const zval_user& rc);
@@ -66,6 +71,8 @@ namespace zpp {
 	    zstr_mgr(zend_long ival);
 	    
 	    zstr_mgr(zstr_buffer&& m);
+
+	   
 
 	    bool ok() const {
 	    	return (s);

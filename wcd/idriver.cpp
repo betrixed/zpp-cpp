@@ -467,6 +467,32 @@ IDriver::fetchRow(zval_user stmt, int mode)
 	return sobj.call(DBS.fetch_str, farg);
 }
 
+
+zobj_mgr 
+IDriver::newBindings()
+{
+	zobj_mgr result(Bindings::omg.new_zobj());
+
+	Bindings& bind = *zobj_toc<Bindings>(result);
+	
+	bind.construct(isql_, zobj_user(vobj()));
+
+	zobj_mgr plist = this->newParamList();
+
+	bind.setParamList(plist);
+	
+	return result;
+}
+
+zobj_mgr 
+IDriver::newParamList()
+{
+	zobj_mgr result(ParamList::omg.new_zobj());
+	ParamList* plist = zobj_toc<ParamList>(result);
+	plist->construct(zobj_user(vobj()));
+	return result;
+}
+
 zobj_mgr 
 IDriver::newDmlBuild()
 {
@@ -574,7 +600,7 @@ IDriver::getAttribute(int key)
 zval_mgr 
 IDriver::querySingle(zstr_user query)
 {
-	zobj_mgr pdo(handle_);
+	zobj_user pdo(handle_);
 
 	zval_mgr arg1(query);
 
@@ -756,7 +782,7 @@ IDriver::prepareQuery(zstr_user query, htab_read values, htab_read bindTypes)
 {
 	zval_mgr stmt_mgr = prepare(query);
 
-	zobj_mgr stmt(stmt_mgr);
+	zobj_user stmt(stmt_mgr);
 
 	if (!stmt.ok())
 	{
@@ -1312,6 +1338,30 @@ ZEND_METHOD(Wcd_IDriver, modelClassName)
 	IDriver* db = zval_toc<IDriver>(ZEND_THIS);	
 
 	zstr_mgr result = db->modelClassName(table);
+
+	result.move_zv(return_value);
+}
+
+
+ZEND_METHOD(Wcd_IDriver, newParamList)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	IDriver* db = zval_toc<IDriver>(ZEND_THIS);
+
+	zobj_mgr result = db->newParamList();
+
+	result.move_zv(return_value);
+}
+
+
+ZEND_METHOD(Wcd_IDriver, newBindings)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	IDriver* db = zval_toc<IDriver>(ZEND_THIS);
+
+	zobj_mgr result = db->newBindings();
 
 	result.move_zv(return_value);
 }

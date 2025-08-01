@@ -94,8 +94,12 @@ class IDriver {
 
     public function modelClassName(string $tableName) : string {}
 
+    public function newBindings() : \Wcd\Sql\Bindings;
+
     public function newDmlBuild() : IBuild {}
 
+    public function newParamList() : \Wcd\Sql\ParamList;
+    
     public function param(int $pno): string {}
 
     public function prepare(string $sql) : mixed {}
@@ -148,8 +152,6 @@ class IBuild {
     public function getFrom() :  Sql\JoinTables {}
 
     public function getInsertSql(array $columns) :  Wcd\Sql\ParamList {}
-
-    public function getParamList() :  Sql\ParamList {}
 
     public function getSql() :  Sql\ISql {}
 

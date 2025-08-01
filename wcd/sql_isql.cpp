@@ -57,9 +57,9 @@ void ParamList::debug_info(htab_write di)
 }
 
 void 
-ParamList::construct(zval_user driver)
+ParamList::construct(zobj_user driver)
 {
-	driver_ = driver.zobject();
+	driver_ = driver;
 }
 
 zstr_mgr 

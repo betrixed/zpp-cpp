@@ -36,21 +36,11 @@ using namespace zpp;
 	void IBuild::construct(zval_user driver)
 	{
 		driver_ = driver;
-		params_ = ParamList::omg.new_zobj();
-		ParamList* plist = zobj_toc<ParamList>(params_);
-
-		plist->construct(driver);
-
 		IDriver* db = zobj_toc<IDriver>(driver_);
+
+		bindings_ = db->newBindings();
+		
 		isql_ = db->isql_;
-
-		bindings_ = Bindings::omg.new_zobj();
-		Bindings& bind = *zobj_toc<Bindings>(bindings_);
-
-		zval_mgr sqlmgr(isql_);
-
-		bind.construct(sqlmgr, driver);
-		bind.setParamList(params_);
 
 	}
 
@@ -180,7 +170,6 @@ using namespace zpp;
 	{
 		isql_.init();
 		driver_.init();
-		params_.init();
 		bindings_.init();
 		model_.init();
 	}
@@ -199,8 +188,6 @@ using namespace zpp;
 
 		Bindings& bind = bindings();
 		bind.wipe(ISql::SQL_INSERT);
-		ParamList* plist = zobj_toc<ParamList>(params_);
-		plist->wipe();
 
 		zval_mgr result;
 		zobj_mgr row_mgr;
@@ -293,7 +280,6 @@ using namespace zpp;
 	{
 		di.set(SQSTR.driver, driver_);
 		di.set(SQSTR.isql, isql_);
-		di.set(SQSTR.params, params_);
 
 		di.set(SQSTR.bind_key, bindings_);
 
@@ -373,7 +359,6 @@ using namespace zpp;
 			htab_read params(plist->getValues());
 
 			result = RunSql::op(driver_, sql, params);
-			
 		}
 
 		return result;
@@ -387,8 +372,6 @@ using namespace zpp;
 		if (wipe)
 		{
 			bind.wipe();
-			ParamList* plist = zobj_toc<ParamList>(params_);
-			plist->wipe();
 		}
 
 		bind.addstr(ISql::SQL_FROM, table);
@@ -398,8 +381,9 @@ using namespace zpp;
 	IBuild::limit(int lim, int offset)
 	{
 		Bindings& bind = bindings();
-
-		bind.limit(lim, offset);
+		zval_mgr a1(lim);
+		zval_mgr a2(offset);
+		bind.limit(a1, a2);
 	}
 
 	int 
@@ -546,8 +530,6 @@ using namespace zpp;
 		Bindings& bind = bindings();
 		bind.wipe(ISql::SQL_INSERT);
 
-		ParamList* params = zobj_toc<ParamList>(params_);
-		params->wipe();
 		bind.addarray(ISql::SQL_INSERT, columns);
 
 		ISql* isql = zobj_toc<ISql>(isql_);
@@ -560,7 +542,10 @@ using namespace zpp;
 	IBuild::get_first()
 	{
 		Bindings& bind = bindings();
-		bind.limit(1, 0);
+		zval_mgr a1(1);
+		zval_mgr a2;
+
+		bind.limit(a1, a2);
 		zval_mgr result = bind.select();
 
 		if (result.isArray())
@@ -917,14 +902,6 @@ ZEND_METHOD(Wcd_IBuild, getInsertSql)
 	result.move_zv(return_value);
 }
 
-//public function getParamList() : ?ParamList
-ZEND_METHOD(Wcd_IBuild, getParamList)
-{
-	ZEND_PARSE_PARAMETERS_NONE();
-	IBuild* cobj = zval_toc<IBuild>(ZEND_THIS);
-	zobj_mgr result = cobj->params_;
-	result.move_zv(return_value);
-}
 
 ZEND_METHOD(Wcd_IBuild, hasModel)
 {

@@ -158,7 +158,7 @@ namespace wcd {
 
 		void debug_info(htab_write di) override;
 
-		void construct(zval_user driver);
+		void construct(zobj_user driver);
 		zstr_mgr addParam(zval_user value);
 		//zstr_mgr addParam(zval_user value);
 		zstr_mgr addParamList(htab_read values);
@@ -299,7 +299,7 @@ namespace wcd {
 
 		void debug_info(htab_write di) override;
 
-		void construct(zval_user sql, zval_user connect);
+		void construct(zobj_user sql, zobj_user connect);
 
 		void add(int key, zval_user value);
 
@@ -316,6 +316,7 @@ namespace wcd {
 
 		bool aliasSelect();
 
+		void limit(zval_user limit, zval_user offset);
 		void limit(int limit, int offset=0);
 
 		void whereKeyValue(zval_user keys, zval_user values);
@@ -351,9 +352,7 @@ namespace wcd {
 		}
 		*/
 
-		const zobj_mgr& getParamList() {
-			return paramList_;
-		}
+		zobj_user getParamList();
 
 		void set(int key, zval_user value);
 		void set(int key, int value);

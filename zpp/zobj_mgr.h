@@ -36,6 +36,8 @@ namespace zpp {
 
 		zobj_mgr(const zval* zp);
 
+		zobj_mgr(const zobj_user& rc);
+		
 		zobj_mgr& operator=(const zobj_user &rc);
 
 		zobj_mgr& operator=(const zobj_mgr &rc);

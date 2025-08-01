@@ -24,7 +24,7 @@ public:
 
 	static zobj_mgr make_cache( zval_user options, zval_user services);
 
-	void __construct(zval_user options, zval_user services);
+	void construct(zval_user options, zval_user services);
 
 	void addLocal(zval_user pkg);
 

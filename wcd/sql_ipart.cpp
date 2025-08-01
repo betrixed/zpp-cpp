@@ -139,7 +139,7 @@ void sql_strtab::init()
 	by_alias  = "by_alias";
 	model  = "model";
 	modelclass = "modelclass";
-	
+	join_tables = "jointables";
 	joins  = "joins";
 	prime  = "prime";
 	orderby  = "orderby";

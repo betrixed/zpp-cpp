@@ -503,9 +503,9 @@ bool RouteMatch::prepare_call()
 
 	zval_user route_target(route->target_);
 
-	zobj_user tg_obj(route_target.zobject());
+	zobj_mgr tg_obj(route_target.zobject());
 	//zend_printf("prepare_call 2\n");
-	if (!tg_obj.isNull())
+	if (tg_obj.ok())
 	{
 		this->target_ = tg_obj;
 

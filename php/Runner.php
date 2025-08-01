@@ -5,7 +5,8 @@ class Runner {
 	public function runObject(object $obj)
 	{
 		$m = get_class_methods($obj);
-
+                
+                echo "\nRun Object " . get_class($obj);
 		foreach($m as $name)
 		{
 			if (str_starts_with($name, "test"))

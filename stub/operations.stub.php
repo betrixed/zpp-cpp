@@ -41,7 +41,7 @@ class Simple {
 
     public function update(array $values) : mixed {}
 };
-/*
+
 class Operation {
 	public function __construct(IDriver $db);
 
@@ -56,9 +56,21 @@ class Operation {
 
 	public function getParams() : ?array {}
 
-	public function prepare(int $fetch) : Simple {}
+	public function getRows(?int $fmode = null) : mixed {}
 
-	public function getRows(int $fetch) : ?array {}
+	public function getSqlParams() : ParamList;
 
+	public function limit(mixed $ct, int $start = 0) : void {}
+
+	public function orderBy(mixed $column, bool $descend = false) : void {}
+
+	public function prepare(?int $fmode = null) : Simple {}
+
+	public function returns(array $retn) : void {}
+
+	public function run() : mixed {}
+
+	public function where(mixed $lattr, mixed $rattr = null, ?int $op = null, ?int $logic = null) : void {}
+
+	public function wipe() : void {}
 };
-*/

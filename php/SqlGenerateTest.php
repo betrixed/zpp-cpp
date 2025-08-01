@@ -7,7 +7,7 @@ use Wcc\{
     Services
 };
 
-use Wcd\IServer;
+use Wcd\{IServer,IDriver};
 use Wcd\Sql\{
     Select,
     TColumns,
@@ -39,7 +39,7 @@ class SqlGenerateTest extends Asserts
     protected function setUp(): void
     {
         $this->cfg = Services::getOne(Config::class);
-        $this->iterations = 20;
+        $this->iterations = 3;
     }
 
 
@@ -88,39 +88,55 @@ class SqlGenerateTest extends Asserts
            $loader->setThrowNotFound(true);
      }
      
+     public function gen1(IDriver $db) : string
+     {
+        $limit = 20;
+        $sel = new Select($db);
+        $links_t = $sel->addPrime('links', 'A',
+                ['id', 'url', 'title', 'sitename',
+                    'summary', 'urltype', 'date_created']);
+        $image_t = $sel->addTable('image', 'B',
+                ['name' => 'im_file', 'description' => 'im_caption']);
+        $gallery_t = new TColumns('gallery', 'C', ['path' => 'im_path']);
+        $j1 = $sel->addJoin($image_t, $links_t, JoinInfo::J_LEFT);
+        $j1->addExpr(new JoinExpr('id', 'imageid'));
+        $j2 = $sel->addJoin($gallery_t, $image_t, JoinInfo::J_LEFT);
+        $j2->addExpr(new JoinExpr('id', 'galleryid'));
+        $attr = new TableAttr('A', 'urltype');
+
+        $sel->where($attr, new Literal('Remote'), JoinExpr::OP_EQ);
+        $sel->where($attr, new Literal('Front'), JoinExpr::OP_EQ, JoinExpr::B_OR);
+        $sel->where($attr, new Literal('Event'), JoinExpr::OP_EQ, JoinExpr::B_OR);
+        $sel->where($attr, new Literal('Blog'), JoinExpr::OP_EQ, JoinExpr::B_OR);
+        $sel->orderBy('date_created', true);
+        $sel->limit($limit);
+
+        $plist = $sel->getSqlParams();
+        return $plist->getSql();
+        
+     }
      public function testGenEx1()
     {
-        $limit = 20;
+        
         $servers = Services::getOne(IServer::class);
         $db = $servers->getConnect("pcanex");
 
         $ct = $this->iterations;
-        $tstart = microtime(true);
+        
         $sql = "";
-
+        
+        if ($ct > 1)
+        {
+            $tstart = microtime(true);
+            $sql = $this->gen1($db); // discard 1st
+             $tend = microtime(true);
+             $msec = number_format(($tend - $tstart) * 1000, 3);
+             fwrite(STDERR, "\nsql generation 0th discard iteration $msec ms\n");
+        }
+        $tstart = microtime(true);
         for ($i = 0; $i < $ct; $i++)
         {
-            $sel = new Select($db);
-            $links_t = $sel->addPrime('links', 'A',
-                    ['id', 'url', 'title', 'sitename',
-                        'summary', 'urltype', 'date_created']);
-            $image_t = $sel->addTable('image', 'B',
-                    ['name' => 'im_file', 'description' => 'im_caption']);
-            $gallery_t = new TColumns('gallery', 'C', ['path' => 'im_path']);
-            $j1 = $sel->addJoin($image_t, $links_t, JoinInfo::J_LEFT);
-            $j1->addExpr(new JoinExpr('id', 'imageid'));
-            $j2 = $sel->addJoin($gallery_t, $image_t, JoinInfo::J_LEFT);
-            $j2->addExpr(new JoinExpr('id', 'galleryid'));
-            $attr = new TableAttr('A', 'urltype');
-
-            $sel->where($attr, new Literal('Remote'), JoinExpr::OP_EQ);
-            $sel->where($attr, new Literal('Front'), JoinExpr::OP_EQ, JoinExpr::B_OR);
-            $sel->where($attr, new Literal('Event'), JoinExpr::OP_EQ, JoinExpr::B_OR);
-            $sel->where($attr, new Literal('Blog'), JoinExpr::OP_EQ, JoinExpr::B_OR);
-            $sel->orderBy('date_created', true);
-            $sel->limit($limit);
-
-            $sql = $sel->getSql();
+            $sql = $this->gen1($db);
         }
         $tend = microtime(true);
 
@@ -171,6 +187,7 @@ EOS;
         for ($i = 0; $i < $ct; $i++)
         {
             $sql = $cache->get($sql_key);
+            
         }
         $tend = microtime(true);
 
@@ -188,91 +205,105 @@ EOS;
         }
     }
 
+    public function gen2(IDriver $db)
+    {
+        $sel = new Select($db);
+        $prime = $sel->addPrime('blog', 'A',
+                ['id', 'title', 'style', 'title_clean']);
+        $rev = $sel->addTable('blog_revision', 'R', ['content' => 'article']);
+
+        $event = $sel->addTable('event', 'B',
+                ['fromtime' => 'date1', 'totime' => 'date2']);
+
+        $b_fromtime = new TableAttr('B', 'fromtime');
+        $b_totime = new TableAttr('B', 'totime');
+
+        $ex1 = new JoinExpr($b_fromtime, null, JoinExpr::OP_NOTNULL);
+        $ex2 = new JoinExpr($b_totime, null, JoinExpr::OP_NOTNULL);
+
+        $sql_type = $db->getSqlType();
+        if ($sql_type ===
+                'sqlite')
+        {
+            $now = new Expr("datetime('now')");
+            $nowfn1 = new JoinExpr(new Expr('datetime(B.fromtime)'), $now,
+                    JoinExpr::OP_GT);
+            $nowfn2 = new JoinExpr(new Expr('datetime(B.totime)'), $now,
+                    JoinExpr::OP_GT);
+        } else
+        {
+            $now = new Expr('NOW()');
+            $nowfn1 = new JoinExpr($b_fromtime, $now, JoinExpr::OP_GT);
+            $nowfn2 = new JoinExpr($b_totime, $now, JoinExpr::OP_GT);
+        }
+
+        $jnow1 = new JoinExpr($ex1, $nowfn1, JoinExpr::OP_AND, JoinExpr::B_NULL);
+        $jnow2 = new JoinExpr($ex2, $nowfn2, JoinExpr::OP_AND, JoinExpr::B_NULL);
+        $jnow3 = new JoinExpr($jnow1, $jnow2, JoinExpr::OP_OR, JoinExpr::B_NULL);
+
+        $j1 = $sel->addJoin($rev, $prime);
+        $j1->add('blog_id', 'id', JoinExpr::OP_EQ);
+        $j1->add('revision', 'revision', JoinExpr::OP_EQ, JoinExpr::B_AND);
+
+        $j2 = $sel->addJoin($event, $prime);
+        $j2->add('blogid', 'id', JoinExpr::OP_EQ);
+        $j2->add($jnow3, null, JoinExpr::OP_NOP, JoinExpr::B_AND);
+
+        $subQ1 = new Select($db);
+        $subPrime = $subQ1->addPrime('blog_meta', 'MC', ['blog_id', 'content']);
+        $jmeta = $subQ1->addTable('meta', 'M');
+
+        $jsub = $subQ1->addJoin($jmeta, $subPrime);
+        $jsub->add('id', 'meta_id');
+        $jsub->add('meta_name', new Literal('og:description'));
+
+        $subQ1->setAlias('C');
+        $subQ1->add(['content']);
+        $j3 = $sel->addJoin($subQ1->icols(), $prime);
+        $j3->add('blog_id', 'id');
+
+        $subQ2 = new Select($db);
+        $subQ2p = $subQ2->addPrime('blog_meta', 'MC', ['blog_id', 'content']);
+        $jm2 = $subQ2->addTable('meta', 'M');
+
+        $js2 = $subQ2->addJoin($jm2, $subQ2p);
+        $js2->add('id', 'meta_id');
+        $js2->add('meta_name', new Literal('og:image'));
+
+        $subQ2->setAlias('D');
+        $subQ2->add(['content' => 'image']);
+        $j4 = $sel->addJoin($subQ2->icols(), $prime);
+        $j4->add('blog_id', 'id');
+
+        $j5 = $sel->addJoin(new TColumns('links', 'L', ['url']), $prime,
+                JoinInfo::J_LEFT);
+        $j5->add('refid', 'id');
+        $sel->orderBy($b_fromtime);
+
+        $plist = $sel->getSqlParams();
+        return $plist->getSql();
+    }
+    
     public function testGenEx2()
     {
         $db = IServer::connect("pcanex");
      
-        $sel = new Select($db);
-
         $ct =  $this->iterations;
-        $tstart = microtime(true);
+        
         $sql = "";
-
-        for ($i = 0; $i <= $ct; $i++)
+        
+        if ($ct > 1)
         {
-            $prime = $sel->addPrime('blog', 'A',
-                    ['id', 'title', 'style', 'title_clean']);
-            $rev = $sel->addTable('blog_revision', 'R', ['content' => 'article']);
-
-            $event = $sel->addTable('event', 'B',
-                    ['fromtime' => 'date1', 'totime' => 'date2']);
-
-            $b_fromtime = new TableAttr('B', 'fromtime');
-            $b_totime = new TableAttr('B', 'totime');
-
-            $ex1 = new JoinExpr($b_fromtime, null, JoinExpr::OP_NOTNULL);
-            $ex2 = new JoinExpr($b_totime, null, JoinExpr::OP_NOTNULL);
-
-            $sql_type = $db->getSqlType();
-            if ($sql_type ===
-                    'sqlite')
-            {
-                $now = new Expr("datetime('now')");
-                $nowfn1 = new JoinExpr(new Expr('datetime(B.fromtime)'), $now,
-                        JoinExpr::OP_GT);
-                $nowfn2 = new JoinExpr(new Expr('datetime(B.totime)'), $now,
-                        JoinExpr::OP_GT);
-            } else
-            {
-                $now = new Expr('NOW()');
-                $nowfn1 = new JoinExpr($b_fromtime, $now, JoinExpr::OP_GT);
-                $nowfn2 = new JoinExpr($b_totime, $now, JoinExpr::OP_GT);
-            }
-
-            $jnow1 = new JoinExpr($ex1, $nowfn1, JoinExpr::OP_AND, JoinExpr::B_NULL);
-            $jnow2 = new JoinExpr($ex2, $nowfn2, JoinExpr::OP_AND, JoinExpr::B_NULL);
-            $jnow3 = new JoinExpr($jnow1, $jnow2, JoinExpr::OP_OR, JoinExpr::B_NULL);
-
-            $j1 = $sel->addJoin($rev, $prime);
-            $j1->add('blog_id', 'id', JoinExpr::OP_EQ);
-            $j1->add('revision', 'revision', JoinExpr::OP_EQ, JoinExpr::B_AND);
-
-            $j2 = $sel->addJoin($event, $prime);
-            $j2->add('blogid', 'id', JoinExpr::OP_EQ);
-            $j2->add($jnow3, null, JoinExpr::OP_NOP, JoinExpr::B_AND);
-
-            $subQ1 = new Select($db);
-            $subPrime = $subQ1->addPrime('blog_meta', 'MC', ['blog_id', 'content']);
-            $jmeta = $subQ1->addTable('meta', 'M');
-
-            $jsub = $subQ1->addJoin($jmeta, $subPrime);
-            $jsub->add('id', 'meta_id');
-            $jsub->add('meta_name', new Literal('og:description'));
-
-            $subQ1->setAlias('C');
-            $subQ1->add(['content']);
-            $j3 = $sel->addJoin($subQ1->icols(), $prime);
-            $j3->add('blog_id', 'id');
-
-            $subQ2 = new Select($db);
-            $subQ2p = $subQ2->addPrime('blog_meta', 'MC', ['blog_id', 'content']);
-            $jm2 = $subQ2->addTable('meta', 'M');
-
-            $js2 = $subQ2->addJoin($jm2, $subQ2p);
-            $js2->add('id', 'meta_id');
-            $js2->add('meta_name', new Literal('og:image'));
-
-            $subQ2->setAlias('D');
-            $subQ2->add(['content' => 'image']);
-            $j4 = $sel->addJoin($subQ2->icols(), $prime);
-            $j4->add('blog_id', 'id');
-
-            $j5 = $sel->addJoin(new TColumns('links', 'L', ['url']), $prime,
-                    JoinInfo::J_LEFT);
-            $j5->add('refid', 'id');
-            $sel->orderBy($b_fromtime);
-
-            $sql = $sel->getSql();
+            $tstart = microtime(true);
+            $sql = $this->gen2($db);
+            $tend = microtime(true);
+             $msec = number_format(($tend - $tstart) * 1000, 3);
+             fwrite(STDERR, "\nsql generation 0th discard iteration $msec ms\n");
+        }
+        $tstart = microtime(true);
+        for ($i = 0; $i < $ct; $i++)
+        {
+            $sql = $this->gen2($db);
         }
         $tend = microtime(true);
         

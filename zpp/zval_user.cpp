@@ -157,6 +157,32 @@ zval_user::zval_user(const zval* rc)
 }   
 
 bool 
+zval_user::empty() const 
+{
+	if (!p_)
+		return true;
+	zval* rp = zval_user::real_zval(p_);
+
+	int rtype = Z_TYPE_P(rp);
+
+	switch (rtype)
+	{
+	case IS_FALSE:
+		return true;
+	case IS_LONG:
+    	return (Z_LVAL_P(rp) == 0) ? true : false;
+    case IS_DOUBLE:
+    	return (Z_DVAL_P(rp) == 0.0) ? true : false;
+	case IS_ARRAY:
+    	return htab_read(Z_ARR_P(rp)).size() ? false : true;
+    case IS_STRING:
+    	return zstr_user(Z_STR_P(rp)).size() ? false : true;
+	default:
+    	return false;
+	}
+}
+
+bool 
 zval_user::ok() const {
 	if (!p_)
 		return false;
@@ -173,7 +199,7 @@ zval_user::ok() const {
     case IS_STRING:
     	return zstr_user(Z_STR_P(rp)).size() ? true : false;
     }
-    // Don't care about zero LONG or DOUBLE
+    // Don't care about zero values of LONG or DOUBLE
     return true;
 }
 

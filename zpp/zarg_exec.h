@@ -15,9 +15,11 @@ namespace zpp {
 class zarg_exec 
 {
 protected:
-	zstr_buffer*        errors_;
-	zval*				zptr_;
-	size_t              nargs_;
+	zstr_buffer*          errors_;
+	zval*				  zptr0_;
+	uint32_t              nargs_;
+	uint32_t              option_;
+
 public:
 	zarg_exec(zend_execute_data* ze);
 	~zarg_exec();

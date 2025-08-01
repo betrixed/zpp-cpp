@@ -19,6 +19,7 @@ class zval_user;
 class zobj_mgr;
 class base_d;
 class zstr_mgr;
+class zobj_user;
 
 class zval_mgr {
 protected:
@@ -87,6 +88,10 @@ public:
 
     zval_mgr(const zval_user& rc);
 
+    zval_mgr(const zstr_user& rc);
+
+    //zval_mgr(const zobj_user& rc);
+
     //! mutate in place to suggested type if necessary
     void     toLong();
     void     toDouble();
@@ -105,7 +110,9 @@ public:
 
     const zval_mgr& operator=(const zval_user &rc);
 
-    const zval_mgr& operator=(const zobj_mgr &rc);
+    const zval_mgr& operator=(const zobj_user &rc);
+
+    //const zval_mgr& operator=(const zobj_mgr &rc);
 
     const zval_mgr& operator=(const zstr_user &rc);
 

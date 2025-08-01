@@ -90,6 +90,11 @@ zobj_mgr::zobj_mgr(zend_object* rc) : zobj_user(rc)
     own();
 }
 
+zobj_mgr::zobj_mgr(const zobj_user& rc) : zobj_user(rc.obj_)
+{
+    own();
+}
+
 zobj_mgr::zobj_mgr(const zobj_mgr& rc) : zobj_user(rc.obj_)
 {
     own();

@@ -92,6 +92,7 @@ extern "C" {
 #include "wcd/simple.cpp"
 #include "wcc/hmap.cpp"
 #include "wcd/irow.cpp"
+#include "wcd/operation.cpp"
 
 
  //SQL_IPART_CPP
@@ -330,6 +331,10 @@ PHP_MINIT(wcc_route_add)(INIT_FUNC_ARGS_PASSTHRU);
 
 #ifdef WCD_SIMPLE_CPP
 	PHP_MINIT(Wcd_Simple_reg)(INIT_FUNC_ARGS_PASSTHRU);
+#endif
+
+#ifdef WCD_OPERATION_CPP
+	PHP_MINIT(Wcd_Operation_reg)(INIT_FUNC_ARGS_PASSTHRU);
 #endif
 	
 #ifdef WCD_IBUILD_CPP

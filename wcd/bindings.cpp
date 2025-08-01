@@ -104,10 +104,10 @@ Bindings::primeJoin(zval_user tcol)
 }
 
 void 
-Bindings::construct(zval_user sql, zval_user connect)
+Bindings::construct(zobj_user sql, zobj_user connect)
 {
-	sql_ = sql.zobject();
-	db_ = connect.zobject();
+	sql_ = sql;
+	db_ = connect;
 }
 
 JoinTables* 
@@ -130,6 +130,19 @@ Bindings::getJoins()
 	
 	htab_write(data_).set((zend_long) ISql::SQL_FROM, result);
 	return result;
+}
+
+zobj_user
+Bindings::getParamList()
+{
+	if (paramList_.ok())
+	{
+		return paramList_;
+	}
+
+	IDriver* db = zobj_toc<IDriver>(db_);
+	paramList_ = db->newParamList();
+	return paramList_;
 }
 
 bool
@@ -418,6 +431,8 @@ void Bindings::wipe(int key)
 	else {
 		hw.unset(key);
 	}
+
+	paramList_.init();
 }
 
 zstr_mgr alias_str_key(zstr_user malias)
@@ -688,16 +703,23 @@ Bindings::update(zstr_user column, zval_user value)
 
 	addarray(ISql::SQL_UPDATE, data_mgr);
 }
+void 
+Bindings::limit(int lval, int offset)
+{
+	zval_mgr a1(lval);
+	zval_mgr a2(offset);
+	limit(a1,a2);
+}
 
 void 
-Bindings::limit(int limit, int offset)
+Bindings::limit(zval_user limit, zval_user offset)
 {
 	htab_mgr data;
 
 	htab_write hw(data);
 
 	hw.set(SQSTR.limit, limit);
-	if (offset)
+	if (!offset.empty())
 	{
 		hw.set(SQSTR.offset, offset);
 	}
@@ -821,7 +843,7 @@ ZEND_METHOD(Wcd_Sql_Bindings, getParamList)
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	Bindings* cobj = zval_toc<Bindings>(ZEND_THIS);
-	const zobj_mgr& result = cobj->getParamList();
+	zobj_user result = cobj->getParamList();
 	result.return_zv(return_value);
 }
 

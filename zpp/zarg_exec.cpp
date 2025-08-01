@@ -26,29 +26,32 @@ zarg_exec::~zarg_exec()
 
 zarg_exec::zarg_exec(zend_execute_data* ze) : errors_(nullptr)
 {
+	zptr0_ = (zval*)(ZEND_CALL_VAR_NUM(ze, 0));
 	nargs_ = ZEND_CALL_NUM_ARGS(ze);
-	zptr_ = (zval*)(ZEND_CALL_VAR_NUM(ze, 0));
+	option_ = 0;
 }
 
 zval*
 zarg_exec::option(size_t ix)
 {
+	option_ = 1;
 	if ((ix < 1) || (ix > nargs_))
 	{
 		return (zval*)nullptr;
 	}
-	return zptr_ + (ix-1);
+	return zptr0_ + (ix-1);
 }
 
 zval* 
 zarg_exec::need(size_t ix)
 {
+	option_ = 0;
 	if ((ix < 1) || (ix > nargs_))
 	{
 		error() << "; Bad argument index " << ix;
 		return (zval*)nullptr;
 	}
-	return zptr_ + (ix-1);
+	return zptr0_ + (ix-1);
 }
 
 bool 
@@ -61,7 +64,10 @@ zarg_exec::zstring(zstr_user& value, zval* arg)
 	{
 		return true;
 	}
-	error() << "; Expect string";
+	if (!option_)
+	{
+		error() << "; Expect string";
+	}
 	return false;
 }
 
@@ -75,7 +81,10 @@ zarg_exec::zstring_null(zstr_user& value, zval* arg)
 		value = arg;
 		return true;
 	}
-	error() << "; Expect string or NULL";
+	if (!option_)
+	{
+		error() << "; Expect string or NULL";
+	}
 	return false;
 }
 
@@ -89,7 +98,10 @@ zarg_exec::zarray_null(htab_read& value, zval* arg)
 		value = test.zarray();
 		return true;
 	}
-	error() << "; Expect Array or NULL";
+	if (!option_)
+	{
+		error() << "; Expect Array or NULL";
+	}
 	return false;
 }
 
@@ -105,7 +117,10 @@ zarg_exec::zarray(htab_read& value, zval* arg)
 		value = test.zarray();
 		return true;
 	}
-	error() << "; Expect Array or NULL";
+	if (!option_)
+	{
+		error() << "; Expect Array or NULL";
+	}
 	return false;
 }
 
@@ -116,9 +131,11 @@ zarg_exec::obj_ofclass_null(zobj_user& value, zval* arg, zend_class_entry* ce)
 	if (value.instanceof(ce) || value.isNull()) {
 		return true;
 	}
-
 	zstr_user name(ce->name);
-	error() << "; Expect NULL or object of class " << name;
+	if (!option_)
+	{
+		error() << "; Expect NULL or object of class " << name;
+	}
 	return false;
 }
 
@@ -130,7 +147,10 @@ zarg_exec::obj_ofclass(zobj_user& value, zval* arg, zend_class_entry* ce)
 		return true;
 	}
 	zstr_user name(ce->name);
-	error() << "; Expect object of class " << name;
+	if (!option_)
+	{
+		error() << "; Expect object of class " << name;
+	}
 	return false;
 }
 
@@ -141,7 +161,10 @@ zarg_exec::zlong_null(zend_long& value, zval* arg)
 	int itype = test.ref_type();
 	if (itype != IS_LONG && itype != IS_NULL) 
 	{
-		error() << "; Expected integer value or NULL";
+		if (!option_) {
+			error() << "; Expected integer value or NULL";
+		}
+		
 		return false;
 	}
 	value = test.zlong();
@@ -158,6 +181,10 @@ zarg_exec::zbool(bool& value, zval* arg)
 		value = test.zbool();
 		return true;
 	}
+	if (!option_)
+	{
+		error() << "; Expected bool value";
+	}
 	return false;
 }
 
@@ -168,7 +195,10 @@ zarg_exec::zlong(zend_long& value, zval* arg)
 	zval_user test(arg);
 	if (!test.isLong()) 
 	{
-		error() << "; Expected integer value";
+		if (!option_)
+		{
+			error() << "; Expected integer value";
+		}
 		return false;
 	}
 	value = test.zlong();

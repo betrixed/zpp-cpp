@@ -61,7 +61,7 @@ ICache::make_cache( zval_user options, zval_user services)
     return result;
 }
 
-void ICache::__construct(zval_user options, zval_user services)
+void ICache::construct(zval_user options, zval_user services)
 {
 	if (services.isNull())
 	{
@@ -434,7 +434,7 @@ ZEND_METHOD(Wcc_ICache, __construct)
 	}
 
 	auto cobj = zval_toc<ICache>(ZEND_THIS);
-	cobj->__construct(options,services_obj);
+	cobj->construct(options,services_obj);
 }
 
 ZEND_METHOD(Wcc_ICache, make_cache)

@@ -96,7 +96,9 @@ namespace wcd {
 
 		zstr_mgr modelClassName(zstr_user tableName);
 
+		zobj_mgr newBindings();
 		zobj_mgr newDmlBuild();
+		zobj_mgr newParamList();
 		zstr_mgr param(int pno);
 
 		zval_mgr prepare(zstr_user query);
@@ -105,6 +107,8 @@ namespace wcd {
 
 		zval_mgr query(zstr_user query, htab_read params);
 		zval_mgr querySingle(zstr_user query);
+
+		
 
 		zstr_mgr quoteName(zstr_user name);
 
