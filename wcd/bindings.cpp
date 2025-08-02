@@ -687,7 +687,8 @@ Bindings::orderBy(zstr_user cname, bool descend)
 	htab_write hw(args);
 
 	hw.set(SQSTR.column, cname);
-	hw.set(SQSTR.descend, descend);
+	zval_mgr boolmgr(descend); // otherwise taken as integer value
+	hw.set(SQSTR.descend, boolmgr);
 
 	add(ISql::SQL_ORDER, args);
 }

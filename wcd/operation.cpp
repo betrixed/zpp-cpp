@@ -21,8 +21,8 @@ base_obj_mgr<Operation> Operation::omg;
 void 
 Operation::debug_info(htab_write di)
 {
+	base_d::debug_info(di);
 	di.set(SQSTR.driver, db_);
-	di.set(SQSTR.bind_key, bind_);
 	di.set(SQSTR.join_tables, joiner_);
 }
 
@@ -34,6 +34,9 @@ Operation::construct(zobj_user db)
 
 	bind_ = dr->newBindings();
 
+	zobj_user self(vobj());
+	zval_mgr arg(bind_);
+	self.property(SQSTR.bind_key, arg);
 	wipe();
 
 }
@@ -196,9 +199,16 @@ Operation::wipe()
 	Bindings& bind = *zobj_toc<Bindings>(bind_);
 	bind.wipe();
 
-	zobj_mgr joiner_ = JoinTables::omg.new_zobj();
-	zval_mgr a1(joiner_);
-	bind.set(ISql::SQL_FROM, a1);
+	joiner_ = JoinTables::omg.new_zobj();
+	
+	if (joiner_.ok())
+	{
+		zval_mgr a1(joiner_);
+		
+		bind.set(ISql::SQL_FROM, a1);
+		
+	}
+	
 }
 
 

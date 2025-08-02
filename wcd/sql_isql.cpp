@@ -15,6 +15,10 @@
 #include "model.h"
 #endif
 
+#ifndef WCD_OPERATION_H
+#include "operation.h"
+#endif
+
 #ifndef SQL_ARGINFO_H
 #define SQL_ARGINFO_H
 extern "C" {
@@ -1063,9 +1067,15 @@ ISql::fromJT(Bindings& bind, JoinTables* jt)
 		{
 			TColumns* tcol = static_cast<TColumns*>(left);
 			zobj_mgr  subq(tcol->getOwner());
+			// Owner is an "Operation" , usually a Select
 			//showobj("subq owner",subq);
-			zval_mgr subq_sql = subq.call(SQSTR.getsql);
-			buf << " (" << zval_user(subq_sql).zstr() << ")";
+			Operation* op = zobj_toc<Operation>(subq);
+			zobj_mgr   plist_mgr = op->getSqlParams();
+		    ParamList* plist = zobj_toc<ParamList>(plist_mgr);
+		    zstr_mgr   sub_sql = plist->getSql();
+
+			//zval_mgr subq_sql = subq.call(SQSTR.getsql);
+			buf << " (" << sub_sql << ")";
 		}
 		buf << ' ' << l_alias;
 

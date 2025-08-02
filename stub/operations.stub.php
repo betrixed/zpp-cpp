@@ -6,6 +6,8 @@
 namespace Wcd\Sql;
 
 class Simple {
+	public readonly ?Bindings $bindings = null;
+
 	public function __construct(IDriver $db, ?int $fetch = null);
 
 	public function __destruct();
