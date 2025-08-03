@@ -108,7 +108,7 @@ namespace wcd {
 		zstr_intern  orderby;
 		zstr_intern  where;
 
-		zstr_intern  getsql;	
+		zstr_intern  get_sql_params;	
 		zstr_intern  idriver;
 		zstr_intern  getfetch;
 		zstr_intern  setfetch;

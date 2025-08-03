@@ -47,7 +47,7 @@ namespace wcd {
 
 		void limit(int lim, int offset=0);
 		void offset(int value);
-		void orderBy(zstr_user colname, bool descend=false);
+		void orderBy(zval_user colname, bool descend=false);
 		
 		zval_mgr deleteRow(zobj_user rowobj);
 		

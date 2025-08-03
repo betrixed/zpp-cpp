@@ -10,6 +10,8 @@ echo $f
 done
 
 make ./stub/config_arginfo.h
+make ./stub/sqlipart_arginfo.h
+make ./stub/bindings_arginfo.h
 make ./stub/hmap_arginfo.h
 make ./stub/wcc_arginfo.h
 make ./stub/xmlread_arginfo.h
@@ -18,7 +20,7 @@ make ./stub/htmlgem_arginfo.h
 make ./stub/request_globals_arginfo.h
 make ./stub/global_response_arginfo.h
 make ./stub/toml_arginfo.h
-make ./stub/sqlipart_arginfo.h
+
 #make ./stub/irow_arginfo.h
 make ./stub/iconfig_arginfo.h
 make ./stub/ds_arginfo.h

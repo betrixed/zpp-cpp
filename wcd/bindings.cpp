@@ -15,10 +15,10 @@
 #include "model.h"
 #endif
 
-#ifndef SQL_ARGINFO_H
-#define SQL_ARGINFO_H
+#ifndef BINDINGS_ARGINFO_H
+#define BINDINGS_ARGINFO_H
 extern "C" {
-	#include "stub/sqlipart_arginfo.h"
+	#include "stub/bindings_arginfo.h"
 };
 #endif
 
@@ -680,13 +680,13 @@ Bindings::select()
 }
 
 void 
-Bindings::orderBy(zstr_user cname, bool descend)
+Bindings::orderBy(zval_user colspec, bool descend)
 {
 	zval_mgr args;
 
 	htab_write hw(args);
 
-	hw.set(SQSTR.column, cname);
+	hw.set(SQSTR.column, colspec);
 	zval_mgr boolmgr(descend); // otherwise taken as integer value
 	hw.set(SQSTR.descend, boolmgr);
 
@@ -856,6 +856,25 @@ ZEND_METHOD(Wcd_Sql_Bindings, iSql)
 	const zobj_mgr& result = cobj->isql();
 
 	result.return_zv(return_value);
+}
+
+ZEND_METHOD(Wcd_Sql_Bindings, orderBy)
+{
+	zarg_exec args(execute_data);
+
+	zval_user colspec( args.need(1));
+	bool descend = false;
+	
+
+	args.zbool(descend, args.option(2));
+
+	if (!args.throw_errors())
+	{
+		Bindings* cobj = zval_toc<Bindings>(ZEND_THIS);
+		cobj->orderBy(colspec, descend);
+	}
+
+
 }
 
 /* public function primeJoin(TColumns $tc): JoinTables {} */

@@ -167,7 +167,7 @@ class IBuild {
 
     public function oneRow() : mixed {}
 
-    public function orderBy(string $column, bool $descend = false) : void {}
+    public function orderBy(mixed $column, bool $descend = false) : void {}
 
     public function seqLastValue(string $seqname): ?int {}
 

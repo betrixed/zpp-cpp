@@ -26,6 +26,13 @@ extern "C" {
 };
 #endif
 
+#ifndef BINDINGS_ARGINFO_H
+#define BINDINGS_ARGINFO_H
+extern "C" {
+	#include "stub/bindings_arginfo.h"
+};
+#endif
+
 namespace wcd {
 
 zend_class_entry* zintf_ce_Sql_IfSql;
@@ -576,7 +583,8 @@ ISql::orderBy(htab_read obind)
 
 	auto ix = wk.key();
 	auto order_tab = wk.value();
-
+	zstr_user alias;
+	zstr_user attr;
 	for(wk.start(obind); wk.ok(); wk.next())
 	{
 		if (order_tab.isArray())
@@ -592,10 +600,13 @@ ISql::orderBy(htab_read obind)
 			if (col.isObject())
 			{
 				TableAttr* ta = zval_toc<TableAttr>(col);
-				buf << ta->getTable() << '.' << this->quoteName(ta->getAttr());
+				alias = ta->getTable();
+				attr = ta->getAttr();
+				buf << alias << '.' << this->quoteName(attr);
 			}
 			else {
-				buf << this->quoteName(col.zstr());
+				attr = col.zstr();
+				buf << this->quoteName(attr);
 			}
 			zval_user descend = order.get(SQSTR.descend);
 			if (descend.isTrue()) {
@@ -1066,11 +1077,10 @@ ISql::fromJT(Bindings& bind, JoinTables* jt)
 		else  if (partid == SqlPartId::ICOL_PID)
 		{
 			TColumns* tcol = static_cast<TColumns*>(left);
-			zobj_mgr  subq(tcol->getOwner());
+			zobj_mgr  owner(tcol->getOwner());
 			// Owner is an "Operation" , usually a Select
 			//showobj("subq owner",subq);
-			Operation* op = zobj_toc<Operation>(subq);
-			zobj_mgr   plist_mgr = op->getSqlParams();
+			zobj_mgr plist_mgr(owner.call(SQSTR.get_sql_params));
 		    ParamList* plist = zobj_toc<ParamList>(plist_mgr);
 		    zstr_mgr   sub_sql = plist->getSql();
 

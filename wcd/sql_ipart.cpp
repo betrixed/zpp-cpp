@@ -145,7 +145,7 @@ void sql_strtab::init()
 	orderby  = "orderby";
 	where  = "where";
 
-	getsql = "getsql";
+	get_sql_params = "getsqlparams";
 	valuesdefault = "valuesdefault";
 	eager_load = "eager_load";
 	statement = "stmt";

@@ -332,7 +332,7 @@ namespace wcd {
 
 		void offset(int value);
 
-		void orderBy(zstr_user column, bool descend=false);
+		void orderBy(zval_user column, bool descend=false);
 
 		void update(zstr_user column, zval_user value);
 

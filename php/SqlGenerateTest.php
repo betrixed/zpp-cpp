@@ -52,8 +52,11 @@ class SqlGenerateTest extends Asserts
      {
           $ta = TableAttr::splitDot("T.attr_name");
           $this->assertIsClass($ta, TableAttr::class);
+          
+          $this->assertEquals($ta->getTable(), "T");
+           $this->assertEquals($ta->getAttr(), "attr_name");
           $s = TableAttr::splitDot("attr_name");
-           $this->assertIsString($s, TableAttr::class);
+          $this->assertEquals($s, "attr_name");
      }
      public function getCache() : ?ICache
      {

@@ -619,7 +619,7 @@ using namespace zpp;
 	}
 
 	void 
-	IBuild::orderBy(zstr_user colname, bool descend)
+	IBuild::orderBy(zval_user colname, bool descend)
 	{
 		Bindings& bind = bindings();
 
@@ -996,17 +996,18 @@ ZEND_METHOD(Wcd_IBuild, oneRow)
 //public function orderBy(string $column, bool $descend = false) : void
 ZEND_METHOD(Wcd_IBuild, orderBy)
 {
-	zend_string* colname;
+	zarg_exec args(execute_data);
+
 	bool         descend = false;
+	zval_user    colspec(args.need(1));
 
-	ZEND_PARSE_PARAMETERS_START(1,2)
-	Z_PARAM_STR(colname)
-	Z_PARAM_OPTIONAL
-	Z_PARAM_BOOL(descend)
-	ZEND_PARSE_PARAMETERS_END();
+	args.zbool(descend, args.option(2));
 
-	IBuild* cobj = zval_toc<IBuild>(ZEND_THIS);
-	cobj->orderBy(colname, descend);
+	if (!args.throw_errors())
+	{
+		IBuild* cobj = zval_toc<IBuild>(ZEND_THIS);
+		cobj->orderBy(colspec, descend);
+	}
 }
 
 //public function seqLastValue(string $seqname): ?int
