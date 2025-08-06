@@ -686,7 +686,17 @@ Bindings::orderBy(zval_user colspec, bool descend)
 
 	htab_write hw(args);
 
-	hw.set(SQSTR.column, colspec);
+	if (colspec.isString())
+	{
+		zval_mgr ta_mgr = TableAttr::splitDot(colspec);
+
+		hw.set(SQSTR.column, ta_mgr);
+	}
+	else 
+	{
+		hw.set(SQSTR.column, colspec);
+	}
+	
 	zval_mgr boolmgr(descend); // otherwise taken as integer value
 	hw.set(SQSTR.descend, boolmgr);
 
@@ -720,7 +730,7 @@ Bindings::limit(zval_user limit, zval_user offset)
 	htab_write hw(data);
 
 	hw.set(SQSTR.limit, limit);
-	if (!offset.empty())
+	if (offset.ok())
 	{
 		hw.set(SQSTR.offset, offset);
 	}

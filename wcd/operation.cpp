@@ -30,9 +30,10 @@ void
 Operation::construct(zobj_user db)
 {
 	db_ = db;
-	IDriver* dr = zobj_toc<IDriver>(db);
 
-	bind_ = dr->newBindings();
+	IDriver& dr = driver();
+
+	bind_ = dr.newBindings();
 
 	zobj_user self(vobj());
 	zval_mgr arg(bind_);
@@ -87,7 +88,7 @@ Operation::getRows(int fetch)
 {
 	zval_mgr result;
 
-	zobj_mgr simple( prepare( fetch ));
+	zobj_mgr simple = prepare( fetch );
 
 	if (simple.ok())
 	{
@@ -101,8 +102,25 @@ Operation::getRows(int fetch)
 zobj_mgr
 Operation::getSqlParams()
 {
-	Bindings& bind = *zobj_toc<Bindings>(bind_);
+	Bindings& bind = bindings();
 	return bind.getParamList();
+}
+
+/* this throws away the ParamList object
+*/
+zstr_mgr 
+Operation::getSql()
+{
+	zstr_mgr sql;
+
+	zobj_user self(vobj());
+	zobj_mgr pobj = self.call(SQSTR.get_sql_params);
+	if (pobj.ok())
+	{
+		ParamList* plist = zobj_toc<ParamList>(pobj);
+		sql = plist->getSql();
+	}
+	return sql;
 }
 
 void 
@@ -129,20 +147,28 @@ Operation::prepare(int fetch)
 	}
 
 	zobj_mgr s = Simple::omg.new_zobj();
-	Simple* sobj = zobj_toc<Simple>(s);
 
-	Bindings& bind = *zobj_toc<Bindings>(bind_);
+	Simple* sobj = zobj_toc<Simple>(s);
+	sobj->construct(db_, fetch);
+	//showobj("Simple", s);
+
+	Bindings& bind = bindings();
 	zval_mgr retvals = bind.get(ISql::SQL_RETURN);
 
 	if (retvals.ok())
 	{
 		sobj->returnsValues(true);
 	}
-	zobj_mgr pobj_mgr = getSqlParams();
+
+	zobj_user self(vobj());
+
+	zobj_mgr pobj_mgr = self.call(SQSTR.get_sql_params);
 	ParamList* plist = zobj_toc<ParamList>(pobj_mgr);
 	bind.wipe();
 
 	zstr_mgr sql = plist->getSql();
+	//showstr("prepare", sql);
+
 	sobj->prepare(sql);
 
 	htab_read values( plist->getValues());
@@ -159,7 +185,7 @@ Operation::prepare(int fetch)
 void 
 Operation::returns(htab_read list)
 {
-	Bindings& bind = *zobj_toc<Bindings>(bind_);
+	Bindings& bind = bindings();
 	bind.addarray(ISql::SQL_RETURN, list);
 }
 
@@ -188,7 +214,7 @@ Operation::where(zval_user lattr, zval_user rattr, int op, int blogic)
 		blogic = JoinExpr::B_AND;
 	}
 	zstr_user bstr = JoinExpr::boolStr(blogic);
-	Bindings& bind = *zobj_toc<Bindings>(bind_);
+	Bindings& bind = bindings();
 	bind.where(lattr, opstr, rattr, bstr);
 
 }
@@ -196,7 +222,7 @@ Operation::where(zval_user lattr, zval_user rattr, int op, int blogic)
 void 
 Operation::wipe()
 {
-	Bindings& bind = *zobj_toc<Bindings>(bind_);
+	Bindings& bind = bindings();
 	bind.wipe();
 
 	joiner_ = JoinTables::omg.new_zobj();
@@ -338,6 +364,17 @@ ZEND_METHOD(Wcd_Sql_Operation, getSqlParams)
 	Operation* cobj = zval_toc<Operation>(ZEND_THIS);
 
 	zobj_mgr result = cobj->getSqlParams();
+
+	result.move_zv(return_value);
+}
+
+ZEND_METHOD(Wcd_Sql_Operation, getSql)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	Operation* cobj = zval_toc<Operation>(ZEND_THIS);
+
+	zstr_mgr result = cobj->getSql();
 
 	result.move_zv(return_value);
 }

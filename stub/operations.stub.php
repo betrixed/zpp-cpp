@@ -6,7 +6,7 @@
 namespace Wcd\Sql;
 
 class Simple {
-	public readonly ?Bindings $bindings = null;
+	
 
 	public function __construct(IDriver $db, ?int $fetch = null);
 
@@ -45,6 +45,8 @@ class Simple {
 };
 
 class Operation {
+	public readonly ?Bindings $bind;
+
 	public function __construct(IDriver $db);
 
 	public function __destruct();
@@ -60,7 +62,9 @@ class Operation {
 
 	public function getRows(?int $fmode = null) : mixed {}
 
-	public function getSqlParams() : ParamList;
+	public function getSqlParams() : ParamList {}
+
+	public function getSql() : string {}
 
 	public function limit(mixed $ct, int $start = 0) : void {}
 
@@ -76,3 +80,33 @@ class Operation {
 
 	public function wipe() : void {}
 };
+
+class Select extends Operation {
+	public function __construct(IDriver $db, bool $autoAlias = false);
+
+	public function __destruct();
+
+	public function add(array $cols) : void {}
+
+	public function addJoin(
+		  IColumns $ltable, 
+		  ?IColumns $rtable = null, 
+		  int $jtype = JoinInfo::J_INNER) : JoinInfo {}
+
+	public function addTable(
+		string $table, 
+		?string $alias = null, 
+		?array $cols=null) : TColumns {}
+
+	
+
+	public function getRenamed() : array {}
+
+	public function getSqlParams() : ParamList {}
+
+	public function icols() : IColumns {}
+
+	public function setAlias(string $alias) void {}
+
+};
+

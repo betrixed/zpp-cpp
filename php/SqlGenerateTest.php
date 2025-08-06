@@ -12,6 +12,7 @@ use Wcd\Sql\{
     Select,
     TColumns,
     Literal,
+    Param,
     JoinExpr,
     JoinInfo,
     TableAttr,
@@ -89,6 +90,31 @@ class SqlGenerateTest extends Asserts
           $this->assertTrue(count($names) > 0);
           
            $loader->setThrowNotFound(true);
+     }
+     
+     public function testCategoriesSet()
+     {
+         $id = 1490;
+         $servers = Services::getOne(IServer::class);
+         $db = $servers->getConnect("pcanex");
+
+        $sel = new Select($db);
+        $c = $sel->addPrime('blog_category', 'C', ['id', 'name', 'name_clean']);
+        $b = $sel->addTable('blog_to_category', 'B', ['blog_id']);
+        $j1 = $sel->addJoin($b, $c, JoinInfo::J_LEFT);
+        $j1->add('category_id', 'id');
+        //Param adds a value
+        $j1->add('blog_id', new Param($id));
+        $sel->orderBy('name');
+
+        
+        $sop = $sel->prepare();
+        
+        $result = $sop->getRows();
+        
+        $this->assertIsArray($result);
+        $this->assertNotEmpty($result);
+        
      }
      
      public function gen1(IDriver $db) : string

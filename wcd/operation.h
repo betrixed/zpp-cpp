@@ -27,6 +27,19 @@ protected:
 
 	void genSql();
 
+	Bindings& bindings() {
+		return *zobj_toc<Bindings>(bind_);
+	}
+
+	IDriver& driver() {
+		return *zobj_toc<IDriver>(db_);
+	}
+	
+	JoinTables& joiner() 
+	{
+		zobj_user jobj = getJoiner();
+		return *zobj_toc<JoinTables>(jobj);
+	}
 public:
 
 	static base_obj_mgr<Operation> omg;
@@ -40,6 +53,7 @@ public:
 
 	zval_mgr firstRow(int fetch);
 	
+
 	zobj_user getJoiner();
 
 	htab_read getParams();
@@ -47,6 +61,8 @@ public:
 	zval_mgr getRows(int fetch);
 
 	virtual zobj_mgr getSqlParams();
+
+	zstr_mgr getSql();
 
 	void limit(zval_user ct, zval_user start);
 
