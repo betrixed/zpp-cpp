@@ -16,6 +16,7 @@ libtool
 run-tests.php
 /nbproject/*
 /nbproject/private/
+/tests/pcan_models/**
 /tests/_data/schema.*
 /tests/_models/**
 rdebug.sh

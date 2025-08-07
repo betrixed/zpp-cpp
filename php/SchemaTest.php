@@ -5,8 +5,7 @@ use Wcc\{
     Config,
     ReadCache,
     ReflectCache,
-    Services,
-    XmlWrite,
+    Services
 };
 
 use Wcd\{

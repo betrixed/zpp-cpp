@@ -51,6 +51,8 @@ public:
 	zstr_intern  svckey_str;
 	zstr_intern  active_str;
 	zstr_intern  config_str;
+		
+	zstr_intern  active_cfg;
 
 	zstr_intern  alias_str;
 	zstr_intern  dbcache_str;
@@ -87,6 +89,7 @@ public:
 		svckey_str = "activekey";
 		active_str = "connect";
 		config_str = "configure";
+		active_cfg = "activecfg";
 
 		alias_str = "alias";
 		dbcache_str = "dbcache";
@@ -228,10 +231,13 @@ IServer::getConnect(zstr_user name)
 		// call keyed activation function
 		Services::service(key);
 	}
+	class_data cd(IServer::omg.class_entry_);
+	zstr_mgr   name_mgr;
 
 	if (!name.ok())
 	{
-		name = ISV.default_name;
+		name_mgr = cd.static_property(ISV.active_cfg);
+		name = name_mgr;
 	}
 
 	zobj_mgr conn(active_.get(name));
@@ -258,9 +264,26 @@ IServer::getConnect(zstr_user name)
 zobj_mgr //static 
 IServer::connect(zstr_user name)
 {
+	zstr_mgr name_mgr;
+
 	zobj_user me = Services::getOne(IServer::omg.class_name());
 
 	IServer* s = zobj_toc<IServer>(me);
+
+	class_data cd(IServer::omg.class_entry_);
+
+	if (!name.ok())
+	{
+		
+		name_mgr = cd.static_property(ISV.active_cfg);
+		name = name_mgr;
+	}
+	else {
+		zval_mgr value(name);
+		cd.static_property(ISV.active_cfg, value);
+	}
+
+	
 
 	return s->getConnect(name);
 }

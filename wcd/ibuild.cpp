@@ -134,13 +134,9 @@ using namespace zpp;
 		{
 			htab_walk wk;
 			auto item = wk.value();
-			for(wk.start(p0.zarray()); wk.ok(); wk.next())
+			for(wk.start(aw); wk.ok(); wk.next())
 			{
-				//Only process arrays
-				if (item.isArray())
-				{
-					where_list(item.zarray());
-				}
+				where_list(item.zarray());
 			}
 		}
 		else {

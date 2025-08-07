@@ -19,6 +19,10 @@ use Wcd\Sql\{
     Expr
 };
 
+use Pcan\Models\BlogRevision;
+
+use Wcd\Models\Generate;
+
 class SqlGenerateTest extends Asserts
 {
 
@@ -75,10 +79,64 @@ class SqlGenerateTest extends Asserts
          return __CLASS__ . '_2.blog_sql_test';
      }
      
+     public function testPcanModels()
+     {
+        $con = IServer::connect("pcanex");
+
+        $schema = $con->getSchema();
+
+        $tables = $schema->getTables();
+        //string $folder, string $namespace, ?array $mappings = null,
+        //    \Closure $output = null)
+        
+        $cfg = $con->iConfig();
+        
+        $nspace = $cfg->get("model_ns");
+         
+        $finder = Services::service("finder");
+
+        $paths = $finder->getNSPaths();
+        
+        $path = $paths[$nspace] ?? null;
+        
+        $this->assertNotEmpty($path);
+        
+        $dos = Services::service('dos');
+
+        $dos->rm_alldir($path);
+        
+        $result = Generate::make(
+                        $con,
+                        $path,
+                        $nspace,
+                        null,
+                        function (string $s) {
+                            
+                        });
+
+        $ok = is_array($tables) && !empty($tables) && ($result === count($tables));
+        $this->assertTrue($ok);
+     }
+     
+     
+     public function testIBuildWhere()
+     {
+        $servers = Services::getOne(IServer::class);
+        $db = $servers->getConnect("pcanex");
+        
+        $id = 1490;
+        $rid = 2;
+        $robj = BlogRevision::findFirst(['blog_id', '=', $id], ['revision', '=', $rid]);
+        
+        $this->assertIsObject($robj);
+        
+        $this->assertEquals($robj->blog_id, $id);
+        $this->assertEquals($robj->revision, $rid);
+        
+     }
      public function testColumnsData()
      {
-          $servers = Services::getOne(IServer::class);
-          $db = $servers->getConnect("pcanex");
+          $db = IServer::Connect("pcanex");
           
           $loader = Services::service("loader");
           $loader->setThrowNotFound(false);

@@ -70,6 +70,12 @@ public:
 	zstr_intern  rollback_fn;
 	zstr_intern  setattribute_fn;
 
+	zstr_intern  cfg_name;
+	zstr_intern  db_name;
+	zstr_intern  tbl_models;
+	zstr_intern  iconfig_key;
+	zstr_intern  schema_def;
+
 	DBSInit() : state_init() {}
 		
 
@@ -105,6 +111,13 @@ void DBSInit::init() {
 		readschema_fn = "readschema";
 		rollback_fn = "rollback";
 		setattribute_fn = "setattribute";
+
+		cfg_name = "cfg_name";
+		db_name = "db_name";
+		tbl_models = "table_models";
+		iconfig_key = "cfg";
+		schema_def = "schemaDef";
+
 	}
 
 DBSInit DBS;
@@ -122,6 +135,35 @@ IDriver::construct(zobj_user icfgobj, zstr_user name)
 	IConfig* cfg = icfg_c();
 	db_name_ = cfg->getDatabase();
 	isql_ = cfg->newSql();
+}
+
+void 
+IDriver::debug_info(htab_write di)
+{
+	/*
+zobj_mgr    icfg_;
+		zstr_mgr    cfg_name_;
+		zstr_mgr	db_name_;
+		zobj_mgr    isql_;
+
+		zval_mgr 	handle_;
+
+		int         ifetch_;
+		bool        logging_;
+		zstr_mgr    lastsql_;
+
+		htab_mgr    table_models_;
+
+		zobj_mgr    schema_def_;
+*/
+
+	di.set(DBS.cfg_name, cfg_name_);
+	di.set(DBS.db_name, db_name_);
+	di.set(DBS.tbl_models, table_models_);
+	di.set(DBS.iconfig_key, icfg_);
+	di.set(DBS.schema_def, schema_def_);
+	di.set(DBS.fetch_str, ifetch_);
+
 }
 
 zobj_mgr  

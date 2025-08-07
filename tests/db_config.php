@@ -33,7 +33,8 @@ return [
             'collation' => 'utf8mb4_unicode_ci',
             'database' => 'pcanex',
             'username' => 'pcanex',
-            'password' => 'WhatsUpDoc'
+            'password' => 'WhatsUpDoc',
+            'model_ns' => 'Pcan\Models',
         ],
         
         'sqlite3' => [

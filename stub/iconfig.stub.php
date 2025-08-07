@@ -36,7 +36,8 @@ class IServer {
 
     const string DEFAULT_NAME = "default";
 
-
+    public static string $activecfg = "default";
+    
     public static function Connect(?string $name = null) : ?IDriver {}
 
     public function __construct(string $svkey) {}

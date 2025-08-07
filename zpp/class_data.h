@@ -53,8 +53,12 @@ class class_data {
                         zend_type datatype, int accessflag = ZEND_ACC_PUBLIC);
         //void add_constant(const zstr_intern& name,  zval_user value, int flags = ZEND_ACC_PUBLIC);
 
-
+        // read
         zval_mgr static_property(zend_string* s);
+        
+        // write
+        void static_property(zend_string* pname, zval* value);
+
         zval_mgr constant_value(zend_string* s);
   
 

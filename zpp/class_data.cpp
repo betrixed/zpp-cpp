@@ -143,6 +143,12 @@ class_data::std_object()
     return zobj_mgr(std::move(init));
 }
 
+void
+class_data::static_property(zend_string* pname, zval* value)
+{
+    zend_update_static_property_ex(class_entry_, pname, value);
+}
+
 zval_mgr 
 class_data::static_property(zend_string* s)
 {

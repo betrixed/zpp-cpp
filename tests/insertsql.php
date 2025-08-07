@@ -46,6 +46,7 @@ $vendor = "../hub/private/vendor";
 
 $finder->addPathArray([
     $cfg->models_namespace => $cfg->models_dir,
+    "Pcan\Models" => "tests/pcan_models",
 ]);
 if (!file_exists($cfg->models_dir)) {
     Dos::make_dir($cfg->models_dir);
