@@ -428,7 +428,7 @@ IColumns::debug_info(htab_write di)
 }	
 
 void 
-IColumns::construct(zval_user owner)
+IColumns::construct(zobj_user owner)
 {
 	owner_ = owner;
 }
@@ -441,9 +441,9 @@ void IColumns::clear()
 }
 		
 void 
-IColumns::add(zval_user columns)		
+IColumns::add(htab_read columns)		
 {
-	if (columns.isArray())
+	if (columns.ok())
 	{
 		htab_walk wk;
 
@@ -455,7 +455,7 @@ IColumns::add(zval_user columns)
 		auto name = wk.value();
 		htab_write names(colnames_);
 
-		for(wk.start(columns.zarray()); wk.ok(); wk.next())
+		for(wk.start(columns); wk.ok(); wk.next())
 		{
 			if (ix.isLong()) 
 			{
@@ -658,6 +658,7 @@ Param::construct(zval_user zp)
 }; //namespace wcd
 
 using namespace wcd;
+using namespace zpp;
 
 ZEND_METHOD(Wcd_Sql_Literal, __construct)
 {
@@ -798,15 +799,18 @@ ZEND_METHOD(Wcd_Sql_JoinExpr, boolstr)
 
 ZEND_METHOD(Wcd_Sql_IColumns, __construct)
 {
-	zval* owner;
-
-	ZEND_PARSE_PARAMETERS_START(1,1)
-	Z_PARAM_OBJECT_OR_NULL(owner)
-	ZEND_PARSE_PARAMETERS_END();
+	zarg_exec args(execute_data);
 
 
-	IColumns* cobj = zval_toc<IColumns> (ZEND_THIS);
-	cobj->construct(owner);
+	zobj_mgr owner;
+
+	args.obj_null(owner, args.need(1));
+
+	if (!args.throw_errors())
+	{
+		IColumns* cobj = zval_toc<IColumns> (ZEND_THIS);
+		cobj->construct(owner);
+	}
 }
 
 ZEND_METHOD(Wcd_Sql_IColumns, getPartId)
@@ -882,12 +886,17 @@ ZEND_METHOD(Wcd_Sql_IColumns, setColAlias)
 
 ZEND_METHOD(Wcd_Sql_IColumns, add)
 {
-	zval* more;
-	ZEND_PARSE_PARAMETERS_START(1,1)
-	Z_PARAM_ARRAY(more)
-	ZEND_PARSE_PARAMETERS_END();
-	IColumns* cobj = zval_toc<IColumns> (ZEND_THIS);
-	cobj->add(more);
+	zarg_exec args(execute_data);
+
+	htab_read cols;
+
+	args.zarray(cols, args.need(1));
+
+	if (!args.throw_errors())
+	{
+		IColumns* cobj = zval_toc<IColumns> (ZEND_THIS);
+		cobj->add(cols);
+	}	
 }
 
 ZEND_METHOD(Wcd_Sql_IColumns, unsetCol)

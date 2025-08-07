@@ -32,6 +32,9 @@ public:
 	bool zstring(zstr_user& value, zval* arg);
 	bool zstring_null(zstr_user& value, zval* arg);
 
+	bool obj(zobj_user& value, zval* arg);
+	bool obj_null(zobj_user& value, zval* arg);
+
 	bool obj_ofclass(zobj_user& value, zval* arg, zend_class_entry* ce);
 	bool obj_ofclass_null(zobj_user& value, zval* arg, zend_class_entry* ce);
 	

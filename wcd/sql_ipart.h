@@ -336,7 +336,7 @@ namespace wcd {
 
 		IColumns() : SqlPartId(ICOL_PID) {}
 
-		void construct(zval_user owner);
+		void construct(zobj_user owner);
 
 		void clear();
 
@@ -368,7 +368,7 @@ namespace wcd {
 
 		void setColAlias(zstr_user name, zstr_user alias);
 
-		void add(zval_user columns);
+		void add(htab_read columns);
 
 		void unsetCol(zstr_user key)
 		{

@@ -139,6 +139,33 @@ zarg_exec::obj_ofclass_null(zobj_user& value, zval* arg, zend_class_entry* ce)
 	return false;
 }
 
+bool 
+zarg_exec::obj(zobj_user& value, zval* arg)
+{
+	value = zobj_user(arg);
+	bool result = value.ok();
+	if (!option_ && !result)
+	{
+		error() << "; Expected object";
+	}
+	return result;
+}
+
+bool 
+zarg_exec::obj_null(zobj_user& value, zval* arg)
+{
+	zval_user test(arg);
+	int itype = test.ref_type();
+	if (itype != IS_OBJECT && itype != IS_NULL)
+	{
+		if (!option_) {
+			error() << "; Expected Object or NULL";
+		}
+		return false;
+	}
+	return true;
+}
+
 bool
 zarg_exec::obj_ofclass(zobj_user& value, zval* arg, zend_class_entry* ce)
 {

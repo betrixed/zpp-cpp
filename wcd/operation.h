@@ -58,7 +58,7 @@ public:
 
 	htab_read getParams();
 
-	zval_mgr getRows(int fetch);
+	zval_mgr getRows(int fetch = IDriver::FETCH_ASSOC);
 
 	virtual zobj_mgr getSqlParams();
 

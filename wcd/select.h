@@ -41,7 +41,7 @@ public:
 
 	zval_mgr getRenamed();
 
-	zobj_mgr iCols();
+	zobj_user iCols();
 
 	void setAlias(zstr_user alias);
 

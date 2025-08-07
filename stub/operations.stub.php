@@ -106,7 +106,7 @@ class Select extends Operation {
 
 	public function icols() : IColumns {}
 
-	public function setAlias(string $alias) void {}
+	public function setAlias(string $alias) : void {}
 
 };
 
