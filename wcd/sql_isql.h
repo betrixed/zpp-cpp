@@ -310,7 +310,7 @@ namespace wcd {
 
 		zval* get(int key);
 
-		const obj_rc& isql() {
+		obj_ptr isql() {
 			return isql_;
 		}
 

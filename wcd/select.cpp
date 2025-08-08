@@ -272,11 +272,6 @@ ZEND_METHOD(Wcd_Sql_Select, setAlias)
 
 }
 
-PHP_MINIT_FUNCTION(Wcd_Select_reg)
-{
-	Select::omg.classEntry(register_class_Wcd_Sql_Select(Operation::omg.class_entry_));
-	return SUCCESS;
-}
 
 #endif
 

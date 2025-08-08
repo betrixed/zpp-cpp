@@ -23,9 +23,9 @@ obj_rc
 Insert::getSqlParams()
 {
 	Bindings& bind = this->bindings();
-	obj_rc isql_mgr = bind.iSql();
+	obj_ptr isql_ptr = bind.isql();
 
-	ISql* isql = zobj_toc<ISql>(isql_mgr);
+	ISql* isql = zobj_toc<ISql>(isql_ptr);
 
 	val_ptr idata = bind.get(ISql::SQL_INSERT);
 
@@ -51,7 +51,7 @@ Insert::getSqlParams()
 			{
 				coldata.set(name_ptr, false_val);
 			}
-			bind.add(ISql::SQL_INSERT, coldata);
+			bind.addarray(ISql::SQL_INSERT, coldata_rc);
 		}
 		else {
 			zend_throw_error(zend_ce_error,"Insert: values not set");
@@ -62,7 +62,7 @@ Insert::getSqlParams()
 
 	bind.wipe();
 
-	return plist_rc();
+	return plist_rc;
 }
 
 }; // namespace wcd

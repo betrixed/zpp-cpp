@@ -27,7 +27,7 @@ Update::set(str_ptr column, val_ptr value)
 	args.set(SQSTR.valuekey, value);
 
 	Bindings& bind = this->bindings();
-	bind.add(ISql::SQL_UPDATE, args_rc);
+	bind.addarray(ISql::SQL_UPDATE, args_rc);
 }
 
 obj_rc 
@@ -35,15 +35,15 @@ Update::getSqlParams()
 {
 	Bindings& bind = this->bindings();
 
-	obj_rc isql_mgr = bind.iSql();
+	obj_ptr isql_ptr = bind.isql();
 
-	ISql* isql = zobj_toc<ISql>(isql_mgr);
+	ISql* isql = zobj_toc<ISql>(isql_ptr);
 
 	obj_rc plist_rc = isql->update(bind);
 
 	bind.wipe();
 
-	return plist_rc();
+	return plist_rc;
 }
 
 }; // namespace wcd

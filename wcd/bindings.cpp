@@ -863,7 +863,7 @@ ZEND_METHOD(Wcd_Sql_Bindings, iSql)
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	Bindings* cobj = zval_toc<Bindings>(ZEND_THIS);
-	const obj_rc& result = cobj->isql();
+	obj_ptr result = cobj->isql();
 
 	result.return_zv(return_value);
 }

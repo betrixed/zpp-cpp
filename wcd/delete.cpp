@@ -23,7 +23,7 @@ Delete::getSqlParams()
 {
 	Bindings& bind = this->bindings();
 
-	obj_rc isql_mgr = bind.iSql();
+	obj_rc isql_mgr = bind.isql();
 
 	ISql* isql = zobj_toc<ISql>(isql_mgr);
 
@@ -31,7 +31,7 @@ Delete::getSqlParams()
 
 	bind.wipe();
 
-	return plist_rc();
+	return plist_rc;
 }
 
 }; // namespace wcd

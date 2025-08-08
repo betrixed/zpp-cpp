@@ -94,7 +94,9 @@ extern "C" {
 #include "wcd/irow.cpp"
 #include "wcd/operation.cpp"
 #include "wcd/select.cpp"
-
+#include "wcd/update.cpp"
+#include "wcd/insert.cpp"
+#include "wcd/delete.cpp"
  //SQL_IPART_CPP
 //#include "wcc/sql_ipart.cpp"
 //#include "wcc/sql_isql.cpp"
