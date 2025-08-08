@@ -8,19 +8,19 @@
 #define ZSTR_MGR_H
 
 #ifndef ZSTR_USER_H
-#include "zstr_user.h"
+#include "str_ptr.h"
 #endif
 
 namespace zpp {
 
-	class zstr_user;
-	class zval_mgr;
-	class zval_user;
+	class str_ptr;
+	class val_rc;
+	class val_ptr;
 	
-	class zstr_buffer;
+	class str_buf;
 	class zstr_temp;
 	
-	class zstr_mgr  : public zstr_user
+	class str_rc  : public str_ptr
 	{
 	protected:
 
@@ -28,49 +28,49 @@ namespace zpp {
 	    void lose();
 	    void bind(zend_string* rc);
 
-	    friend class zstr_user;
-	    friend class zval_mgr;
+	    friend class str_ptr;
+	    friend class val_rc;
 
 	public:
 
 		static void try_addref(zend_string* zs);
 		static bool try_decref(zend_string* zs);
 
-		~zstr_mgr();
+		~str_rc();
 
-	    zstr_mgr() : zstr_user()
+	    str_rc() : str_ptr()
 	    {   
 	    }
 		
-	    zstr_mgr(zend_string* p) : zstr_user(p)
+	    str_rc(zend_string* p) : str_ptr(p)
 	    {
 	        own();
 	    }
 
-		zstr_mgr(zstr_mgr&& rc) : zstr_user(rc.s)
+		str_rc(str_rc&& rc) : str_ptr(rc.s)
 	    {
 	        rc.s = nullptr;
 	    }
 
-		zstr_mgr(const zstr_mgr& rc) : zstr_user(rc.s)
+		str_rc(const str_rc& rc) : str_ptr(rc.s)
 	    {
 	        own();
 	    }
 
-	    zstr_mgr(const zstr_user& su) : zstr_user(su.s)
+	    str_rc(const str_ptr& su) : str_ptr(su.s)
 	    {
 	    	own();
 	    }
 
-	    zstr_mgr(zval* copy);
+	    str_rc(zval* copy);
 
-	    zstr_mgr(const zval_user& rc);
+	    str_rc(const val_ptr& rc);
 
-	    zstr_mgr(zval_mgr&& rc);
+	    str_rc(val_rc&& rc);
 
-	    zstr_mgr(zend_long ival);
+	    str_rc(zend_long ival);
 	    
-	    zstr_mgr(zstr_buffer&& m);
+	    str_rc(str_buf&& m);
 
 	   
 
@@ -87,15 +87,15 @@ namespace zpp {
 	    size_t size() const;
 	    const char* data() const;
 
-	    const zstr_mgr& operator=(const zstr_mgr& rc);
-	    const zstr_mgr& operator=(zend_string* rc);
-	    const zstr_mgr& operator=(zval* rc);
+	    const str_rc& operator=(const str_rc& rc);
+	    const str_rc& operator=(zend_string* rc);
+	    const str_rc& operator=(zval* rc);
 		 
-		const zstr_mgr& operator=(zstr_buffer&& m);
+		const str_rc& operator=(str_buf&& m);
 
-	    zstr_mgr& operator=(zval_mgr&& rc);
-	    zstr_mgr& operator=(zstr_mgr&& rc);
-	    zstr_mgr& operator=(zstr_temp&& rc);
+	    str_rc& operator=(val_rc&& rc);
+	    str_rc& operator=(str_rc&& rc);
+	    str_rc& operator=(zstr_temp&& rc);
 
 	    void move_zv(zval* ret);
 
@@ -103,44 +103,44 @@ namespace zpp {
 
 	    operator zend_string*() const { return (zend_string*) s; }
 
-	    const zstr_mgr& operator=(const zstr_user& rc);
+	    const str_rc& operator=(const str_ptr& rc);
 
-	    static zstr_mgr base64_decode(const unsigned char* c, size_t slen);
-	    static zstr_mgr base64_encode(const unsigned char* c, size_t slen);
+	    static str_rc base64_decode(const unsigned char* c, size_t slen);
+	    static str_rc base64_encode(const unsigned char* c, size_t slen);
 
-		static zstr_mgr empty_str();
+		static str_rc empty_str();
 
 
 	};
 
-	class zstr_empty : public zstr_mgr
+	class zstr_empty : public str_rc
 	{
 	public:
 		zstr_empty();
 	};
 	
 	/** A "persistent" string, not using emalloc and efree */
-	class zstr_perm : public zstr_mgr {
+	class zstr_perm : public str_rc {
 	public:
-		zstr_perm() : zstr_mgr() {}
+		zstr_perm() : str_rc() {}
 		zstr_perm(const char* c, size_t slen = 0);
 
 		operator zend_string*() const { return (zend_string*) s; }
 	};
 
 	/** A "temporary" string, during a request, uses emalloc and efree */
-	class zstr_temp : public zstr_mgr {
+	class zstr_temp : public str_rc {
 	public:
-		zstr_temp() : zstr_mgr() {}
+		zstr_temp() : str_rc() {}
 		zstr_temp(const char* c, size_t slen = 0);
 
 		operator zend_string*() const { return (zend_string*) s; }
 	};
 	
 	/** A "persistent" string stored as "interned", for module/class initialize */
-	class zstr_intern : public zstr_mgr {
+	class zstr_intern : public str_rc {
 	public:
-		zstr_intern() : zstr_mgr() {}
+		zstr_intern() : str_rc() {}
 		zstr_intern(const char* c, size_t slen = 0);
 
 		~zstr_intern() { 
@@ -157,5 +157,5 @@ namespace zpp {
 
 }; // namespace Php
 
-//zstr_mgr.h
+//str_rc.h
 #endif

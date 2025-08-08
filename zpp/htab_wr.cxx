@@ -2,20 +2,20 @@
 #define HTAB_WRITE_CPP
 
 #ifndef HTAB_WRITE_H
-#include "htab_write.h"
+#include "htab_wr.h"
 #endif
 
 
 #ifndef HTAB_MGR_H
-#include "htab_mgr.h"
+#include "htab_rc.h"
 #endif
 
 #ifndef ZVAL_MGR_H
-#include "zval_mgr.h"
+#include "val_rc.h"
 #endif
 
 #ifndef ZOBJ_MGR_H
-#include "zobj_mgr.h"
+#include "obj_rc.h"
 #endif
 
 #ifndef HTAB_WALK_H
@@ -27,16 +27,16 @@
 namespace zpp {
 
 void 
-htab_write::giveback(zval* mgr)
+htab_wr::giveback(zval* mgr)
 {
-	//printf("htab_write giveback\n");
-	zval_user test(mgr);
+	//printf("htab_wr giveback\n");
+	val_ptr test(mgr);
 	//showmem("giveback zval", test);
 	HashTable* h = test.zarray();
 	if (!h)
 	{
 		// try to clean
-		zval_mgr::try_decref(mgr);
+		val_rc::try_decref(mgr);
 		*mgr = {0};
 
 		h = zend_new_array(HT_MIN_SIZE);
@@ -48,7 +48,7 @@ htab_write::giveback(zval* mgr)
 	}
 	else 
 	{
-		htab_mgr::cowop(h);
+		htab_rc::cowop(h);
 		#ifdef HTAB_SHOW_MEMORY
 		zend_printf("cowop array %lx to zval %lx\n", h, mgr);	
 		#endif
@@ -57,35 +57,35 @@ htab_write::giveback(zval* mgr)
 	ht_ = h;
 }
 
-htab_write::htab_write(htab_mgr& mgr)
+htab_wr::htab_wr(htab_rc& mgr)
 {
 	// ensure both mgr, and write have same array rc==1
-	//printf("htab_write htab_mgr& mgr\n");
-	htab_mgr::cowop(mgr.ht_);
+	//printf("htab_wr htab_rc& mgr\n");
+	htab_rc::cowop(mgr.ht_);
 	ht_ = mgr.ht_;
 }
 
 
-htab_write::htab_write(zval_mgr& mgr)
+htab_wr::htab_wr(val_rc& mgr)
 {
 	giveback(mgr);
 }
 
-htab_write::htab_write(zval_user mgr)
+htab_wr::htab_wr(val_ptr mgr)
 {
 	giveback(mgr);
 }
 
-htab_write::htab_write(HashTable* h)
+htab_wr::htab_wr(HashTable* h)
 {
-	//printf("htab_write HashTable*\n");
+	//printf("htab_wr HashTable*\n");
 	ht_ = h;
 }
 
-htab_write::htab_write(const zval* p)
+htab_wr::htab_wr(const zval* p)
 {
 	if (p) {
-		ht_ = zval_user((zval*)p).zarray();
+		ht_ = val_ptr((zval*)p).zarray();
 	}
 	else {
 		ht_ = nullptr;
@@ -93,60 +93,60 @@ htab_write::htab_write(const zval* p)
 }
 
 
-void htab_write::push_back(HashTable* t)
+void htab_wr::push_back(HashTable* t)
 {
 	zval tmp = {0};
-	zval_user::array_bind(&tmp, t);
+	val_ptr::array_bind(&tmp, t);
 	if (zend_hash_next_index_insert(ht_, &tmp))
 	{
 		if (Z_TYPE_FLAGS(tmp) != 0)
-			zval_mgr::try_addref(&tmp);
+			val_rc::try_addref(&tmp);
 	}
 }
 
-void htab_write::push_back(zend_string* zs)
+void htab_wr::push_back(zend_string* zs)
 {
 	zval tmp = {0};
-	zval_user::string_bind(&tmp,zs);
+	val_ptr::string_bind(&tmp,zs);
 
 	if (zend_hash_next_index_insert(ht_, &tmp))
 	{
 		if (Z_TYPE_FLAGS(tmp) != 0) {
-			zval_mgr::try_addref(&tmp);
+			val_rc::try_addref(&tmp);
 		}
 		
 	}
 }
 
-void htab_write::push_back(zend_object* zo)
+void htab_wr::push_back(zend_object* zo)
 {
 	zval tmp = {0};
-	zval_user::object_bind(&tmp, zo);
+	val_ptr::object_bind(&tmp, zo);
 
 	if (zend_hash_next_index_insert(ht_, &tmp))
 	{
-		zval_mgr::try_addref(&tmp);
+		val_rc::try_addref(&tmp);
 	}
 }
 
-void htab_write::clear()
+void htab_wr::clear()
 {
 	if (ht_) {
-		//showarray("htab_write clear", ht_);
+		//showarray("htab_wr clear", ht_);
 		zend_hash_clean(ht_);
 	}
 }
 
-void htab_write::push_back(zval* zv)
+void htab_wr::push_back(zval* zv)
 {
 	if (zend_hash_next_index_insert(ht_, zv))
 	{
 		if (Z_TYPE_FLAGS_P(zv) != 0)
-			zval_mgr::try_addref(zv);
+			val_rc::try_addref(zv);
 	}
 }
 
-void htab_write::push_back(const char* s, std::size_t slen)
+void htab_wr::push_back(const char* s, std::size_t slen)
 {
 	zstr_temp temp(s, slen);
 	push_back((zend_string*)temp);
@@ -154,9 +154,9 @@ void htab_write::push_back(const char* s, std::size_t slen)
 
 
 void 
-htab_write::set(zval* key, zval* value)
+htab_wr::set(zval* key, zval* value)
 {
-	 zval_user test(key);
+	 val_ptr test(key);
 
 	 zval* result = nullptr;
 	 if (test.isLong())
@@ -172,19 +172,19 @@ htab_write::set(zval* key, zval* value)
 	 }
 	 if (result)
 	 {
-	 	zval_mgr::try_addref(value);
+	 	val_rc::try_addref(value);
 	 }
 }
-void htab_write::set(zval* key, zend_string* value)
+void htab_wr::set(zval* key, zend_string* value)
 {
 	zval temp = {0};
-	zval_user::string_bind(&temp, value);
+	val_ptr::string_bind(&temp, value);
 	set(key, &temp);
 }
 
 /*
 void 
-htab_write::set(zend_string* key, zend_string* value)
+htab_wr::set(zend_string* key, zend_string* value)
 {
 	zval_own temp(value);
 	set(key, temp);
@@ -192,60 +192,60 @@ htab_write::set(zend_string* key, zend_string* value)
 */
 
 
-void htab_write::set(zend_string* key, HashTable* t)
+void htab_wr::set(zend_string* key, HashTable* t)
 {
-	//showstr("htab_write::set  key", key);
+	//showstr("htab_wr::set  key", key);
 
 	zval tmp = {0};
-	zval_user::array_bind(&tmp, t);
+	val_ptr::array_bind(&tmp, t);
 	if (zend_hash_update(ht_, key, &tmp))
 	{	 
 		 if (Z_REFCOUNTED(tmp)) 
-			htab_mgr::try_addref(t);
+			htab_rc::try_addref(t);
 	}
-	//showarray("htab_write::set  HashTable* ", value);
+	//showarray("htab_wr::set  HashTable* ", value);
 }
 
-void htab_write::set(zend_string* key, zend_object* obj)
+void htab_wr::set(zend_string* key, zend_object* obj)
 {
 	zval temp = {0};
-	zval_user::object_bind(&temp, obj);
+	val_ptr::object_bind(&temp, obj);
 
 	if (zend_hash_update(ht_, key, &temp))
 	{
 		if (obj)
-			zobj_mgr::try_addref(obj);
+			obj_rc::try_addref(obj);
 	}
 }
 
-void htab_write::set(zend_string* key, double value)
+void htab_wr::set(zend_string* key, double value)
 {
 	zval temp = {0};
 	ZVAL_DOUBLE(&temp, value);
 	zend_hash_update(ht_, key, &temp);
 }
 
-void htab_write::set(zend_string* key, int val)
+void htab_wr::set(zend_string* key, int val)
 {
 	zval temp = {0};
 	ZVAL_LONG(&temp, val);
 	zend_hash_update(ht_, key, &temp);
 }
 
-void htab_write::setnull(zend_string* key)
+void htab_wr::setnull(zend_string* key)
 {
 	zval temp = {0};
 	ZVAL_NULL(&temp);
 	zend_hash_update(ht_, key, &temp);
 }
 
-void htab_write::set(zend_string* key, zval* val)
+void htab_wr::set(zend_string* key, zval* val)
 {
-	//showmem("htab_write::set zval*", val);
+	//showmem("htab_wr::set zval*", val);
 	if (zend_hash_update(ht_, key, val))
 	{
 		if (Z_TYPE_FLAGS_P(val) != 0) {
-			zval_mgr::try_addref(val);
+			val_rc::try_addref(val);
 			//showmem("try_addref zval*", val);
 		}
 	}	
@@ -253,31 +253,31 @@ void htab_write::set(zend_string* key, zval* val)
 
 /*
 void
-htab_write::set(zstr_user key, const zstr_mgr& value)
+htab_wr::set(str_ptr key, const str_rc& value)
 {
-	zval_mgr temp(value);
+	val_rc temp(value);
 	update(key, temp);
 }
 */
 
 void 
-htab_write::set(zend_string* key, zend_string* value)
+htab_wr::set(zend_string* key, zend_string* value)
 {
-	//showstr("htab_write::set key", key);
-	//showstr("htab_write::set value", value);
+	//showstr("htab_wr::set key", key);
+	//showstr("htab_wr::set value", value);
 	zval temp = {0};
-	zval_user::string_bind(&temp, value);
+	val_ptr::string_bind(&temp, value);
 	if (zend_hash_update(ht_, key, &temp))
 	{
 		if (Z_TYPE_FLAGS(temp) != 0)
 		{
-			zstr_mgr::try_addref(value);
+			str_rc::try_addref(value);
 		}
 	}
 }
 
 void 
-htab_write::set_null(zend_string* key)
+htab_wr::set_null(zend_string* key)
 {
 	zval temp = {0};
 	ZVAL_NULL(&temp);
@@ -285,14 +285,14 @@ htab_write::set_null(zend_string* key)
 }
 
 void 
-htab_write::set_null(zend_long idx)
+htab_wr::set_null(zend_long idx)
 {
 	zval temp = {0};
 	ZVAL_NULL(&temp);
 	zend_hash_index_update(ht_, idx, &temp);
 }
 
-void htab_write::set_null(zval_user key)
+void htab_wr::set_null(val_ptr key)
 {
 	if (key.isLong()) {
 		 return set_null(key.zlong());
@@ -303,7 +303,7 @@ void htab_write::set_null(zval_user key)
 	}
 }
 
-bool htab_write::unset(zval_user key)
+bool htab_wr::unset(val_ptr key)
 {
 	if (key.isLong()) {
 		 return unset(key.zlong());
@@ -316,63 +316,63 @@ bool htab_write::unset(zval_user key)
 }
 
 /*
-void htab_write::set(zend_long idx, zval_user value)
+void htab_wr::set(zend_long idx, val_ptr value)
 {
 	update(idx, value);
 }
 */
 
-void htab_write::set(zend_long idx, HashTable* value)
+void htab_wr::set(zend_long idx, HashTable* value)
 {
 	zval temp = {0};
-	zval_user::array_bind(&temp,value);
+	val_ptr::array_bind(&temp,value);
 	
 	if (zend_hash_index_update(ht_, idx, &temp))
 	{
 		if (Z_TYPE_FLAGS(temp) != 0)
 		{
-			htab_mgr::try_addref(value);
+			htab_rc::try_addref(value);
 		}
 	}
 }
 
-void htab_write::set(zend_long idx, zend_object* value)
+void htab_wr::set(zend_long idx, zend_object* value)
 {
 	zval temp = {0};
-	zval_user::object_bind(&temp,value);
+	val_ptr::object_bind(&temp,value);
 	
 	if (zend_hash_index_update(ht_, idx, &temp))
 	{
 		if (Z_TYPE_FLAGS(temp) != 0)
 		{
-			zval_mgr::try_addref(&temp);
+			val_rc::try_addref(&temp);
 		}
 	}
 }
 
-bool htab_write::unset(zend_string* skey)
+bool htab_wr::unset(zend_string* skey)
 {
 	return (zend_hash_del(ht_, skey) == SUCCESS);
 }
 
-bool htab_write::unset(zend_long idx)
+bool htab_wr::unset(zend_long idx)
 {
 	return (zend_hash_index_del(ht_, idx) == SUCCESS);
 }
 
-void htab_write::set(zend_long idx, zval* value)
+void htab_wr::set(zend_long idx, zval* value)
 {	
 	if (zend_hash_index_update(ht_, idx, value))
 	{
 		if (Z_TYPE_FLAGS_P(value) != 0)
 		{
-			zval_mgr::try_addref(value);
+			val_rc::try_addref(value);
 		}
 	}
 }
 
 void
-htab_write::merge(HashTable* src)
+htab_wr::merge(HashTable* src)
 {
 	htab_walk w;
 	auto key = w.key();
@@ -400,7 +400,7 @@ htab_write::merge(HashTable* src)
 
 
 void
-htab_write::removal(htab_read exkeys)
+htab_wr::removal(htab_rd exkeys)
 {
 	//showarray("exkeys", exkeys);
 
@@ -413,7 +413,7 @@ htab_write::removal(htab_read exkeys)
 		//showarray("extract from", ht_);
 		//showmem("value for key", exkey);
 
-		zval_user v2 = this->get(exkey);
+		val_ptr v2 = this->get(exkey);
 		
 		if (v2.ok()) 
 		{
@@ -423,23 +423,23 @@ htab_write::removal(htab_read exkeys)
 	}
 }
 
-void htab_write::push_back(const zval_mgr& zv) 
+void htab_wr::push_back(const val_rc& zv) 
 {
     push_back((zval*) zv);
 }
 
-void htab_write::push_back(int value) 
+void htab_wr::push_back(int value) 
 {
-	zval_mgr temp(value);
+	val_rc temp(value);
     push_back((zval*) temp);
 }
 
-void htab_write::push_back(zval_user zv) 
+void htab_wr::push_back(val_ptr zv) 
 {
     push_back((zval*) zv);
 }
 
-void htab_write::push_back(zstr_user su)
+void htab_wr::push_back(str_ptr su)
 {
     push_back((zend_string*) su);
 }

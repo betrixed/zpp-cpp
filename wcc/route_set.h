@@ -18,25 +18,25 @@ class   RouteSet : public base_d {
 protected:
 
 	void indexRoutes();
-	void indexItem(zval_user obj);
-	void indexRouteKey(zobj_user obj);
+	void indexItem(val_ptr obj);
+	void indexRouteKey(obj_ptr obj);
 	void copy_target(Route* r);
 	
 public:
-	htab_mgr fixed_;
-	htab_mgr vary_;
-	zstr_mgr file_;
-	htab_mgr nameIndex_;
+	htab_rc fixed_;
+	htab_rc vary_;
+	str_rc file_;
+	htab_rc nameIndex_;
 
 	// default modifications for route targets
-	zstr_mgr method_sfx_;
+	str_rc method_sfx_;
 
-	zstr_mgr prefix_;
-	zstr_mgr module_name_;
+	str_rc prefix_;
+	str_rc module_name_;
 
-	zval_mgr notFound_;
+	val_rc notFound_;
 
-	static zstr_user rex_url();
+	static str_ptr rex_url();
 
 	static base_obj_mgr<RouteSet> omg;
 
@@ -44,42 +44,42 @@ public:
 	
 	virtual ~RouteSet();
 
-	virtual void debug_info(htab_write di);
+	virtual void debug_info(htab_wr di);
 
 	Route* match(RouteMatch* rm);
 
 	bool compile(Route* route);
 	
-	void prefix(zstr_user start);
-	void module(zstr_user name);
-	void methodSfx(zstr_user name);
-	void notFound(zval_user target);
+	void prefix(str_ptr start);
+	void module(str_ptr name);
+	void methodSfx(str_ptr name);
+	void notFound(val_ptr target);
 	
-	htab_mgr serialize();
-	void     unserialize(htab_read htab);
+	htab_rc serialize();
+	void     unserialize(htab_rd htab);
 
-	void  addRouteList(htab_read list, zstr_user prefix, zstr_user module);
-	void  addRoute(zobj_user route);
+	void  addRouteList(htab_rd list, str_ptr prefix, str_ptr module);
+	void  addRoute(obj_ptr route);
 
-	zobj_mgr getRoute(zstr_user name);
-	zstr_mgr routeUrl(zstr_user name, htab_read params);
+	obj_rc getRoute(str_ptr name);
+	str_rc routeUrl(str_ptr name, htab_rd params);
 	
-	void setFile(zstr_user name) {
+	void setFile(str_ptr name) {
 		file_ = name;
 	}
 
-	zstr_user getFile() const {
+	str_ptr getFile() const {
 		return file_;
 	}
 
-	htab_read getFixed() {
+	htab_rd getFixed() {
 		return fixed_;
 	}
 
-	htab_read getVary() {
+	htab_rd getVary() {
 		return vary_;
 	}
-	static void  appendRoute(htab_write array, zstr_user key, Route* route);
+	static void  appendRoute(htab_wr array, str_ptr key, Route* route);
 
 	VIRTUAL_ZOBJPTR
 

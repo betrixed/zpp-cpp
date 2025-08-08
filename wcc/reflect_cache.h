@@ -12,32 +12,32 @@ using namespace zpp;
 
 class  ReflectCache : public base_d {
 protected:
-	htab_mgr  cache_;
+	htab_rc  cache_;
 public:
 
 	static const char* class_name;
 
 	static base_obj_mgr<ReflectCache> omg;
 
-	static zobj_user instance();
+	static obj_ptr instance();
 
 	static ReflectCache* cpp();
 
-	static zobj_mgr staticInstance(zstr_user class_name);
+	static obj_rc staticInstance(str_ptr class_name);
 
-	static zobj_mgr staticInstanceArgs(zstr_user class_name, htab_read args);
+	static obj_rc staticInstanceArgs(str_ptr class_name, htab_rd args);
 	
 	ReflectCache();
 
-	zobj_mgr getReflectClass(zstr_user class_name);
+	obj_rc getReflectClass(str_ptr class_name);
 
-	zobj_mgr newInstance(zstr_user class_name);
+	obj_rc newInstance(str_ptr class_name);
 
-	zobj_mgr newInstanceArgs(zstr_user class_name, htab_read args);
+	obj_rc newInstanceArgs(str_ptr class_name, htab_rd args);
 
 	void clear();
 	
-	virtual void debug_info(htab_write hw);
+	virtual void debug_info(htab_wr hw);
 	
 	VIRTUAL_ZOBJPTR
 	

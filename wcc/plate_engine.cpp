@@ -49,7 +49,7 @@ public:
 PEng_init PEI;
 
 void
-PlateEngine::debug_info(htab_write d)
+PlateEngine::debug_info(htab_wr d)
 {
 
 	d.set(PEI.search_list, search_);
@@ -62,12 +62,12 @@ PlateEngine::debug_info(htab_write d)
 
 }
 
-void PlateEngine::setLoadHtml(zobj_user obj)
+void PlateEngine::setLoadHtml(obj_ptr obj)
 {
 	 loadintf_ = obj;
 }
 
-zobj_user PlateEngine::getLoadHtml()
+obj_ptr PlateEngine::getLoadHtml()
 {
 	 return loadintf_;
 }
@@ -84,16 +84,16 @@ bool PlateEngine::getLabel()
 	return doLabel_;
 }
 
-void PlateEngine::store(zstr_user name, zobj_user plate)
+void PlateEngine::store(str_ptr name, obj_ptr plate)
 {
-	htab_write(stored_).set(name, plate);
+	htab_wr(stored_).set(name, plate);
 }
 
 void PlateEngine::clearPlates()
 {
 	//showobj("clearPlates1", this->zobj());
 	//* break circular references to self
-	htab_write map(stored_);
+	htab_wr map(stored_);
 
 	if (map.size()) {
 		htab_walk wk;
@@ -108,43 +108,43 @@ void PlateEngine::clearPlates()
 	stored_.init();
 }
 
-void PlateEngine::shareWithAll(htab_read data)
+void PlateEngine::shareWithAll(htab_rd data)
 {
-	htab_write(shared_data_).merge(data);
+	htab_wr(shared_data_).merge(data);
 	//showobj("shareWithAll", this->zobj());
 }
 
-void PlateEngine::setFinder(zobj_user pathlist)
+void PlateEngine::setFinder(obj_ptr pathlist)
 {
 	search_ = pathlist;
 }
 
-zobj_user 
+obj_ptr 
 PlateEngine::getFinder()
 {
 	//showobj("engine getPaths", this->zobj());
 	return search_;
 }
 
-zstr_mgr 
+str_rc 
 PlateEngine::dumpPaths()
 {
 	if (search_.isNull())
 	{
-		return zstr_mgr();
+		return str_rc();
 	}
-	zval_mgr ptab = zobj_user(search_).call(PEI.getpaths);
+	val_rc ptab = obj_ptr(search_).call(PEI.getpaths);
 
-	htab_read paths(ptab);
+	htab_rd paths(ptab);
 
 	size_t pcount = paths.size();
-	zstr_buffer dump;
+	str_buf dump;
 
 	dump << "<p>Search in (" << (int)pcount << ") <br>\n";
 	while(pcount)
 	{
 		--pcount;
-		zstr_user pval = paths.get(pcount);
+		str_ptr pval = paths.get(pcount);
 		dump << pval << "<br>\n";
 	}
 	dump << "</p>\n";
@@ -153,16 +153,16 @@ PlateEngine::dumpPaths()
 }
 
 // combine shared with override from plates_data
-htab_mgr
-PlateEngine::getData(zstr_user name)
+htab_rc
+PlateEngine::getData(str_ptr name)
 {
-	htab_mgr result;
+	htab_rc result;
 	
-	htab_write hw(result);
+	htab_wr hw(result);
 
 	hw.merge(shared_data_);
 
-	htab_read pdata = htab_read(plates_data_).get(name);
+	htab_rd pdata = htab_rd(plates_data_).get(name);
 	if (pdata.ok())
 	{
 		hw.merge(pdata);
@@ -170,21 +170,21 @@ PlateEngine::getData(zstr_user name)
 	return result;
 }
 
-void PlateEngine::setExtensions(zval_user sval)
+void PlateEngine::setExtensions(val_ptr sval)
 {
 	extensions_ = sval.zarray();
 }
 
-zval_mgr
+val_rc
 PlateEngine::getExtensions()
 {
-	return zval_mgr(extensions_);
+	return val_rc(extensions_);
 }
 
 void
-PlateEngine::registerFunction(zstr_user name, zval_user callback)
+PlateEngine::registerFunction(str_ptr name, val_ptr callback)
 {
-	htab_write(functions_).set(name, callback);
+	htab_wr(functions_).set(name, callback);
 }
 
 void
@@ -192,27 +192,27 @@ PlateEngine::clearPaths()
 {
 	if (search_.isNull())
 		return;
-	zobj_user(search_).call(PEI.clear_key);
+	obj_ptr(search_).call(PEI.clear_key);
 }
 
-zstr_mgr 
-PlateEngine::find(zstr_user name)
+str_rc 
+PlateEngine::find(str_ptr name)
 {
 	if (search_.isNull())
 	{
-		return zstr_mgr();
+		return str_rc();
 	}
 
-	zval_mgr arg1(name);
-	zval_mgr arg2(extensions_); // needs a wrapper
-	return  zobj_user(search_).call(PEI.find_leaf, arg1, arg2);
+	val_rc arg1(name);
+	val_rc arg2(extensions_); // needs a wrapper
+	return  obj_ptr(search_).call(PEI.find_leaf, arg1, arg2);
 }
 
-zval_mgr
-PlateEngine::getFunction(zstr_user name)
+val_rc
+PlateEngine::getFunction(str_ptr name)
 {
-	zval_mgr result;
-	htab_read hr(functions_);
+	val_rc result;
+	htab_rd hr(functions_);
 
 	if (hr.ok())
 	{
@@ -221,19 +221,19 @@ PlateEngine::getFunction(zstr_user name)
 	return result;
 }
 
-zstr_mgr PlateEngine::fileLabel(zstr_user file)
+str_rc PlateEngine::fileLabel(str_ptr file)
 {
-	zstr_buffer buf;
+	str_buf buf;
 
 	buf << "<!--" << file << " -->\n";
 
 	return buf;
 }
 
-zstr_mgr 
-PlateEngine::render(zstr_user name, htab_read data)
+str_rc 
+PlateEngine::render(str_ptr name, htab_rd data)
 {
-	zobj_mgr plate = getPlate(name);
+	obj_rc plate = getPlate(name);
 	if (!plate.ok())
 	{
 		plate = newPlate(name, false);
@@ -241,15 +241,15 @@ PlateEngine::render(zstr_user name, htab_read data)
 	Plate* p = zobj_toc<Plate>(plate);
 	return  p->render(data);
 }
-zobj_mgr 
-PlateEngine::newPlate(zstr_user name, bool store)
+obj_rc 
+PlateEngine::newPlate(str_ptr name, bool store)
 {
-	zobj_mgr result;
+	obj_rc result;
 
 	//zend_printf("newPlate fn\n");
 	result = Plate::omg.new_zobj();
 
-	zobj_user plate(result);
+	obj_ptr plate(result);
 	//showobj("plate zobj", plate);
 
 	fn_call_args<2> cplate;
@@ -262,20 +262,20 @@ PlateEngine::newPlate(zstr_user name, bool store)
 
 	if (store)
 	{
-		htab_write hw(stored_);
+		htab_wr hw(stored_);
 		hw.set(name, plate);
 	}
 	return result;
 }
 
-zobj_mgr 
-PlateEngine::getPlate(zstr_user name)
+obj_rc 
+PlateEngine::getPlate(str_ptr name)
 {
-	zobj_mgr result;
+	obj_rc result;
 
-	htab_read hw(stored_);
+	htab_rd hw(stored_);
 
-	zobj_user test = hw.get(name);
+	obj_ptr test = hw.get(name);
 
 	if (test.ok()) {
 		//showobj("return stored object", pobj);
@@ -285,9 +285,9 @@ PlateEngine::getPlate(zstr_user name)
 	return result;
 }
 
-void PlateEngine::storePlate(zobj_user plate)
+void PlateEngine::storePlate(obj_ptr plate)
 {
-	htab_write hw(stored_);
+	htab_wr hw(stored_);
 	if (plate.ok())
 	{
 		Plate* p = zobj_toc<Plate>(plate);
@@ -296,35 +296,35 @@ void PlateEngine::storePlate(zobj_user plate)
 }
 
 void 
-PlateEngine::mergePlateData(htab_read data, zstr_user tname)
+PlateEngine::mergePlateData(htab_rd data, str_ptr tname)
 {
-	htab_write hw(plates_data_);
-	htab_write pdata = hw.get(tname);
+	htab_wr hw(plates_data_);
+	htab_wr pdata = hw.get(tname);
 	if (pdata.isNull())
 	{
 		hw.set(tname, data);
 	}
 	else {
-		htab_write ta(pdata);
+		htab_wr ta(pdata);
 		ta.merge(data);
 	}
 }
 
 // templates should be  Array - list of names, or name
 void 
-PlateEngine::shareData(htab_read data, zval_user where)
+PlateEngine::shareData(htab_rd data, val_ptr where)
 {
 	if (where.isNull())
 	{
-		htab_write(shared_data_).merge(data);
+		htab_wr(shared_data_).merge(data);
 		return;
 	}
 
-	htab_mgr tarray;
+	htab_rc tarray;
 
 	if (where.isString())
 	{
-		htab_write temp(tarray);
+		htab_wr temp(tarray);
 		temp.push_back(where);
 	}
 	else if (where.isArray())
@@ -354,7 +354,7 @@ ZEND_METHOD(Wcc_PlateEngine, fileComment)
 	Z_PARAM_STR(file)
 	ZEND_PARSE_PARAMETERS_END();
 
-	zstr_mgr result = PlateEngine::fileLabel(file);
+	str_rc result = PlateEngine::fileLabel(file);
 	result.move_zv(return_value);
 }
 
@@ -400,7 +400,7 @@ ZEND_METHOD(Wcc_PlateEngine, getData)
 
 	auto cobj = zval_toc<PlateEngine>(ZEND_THIS);
 
-	htab_mgr data = cobj->getData(name);
+	htab_rc data = cobj->getData(name);
 	data.move_zv(return_value);
 }
 
@@ -413,7 +413,7 @@ ZEND_METHOD(Wcc_PlateEngine, getExtensions)
 	ZEND_PARSE_PARAMETERS_END();
 
 	auto cobj = zval_toc<PlateEngine>(ZEND_THIS);
-	zval_mgr ref = cobj->getExtensions();
+	val_rc ref = cobj->getExtensions();
 	ref.move_zv(return_value);
 }
 
@@ -424,7 +424,7 @@ ZEND_METHOD(Wcc_PlateEngine, getFinder)
 	ZEND_PARSE_PARAMETERS_END();
 
 	auto cobj = zval_toc<PlateEngine>(ZEND_THIS);
-	zobj_user ref = cobj->getFinder();
+	obj_ptr ref = cobj->getFinder();
 
 	ref.return_zv(return_value);
 }
@@ -447,7 +447,7 @@ ZEND_METHOD(Wcc_PlateEngine, getLoadHtml)
 	ZEND_PARSE_PARAMETERS_END();
 
 	auto cobj = zval_toc<PlateEngine>(ZEND_THIS);
-	zobj_user ref = cobj->getLoadHtml();
+	obj_ptr ref = cobj->getLoadHtml();
 	ref.return_zv(return_value);
 }
 
@@ -478,7 +478,7 @@ ZEND_METHOD(Wcc_PlateEngine, newPlate)
 
 	auto cobj = zval_toc<PlateEngine>(ZEND_THIS);
 
-	zobj_mgr ret = cobj->newPlate(name, store);
+	obj_rc ret = cobj->newPlate(name, store);
 
 	//showobj("zobj_own make ", ret);
 	ret.move_zv(return_value);
@@ -496,7 +496,7 @@ ZEND_METHOD(Wcc_PlateEngine, getPlate)
 
 	auto cobj = zval_toc<PlateEngine>(ZEND_THIS);
 
-	zobj_user ret = cobj->getPlate(name);
+	obj_ptr ret = cobj->getPlate(name);
 
 	ret.return_zv(return_value);
 }
@@ -530,7 +530,7 @@ ZEND_METHOD(Wcc_PlateEngine, render)
 
 	auto cobj = zval_toc<PlateEngine>(ZEND_THIS);
 
-	zstr_mgr ret = cobj->render(name,zval_user(data));
+	str_rc ret = cobj->render(name,val_ptr(data));
 	ret.move_zv(return_value);
 }
 

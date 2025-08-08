@@ -101,7 +101,7 @@ void //static - undo creation work
 HmapIterator::it_dtor(zend_object_iterator *iter)
 {
 	//zend_object* obj = Z_OBJ_P(&iter->data);
-	//zobj_mgr::try_decref(obj);
+	//obj_rc::try_decref(obj);
 	HmapIterator *iterator = phmi(iter);
         iterator->walk.init();
         iterator->htab.init();
@@ -165,7 +165,7 @@ Hmap_php::get_property_ptr_ptr(zend_object* object, zend_string* name,
 {
 	//if (!zend_std_has_property(object, name, ZEND_PROPERTY_EXISTS, cache_slot)) {
 		Hmap* cobj = zobj_toc<Hmap>(object);
-		htab_read look(cobj->data_);
+		htab_rd look(cobj->data_);
 		if (look.isNull())
 		{
 			return nullptr;
@@ -184,7 +184,7 @@ Hmap_php::read_property(zend_object* object, zend_string* name, int type,
 	//if (!zend_std_has_property(object, name, ZEND_PROPERTY_EXISTS, cache_slot)) 
 	//{
 		Hmap* cobj = zobj_toc<Hmap>(object);
-		htab_read look(cobj->data_);
+		htab_rd look(cobj->data_);
 
 		if (look.isNull())
 		{
@@ -216,12 +216,12 @@ Hmap_php::write_property(zend_object* object, zend_string* name, zval* value, vo
 	//{
 		Hmap* cobj = zobj_toc<Hmap>(object);
 		
-		htab_write hw(cobj->data_);
+		htab_wr hw(cobj->data_);
 
 		zval* result = zend_hash_update(hw, name, value);
 		if (Z_TYPE_FLAGS_P(result) != 0)
 		{
-			zval_mgr::try_addref(result);
+			val_rc::try_addref(result);
 		}
 		return result;
 	//}
@@ -238,7 +238,7 @@ Hmap_php::has_property(zend_object* object, zend_string* name, int has_set_exist
 	}*/
 
 	Hmap* cobj = zobj_toc<Hmap>(object);
-	htab_read look(cobj->data_);
+	htab_rd look(cobj->data_);
 	if (look.isNull())
 	{
 		  return false;
@@ -256,7 +256,7 @@ Hmap_php::unset_property(zend_object* object, zend_string* name, void **cache_sl
 	}
 	*/
 	Hmap* cobj = zobj_toc<Hmap>(object);
-	htab_write hw(cobj->data_);
+	htab_wr hw(cobj->data_);
 	zend_hash_del(hw, name);
 }
 
@@ -265,7 +265,7 @@ ZEND_RESULT_CODE
 Hmap_php::count_elements(zend_object* object, zend_long *count)
 {
 	Hmap* cobj = zobj_toc<Hmap>(object);
-	htab_read look(cobj->data_);
+	htab_rd look(cobj->data_);
 	*count = look.size();
 	return SUCCESS;
 }
@@ -276,7 +276,7 @@ HashTable*
 Hmap::get_properties(zend_object* object)
 {
 	Hmap* cobj = zobj_toc<Hmap>(object);
-	htab_read look(cobj->data_);
+	htab_rd look(cobj->data_);
 	return look;
 }
 */
@@ -284,19 +284,19 @@ HashTable*
 Hmap_php::get_properties_for(zend_object* object, zend_prop_purpose purpose)
 {
 	Hmap* cobj = zobj_toc<Hmap>(object);
-	htab_mgr look(cobj->data_);
+	htab_rc look(cobj->data_);
 	switch(purpose)
 	{
 	case ZEND_PROP_PURPOSE_DEBUG:
 		{
-			htab_mgr temp_mgr;
-			htab_write  di(temp_mgr);
+			htab_rc temp_mgr;
+			htab_wr  di(temp_mgr);
 
 			
 
 			cobj->debug_info(di);
 			HashTable* result = (HashTable*) temp_mgr;
-			htab_mgr::try_addref(result);
+			htab_rc::try_addref(result);
 
 			return result;
 		}
@@ -314,31 +314,31 @@ Hmap_php::get_properties_for(zend_object* object, zend_prop_purpose purpose)
 	return nullptr;
 }
 
-zobj_mgr // static
-Hmap::newFromArray(zval_user htab)
+obj_rc // static
+Hmap::newFromArray(val_ptr htab)
 {
-	htab_mgr hold;
+	htab_rc hold;
 	if (htab.isArray())
 	{
 		hold = htab.zarray(); // already owned
 	}
 	else {
-		hold.adopt(htab_mgr::empty_array());// take ownership
+		hold.adopt(htab_rc::empty_array());// take ownership
 	}
 
-	zobj_mgr result = Hmap::omg.new_zobj();
+	obj_rc result = Hmap::omg.new_zobj();
 	Hmap* cobj = zobj_toc<Hmap>(result);
 	cobj->construct(hold); // take ownership if not empty
 
 	return result;
 }
 
-zobj_mgr  // static
+obj_rc  // static
 Hmap::new_hmap()
 {
-	zobj_mgr result = Hmap::omg.new_zobj();
+	obj_rc result = Hmap::omg.new_zobj();
 	Hmap* cobj = zobj_toc<Hmap>(result);
-	htab_read nullarray;
+	htab_rd nullarray;
 	cobj->construct(nullarray);
 	return result;
 }
@@ -347,7 +347,7 @@ zval*
 Hmap_php::read_dimension(zend_object* obj, zval* offset, int type, zval* return_value)
 {
 	Hmap* cobj = zobj_toc<Hmap>(obj);
-	htab_read look(cobj->data_);
+	htab_rd look(cobj->data_);
 	if (look.isNull())
 	{
 		return nullptr;
@@ -359,7 +359,7 @@ void
 Hmap_php::write_dimension(zend_object* obj, zval* offset, zval* set_value)
 {
 	Hmap* cobj = zobj_toc<Hmap>(obj);
-	htab_write hw(cobj->data_);
+	htab_wr hw(cobj->data_);
 	hw.set(offset, set_value);
 }
 
@@ -367,7 +367,7 @@ int
 Hmap_php::has_dimension(zend_object* object, zval* offset, int check_empty)
 {
 	Hmap* cobj = zobj_toc<Hmap>(object);
-	htab_read look(cobj->data_);
+	htab_rd look(cobj->data_);
 	if (look.isNull())
 	{
 		return false;
@@ -378,7 +378,7 @@ Hmap_php::has_dimension(zend_object* object, zval* offset, int check_empty)
 	}
 	if (check_empty)
 	{
-		if (zval_user(check).ok())
+		if (val_ptr(check).ok())
 		{
 			return 1;
 		}
@@ -390,7 +390,7 @@ void
 Hmap_php::unset_dimension(zend_object* object, zval* unset)
 {
 	Hmap* cobj = zobj_toc<Hmap>(object);
-	htab_write hw(cobj->data_);
+	htab_wr hw(cobj->data_);
 	hw.unset(unset);
 }
 
@@ -398,29 +398,29 @@ Hmap_php::unset_dimension(zend_object* object, zval* unset)
 
 Hmap::Hmap() : base_d () 
 {
-    data_ = htab_mgr::empty_array();
+    data_ = htab_rc::empty_array();
 }
 
 Hmap::~Hmap() 
 {}
 
 void 
-Hmap::construct(htab_read values)
+Hmap::construct(htab_rd values)
 {
 	//showarray("Hmap::construct", values);
 	if (values.size() > 0)
 	{
-		(htab_mgr&) data_ = values; // takes ownership
+		(htab_rc&) data_ = values; // takes ownership
 		//showdata("construct ", data_);
 	}
 }
 
-zval_mgr 
-Hmap::getOrNot(zstr_user name, zval_user ifnot)
+val_rc 
+Hmap::getOrNot(str_ptr name, val_ptr ifnot)
 {
-	zval_user result;
+	val_ptr result;
 
-	htab_read look(data_);
+	htab_rd look(data_);
 
 	if (look.ok())
 	{
@@ -433,17 +433,17 @@ Hmap::getOrNot(zstr_user name, zval_user ifnot)
 }
 
 bool   
-Hmap::has(zstr_user name)
+Hmap::has(str_ptr name)
 {
-	htab_read look(data_);
+	htab_rd look(data_);
 	return look.ok() && look.has_key(name);
 }
 
-zval_mgr
-Hmap::get(zstr_user name)
+val_rc
+Hmap::get(str_ptr name)
 {	
-	zval_mgr result;
-	htab_read look(data_);
+	val_rc result;
+	htab_rd look(data_);
 	if (look.ok())
 	{
 		result = look.get(name);
@@ -451,11 +451,11 @@ Hmap::get(zstr_user name)
 	return result;
 }
 
-zval_mgr Hmap::get(zval_user key)
+val_rc Hmap::get(val_ptr key)
 {
-	zval_mgr result;
+	val_rc result;
 
-	htab_read look(data_);
+	htab_rd look(data_);
 	if (look.ok())
 	{
 		result = look.get(key);
@@ -465,9 +465,9 @@ zval_mgr Hmap::get(zval_user key)
 
 ///zend_std_unset_property
 void  
-Hmap::unset(zstr_user name)
+Hmap::unset(str_ptr name)
 {
-	htab_write hw(data_);
+	htab_wr hw(data_);
 	if (hw.ok())
 	{
 		hw.unset(name);
@@ -475,53 +475,53 @@ Hmap::unset(zstr_user name)
 }
 
 void   
-Hmap::set(zstr_user name, zval_user value)
+Hmap::set(str_ptr name, val_ptr value)
 {
-	htab_write hw(data_);
+	htab_wr hw(data_);
 	hw.set(name, value);
 }
 
 
-void Hmap::debug_info(htab_write hw)
+void Hmap::debug_info(htab_wr hw)
 {
 	// allow derived classes to override
 	base_d::debug_info(hw);
 	//di.set(HMAPit.data_key, data_);
 }
 
-htab_mgr 
-Hmap::subsetkey(zstr_user key)
+htab_rc 
+Hmap::subsetkey(str_ptr key)
 {
-	htab_mgr result;
-	htab_write hw(result);
-	zval_mgr value = get(key);
+	htab_rc result;
+	htab_wr hw(result);
+	val_rc value = get(key);
 	hw.set(key, value);
 	return result;
 }
 
 // keys as list values in data
-htab_mgr 
-Hmap::subset(htab_read data)
+htab_rc 
+Hmap::subset(htab_rd data)
 {
-	htab_mgr result;
-	htab_write hw(result);
+	htab_rc result;
+	htab_wr hw(result);
 
 	htab_walk wk;
 
 	auto key = wk.value();
 	for(wk.start(data); wk.ok(); wk.next())
 	{
-		zval_user value = this->get(key);
+		val_ptr value = this->get(key);
 		hw.set(key, value);
 	}
 	return result;
 }
 
 void   
-Hmap::addArray(htab_read data)
+Hmap::addArray(htab_rd data)
 {
 	for_key_value fkv;
-	htab_write hw(data_);
+	htab_wr hw(data_);
 
 	for(fkv.start(data); fkv.ok(); fkv.next())
 	{
@@ -530,56 +530,56 @@ Hmap::addArray(htab_read data)
 }
 
 void
-Hmap::assign(htab_read data)
+Hmap::assign(htab_rd data)
 {
-	(htab_mgr&) data_ = data;
+	(htab_rc&) data_ = data;
 }
 
 zend_long 
 Hmap::count() const
 {
-		return htab_read(data_).size();
+		return htab_rd(data_).size();
 }
 
-htab_read 
+htab_rd 
 Hmap::toArray()
 {
-	return htab_read(data_);
+	return htab_rd(data_);
 }
 
-zstr_mgr 
-Hmap::unhive(zstr_user subj)
+str_rc 
+Hmap::unhive(str_ptr subj)
 {
 	preg sfind("#@([a-zA-Z][\\w\\d]*)#", preg::OFFSET_CAPTURE, true);
 
 	int ct = sfind.matches(subj);
 	if (ct > 0) {
-		htab_read m = sfind.results();
+		htab_rd m = sfind.results();
 
-		htab_read replace_list = m.get((int)0);
-		htab_read keys_list = m.get(1);
+		htab_rd replace_list = m.get((int)0);
+		htab_rd keys_list = m.get(1);
 
 		std::string_view original = subj.vstr();
 
-		zstr_buffer result;
+		str_buf result;
 		size_t ipos = 0;
 
-		htab_read mydata(data_);
+		htab_rd mydata(data_);
 
 		for(int i = 0; i < ct; i++)
 		{
-			htab_read k1 = keys_list.get(i);
-			zval_user fkey = k1.get((int)0);
+			htab_rd k1 = keys_list.get(i);
+			val_ptr fkey = k1.get((int)0);
 			//showmem("get key", fkey);
 			
-			zval_mgr rval = mydata.get(fkey);
+			val_rc rval = mydata.get(fkey);
 
 			//showmem("replace value", rval);
-			zstr_user replace_str = zval_user(rval).zstr();
+			str_ptr replace_str = val_ptr(rval).zstr();
 
-			htab_read f1 = replace_list.get(i);
-			zstr_user slen_f1 = f1.get((int)0);
-			zval_user soffset_f1 = f1.get(1);
+			htab_rd f1 = replace_list.get(i);
+			str_ptr slen_f1 = f1.get((int)0);
+			val_ptr soffset_f1 = f1.get(1);
 
 			size_t slen = slen_f1.size();
 			zend_long soffset = soffset_f1.zlong();
@@ -600,16 +600,16 @@ Hmap::unhive(zstr_user subj)
 		return result.zstr();
 	}
 	else {
-		return zstr_mgr(subj);
+		return str_rc(subj);
 	}
 }
 
-htab_mgr 
+htab_rc 
 Hmap::serialize()
 {
-	zobj_user self(vobj());
+	obj_ptr self(vobj());
 
-	htab_mgr result;
+	htab_rc result;
 
 	HashTable* ht = Hmap::omg.handlers_.get_properties_for(self, ZEND_PROP_PURPOSE_SERIALIZE);
 
@@ -619,10 +619,10 @@ Hmap::serialize()
 }
 
 void 
-Hmap::unserialize(htab_read htab)
+Hmap::unserialize(htab_rd htab)
 {
 
-	(htab_mgr&)data_ = htab;
+	(htab_rc&)data_ = htab;
 
 }
 
@@ -645,10 +645,10 @@ ZEND_METHOD(Wcc_Hmap, __construct)
 
 	auto cobj = zval_toc<Hmap>(ZEND_THIS);
 
-	htab_read arg1;
+	htab_rd arg1;
 
 	if (data) {
-		arg1 = zval_user(data).zarray();
+		arg1 = val_ptr(data).zarray();
 	}
 	cobj->construct(arg1);
 }
@@ -665,12 +665,12 @@ ZEND_METHOD(Wcc_Hmap, getOrNot)
 	ZEND_PARSE_PARAMETERS_END();
 
 	auto cobj = zval_toc<Hmap>(ZEND_THIS);
-	zval_user temp;
+	val_ptr temp;
 
 	if (ifnot) {
 		temp = ifnot;
 	}
-	zval_mgr result = cobj->getOrNot(key, temp);
+	val_rc result = cobj->getOrNot(key, temp);
 	result.move_zv(return_value);
 
 }
@@ -699,7 +699,7 @@ ZEND_METHOD(Wcc_Hmap, get)
 
 	auto cobj = zval_toc<Hmap>(ZEND_THIS);
 
-	zval_mgr temp = cobj->get(key);
+	val_rc temp = cobj->get(key);
 	temp.move_zv(return_value);
 }
 
@@ -744,7 +744,7 @@ ZEND_METHOD(Wcc_Hmap, subset)
 	ZEND_PARSE_PARAMETERS_END();
 
 	auto cobj = zval_toc<Hmap>(ZEND_THIS);
-	htab_mgr temp;
+	htab_rc temp;
 
 	if (list)
 	{
@@ -802,7 +802,7 @@ ZEND_METHOD(Wcc_Hmap, toArray)
 
 	auto cobj = zval_toc<Hmap>(ZEND_THIS);
 
-	htab_read result = cobj->toArray();
+	htab_rd result = cobj->toArray();
 	result.return_zv(return_value);
 }
 
@@ -816,7 +816,7 @@ ZEND_METHOD(Wcc_Hmap, unhive)
 
 	auto cobj = zval_toc<Hmap>(ZEND_THIS);
 
-	zstr_mgr result = cobj->unhive(trans);
+	str_rc result = cobj->unhive(trans);
 	result.move_zv(return_value);
 }
 
@@ -831,7 +831,7 @@ ZEND_METHOD(Wcc_Hmap, offsetGet)
 
 	auto cobj = zval_toc<Hmap>(ZEND_THIS);
 
-	zval_mgr temp = cobj->get(zval_user(key));
+	val_rc temp = cobj->get(val_ptr(key));
 	temp.move_zv(return_value);
 }
 
@@ -847,7 +847,7 @@ ZEND_METHOD(Wcc_Hmap, offsetSet)
 
 	auto cobj = zval_toc<Hmap>(ZEND_THIS);
 		zend_printf("offsetSet called\n");
-	cobj->set(zval_user(key), zval_user(value));
+	cobj->set(val_ptr(key), val_ptr(value));
 }
 
 ZEND_METHOD(Wcc_Hmap, offsetExists)
@@ -860,7 +860,7 @@ ZEND_METHOD(Wcc_Hmap, offsetExists)
 
 	auto cobj = zval_toc<Hmap>(ZEND_THIS);
 
-	bool temp = cobj->has(zval_user(key));
+	bool temp = cobj->has(val_ptr(key));
 	RETURN_BOOL(temp);
 }
 
@@ -875,7 +875,7 @@ ZEND_METHOD(Wcc_Hmap, offsetUnset)
 
 	auto cobj = zval_toc<Hmap>(ZEND_THIS);
 
-	cobj->unset(zval_user(key));
+	cobj->unset(val_ptr(key));
 }
 
 
@@ -895,7 +895,7 @@ ZEND_METHOD(Wcc_Hmap, __serialize)
 
 	Hmap* cobj = zval_toc<Hmap>(ZEND_THIS);
 
-	htab_mgr ret = cobj->serialize();
+	htab_rc ret = cobj->serialize();
 	ret.move_zv(return_value);
 }
 
@@ -907,7 +907,7 @@ ZEND_METHOD(Wcc_Hmap, __unserialize)
 	Z_PARAM_ARRAY(data)
 	ZEND_PARSE_PARAMETERS_END();
 
-	htab_read hw(Z_ARR_P(data));
+	htab_rd hw(Z_ARR_P(data));
 
 	Hmap*   cobj = zval_toc<Hmap>(ZEND_THIS);
 

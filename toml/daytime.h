@@ -30,22 +30,22 @@ namespace wcc {
 
 		static base_obj_mgr<Day24> omg;
 
-		virtual void debug_info(htab_write di);
+		virtual void debug_info(htab_wr di);
 		
-		void construct(zstr_user sval);
+		void construct(str_ptr sval);
 
-		void str(zstr_user sval);
+		void str(str_ptr sval);
 		void time(long hours, long mins, double seconds);
 
 		void day(double dval);
 
 		double value() const { return tval_; }
 
-		void split(zval_user hours, zval_user mins, zval_user seconds);
+		void split(val_ptr hours, val_ptr mins, val_ptr seconds);
 
-		zstr_mgr format(int flags);
+		str_rc format(int flags);
 
-		zstr_mgr toString();
+		str_rc toString();
 
 		static bool 		day24_time(int hours, int mins, double secs, double& ret, bool except=false);
 		static bool		 	day24_str(const char* s, long slen, double& ret, bool except=false);
@@ -55,10 +55,10 @@ namespace wcc {
 	};
 
 	
-	class day24_obj : public zobj_mgr {
+	class day24_obj : public obj_rc {
 	protected:
 		// return un-managed object
-		static Day24* make_obj(zstr_user zs);
+		static Day24* make_obj(str_ptr zs);
 	public:
 		
 		
@@ -66,8 +66,8 @@ namespace wcc {
 	 *  Helps to have default time zone setup in php.ini
 	 *  or by a set call.
 	 * */
-		day24_obj(zstr_user zs);
-		zstr_mgr format(int flags);
+		day24_obj(str_ptr zs);
+		str_rc format(int flags);
 	};
 } // namespace
 

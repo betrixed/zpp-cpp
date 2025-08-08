@@ -11,18 +11,18 @@
 #define ZPP_BUILD_ALL
 
 
-#include "zstr_user.h"
-#include "zstr_mgr.h"
+#include "str_ptr.h"
+#include "str_rc.h"
 
-#include "htab_read.h"
-#include "htab_mgr.h"
-#include "htab_write.h"
+#include "htab_rd.h"
+#include "htab_rc.h"
+#include "htab_wr.h"
 
-#include "zobj_mgr.h"
-#include "zobj_user.h"
+#include "obj_rc.h"
+#include "obj_ptr.h"
 
-#include "zval_mgr.h"
-#include "zval_user.h"
+#include "val_rc.h"
+#include "val_ptr.h"
 
 
 #include "htab_walk.h"
@@ -32,7 +32,7 @@
 #include "fn_call.h"
 #include "show_zpp.h"
 
-#include "zstr_buffer.h"
+#include "str_buf.h"
 
 #include "datetime.h"
 
@@ -131,9 +131,9 @@ namespace zpp {
 	 *     called in base_obj_mgr<T>::znew_ex
 	 * 
 	 * 	   Other de
-        void push_back(zval_user zv);
+        void push_back(val_ptr zv);
 
-        void push_back(zstr_user su);
+        void push_back(str_ptr su);
         tails of inheritance to cater for, include calling virtual functions of parent class where properly useful,
 	 *     eg call parent virtual debug_info, or  the function handling constructor, internal function of parent.
 	 */
@@ -239,13 +239,13 @@ namespace zpp {
 		{
 		}
 		
-		virtual void debug_info(htab_write ht);
+		virtual void debug_info(htab_wr ht);
 
-		virtual zstr_mgr toString() const {
-			return zstr_mgr();
+		virtual str_rc toString() const {
+			return str_rc();
 		};
 
-		virtual zstr_user extender();
+		virtual str_ptr extender();
 
 		template< typename T > friend class base_obj_mgr;
 	};
@@ -408,10 +408,10 @@ namespace zpp {
 			return nobj;
 		}
 
-		static  zobj_mgr new_zobj()
+		static  obj_rc new_zobj()
 		{
 			// setup object with handlers
-			zobj_mgr result;
+			obj_rc result;
 			result.adopt(mydef::make_new());
 			//showobj("new_zobj()", result);
 			return result;
@@ -451,7 +451,7 @@ namespace zpp {
 			zend_object* zo = p->vobj();
 			zend_printf("%s %lu: %lx p %lx ob (%u) %s size %lu ", s, obj_count_, (uintptr_t)p, (uintptr_t)zo, GC_REFCOUNT(zo), typeid(T).name()
 				, sizeof(T) + sizeof(base_d*) + sizeof(zend_object) + zend_object_properties_size(class_entry_));
-			zstr_user ext = p->extender();
+			str_ptr ext = p->extender();
 			if (ext.size())
 			{
 				zend_printf("extd %s\n", ext.data());
@@ -532,11 +532,11 @@ namespace zpp {
 			/* to be deleted by zend */
 			*is_temp = 1; 
 			
-			htab_mgr ret;
+			htab_rc ret;
 			
 			//showobj("obj = ", object);
 			//showarray("base_debug_info", ret);
-			htab_write hw(ret);
+			htab_wr hw(ret);
 			//showarray("base_debug_info write", ret);
 			T* cobj = cpp(object);
 			//zend_printf("2 T* %lx zobj %lx\n", cobj, cobj->zobj());

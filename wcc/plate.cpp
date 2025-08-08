@@ -112,7 +112,7 @@ OBtable::init()
 }
 
 
-void Plate::debug_info(htab_write d)
+void Plate::debug_info(htab_wr d)
 {
 
 	//zend_printf("debug info Plate\n");
@@ -143,7 +143,7 @@ void Plate::debug_info(htab_write d)
 
 }
 
-void Plate::construct(zstr_user name, zobj_user engine)
+void Plate::construct(str_ptr name, obj_ptr engine)
 {	
 
 	//ServiceAccess::construct(Wcc_Services::instance());
@@ -161,10 +161,10 @@ void Plate::construct(zstr_user name, zobj_user engine)
 }
 
 /*
-zobj_mgr
-Plate::make(zobj_user engine, zstr_user name)
+obj_rc
+Plate::make(obj_ptr engine, str_ptr name)
 {
-	zobj_mgr result = Plate::omg.new_zobj();
+	obj_rc result = Plate::omg.new_zobj();
 	Plate* cobj = zobj_toc<Plate>(result);
 	cobj->construct(engine, name);
 
@@ -172,14 +172,14 @@ Plate::make(zobj_user engine, zstr_user name)
 }
 */
 
-void Plate::setData(htab_read data)
+void Plate::setData(htab_rd data)
 {
 	//showmem("setData arg", data);
 	data_ = data;
 	//showarray("setData data", data_);
 }
 
-htab_read 
+htab_rd 
 Plate::getData()
 {
 	return data_;
@@ -192,10 +192,10 @@ bool Plate::pathExists() {
 }
 
 
-zstr_mgr 
-Plate::escape(zstr_user s, zstr_user func) 
+str_rc 
+Plate::escape(str_ptr s, str_ptr func) 
 {
-	zstr_mgr result;
+	str_rc result;
 
 	if (!s.size())
 	{
@@ -215,9 +215,9 @@ Plate::escape(zstr_user s, zstr_user func)
 }
 
 //! return value is anchored by path_ member.
-zstr_user Plate::getPath()
+str_ptr Plate::getPath()
 {
-	zstr_user result(path_);
+	str_ptr result(path_);
 
 	if (result.isNull())
 	{
@@ -230,27 +230,27 @@ zstr_user Plate::getPath()
 }
 
 
-zstr_user
+str_ptr
 Plate::getName() 
 {
 	return name_;
 }
 
-htab_mgr
+htab_rc
 Plate::getPublish()
 {
 
 	//zend_printf("getPublish\n");
-	htab_mgr result;
-	htab_write publish(result);
+	htab_rc result;
+	htab_wr publish(result);
 
 	//showarrayy("publish 1", publish_);
 	PlateEngine* pe = zobj_toc<PlateEngine>(engine_);
 
-	htab_mgr plate_data = pe->getData(name_);
+	htab_rc plate_data = pe->getData(name_);
 	publish.merge(plate_data);
 
-	htab_read owndata(data_);
+	htab_rd owndata(data_);
 	if (owndata.size() > 0) {
 		publish.merge(owndata);
 	}
@@ -258,14 +258,14 @@ Plate::getPublish()
 	return result;
 }
 
-void Plate::addSection(zstr_user name, zstr_user val) 
+void Plate::addSection(str_ptr name, str_ptr val) 
 {
-	htab_write(sections_).set(name,val);
+	htab_wr(sections_).set(name,val);
 }
 
-zstr_user Plate::getSection(zstr_user name, zstr_user defaultval)
+str_ptr Plate::getSection(str_ptr name, str_ptr defaultval)
 {
-	zstr_user result = htab_read(sections_).get(name);
+	str_ptr result = htab_rd(sections_).get(name);
 	if (result.isNull())
 	{
 		result = defaultval;
@@ -275,40 +275,40 @@ zstr_user Plate::getSection(zstr_user name, zstr_user defaultval)
 
 
 // sub-routine for internal
-zstr_mgr
-Plate::full_render(htab_read rdata)
+str_rc
+Plate::full_render(htab_rd rdata)
 {	
-	zstr_mgr result;
+	str_rc result;
 
-	zstr_user name = getName();
+	str_ptr name = getName();
 
 	PlateEngine* engine = zobj_toc<PlateEngine>(engine_);
 	
-	htab_write wdata(data_);
+	htab_wr wdata(data_);
 
 	if (rdata.size())
 	{
 		wdata.merge(rdata);
 	}
-	zstr_user mypath = getPath();
+	str_ptr mypath = getPath();
 	
 	if (mypath.isNull())
 	{
-		zstr_buffer buf;
+		str_buf buf;
 		buf << "<p>The template '" << name << "' could not be found</p>\n";
 		buf << engine->dumpPaths();
 
 		return buf.zstr();
 	}
 
-	zobj_user loadHtml = engine->getLoadHtml();
+	obj_ptr loadHtml = engine->getLoadHtml();
 
 	if (loadHtml.isNull()) {
 		zend_throw_error(zend_ce_error, "PlateEngine has no IfLoadHtml object");
 		return result;
 	}
-	zval_mgr arg1 (this->getPath());
-	zval_mgr arg2 (this->getPublish());
+	val_rc arg1 (this->getPath());
+	val_rc arg2 (this->getPublish());
 	
 	result = loadHtml.call(PLD.get_html, arg1, arg2);
 
@@ -321,11 +321,11 @@ void Plate::clean()
 	engine_.init(); 
 }
 
-zstr_mgr Plate::render(htab_read data)
+str_rc Plate::render(htab_rd data)
 {
 	//showstr("plate render for ", leaf_);
 
-	zstr_mgr result;
+	str_rc result;
 	// showstr("raw_", raw_);
 
 	if (raw_.size()) {
@@ -335,13 +335,13 @@ zstr_mgr Plate::render(htab_read data)
 		result = full_render(data);
 	}
 
-	zstr_user wrap(layout_);
+	str_ptr wrap(layout_);
 
 	if (wrap.size()) {
 		PlateEngine* pe = zobj_toc<PlateEngine>(engine_);
 
-		zobj_mgr temp = pe->getPlate(wrap);
-		zobj_user layout_obj(temp);
+		obj_rc temp = pe->getPlate(wrap);
+		obj_ptr layout_obj(temp);
 		
 		if (layout_obj.ok())
 		{
@@ -355,8 +355,8 @@ zstr_mgr Plate::render(htab_read data)
 	return result;
 }
 
-zstr_mgr 
-Plate::insert(zstr_user name, htab_read data)
+str_rc 
+Plate::insert(str_ptr name, htab_rd data)
 {
 	PlateEngine* pe = zobj_toc<PlateEngine>(engine_);
 	if (data.isNull())
@@ -366,14 +366,14 @@ Plate::insert(zstr_user name, htab_read data)
 	return pe->render(name, data);
 }
 
-zstr_mgr Plate::fetch(zstr_user name, htab_read data)
+str_rc Plate::fetch(str_ptr name, htab_rd data)
 {
 	return insert(name, data);
 }
 
-zstr_mgr Plate::getContent()
+str_rc Plate::getContent()
 {
-	zval_user content = htab_read(sections_).get(PLD.content_key);
+	val_ptr content = htab_rd(sections_).get(PLD.content_key);
 	if (content.isNull())
 	{
 		return zstr_temp("<pre>\n-- Missing Content--\n</pre>\n");
@@ -390,15 +390,15 @@ void Plate::stop()
 		return;
 	}
 
-	zstr_mgr newContent = OBfn.obgetclean.call_fn();
+	str_rc newContent = OBfn.obgetclean.call_fn();
 
-	htab_write slabs(sections_);
+	htab_wr slabs(sections_);
 
-	zstr_buffer buf;
+	str_buf buf;
 
 	if (isPushed_) {
 
-		zstr_user prevContent = slabs.get(sectionName_);
+		str_ptr prevContent = slabs.get(sectionName_);
 
 		if (prevContent.size())
 		{
@@ -407,17 +407,17 @@ void Plate::stop()
 		isPushed_ = false;
 	}
 	buf << newContent;
-	zstr_mgr gather(std::move(buf));
+	str_rc gather(std::move(buf));
 	slabs.set(sectionName_,gather);
 }
 
-void Plate::push(zstr_user name)
+void Plate::push(str_ptr name)
 {
 	isPushed_ = true;
 	start(name);
 }
 
-void Plate::start(zstr_user name)
+void Plate::start(str_ptr name)
 {
 	if (name == PLD.content_key) {
 		zend_throw_error(zend_ce_error,"Section name 'content' is reserved");
@@ -434,8 +434,8 @@ void Plate::start(zstr_user name)
 }
 
 int Plate::getObLevel() {
-	zval_mgr level = OBfn.obgetlevel.call_fn();
-	return zval_user(level).zlong();
+	val_rc level = OBfn.obgetlevel.call_fn();
+	return val_ptr(level).zlong();
 }
 
 void Plate::styleBegin()
@@ -452,19 +452,19 @@ void Plate::styleEnd()
 		zend_throw_error(zend_ce_error,"StyleEnd ob_level() error");
 		return;
 	}
-	zval_mgr styles = OBfn.obgetcontents.call_fn();
+	val_rc styles = OBfn.obgetcontents.call_fn();
 	OBfn.obendclean.call_fn();
 
 	auto services = Services::cpp_global();
 
-	zval_mgr assets_z = services->get(PLD.assets_key);
-	zobj_user assets(assets_z);
+	val_rc assets_z = services->get(PLD.assets_key);
+	obj_ptr assets(assets_z);
 	if (assets.ok()) {
-		zobj_user(assets).call(PLD.addstyle_fn,  styles);
+		obj_ptr(assets).call(PLD.addstyle_fn,  styles);
 	}
 }
 
-void Plate::layout(zstr_user leaf, htab_read data)
+void Plate::layout(str_ptr leaf, htab_rd data)
 {
 	layout_ = leaf;
 
@@ -472,12 +472,12 @@ void Plate::layout(zstr_user leaf, htab_read data)
 
 }
 
-void Plate::setLayout(zstr_user leaf)
+void Plate::setLayout(str_ptr leaf)
 {
 	layout_ = leaf;
 }
 
-void Plate::setLayoutData(htab_read data)
+void Plate::setLayoutData(htab_rd data)
 {
 	layoutData_ = data;
 }
@@ -507,7 +507,7 @@ ZEND_METHOD(Wcc_Plate, getPublish)
 	auto cobj = zval_toc<Plate>(ZEND_THIS);
 	//zend_printf("getPublish zend\n");
 
-	htab_mgr data = cobj->getPublish();
+	htab_rc data = cobj->getPublish();
 	//showarray("moved", data);
 	data.move_zv(return_value);
 
@@ -520,7 +520,7 @@ ZEND_METHOD(Wcc_Plate, getData)
 	ZEND_PARSE_PARAMETERS_END();
 
 	auto cobj = zval_toc<Plate>(ZEND_THIS);
-	htab_read data = cobj->getData();
+	htab_rd data = cobj->getData();
 	//showarray("Plate getData", data);
 	data.return_zv(return_value);
 }
@@ -549,7 +549,7 @@ ZEND_METHOD(Wcc_Plate, escape)
 	ZEND_PARSE_PARAMETERS_END();
 
 	auto cobj = zval_toc<Plate>(ZEND_THIS);
-	zstr_mgr val = cobj->escape(s, func);
+	str_rc val = cobj->escape(s, func);
 
 	val.move_zv(return_value);
 }
@@ -579,7 +579,7 @@ ZEND_METHOD(Wcc_Plate, fetch)
 	ZEND_PARSE_PARAMETERS_END();
 
 	auto cobj = zval_toc<Plate>(ZEND_THIS);
-	zstr_mgr ret = cobj->fetch(name, data);
+	str_rc ret = cobj->fetch(name, data);
 	ret.move_zv(return_value);
 }
 
@@ -590,7 +590,7 @@ ZEND_METHOD(Wcc_Plate, getContent)
 	ZEND_PARSE_PARAMETERS_END();
 
 	auto cobj = zval_toc<Plate>(ZEND_THIS);
-	zstr_mgr ret = cobj->getContent();
+	str_rc ret = cobj->getContent();
 	ret.move_zv(return_value);
 }
 
@@ -601,7 +601,7 @@ ZEND_METHOD(Wcc_Plate, getPath)
 	ZEND_PARSE_PARAMETERS_END();
 
 	auto cobj = zval_toc<Plate>(ZEND_THIS);
-	zstr_user ret = cobj->getPath();
+	str_ptr ret = cobj->getPath();
 	ret.return_zv(return_value);
 }
 
@@ -619,7 +619,7 @@ ZEND_METHOD(Wcc_Plate, insert)
 
 	auto cobj = zval_toc<Plate>(ZEND_THIS);
 
-	zstr_mgr ret = cobj->insert(name, data);
+	str_rc ret = cobj->insert(name, data);
 	ret.move_zv(return_value);
 }
 
@@ -629,7 +629,7 @@ ZEND_METHOD(Wcc_Plate, layout)
 	zend_string* name = nullptr;
 	zval* data = nullptr;
 
-	zval_mgr nodata;
+	val_rc nodata;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 	Z_PARAM_STR(name)
@@ -681,7 +681,7 @@ ZEND_METHOD(Wcc_Plate, render)
 
 	auto cobj = zval_toc<Plate>(ZEND_THIS);
 
-	zstr_mgr ret = cobj->render(data);
+	str_rc ret = cobj->render(data);
 
 	ret.move_zv(return_value);
 }
@@ -700,7 +700,7 @@ ZEND_METHOD(Wcc_Plate, section)
 
 	auto cobj = zval_toc<Plate>(ZEND_THIS);
 
-	zstr_user ret = cobj->getSection(name, ifnot);
+	str_ptr ret = cobj->getSection(name, ifnot);
 
 	ret.return_zv(return_value);
 }

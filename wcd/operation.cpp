@@ -19,7 +19,7 @@ using namespace wcc;
 base_obj_mgr<Operation> Operation::omg;
 
 void 
-Operation::debug_info(htab_write di)
+Operation::debug_info(htab_wr di)
 {
 	base_d::debug_info(di);
 	di.set(SQSTR.driver, db_);
@@ -27,7 +27,7 @@ Operation::debug_info(htab_write di)
 }
 
 void 
-Operation::construct(zobj_user db)
+Operation::construct(obj_ptr db)
 {
 	db_ = db;
 
@@ -35,8 +35,8 @@ Operation::construct(zobj_user db)
 
 	bind_ = dr.newBindings();
 
-	zobj_user self(vobj());
-	zval_mgr arg(bind_);
+	obj_ptr self(vobj());
+	val_rc arg(bind_);
 	self.property(SQSTR.bind_key, arg);
 	wipe();
 
@@ -49,13 +49,13 @@ Operation::destruct()
 	db_.init();
 }
 
-zobj_mgr 
-Operation::addPrime(zstr_user table, zstr_user alias, htab_read cols)
+obj_rc 
+Operation::addPrime(str_ptr table, str_ptr alias, htab_rd cols)
 {
-	zobj_mgr tc = TColumns::omg.new_zobj();
+	obj_rc tc = TColumns::omg.new_zobj();
 	TColumns* tcobj = zobj_toc<TColumns>(tc);
 
-	zval_mgr tval(cols);
+	val_rc tval(cols);
 	tcobj->construct(table, alias, tval);
 
 	JoinTables* jt = zobj_toc<JoinTables>(joiner_);
@@ -63,12 +63,12 @@ Operation::addPrime(zstr_user table, zstr_user alias, htab_read cols)
 	return tc;
 }
 
-zval_mgr 
+val_rc 
 Operation::firstRow(int fetch)
 {
-	zval_mgr result = getRows(fetch);
+	val_rc result = getRows(fetch);
 
-	htab_read rows(result.zarray());
+	htab_rd rows(result.zarray());
 	if (rows.size())
 	{
 		return rows.get(int(0));
@@ -77,18 +77,18 @@ Operation::firstRow(int fetch)
 	return result;
 }
 
-zobj_user
+obj_ptr
 Operation::getJoiner()
 {
 	return joiner_;
 }
 
-zval_mgr 
+val_rc 
 Operation::getRows(int fetch)
 {
-	zval_mgr result;
+	val_rc result;
 
-	zobj_mgr simple = prepare( fetch );
+	obj_rc simple = prepare( fetch );
 
 	if (simple.ok())
 	{
@@ -99,7 +99,7 @@ Operation::getRows(int fetch)
 	return result;
 }
 
-zobj_mgr
+obj_rc
 Operation::getSqlParams()
 {
 	Bindings& bind = bindings();
@@ -108,13 +108,13 @@ Operation::getSqlParams()
 
 /* this throws away the ParamList object
 */
-zstr_mgr 
+str_rc 
 Operation::getSql()
 {
-	zstr_mgr sql;
+	str_rc sql;
 
-	zobj_user self(vobj());
-	zobj_mgr pobj = self.call(SQSTR.get_sql_params);
+	obj_ptr self(vobj());
+	obj_rc pobj = self.call(SQSTR.get_sql_params);
 	if (pobj.ok())
 	{
 		ParamList* plist = zobj_toc<ParamList>(pobj);
@@ -124,7 +124,7 @@ Operation::getSql()
 }
 
 void 
-Operation::limit(zval_user ct, zval_user start)
+Operation::limit(val_ptr ct, val_ptr start)
 {
 	Bindings& bind = *zobj_toc<Bindings>(bind_);
 
@@ -132,13 +132,13 @@ Operation::limit(zval_user ct, zval_user start)
 }
 
 void 
-Operation::orderBy(zval_user column, bool descend)
+Operation::orderBy(val_ptr column, bool descend)
 {
 	Bindings& bind = *zobj_toc<Bindings>(bind_);
 	bind.orderBy(column, descend);
 }
 
-zobj_mgr 
+obj_rc 
 Operation::prepare(int fetch)
 {
 	if (fetch < 0)
@@ -146,32 +146,32 @@ Operation::prepare(int fetch)
 		fetch = IDriver::FETCH_ASSOC;
 	}
 
-	zobj_mgr s = Simple::omg.new_zobj();
+	obj_rc s = Simple::omg.new_zobj();
 
 	Simple* sobj = zobj_toc<Simple>(s);
 	sobj->construct(db_, fetch);
 	//showobj("Simple", s);
 
 	Bindings& bind = bindings();
-	zval_mgr retvals = bind.get(ISql::SQL_RETURN);
+	val_rc retvals = bind.get(ISql::SQL_RETURN);
 
 	if (retvals.ok())
 	{
 		sobj->returnsValues(true);
 	}
 
-	zobj_user self(vobj());
+	obj_ptr self(vobj());
 
-	zobj_mgr pobj_mgr = self.call(SQSTR.get_sql_params);
+	obj_rc pobj_mgr = self.call(SQSTR.get_sql_params);
 	ParamList* plist = zobj_toc<ParamList>(pobj_mgr);
 	bind.wipe();
 
-	zstr_mgr sql = plist->getSql();
+	str_rc sql = plist->getSql();
 	//showstr("prepare", sql);
 
 	sobj->prepare(sql);
 
-	htab_read values( plist->getValues());
+	htab_rd values( plist->getValues());
 
 	if (values.size())
 	{
@@ -183,37 +183,37 @@ Operation::prepare(int fetch)
 }
 
 void 
-Operation::returns(htab_read list)
+Operation::returns(htab_rd list)
 {
 	Bindings& bind = bindings();
 	bind.addarray(ISql::SQL_RETURN, list);
 }
 
-zval_mgr 
+val_rc 
 Operation::run()
 {
-	zobj_mgr s = prepare(IDriver::FETCH_ASSOC);
+	obj_rc s = prepare(IDriver::FETCH_ASSOC);
 	Simple* sobj = zobj_toc<Simple>(s);
 	return sobj->run();
 }
 
 void 
-Operation::where(zval_user lattr, zval_user rattr, int op, int blogic)
+Operation::where(val_ptr lattr, val_ptr rattr, int op, int blogic)
 {
-	htab_mgr data;
+	htab_rc data;
 
-	htab_write hw(data);
+	htab_wr hw(data);
 
 	if(op < 0)
 	{
 		op = JoinExpr::OP_EQ;
 	}
-	zstr_user opstr = JoinExpr::opStr(op);
+	str_ptr opstr = JoinExpr::opStr(op);
 	if (blogic < 0)
 	{
 		blogic = JoinExpr::B_AND;
 	}
-	zstr_user bstr = JoinExpr::boolStr(blogic);
+	str_ptr bstr = JoinExpr::boolStr(blogic);
 	Bindings& bind = bindings();
 	bind.where(lattr, opstr, rattr, bstr);
 
@@ -229,7 +229,7 @@ Operation::wipe()
 	
 	if (joiner_.ok())
 	{
-		zval_mgr a1(joiner_);
+		val_rc a1(joiner_);
 		
 		bind.set(ISql::SQL_FROM, a1);
 		
@@ -244,9 +244,9 @@ using namespace wcd;
 
 ZEND_METHOD(Wcd_Sql_Operation, __construct)
 {
-	zarg_exec args(execute_data);
+	zarg_rd args(execute_data);
 
-	zobj_user driver;
+	obj_ptr driver;
 
 	args.obj_ofclass(driver, args.need(1), IDriver::omg.class_entry_);
 
@@ -268,11 +268,11 @@ ZEND_METHOD(Wcd_Sql_Operation, __destruct)
 
 ZEND_METHOD(Wcd_Sql_Operation, addPrime)
 {
-	zarg_exec args(execute_data);
+	zarg_rd args(execute_data);
 
-	zstr_user table;
-	zstr_user alias;
-	htab_read cols;
+	str_ptr table;
+	str_ptr alias;
+	htab_rd cols;
 
 	args.zstring(table, args.need(1));
 	args.zstring_null(alias, args.option(2));
@@ -283,7 +283,7 @@ ZEND_METHOD(Wcd_Sql_Operation, addPrime)
 	{
 		Operation* cobj = zval_toc<Operation>(ZEND_THIS);
 
-		zobj_mgr result(cobj->addPrime(table, alias, cols));
+		obj_rc result(cobj->addPrime(table, alias, cols));
 
 		result.move_zv(return_value);
 	}
@@ -291,11 +291,11 @@ ZEND_METHOD(Wcd_Sql_Operation, addPrime)
 
 ZEND_METHOD(Wcd_Sql_Operation, firstRow)
 {
-	zarg_exec args(execute_data);
+	zarg_rd args(execute_data);
 
-	zstr_user table;
-	zstr_user alias;
-	htab_read cols;
+	str_ptr table;
+	str_ptr alias;
+	htab_rd cols;
 
 	args.zstring(table, args.need(1));
 	args.zstring_null(alias, args.option(2));
@@ -306,7 +306,7 @@ ZEND_METHOD(Wcd_Sql_Operation, firstRow)
 	{
 		Operation* cobj = zval_toc<Operation>(ZEND_THIS);
 
-		zobj_mgr result(cobj->addPrime(table, alias, cols));
+		obj_rc result(cobj->addPrime(table, alias, cols));
 
 		result.move_zv(return_value);
 	}
@@ -318,7 +318,7 @@ ZEND_METHOD(Wcd_Sql_Operation, getJoiner)
 
 	Operation* cobj = zval_toc<Operation>(ZEND_THIS);
 
-	zobj_user result = cobj->getJoiner();
+	obj_ptr result = cobj->getJoiner();
 
 	result.return_zv(return_value);
 }
@@ -329,7 +329,7 @@ ZEND_METHOD(Wcd_Sql_Operation, getParams)
 
 	Operation* cobj = zval_toc<Operation>(ZEND_THIS);
 	
-	htab_read result = cobj->getParams();
+	htab_rd result = cobj->getParams();
 
 	result.return_zv(return_value);
 }
@@ -337,7 +337,7 @@ ZEND_METHOD(Wcd_Sql_Operation, getParams)
 ZEND_METHOD(Wcd_Sql_Operation, getRows)
 {
 
-	zarg_exec args(execute_data);
+	zarg_rd args(execute_data);
 
 	zend_long fetch = -1;
 
@@ -347,7 +347,7 @@ ZEND_METHOD(Wcd_Sql_Operation, getRows)
 	{
 		fetch = IDriver::FETCH_ASSOC;
 	}
-	zval_mgr result;
+	val_rc result;
 
 	if (!args.throw_errors())
 	{
@@ -363,7 +363,7 @@ ZEND_METHOD(Wcd_Sql_Operation, getSqlParams)
 
 	Operation* cobj = zval_toc<Operation>(ZEND_THIS);
 
-	zobj_mgr result = cobj->getSqlParams();
+	obj_rc result = cobj->getSqlParams();
 
 	result.move_zv(return_value);
 }
@@ -374,17 +374,17 @@ ZEND_METHOD(Wcd_Sql_Operation, getSql)
 
 	Operation* cobj = zval_toc<Operation>(ZEND_THIS);
 
-	zstr_mgr result = cobj->getSql();
+	str_rc result = cobj->getSql();
 
 	result.move_zv(return_value);
 }
 
 ZEND_METHOD(Wcd_Sql_Operation, limit)
 {
-	zarg_exec args(execute_data);
+	zarg_rd args(execute_data);
 
-	zval_user maxct(args.need(1));
-	zval_user start(args.option(2));
+	val_ptr maxct(args.need(1));
+	val_ptr start(args.option(2));
 
 	Operation* cobj = zval_toc<Operation>(ZEND_THIS);
 
@@ -394,9 +394,9 @@ ZEND_METHOD(Wcd_Sql_Operation, limit)
 
 ZEND_METHOD(Wcd_Sql_Operation, orderBy)
 {
-	zarg_exec args(execute_data);
+	zarg_rd args(execute_data);
 
-	zval_user column(args.need(1));
+	val_ptr column(args.need(1));
 	bool      descend;
 
 	if (!args.zbool(descend,args.option(2)))
@@ -414,7 +414,7 @@ ZEND_METHOD(Wcd_Sql_Operation, orderBy)
 
 ZEND_METHOD(Wcd_Sql_Operation, prepare)
 {
-	zarg_exec args(execute_data);
+	zarg_rd args(execute_data);
 
 	zend_long fetch = -1;
 
@@ -424,7 +424,7 @@ ZEND_METHOD(Wcd_Sql_Operation, prepare)
 	{
 		fetch = IDriver::FETCH_ASSOC;
 	}
-	zobj_mgr result;
+	obj_rc result;
 
 	if (!args.throw_errors())
 	{
@@ -436,9 +436,9 @@ ZEND_METHOD(Wcd_Sql_Operation, prepare)
 
 ZEND_METHOD(Wcd_Sql_Operation, returns)
 {
-	zarg_exec args(execute_data);
+	zarg_rd args(execute_data);
 
-	htab_read rvalues;
+	htab_rd rvalues;
 
 	args.zarray(rvalues, args.need(1));
 
@@ -455,17 +455,17 @@ ZEND_METHOD(Wcd_Sql_Operation, run)
 
 	Operation* cobj = zval_toc<Operation>(ZEND_THIS);
 
-	zval_mgr result(cobj->run());
+	val_rc result(cobj->run());
 
 	result.move_zv(return_value);
 }
 
 ZEND_METHOD(Wcd_Sql_Operation, where)
 {
-	zarg_exec args(execute_data);
+	zarg_rd args(execute_data);
 
-	zval_user lattr(args.need(1));
-	zval_user rattr(args.option(2));
+	val_ptr lattr(args.need(1));
+	val_ptr rattr(args.option(2));
 
 	zend_long op = -1;
 	zend_long blogic = -1;

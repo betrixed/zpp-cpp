@@ -13,17 +13,17 @@
 
 namespace zpp {
 
-	class zstr_mgr;
-	class zval_user;
+	class str_rc;
+	class val_ptr;
 
 	class zstr_intern;
 
-	class zstr_user {
+	class str_ptr {
 	protected:
 	    zend_string* s;
 
-	    friend class zstr_mgr;
-	    friend class zval_mgr;
+	    friend class str_rc;
+	    friend class val_rc;
 	public:
 
 		static const char* empty;
@@ -34,28 +34,28 @@ namespace zpp {
 			LRTRIM = 3
 		};
 
-		zstr_user() : s( (zend_string*) nullptr) {}
+		str_ptr() : s( (zend_string*) nullptr) {}
 
-	    zstr_user(zend_string* p)
+	    str_ptr(zend_string* p)
 	    {
 	        s = p;
 	    }   
 
-	    zstr_user(zval* p);
+	    str_ptr(zval* p);
 
-	    zstr_user(const zstr_user& rc)
+	    str_ptr(const str_ptr& rc)
 	    {
 	        s = rc.s;
 	    }
 
 	    //! Can't declare inline here
-	    zstr_user(const zval_user& rc);
+	    str_ptr(const val_ptr& rc);
 
-	    zstr_user(const zstr_mgr& mgr);
+	    str_ptr(const str_rc& mgr);
 
-	    zstr_user(const zstr_intern& zs);
+	    str_ptr(const zstr_intern& zs);
 
-	    //const zstr_user& operator=(const zstr_mgr& zm);
+	    //const str_ptr& operator=(const str_rc& zm);
 
 	    operator zend_string*() const { return (zend_string*) s; }
 
@@ -76,51 +76,51 @@ namespace zpp {
 
 		std::string_view  subview(int offset, int len) const;
 
-		zstr_mgr substr(int offset, int len=INT_MAX) const;
+		str_rc substr(int offset, int len=INT_MAX) const;
 
-		zstr_mgr to_lower() const;
+		str_rc to_lower() const;
 
-		zstr_mgr to_upper() const;
+		str_rc to_upper() const;
 
-		zstr_mgr uncamel(const char* sep = nullptr) const;
+		str_rc uncamel(const char* sep = nullptr) const;
 
-		zstr_mgr trim(const char* what = (const char*) nullptr,
+		str_rc trim(const char* what = (const char*) nullptr,
 		 				int mode = LRTRIM) const;
 
-		zstr_mgr strtr(const char* from, const char* to) const;
+		str_rc strtr(const char* from, const char* to) const;
 		
-		zstr_mgr ucfirst();
+		str_rc ucfirst();
 
 		int find(char c, size_t pos=0) const;
 		int rfind(char c, size_t pos = INT_MAX) const;
 		int find(const std::string_view& needle, size_t pos) const;
 
-		int strpos(zstr_user needle);
+		int strpos(str_ptr needle);
 		
-		bool contains(zstr_user needle);
+		bool contains(str_ptr needle);
 
 		void return_zv(zval* ret);
 
-		bool starts_with(zstr_user match) const;
+		bool starts_with(str_ptr match) const;
 
-		bool ends_with(zstr_user match) const;
+		bool ends_with(str_ptr match) const;
 		
-		const zstr_user& operator=(zval* rc);
+		const str_ptr& operator=(zval* rc);
 
-		static zstr_mgr json_encode(zval_user value, int flags);
+		static str_rc json_encode(val_ptr value, int flags);
 	};
 
 	int zs_cmp(zend_string* a, zend_string* b);
 	int zs_cmp_ci(zend_string* a, zend_string* b);
 
-	zstr_mgr str_replace( zstr_user mstr, zstr_user rstr, zstr_user subject );
+	str_rc str_replace( str_ptr mstr, str_ptr rstr, str_ptr subject );
 
-	zstr_mgr str_replace(const std::string_view& match, 
+	str_rc str_replace(const std::string_view& match, 
 						 const std::string_view& replace,
-						 zstr_user subject);
+						 str_ptr subject);
 
 };
 
 
-//zstr_user.h
+//str_ptr.h
 #endif

@@ -24,7 +24,7 @@ namespace wcc {
 zval* 
 Config::read_dimension(zend_object* obj, zval* offset, int type,  zval* return_value)
 {
-	return zobj_user(obj).property_get(offset, return_value);
+	return obj_ptr(obj).property_get(offset, return_value);
 }
 
 void 
@@ -32,29 +32,29 @@ Config::write_dimension(zend_object* obj, zval* offset,  zval* set_value)
 {
 	//showmem("write dimension offset", offset);
 	Config* cobj = zobj_toc<Config>(obj);
-	cobj->set(zval_user(offset), zval_user(set_value));
+	cobj->set(val_ptr(offset), val_ptr(set_value));
 
-	//zobj_user(obj).property(offset, set_value);
+	//obj_ptr(obj).property(offset, set_value);
 }
 
 int   
 Config::has_dimension(zend_object *object, zval *offset, int check_empty)
 {
-	return zobj_user(object).has_property(offset);
+	return obj_ptr(object).has_property(offset);
 }
 
 void   
 Config::unset_dimension(zend_object *object, zval *unset)
 {
-	return zobj_user(object).unset_property(unset);
+	return obj_ptr(object).unset_property(unset);
 }
 #endif
 
 
-zobj_mgr // static
-Config::make(htab_read initdata)
+obj_rc // static
+Config::make(htab_rd initdata)
 {
-	zobj_mgr result = Config::omg.new_zobj();
+	obj_rc result = Config::omg.new_zobj();
 	Config* cobj = zobj_toc<Config>(result);
 
 	cobj->construct(initdata);
@@ -62,17 +62,17 @@ Config::make(htab_read initdata)
 }
 
 void 
-Config::debug_info(htab_write hw)
+Config::debug_info(htab_wr hw)
 {
 	base_d::debug_info(hw);
 }
 
 void 
-Config::construct(htab_read values)
+Config::construct(htab_rd values)
 {
 	if (values.size() > 0)
 	{
-		zobj_user self(this->vobj());
+		obj_ptr self(this->vobj());
 		for_key_value wk;
 
 		for(wk.start(values); wk.ok(); wk.next())
@@ -83,12 +83,12 @@ Config::construct(htab_read values)
 }
 
 
-zval_mgr 
-Config::getOrNot(zstr_user name, zval_user ifnot)
+val_rc 
+Config::getOrNot(str_ptr name, val_ptr ifnot)
 {
-	zval_mgr result;
+	val_rc result;
 
-	zobj_user self(this->vobj());
+	obj_ptr self(this->vobj());
 
 	//result = self.property(name);
 
@@ -110,7 +110,7 @@ Config::getOrNot(zstr_user name, zval_user ifnot)
 		//showstr("missing", name);
 		//showmem("result", result);
 	}
-	if (zval_user(result).isNull() && !ifnot.isNull())
+	if (val_ptr(result).isNull() && !ifnot.isNull())
 	{
 		result = ifnot;
 	}
@@ -118,17 +118,17 @@ Config::getOrNot(zstr_user name, zval_user ifnot)
 }
 
 bool      
-Config::has(zstr_user name)
+Config::has(str_ptr name)
 {
-	zobj_user self(this->vobj());
+	obj_ptr self(this->vobj());
 
 	return self.has_property(name);
 }
 
-zval_mgr
-Config::get(zstr_user name)
+val_rc
+Config::get(str_ptr name)
 {
-	zobj_user self(this->vobj());
+	obj_ptr self(this->vobj());
 
 	return self.property(name);
 }
@@ -136,29 +136,29 @@ Config::get(zstr_user name)
 
 ///zend_std_unset_property
 void   
-Config::unset(zstr_user  name)
+Config::unset(str_ptr  name)
 {
 	zend_std_unset_property(this->vobj(), name, nullptr);
 }
 
 void      
-Config::set(zstr_user  name, zval_user value)
+Config::set(str_ptr  name, val_ptr value)
 {
-	//showstr("set zstr_user", name);
-	zobj_user(this->vobj()).property(name, value);
+	//showstr("set str_ptr", name);
+	obj_ptr(this->vobj()).property(name, value);
 }
 
 #ifdef CONFIG_DIMENSIONS
 
 bool      
-Config::has(zval_user key)
+Config::has(val_ptr key)
 {
-	zstr_mgr skey = key.to_zstr();
+	str_rc skey = key.to_zstr();
 	return has(skey);
 }
 
 void      
-Config::set(zval_user  key,  zval_user value)
+Config::set(val_ptr  key,  val_ptr value)
 {
 	//showmem("set key", key);
 	//showmem("set value", value);
@@ -168,58 +168,58 @@ Config::set(zval_user  key,  zval_user value)
 		set(key.zstr(), value);
 	}
 	else {
-		zstr_mgr skey = key.to_zstr();
+		str_rc skey = key.to_zstr();
 		//showstr("set interned key", skey);
 		set(skey, value);
 	}
 }
 
-zval_mgr  
-Config::get(zval_user name)
+val_rc  
+Config::get(val_ptr name)
 {
-	zstr_mgr skey = name.to_zstr();
+	str_rc skey = name.to_zstr();
 	//showstr("config get", skey);
 
-	zval_mgr result = zobj_user(this->vobj()).property(skey);
+	val_rc result = obj_ptr(this->vobj()).property(skey);
 	//showmem("config get", result);
 	return result;
 
 }
 
 void      
-Config::unset(zval_user  key)
+Config::unset(val_ptr  key)
 {
-	zstr_mgr skey = key.to_zstr();
-	zobj_user(this->vobj()).unset_property(skey);
+	str_rc skey = key.to_zstr();
+	obj_ptr(this->vobj()).unset_property(skey);
 }
 #endif
 
 
-htab_mgr  
-Config::subsetkey(zstr_user key)
+htab_rc  
+Config::subsetkey(str_ptr key)
 {
 
-	htab_mgr result;
-	htab_write hw(result);
-	zval_mgr value = get(key);
+	htab_rc result;
+	htab_wr hw(result);
+	val_rc value = get(key);
 	hw.set(key, value);
 
 	return result;
 }
 
-htab_mgr  
-Config::subset(htab_read data)
+htab_rc  
+Config::subset(htab_rd data)
 {
 	for_key_value wk;
-	htab_mgr result;
-	htab_write hw(result);
-	zval_user vkey;
+	htab_rc result;
+	htab_wr hw(result);
+	val_ptr vkey;
 
 	for(wk.start(data); wk.ok(); wk.next())
 	{
 		vkey = wk.value();
-		zstr_mgr key(vkey.to_zstr());
-		zval_mgr value = this->get(key);
+		str_rc key(vkey.to_zstr());
+		val_rc value = this->get(key);
 
 		hw.set(key, value);
 	}
@@ -227,7 +227,7 @@ Config::subset(htab_read data)
 }
 
 void      
-Config::addArray(htab_read data)
+Config::addArray(htab_rd data)
 {
 	for_key_value fkv;
 	for(fkv.start(data); fkv.ok(); fkv.next())
@@ -236,10 +236,10 @@ Config::addArray(htab_read data)
 	}
 }
 
-htab_mgr  
+htab_rc  
 Config::toArray()
 {
-	htab_mgr result;
+	htab_rc result;
 
 	HashTable* ht = zend_std_get_properties_for(this->vobj(), ZEND_PROP_PURPOSE_GET_OBJECT_VARS);
 	result.adopt(ht);
@@ -249,13 +249,13 @@ Config::toArray()
 void
 Config::clear()
 {
-	htab_mgr temp = toArray();
+	htab_rc temp = toArray();
 
-	htab_read look(temp);
+	htab_rd look(temp);
 
 	for_key_value wk;
 
-	zobj_user self(vobj());
+	obj_ptr self(vobj());
 
 	for(wk.start(look); wk.ok(); wk.next())
 	{
@@ -263,36 +263,36 @@ Config::clear()
 	}
 }
 
-zstr_mgr 
-Config::unhive(zstr_user subj)
+str_rc 
+Config::unhive(str_ptr subj)
 {
 	preg sfind("#@([a-zA-Z][\\w\\d]*)#", preg::OFFSET_CAPTURE, true);
 
 	int ct = sfind.matches(subj);
 	if (ct > 0) {
-		htab_read m = sfind.results();
+		htab_rd m = sfind.results();
 
-		htab_read replace_list = m.get((int)0);
-		htab_read keys_list = m.get(1);
+		htab_rd replace_list = m.get((int)0);
+		htab_rd keys_list = m.get(1);
 
 		std::string_view original = subj.vstr();
 
-		zstr_buffer result;
+		str_buf result;
 		size_t ipos = 0;
 
 		for(int i = 0; i < ct; i++)
 		{
-			htab_read  k1 = keys_list.get(i);
-			zval_user fkey = k1.get((int)0);
+			htab_rd  k1 = keys_list.get(i);
+			val_ptr fkey = k1.get((int)0);
 			//showmem("get key", fkey);
 			
-			zval_mgr rval = this->get(fkey);
+			val_rc rval = this->get(fkey);
 			//showmem("replace value", rval);
-			zstr_user replace_str = zval_user(rval).zstr();
+			str_ptr replace_str = val_ptr(rval).zstr();
 
-			htab_read f1 = replace_list.get(i);
-			zstr_user  slen_f1 = f1.get((int)0);
-			zval_user  soffset_f1 = f1.get(1);
+			htab_rd f1 = replace_list.get(i);
+			str_ptr  slen_f1 = f1.get((int)0);
+			val_ptr  soffset_f1 = f1.get(1);
 
 			size_t slen = slen_f1.size();
 			zend_long soffset = soffset_f1.zlong();
@@ -313,7 +313,7 @@ Config::unhive(zstr_user subj)
 		return result.zstr();
 	}
 	else {
-		return zstr_mgr(subj);
+		return str_rc(subj);
 	}
 }
 
@@ -330,10 +330,10 @@ ZEND_METHOD(Wcc_Config, __construct)
 
 	auto cobj = zval_toc<Config>(ZEND_THIS);
 
-	htab_read arg1;
+	htab_rd arg1;
 
 	if (data) {
-		arg1 = zval_user(data).zarray();
+		arg1 = val_ptr(data).zarray();
 	}
 	cobj->construct(arg1);
 }
@@ -350,12 +350,12 @@ ZEND_METHOD(Wcc_Config, getOrNot)
 	ZEND_PARSE_PARAMETERS_END();
 
 	auto cobj = zval_toc<Config>(ZEND_THIS);
-	zval_user temp;
+	val_ptr temp;
 
 	if (ifnot) {
 		temp = ifnot;
 	}
-	zval_mgr result = cobj->getOrNot(key, temp);
+	val_rc result = cobj->getOrNot(key, temp);
 	result.move_zv(return_value);
 
 }
@@ -384,7 +384,7 @@ ZEND_METHOD(Wcc_Config, get)
 
 	auto cobj = zval_toc<Config>(ZEND_THIS);
 
-	zval_mgr temp = cobj->get(key);
+	val_rc temp = cobj->get(key);
 	temp.move_zv(return_value);
 }
 
@@ -429,7 +429,7 @@ ZEND_METHOD(Wcc_Config, subset)
 	ZEND_PARSE_PARAMETERS_END();
 
 	auto cobj = zval_toc<Config>(ZEND_THIS);
-	htab_mgr temp;
+	htab_rc temp;
 
 	if (list)
 	{
@@ -475,7 +475,7 @@ ZEND_METHOD(Wcc_Config, toArray)
 
 	auto cobj = zval_toc<Config>(ZEND_THIS);
 
-	htab_mgr result = cobj->toArray();
+	htab_rc result = cobj->toArray();
 	result.move_zv(return_value);
 }
 
@@ -489,7 +489,7 @@ ZEND_METHOD(Wcc_Config, unhive)
 
 	auto cobj = zval_toc<Config>(ZEND_THIS);
 
-	zstr_mgr result = cobj->unhive(trans);
+	str_rc result = cobj->unhive(trans);
 	result.move_zv(return_value);
 }
 
@@ -504,7 +504,7 @@ ZEND_METHOD(Wcc_Config, offsetGet)
 
 	auto cobj = zval_toc<Config>(ZEND_THIS);
 
-	zval_mgr temp = cobj->get(zval_user(key));
+	val_rc temp = cobj->get(val_ptr(key));
 	temp.move_zv(return_value);
 }
 
@@ -520,7 +520,7 @@ ZEND_METHOD(Wcc_Config, offsetSet)
 
 	auto cobj = zval_toc<Config>(ZEND_THIS);
 		zend_printf("offsetSet called\n");
-	cobj->set(zval_user(key), zval_user(value));
+	cobj->set(val_ptr(key), val_ptr(value));
 }
 
 ZEND_METHOD(Wcc_Config, offsetExists)
@@ -533,7 +533,7 @@ ZEND_METHOD(Wcc_Config, offsetExists)
 
 	auto cobj = zval_toc<Config>(ZEND_THIS);
 
-	bool temp = cobj->has(zval_user(key));
+	bool temp = cobj->has(val_ptr(key));
 	RETURN_BOOL(temp);
 }
 
@@ -548,7 +548,7 @@ ZEND_METHOD(Wcc_Config, offsetUnset)
 
 	auto cobj = zval_toc<Config>(ZEND_THIS);
 
-	cobj->unset(zval_user(key));
+	cobj->unset(val_ptr(key));
 }
 */
 

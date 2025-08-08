@@ -7,7 +7,7 @@
 
 
 #ifndef ZOBJ_MGR_H
-#include "zobj_mgr.h"
+#include "obj_rc.h"
 #endif
 
 namespace zpp {
@@ -19,11 +19,11 @@ class class_data {
         bool check(const char* msg);
     public:
 
-        static zend_class_entry* get_class(zstr_user classname);
+        static zend_class_entry* get_class(str_ptr classname);
 
-        static zobj_mgr create_object(zstr_user classname);
+        static obj_rc create_object(str_ptr classname);
 
-        static zobj_mgr std_object();
+        static obj_rc std_object();
         
         class_data() : class_entry_(nullptr) {}
 
@@ -32,7 +32,7 @@ class class_data {
             /* void */
         }
         
-        class_data(zstr_user classname);
+        class_data(str_ptr classname);
 
         bool ok() const { return (class_entry_); }
 
@@ -41,28 +41,28 @@ class class_data {
             class_entry_ = ce;
         }
 
-        bool set(zstr_user classname);
+        bool set(str_ptr classname);
 
-        zstr_user className();
+        str_ptr className();
 
         void add_constant(const char* name, const char* value);
         void add_constant(const char* name, zend_string* zs);
         void add_constant(const char* name, zend_long value);
 
-        void typed_property(zstr_user name, zval_user data, 
+        void typed_property(str_ptr name, val_ptr data, 
                         zend_type datatype, int accessflag = ZEND_ACC_PUBLIC);
-        //void add_constant(const zstr_intern& name,  zval_user value, int flags = ZEND_ACC_PUBLIC);
+        //void add_constant(const zstr_intern& name,  val_ptr value, int flags = ZEND_ACC_PUBLIC);
 
         // read
-        zval_mgr static_property(zend_string* s);
+        val_rc static_property(zend_string* s);
         
         // write
         void static_property(zend_string* pname, zval* value);
 
-        zval_mgr constant_value(zend_string* s);
+        val_rc constant_value(zend_string* s);
   
 
-        bool new_object(zobj_mgr& om);
+        bool new_object(obj_rc& om);
 
     };
 

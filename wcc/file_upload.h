@@ -16,33 +16,33 @@ namespace wcc {
 	class FileUpload : public base_d 
 	{
 	protected:
-		zstr_mgr error_;
-		zstr_mgr name_;
-		zstr_mgr ext_;
-		zstr_mgr key_;
-		zstr_mgr realType_;
-		zstr_mgr tmp_name_;
-		zstr_mgr type_;
+		str_rc error_;
+		str_rc name_;
+		str_rc ext_;
+		str_rc key_;
+		str_rc realType_;
+		str_rc tmp_name_;
+		str_rc type_;
 		zend_long size_;
 	public:
 		static base_obj_mgr<FileUpload> omg;
 
-		virtual void debug_info(htab_write hw);
+		virtual void debug_info(htab_wr hw);
 		
-		void construct(htab_read file_data, zstr_user name);
+		void construct(htab_rd file_data, str_ptr name);
 
-		zstr_mgr getRealType();
+		str_rc getRealType();
 
 		bool isUploadedFile();
 
-		bool moveTo(zstr_user destination);
+		bool moveTo(str_ptr destination);
 
-		zstr_user getName()
+		str_ptr getName()
 		{
 			return name_;
 		}
 
-		zstr_user getKey()
+		str_ptr getKey()
 		{
 			return key_;
 		}
@@ -52,17 +52,17 @@ namespace wcc {
 			return size_;
 		}
 
-		zstr_user getTempName()
+		str_ptr getTempName()
 		{
 			return tmp_name_;
 		}
 
-		zstr_user getType() 
+		str_ptr getType() 
 		{
 			return type_;
 		}
 
-		zstr_user getError()
+		str_ptr getError()
 		{
 			return error_;
 		}

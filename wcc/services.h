@@ -11,15 +11,15 @@ namespace wcc {
 
 class  Services : public base_d {
 protected:
-	htab_mgr  active_;
-	htab_mgr  defer_;
-	htab_mgr  instances_;
+	htab_rc  active_;
+	htab_rc  defer_;
+	htab_rc  instances_;
 
 	int       defer_ct_;
 	bool      throw_fail_;
 
-	zval_mgr  activate(zstr_user key);
-	zval_mgr  call_value(zobj_user callme);
+	val_rc  activate(str_ptr key);
+	val_rc  call_value(obj_ptr callme);
 
 public:
 
@@ -28,36 +28,36 @@ public:
 	Services();
 	virtual ~Services();
 	// instance
-	static zobj_user  instance();
+	static obj_ptr  instance();
 	static Services* cpp_global();
 
-	static zobj_user  setOne(zstr_user key, zobj_user obj);
-	static zobj_user  getOne(zstr_user key);
+	static obj_ptr  setOne(str_ptr key, obj_ptr obj);
+	static obj_ptr  getOne(str_ptr key);
 
-	static zval_mgr  service(zstr_user key);
-	static zval_mgr  service(const std::string_view& key);	
+	static val_rc  service(str_ptr key);
+	static val_rc  service(const std::string_view& key);	
 
-	zobj_user  newInstance(zstr_user key);
+	obj_ptr  newInstance(str_ptr key);
 	
-	zobj_user  setObject(zobj_user obj, zstr_user key);
+	obj_ptr  setObject(obj_ptr obj, str_ptr key);
 
 	/* return cached object */
-	zobj_user  getObject(zstr_user key);
+	obj_ptr  getObject(str_ptr key);
 
 	/* service functions */
 
-	bool       isActive(zstr_user name);
-	bool       has(zstr_user name);
+	bool       isActive(str_ptr name);
+	bool       has(str_ptr name);
 
-	void       setDefer(zstr_user name, zval_user value);
-	void       set(zstr_user name, zval_user value);
-	zval_mgr   get(zstr_user name);
+	void       setDefer(str_ptr name, val_ptr value);
+	void       set(str_ptr name, val_ptr value);
+	val_rc   get(str_ptr name);
 
-	void       unset(zstr_user name);
+	void       unset(str_ptr name);
 
 	void       setThrowFail(bool value);
 
-	virtual void debug_info(htab_write ht);
+	virtual void debug_info(htab_wr ht);
 
 	void       clearActive();
 	void       clearDefer();

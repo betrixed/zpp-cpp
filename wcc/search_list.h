@@ -16,35 +16,35 @@ namespace wcc {
 
 	class  SearchList : public base_d {
 	protected:
-		htab_mgr paths_;
+		htab_rc paths_;
 	public:
 
-		virtual void debug_info(htab_write hw);
+		virtual void debug_info(htab_wr hw);
 		
 		static base_obj_mgr<SearchList> omg;
 
-		void construct(zval_user paths);
+		void construct(val_ptr paths);
 
 		void clear();
 
-		bool hasPath(zstr_user name);
+		bool hasPath(str_ptr name);
 
-		void setPaths(zval_user sp);
+		void setPaths(val_ptr sp);
 
-		void addPath(zstr_user p);
+		void addPath(str_ptr p);
 
-		void addPaths(zval_user sp);
+		void addPaths(val_ptr sp);
 
 		bool try_path(
 			const fs::path& dir, 
 			const fs::path& file,  
-			zstr_mgr& result);
+			str_rc& result);
 
-		zstr_mgr findLeaf(zstr_user leaf, zval_user extensions);
+		str_rc findLeaf(str_ptr leaf, val_ptr extensions);
 		
-		zstr_user getName();
+		str_ptr getName();
 
-		htab_read getPaths();
+		htab_rd getPaths();
 
 		VIRTUAL_ZOBJPTR
 

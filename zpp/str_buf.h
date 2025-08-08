@@ -2,7 +2,7 @@
 #define ZSTR_BUFFER_H
 
 #ifndef ZSTR_OUTPUT_H
-#include "zstr_output.h"
+#include "str_out.h"
 #endif
 
 extern "C" {
@@ -13,14 +13,14 @@ extern "C" {
 namespace zpp {
 
 
-//! zstr_buffer with memory layout as "smart_string"
-	class zstr_buffer : public zstr_output {
+//! str_buf with memory layout as "smart_string"
+	class str_buf : public str_out {
 	protected:
 		smart_str    buf;
 
 		static zend_string* init_zs(const char* c, size_t slen);
 
-		friend class zstr_mgr;
+		friend class str_rc;
 
 		void initbuf();
 
@@ -30,21 +30,21 @@ namespace zpp {
 		zend_string* finalize();
 	public:
 
-		zstr_buffer();
+		str_buf();
 
-		zstr_buffer(zval *v);
+		str_buf(zval *v);
 
-		zstr_buffer(zend_string* w);
+		str_buf(zend_string* w);
 
-		zstr_buffer (const std::string_view& cs);
+		str_buf (const std::string_view& cs);
 
-		zstr_buffer (const std::string& cs);
+		str_buf (const std::string& cs);
 
-		zstr_buffer (const char* c, size_t slen);
+		str_buf (const char* c, size_t slen);
 
-		zstr_buffer (const char* c);
+		str_buf (const char* c);
 
-		virtual ~zstr_buffer();
+		virtual ~str_buf();
 
 		void append(const char* c, size_t slen) override;
 
@@ -52,14 +52,14 @@ namespace zpp {
 
 		size_t capacity() const { return buf.a; }
 
-		zstr_buffer& operator=(const char* c);
+		str_buf& operator=(const char* c);
 
 		
 		// Finalize, 0-terminate, return as std::string, 
 		std::string str();
 
 		// Finalize, 0-terminate give away
-		zstr_mgr zstr();
+		str_rc zstr();
 
 		// view of content so far, does not finalize
 		std::string_view vstr() const;
@@ -73,5 +73,5 @@ namespace zpp {
 	
 };
 
-//zstr_buffer.h
+//str_buf.h
 #endif

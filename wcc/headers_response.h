@@ -21,11 +21,11 @@ namespace wcc {
 	public:
 		static Hmap_mgr<Headers> omg;
 		
-		virtual void debug_info(htab_write ht);
+		virtual void debug_info(htab_wr ht);
 		 
 		void reset();
 		bool send();
-		void setRaw(zstr_user zs);
+		void setRaw(str_ptr zs);
 	};
 
 };

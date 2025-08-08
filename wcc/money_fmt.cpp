@@ -56,7 +56,7 @@ enum {
 };
 
 void 
-MoneyFmt::debug_info(htab_write hw)
+MoneyFmt::debug_info(htab_wr hw)
 {
 	hw.set(MFI.lang,   lang_str_);
 	hw.set(MFI.symbol, money_sym_);
@@ -64,25 +64,25 @@ MoneyFmt::debug_info(htab_write hw)
 }
 
 void 
-MoneyFmt::construct(zstr_user slang)
+MoneyFmt::construct(str_ptr slang)
 {
 	lang_str_ = slang;
 
-	zval_mgr lang(slang);
+	val_rc lang(slang);
 	
-	zval_mgr currency_flag(UNUM_CURRENCY); 
+	val_rc currency_flag(UNUM_CURRENCY); 
 
-	zval_mgr symbol_flag(UNUM_INTL_CURRENCY_SYMBOL);  
+	val_rc symbol_flag(UNUM_INTL_CURRENCY_SYMBOL);  
 
 	money_fmt_ = FCall2(MFI.numfmt_create).call(lang, currency_flag);
 
-	money_sym_ = zobj_user(money_fmt_).call(MFI.getsymbol, symbol_flag);
+	money_sym_ = obj_ptr(money_fmt_).call(MFI.getsymbol, symbol_flag);
 }
 
-zstr_mgr 
-MoneyFmt::formatNoSym(zval_user value)
+str_rc 
+MoneyFmt::formatNoSym(val_ptr value)
 {
-	zstr_mgr result;
+	str_rc result;
 
 	double dval = value.zdouble();
 	zend_string* fs = _php_math_number_format(dval / 100.0, 2, '.', ',');
@@ -90,26 +90,26 @@ MoneyFmt::formatNoSym(zval_user value)
 	return result;
 }
 
-zstr_user MoneyFmt::symbol() const
+str_ptr MoneyFmt::symbol() const
 {
 	return money_sym_;
 }
 
-zstr_user MoneyFmt::language() const
+str_ptr MoneyFmt::language() const
 {
 	return lang_str_;
 }
 
-zstr_mgr 
-MoneyFmt::fmtValue(zval_user value)
+str_rc 
+MoneyFmt::fmtValue(val_ptr value)
 {
 	return formatNoSym(value);
 }
 
-zstr_mgr 
-MoneyFmt::format(zval_user value)
+str_rc 
+MoneyFmt::format(val_ptr value)
 {
-	zstr_buffer result;
+	str_buf result;
 
 	result << money_sym_ << ' ' << formatNoSym(value);
 
@@ -143,7 +143,7 @@ ZEND_METHOD(Wcc_Money, formatNoSym)
 	ZEND_PARSE_PARAMETERS_END();
 
 	auto cobj = zval_toc<MoneyFmt>(ZEND_THIS);
-	zstr_mgr result = cobj->formatNoSym(value);
+	str_rc result = cobj->formatNoSym(value);
 	result.move_zv(return_value);
 
 }
@@ -157,7 +157,7 @@ ZEND_METHOD(Wcc_Money, fmtValue)
 	ZEND_PARSE_PARAMETERS_END();
 
 	auto cobj = zval_toc<MoneyFmt>(ZEND_THIS);
-	zstr_mgr result = cobj->fmtValue(value);
+	str_rc result = cobj->fmtValue(value);
 	result.move_zv(return_value);
 
 }
@@ -171,7 +171,7 @@ ZEND_METHOD(Wcc_Money, format)
 	ZEND_PARSE_PARAMETERS_END();
 
 	auto cobj = zval_toc<MoneyFmt>(ZEND_THIS);
-	zstr_mgr result = cobj->format(value);
+	str_rc result = cobj->format(value);
 	result.move_zv(return_value);
 	
 }
@@ -182,7 +182,7 @@ ZEND_METHOD(Wcc_Money, symbol)
 	ZEND_PARSE_PARAMETERS_END();
 
 	auto cobj = zval_toc<MoneyFmt>(ZEND_THIS);
-	zstr_user result = cobj->symbol();
+	str_ptr result = cobj->symbol();
 	result.return_zv(return_value);
 }
 
@@ -192,7 +192,7 @@ ZEND_METHOD(Wcc_Money, language)
 	ZEND_PARSE_PARAMETERS_END();
 
 	auto cobj = zval_toc<MoneyFmt>(ZEND_THIS);
-	zstr_user result = cobj->language();
+	str_ptr result = cobj->language();
 	result.return_zv(return_value);
 }
 

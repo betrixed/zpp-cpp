@@ -33,7 +33,7 @@ using namespace zpp;
 
 	base_obj_mgr<IBuild> IBuild::omg;
 
-	void IBuild::construct(zval_user driver)
+	void IBuild::construct(val_ptr driver)
 	{
 		driver_ = driver;
 		IDriver* db = zobj_toc<IDriver>(driver_);
@@ -46,7 +46,7 @@ using namespace zpp;
 
 	void throw_array_hole(unsigned int ix)
 	{
-		zstr_buffer buf;
+		str_buf buf;
 
 		buf << "Where list has missing index " << ix;
 
@@ -57,23 +57,23 @@ using namespace zpp;
 	IBuild::distinct(bool set)
 	{
 		Bindings& bind = bindings();
-		zval_mgr value(set);
+		val_rc value(set);
 		bind.set((int) ISql::SQL_DISTINCT, value);
 	}
-	void IBuild::where_unpack(htab_read aw)
+	void IBuild::where_unpack(htab_rd aw)
 	{
 		auto wlen = aw.size();
 		if (wlen==0)
 		{
 			return;
 		}
-		zval_user p0 = aw.get(int(0));
+		val_ptr p0 = aw.get(int(0));
 		if (p0.isNull())
 		{
 			throw_array_hole(0);
 			return;
 		}
-		zval_user p3;
+		val_ptr p3;
 		if (wlen > 3)
 		{
 			p3 = aw.get(int(3));
@@ -83,7 +83,7 @@ using namespace zpp;
 				return;
 			}
 		}
-		zval_user p2;
+		val_ptr p2;
 		if (wlen > 2)
 		{
 			p2 = aw.get(int(2));
@@ -93,7 +93,7 @@ using namespace zpp;
 				return;
 			}
 		}
-		zval_user p1 = aw.get(int(1));
+		val_ptr p1 = aw.get(int(1));
 		if (p1.isNull()) 
 		{
 			throw_array_hole(1);
@@ -106,15 +106,15 @@ using namespace zpp;
 			where(p0,p1,p2,p3);
 			break;
 		case 3:
-			where(p0,p1,p2, zval_user());
+			where(p0,p1,p2, val_ptr());
 			break;
 		case 2:
-			where(p0,p1, zval_user(), zval_user());
+			where(p0,p1, val_ptr(), val_ptr());
 			break;
 		}
 	}
 
-	void IBuild::where_list(htab_read aw)
+	void IBuild::where_list(htab_rd aw)
 	{
 		auto wlen = aw.size();
 
@@ -123,7 +123,7 @@ using namespace zpp;
 			return;
 		}
 
-		zval_user p0 = aw.get(int(0));
+		val_ptr p0 = aw.get(int(0));
 
 		if (p0.isNull())
 		{
@@ -171,24 +171,24 @@ using namespace zpp;
 	}
 
 	void 
-	IBuild::setReturns(htab_read names)
+	IBuild::setReturns(htab_rd names)
 	{
 		Bindings& bind = bindings();
 		bind.addarray(ISql::SQL_RETURN, names);
 	}
 
-	zval_mgr 
-	IBuild::insert(zval_user rdata)
+	val_rc 
+	IBuild::insert(val_ptr rdata)
 	{
 		//zend_printf("IBuild::insert\n");
 
 		Bindings& bind = bindings();
 		bind.wipe(ISql::SQL_INSERT);
 
-		zval_mgr result;
-		zobj_mgr row_mgr;
-		htab_mgr timeStamps;
-		htab_read rows;
+		val_rc result;
+		obj_rc row_mgr;
+		htab_rc timeStamps;
+		htab_rd rows;
 
 		bool     is_multiple = false;
 
@@ -215,14 +215,14 @@ using namespace zpp;
 		}
 
 		IRow* irow = zobj_toc<IRow>(row_mgr);
-		zobj_user model_mgr = irow->getModel();
+		obj_ptr model_mgr = irow->getModel();
 
 		Model* model = zobj_toc<Model>(model_mgr);
 
 		if (model->hasTimeStamps()) {
 			timeStamps = irow->stampTime(now());
 		}
-		zval_mgr temp;
+		val_rc temp;
 
 		if (is_multiple) {
 			htab_walk wk;
@@ -247,7 +247,7 @@ using namespace zpp;
 		}
 
 		
-		zobj_mgr plist_mgr = isql().insert(bind);
+		obj_rc plist_mgr = isql().insert(bind);
 		//showobj("plist_mgr", plist_mgr);
 
 		bind.wipe(ISql::SQL_INSERT);
@@ -255,9 +255,9 @@ using namespace zpp;
 		if (plist_mgr.ok())
 		{
 			ParamList* plist = zobj_toc<ParamList>(plist_mgr);
-			zstr_user sql(plist->getSql());
-			htab_read values(plist->getValues());
-			htab_read rets(plist->getReturns());
+			str_ptr sql(plist->getSql());
+			htab_rd values(plist->getValues());
+			htab_rd rets(plist->getReturns());
 
 			IDriver& db = idb();
 
@@ -272,7 +272,7 @@ using namespace zpp;
 	}
 
 	void 
-	IBuild::debug_info(htab_write di)
+	IBuild::debug_info(htab_wr di)
 	{
 		di.set(SQSTR.driver, driver_);
 		di.set(SQSTR.isql, isql_);
@@ -284,31 +284,31 @@ using namespace zpp;
 		di.set(SQSTR.columns, columns_);
 	}
 
-	zval_mgr
-	IBuild::aggregate(zstr_user agfn, htab_read columns)
+	val_rc
+	IBuild::aggregate(str_ptr agfn, htab_rd columns)
 	{
 		model_.init();
 
-		htab_mgr args_mgr;
-		htab_write args(args_mgr);
+		htab_rc args_mgr;
+		htab_wr args(args_mgr);
 
 		args.set(SQSTR.function, agfn);
 		args.set(SQSTR.columns, columns);
 
 		Bindings& bind = bindings();
-		zval_mgr temp(args_mgr);
+		val_rc temp(args_mgr);
 		bind.set(ISql::SQL_AGGREGATE, temp);
 		bind.set(ISql::FETCH_AS, IDriver::FETCH_OBJECT);
 
 
-		zval_mgr result = bind.select();
+		val_rc result = bind.select();
 
 		if (result.isArray())
 		{
-			htab_read rows(result);
+			htab_rd rows(result);
 			if (rows.size())
 			{
-				zobj_mgr robj = rows.get(int(0));
+				obj_rc robj = rows.get(int(0));
 				result = robj.property(agfn);
 			}
 		}
@@ -316,14 +316,14 @@ using namespace zpp;
 		return result;
 	}
 
-	zval_mgr 
-	IBuild::update(zobj_user irow, htab_read dirty)
+	val_rc 
+	IBuild::update(obj_ptr irow, htab_rd dirty)
 	{
 		Bindings& bind = bindings();
 
 		IRow* rowobj = zobj_toc<IRow>(irow);
 
-		zval_mgr result;
+		val_rc result;
 
 		if (dirty.size())
 		{
@@ -336,7 +336,7 @@ using namespace zpp;
 				bind.update(cvalue, rowobj->get(cvalue));
 			}
 
-			htab_mgr ts = rowobj->stampTime(now(), Model::UPDATE_TS);
+			htab_rc ts = rowobj->stampTime(now(), Model::UPDATE_TS);
 
 			if (ts.size())
 			{
@@ -348,11 +348,11 @@ using namespace zpp;
 				}
 			}
 
-			zobj_mgr plist_mgr = isql().update(bind);
+			obj_rc plist_mgr = isql().update(bind);
 			ParamList* plist = zobj_toc<ParamList>(plist_mgr);
 
-			zstr_user sql(plist->getSql());
-			htab_read params(plist->getValues());
+			str_ptr sql(plist->getSql());
+			htab_rd params(plist->getValues());
 
 			result = RunSql::op(driver_, sql, params);
 		}
@@ -361,7 +361,7 @@ using namespace zpp;
 	}
 
 	void 
-	IBuild::table(zstr_user table, bool wipe)
+	IBuild::table(str_ptr table, bool wipe)
 	{
 		Bindings& bind = bindings();
 
@@ -377,20 +377,20 @@ using namespace zpp;
 	IBuild::limit(int lim, int offset)
 	{
 		Bindings& bind = bindings();
-		zval_mgr a1(lim);
-		zval_mgr a2(offset);
+		val_rc a1(lim);
+		val_rc a2(offset);
 		bind.limit(a1, a2);
 	}
 
 	int 
-	IBuild::count(zval_user columns)
+	IBuild::count(val_ptr columns)
 	{
-		htab_mgr names_mgr;
-		htab_write names(names_mgr);
+		htab_rc names_mgr;
+		htab_wr names(names_mgr);
 
 		if (columns.isString())
 		{
-			htab_write hw(names);
+			htab_wr hw(names);
 			names.push_back(columns.zstr());
 		}
 		else if (columns.isArray()) {
@@ -399,20 +399,20 @@ using namespace zpp;
 		else {
 			names.push_back(SQSTR.asterisk);
 		}
-		zval_mgr result = aggregate(SQSTR.count_str, names_mgr);
+		val_rc result = aggregate(SQSTR.count_str, names_mgr);
 		return result.zlong();
 	}
 
-	zval_mgr 
-	IBuild::deleteRow(zobj_user rowobj)
+	val_rc 
+	IBuild::deleteRow(obj_ptr rowobj)
 	{
 		Model* model = zobj_toc<Model>(model_);
 		IRow*  irow = zobj_toc<IRow>(rowobj);
 
-		zval_mgr null_result;
+		val_rc null_result;
 
 
-		htab_read pkey = model->getPKey();
+		htab_rd pkey = model->getPKey();
 		//zend_printf("deleteRow - ");
 		//showdata("pkey", pkey);
 
@@ -422,19 +422,19 @@ using namespace zpp;
 
 	    if (pkeyct)
 	    {
-	    	htab_mgr values = irow->getDataValues(pkey);
+	    	htab_rc values = irow->getDataValues(pkey);
 	    	//showdata("values", values);
 	    	for( int ix = 0; ix < pkeyct; ix++)
 	    	{
-	    		zval_user key = pkey.get(ix);
-	    		zval_user value = values.get(key);
+	    		val_ptr key = pkey.get(ix);
+	    		val_ptr value = values.get(key);
 	    		//showmem("key value", value);
 	    		bind.where(key, SQSTR.cmp_equal, value, SQSTR.and_str);
 	    	}
 	    }
 	    else {
 	    	//WHERE alread set?
-	    	zval_user wcond = bind.get(ISql::SQL_WHERE);
+	    	val_ptr wcond = bind.get(ISql::SQL_WHERE);
 	    	if (wcond.isNull())
 	    	{
 	    		zend_throw_error(zend_ce_error,"deleteRow() without primary key or where condition set");
@@ -442,11 +442,11 @@ using namespace zpp;
 	    	}
 	    }
 	    ISql& sp = isql();
-	    zobj_mgr params_mgr =  sp.deleteSql(bind);
+	    obj_rc params_mgr =  sp.deleteSql(bind);
 	    ParamList* plist = zobj_toc<ParamList>(params_mgr);
-	    zstr_user sql(plist->getSql());
+	    str_ptr sql(plist->getSql());
 	    //showstr("delete sql", sql);
-	    htab_read params(plist->getValues());
+	    htab_rd params(plist->getValues());
 	    //showdata("delete params", params);
 
 	    return RunSql::op(driver_, sql, params);
@@ -455,18 +455,18 @@ using namespace zpp;
 	}
 
 	void 
-	IBuild::whereKeyValue(zval_user key, zval_user value)
+	IBuild::whereKeyValue(val_ptr key, val_ptr value)
 	{
 		Bindings& bind = bindings();
 		bind.whereKeyValue(key, value);
 	}
 
 	void
-	IBuild::where(zval_user column, zval_user opcmp, zval_user value, zval_user bval)
+	IBuild::where(val_ptr column, val_ptr opcmp, val_ptr value, val_ptr bval)
 	{
-		zval_mgr arg2;
-		zval_mgr arg3;
-		zval_mgr arg4;
+		val_rc arg2;
+		val_rc arg3;
+		val_rc arg4;
 
 		if (!value.ok())
 		{
@@ -490,7 +490,7 @@ using namespace zpp;
 	}
 
 	void
-	IBuild::where(zval_user column, zstr_user opcmp, zval_user value, zstr_user bval)
+	IBuild::where(val_ptr column, str_ptr opcmp, val_ptr value, str_ptr bval)
 	{
 		Bindings& bind = bindings();
 
@@ -506,13 +506,13 @@ using namespace zpp;
 		}
 		if (column.isObject())
 		{
-			zobj_mgr raw = column.zobject();
+			obj_rc raw = column.zobject();
 			if (raw.instanceof(Raw::omg.classEntry())) {
 				whereRaw(raw, value, bval);
 				return;
 			}
 		}
-		zstr_buffer buf;
+		str_buf buf;
 		buf << "column type '" << zend_zval_type_name(column) << "' not supported";
 
 		zend_throw_error(zend_ce_error, buf.data());
@@ -520,8 +520,8 @@ using namespace zpp;
 		
 	}
 
-	zobj_mgr 
-	IBuild::getInsertSql(htab_read columns)
+	obj_rc 
+	IBuild::getInsertSql(htab_rd columns)
 	{
 		Bindings& bind = bindings();
 		bind.wipe(ISql::SQL_INSERT);
@@ -534,19 +534,19 @@ using namespace zpp;
 
 	}
 
-	zval_mgr
+	val_rc
 	IBuild::get_first()
 	{
 		Bindings& bind = bindings();
-		zval_mgr a1(1);
-		zval_mgr a2;
+		val_rc a1(1);
+		val_rc a2;
 
 		bind.limit(a1, a2);
-		zval_mgr result = bind.select();
+		val_rc result = bind.select();
 
 		if (result.isArray())
 		{
-			htab_read rdata(result);
+			htab_rd rdata(result);
 			if (rdata.size())
 			{
 				result = rdata.get(int(0));
@@ -558,7 +558,7 @@ using namespace zpp;
 		return result;
 	}
 
-	zval_mgr 
+	val_rc 
 	IBuild::oneRow()
 	{
 		columns_.init();
@@ -566,14 +566,14 @@ using namespace zpp;
 	}
 
 
-	zval_mgr 
+	val_rc 
 	IBuild::allRows()
 	{
 		return bindings().select();
 	}
 
-	zval_mgr 
-	IBuild::first(htab_read columns)
+	val_rc 
+	IBuild::first(htab_rd columns)
 	{
 		if (columns.size())
 		{
@@ -583,8 +583,8 @@ using namespace zpp;
 		return get_first();
 	}
 
-	zval_mgr
-	IBuild::get(htab_read columns)
+	val_rc
+	IBuild::get(htab_rd columns)
 	{
 		Bindings& bind = bindings();
 		if (columns.size())
@@ -595,7 +595,7 @@ using namespace zpp;
 		return bind.select();
 	}
 
-	zstr_mgr 
+	str_rc 
 	IBuild::now()
 	{
 		datetime_obj dtime;
@@ -615,24 +615,24 @@ using namespace zpp;
 	}
 
 	void 
-	IBuild::orderBy(zval_user colname, bool descend)
+	IBuild::orderBy(val_ptr colname, bool descend)
 	{
 		Bindings& bind = bindings();
 
 		bind.orderBy(colname, descend);
 	}
 
-	zval_mgr 
-	IBuild::seqLastValue(zstr_user seqname)
+	val_rc 
+	IBuild::seqLastValue(str_ptr seqname)
 	{
 
-		zstr_user sql = isql().seqLastValue(seqname);
+		str_ptr sql = isql().seqLastValue(seqname);
 
-		zval_mgr result = RunSql::op(driver_, sql);
+		val_rc result = RunSql::op(driver_, sql);
 
 		if (result.ok()) {
-			htab_read rows(result);
-			htab_read r1(rows.get(int(0)));
+			htab_rd rows(result);
+			htab_rd r1(rows.get(int(0)));
 			htab_walk wk;
 			wk.start(r1);
 			return wk.value();
@@ -641,7 +641,7 @@ using namespace zpp;
 	}
 
 	void 
-	IBuild::set(zstr_user cname, zval_user value)
+	IBuild::set(str_ptr cname, val_ptr value)
 	{
 		Bindings& bind = bindings();
 		bind.update(cname, value);	
@@ -656,14 +656,14 @@ using namespace zpp;
 	}
 
 	void 
-	IBuild::setInsert(htab_read data)
+	IBuild::setInsert(htab_rd data)
 	{
 		Bindings& bind = bindings();
 		bind.addarray(ISql::SQL_INSERT, data);
 	}
 
 	void 
-	IBuild::setModel(zobj_user model, bool bind)
+	IBuild::setModel(obj_ptr model, bool bind)
 	{
 		if (model.ok())
 		{
@@ -679,27 +679,27 @@ using namespace zpp;
 		{
 			//showobj("set model", model);
 			Model* m = zobj_toc<Model>(model);
-			zstr_mgr name = m->getName();
+			str_rc name = m->getName();
 
 			//zend_printf("table %s\n", name.data());
 			table(name);
 
 			Bindings& bind = bindings();
-			zval_mgr temp(model);
+			val_rc temp(model);
 			bind.set(ISql::MODEL_OBJ, temp);
 			bind.set(ISql::FETCH_AS, IDriver::FETCH_ASSOC);
 		}
 	}
 
-	zval_mgr 
-	IBuild::setSeqValue(int value, htab_read data)
+	val_rc 
+	IBuild::setSeqValue(int value, htab_rd data)
 	{
-		zstr_mgr sql = isql().setSeqValue(value, data);
-		zval_mgr result = RunSql::op(driver_, sql);
+		str_rc sql = isql().setSeqValue(value, data);
+		val_rc result = RunSql::op(driver_, sql);
 
 		if (result.isArray()) {
-			htab_read rows(result);
-			htab_read r1(rows.get(int(0)));
+			htab_rd rows(result);
+			htab_rd r1(rows.get(int(0)));
 			result = htab_walk::first(r1);
 		}
 		return result;
@@ -751,7 +751,7 @@ ZEND_METHOD(Wcd_IBuild, aggregate)
 
 	IBuild* cobj = zval_toc<IBuild>(ZEND_THIS);
 
-	zval_mgr result = cobj->aggregate(func, columns);
+	val_rc result = cobj->aggregate(func, columns);
 
 	result.move_zv(return_value);
 }
@@ -761,7 +761,7 @@ ZEND_METHOD(Wcd_IBuild, allRows)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 	IBuild* cobj = zval_toc<IBuild>(ZEND_THIS);
-	zval_mgr result = cobj->allRows();
+	val_rc result = cobj->allRows();
 	result.move_zv(return_value);
 }
 
@@ -776,7 +776,7 @@ ZEND_METHOD(Wcd_IBuild, count)
 	Z_PARAM_ARRAY_HT_OR_STR_OR_NULL(list, column)
 	ZEND_PARSE_PARAMETERS_END();
 
-	zval_mgr columns;
+	val_rc columns;
 
 	if (column)
 	{
@@ -791,7 +791,7 @@ ZEND_METHOD(Wcd_IBuild, count)
 	RETURN_LONG(cobj->count(columns));
 }
 
-//	zval_mgr deleteRow(zobj_user rowobj)
+//	val_rc deleteRow(obj_ptr rowobj)
 ZEND_METHOD(Wcd_IBuild, deleteRow)
 {
 	zval* irow;
@@ -801,7 +801,7 @@ ZEND_METHOD(Wcd_IBuild, deleteRow)
 	ZEND_PARSE_PARAMETERS_END();
 
 	IBuild* cobj = zval_toc<IBuild>(ZEND_THIS);
-	zval_mgr result = cobj->deleteRow(irow);
+	val_rc result = cobj->deleteRow(irow);
 	result.move_zv(return_value);
 }
 
@@ -830,7 +830,7 @@ ZEND_METHOD(Wcd_IBuild, first)
 	ZEND_PARSE_PARAMETERS_END();
 
 	IBuild* cobj = zval_toc<IBuild>(ZEND_THIS);
-	zval_mgr result = cobj->first(htab_read(ht));
+	val_rc result = cobj->first(htab_rd(ht));
 	result.move_zv(return_value);
 }
 
@@ -845,7 +845,7 @@ ZEND_METHOD(Wcd_IBuild, get)
 	ZEND_PARSE_PARAMETERS_END();
 
 	IBuild* cobj = zval_toc<IBuild>(ZEND_THIS);
-	zval_mgr result = cobj->get(htab_read(ht));
+	val_rc result = cobj->get(htab_rd(ht));
 	result.move_zv(return_value);
 }
 
@@ -853,7 +853,7 @@ ZEND_METHOD(Wcd_IBuild, getDriver)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 	IBuild* cobj = zval_toc<IBuild>(ZEND_THIS);
-	zobj_mgr result = cobj->driver_;
+	obj_rc result = cobj->driver_;
 	result.move_zv(return_value);
 }
 
@@ -861,7 +861,7 @@ ZEND_METHOD(Wcd_IBuild, getBindings)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 	IBuild* cobj = zval_toc<IBuild>(ZEND_THIS);
-	zobj_mgr result = cobj->bindings_;
+	obj_rc result = cobj->bindings_;
 	result.move_zv(return_value);
 }
 
@@ -869,7 +869,7 @@ ZEND_METHOD(Wcd_IBuild, getSql)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 	IBuild* cobj = zval_toc<IBuild>(ZEND_THIS);
-	zobj_mgr result = cobj->isql_;
+	obj_rc result = cobj->isql_;
 	result.move_zv(return_value);	
 }
 
@@ -880,7 +880,7 @@ ZEND_METHOD(Wcd_IBuild, getFrom)
 	Bindings& bind = *zobj_toc<Bindings>(cobj->bindings_);
 
 
-	zobj_user result = bind.get(ISql::SQL_FROM);
+	obj_ptr result = bind.get(ISql::SQL_FROM);
 
 	result.return_zv(return_value);
 }
@@ -894,7 +894,7 @@ ZEND_METHOD(Wcd_IBuild, getInsertSql)
 	ZEND_PARSE_PARAMETERS_END();
 
 	IBuild* cobj = zval_toc<IBuild>(ZEND_THIS);
-	zobj_mgr result = cobj->getInsertSql(columns);
+	obj_rc result = cobj->getInsertSql(columns);
 	result.move_zv(return_value);
 }
 
@@ -915,10 +915,10 @@ ZEND_METHOD(Wcd_IBuild, insert)
 	Z_PARAM_ZVAL(data)
 	ZEND_PARSE_PARAMETERS_END();
 	
-	zval_user test(data);
+	val_ptr test(data);
 	if (test.isObject())
 	{
-		zobj_mgr irow(test.zobject());
+		obj_rc irow(test.zobject());
 		if (! irow.instanceof(IRow::omg.class_entry_))
 		{
 			zend_throw_error(zend_ce_error,"Not IRow object");
@@ -931,7 +931,7 @@ ZEND_METHOD(Wcd_IBuild, insert)
 		RETURN_NULL();
 	}
 	IBuild* cobj = zval_toc<IBuild>(ZEND_THIS);
-	zval_mgr result = cobj->insert(test);
+	val_rc result = cobj->insert(test);
 	result.move_zv(return_value);
 }
 
@@ -957,7 +957,7 @@ ZEND_METHOD(Wcd_IBuild, now)
 
 	IBuild* cobj = zval_toc<IBuild>(ZEND_THIS);
 
-	zstr_mgr result = cobj->now();
+	str_rc result = cobj->now();
 
 	result.move_zv(return_value);
 }
@@ -984,7 +984,7 @@ ZEND_METHOD(Wcd_IBuild, oneRow)
 
 	IBuild* cobj = zval_toc<IBuild>(ZEND_THIS);
 
-	zval_mgr result = cobj->oneRow();
+	val_rc result = cobj->oneRow();
 
 	result.move_zv(return_value);
 }
@@ -992,10 +992,10 @@ ZEND_METHOD(Wcd_IBuild, oneRow)
 //public function orderBy(string $column, bool $descend = false) : void
 ZEND_METHOD(Wcd_IBuild, orderBy)
 {
-	zarg_exec args(execute_data);
+	zarg_rd args(execute_data);
 
 	bool         descend = false;
-	zval_user    colspec(args.need(1));
+	val_ptr    colspec(args.need(1));
 
 	args.zbool(descend, args.option(2));
 
@@ -1016,7 +1016,7 @@ ZEND_METHOD(Wcd_IBuild, seqLastValue)
 
 	IBuild* cobj = zval_toc<IBuild>(ZEND_THIS);
 	
-	zval_mgr result = cobj->seqLastValue(sname);
+	val_rc result = cobj->seqLastValue(sname);
 	result.move_zv(return_value);
 }
 
@@ -1124,7 +1124,7 @@ ZEND_METHOD(Wcd_IBuild, setSeqValue)
 
 	IBuild* cobj = zval_toc<IBuild>(ZEND_THIS);
 
-	zval_mgr result = cobj->setSeqValue(value, data);
+	val_rc result = cobj->setSeqValue(value, data);
 
 	result.move_zv(return_value);
 }
@@ -1161,7 +1161,7 @@ ZEND_METHOD(Wcd_IBuild, update)
 
 	IBuild* cobj = zval_toc<IBuild>(ZEND_THIS);
 
-	zval_mgr result = cobj->update(row, dirty);
+	val_rc result = cobj->update(row, dirty);
 
 	result.move_zv(return_value);
 }

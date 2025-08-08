@@ -2,18 +2,18 @@
 #define HTAB_WRITE_H
 
 #ifndef HTAB_READ_H
-#include "htab_read.h"
+#include "htab_rd.h"
 #endif 
 
 #ifndef ZSTR_MGR_H
-#include "zstr_mgr.h"
+#include "str_rc.h"
 #endif
 
 namespace zpp {
 
     class zstr_intern;
 
-    class htab_write : public htab_read 
+    class htab_wr : public htab_rd 
     {
     protected:
         void giveback(zval* mgr);
@@ -25,20 +25,20 @@ namespace zpp {
          *  to ensure its reference count is 1.
          */
 
-        htab_write(htab_mgr& mgr);
-        htab_write(zval_mgr& mgr);
-        htab_write(zval_user mgr);
-        htab_write(HashTable* h);
-        htab_write(const zval* p);
+        htab_wr(htab_rc& mgr);
+        htab_wr(val_rc& mgr);
+        htab_wr(val_ptr mgr);
+        htab_wr(HashTable* h);
+        htab_wr(const zval* p);
         
-        htab_write(const htab_write& w)
+        htab_wr(const htab_wr& w)
         {
             ht_ = w.ht_;
         }
 
 
 
-        const htab_write& operator=(const zval* p);
+        const htab_wr& operator=(const zval* p);
         
         
         void merge(HashTable* src);
@@ -53,15 +53,15 @@ namespace zpp {
 
         void push_items(auto&&... args)
         {
-            for (auto s : std::initializer_list<zstr_user>{ args... })
+            for (auto s : std::initializer_list<str_ptr>{ args... })
                 push_back(s);
         }
             
-        void push_back(const zval_mgr& zv);
+        void push_back(const val_rc& zv);
 
-        void push_back(zval_user zv);
+        void push_back(val_ptr zv);
 
-        void push_back(zstr_user su);
+        void push_back(str_ptr su);
         
         void push_back(HashTable* value);
 
@@ -72,7 +72,7 @@ namespace zpp {
             push_back((zend_string*) si);
         }
 
-        void push_back(zstr_mgr sm)
+        void push_back(str_rc sm)
         {
             push_back((zend_string*)sm);
         }
@@ -93,11 +93,11 @@ namespace zpp {
         
         void set_null(zend_string* key);
         void set_null(zend_long idx);
-        void set_null(zval_user key);
+        void set_null(val_ptr key);
         //To avoid cast to zend_string* 
-        //void set(zstr_user key, const zstr_mgr& value);
+        //void set(str_ptr key, const str_rc& value);
 
-        //void set(zval_user key, zval_user value);
+        //void set(val_ptr key, val_ptr value);
 
         void set(zend_long idx, zval* value);
         void set(zend_long idx, HashTable* value);
@@ -105,7 +105,7 @@ namespace zpp {
 
         bool unset(zend_long idx);
         bool unset(zend_string* key);
-        bool unset(zval_user key);
+        bool unset(val_ptr key);
 
 		/** Pull out, values given by array of
 		 *  string keys, unset them here, 
@@ -114,10 +114,10 @@ namespace zpp {
         
 
         /** Delete the keys in the exkeys list */
-        void removal(htab_read exkeys);
+        void removal(htab_rd exkeys);
     };
 
 };
 
-//htab_write.h
+//htab_wr.h
 #endif

@@ -44,7 +44,7 @@ public:
 
 	static Config_Mgr omg;
 	
-	static zobj_mgr make(htab_read initdata);
+	static obj_rc make(htab_rd initdata);
 
 		/*
 	static zval* read_dimension(zend_object* obj, zval* offset, int type,  zval* return_value);
@@ -60,45 +60,45 @@ public:
 	static HashTable* get_gc(zend_object *obj, zval **gc_data, int *gc_data_count);
 	static ZEND_RESULT_CODE count_elements(zend_object *object, zend_long *count);
 		*/
-	void construct(htab_read values);
+	void construct(htab_rd values);
 
 	/** Avoid warning for missing property */
-	zval_mgr getOrNot(zstr_user name, zval_user ifnot);
+	val_rc getOrNot(str_ptr name, val_ptr ifnot);
 
-	bool      has(zstr_user name);
+	bool      has(str_ptr name);
 	
-	zval_mgr  get(zstr_user name);
+	val_rc  get(str_ptr name);
 	
-	void      set(zstr_user name, zval_user value);
+	void      set(str_ptr name, val_ptr value);
 
-	void      unset(zstr_user name);
+	void      unset(str_ptr name);
 	
 #ifdef CONFIG_DIMENSIONS
-	zval_mgr  get(zval_user name);
-	void      set(zval_user  key,  zval_user value);
-	void 	  unset(zval_user  key);
-	bool      has(zval_user   key);
+	val_rc  get(val_ptr name);
+	void      set(val_ptr  key,  val_ptr value);
+	void 	  unset(val_ptr  key);
+	bool      has(val_ptr   key);
 #endif
 
 	// for ArrayAccess interface, dimensions interface
 
-	htab_mgr  subsetkey(zstr_user key);
-	htab_mgr  subset(htab_read data);
+	htab_rc  subsetkey(str_ptr key);
+	htab_rc  subset(htab_rd data);
 
-	void      addArray(htab_read data);
+	void      addArray(htab_rd data);
 
-	htab_mgr  toArray();
+	htab_rc  toArray();
 
 	zend_long count() const;
 
-	zstr_mgr  unhive(zstr_user data);
+	str_rc  unhive(str_ptr data);
 
 	void      clear();
 
 	
 	VIRTUAL_ZOBJPTR
 
-	virtual   void debug_info(htab_write hw);
+	virtual   void debug_info(htab_wr hw);
 	
 };
 

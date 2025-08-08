@@ -56,7 +56,7 @@ IRInit::init()
 
 IRow::IRow() : Hmap ()
 {
-	original_ = htab_mgr::empty_array();
+	original_ = htab_rc::empty_array();
 }
 
 IRow::~IRow()  
@@ -64,13 +64,13 @@ IRow::~IRow()
 }
 
 void 
-IRow::construct(zobj_user tmodel, htab_read data, bool exists)
+IRow::construct(obj_ptr tmodel, htab_rd data, bool exists)
 {
 	table_model_ = tmodel;
 	setData(data, exists);
 }
 
-void IRow::debug_info(htab_write di)
+void IRow::debug_info(htab_wr di)
 {
 	
 	di.set(IRSTR.data_str, data_);
@@ -80,7 +80,7 @@ void IRow::debug_info(htab_write di)
 }
 
 void 
-IRow::setData(htab_read data, bool exists)
+IRow::setData(htab_rd data, bool exists)
 {
 	if (data.size())
 	{
@@ -107,7 +107,7 @@ IRow::create(bool reload)
 void 
 IRow::delete_row()
 {
-	zval_mgr self(vobj());
+	val_rc self(vobj());
 	//zend_printf("IRow delete\n");
 	//showobj("table_model", table_model_);
 
@@ -124,13 +124,13 @@ IRow::exists()
 bool 
 IRow::save(bool reload)
 {
-	zval_mgr self(vobj());
-	zval_mgr arg;
+	val_rc self(vobj());
+	val_rc arg;
 
 	arg.set_bool(reload);
 
-	zval_mgr result = table_model_.call(IRSTR.save_key, self, arg);
-	return zval_user(result).isTrue(); 
+	val_rc result = table_model_.call(IRSTR.save_key, self, arg);
+	return val_ptr(result).isTrue(); 
 }
 
 
@@ -144,37 +144,37 @@ IRow::update(bool reload)
 void 
 IRow::read()
 {
-	zval_mgr self(vobj());
+	val_rc self(vobj());
 	table_model_.call(IRSTR.read_key, self);	
 }
 
 
-htab_mgr 
-IRow::getDataValues(htab_read attrlist)
+htab_rc 
+IRow::getDataValues(htab_rd attrlist)
 {
-	htab_mgr result;
+	htab_rc result;
 
 	if (data_.size())
 	{
-		result = htab_mgr::subset(attrlist, data_, true);
+		result = htab_rc::subset(attrlist, data_, true);
 	}
 	return result;
 }
 
 bool 
-IRow::hasValue(zstr_user key)
+IRow::hasValue(str_ptr key)
 {
-	zval_user value = data_.get(key);
+	val_ptr value = data_.get(key);
 	return value.ok();
 }
 
-htab_mgr 
+htab_rc 
 IRow::getDirty()
 {
-	htab_mgr result;
-	result = htab_mgr::empty_array();
+	htab_rc result;
+	result = htab_rc::empty_array();
 
-	htab_write dirty(result);
+	htab_wr dirty(result);
 
 	if (original_ == data_) {
 		return result;
@@ -187,7 +187,7 @@ IRow::getDirty()
 
 	for(wk.start(data_); wk.ok(); wk.next())
 	{
-		zval_user orig = original_.get(skey);
+		val_ptr orig = original_.get(skey);
 		if (orig != dvalue) 
 		{
 			dirty.push_back(skey);
@@ -196,14 +196,14 @@ IRow::getDirty()
 	return result;
 }
 
-htab_read 
+htab_rd 
 IRow::getData() const
 {
 	return data_;
 }
 
 bool 
-IRow::isDirty(zstr_user colname)
+IRow::isDirty(str_ptr colname)
 {
 	if (data_.size() == 0)
 		return false;
@@ -213,8 +213,8 @@ IRow::isDirty(zstr_user colname)
 
 	if (colname.size())
 	{
-		zval_user orig = original_.get(colname);
-		zval_user dvalue = data_.get(colname);
+		val_ptr orig = original_.get(colname);
+		val_ptr dvalue = data_.get(colname);
 		return (orig != dvalue);
 	}
 	htab_walk wk;
@@ -224,7 +224,7 @@ IRow::isDirty(zstr_user colname)
 
 	for(wk.start(data_); wk.ok(); wk.next())
 	{
-		zval_user orig = original_.get(skey);
+		val_ptr orig = original_.get(skey);
 		if (	((zval*) orig) == ((zval*) dvalue) )
 			continue;
 		if (orig != dvalue) 
@@ -237,15 +237,15 @@ IRow::isDirty(zstr_user colname)
 
 
 void 
-IRow::mergeData(htab_read attrs)
+IRow::mergeData(htab_rd attrs)
 {
 	if (attrs.size() == 0)
 	{
 		return;
 	}
-	zval_mgr defs_zval_mgr = table_model_.call(IRSTR.getcoldefs);
-	zval_user defs_zval(defs_zval_mgr);
-	htab_mgr cdefs;
+	val_rc defs_zval_mgr = table_model_.call(IRSTR.getcoldefs);
+	val_ptr defs_zval(defs_zval_mgr);
+	htab_rc cdefs;
 
 
 	if (defs_zval.isArray())
@@ -253,7 +253,7 @@ IRow::mergeData(htab_read attrs)
 		cdefs = defs_zval.zarray();
 	}
 
-	htab_write hw(data_);
+	htab_wr hw(data_);
 
 	htab_walk wk;
 	auto key = wk.key();
@@ -261,7 +261,7 @@ IRow::mergeData(htab_read attrs)
 
 	for(wk.start(attrs); wk.ok(); wk.next())
 	{
-		zstr_user cname = key.zstr();
+		str_ptr cname = key.zstr();
 		if (cdefs.size() && !cdefs.has_key(cname))
 		{
 			zend_throw_error(zend_ce_error, "Unknown attribute %s", cname.data());
@@ -278,27 +278,27 @@ IRow::setExists()
 	original_ = data_;
 }
 
-void IRow::copy(zobj_mgr recobj)
+void IRow::copy(obj_rc recobj)
 {
 	IRow* rec = zobj_toc<IRow>(recobj);
 	data_ = rec->data_;
 	original_ = rec->original_;
 }
 
-htab_mgr 
-IRow::stampTime(zstr_user value, int dtflags)
+htab_rc 
+IRow::stampTime(str_ptr value, int dtflags)
 {
-	htab_mgr result;
+	htab_rc result;
 
-	result = htab_mgr::empty_array();
+	result = htab_rc::empty_array();
 
-	zval_mgr arg1(value);
-	zval_mgr arg2(dtflags);
+	val_rc arg1(value);
+	val_rc arg2(dtflags);
 
-	zval_mgr ta_array = table_model_.call(IRSTR.stamptime, arg1, arg2);
+	val_rc ta_array = table_model_.call(IRSTR.stamptime, arg1, arg2);
 	
 
-	zval_user test(ta_array);
+	val_ptr test(ta_array);
 
 	if (test.size())
 	{
@@ -353,7 +353,7 @@ ZEND_METHOD(Wcd_IRow, getData)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 	auto cobj = zval_toc<IRow>(ZEND_THIS);
-	htab_read data = cobj->toArray();
+	htab_rd data = cobj->toArray();
 	data.return_zv(return_value);
 
 }
@@ -363,7 +363,7 @@ ZEND_METHOD(Wcd_IRow, getDirty)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 	auto cobj = zval_toc<IRow>(ZEND_THIS);
-	htab_mgr data = cobj->getDirty();
+	htab_rc data = cobj->getDirty();
 	data.move_zv(return_value);
 }
 
@@ -371,7 +371,7 @@ ZEND_METHOD(Wcd_IRow, getModel)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 	auto cobj = zval_toc<IRow>(ZEND_THIS);
-	zobj_user data = cobj->getModel();
+	obj_ptr data = cobj->getModel();
 	data.return_zv(return_value);
 }
 
@@ -411,7 +411,7 @@ ZEND_METHOD(Wcd_IRow, mergeData)
 	auto cobj = zval_toc<IRow>(ZEND_THIS);
 	cobj->mergeData(vset);
 
-	zobj_mgr rowobj = cobj->vobj();
+	obj_rc rowobj = cobj->vobj();
 	rowobj.move_zv(return_value);
 }
 
@@ -450,7 +450,7 @@ ZEND_METHOD(Wcd_IRow, read)
 
 	auto cobj = zval_toc<IRow>(ZEND_THIS);
 	cobj->read();
-	zobj_mgr rowobj = cobj->vobj();
+	obj_rc rowobj = cobj->vobj();
 	rowobj.move_zv(return_value);
 }
 
@@ -500,7 +500,7 @@ ZEND_METHOD(Wcd_IRow, stampTime)
 	ZEND_PARSE_PARAMETERS_END();
 
 	auto cobj = zval_toc<IRow>(ZEND_THIS);
-	htab_mgr data = cobj->stampTime(key, tsflags);
+	htab_rc data = cobj->stampTime(key, tsflags);
 	data.move_zv(return_value);
 }
 
@@ -512,7 +512,7 @@ ZEND_METHOD(Wcd_IRow, getDataValues)
 	ZEND_PARSE_PARAMETERS_END();
 
 	auto cobj = zval_toc<IRow>(ZEND_THIS);
-	htab_mgr data = cobj->getDataValues(names);
+	htab_rc data = cobj->getDataValues(names);
 	data.move_zv(return_value);
 }
 

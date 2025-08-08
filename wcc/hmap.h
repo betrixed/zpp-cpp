@@ -40,7 +40,7 @@ public:
 
         zend_object_iterator             phpit;
         htab_walk			 walk;
-        htab_mgr   			 htab;
+        htab_rc   			 htab;
                     // function table managed by iterator
         static HmapIterator* phmi(zend_object_iterator* zoi) {
                 return (HmapIterator*) zoi;
@@ -123,7 +123,7 @@ protected:
 
 class Hmap : public base_d {
 protected:
-	htab_mgr data_;
+	htab_rc data_;
 
 	friend class Hmap_php;
 
@@ -133,65 +133,65 @@ public:
 	virtual ~Hmap();
 
 
-	htab_read reader() const 
+	htab_rd reader() const 
 	{
             return data_;
 	}
 
-	htab_write writer()
+	htab_wr writer()
 	{
-	    return htab_write(data_);
+	    return htab_wr(data_);
 	}
 	static Hmap_mgr omg;
 	
-	//void debug_info(htab_write hw) override;
+	//void debug_info(htab_wr hw) override;
 	
 	//! Create a new Hmap constructed witn HashTable/zend_array
-	static zobj_mgr newFromArray(zval_user init);
-	static zobj_mgr new_hmap();
+	static obj_rc newFromArray(val_ptr init);
+	static obj_rc new_hmap();
 	
-	virtual void debug_info(htab_write hw);
+	virtual void debug_info(htab_wr hw);
 
-	void construct(htab_read values);
+	void construct(htab_rd values);
 
 	/** Avoid warning for missing property */
-	zval_mgr getOrNot(zstr_user name, zval_user ifnot);
+	val_rc getOrNot(str_ptr name, val_ptr ifnot);
 
-	bool   has(zstr_user name);
+	bool   has(str_ptr name);
 	
-	zval_mgr get(zstr_user name);
-	zval_mgr get(zval_user name);
+	val_rc get(str_ptr name);
+	val_rc get(val_ptr name);
 
-	void   set(zstr_user name, zval_user value);
-	//void   set(zval_user key, zval_user value);
+	void   set(str_ptr name, val_ptr value);
+	//void   set(val_ptr key, val_ptr value);
 
-	void   unset(zstr_user name);
-	void   unset(zval_user key);
+	void   unset(str_ptr name);
+	void   unset(val_ptr key);
 	
-	bool   has(zval_user  key);
+	bool   has(val_ptr  key);
 
 	// for ArrayAccess interface, dimensions interface
 
-	htab_mgr subsetkey(zstr_user key);
-	htab_mgr subset(htab_read data);
+	htab_rc subsetkey(str_ptr key);
+	htab_rc subset(htab_rd data);
 
-	void   addArray(htab_read data);
-	void   assign(htab_read data);
+	void   addArray(htab_rd data);
+	void   assign(htab_rd data);
 
-	htab_read toArray();
+	htab_rd toArray();
 
 	zend_long count() const;
 
-	zstr_mgr unhive(zstr_user data);
+	str_rc unhive(str_ptr data);
 
-	htab_mgr serialize();
-	void     unserialize(htab_read htab);
+	htab_rc serialize();
+	void     unserialize(htab_rd htab);
 
 	void      clear();
 
 	VIRTUAL_ZOBJPTR
 
-	static htab_read map_htab(zobj_mgr mobj) 
+	static htab_rd map_htab(obj_rc mobj) 
 	{
 		Hmap* hmap = zobj_toc<Hmap>(mobj);
 		return hmap->reader();

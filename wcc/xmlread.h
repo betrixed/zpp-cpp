@@ -20,12 +20,12 @@ namespace zpp {
 
 	class xmlreader_open : public fn_call_args<3> {
     public:
-        zobj_mgr call(zstr_user path);
+        obj_rc call(str_ptr path);
     };
 
     class xmlreader_xml : public fn_call_args<3> {
     public:
-        zobj_mgr call(zstr_user src);
+        obj_rc call(str_ptr src);
     };
     
 
@@ -82,25 +82,25 @@ namespace wcc {
 		fn_call   readstring_;
 		fn_call   read_;
 		bool      fileOpen_;
-		zstr_mgr  hold_; // filename or xml data
-		zobj_mgr  self_; // XmlReader::Object
+		str_rc  hold_; // filename or xml data
+		obj_rc  self_; // XmlReader::Object
 
-		bool adopt_xmlobj(zobj_mgr& test);
+		bool adopt_xmlobj(obj_rc& test);
 	public:
 		XmlWrap();
 		~XmlWrap();
 
-		bool fromFile(zstr_user path);
-		bool fromString(zstr_user xml);
+		bool fromFile(str_ptr path);
+		bool fromString(str_ptr xml);
 		void fn_setup();
 
-		zstr_mgr  xml_name();
+		str_rc  xml_name();
 
-		zstr_mgr  get_attribute(zstr_user name);
-		//zstr_mgr  xml_string();
+		str_rc  get_attribute(str_ptr name);
+		//str_rc  xml_string();
 
-		zval_mgr  xml_name_zval();
-		zval_mgr  xml_str_zval();
+		val_rc  xml_name_zval();
+		val_rc  xml_str_zval();
 
 		bool      read();
 		int		  nodeType();
@@ -110,12 +110,12 @@ namespace wcc {
 			return self_.ok();
 		}
 
-		zobj_user xml() 
+		obj_ptr xml() 
 		{
 			return self_;
 		}
-		operator zobj_user* () {
-			return (zobj_user*)(this);
+		operator obj_ptr* () {
+			return (obj_ptr*)(this);
 		}
 
 	};
@@ -134,9 +134,9 @@ namespace wcc {
 		static base_obj_mgr<Wcc_XmlRead> omg;
 
 
-		static zval_mgr fromFile(zstr_user file);
+		static val_rc fromFile(str_ptr file);
 
-		static zval_mgr fromString(zstr_user src);
+		static val_rc fromString(str_ptr src);
 		
 		class DStack {
 		protected:
@@ -158,8 +158,8 @@ namespace wcc {
 				efree(ptr);
 			}
 
-			zval_mgr  ref_; // storage always a zval
-			zstr_mgr  key_; // key must always be a string
+			val_rc  ref_; // storage always a zval
+			str_rc  key_; // key must always be a string
 			int       kind_; // object / packed array / keyed array
 
 
@@ -167,7 +167,7 @@ namespace wcc {
 
 			~DStack();
 
-			DStack(zstr_user k, const zval_mgr& val, int eval);
+			DStack(str_ptr k, const val_rc& val, int eval);
 
 			/*DStack& operator=(DStack&& m)
 			{
@@ -187,13 +187,13 @@ namespace wcc {
 	protected:
 
 
-		zobj_mgr   addRoot_; /* preinstalled object root ? */
+		obj_rc   addRoot_; /* preinstalled object root ? */
 
-		htab_mgr  tag_objs_; /* Array of tag name - class name */
+		htab_rc  tag_objs_; /* Array of tag name - class name */
 
 		/** cache zend_string  used for repeated property/call access */
 			
-		XmlWrap xml_; // derived from zobj_mgr, adopts XmlReader
+		XmlWrap xml_; // derived from obj_rc, adopts XmlReader
 		bool done_; // or error condition
 
 		/** PHP file handle returned by XMLReader::open */
@@ -204,10 +204,10 @@ namespace wcc {
 		DStack  *top_;
 		size_t  stacked_;
 
-		bool 	tag_start(zstr_user tag, zstr_user val);
-		void 	tag_end(zstr_user tag);
+		bool 	tag_start(str_ptr tag, str_ptr val);
+		void 	tag_end(str_ptr tag);
 
-		void 	throwKey(zstr_user key);
+		void 	throwKey(str_ptr key);
 		void 	throwNoKey();
 
 		void    nextEnd();
@@ -216,44 +216,44 @@ namespace wcc {
 		void	tagsTable();
 		void 	attach_ds(DStack* ds);
 
-		void    pushRoot(zstr_user classname);
-		void       pushClass(zstr_user classname, zstr_user val);
-		void 	   pushTable(int kind, zstr_user val);
+		void    pushRoot(str_ptr classname);
+		void       pushClass(str_ptr classname, str_ptr val);
+		void 	   pushTable(int kind, str_ptr val);
 
-		zobj_mgr  newRoot(zstr_user classname);
+		obj_rc  newRoot(str_ptr classname);
 		void      popStack();
 
-		void      setEmptyArray(zstr_user key);
+		void      setEmptyArray(str_ptr key);
 
-		void      setValue(zval_user val, zstr_user key);
+		void      setValue(val_ptr val, str_ptr key);
 
-		void      setBool(zstr_user key);
-		void      setInteger(zstr_user key);
-		void      setFloat(zstr_user key);
-		void      setArray(zstr_user key);
-		void      setString(zstr_user key);
-		void      setDateTime(zstr_user key);
-		void      setNull(zstr_user key);
+		void      setBool(str_ptr key);
+		void      setInteger(str_ptr key);
+		void      setFloat(str_ptr key);
+		void      setArray(str_ptr key);
+		void      setString(str_ptr key);
+		void      setDateTime(str_ptr key);
+		void      setNull(str_ptr key);
 
 		void      setKeys();
 
-		bool 	  openfile(zstr_user file);
-		bool      openstring(zstr_user src);
+		bool 	  openfile(str_ptr file);
+		bool      openstring(str_ptr src);
 
 		void      init();
 		void	  clean();
 		
-		zval_mgr  loop();
+		val_rc  loop();
 
 	public:
 		Wcc_XmlRead();
 		virtual ~Wcc_XmlRead();
 
 		/** return PHP array version of xml data */
-		zval_mgr parseFile(zstr_user filename);
-		zval_mgr parse(zstr_user src);
+		val_rc parseFile(str_ptr filename);
+		val_rc parse(str_ptr src);
 
-		virtual void debug_info(htab_write ht);
+		virtual void debug_info(htab_wr ht);
 	
 		VIRTUAL_ZOBJPTR
 	

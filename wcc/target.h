@@ -16,30 +16,30 @@ namespace wcc {
 
 	class Target : public base_d {
 	public:
-		zstr_mgr class_;
-		zstr_mgr func_;
-		zstr_mgr module_;
+		str_rc class_;
+		str_rc func_;
+		str_rc module_;
 
 
-		virtual void debug_info(htab_write di);
+		virtual void debug_info(htab_wr di);
 	
-		static zobj_mgr go(zstr_user cname, zstr_user fname);
+		static obj_rc go(str_ptr cname, str_ptr fname);
 		
 		static base_obj_mgr<Target> omg;
 
-		void construct(zstr_user cname, zstr_user fname);
+		void construct(str_ptr cname, str_ptr fname);
 
-		zstr_user getClass();
-		zstr_user getFunc();
-		zstr_user getModule();
+		str_ptr getClass();
+		str_ptr getFunc();
+		str_ptr getModule();
 
-		void setFunc(zstr_user name);
-		void setModule(zstr_user name);
+		void setFunc(str_ptr name);
+		void setModule(str_ptr name);
 
-		htab_mgr serialize();
-		void unserialize(htab_read htab);
+		htab_rc serialize();
+		void unserialize(htab_rd htab);
 
-		zobj_mgr copy();
+		obj_rc copy();
 
 		VIRTUAL_ZOBJPTR	
 

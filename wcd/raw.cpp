@@ -22,16 +22,16 @@ namespace wcd {
 base_obj_mgr<Raw> Raw::omg;	
 
 void 
-Raw::construct(zstr_user sql, zobj_user driver)
+Raw::construct(str_ptr sql, obj_ptr driver)
 {
 	sql_ = sql;
 	db_ = driver;
 }
 
-zval_mgr  
+val_rc  
 Raw::execute()
 {
-	zval_mgr result;
+	val_rc result;
 
 	if (!db_.ok())
 	{
@@ -44,14 +44,14 @@ Raw::execute()
 }
 
 
-zobj_mgr  
+obj_rc  
 Raw::getConnection()
 {
 	return db_;
 }
 
 
-zstr_mgr  
+str_rc  
 Raw::getSql()
 {
 	return sql_;
@@ -59,7 +59,7 @@ Raw::getSql()
 
 
 void  
-Raw::setConnection(zobj_user driver)
+Raw::setConnection(obj_ptr driver)
 {
 	db_ = driver;
 }
@@ -100,7 +100,7 @@ ZEND_METHOD(Wcd_Sql_Raw, getConnection)
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	Raw* cobj = zval_toc<Raw>(ZEND_THIS);
-	zobj_mgr db = cobj->getConnection();
+	obj_rc db = cobj->getConnection();
 	db.move_zv(return_value);
 }
 
@@ -109,7 +109,7 @@ ZEND_METHOD(Wcd_Sql_Raw, getSql)
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	Raw* cobj = zval_toc<Raw>(ZEND_THIS);
-	zstr_mgr db = cobj->getSql();
+	str_rc db = cobj->getSql();
 	db.move_zv(return_value);
 }
 
@@ -118,7 +118,7 @@ ZEND_METHOD(Wcd_Sql_Raw, execute)
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	Raw* cobj = zval_toc<Raw>(ZEND_THIS);
-	zval_mgr data = cobj->execute();
+	val_rc data = cobj->execute();
 	data.move_zv(return_value);
 }
 

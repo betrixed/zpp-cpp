@@ -21,33 +21,33 @@ using namespace zpp;
 
 	class HtmlPlates : public base_d {
 	protected:
-		htab_mgr levels_;
-		htab_mgr values_;
-		zobj_mgr model_;
-		zstr_mgr model_svc_;
+		htab_rc levels_;
+		htab_rc values_;
+		obj_rc model_;
+		str_rc model_svc_;
 	public:
 		static base_obj_mgr<HtmlPlates> omg;
 
-		virtual void debug_info(htab_write hw);
+		virtual void debug_info(htab_wr hw);
 
-		void construct(zstr_user model_id);
+		void construct(str_ptr model_id);
 
 		void initValues();
 
 		/**
 		 * Push from inner to outer
 		 */
-		void pushLevel(zstr_user name);
+		void pushLevel(str_ptr name);
 
-		zobj_mgr getModel();
+		obj_rc getModel();
 
-		void setModel(zobj_user model);
+		void setModel(obj_ptr model);
 
-		void mergeData(htab_read items);
+		void mergeData(htab_rd items);
 
-		zstr_mgr render(htab_read options);
+		str_rc render(htab_rd options);
 
-		zstr_mgr renderView(htab_write options);
+		str_rc renderView(htab_wr options);
 
 		VIRTUAL_ZOBJPTR
 	};

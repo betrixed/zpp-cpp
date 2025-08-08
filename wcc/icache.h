@@ -12,73 +12,73 @@ namespace wcc {
 
 class  ICache : public base_d {
 protected:
-	htab_mgr  cached_;
-	htab_mgr  svc_cache_;
-	htab_mgr  options_;
-	zstr_mgr  prefix_;
-	zobj_mgr  services_;
+	htab_rc  cached_;
+	htab_rc  svc_cache_;
+	htab_rc  options_;
+	str_rc  prefix_;
+	obj_rc  services_;
 	zend_long ttl_;
 public:
 
 	static base_obj_mgr<ICache> omg;
 
-	static zobj_mgr make_cache( zval_user options, zval_user services);
+	static obj_rc make_cache( val_ptr options, val_ptr services);
 
-	void construct(zval_user options, zval_user services);
+	void construct(val_ptr options, val_ptr services);
 
-	void addLocal(zval_user pkg);
+	void addLocal(val_ptr pkg);
 
 	bool clear();
 
-	bool clearPrefix(zstr_user prefix);
+	bool clearPrefix(str_ptr prefix);
 
-	bool deleteKey(zstr_user key);
+	bool deleteKey(str_ptr key);
 
-	htab_mgr getExpired();
+	htab_rc getExpired();
 	
 	int  deleteExpired();
 
-	bool deleteMultiple(htab_read keys);
+	bool deleteMultiple(htab_rd keys);
 
-	zval_mgr get(zstr_user key, zval_user noval = zval_user());
+	val_rc get(str_ptr key, val_ptr noval = val_ptr());
 
-	zval_mgr getCached(zstr_user key);
+	val_rc getCached(str_ptr key);
 
-	zval_mgr getData(zstr_user key);
+	val_rc getData(str_ptr key);
 
-	zval_mgr getMultiple(htab_read keys, zval_user noval);
+	val_rc getMultiple(htab_rd keys, val_ptr noval);
 
-	zstr_user getPrefix()
+	str_ptr getPrefix()
 	{
 		return prefix_;
 	}
 
-	zval_mgr getService(zstr_user key);
+	val_rc getService(str_ptr key);
 
 	zend_long getTTL() {
 		return ttl_;
 	}
 
-	htab_mgr getUnsaved();
+	htab_rc getUnsaved();
 
-	zval_mgr getOption(zstr_user key);
+	val_rc getOption(str_ptr key);
 
-	void setOption(zstr_user key, zval_user value);
+	void setOption(str_ptr key, val_ptr value);
 	
-	bool set(zstr_user key, zval_user data, zend_long ttl = 0);
+	bool set(str_ptr key, val_ptr data, zend_long ttl = 0);
 
-	zobj_mgr setCached(zstr_user key, zval_user data, zend_long ttl = 0);
+	obj_rc setCached(str_ptr key, val_ptr data, zend_long ttl = 0);
 
-	bool setMultiple(zval_user values, zend_long ttl = 0);
+	bool setMultiple(val_ptr values, zend_long ttl = 0);
 
-	void setServices(zval_user svc);
+	void setServices(val_ptr svc);
 
 	void setTTL(zend_long ttl)
 	{
 		ttl_ = ttl;
 	}
 
- 	virtual void debug_info(htab_write s);
+ 	virtual void debug_info(htab_wr s);
  	
 	VIRTUAL_ZOBJPTR
 

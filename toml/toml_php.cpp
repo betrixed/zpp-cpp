@@ -39,11 +39,11 @@ void
 Toml::name_table(toml_table_t* st)
 {
 		//zend_printf("In name_table\n");
-		htab_write  array(top_->table_);
+		htab_wr  array(top_->table_);
 		//showarray("old top", top_->table_);
 
-		htab_mgr 	 ztab; // new table
-		htab_write   hw(ztab); //writer to it.
+		htab_rc 	 ztab; // new table
+		htab_wr   hw(ztab); //writer to it.
 
 		zstr_temp tkey(st->key);
 		//zend_printf("New table named %s\n", st->key);
@@ -63,10 +63,10 @@ Toml::array_table(toml_table_t* st)
 {
 		//zend_printf("In array_table\n");
 
-	  htab_write  array(top_->table_);
+	  htab_wr  array(top_->table_);
 
-	  htab_mgr ztab;
-	  htab_write hw(ztab); //make writable array
+	  htab_rc ztab;
+	  htab_wr hw(ztab); //make writable array
 	  array.push_back(ztab);
 
 	  stack_htab levelup(hw, top_, &top_);
@@ -101,13 +101,13 @@ Toml::z_table(toml_table_t* st)
 void 
 Toml::z_array(toml_array_t* arr)
 {
-		htab_write ctop(top_->table_);
+		htab_wr ctop(top_->table_);
 
 		int kind = arr->kind;
 		int vtype = arr->type;
 
-		htab_mgr   ztab;
-		htab_write hw(ztab);
+		htab_rc   ztab;
+		htab_wr hw(ztab);
 
 		if (arr->key)
 		{
@@ -153,7 +153,7 @@ Toml::z_array(toml_array_t* arr)
 #ifdef DEBUG_SHOW_TS
 static void show_ts(toml_timestamp_t& ts)
 {
-	zstr_buffer buf;
+	str_buf buf;
 
 	if (ts.year) {
 		 buf << *ts.year << '-' << *ts.month << '-' <<  *ts.day;
@@ -161,7 +161,7 @@ static void show_ts(toml_timestamp_t& ts)
 	if (ts.hour) {
 		buf << *ts.hour << ':' << *ts.minute << ':' <<  *ts.microsec;
 	}
-	zstr_mgr dump(std::move(buf));
+	str_rc dump(std::move(buf));
 
 	//zend_printf("ts = %s\n", dump.data());
 }
@@ -176,10 +176,10 @@ Toml::z_value(toml_keyval_t* st, int expect)
 
 	//zend_printf("In z_value for %lx\n", key);
 
-	htab_write table = top_->table_;
+	htab_wr table = top_->table_;
 
 	int  checked = -1; // not checked!
-	zval_mgr 	  store; // managed zval struct
+	val_rc 	  store; // managed zval struct
 	toml_datum_t   p;
 	toml_timestamp_t ts;
 	
@@ -309,8 +309,8 @@ void Toml::w_values(const toml::ppref<toml_keyval_t>& values)
 }
 
 
-htab_read
-Toml::parseFile(zstr_user path)
+htab_rd
+Toml::parseFile(str_ptr path)
 {
 	if (!fs::is_regular_file(path.data()))
 	{
@@ -318,12 +318,12 @@ Toml::parseFile(zstr_user path)
 		return htab_empty();
 	}
 
-	zstr_mgr toml = file_get_contents(path);
+	str_rc toml = file_get_contents(path);
 	return parse(toml);
 }
 
-htab_read
-Toml::parse(zstr_user toml)
+htab_rd
+Toml::parse(str_ptr toml)
 {
 	hold_ = toml;
 	
@@ -351,22 +351,22 @@ Toml::parse(zstr_user toml)
 }
 
 
-htab_read //static
-Toml::decode(zstr_user toml)
+htab_rd //static
+Toml::decode(str_ptr toml)
 {
-	zobj_mgr obj = Toml::omg.new_zobj();
+	obj_rc obj = Toml::omg.new_zobj();
 	Toml*  cobj = zobj_toc<Toml>(obj);
-	htab_read result = cobj->parse(toml);
+	htab_rd result = cobj->parse(toml);
 	return result;
 }
 
-htab_read //static
-Toml::decodeFile(zstr_user path)
+htab_rd //static
+Toml::decodeFile(str_ptr path)
 {
-	zobj_mgr obj = Toml::omg.new_zobj();
+	obj_rc obj = Toml::omg.new_zobj();
 	Toml*  cobj = zobj_toc<Toml>(obj);
 
-	htab_read result = cobj->parseFile(path);
+	htab_rd result = cobj->parseFile(path);
 	return result;
 }
 
@@ -382,7 +382,7 @@ ZEND_METHOD(Toml, decode)
 	Z_PARAM_STR(s)
 	ZEND_PARSE_PARAMETERS_END();
 
-	htab_read result = Toml::decode(s);
+	htab_rd result = Toml::decode(s);
 	result.return_zv(return_value);
 
 }
@@ -394,7 +394,7 @@ ZEND_METHOD(Toml, decodeFile)
 	Z_PARAM_STR(path)
 	ZEND_PARSE_PARAMETERS_END();
 
-	htab_read result = Toml::decodeFile(path);
+	htab_rd result = Toml::decodeFile(path);
 	result.return_zv(return_value);
 
 }
@@ -409,7 +409,7 @@ ZEND_METHOD(Toml, parse)
 
 	auto cobj = zval_toc<Toml>(ZEND_THIS);
 
-	htab_read result = cobj->parse(s);
+	htab_rd result = cobj->parse(s);
 	result.return_zv(return_value);
 }
 
@@ -422,7 +422,7 @@ ZEND_METHOD(Toml, parseFile)
 
 	auto cobj = zval_toc<Toml>(ZEND_THIS);
 
-	htab_read result = cobj->parseFile(path);
+	htab_rd result = cobj->parseFile(path);
 	result.return_zv(return_value);
 }
 

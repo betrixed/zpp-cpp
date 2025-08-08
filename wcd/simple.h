@@ -23,51 +23,51 @@ protected:
 	bool autoclose_;
 	bool retval_;
 	int  fetch_;
-	htab_mgr values_;
-	zval_mgr stmt_;
-	zstr_mgr sql_;
-	zobj_mgr db_;
+	htab_rc values_;
+	val_rc stmt_;
+	str_rc sql_;
+	obj_rc db_;
 
 protected:
 
-	zval_mgr send(bool rval);
+	val_rc send(bool rval);
 	
 public:
 
 	static base_obj_mgr<Simple> omg;
 	
-	virtual void debug_info(htab_write di);
+	virtual void debug_info(htab_wr di);
 
-	void construct(zobj_user db, int fetch = IDriver::FETCH_ASSOC);
+	void construct(obj_ptr db, int fetch = IDriver::FETCH_ASSOC);
 	void destruct();
 
-	htab_mgr arrayMap(zstr_user keycol, zstr_user valcol, zstr_user table);
+	htab_rc arrayMap(str_ptr keycol, str_ptr valcol, str_ptr table);
 
-	htab_mgr arraySet(zstr_user sql, htab_read params = htab_read());
+	htab_rc arraySet(str_ptr sql, htab_rd params = htab_rd());
 
-	zstr_mgr bind(zval_user value);
+	str_rc bind(val_ptr value);
 
-	zval_mgr exec(zstr_user sql, htab_read params);
+	val_rc exec(str_ptr sql, htab_rd params);
 
-	zval_mgr firstrow(zstr_user sql, htab_read params);
+	val_rc firstrow(str_ptr sql, htab_rd params);
 
-	zval_mgr getRows();
+	val_rc getRows();
 
-	zstr_mgr getSchemaName();
+	str_rc getSchemaName();
 
-	zval_mgr insert(htab_read values);
+	val_rc insert(htab_rd values);
 
-	bool prepare(zstr_user sql);
+	bool prepare(str_ptr sql);
 
-	zstr_mgr quoteName(zstr_user name);
+	str_rc quoteName(str_ptr name);
 
 	void returnsValues(bool rval);
 
-	zval_mgr run();
+	val_rc run();
 
-	void setValues(htab_read values);
+	void setValues(htab_rd values);
 
-	zval_mgr update(htab_read values);
+	val_rc update(htab_rd values);
 };
 
 }; //namespace wcd

@@ -17,73 +17,73 @@ class RouteMatch : public base_d {
 
 protected:
 
-	void set_tuple12(htab_read tg);
-	void set_tuple14(htab_read tg);
-	htab_mgr fetchArgs();
+	void set_tuple12(htab_rd tg);
+	void set_tuple14(htab_rd tg);
+	htab_rc fetchArgs();
 
-	zobj_user    testRoute(zobj_user robj);
+	obj_ptr    testRoute(obj_ptr robj);
 
-	zobj_user    firstMatch(zval_user wrap);
+	obj_ptr    firstMatch(val_ptr wrap);
 public:
-	zobj_mgr route_;
-	htab_mgr roles_;
-	htab_mgr ob_args_;
-	htab_mgr match_args_;
-	htab_mgr errors_;
+	obj_rc route_;
+	htab_rc roles_;
+	htab_rc ob_args_;
+	htab_rc match_args_;
+	htab_rc errors_;
 
 // string values
-	zstr_mgr uri_;
-	zstr_mgr module_name_;
-	zstr_mgr ob_class_;
-	zstr_mgr ob_method_;
+	str_rc uri_;
+	str_rc module_name_;
+	str_rc ob_class_;
+	str_rc ob_method_;
 
 
 	long verb_flag_;
 	long ajax_flag_;
 
 //  processing values
-	zval_mgr target_; 
-	zval_mgr result_;
+	val_rc target_; 
+	val_rc result_;
 
 	static base_obj_mgr<RouteMatch> omg;
 
-	static zval_mgr call_method(zobj_user obj, zstr_user method, htab_read args);
+	static val_rc call_method(obj_ptr obj, str_ptr method, htab_rd args);
 
 	//public function __construct(string $uri, int $verb_flag, mixed $ajax_flag);
-	void construct(zstr_user uri, int verbs, int ajax);
+	void construct(str_ptr uri, int verbs, int ajax);
 
 	//public function setCallInfo(string $obclass, string $obmethod, array $args) : void;
 
-	void setCallInfo(zstr_user obclass, zstr_user obmethod, zval_user args);
+	void setCallInfo(str_ptr obclass, str_ptr obmethod, val_ptr args);
 
-	virtual void debug_info(htab_write di);
+	virtual void debug_info(htab_wr di);
 
-	zobj_user getMatch() const
+	obj_ptr getMatch() const
 	{
 		return route_;
 	}
 
-	void setRoute(zobj_user ro)
+	void setRoute(obj_ptr ro)
 	{
 		route_ = ro;
 	}
 	
-	htab_read getErrors() const
+	htab_rd getErrors() const
 	{
 		return errors_;
 	}
 
-	zstr_user getUri() const
+	str_ptr getUri() const
 	{
 		return uri_;
 	}
 
-	htab_read getRoles() const
+	htab_rd getRoles() const
 	{
 		return roles_;
 	}
 
-	htab_read getObjArgs() const
+	htab_rd getObjArgs() const
 	{
 		return ob_args_;
 	}
@@ -95,24 +95,24 @@ public:
 	{
 		module_name_ = s;
 	}
-	zstr_user getModuleName() const
+	str_ptr getModuleName() const
 	{
 		return module_name_;
 	}
 
-	zstr_user getObjClass() const
+	str_ptr getObjClass() const
 	{
 		return ob_class_;
 	}
 
-	zstr_user getObjMethod() const
+	str_ptr getObjMethod() const
 	{
 		return ob_method_;
 	}
 
 	bool prepare_call();
 
-	zval_mgr call(htab_read extra, zobj_user before, zobj_user after);
+	val_rc call(htab_rd extra, obj_ptr before, obj_ptr after);
 
 #ifndef BASE_ZOBJPTR
 	VIRTUAL_ZOBJPTR

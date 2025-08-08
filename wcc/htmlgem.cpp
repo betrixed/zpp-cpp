@@ -19,7 +19,7 @@ namespace wcc {
 #endif
 
 
-using  Value = zval_user;
+using  Value = val_ptr;
 
 enum LabelLocate {
 	NO_LABEL,
@@ -207,7 +207,7 @@ HtmlGem::~HtmlGem()
 
 }
 
-void HtmlGem::debug_info(htab_write hw)
+void HtmlGem::debug_info(htab_wr hw)
 {
 	hw.set(HTG.date_icon, date_icon_);
 	hw.set(HTG.date_fmt, date_fmt_);
@@ -227,7 +227,7 @@ HtmlGem::HtmlGem() : base_d()
 
 	id_add_ = 0;
 
-	htab_write hw(styles_);
+	htab_wr hw(styles_);
 
 	zstr_temp figure_style("float:left;width:47%;margin:10px;");
 	hw.set(HTG.figurekey, figure_style);
@@ -237,30 +237,30 @@ HtmlGem::HtmlGem() : base_d()
 }
 
 
-void HtmlGem::setLabelClass(zstr_user v)
+void HtmlGem::setLabelClass(str_ptr v)
 {
 	label_class_ = v;
 }
 
-void HtmlGem::setTextClass(zstr_user v)
+void HtmlGem::setTextClass(str_ptr v)
 {
 	text_class_ = v;
 }
 
-void HtmlGem::setDateTimeFmt(zstr_user v)
+void HtmlGem::setDateTimeFmt(str_ptr v)
 {
 	datetime_fmt_ = v;
 }
 
-void HtmlGem::setDateIcon(zstr_user v)
+void HtmlGem::setDateIcon(str_ptr v)
 {
 	date_icon_ = v;
 }
 
-zstr_mgr 
-HtmlGem::ensureIdValue(htab_write ht)
+str_rc 
+HtmlGem::ensureIdValue(htab_wr ht)
 {
-	zstr_mgr result;
+	str_rc result;
 
 	result = ht.get(HTG.idkey);
 
@@ -272,11 +272,11 @@ HtmlGem::ensureIdValue(htab_write ht)
 
 	result = ht.get(HTG.namekey);
 
-	zstr_buffer nameval;
+	str_buf nameval;
 
 	if (result.ok())
 	{
-		nameval << zstr_user(result);
+		nameval << str_ptr(result);
 	}
 	else {
 		nameval << HTG.namekey;
@@ -295,16 +295,16 @@ HtmlGem::ensureIdValue(htab_write ht)
 }
 
 
-zstr_mgr  
-HtmlGem::output(zval_user item)
+str_rc  
+HtmlGem::output(val_ptr item)
 {
 	if (item.isString())
 	{
 		return item;
 	}
 
-	zstr_buffer buf;
-	//zstr_mgr temp;
+	str_buf buf;
+	//str_rc temp;
 
 	if (item.isArray())
 	{
@@ -337,10 +337,10 @@ HtmlGem::output(zval_user item)
 	return buf.zstr();
 }
 
-zstr_mgr
-HtmlGem::generateTag(zstr_user tag, htab_read pset)
+str_rc
+HtmlGem::generateTag(str_ptr tag, htab_rd pset)
 {
-	zstr_buffer out;
+	str_buf out;
 
 	out << "<" << tag;
 	htab_walk walk;
@@ -348,15 +348,15 @@ HtmlGem::generateTag(zstr_user tag, htab_read pset)
 	auto arg = walk.key();
 	auto val = walk.value();
 
-	zstr_user zuse;
+	str_ptr zuse;
 
 	for(walk.start(pset); walk.ok(); walk.next()) 
 	{
 		if (val.isObject())
 		{
-			zobj_user obj(val.zobject());
+			obj_ptr obj(val.zobject());
 			if (obj.isDateTime()) {
-				zval_mgr inout(datetime_fmt_);
+				val_rc inout(datetime_fmt_);
 
 				inout = obj.call(HTG.format, inout);
 				zuse = inout;
@@ -366,7 +366,7 @@ HtmlGem::generateTag(zstr_user tag, htab_read pset)
 				}
 			}
 		}
-		zstr_mgr ws;
+		str_rc ws;
 
 		if (arg.isLong()) {
 			out << " " << val.zstr();
@@ -397,22 +397,22 @@ HtmlGem::generateTag(zstr_user tag, htab_read pset)
 	return out.zstr();
 }
 
-zstr_mgr 
-HtmlGem::getTag(htab_read ps, htab_write ex, zstr_user tag)
+str_rc 
+HtmlGem::getTag(htab_rd ps, htab_wr ex, str_ptr tag)
 {
 	ex.merge(ps);
-	zval_user test = ex.get(HTG.classkey);
+	val_ptr test = ex.get(HTG.classkey);
 	
 	//ex.show_data("merged ps");
 
 	//showmem("get_tag", test);
 	if (!test.isNull())
 	{
-		zval_mgr cdef(test);
-		zval_user cdef_use(cdef);
+		val_rc cdef(test);
+		val_ptr cdef_use(cdef);
 
-		zval_mgr cset = ex.get(HTG.classkey);
-		zval_user  cset_use(cset);
+		val_rc cset = ex.get(HTG.classkey);
+		val_ptr  cset_use(cset);
 
 		if (cset_use.isNull()) {
 			ex.set(HTG.classkey, cdef);
@@ -434,8 +434,8 @@ HtmlGem::getTag(htab_read ps, htab_write ex, zstr_user tag)
 				cdef.new_array();
 			}
 
-			htab_read cset_ht(cset);
-			htab_read cdef_ht(cdef);
+			htab_rd cset_ht(cset);
+			htab_rd cdef_ht(cdef);
 
 			if ((cdef_ht.size() > 0)  && (cset_ht.size() > 0))
 			{
@@ -453,20 +453,20 @@ HtmlGem::getTag(htab_read ps, htab_write ex, zstr_user tag)
 	return HtmlGem::generateTag(tag, ex);
 }
 
-zstr_mgr HtmlGem::label_front(htab_read ps)
+str_rc HtmlGem::label_front(htab_rd ps)
 {
-	zstr_buffer out;
+	str_buf out;
 
 	out << '<' << HTG.labelkey;
 
-	zstr_user id = ps.get(HTG.idkey);
+	str_ptr id = ps.get(HTG.idkey);
 
 	if (id.ok()) 
 	{
 		out << " for=";
 		out.quote_name(id);
 	}
-	zstr_user labclass = ps.get(HTG.classkey);
+	str_ptr labclass = ps.get(HTG.classkey);
 
 	if (labclass.isNull()) {
 		labclass = label_class_;
@@ -480,10 +480,10 @@ zstr_mgr HtmlGem::label_front(htab_read ps)
 	return out.zstr();
 }
 
-zstr_mgr 
-HtmlGem::in_label(htab_read ps)
+str_rc 
+HtmlGem::in_label(htab_rd ps)
 {
-	zstr_buffer out;
+	str_buf out;
 
 	out << label_front(ps);
 
@@ -492,11 +492,11 @@ HtmlGem::in_label(htab_read ps)
 
 	out << HTG.blank;
 	if (label.isArray()) {
-		htab_read hlab(label);
+		htab_rd hlab(label);
 		label = hlab.get(HTG.labelkey);
 	}
 	out << label.zstr();
-	zstr_user temp(content);
+	str_ptr temp(content);
 	if (temp.ok()) {
 		out << HTG.blank << temp;
 	}
@@ -504,9 +504,9 @@ HtmlGem::in_label(htab_read ps)
 	return  out.zstr();
 }; 
 
-zstr_mgr HtmlGem::out_label(htab_read  ps)
+str_rc HtmlGem::out_label(htab_rd  ps)
 {
-	zstr_buffer out;
+	str_buf out;
 	//zend_printf("out_label\n");
 
 	out << label_front(ps);
@@ -515,10 +515,10 @@ zstr_mgr HtmlGem::out_label(htab_read  ps)
 	Value content = ps.get(HTG.content_key);
 
 	if (label.isArray()) {
-		htab_read wl(label);
+		htab_rd wl(label);
 		label = wl.get(HTG.labelkey);
 	}
-	zstr_user temp(label);
+	str_ptr temp(label);
 
 	if (label.ok()) {
 		out << temp;
@@ -535,57 +535,57 @@ zstr_mgr HtmlGem::out_label(htab_read  ps)
 }; 
 
 
-zstr_mgr 
-HtmlGem::button(zval_user pset)
+str_rc 
+HtmlGem::button(val_ptr pset)
 {
-	htab_mgr pscopy(pset.zarray());
+	htab_rc pscopy(pset.zarray());
 
-	htab_write ps(pscopy);
+	htab_wr ps(pscopy);
 
-	zstr_mgr content = ps.get(HTG.content_key);
+	str_rc content = ps.get(HTG.content_key);
 
 	if (content.ok()) {
 		ps.unset(HTG.content_key);
 	}
 
-	zstr_buffer out;
+	str_buf out;
 
 	out << generateTag(HTG.buttonkey, ps) << content << HTG.endtag << HTG.buttonkey << '>';
 	return  out.zstr();
 }
 
 
-void HtmlGem::outWrapDiv(zstr_buffer& out, zstr_user cname)
+void HtmlGem::outWrapDiv(str_buf& out, str_ptr cname)
 {
 	out << '<' << HTG.divkey << ' ' << HTG.classkey << '=';
 	out.quote_name(cname); 
 	out << '>';
 }
 
-void HtmlGem::endWrapDiv(zstr_buffer& out) {
+void HtmlGem::endWrapDiv(str_buf& out) {
 	out << HTG.endtag << HTG.divkey << HTG.tagendl;
 }
 
-zstr_mgr HtmlGem::checkbox(zval_user pset)
+str_rc HtmlGem::checkbox(val_ptr pset)
 {
-	htab_mgr pscopy(pset.zarray());
+	htab_rc pscopy(pset.zarray());
 
-	htab_write ps(pscopy);
+	htab_wr ps(pscopy);
 
-	zstr_mgr id = ensureIdValue(ps);
+	str_rc id = ensureIdValue(ps);
 
-	zstr_buffer out;
+	str_buf out;
 
-	zstr_mgr wrapdiv = ps.get(HTG.divkey);
+	str_rc wrapdiv = ps.get(HTG.divkey);
 
-	zstr_user test(wrapdiv);
+	str_ptr test(wrapdiv);
 
 	if (test.size()) {
 		outWrapDiv(out, test);
 		ps.unset(HTG.divkey);
 	}
 
-	zstr_mgr text = ps.get(HTG.labelkey);
+	str_rc text = ps.get(HTG.labelkey);
 
 	test = text;
 	if (test.size()) {
@@ -600,14 +600,14 @@ zstr_mgr HtmlGem::checkbox(zval_user pset)
 		}
 	}
 	
-	zval_user check = ps.get(HTG.checked);
+	val_ptr check = ps.get(HTG.checked);
 
 	if (!check.isNull()) {
 		int checkval = check.zlong();
 		ps.unset(HTG.checked); 
 		//check.init(); //  check now invalid
 		if (checkval != 0) {
-			zstr_user cval = HTG.checked;
+			str_ptr cval = HTG.checked;
 			//showstr("pushback", cval);
 			ps.push_back(cval);
 			//showdata("checkbox", ps);
@@ -618,13 +618,13 @@ zstr_mgr HtmlGem::checkbox(zval_user pset)
 		ps.set(HTG.valuekey, 1);
 	}
 
-	htab_mgr   htemp;
+	htab_rc   htemp;
 
-	htab_write hp(htemp);
+	htab_wr hp(htemp);
 
 	hp.set(HTG.typekey,HTG.checkboxkey);
 
-	zstr_mgr tag = getTag(ps, hp, HTG.inputtag);
+	str_rc tag = getTag(ps, hp, HTG.inputtag);
 	out << tag << '\n';
 
 	if (!text.isNull()) {
@@ -643,19 +643,19 @@ zstr_mgr HtmlGem::checkbox(zval_user pset)
 }
 
 
-zstr_mgr 
-HtmlGem::check_value(zval_user pset)
+str_rc 
+HtmlGem::check_value(val_ptr pset)
 {
-	zstr_buffer out;
-	htab_read ps(pset.zarray());
+	str_buf out;
+	htab_rd ps(pset.zarray());
 
-	zstr_user label = ps.get(HTG.labelkey);
+	str_ptr label = ps.get(HTG.labelkey);
 
 	if (label.size()) {
 		out << '<' << HTG.labelkey << '>' << label << HTG.endtag << label << '>';
 	}
 
-	zstr_user ck = ps.get(HTG.checked);
+	str_ptr ck = ps.get(HTG.checked);
 	if (ck.size()) {
 		out << HTG.nbspace << HTG.checkmark << HTG.nbspace;
 	}
@@ -666,30 +666,30 @@ HtmlGem::check_value(zval_user pset)
 }
 
 
-zstr_mgr HtmlGem::submit(zval_user pset)
+str_rc HtmlGem::submit(val_ptr pset)
 {
-	htab_mgr  tab_list;
+	htab_rc  tab_list;
 	// defaults
-	htab_write list(tab_list);
+	htab_wr list(tab_list);
 
 	//defaults
 	list.set(HTG.typekey,HTG.submit);
 	list.set(HTG.valuekey, HTG.Submit);
 
-	return getTag(htab_read(pset), list, HTG.inputtag);
+	return getTag(htab_rd(pset), list, HTG.inputtag);
 }
 
-zstr_mgr HtmlGem::datetime_value(zval_user pset)
+str_rc HtmlGem::datetime_value(val_ptr pset)
 {
-	zstr_buffer out;
+	str_buf out;
 
-	htab_mgr pcopy(pset.zarray());
-	htab_write ps(pcopy);
+	htab_rc pcopy(pset.zarray());
+	htab_wr ps(pcopy);
 
-	zval_user val = ps.get(HTG.valuekey);
-	zstr_user fmt = ps.get(HTG.format);
+	val_ptr val = ps.get(HTG.valuekey);
+	str_ptr fmt = ps.get(HTG.format);
 	
-	zval_mgr vdate;
+	val_rc vdate;
 
 	if (fmt.size() && !val.isNull()) 
 	{
@@ -699,7 +699,7 @@ zstr_mgr HtmlGem::datetime_value(zval_user pset)
 		vdate = val;
 	}
 
-	zstr_buffer ds; //date string buffer
+	str_buf ds; //date string buffer
 	ds << HTG.nbspace;
 	if (!val.isNull()) {
 	    ds << val.vstr();
@@ -711,7 +711,7 @@ zstr_mgr HtmlGem::datetime_value(zval_user pset)
 
 	Value label = ps.get(HTG.labelkey);
 
-	zstr_mgr datetext = ds.zstr();
+	str_rc datetext = ds.zstr();
 
 	if (!label.isNull()) {
 		ps.set(HTG.content_key, datetext);
@@ -729,10 +729,10 @@ zstr_mgr HtmlGem::datetime_value(zval_user pset)
 /**
  * May show recent dates as in the past
  */
-zstr_mgr
-HtmlGem::datetime_text(zstr_user dtvalue)
+str_rc
+HtmlGem::datetime_text(str_ptr dtvalue)
 {
-	zstr_mgr dstr(dtvalue);
+	str_rc dstr(dtvalue);
 
 	datetime_obj before(dstr);
 	datetime_obj now;
@@ -744,7 +744,7 @@ HtmlGem::datetime_text(zstr_user dtvalue)
 	int days = diff.days();
 
 	if ((years < 1) && (months < 1)) {
-		zstr_buffer buf;
+		str_buf buf;
 		if (days >= 14) {
 			buf << int(days / 7 ) << " weeks ago";
 		}
@@ -759,25 +759,25 @@ HtmlGem::datetime_text(zstr_user dtvalue)
 }; // namespace
 
 
-zstr_mgr
-HtmlGem::text_value(zval_user pset)
+str_rc
+HtmlGem::text_value(val_ptr pset)
 {
-	htab_mgr pscopy(pset.zarray());
-	htab_write ps(pscopy);
+	htab_rc pscopy(pset.zarray());
+	htab_wr ps(pscopy);
 
-	htab_write keys2(label_keys2_);
+	htab_wr keys2(label_keys2_);
 
 	if (keys2.size() == 0) {
 		keys2.push_back(HTG.labelkey);
 		keys2.push_back(HTG.label_class);
 	}
 
-	zstr_buffer out;
+	str_buf out;
 
-	htab_mgr mylabel = htab_mgr::extract(keys2,ps);
+	htab_rc mylabel = htab_rc::extract(keys2,ps);
 	out << out_label(mylabel);
 
-	zstr_user text = ps.get(HTG.valuekey);
+	str_ptr text = ps.get(HTG.valuekey);
 
 	if (text.size()) {
 		out << HTG.nbspace << text << HTG.nbspace;
@@ -788,10 +788,10 @@ HtmlGem::text_value(zval_user pset)
 	return out.zstr();
 }
 
-htab_read 
+htab_rd 
 HtmlGem::getLabelKeys1() 
 {
-	htab_write hw(label_keys1_);
+	htab_wr hw(label_keys1_);
 
 	if (hw.size() == 0)
 	{
@@ -801,17 +801,17 @@ HtmlGem::getLabelKeys1()
 	return label_keys1_;
 }
 
-htab_mgr
-HtmlGem::label_method(htab_write ps, int& labeltype)
+htab_rc
+HtmlGem::label_method(htab_wr ps, int& labeltype)
 {
-	htab_read kist = getLabelKeys1();
-	htab_mgr  result = htab_mgr::extract(kist, ps);
-	htab_write hw_label(result);
+	htab_rd kist = getLabelKeys1();
+	htab_rc  result = htab_rc::extract(kist, ps);
+	htab_wr hw_label(result);
 
 	//showdata("hw_label", hw_label);
 
-	zstr_mgr ltext = ps.get(HTG.labelkey);
-	zstr_user label(ltext);
+	str_rc ltext = ps.get(HTG.labelkey);
+	str_ptr label(ltext);
 
 	if (label.size()) {
 		
@@ -844,32 +844,32 @@ HtmlGem::label_method(htab_write ps, int& labeltype)
 }
 
 
-zstr_mgr
-HtmlGem::inputType(zval_user pset, zstr_user itype)
+str_rc
+HtmlGem::inputType(val_ptr pset, str_ptr itype)
 {
-	htab_mgr atype_ht;
-	htab_write atype(atype_ht);
+	htab_rc atype_ht;
+	htab_wr atype(atype_ht);
 
 	atype.set(HTG.typekey, itype);
 
 	//atype.show_data("atype ");
 	
-	htab_mgr pscopy(pset.zarray());
-	htab_write ps(pscopy);
+	htab_rc pscopy(pset.zarray());
+	htab_wr ps(pscopy);
 	
 	ensureIdValue(ps);
 
 	//ps.show_data("psid -- 1 ");
 
-	zstr_buffer out;
+	str_buf out;
 
 	if (!ps.has_key(HTG.classkey)) {
 		ps.set(HTG.classkey, text_class_);
 		//ps.show_data("psid -- 2 ");
 	}
 
-	zstr_mgr wrapdiv = ps.get(HTG.divkey);
-	zstr_user wuse(wrapdiv);
+	str_rc wrapdiv = ps.get(HTG.divkey);
+	str_ptr wuse(wrapdiv);
 
 	if (wuse.size()) {
 		outWrapDiv(out, wuse);
@@ -878,10 +878,10 @@ HtmlGem::inputType(zval_user pset, zstr_user itype)
 	
 	int label_loc = LabelLocate::NO_LABEL;
 
-	htab_mgr ht_label = label_method(ps, label_loc);
-	htab_write ldata(ht_label);
+	htab_rc ht_label = label_method(ps, label_loc);
+	htab_wr ldata(ht_label);
 
-	zstr_mgr input =  getTag(ps, atype, HTG.inputtag);
+	str_rc input =  getTag(ps, atype, HTG.inputtag);
 	
 	//showstr("input tag", input);
 	if (label_loc == LabelLocate::IN_LABEL) {
@@ -904,42 +904,42 @@ HtmlGem::inputType(zval_user pset, zstr_user itype)
 
 }
 
-zstr_mgr
-HtmlGem::plaintext(zval_user pset)
+str_rc
+HtmlGem::plaintext(val_ptr pset)
 {
 	return inputType(pset, HTG.textkey);
 }
 
-zstr_mgr
-HtmlGem::number(zval_user pset)
+str_rc
+HtmlGem::number(val_ptr pset)
 {
 	return inputType(pset, HTG.number);
 }
 
-zstr_mgr
-HtmlGem::radio(zval_user pset)
+str_rc
+HtmlGem::radio(val_ptr pset)
 {
-	htab_mgr pscopy(pset.zarray());
+	htab_rc pscopy(pset.zarray());
 
-	htab_write ps(pscopy);
+	htab_wr ps(pscopy);
 
-	zstr_mgr label_s = ps.get(HTG.labelkey);
-	zstr_user label(label_s);
+	str_rc label_s = ps.get(HTG.labelkey);
+	str_ptr label(label_s);
 
 	if (label.size()) {
 		ps.unset(HTG.labelkey);
 	}
-	zstr_mgr id = ensureIdValue(ps);
+	str_rc id = ensureIdValue(ps);
 
-	zstr_buffer out;
+	str_buf out;
 
-	zval_mgr altered(ps);
+	val_rc altered(ps);
 	out << inputType(altered, HTG.radio);
 
 	if (label.size()) 
 	{
-		htab_mgr ldata_ht;
-		htab_write ldata(ldata_ht);
+		htab_rc ldata_ht;
+		htab_wr ldata(ldata_ht);
 
 		ldata.set(HTG.idkey, id);
 		ldata.set(HTG.labelkey,label);
@@ -949,13 +949,13 @@ HtmlGem::radio(zval_user pset)
 	return out.zstr();
 }
 
-zstr_mgr
-HtmlGem::email(zval_user pset)
+str_rc
+HtmlGem::email(val_ptr pset)
 {
-	htab_mgr pscopy(pset.zarray());
-	htab_write ps(pscopy);
+	htab_rc pscopy(pset.zarray());
+	htab_wr ps(pscopy);
 
-	zstr_user test = ps.get(HTG.placehold);
+	str_ptr test = ps.get(HTG.placehold);
 
 	if (test.isNull()) {
 		ps.set(HTG.placehold, HTG.placehold_d);
@@ -964,62 +964,62 @@ HtmlGem::email(zval_user pset)
 	if (test.isNull()) {
 		ps.set(HTG.aria_describe,HTG.aria_describe_d);
 	}
-	zval_mgr altered(pscopy);
+	val_rc altered(pscopy);
 
 	return inputType(altered,HTG.email);
 }
 
-zstr_mgr 
-HtmlGem::hidden(zval_user pset)
+str_rc 
+HtmlGem::hidden(val_ptr pset)
 {
 	return inputType(pset, HTG.hidden);
 }
 
-zstr_mgr 
-HtmlGem::money(zval_user pset)
+str_rc 
+HtmlGem::money(val_ptr pset)
 {
 	return inputType(pset, HTG.money);
 }
 
-zstr_mgr 
-HtmlGem::phone(zval_user pset)
+str_rc 
+HtmlGem::phone(val_ptr pset)
 {
 	return inputType(pset, HTG.tel);
 }
 
-zstr_mgr 
-HtmlGem::password(zval_user pset)
+str_rc 
+HtmlGem::password(val_ptr pset)
 {
 	return inputType(pset, HTG.password);
 }
 
-zstr_mgr
-HtmlGem::xcheck(zval_user pset)
+str_rc
+HtmlGem::xcheck(val_ptr pset)
 {
-	htab_mgr pscopy(pset.zarray());
-	htab_write ps(pscopy);
+	htab_rc pscopy(pset.zarray());
+	htab_wr ps(pscopy);
 
 	if (ps.has_key(HTG.namekey)) {
 		ps.set(HTG.namekey, HTG.xcheck);
 	}
 
-	htab_mgr extra;
-	htab_write ex(extra);
+	htab_rc extra;
+	htab_wr ex(extra);
 
 	ex.set(HTG.typekey, HTG.hidden)                                                                                                                                                                                                               ;
 	return getTag(ps, ex, HTG.inputtag);
 }
 
-void HtmlGem::outAttr(zstr_buffer& out, zstr_user name, zstr_user value)
+void HtmlGem::outAttr(str_buf& out, str_ptr name, str_ptr value)
 {
 	out << HTG.blank <<  name <<  '=';
 	out.quote_name(value);
 }
 
 static 
-zstr_mgr glyph_out(zstr_user glyph)
+str_rc glyph_out(str_ptr glyph)
 {
-	zstr_buffer ss;
+	str_buf ss;
 
 	ss << "<span class=\"icon\"><i class=\"fas fa-";
 	ss << glyph.vstr();
@@ -1028,14 +1028,14 @@ zstr_mgr glyph_out(zstr_user glyph)
 	return ss.zstr();
 }
 
-zstr_mgr 
-HtmlGem::linkTo(zval_user pset)
+str_rc 
+HtmlGem::linkTo(val_ptr pset)
 {
-	htab_mgr   pscopy(pset.zarray());
-	htab_write ps(pscopy);
+	htab_rc   pscopy(pset.zarray());
+	htab_wr ps(pscopy);
 	
-	zstr_mgr href = ps.get(HTG.hrefkey);
-	zstr_user test(href);
+	str_rc href = ps.get(HTG.hrefkey);
+	str_ptr test(href);
 
 	if (test.size()) {
 		ps.unset(HTG.hrefkey);
@@ -1044,17 +1044,17 @@ HtmlGem::linkTo(zval_user pset)
 		href = HTG.hash_char;
 	}
 
-	zstr_mgr icon = ps.get(HTG.iconkey);
+	str_rc icon = ps.get(HTG.iconkey);
 	if (!icon.isNull()) {
 		ps.unset(HTG.iconkey);
 	}
-	zstr_mgr text = ps.get(HTG.textkey);
+	str_rc text = ps.get(HTG.textkey);
 	test = text;
 	if (test.size()) {
 		ps.unset(HTG.textkey);
 	}
 	else {
-		zstr_mgr glyph = ps.get(HTG.glyphkey);
+		str_rc glyph = ps.get(HTG.glyphkey);
 		test = glyph;
 		if (test.size()) {
 			ps.unset(HTG.glyphkey);
@@ -1064,7 +1064,7 @@ HtmlGem::linkTo(zval_user pset)
 			text = zstr_empty();
 		}
 	}
-	zstr_buffer out;
+	str_buf out;
 
 	out << "<a ";
 
@@ -1092,19 +1092,19 @@ HtmlGem::linkTo(zval_user pset)
 	return out.zstr();
 }
 
-void HtmlGem::ifKeyAttr(zstr_buffer& out, zstr_user key, htab_read ps)
+void HtmlGem::ifKeyAttr(str_buf& out, str_ptr key, htab_rd ps)
 {
-	zstr_user val = ps.get(key);
+	str_ptr val = ps.get(key);
 	if (val.ok()) {
 		outAttr(out, key, val);
 	}
 }
 
-htab_read HtmlGem::getSelectKeys()
+htab_rd HtmlGem::getSelectKeys()
 {
-	if (htab_read(select_keys_).size()==0)
+	if (htab_rd(select_keys_).size()==0)
 	{
-		htab_write hw(select_keys_);
+		htab_wr hw(select_keys_);
 
 		hw.set(HTG.idkey,true);
 		hw.set(HTG.classkey,true);
@@ -1115,22 +1115,22 @@ htab_read HtmlGem::getSelectKeys()
 	return select_keys_;
 }
 
-zstr_mgr 
-HtmlGem::select_list(zval_user pset)
+str_rc 
+HtmlGem::select_list(val_ptr pset)
 {
-	zstr_buffer out;
-	zval_user test;
+	str_buf out;
+	val_ptr test;
 
-	htab_mgr   pscopy(pset.zarray());
-	htab_write ps(pscopy);
+	htab_rc   pscopy(pset.zarray());
+	htab_wr ps(pscopy);
 
-	zval_mgr list = ps.get(HTG.listkey);
+	val_rc list = ps.get(HTG.listkey);
 	test = list;
 
 	if (test.isArray()) {
-		htab_read options(list);
+		htab_rd options(list);
 
-		zval_mgr selected = ps.get(HTG.valuekey);
+		val_rc selected = ps.get(HTG.valuekey);
 
 		ps.unset(HTG.listkey);
 
@@ -1148,7 +1148,7 @@ HtmlGem::select_list(zval_user pset)
 		ifKeyAttr(out, HTG.classkey, ps);
 		ifKeyAttr(out, HTG.namekey, ps);
 		{
-			htab_read select_keys = getSelectKeys();
+			htab_rd select_keys = getSelectKeys();
 
 			// any other attributes?
 			htab_walk wk;
@@ -1170,8 +1170,8 @@ HtmlGem::select_list(zval_user pset)
 			auto  skey = op.key();
 			auto  sval = op.value();
 
-			zstr_mgr  selected_as_str;
-			zstr_user suse;
+			str_rc  selected_as_str;
+			str_ptr suse;
 
 			test = selected;
 
@@ -1184,7 +1184,7 @@ HtmlGem::select_list(zval_user pset)
 
 			for(op.start(options); op.ok(); op.next()) 
 			{
-				zstr_mgr option_key = skey.to_zstr();
+				str_rc option_key = skey.to_zstr();
 
 				if (suse.isNull())
 				{
@@ -1209,28 +1209,28 @@ HtmlGem::select_list(zval_user pset)
 	return out.zstr();
 }
 
-zstr_mgr
- HtmlGem::select(zval_user pset)
+str_rc
+ HtmlGem::select(val_ptr pset)
 {
-	htab_mgr pset_copy(pset.zarray());
+	htab_rc pset_copy(pset.zarray());
 
-	htab_write ps(pset_copy);
+	htab_wr ps(pset_copy);
 
 	ensureIdValue(ps);
-	zstr_buffer out;
+	str_buf out;
 
-	zstr_mgr wrapdiv = ps.get(HTG.divkey);
-	zstr_user test(wrapdiv);
+	str_rc wrapdiv = ps.get(HTG.divkey);
+	str_ptr test(wrapdiv);
 
 	if (test.size()) {
 		outWrapDiv(out,test);
 		ps.unset(HTG.divkey);
 	}
 	int method = 0;
-	htab_mgr label_ht = label_method(ps,method);
-	htab_write label(label_ht);
+	htab_rc label_ht = label_method(ps,method);
+	htab_wr label(label_ht);
 
-	zstr_mgr select = select_list(pset);
+	str_rc select = select_list(pset);
 
 	if (method == OUT_LABEL) {
 		label.set(HTG.content_key,select);
@@ -1246,22 +1246,22 @@ zstr_mgr
 	return out.zstr();
 }
 
-void HtmlGem::setStyle(zstr_user name, zval_user value)
+void HtmlGem::setStyle(str_ptr name, val_ptr value)
 {
-	htab_write hw(styles_);
+	htab_wr hw(styles_);
 
 	hw.set(name,value); // map or string "xx:ss;"
 }
 
-htab_mgr
-style_toArray(zstr_user style)
+htab_rc
+style_toArray(str_ptr style)
 {
 
-	zval_mgr pairs_val = explode(HTG.semicolon, style, 0);
-	htab_read pairs(pairs_val);
+	val_rc pairs_val = explode(HTG.semicolon, style, 0);
+	htab_rd pairs(pairs_val);
 
-	htab_mgr result;
-	htab_write hw(result);
+	htab_rc result;
+	htab_wr hw(result);
 
 	htab_walk wk;
 
@@ -1275,8 +1275,8 @@ style_toArray(zstr_user style)
 
 		if ((ix != std::string_view::npos) && (ix > 0)) 
 		{
-			zstr_mgr key(sview.substr(0,ix));
-			zstr_mgr val(sview.substr(ix+1));
+			str_rc key(sview.substr(0,ix));
+			str_rc val(sview.substr(ix+1));
 
 			hw.set(key, val);
 		}
@@ -1284,10 +1284,10 @@ style_toArray(zstr_user style)
 	return result;
 }
 
-htab_mgr 
-mergeStyles(zval_user list1, zval_user list2)
+htab_rc 
+mergeStyles(val_ptr list1, val_ptr list2)
 {
-	htab_mgr result;
+	htab_rc result;
 
 
 	if (list1.isString()) {
@@ -1297,24 +1297,24 @@ mergeStyles(zval_user list1, zval_user list2)
 	{
 		result = list1.zarray();
 	}
-	htab_write hw(result);
+	htab_wr hw(result);
 	if (list2.isString())
 	{
-		htab_mgr merge2 = style_toArray(list2.to_zstr());
+		htab_rc merge2 = style_toArray(list2.to_zstr());
 		hw.merge(merge2);
 	}
 	else if (list2.isArray()) {
-		htab_read ht2(list2);
+		htab_rd ht2(list2);
 		if (ht2.size())
 			hw.merge(ht2);
 	}
 	return result;
 }
 
-zstr_mgr 
-array_toStyle(htab_read slist)
+str_rc 
+array_toStyle(htab_rd slist)
 {
-	zstr_buffer ss;
+	str_buf ss;
 
 	htab_walk wk;
 	auto key = wk.key();
@@ -1327,10 +1327,10 @@ array_toStyle(htab_read slist)
 	return ss.zstr();
 }
 
-zstr_mgr
-HtmlGem::getStyle(zstr_user skey)
+str_rc
+HtmlGem::getStyle(str_ptr skey)
 {
-	zval_user style = htab_read(styles_).get(skey);
+	val_ptr style = htab_rd(styles_).get(skey);
 	if (style.isArray())
 	{
 		return array_toStyle(style);
@@ -1339,13 +1339,13 @@ HtmlGem::getStyle(zstr_user skey)
 }
 
 void
-HtmlGem::image_tag(zstr_buffer& ss, zstr_user path)
+HtmlGem::image_tag(str_buf& ss, str_ptr path)
 {
 	ss <<  HTG.begintag << HTG.imgkey;
 
 	outAttr(ss, HTG.srckey, path);
 	
-	zstr_mgr tagstyle  = getStyle(HTG.imgkey);
+	str_rc tagstyle  = getStyle(HTG.imgkey);
 
 	if (!tagstyle.isNull()) {
 		outAttr(ss, HTG.stylekey, tagstyle);
@@ -1355,11 +1355,11 @@ HtmlGem::image_tag(zstr_buffer& ss, zstr_user path)
 }
 
 void
-HtmlGem::figcaption_tag(zstr_buffer& ss, zstr_user text)
+HtmlGem::figcaption_tag(str_buf& ss, str_ptr text)
 {
 	ss << HTG.begintag << HTG.figcaption;
 
-	zstr_mgr tagstyle = getStyle(HTG.figcaption);
+	str_rc tagstyle = getStyle(HTG.figcaption);
 
 	if (!tagstyle.isNull()) {
 		outAttr(ss, HTG.stylekey, tagstyle);
@@ -1368,30 +1368,30 @@ HtmlGem::figcaption_tag(zstr_buffer& ss, zstr_user text)
 	ss << ">" << text << HTG.endtag << HTG.figcaption << HTG.tagendl;
 }
 
-zstr_mgr HtmlGem::figure(zval_user pset)
+str_rc HtmlGem::figure(val_ptr pset)
 {
-	zstr_buffer out;
+	str_buf out;
 
-	htab_mgr pscopy(pset.zarray());
-	htab_write ps(pscopy);
+	htab_rc pscopy(pset.zarray());
+	htab_wr ps(pscopy);
 
-	zstr_mgr src = ps.get(HTG.file_key);
-	zstr_user test(src);
+	str_rc src = ps.get(HTG.file_key);
+	str_ptr test(src);
 
 	if (test.size()) {
 		out << '<' << HTG.figurekey;
 
-		zval_mgr s =  getStyle(HTG.figurekey);
-		zval_mgr morestyle = ps.get(HTG.figurekey);
+		val_rc s =  getStyle(HTG.figurekey);
+		val_rc morestyle = ps.get(HTG.figurekey);
 
-		htab_mgr tagstyle = mergeStyles(s, morestyle);
-		zstr_mgr attr = array_toStyle(tagstyle);
+		htab_rc tagstyle = mergeStyles(s, morestyle);
+		str_rc attr = array_toStyle(tagstyle);
 
 		outAttr(out, HTG.stylekey , attr );
 		out << HTG.tagendl; // end figure tag open
 		image_tag(out, src);
 
-		zstr_user caption = ps.get(HTG.caption_str);
+		str_ptr caption = ps.get(HTG.caption_str);
 		if (caption.size()) {
 			figcaption_tag(out, caption);
 		}
@@ -1402,21 +1402,21 @@ zstr_mgr HtmlGem::figure(zval_user pset)
 
 
 /* setup properties for datetime picker class */
-zstr_mgr 
-HtmlGem::datetime(zval_user pset)
+str_rc 
+HtmlGem::datetime(val_ptr pset)
 {
-	zstr_buffer out;
+	str_buf out;
 
-	htab_mgr pscopy(pset.zarray());
-	htab_write ps(pscopy);
+	htab_rc pscopy(pset.zarray());
+	htab_wr ps(pscopy);
 
-	zstr_mgr idstr = ensureIdValue(ps);
+	str_rc idstr = ensureIdValue(ps);
 
-	zstr_buffer dateid;
+	str_buf dateid;
 
 	dateid << "pick" << idstr;
 
-	zstr_mgr dateid_str = dateid.zstr();
+	str_rc dateid_str = dateid.zstr();
 
 	out << '<' << HTG.divkey; // level 
 
@@ -1430,15 +1430,15 @@ HtmlGem::datetime(zval_user pset)
 	outWrapDiv(out, HTG.level_item);//1 div level-item
 
 	int method = 0;
-	htab_mgr label_ht = label_method(ps, method);
-	htab_write label(label_ht);
+	htab_rc label_ht = label_method(ps, method);
+	htab_wr label(label_ht);
 
 	//showarray("label table", label);
 
-	zstr_buffer dtclass;
+	str_buf dtclass;
 
-	zstr_mgr dtm_fmt =  ps.get(HTG.fmt_key);
-	zstr_user test(dtm_fmt);
+	str_rc dtm_fmt =  ps.get(HTG.fmt_key);
+	str_ptr test(dtm_fmt);
 
 	if (test.isNull()){
 		dtclass << HTG.datetime_class;
@@ -1450,27 +1450,27 @@ HtmlGem::datetime(zval_user pset)
 
 	//zend_printf("dtclass\n");
 
-	zstr_mgr dt_class_str = dtclass.zstr();
+	str_rc dt_class_str = dtclass.zstr();
 
-	htab_mgr attrlist_ht;
-	htab_write attrlist(attrlist_ht);
+	htab_rc attrlist_ht;
+	htab_wr attrlist(attrlist_ht);
 
 	attrlist.set(HTG.typekey, HTG.textkey);
 
-	zstr_buffer dtinput;
+	str_buf dtinput;
 
 	dtinput << dt_class_str << "-input";
 
-	zval_mgr value = dtinput.zstr();
+	val_rc value = dtinput.zstr();
 
 	//zend_printf("dtinput\n");
 	attrlist.set(HTG.classkey,value);
 
-	zstr_buffer atarg;
+	str_buf atarg;
 
 	atarg << "#" << dateid_str;
 
-	zstr_mgr atarg_str = atarg.zstr();
+	str_rc atarg_str = atarg.zstr();
 
 	attrlist.set(HTG.data_target, atarg_str);
 
@@ -1480,7 +1480,7 @@ HtmlGem::datetime(zval_user pset)
 	attrlist.set(HTG.maxlength,s24);
 
 
-	zstr_mgr input = getTag(ps, attrlist, HTG.inputtag);
+	str_rc input = getTag(ps, attrlist, HTG.inputtag);
 	//zend_printf("dt 4\n");
 
 	if (method == OUT_LABEL) {
@@ -1496,7 +1496,7 @@ HtmlGem::datetime(zval_user pset)
 		out << input;
 	}
 	//zend_printf("dt 5\n");
-	zstr_mgr icon = ps.get(HTG.iconkey);
+	str_rc icon = ps.get(HTG.iconkey);
 	if (!icon.isNull()) {
 		ps.unset(HTG.iconkey);
 	}
@@ -1523,36 +1523,36 @@ HtmlGem::datetime(zval_user pset)
 }
 
 
-zstr_mgr
-HtmlGem::multiline(zval_user pset)
+str_rc
+HtmlGem::multiline(val_ptr pset)
 {
-	zstr_buffer out;
-	htab_read temp(pset);
+	str_buf out;
+	htab_rd temp(pset);
 	//showarray("pset", temp);
-	htab_mgr pscopy(temp);
+	htab_rc pscopy(temp);
 	//showarray("pscopy", pscopy);
 	
 
-	htab_write ps(pscopy);
+	htab_wr ps(pscopy);
 
 	ensureIdValue(ps);
 	
 
-	zval_mgr clist = ps.get(HTG.classkey);
+	val_rc clist = ps.get(HTG.classkey);
 
-	if (zval_user(clist).isNull()) {
+	if (val_ptr(clist).isNull()) {
 		clist = text_class_;
 	}
 	
-	zstr_mgr wrapdiv = ps.get(HTG.divkey);
-	zstr_user test(wrapdiv);
+	str_rc wrapdiv = ps.get(HTG.divkey);
+	str_ptr test(wrapdiv);
 
 	if (test.size()) {
 		outWrapDiv(out, test);
 		ps.unset(HTG.divkey);
 	}
 
-	zstr_mgr value = ps.get(HTG.valuekey);
+	str_rc value = ps.get(HTG.valuekey);
 	test = value;
 	if (test.size()) {
 		ps.unset(HTG.valuekey);
@@ -1561,15 +1561,15 @@ HtmlGem::multiline(zval_user pset)
 
 	int method;
 	//showarray("ps", ps);
-	htab_mgr label = label_method(ps, method);
+	htab_rc label = label_method(ps, method);
 
 
-	zstr_buffer input;
+	str_buf input;
 
 	input << generateTag(HTG.textarea, ps);
 	input << value << HTG.endtag << HTG.textarea << '>';
 
-	zstr_mgr input_str = input.zstr();
+	str_rc input_str = input.zstr();
 
 	//showmem("input_str", input_str);
 
@@ -1608,7 +1608,7 @@ ZEND_METHOD(Wcc_HtmlGem, button)
 
 	auto cobj = zval_toc<HtmlGem>(ZEND_THIS);
 
-	zstr_mgr result = cobj->button(pset);
+	str_rc result = cobj->button(pset);
 	result.move_zv(return_value);
 
 }
@@ -1623,7 +1623,7 @@ ZEND_METHOD(Wcc_HtmlGem, checkbox)
 
 	auto cobj = zval_toc<HtmlGem>(ZEND_THIS);
 
-	zstr_mgr result = cobj->checkbox(pset);
+	str_rc result = cobj->checkbox(pset);
 	result.move_zv(return_value);
 }
 
@@ -1637,7 +1637,7 @@ ZEND_METHOD(Wcc_HtmlGem, datetime)
 
 	auto cobj = zval_toc<HtmlGem>(ZEND_THIS);
 
-	zstr_mgr result = cobj->datetime(pset);
+	str_rc result = cobj->datetime(pset);
 	result.move_zv(return_value);
 }
 
@@ -1651,7 +1651,7 @@ ZEND_METHOD(Wcc_HtmlGem, datetime_text)
 
 	auto cobj = zval_toc<HtmlGem>(ZEND_THIS);
 
-	zstr_mgr result = cobj->datetime_text(s);
+	str_rc result = cobj->datetime_text(s);
 	result.move_zv(return_value);
 }
 
@@ -1665,7 +1665,7 @@ ZEND_METHOD(Wcc_HtmlGem, email)
 
 	auto cobj = zval_toc<HtmlGem>(ZEND_THIS);
 
-	zstr_mgr result = cobj->email(pset);
+	str_rc result = cobj->email(pset);
 	result.move_zv(return_value);
 
 }
@@ -1680,7 +1680,7 @@ ZEND_METHOD(Wcc_HtmlGem, figure)
 
 	auto cobj = zval_toc<HtmlGem>(ZEND_THIS);
 
-	zstr_mgr result = cobj->figure(pset);
+	str_rc result = cobj->figure(pset);
 	result.move_zv(return_value);
 }
 
@@ -1694,7 +1694,7 @@ ZEND_METHOD(Wcc_HtmlGem, hidden)
 
 	auto cobj = zval_toc<HtmlGem>(ZEND_THIS);
 
-	zstr_mgr result = cobj->hidden(pset);
+	str_rc result = cobj->hidden(pset);
 	result.move_zv(return_value);
 
 }
@@ -1709,7 +1709,7 @@ ZEND_METHOD(Wcc_HtmlGem, linkto)
 
 	auto cobj = zval_toc<HtmlGem>(ZEND_THIS);
 
-	zstr_mgr result = cobj->linkTo(pset);
+	str_rc result = cobj->linkTo(pset);
 	result.move_zv(return_value);
 
 }
@@ -1724,7 +1724,7 @@ ZEND_METHOD(Wcc_HtmlGem, money)
 
 	auto cobj = zval_toc<HtmlGem>(ZEND_THIS);
 
-	zstr_mgr result = cobj->money(pset);
+	str_rc result = cobj->money(pset);
 	result.move_zv(return_value);
 
 }
@@ -1740,7 +1740,7 @@ ZEND_METHOD(Wcc_HtmlGem, multiline)
 	//showmem("parameter array", pset);
 	auto cobj = zval_toc<HtmlGem>(ZEND_THIS);
 
-	zstr_mgr result = cobj->multiline(pset);
+	str_rc result = cobj->multiline(pset);
 	//showmem("result - ", result);
 	result.move_zv(return_value);
 }
@@ -1755,7 +1755,7 @@ ZEND_METHOD(Wcc_HtmlGem, number)
 
 	auto cobj = zval_toc<HtmlGem>(ZEND_THIS);
 
-	zstr_mgr result = cobj->number(pset);
+	str_rc result = cobj->number(pset);
 	result.move_zv(return_value);
 
 }
@@ -1770,7 +1770,7 @@ ZEND_METHOD(Wcc_HtmlGem, phone)
 
 	auto cobj = zval_toc<HtmlGem>(ZEND_THIS);
 
-	zstr_mgr result = cobj->phone(pset);
+	str_rc result = cobj->phone(pset);
 	result.move_zv(return_value);
 
 }
@@ -1785,7 +1785,7 @@ ZEND_METHOD(Wcc_HtmlGem, password)
 
 	auto cobj = zval_toc<HtmlGem>(ZEND_THIS);
 
-	zstr_mgr result = cobj->password(pset);
+	str_rc result = cobj->password(pset);
 	result.move_zv(return_value);
 
 }
@@ -1800,7 +1800,7 @@ ZEND_METHOD(Wcc_HtmlGem, radio)
 
 	auto cobj = zval_toc<HtmlGem>(ZEND_THIS);
 
-	zstr_mgr result = cobj->radio(pset);
+	str_rc result = cobj->radio(pset);
 	result.move_zv(return_value);
 
 }
@@ -1815,7 +1815,7 @@ ZEND_METHOD(Wcc_HtmlGem, plaintext)
 
 	auto cobj = zval_toc<HtmlGem>(ZEND_THIS);
 
-	zstr_mgr result = cobj->plaintext(pset);
+	str_rc result = cobj->plaintext(pset);
 	result.move_zv(return_value);
 
 }
@@ -1830,7 +1830,7 @@ ZEND_METHOD(Wcc_HtmlGem, select)
 
 	auto cobj = zval_toc<HtmlGem>(ZEND_THIS);
 
-	zstr_mgr result = cobj->select(pset);
+	str_rc result = cobj->select(pset);
 	result.move_zv(return_value);
 
 }
@@ -1845,7 +1845,7 @@ ZEND_METHOD(Wcc_HtmlGem, select_list)
 
 	auto cobj = zval_toc<HtmlGem>(ZEND_THIS);
 
-	zstr_mgr result = cobj->select_list(pset);
+	str_rc result = cobj->select_list(pset);
 	result.move_zv(return_value);
 
 }
@@ -1860,7 +1860,7 @@ ZEND_METHOD(Wcc_HtmlGem, output)
 
 	auto cobj = zval_toc<HtmlGem>(ZEND_THIS);
 
-	zstr_mgr result = cobj->output(val);
+	str_rc result = cobj->output(val);
 	result.move_zv(return_value);
 }
 
@@ -1874,7 +1874,7 @@ ZEND_METHOD(Wcc_HtmlGem, submit)
 
 	auto cobj = zval_toc<HtmlGem>(ZEND_THIS);
 
-	zstr_mgr result = cobj->submit(pset);
+	str_rc result = cobj->submit(pset);
 	result.move_zv(return_value);
 
 }
@@ -1889,7 +1889,7 @@ ZEND_METHOD(Wcc_HtmlGem, datetime_value)
 
 	auto cobj = zval_toc<HtmlGem>(ZEND_THIS);
 
-	zstr_mgr result = cobj->datetime_value(pset);
+	str_rc result = cobj->datetime_value(pset);
 	result.move_zv(return_value);
 
 }
@@ -1904,7 +1904,7 @@ ZEND_METHOD(Wcc_HtmlGem, check_value)
 
 	auto cobj = zval_toc<HtmlGem>(ZEND_THIS);
 
-	zstr_mgr result = cobj->check_value(pset);
+	str_rc result = cobj->check_value(pset);
 	result.move_zv(return_value);
 
 }
@@ -1919,7 +1919,7 @@ ZEND_METHOD(Wcc_HtmlGem, text_value)
 
 	auto cobj = zval_toc<HtmlGem>(ZEND_THIS);
 
-	zstr_mgr result = cobj->text_value(pset);
+	str_rc result = cobj->text_value(pset);
 	result.move_zv(return_value);
 
 }
@@ -1934,7 +1934,7 @@ ZEND_METHOD(Wcc_HtmlGem, xcheck)
 
 	auto cobj = zval_toc<HtmlGem>(ZEND_THIS);
 
-	zstr_mgr result = cobj->xcheck(pset);
+	str_rc result = cobj->xcheck(pset);
 	result.move_zv(return_value);
 
 }
@@ -1999,7 +1999,7 @@ ZEND_METHOD(Wcc_HtmlGem, getStyle)
 
 	auto cobj = zval_toc<HtmlGem>(ZEND_THIS);
 
-	zstr_mgr result = cobj->getStyle(name);
+	str_rc result = cobj->getStyle(name);
 	result.move_zv(return_value);
 }
 
@@ -2011,7 +2011,7 @@ ZEND_METHOD(Wcc_HtmlGem, moneyFormat)
 	Z_PARAM_STR_OR_NULL(slang)
 	ZEND_PARSE_PARAMETERS_END();
 
-	zstr_mgr temp;
+	str_rc temp;
 
 	if (!slang) {
 		temp = zstr_temp("en_AU");
@@ -2020,7 +2020,7 @@ ZEND_METHOD(Wcc_HtmlGem, moneyFormat)
 		temp = slang;
 	}
 
-	zobj_mgr result(MoneyFmt::omg.new_zobj());
+	obj_rc result(MoneyFmt::omg.new_zobj());
 	MoneyFmt* mf = zobj_toc<MoneyFmt>(result);
 	mf->construct(temp);
 

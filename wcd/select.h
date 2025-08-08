@@ -18,7 +18,7 @@ class Select : public Operation {
 protected:
 	bool autoAlias_;
 
-	zobj_mgr icols_;
+	obj_rc icols_;
 
 	IColumns& icol() {
 		return *zobj_toc<IColumns>(icols_);
@@ -27,23 +27,23 @@ public:
 
 	static base_obj_mgr<Select> omg;
 
-	virtual zobj_mgr getSqlParams();
+	virtual obj_rc getSqlParams();
 
-	void construct(zobj_user db, bool autoAlias = false);
+	void construct(obj_ptr db, bool autoAlias = false);
 
 	void destruct();
 
-	void add(htab_read cols);
+	void add(htab_rd cols);
 
-	zobj_mgr addJoin(zobj_user ltable, zobj_user rtable, int jtype);
+	obj_rc addJoin(obj_ptr ltable, obj_ptr rtable, int jtype);
 
-	zobj_mgr addTable(zstr_user table, zstr_user alias, htab_read cols);
+	obj_rc addTable(str_ptr table, str_ptr alias, htab_rd cols);
 
-	zval_mgr getRenamed();
+	val_rc getRenamed();
 
-	zobj_user iCols();
+	obj_ptr iCols();
 
-	void setAlias(zstr_user alias);
+	void setAlias(str_ptr alias);
 
 };
 

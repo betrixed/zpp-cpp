@@ -17,27 +17,27 @@ using namespace zpp;
 base_obj_mgr<Select> Select::omg;
 
 
-zobj_mgr 
+obj_rc 
 Select::getSqlParams()
 {
 	Bindings& bind = this->bindings();
 	if (autoAlias_) {
 		bind.aliasSelect();
 	}
-	zobj_mgr isql_mgr = bind.isql();
+	obj_rc isql_mgr = bind.isql();
 	ISql* isq = zobj_toc<ISql>(isql_mgr);
 
-	zobj_mgr plist_mgr = isq->select(bind);
+	obj_rc plist_mgr = isq->select(bind);
 	bind.wipe();
 	return plist_mgr;
 }
 
 void 
-Select::construct(zobj_user db, bool autoAlias)
+Select::construct(obj_ptr db, bool autoAlias)
 {
 	Operation::construct(db);
 	autoAlias_ = autoAlias;
-	zobj_user self(vobj());
+	obj_ptr self(vobj());
 
 	icols_ = IColumns::omg.new_zobj();
 	icol().construct(self);
@@ -52,15 +52,15 @@ Select::destruct()
 }
 
 void 
-Select::add(htab_read cols)
+Select::add(htab_rd cols)
 {
 	icol().add(cols);
 }
 
-zobj_mgr 
-Select::addJoin(zobj_user ltable, zobj_user rtable, int jtype)
+obj_rc 
+Select::addJoin(obj_ptr ltable, obj_ptr rtable, int jtype)
 {
-	zobj_mgr ji_mgr = JoinInfo::omg.new_zobj();
+	obj_rc ji_mgr = JoinInfo::omg.new_zobj();
 	JoinInfo*  ji = zobj_toc<JoinInfo>(ji_mgr);
 
 	ji->construct(ltable, rtable, jtype);
@@ -71,13 +71,13 @@ Select::addJoin(zobj_user ltable, zobj_user rtable, int jtype)
 	return ji_mgr;
 }
 
-zobj_mgr 
-Select::addTable(zstr_user table, zstr_user alias, htab_read cols)
+obj_rc 
+Select::addTable(str_ptr table, str_ptr alias, htab_rd cols)
 {
-	zobj_mgr tc_mgr = TColumns::omg.new_zobj();
+	obj_rc tc_mgr = TColumns::omg.new_zobj();
 	TColumns* tc = zobj_toc<TColumns>(tc_mgr);
 
-	zval_mgr cols_mgr(cols);
+	val_rc cols_mgr(cols);
 	tc->construct(table, alias, cols_mgr);
 
 	JoinTables& jt = this->joiner();
@@ -86,25 +86,25 @@ Select::addTable(zstr_user table, zstr_user alias, htab_read cols)
 	return tc_mgr;
 }
 
-zval_mgr 
+val_rc 
 Select::getRenamed()
 {
-	zval_mgr results = this->getRows();
+	val_rc results = this->getRows();
 
-	zval_mgr rename = bindings().get(ISql::SQL_RENAME);
+	val_rc rename = bindings().get(ISql::SQL_RENAME);
 
 	if (results.isArray() && rename.isArray())
 	{
-		htab_mgr objset;
-		htab_write hw(objset);
+		htab_rc objset;
+		htab_wr hw(objset);
 
-		htab_read rows(results);
-		htab_read rtab(rename);
+		htab_rd rows(results);
+		htab_rd rtab(rename);
 		htab_walk wk;
 
 		for(wk.start(rows); wk.ok(); wk.next())
 		{
-			zobj_mgr split = JoinTables::rowSplit(rows, rtab);
+			obj_rc split = JoinTables::rowSplit(rows, rtab);
 			hw.push_back(split);
 		}
 		results = objset;
@@ -112,14 +112,14 @@ Select::getRenamed()
 	return results;
 }
 
-zobj_user
+obj_ptr
 Select::iCols()
 {
 	return icols_;
 }
 
 void 
-Select::setAlias(zstr_user alias)
+Select::setAlias(str_ptr alias)
 {
 	icol().setAlias(alias);
 }
@@ -131,9 +131,9 @@ using namespace wcd;
 
 ZEND_METHOD(Wcd_Sql_Select, __construct)
 {
-	zarg_exec args(execute_data);
+	zarg_rd args(execute_data);
 
-	zobj_user db;
+	obj_ptr db;
 	bool      auto_alias = false;
 
 	args.obj_ofclass(db, args.need(1), IDriver::omg.class_entry_);
@@ -159,9 +159,9 @@ ZEND_METHOD(Wcd_Sql_Select, __destruct)
 
 ZEND_METHOD(Wcd_Sql_Select, add)
 {
-	zarg_exec args(execute_data);
+	zarg_rd args(execute_data);
 
-	htab_read cols;
+	htab_rd cols;
 
 	args.zarray(cols, args.need(1));
 
@@ -175,12 +175,12 @@ ZEND_METHOD(Wcd_Sql_Select, add)
 
 ZEND_METHOD(Wcd_Sql_Select, addJoin)
 {
-	zarg_exec args(execute_data);
+	zarg_rd args(execute_data);
 
-	zobj_user ltable;
-	zobj_user rtable;
+	obj_ptr ltable;
+	obj_ptr rtable;
 	zend_long jtype = JoinInfo::J_INNER;
-	zobj_mgr result;
+	obj_rc result;
 
 	args.obj_ofclass(ltable, args.need(1), zclass_sql_icolumns);
 	args.obj_ofclass_null(rtable, args.option(2), zclass_sql_icolumns);
@@ -199,13 +199,13 @@ ZEND_METHOD(Wcd_Sql_Select, addJoin)
 
 ZEND_METHOD(Wcd_Sql_Select, addTable)
 {
-	zarg_exec args(execute_data);
+	zarg_rd args(execute_data);
 
-	zstr_user tname;
-	zstr_user talias;
-	htab_read cols;
+	str_ptr tname;
+	str_ptr talias;
+	htab_rd cols;
 
-	zobj_mgr result;
+	obj_rc result;
 
 	args.zstring(tname, args.need(1));
 	args.zstring_null(talias, args.option(2));
@@ -228,7 +228,7 @@ ZEND_METHOD(Wcd_Sql_Select, getRenamed)
 
 	Select* sobj = zval_toc<Select>(ZEND_THIS);
 
-	htab_mgr result = sobj->getRenamed();
+	htab_rc result = sobj->getRenamed();
 
 	result.move_zv(return_value);
 }
@@ -239,7 +239,7 @@ ZEND_METHOD(Wcd_Sql_Select, getSqlParams)
 
 	Select* sobj = zval_toc<Select>(ZEND_THIS);
 
-	zobj_mgr result = sobj->getSqlParams();
+	obj_rc result = sobj->getSqlParams();
 
 	result.move_zv(return_value);
 }
@@ -250,16 +250,16 @@ ZEND_METHOD(Wcd_Sql_Select, icols)
 
 	Select* sobj = zval_toc<Select>(ZEND_THIS);
 
-	zobj_user result = sobj->iCols();
+	obj_ptr result = sobj->iCols();
 
 	result.return_zv(return_value);
 }
 
 ZEND_METHOD(Wcd_Sql_Select, setAlias)
 {
-	zarg_exec args(execute_data);
+	zarg_rd args(execute_data);
 
-	zstr_user alias;
+	str_ptr alias;
 
 	args.zstring(alias, args.need(1));
 

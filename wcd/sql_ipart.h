@@ -181,18 +181,18 @@ namespace wcd {
 	{
 	public:
 
-		zstr_mgr   expr_;
+		str_rc   expr_;
 
 		// Is this needed for an abstract class?
 		Expr() : SqlPartId(EXPR_PID) {}
 
 		static base_obj_mgr<Expr> omg;
 
-		virtual void debug_info(htab_write di);
+		virtual void debug_info(htab_wr di);
 
-		void construct(zstr_user val);
+		void construct(str_ptr val);
 
-		zstr_mgr toString() const override { return expr_; }
+		str_rc toString() const override { return expr_; }
 	};
 
 	class Bindings;
@@ -221,61 +221,61 @@ namespace wcd {
 		    B_OR = 2
 		};
 
-		zval_mgr   lattr_; 
-		zval_mgr   rattr_;
+		val_rc   lattr_; 
+		val_rc   rattr_;
 		int        op_;
 		int        nextop_;
 
 		static base_obj_mgr<JoinExpr> omg;
 
-		virtual void debug_info(htab_write di);
+		virtual void debug_info(htab_wr di);
 
-		static  zstr_user  opStr(int op);
-		static  zstr_user  boolStr(int nextop);
+		static  str_ptr  opStr(int op);
+		static  str_ptr  boolStr(int nextop);
 
-		static  int       toLogic(zstr_user s);
-		static  int       toOperator(zstr_user s);
+		static  int       toLogic(str_ptr s);
+		static  int       toOperator(str_ptr s);
 
 		JoinExpr() : SqlPartId(JE_PID) {}
 
 
-		void construct(zval_user leftval, zval_user rightval, int op, int nextop);
+		void construct(val_ptr leftval, val_ptr rightval, int op, int nextop);
 
 	
 		/*zstr_own emit(int ix, zobj_own bindobj, 
-				zstr_user Lalias, zstr_user Ralias);*/
+				str_ptr Lalias, str_ptr Ralias);*/
 
-		zstr_mgr emit(int ix, Bindings* bind, 
-				zstr_user Lalias, zstr_user Ralias);
+		str_rc emit(int ix, Bindings* bind, 
+				str_ptr Lalias, str_ptr Ralias);
 	};
 
 	class TableAttr : public SqlPartId 
 	{
 	protected:
-		zstr_mgr table_;
-		zstr_mgr attr_;
+		str_rc table_;
+		str_rc attr_;
 	public:
 
-		static zobj_mgr makeTA(zstr_user t, zstr_user a);
-		static zval_mgr splitDot(zstr_user s);
+		static obj_rc makeTA(str_ptr t, str_ptr a);
+		static val_rc splitDot(str_ptr s);
 
 		static base_obj_mgr<TableAttr> omg;
 
-		virtual void debug_info(htab_write di);
+		virtual void debug_info(htab_wr di);
 
 		TableAttr() : SqlPartId(TA_PID) {}
 
-		void construct(zstr_user t, zstr_user a);
+		void construct(str_ptr t, str_ptr a);
 
-		zstr_mgr toString() const override;
+		str_rc toString() const override;
 
 
-		zstr_user getTable() const
+		str_ptr getTable() const
 		{
 			return table_;
 		}
 
-		zstr_user getAttr() const
+		str_ptr getAttr() const
 		{
 			return attr_;
 		}
@@ -285,18 +285,18 @@ namespace wcd {
 	class Param : public SqlPartId
 	{
 	protected:
-		zval_mgr  value_;
+		val_rc  value_;
 	public:
 
 		static base_obj_mgr<Param> omg;
 
-		virtual void debug_info(htab_write di);
+		virtual void debug_info(htab_wr di);
 		
 		Param() :  SqlPartId(PARAM_PID) {}
 
-		void construct(zval_user zp);
+		void construct(val_ptr zp);
 
-		zval_user getValue() const {
+		val_ptr getValue() const {
 			return value_;
 		}
 	};
@@ -305,78 +305,78 @@ namespace wcd {
 	{
 	public:
 
-		zval_mgr   value_;
+		val_rc   value_;
 
 		// Is this needed for an abstract class?
 		static base_obj_mgr<Literal> omg;
 
-		virtual void debug_info(htab_write di);
+		virtual void debug_info(htab_wr di);
 
 		Literal() : SqlPartId(LIT_PID) {}
 
-		void construct(zval_user val);
+		void construct(val_ptr val);
 
-		zval_user getValue() const { return value_; }
+		val_ptr getValue() const { return value_; }
 
-		zstr_mgr toString() const override;
+		str_rc toString() const override;
 	};
 	
 	class IColumns : public SqlPartId 
 	{
 	protected:
-		zstr_mgr 	alias_;
-		htab_mgr  	colnames_;
-		htab_mgr 	expr_;
-		zobj_mgr 	owner_;
+		str_rc 	alias_;
+		htab_rc  	colnames_;
+		htab_rc 	expr_;
+		obj_rc 	owner_;
 	public:
 
 		static base_obj_mgr<IColumns> omg;
 
-		virtual void debug_info(htab_write di);
+		virtual void debug_info(htab_wr di);
 
 		IColumns() : SqlPartId(ICOL_PID) {}
 
-		void construct(zobj_user owner);
+		void construct(obj_ptr owner);
 
 		void clear();
 
-		zobj_user getOwner() const
+		obj_ptr getOwner() const
 		{
 			return owner_;
 		}
 
-		htab_read getColNames() const
+		htab_rd getColNames() const
 		{
 			return colnames_;
 		}
 
-		void setAlias(zstr_user name)
+		void setAlias(str_ptr name)
 		{
 			alias_ = name;
 		}
 
-		zstr_user getAlias() const
+		str_ptr getAlias() const
 		{
 			return alias_;
 		}
 
 		// The alias is the name here
-		virtual zstr_user getName() const
+		virtual str_ptr getName() const
 		{
 			return alias_;
 		}
 
-		void setColAlias(zstr_user name, zstr_user alias);
+		void setColAlias(str_ptr name, str_ptr alias);
 
-		void add(htab_read columns);
+		void add(htab_rd columns);
 
-		void unsetCol(zstr_user key)
+		void unsetCol(str_ptr key)
 		{
-			htab_write names(colnames_);
+			htab_wr names(colnames_);
 			names.unset(key);
 		}
 
-		bool has(zstr_user key) const
+		bool has(str_ptr key) const
 		{
 			return colnames_.has_key(key);
 		}
@@ -386,13 +386,13 @@ namespace wcd {
 			return (colnames_.size() > 0);
 		}
 
-		void addExpr(zstr_user alias, zstr_user expr)
+		void addExpr(str_ptr alias, str_ptr expr)
 		{
-			htab_write exp_w(expr_);
+			htab_wr exp_w(expr_);
 			exp_w.set(alias, expr);
 		}
 
-		htab_read getExpr() const
+		htab_rd getExpr() const
 		{
 			return expr_;
 		}
@@ -402,28 +402,28 @@ namespace wcd {
 	class TColumns : public IColumns 
 	{
 	protected:
-		zstr_mgr 	name_;
-		htab_mgr 	attr_map_;
+		str_rc 	name_;
+		htab_rc 	attr_map_;
 	public:
-		virtual void debug_info(htab_write di);
+		virtual void debug_info(htab_wr di);
 
 		static base_obj_mgr<TColumns> omg; // can't be same name as base??
 
-		static zval_mgr tableCol(zstr_user expr);
+		static val_rc tableCol(str_ptr expr);
 
 		TColumns() : IColumns()
 		{
 			partid_ = TCOL_PID;
 		}
 
-		void construct(zstr_user tname, zstr_user talias,  zval_user tcol);
+		void construct(str_ptr tname, str_ptr talias,  val_ptr tcol);
 
 		// return/create TableAttr of name
-		zval_mgr attr(zstr_user name); 
+		val_rc attr(str_ptr name); 
 
-		void setName(zstr_user name);
+		void setName(str_ptr name);
 
-		virtual zstr_user getName() const
+		virtual str_ptr getName() const
 		{
 			return this->name_;
 		}

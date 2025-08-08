@@ -10,7 +10,7 @@
 #endif
 
 #ifndef ZSTR_MGR_H
-#include "zstr_mgr.h"
+#include "str_rc.h"
 #endif
 
 namespace zpp {
@@ -45,15 +45,15 @@ namespace zpp {
 
 	extern Date_init DTData;
 
-	class timezone_obj : public zobj_mgr {
+	class timezone_obj : public obj_rc {
 	protected:
 		bool make_obj();
 	public:
-		timezone_obj(zstr_user zone);
+		timezone_obj(str_ptr zone);
 	};
 
 
-	class diff_dt : public zobj_mgr {
+	class diff_dt : public obj_rc {
 	public:
 		long years();
 		long months();
@@ -62,10 +62,10 @@ namespace zpp {
 		long minutes();
 		long seconds();
 		double fraction();
-		zval_mgr daystotal();
+		val_rc daystotal();
 	};
 
-	class datetime_obj : public zobj_mgr {
+	class datetime_obj : public obj_rc {
 	protected:
 		bool make_obj();
 
@@ -75,23 +75,23 @@ namespace zpp {
 		 *  or by a set call.
 		 * */
 		datetime_obj(const std::string_view& timestr);
-		datetime_obj(zstr_user zs);
-		datetime_obj(zobj_mgr obj); 
+		datetime_obj(str_ptr zs);
+		datetime_obj(obj_rc obj); 
 
 		/** Now constructor */
 		datetime_obj();
 		
 		diff_dt diff(datetime_obj& dtm);
 
-		zstr_mgr format(zstr_user dfmt);
+		str_rc format(str_ptr dfmt);
 
 		void setTime(int hour, int minute, int secs, int microsec);
 		void setDate(int year, int month, int day);
 		
-		void setTimeZone(zstr_user zone);
+		void setTimeZone(str_ptr zone);
 
-		static zval_mgr  strtotime(zval* value);
-		static zstr_mgr  date(zstr_user dfmt, zval* value);
+		static val_rc  strtotime(zval* value);
+		static str_rc  date(str_ptr dfmt, zval* value);
 
 	};
 }; // namespace

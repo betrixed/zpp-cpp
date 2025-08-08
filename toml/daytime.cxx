@@ -32,7 +32,7 @@ public:
 D24Init D24;
 
 Day24* //static 
-day24_obj::make_obj(zstr_user zs)
+day24_obj::make_obj(str_ptr zs)
 {
 
 	zend_object* obj = Day24::omg.make_new();
@@ -42,13 +42,13 @@ day24_obj::make_obj(zstr_user zs)
 	return cobj;
 }
 
-day24_obj::day24_obj(zstr_user zs) : zobj_mgr()
+day24_obj::day24_obj(str_ptr zs) : obj_rc()
 {
 	Day24* cobj = make_obj(zs);
 	obj_ = cobj->vobj(); // internal adopt
 }
 
-zstr_mgr 
+str_rc 
 day24_obj::format(int flags)
 {
 	Day24* cobj = zobj_toc<Day24>(obj_);
@@ -157,7 +157,7 @@ Day24::day24_format(double val, int flags){
 }
 
 void 
-Day24::construct(zstr_user sval) 
+Day24::construct(str_ptr sval) 
 {
 	if (sval.isNull())
 	{
@@ -169,7 +169,7 @@ Day24::construct(zstr_user sval)
 }
 
 void 
-Day24::str(zstr_user sval) {
+Day24::str(str_ptr sval) {
 	day24_str((const char*) sval.data(), sval.size(), tval_, true);
 }
 
@@ -189,7 +189,7 @@ Day24::day(double dval)
 }
 
 void 
-Day24::split(zval_user hours, zval_user mins, zval_user seconds)
+Day24::split(val_ptr hours, val_ptr mins, val_ptr seconds)
 {
 	int h24;
 	int m60;
@@ -201,25 +201,25 @@ Day24::split(zval_user hours, zval_user mins, zval_user seconds)
 	ZVAL_DOUBLE(Z_REFVAL_P(seconds), s60);
 }
 
-zstr_mgr 
+str_rc 
 Day24::format(int flags)
 {
-	zstr_mgr result;
+	str_rc result;
 
 	result.adopt(day24_format(tval_,flags));
 	return  result;
 }
 
-zstr_mgr 
+str_rc 
 Day24::toString()
 {
-	zstr_mgr result;
+	str_rc result;
 	result.adopt(day24_format(tval_, SEC_AUTO));
 	return result;
 }
 
 
-void Day24::debug_info(htab_write di)
+void Day24::debug_info(htab_wr di)
 {
 	di.set(D24.value_key, (double) tval_);
 	di.set(D24.format_str, this->toString());
@@ -308,7 +308,7 @@ ZEND_METHOD(Day24, format)
 	Z_PARAM_LONG(flags)
 	ZEND_PARSE_PARAMETERS_END();
 	auto cobj = zval_toc<Day24>(ZEND_THIS);
-	zstr_mgr result = cobj->format(flags);
+	str_rc result = cobj->format(flags);
 	result.move_zv(return_value);
 }
 ZEND_METHOD(Day24, __toString)
@@ -316,7 +316,7 @@ ZEND_METHOD(Day24, __toString)
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	auto cobj = zval_toc<Day24>(ZEND_THIS);
-	zstr_mgr result = cobj->toString();
+	str_rc result = cobj->toString();
 	result.move_zv(return_value);
 }
 ZEND_METHOD(Day24, day24_time)
@@ -383,7 +383,7 @@ ZEND_METHOD(Day24, day24_format)
 	Z_PARAM_LONG(flags)
 	ZEND_PARSE_PARAMETERS_END();
 
-	zstr_mgr result;
+	str_rc result;
 
 	result.adopt(Day24::day24_format(dval, flags));
 	result.move_zv(return_value);

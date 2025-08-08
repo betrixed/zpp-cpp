@@ -28,13 +28,13 @@ SearchListInit SLdata;
 
 namespace fs = std::filesystem;
 
-void SearchList::debug_info(htab_write hw)
+void SearchList::debug_info(htab_wr hw)
 {
 	hw.set(SLdata.paths_key, paths_);
 }
 
 void 
-SearchList::construct(zval_user paths)
+SearchList::construct(val_ptr paths)
 {
 	if (paths.isArray())
 	{
@@ -42,7 +42,7 @@ SearchList::construct(zval_user paths)
 	}
 }
 
-htab_read
+htab_rd
 SearchList::getPaths()
 {
 	return paths_;
@@ -55,9 +55,9 @@ SearchList::clear()
 }
 
 bool 
-SearchList::hasPath(zstr_user name)
+SearchList::hasPath(str_ptr name)
 {
-	htab_read hr(paths_);
+	htab_rd hr(paths_);
 
 	size_t pcount = hr.size();
 
@@ -67,7 +67,7 @@ SearchList::hasPath(zstr_user name)
 	while(pcount)
 	{
 		--pcount;
-		zstr_user test = hr.get(pcount);
+		str_ptr test = hr.get(pcount);
 		if (!zs_cmp(test,name))
 		{
 			return true;
@@ -77,30 +77,30 @@ SearchList::hasPath(zstr_user name)
 }
 
 void 
-SearchList::setPaths(zval_user sp)
+SearchList::setPaths(val_ptr sp)
 {
 	paths_ = sp.zarray();
 }
 
 void 
-SearchList::addPath(zstr_user p)
+SearchList::addPath(str_ptr p)
 {
 	if (!hasPath(p))
 	{
-		htab_write hw(paths_);
+		htab_wr hw(paths_);
 		hw.push_back(p);
 	}
 }
 
 void 
-SearchList::addPaths(zval_user sp)
+SearchList::addPaths(val_ptr sp)
 {
-	htab_read list(sp.zarray());
+	htab_rd list(sp.zarray());
 	size_t pcount = list.size();
 	while(pcount > 0) 
 	{
 	 	--pcount;
-	 	zstr_user test = list.get(pcount);
+	 	str_ptr test = list.get(pcount);
 	 	if (test.size()) {
 	 		addPath(test);
 	 	}
@@ -111,7 +111,7 @@ bool
 SearchList::try_path(
 	const fs::path& dir, 
 	const fs::path& file,  
-	zstr_mgr& result)
+	str_rc& result)
 {
 	fs::path fpath = dir /  file;
 	if (fs::is_regular_file(fpath)) 
@@ -123,13 +123,13 @@ SearchList::try_path(
 	return false;
 }
 
-zstr_mgr 
-SearchList::findLeaf(zstr_user leaf, zval_user extensions)
+str_rc 
+SearchList::findLeaf(str_ptr leaf, val_ptr extensions)
 {
 
-	zstr_mgr result;
+	str_rc result;
 
-	htab_read hr(paths_);
+	htab_rd hr(paths_);
 
 	size_t pcount = hr.size();
 	if (pcount == 0)
@@ -139,11 +139,11 @@ SearchList::findLeaf(zstr_user leaf, zval_user extensions)
 	fs::path pleaf(leaf.vstr());
 	fs::path pext = pleaf.extension();
 
-	htab_read exlist(extensions.zarray());
+	htab_rd exlist(extensions.zarray());
 	while(pcount)
 	{
 		--pcount;
-		zstr_user sp = hr.get(pcount);
+		str_ptr sp = hr.get(pcount);
 		fs::path fpath(sp.vstr());
 		if (try_path(fpath, pleaf, result))
 		{
@@ -152,7 +152,7 @@ SearchList::findLeaf(zstr_user leaf, zval_user extensions)
 		size_t extct = exlist.size();
 		for(size_t i = 0; i < extct; i++)
 		{
-			zstr_user extry(exlist.get(i));
+			str_ptr extry(exlist.get(i));
 			fs::path fext(extry.vstr());
 			pleaf.replace_extension(fext);
 			if (try_path(fpath, pleaf, result))
@@ -224,7 +224,7 @@ ZEND_METHOD(Wcc_SearchList, findLeaf)
 	ZEND_PARSE_PARAMETERS_END();
 
 	SearchList* cobj = zval_toc<SearchList>(ZEND_THIS);
-	zstr_mgr path = cobj->findLeaf(leaf, extensions);
+	str_rc path = cobj->findLeaf(leaf, extensions);
 	path.move_zv(return_value); 
 }
 
@@ -259,7 +259,7 @@ ZEND_METHOD(Wcc_SearchList, getPaths)
 
 	SearchList* cobj = zval_toc<SearchList>(ZEND_THIS);
 
-	htab_read result = cobj->getPaths();
+	htab_rd result = cobj->getPaths();
 	result.return_zv(return_value); 
 }
 

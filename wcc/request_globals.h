@@ -23,36 +23,36 @@ namespace wcc {
 	class RequestGlobals : public base_d {
 	protected:
 		// Hmap object managed arrays 
-		zobj_mgr server_;
-		zobj_mgr get_;
+		obj_rc server_;
+		obj_rc get_;
 		
-		zobj_mgr files_;
+		obj_rc files_;
 
-		zobj_mgr request_;
-		zobj_mgr post_;
+		obj_rc request_;
+		obj_rc post_;
 
-		zstr_mgr host_;
-		zstr_mgr body_;
+		str_rc host_;
+		str_rc body_;
 
 		int  verb_;
 		bool strictHost_;
 		bool methodOverride_;
 		bool spoof_;
 		
-		zval_mgr authCallback_;
+		val_rc authCallback_;
 
 	// hidden methods
-		int fileCounter(htab_read data, bool onlySuccessful);
-		zstr_mgr getBestQuality(htab_read parts, zstr_user name);
+		int fileCounter(htab_rd data, bool onlySuccessful);
+		str_rc getBestQuality(htab_rd parts, str_ptr name);
 
-		htab_mgr getQualityHeader(zstr_user key, zstr_user name);
-		htab_mgr resolveAuthorizationHeaders();
+		htab_rc getQualityHeader(str_ptr key, str_ptr name);
+		htab_rc resolveAuthorizationHeaders();
 
-		htab_mgr smoothFiles(htab_read names, htab_read types,
-			htab_read tmp_names, htab_read sizes,
-			htab_read errors, zstr_user prefix);
+		htab_rc smoothFiles(htab_rd names, htab_rd types,
+			htab_rd tmp_names, htab_rd sizes,
+			htab_rd errors, str_ptr prefix);
 
-		htab_read readServer();
+		htab_rd readServer();
 
 	public:
 
@@ -62,51 +62,51 @@ namespace wcc {
 		
 		static base_obj_mgr<RequestGlobals> omg;
 
-		virtual void debug_info(htab_write di);
+		virtual void debug_info(htab_wr di);
 		
 		void construct();
 
-		zobj_user post();
-		zobj_user query();
-		zobj_user server();
+		obj_ptr post();
+		obj_ptr query();
+		obj_ptr server();
 
-		htab_read getPost();
-		htab_read getQuery();
-		htab_read getServer();
+		htab_rd getPost();
+		htab_rd getQuery();
+		htab_rd getServer();
 
-		zobj_mgr makeFile(htab_read data, zstr_user name);
+		obj_rc makeFile(htab_rd data, str_ptr name);
 
-		void setAuthCallback(zval_user callback);
+		void setAuthCallback(val_ptr callback);
 
-		htab_mgr getAcceptableContent();
-		htab_mgr getBasicAuth();
-		zstr_mgr getBestAccept();
-		zstr_mgr getBestCharset();
+		htab_rc getAcceptableContent();
+		htab_rc getBasicAuth();
+		str_rc getBestAccept();
+		str_rc getBestCharset();
 
-		zstr_mgr getBestLanguage();
-		zstr_mgr getBestQuality();
+		str_rc getBestLanguage();
+		str_rc getBestQuality();
 
-		zstr_mgr getClientAddress(bool trustHeader = false);
+		str_rc getClientAddress(bool trustHeader = false);
 
-		htab_mgr getClientCharsets();
+		htab_rc getClientCharsets();
 
-		zstr_mgr getContentType();
+		str_rc getContentType();
 
-		htab_mgr getDigestAuth();
+		htab_rc getDigestAuth();
 
-		zstr_mgr getHTTPReferer();
+		str_rc getHTTPReferer();
 
-		zval_mgr getHeader(zstr_user header);
+		val_rc getHeader(str_ptr header);
 
-		void setHeader(zstr_user header, zval_user value);
+		void setHeader(str_ptr header, val_ptr value);
 		
-		htab_mgr getHeaders();
+		htab_rc getHeaders();
 
-		zstr_mgr getHttpHost();
+		str_rc getHttpHost();
 
-		zval_mgr getJsonRawBody(bool asArray);
+		val_rc getJsonRawBody(bool asArray);
 
-		htab_mgr getLanguages();
+		htab_rc getLanguages();
 
 		int getMethod();
 
@@ -118,35 +118,35 @@ namespace wcc {
 
 
 		
-		zstr_mgr getRawBody();
+		str_rc getRawBody();
 
-		zstr_user getScheme();
+		str_ptr getScheme();
 
-		zstr_mgr getServerAddress();
+		str_rc getServerAddress();
 
-		zstr_mgr getServerName();
+		str_rc getServerName();
 
 		bool getSpoofMethod();
 
 		void setSpoofMethod(bool val);
 
-		zstr_mgr getURI(bool onlyPath = false);
+		str_rc getURI(bool onlyPath = false);
 
-		htab_mgr getUploadedFiles(bool onlySuccess = false, bool namekeys = false);
+		htab_rc getUploadedFiles(bool onlySuccess = false, bool namekeys = false);
 
-		zstr_mgr getUserAgent();
+		str_rc getUserAgent();
 
 		bool hasFiles();
 
-		bool hasHeader(zstr_user header);
+		bool hasHeader(str_ptr header);
 
-		bool hasQuery(zstr_user key);
+		bool hasQuery(str_ptr key);
 
-		bool hasRequest(zstr_user key);
+		bool hasRequest(str_ptr key);
 
 		bool isAjax();
 
-		bool isMethod(zval_user methods, bool strict = false);
+		bool isMethod(val_ptr methods, bool strict = false);
 
 		bool isOptions();
 
@@ -281,12 +281,12 @@ namespace wcc {
 	extern request_init RQit;
 
 
-	zstr_mgr gethostbyname(zstr_user str);
-    zval_mgr finfo_open(int infoflags);
-    zval_mgr finfo_file(zval_mgr& finfo, zstr_user path);
-    zval_mgr finfo_close(zval_mgr& finfo);
-    bool is_uploaded_file(zstr_user path);
-    bool move_uploaded_file(zstr_user from, zstr_user to);
+	str_rc gethostbyname(str_ptr str);
+    val_rc finfo_open(int infoflags);
+    val_rc finfo_file(val_rc& finfo, str_ptr path);
+    val_rc finfo_close(val_rc& finfo);
+    bool is_uploaded_file(str_ptr path);
+    bool move_uploaded_file(str_ptr from, str_ptr to);
 };
 
 #endif

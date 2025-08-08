@@ -15,38 +15,38 @@ namespace wcc {
 	 */ 
 	class ServiceAccess : public base_d {
 	protected:
-		zobj_mgr    	services_;
-		htab_mgr    	cache_;
+		obj_rc    	services_;
+		htab_rc    	cache_;
 		class_data      extender_;
 	public:
 
 		static base_obj_mgr<ServiceAccess> omg;
 
-		virtual void debug_info(htab_write hw);
+		virtual void debug_info(htab_wr hw);
 
 		virtual void init_access();
 
-		virtual zstr_user extender();
+		virtual str_ptr extender();
 
-		void construct(zval_user services_obj);
+		void construct(val_ptr services_obj);
 
 		void destruct();
 		
-		zobj_user getServices();
+		obj_ptr getServices();
 
-		void setServices(zval_user svc);
+		void setServices(val_ptr svc);
 
-		zval_mgr service(zstr_user name);
+		val_rc service(str_ptr name);
 
-		void set(zstr_user name, zval_user value);
+		void set(str_ptr name, val_ptr value);
 
-		bool has(zstr_user name);
+		bool has(str_ptr name);
 
-		void unset(zstr_user name);
+		void unset(str_ptr name);
 
-		void setExtender(zobj_user obj);
+		void setExtender(obj_ptr obj);
 
-		zval_mgr nullService(zstr_user name);
+		val_rc nullService(str_ptr name);
 
 		VIRTUAL_ZOBJPTR
 

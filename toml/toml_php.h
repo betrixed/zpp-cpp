@@ -18,17 +18,17 @@ using namespace zpp;
 
 class Toml : public base_d {
 protected:
-	zstr_mgr 		 hold_; // src_ referenced zend_string*
-	htab_mgr		 root_;	// returned HashTable*
+	str_rc 		 hold_; // src_ referenced zend_string*
+	htab_rc		 root_;	// returned HashTable*
 
 	struct stack_htab {
-		htab_write 	  table_;
+		htab_wr 	  table_;
 		stack_htab*   parent_;
 		stack_htab**  top_;
 
 		//stack_htab() : table_((HashTable*)nullptr), parent_(nullptr) {}
 
-		stack_htab(htab_write stab, stack_htab* p, stack_htab** top)
+		stack_htab(htab_wr stab, stack_htab* p, stack_htab** top)
 			: table_(stab), parent_(p), top_(top) 
 		{
 			*top_ = this;
@@ -64,11 +64,11 @@ public:
 	Toml();
 	virtual ~Toml();
 
-	htab_read parseFile(zstr_user path);
-	htab_read parse(zstr_user toml);
+	htab_rd parseFile(str_ptr path);
+	htab_rd parse(str_ptr toml);
 
-	static htab_read decode(zstr_user toml);
-	static htab_read decodeFile(zstr_user toml);
+	static htab_rd decode(str_ptr toml);
+	static htab_rd decodeFile(str_ptr toml);
 	static base_obj_mgr<Toml> omg;
 
 };

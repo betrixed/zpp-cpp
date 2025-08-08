@@ -2,38 +2,38 @@
 #define ZSTR_BUFFER_CPP
 
 #ifndef ZSTR_BUFFER_H
-#include "zstr_buffer.h"
+#include "str_buf.h"
 #endif
 
 #ifndef ZSTR_USER_H
-#include "zstr_user.h"
+#include "str_ptr.h"
 #endif
 
 #ifndef ZVAL_USER_H
-#include "zval_user.h"
+#include "val_ptr.h"
 #endif
 
 namespace zpp {
 
-void zstr_buffer::initbuf()
+void str_buf::initbuf()
 {
 	buf.s = nullptr;
 	buf.a = 0;
 }
 
-zstr_buffer::zstr_buffer()
+str_buf::str_buf()
 {
 	initbuf();
 }
 
 zend_string* //static
-zstr_buffer::init_zs(const char* c, size_t slen)
+str_buf::init_zs(const char* c, size_t slen)
 {
 	return zend_string_init(c, slen, 0);
 }
 
 void
-zstr_buffer::lose()
+str_buf::lose()
 {
 	if (buf.s)
 	{
@@ -42,28 +42,28 @@ zstr_buffer::lose()
 	}
 }
 
-zstr_buffer::~zstr_buffer() 
+str_buf::~str_buf() 
 {
 	lose();
 }
 
-zstr_buffer::zstr_buffer(zval *v) : zstr_output()
+str_buf::str_buf(zval *v) : str_out()
 {
 	initbuf();
-	zstr_mgr temp = zval_user(v).to_zstr();
+	str_rc temp = val_ptr(v).to_zstr();
 	zend_string* s = temp;
 	if (s) {
 		append(ZSTR_VAL(s), ZSTR_LEN(s));
 	}
 }
 
-zstr_buffer::zstr_buffer(zend_string* w) : zstr_output()
+str_buf::str_buf(zend_string* w) : str_out()
 {
 	initbuf();
-	zstr_output::append(w);	
+	str_out::append(w);	
 }
 
-zstr_buffer::zstr_buffer(const std::string_view& cs) : zstr_output()
+str_buf::str_buf(const std::string_view& cs) : str_out()
 {
 	initbuf();
 	auto slen = cs.size();
@@ -73,7 +73,7 @@ zstr_buffer::zstr_buffer(const std::string_view& cs) : zstr_output()
 	}	
 }
 
-zstr_buffer::zstr_buffer (const char* c, size_t slen) : zstr_output() 
+str_buf::str_buf (const char* c, size_t slen) : str_out() 
 {
 	initbuf();
 	if (slen)
@@ -82,7 +82,7 @@ zstr_buffer::zstr_buffer (const char* c, size_t slen) : zstr_output()
 	}
 }
 
-zstr_buffer::zstr_buffer (const char* c) : zstr_output()
+str_buf::str_buf (const char* c) : str_out()
 {
 	initbuf();
 	auto slen = strlen(c);
@@ -92,7 +92,7 @@ zstr_buffer::zstr_buffer (const char* c) : zstr_output()
 	}
 }
 
-zstr_buffer::zstr_buffer(const std::string& cs) : zstr_output()
+str_buf::str_buf(const std::string& cs) : str_out()
 {
 	initbuf();
 	auto slen = cs.size();
@@ -101,14 +101,14 @@ zstr_buffer::zstr_buffer(const std::string& cs) : zstr_output()
 	}
 }
 
-void zstr_buffer::append(char c)
+void str_buf::append(char c)
 {
 	smart_str_appendc_ex(&buf, c, 0);	
 }
 
 
 void
-zstr_buffer::append(const char* c, size_t slen)
+str_buf::append(const char* c, size_t slen)
 {
 	if (!c || !slen) {
 		return;
@@ -117,13 +117,13 @@ zstr_buffer::append(const char* c, size_t slen)
 }
 
 
-void zstr_buffer::reset()
+void str_buf::reset()
 {
 	lose();
 }
 
-zstr_buffer& 
-zstr_buffer::operator=(const char* c)
+str_buf& 
+str_buf::operator=(const char* c)
 {
 	lose();
 	append(c, strlen(c));
@@ -132,18 +132,18 @@ zstr_buffer::operator=(const char* c)
 
 
 const char* 
-zstr_buffer::data() const {
+str_buf::data() const {
 	if (buf.s) {
 		smart_str_0((smart_str*) &buf);
 		return ZSTR_VAL(buf.s);
 	}
 	else {
-		return zstr_user::empty;
+		return str_ptr::empty;
 	}
 }
 
 size_t 
-zstr_buffer::size() const 
+str_buf::size() const 
 {
 	if (buf.s) {
 		return ZSTR_LEN(buf.s);
@@ -158,7 +158,7 @@ zstr_buffer::size() const
 // return buffer copy as C-string
 // and releases/destroys the zend_string
 std::string 
-zstr_buffer::str()
+str_buf::str()
 {
 	zend_string* xs = zstr(); // reassign buffer back here.
 	std::string result(ZSTR_VAL(xs), ZSTR_LEN(xs));
@@ -173,10 +173,10 @@ zstr_buffer::str()
 // zend_string s.
 // result will need to be "adopted"
 
-zstr_mgr
-zstr_buffer::zstr()
+str_rc
+str_buf::zstr()
 {
-	zstr_mgr result;
+	str_rc result;
 
 	if (buf.s)
 	{
@@ -187,7 +187,7 @@ zstr_buffer::zstr()
 }
 
 zend_string*
-zstr_buffer::finalize()
+str_buf::finalize()
 {
 	if (buf.s)
 	{
@@ -198,25 +198,25 @@ zstr_buffer::finalize()
 
 // this doesn't seem to be useful.
 /*
-zstr_buffer& 
-zstr_buffer::endnull() {
+str_buf& 
+str_buf::endnull() {
 	smart_str_0((smart_str*)(this));
 	return *this;
 }
 */
 
 std::string_view 
-zstr_buffer::vstr() const
+str_buf::vstr() const
 {
 	if (buf.s)
 	{
 		return std::string_view(ZSTR_VAL(buf.s), ZSTR_LEN(buf.s));
 	}
 	else {
-		return std::string_view(zstr_user::empty, 0);
+		return std::string_view(str_ptr::empty, 0);
 	}
 }
 
 };//namespace
-//zstr_buffer.cpp
+//str_buf.cpp
 #endif

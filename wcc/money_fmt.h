@@ -17,30 +17,30 @@ namespace wcc {
 	 */
 	class MoneyFmt : public base_d {
 	protected:
-		zstr_mgr lang_str_;
+		str_rc lang_str_;
 
-		zstr_mgr money_sym_;
+		str_rc money_sym_;
 
 		// money format object for language and currency
-		zobj_mgr money_fmt_; 
+		obj_rc money_fmt_; 
 
 	public:
 
 		static base_obj_mgr<MoneyFmt> omg;
 
-		virtual void debug_info(htab_write hw);
+		virtual void debug_info(htab_wr hw);
 		
-		void construct(zstr_user slang);
+		void construct(str_ptr slang);
 
-		zstr_mgr formatNoSym(zval_user value);
+		str_rc formatNoSym(val_ptr value);
 
-		zstr_mgr fmtValue(zval_user value);
+		str_rc fmtValue(val_ptr value);
 		
-		zstr_mgr format(zval_user value);
+		str_rc format(val_ptr value);
 
-		zstr_user symbol() const;
+		str_ptr symbol() const;
 
-		zstr_user language() const;
+		str_ptr language() const;
 
 		VIRTUAL_ZOBJPTR
 	};

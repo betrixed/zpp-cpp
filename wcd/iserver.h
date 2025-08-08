@@ -20,56 +20,56 @@ namespace wcd {
 	class IServer : public base_d {
 	protected:	
 
-		zstr_mgr svc_key_;
+		str_rc svc_key_;
 
-		htab_mgr active_;
+		htab_rc active_;
 
-		htab_mgr config_;
+		htab_rc config_;
 
-		htab_mgr alias_;
+		htab_rc alias_;
 
-		zobj_mgr dbCache_;
+		obj_rc dbCache_;
 
-		htab_mgr sqlClasses_;
+		htab_rc sqlClasses_;
 
-		htab_mgr driverClasses_;
+		htab_rc driverClasses_;
 
 
-		zobj_mgr activate(zstr_user name);
-		IConfig* needConfig(zstr_user name);
+		obj_rc activate(str_ptr name);
+		IConfig* needConfig(str_ptr name);
 
 	public:
 
 		static base_obj_mgr<IServer> omg;
 
-		virtual void debug_info(htab_write di);
+		virtual void debug_info(htab_wr di);
 		
-		void construct(zstr_user svckey);
+		void construct(str_ptr svckey);
 
 		void initDone();
 
-		zobj_mgr getDataCache();
+		obj_rc getDataCache();
 
-		zobj_mgr getConect(zstr_user name);
+		obj_rc getConect(str_ptr name);
 
-		static zobj_mgr connect(zstr_user name);
+		static obj_rc connect(str_ptr name);
 
-		zobj_mgr getConnect(zstr_user name);
-		zobj_mgr getConfig(zstr_user name);
+		obj_rc getConnect(str_ptr name);
+		obj_rc getConfig(str_ptr name);
 		
-		zstr_mgr getSqlClass(zstr_user dkey);
-		zstr_mgr getDriverClass(zstr_user dkey);
+		str_rc getSqlClass(str_ptr dkey);
+		str_rc getDriverClass(str_ptr dkey);
 
-		htab_read getSqlClasses();
-		htab_read getDriverClasses();
+		htab_rd getSqlClasses();
+		htab_rd getDriverClasses();
 
-		void config(htab_read data);
+		void config(htab_rd data);
 
-		void addConfig(zobj_mgr iconfig, zstr_user name);
+		void addConfig(obj_rc iconfig, str_ptr name);
 
-		void setAlias(zstr_user alias, zstr_user name);
-		htab_read getAliases();
-		htab_mgr  getConfigNames();
+		void setAlias(str_ptr alias, str_ptr name);
+		htab_rd getAliases();
+		htab_rc  getConfigNames();
 
 	};
 

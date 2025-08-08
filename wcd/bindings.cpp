@@ -24,7 +24,7 @@ extern "C" {
 
 namespace wcd {
 
-void Bindings::debug_info(htab_write di)
+void Bindings::debug_info(htab_wr di)
 {
 	di.set(SQSTR.data_key, data_);
 	di.set(SQSTR.param_list, paramList_);
@@ -33,28 +33,28 @@ void Bindings::debug_info(htab_write di)
 }
 
 void 
-Bindings::addarray(int key, htab_read value)
+Bindings::addarray(int key, htab_rd value)
 {
-	zval_mgr adapt(value);
+	val_rc adapt(value);
 	//showarray("Add Array", value);
 	if ((key==ISql::SQL_FROM)||(key==ISql::SQL_JOIN))
 	{
-		set(key, zval_user(adapt));
+		set(key, val_ptr(adapt));
 	}
 	else {
-		addToArray(key, zval_user(adapt));
+		addToArray(key, val_ptr(adapt));
 	}
 	
 }
 
 void 
-Bindings::addstr(int key, zstr_user tname)
+Bindings::addstr(int key, str_ptr tname)
 {
 	if ((key==ISql::SQL_FROM)||(key==ISql::SQL_JOIN))
 	{
-		zstr_mgr talias;
+		str_rc talias;
 
-		zstr_mgr  lcase = tname.to_lower();
+		str_rc  lcase = tname.to_lower();
 		int pos = lcase.find(std::string_view(" as "),0);
 		if (pos >= 0)
 		{
@@ -62,10 +62,10 @@ Bindings::addstr(int key, zstr_user tname)
 			tname = tname.substr(0, pos);
 		}
 
-		zobj_mgr tc_obj = TColumns::omg.new_zobj();
+		obj_rc tc_obj = TColumns::omg.new_zobj();
 		TColumns* tc = zobj_toc<TColumns>(tc_obj);
 
-		zval_mgr colnames(SQSTR.asterisk);
+		val_rc colnames(SQSTR.asterisk);
 
 		tc->construct(tname, talias, colnames);
 
@@ -73,13 +73,13 @@ Bindings::addstr(int key, zstr_user tname)
 		joint->setPrime(tc_obj);
 	}
 	else {
-		zval_mgr temp(tname);
+		val_rc temp(tname);
 		addToArray(key, temp);
 	}
 }
 
 void 
-Bindings::add(int key, zval_user value)
+Bindings::add(int key, val_ptr value)
 {
 	if (value.isString())
 	{
@@ -94,17 +94,17 @@ Bindings::add(int key, zval_user value)
 	addToArray(key, value);
 }
 
-zobj_mgr
-Bindings::primeJoin(zval_user tcol)
+obj_rc
+Bindings::primeJoin(val_ptr tcol)
 {
-	zobj_mgr jobj = getJoins();
+	obj_rc jobj = getJoins();
 	JoinTables* jt = zobj_toc<JoinTables>(jobj);
 	jt->setPrime(tcol.zobject());
 	return jobj;
 }
 
 void 
-Bindings::construct(zobj_user sql, zobj_user connect)
+Bindings::construct(obj_ptr sql, obj_ptr connect)
 {
 	sql_ = sql;
 	db_ = connect;
@@ -113,26 +113,26 @@ Bindings::construct(zobj_user sql, zobj_user connect)
 JoinTables* 
 Bindings::getJoinTables()
 {
-	zobj_mgr jobj = getJoins();
+	obj_rc jobj = getJoins();
 	return zobj_toc<JoinTables>(jobj);
 }
 
-zobj_mgr
+obj_rc
 Bindings::getJoins()
 {
-	zval_user from = get(ISql::SQL_FROM);
+	val_ptr from = get(ISql::SQL_FROM);
 	if (from.isObject())
 	{
-		return zobj_mgr(from.zobject());
+		return obj_rc(from.zobject());
 	}
 
-	zobj_mgr result = JoinTables::omg.new_zobj();
+	obj_rc result = JoinTables::omg.new_zobj();
 	
-	htab_write(data_).set((zend_long) ISql::SQL_FROM, result);
+	htab_wr(data_).set((zend_long) ISql::SQL_FROM, result);
 	return result;
 }
 
-zobj_user
+obj_ptr
 Bindings::getParamList()
 {
 	if (paramList_.ok())
@@ -146,14 +146,14 @@ Bindings::getParamList()
 }
 
 bool
-Bindings::getArray(int key, htab_mgr& value)
+Bindings::getArray(int key, htab_rc& value)
 {
-	zval_user result;
+	val_ptr result;
 	if (data_.try_fetch(key, result))
 	{
 		if (result.isArray())
 		{
-			htab_mgr array(result.zarray());
+			htab_rc array(result.zarray());
 			if (array.size())
 			{
 				value = array;
@@ -165,18 +165,18 @@ Bindings::getArray(int key, htab_mgr& value)
 }
 
 void 
-Bindings::addToArray(int key, zval_user value)
+Bindings::addToArray(int key, val_ptr value)
 {
-	zval_user listown = data_.get(key);
+	val_ptr listown = data_.get(key);
 	//zend_printf("bind key %d ", key);
 	if (listown.isNull())
 	{
-		htab_mgr   list_mgr;
-		htab_write list(list_mgr);
+		htab_rc   list_mgr;
+		htab_wr list(list_mgr);
 
 		list.push_back(value);
 
-		htab_write mylist(data_);
+		htab_wr mylist(data_);
 		//showarray("new Array", list_mgr);
 
 		mylist.set((zend_long)key, list_mgr);
@@ -184,7 +184,7 @@ Bindings::addToArray(int key, zval_user value)
 		
 	}
 	else { //? assert isArray() ?
-		htab_write vlist(listown);
+		htab_wr vlist(listown);
 		vlist.push_back(value);
 		//showmem("addToArray", listown);
 	}
@@ -192,9 +192,9 @@ Bindings::addToArray(int key, zval_user value)
 }
 
 bool 
-Bindings::addJoinData(htab_read data)
+Bindings::addJoinData(htab_rd data)
 {
-	zstr_mgr atype = data.get(SQSTR.typekey);
+	str_rc atype = data.get(SQSTR.typekey);
 	if (atype.isNull())
 	{
 		atype = SQSTR.basic;
@@ -203,10 +203,10 @@ Bindings::addJoinData(htab_read data)
 	// TODO: is this still needed?
 	if (atype.vstr() == SQSTR.nested.vstr())
 	{
-		zobj_mgr prime;
+		obj_rc prime;
 
 		JoinTables* joins = getJoinTables();
-		htab_read jia = joins->getData();
+		htab_rd jia = joins->getData();
 
 		size_t jcount = jia.size();
 		if (jcount==0)
@@ -216,54 +216,54 @@ Bindings::addJoinData(htab_read data)
 		else {
 			prime = jia[jcount-1]; // TODO: why not first?
 		}
-		zstr_user tname = data.get(SQSTR.table);
+		str_ptr tname = data.get(SQSTR.table);
 
-		zobj_mgr tcol_obj = TColumns::omg.new_zobj();
+		obj_rc tcol_obj = TColumns::omg.new_zobj();
 		TColumns* tcol = zobj_toc<TColumns>(tcol_obj);
 
 		// TODO: name is own alias? - because alias used first.
-		zval_mgr colnames(SQSTR.asterisk);
+		val_rc colnames(SQSTR.asterisk);
 		tcol->construct(tname, tname, colnames); 
 
-		zstr_user   jtype = data.get(SQSTR.jointype);
+		str_ptr   jtype = data.get(SQSTR.jointype);
 		int jenum = JoinInfo::getJoinType(jtype);
 
-		zobj_mgr jiobj = JoinInfo::omg.new_zobj();
+		obj_rc jiobj = JoinInfo::omg.new_zobj();
 		JoinInfo* ji = zobj_toc<JoinInfo>(jiobj);
 
-		zval_mgr temp(tcol_obj);
+		val_rc temp(tcol_obj);
 		ji->construct(temp, prime, jenum);
 
 		joins->addJoin(jiobj);
 
-		htab_read nested = data.get(SQSTR.nested);
+		htab_rd nested = data.get(SQSTR.nested);
 		if (nested.size())
 		{
 			htab_walk wk;
-			zval_mgr lhs;
-			zval_mgr rhs;
+			val_rc lhs;
+			val_rc rhs;
 
 			auto jc = wk.value();
 			for(wk.start(nested); wk.ok(); wk.next())
 			{
 				// must be array
-				htab_read jah = jc.zarray();
+				htab_rd jah = jc.zarray();
 
 				if (!jah.size())
 				{
 					throw std::runtime_error("Nested join has no data");
 				}
 
-				zstr_mgr c1str = jah.get(SQSTR.condition1);
-				zval_mgr lhs = TableAttr::splitDot(c1str);
+				str_rc c1str = jah.get(SQSTR.condition1);
+				val_rc lhs = TableAttr::splitDot(c1str);
 
-				zstr_mgr c2str = jah.get(SQSTR.condition2);
-				zval_mgr rhs = TableAttr::splitDot(c2str);
+				str_rc c2str = jah.get(SQSTR.condition2);
+				val_rc rhs = TableAttr::splitDot(c2str);
 
-				zstr_mgr opstr = jah.get(SQSTR.operator_key);
+				str_rc opstr = jah.get(SQSTR.operator_key);
 				int op = JoinExpr::toOperator(opstr);
 
-				zstr_mgr bstr = jah.get(SQSTR.boolean);
+				str_rc bstr = jah.get(SQSTR.boolean);
 				int logic = JoinExpr::toLogic(bstr);	
 
 				ji->add(lhs, rhs, op, logic);			
@@ -284,26 +284,26 @@ bool
 Bindings::aliasSelect()
 {
 	JoinTables* jt = getJoinTables();
-	htab_read tables = jt->getData();
+	htab_rd tables = jt->getData();
 	if (tables.size())
 	{
-		htab_mgr   cols_mgr;
+		htab_rc   cols_mgr;
 
-		htab_write all_cols(cols_mgr);
+		htab_wr all_cols(cols_mgr);
 
-		htab_read all = jt->getTables();
+		htab_rd all = jt->getTables();
 		htab_walk wk;
 
 		auto tcol = wk.value();
 		for(wk.start(all); wk.ok(); wk.next())
 		{
 
-			htab_mgr aliased = this->columnAlias(tcol);
+			htab_rc aliased = this->columnAlias(tcol);
 			all_cols.merge(aliased);
 		}
 		if (all_cols.size())
 		{
-			zval_mgr temp(all_cols);
+			val_rc temp(all_cols);
 			this->set(ISql::SQL_RENAME, temp);
 			return true;
 		}
@@ -311,48 +311,48 @@ Bindings::aliasSelect()
 	return false;
 }
 
-zstr_mgr 
-concat2(zstr_user s1, zstr_user s2)
+str_rc 
+concat2(str_ptr s1, str_ptr s2)
 {
-	zstr_buffer nbuf;
+	str_buf nbuf;
 	nbuf << s1 << s2;
 	return nbuf.zstr();
 }
 
-htab_mgr 
-Bindings::columnAlias(zobj_user tcolobj)
+htab_rc 
+Bindings::columnAlias(obj_ptr tcolobj)
 {
-	zstr_buffer buf;
+	str_buf buf;
 	TColumns* tcol = zobj_toc<TColumns>(tcolobj);
 
 	buf << '_' << tcol->getAlias() << '_';
-	zstr_mgr sfx = buf.zstr();
+	str_rc sfx = buf.zstr();
 
-	htab_mgr aliased_mgr;
-	htab_write aliased(aliased_mgr);
+	htab_rc aliased_mgr;
+	htab_wr aliased(aliased_mgr);
 
 	if (tcol->has(SQSTR.asterisk))
 	{
 		tcol->unsetCol(SQSTR.asterisk);
 
-		zval_mgr tname(tcol->getName());
+		val_rc tname(tcol->getName());
 
-		zobj_mgr model = db_.call(SQSTR.getTableModel, tname);
+		obj_rc model = db_.call(SQSTR.getTableModel, tname);
 
-		htab_read columns = model.call(SQSTR.getColDefs);
+		htab_rd columns = model.call(SQSTR.getColDefs);
 
 		htab_walk wk;
 		auto cname = wk.key();
 		for(wk.start(columns); wk.ok(); wk.next())
 		{
-			zstr_user colname(cname.zstr());
-			zstr_mgr rename = concat2(colname, sfx);
+			str_ptr colname(cname.zstr());
+			str_rc rename = concat2(colname, sfx);
 			aliased.set(rename, colname);
 			tcol->setColAlias(colname, rename);
 		}
 	}
 	else {
-		htab_read columns = tcol->getColNames();
+		htab_rd columns = tcol->getColNames();
 		htab_walk wk;
 		auto cname = wk.key();	
 		auto alias = wk.value();
@@ -360,8 +360,8 @@ Bindings::columnAlias(zobj_user tcolobj)
 		{
 			if (!alias.isString())
 			{
-				zstr_user colname(cname.zstr());
-				zstr_mgr rename = concat2(colname, sfx);
+				str_ptr colname(cname.zstr());
+				str_rc rename = concat2(colname, sfx);
 				aliased.set(rename, colname);
 				tcol->setColAlias(colname, rename);
 			}
@@ -373,17 +373,17 @@ Bindings::columnAlias(zobj_user tcolobj)
 void 
 Bindings::offset(int value)
 {
-	zval_user ldata = data_.get(ISql::SQL_LIMIT);
-	htab_write hw(ldata);
+	val_ptr ldata = data_.get(ISql::SQL_LIMIT);
+	htab_wr hw(ldata);
 
 	hw.set(SQSTR.offset, value);
 
 	set(ISql::SQL_LIMIT, ldata);
 }
 
-void Bindings::set(int key, zval_user value)
+void Bindings::set(int key, val_ptr value)
 {
-	htab_write hw(data_);
+	htab_wr hw(data_);
 
 	hw.set(key, value);
 
@@ -392,22 +392,22 @@ void Bindings::set(int key, zval_user value)
 
 void Bindings::set(int key, int value)
 {
-	htab_write hw(data_);
-	zval_mgr wrap(value);
+	htab_wr hw(data_);
+	val_rc wrap(value);
 	hw.set((zend_long)key, wrap);
 	//showarray("data_int", data_);
 }
 
-void Bindings::set(int key, const zval_mgr& value)
+void Bindings::set(int key, const val_rc& value)
 {
-	htab_write hw(data_);
+	htab_wr hw(data_);
 	hw.set((zend_long)key, value);
 	//showarray("data_zval_mgr&", data_);
 }
 
-void Bindings::set(int key, htab_read value)
+void Bindings::set(int key, htab_rd value)
 {
-	htab_write hw(data_);
+	htab_wr hw(data_);
 	hw.set((zend_long)key, value);
 	//showarray("data_htab_read", data_);
 	//showdata("setdata", data_);
@@ -416,12 +416,12 @@ void Bindings::set(int key, htab_read value)
 
 void Bindings::unset(int key)
 {
-	htab_write(data_).unset(key);
+	htab_wr(data_).unset(key);
 }
 
 void Bindings::wipe(int key)
 {
-	htab_write hw(data_);
+	htab_wr hw(data_);
 
 	if (key == 0)
 	{
@@ -435,9 +435,9 @@ void Bindings::wipe(int key)
 	paramList_.init();
 }
 
-zstr_mgr alias_str_key(zstr_user malias)
+str_rc alias_str_key(str_ptr malias)
 {
-	zstr_buffer buf;
+	str_buf buf;
 
 	buf << '_' << malias << '_';
 
@@ -445,16 +445,16 @@ zstr_mgr alias_str_key(zstr_user malias)
 }
 
 void 
-Bindings::where(zval_user column, zstr_user opstr, zval_user value, zstr_user blogic)
+Bindings::where(val_ptr column, str_ptr opstr, val_ptr value, str_ptr blogic)
 {
-	zval_mgr args;
-	htab_write wh(args);
+	val_rc args;
+	htab_wr wh(args);
 
 	wh.set(SQSTR.column, column);
 
 	if (value.isNull())
 	{
-		zval_mgr valop(opstr);
+		val_rc valop(opstr);
 		wh.set(SQSTR.value, valop);
 		wh.set(SQSTR.operator_key, SQSTR.cmp_equal);
 	}
@@ -477,7 +477,7 @@ Bindings::where(zval_user column, zstr_user opstr, zval_user value, zstr_user bl
 }
 
 void
-Bindings::whereKeyValue(zval_user key, zval_user value)
+Bindings::whereKeyValue(val_ptr key, val_ptr value)
 {
 	if (key.isString() && !value.isArray())
 	{
@@ -485,8 +485,8 @@ Bindings::whereKeyValue(zval_user key, zval_user value)
 	}
 	if (key.isArray() && value.isArray())
 	{
-		htab_read keys(key.zarray());
-		htab_read values(value.zarray());
+		htab_rd keys(key.zarray());
+		htab_rd values(value.zarray());
 
 		auto kct = keys.size();
 		if ((kct > 0) && (kct == values.size()))
@@ -497,7 +497,7 @@ Bindings::whereKeyValue(zval_user key, zval_user value)
 			//zend_printf("kct = %d\n", kct);
 		
 
-			zval_user test = values.get(int(0));
+			val_ptr test = values.get(int(0));
 			if (test.isNull())
 			{
 				for(wk.start(values); wk.ok(); wk.next())
@@ -525,17 +525,17 @@ Bindings::whereKeyValue(zval_user key, zval_user value)
 	zend_throw_error(zend_ce_error,"whereKeyValue parameters do not match");
 }
 
-zval_mgr 
+val_rc 
 Bindings::select()
 {
-	zobj_mgr from = getJoins();
+	obj_rc from = getJoins();
 
-	zval_user columns = get(ISql::NAME_LIST);
+	val_ptr columns = get(ISql::NAME_LIST);
 
 	if (columns.ok())
 	{
 		JoinTables* jt = zobj_toc<JoinTables>(from);
-		zobj_mgr prime = jt->getPrime();
+		obj_rc prime = jt->getPrime();
 		IColumns* pc = zobj_toc<IColumns>(prime);
 		pc->clear();
 		pc->add(columns);
@@ -548,9 +548,9 @@ Bindings::select()
 
 	ISql* sql = zobj_toc<ISql>(sql_);
 
-	zobj_mgr plist = sql->select(*this);
+	obj_rc plist = sql->select(*this);
 
-	zval_user fetch_z = get(ISql::FETCH_AS);
+	val_ptr fetch_z = get(ISql::FETCH_AS);
 
 	int old_fetch = -1;
 	int fetch_as = fetch_z.ok() ? fetch_z.zlong() : -1;
@@ -563,18 +563,18 @@ Bindings::select()
 
 	ParamList* pobj = zobj_toc<ParamList>(plist);
 
-	zval_mgr rows = RunSql::op(db_, pobj->getSql(), pobj->getValues(), true);
+	val_rc rows = RunSql::op(db_, pobj->getSql(), pobj->getValues(), true);
 
 
 	if (fetch_as != old_fetch)
 	{
 		db->setFetch(old_fetch);
 	}
-	zstr_mgr mclass;
+	str_rc mclass;
 
-	zval_mgr model_mgr = get(ISql::MODEL_OBJ);
+	val_rc model_mgr = get(ISql::MODEL_OBJ);
 
-	zobj_user model = model_mgr.zobject();
+	obj_ptr model = model_mgr.zobject();
 
 	if (!model.ok())
 	{
@@ -587,7 +587,7 @@ Bindings::select()
 		}
 	}
 
-	htab_read hr(zval_user(rows).zarray());
+	htab_rd hr(val_ptr(rows).zarray());
 	if (hr.ok())
 	{
 		size_t rct = hr.size();
@@ -617,30 +617,30 @@ Bindings::select()
 	}
 	/*
 	eager_load not implemented
-	zval_mgr  eager_load_mgr = prop.property(SQSTR.eager_load);
-	htab_read eager_load(eager_load_mgr);
+	val_rc  eager_load_mgr = prop.property(SQSTR.eager_load);
+	htab_rd eager_load(eager_load_mgr);
 	*/
-	zval_user rename = get(ISql::SQL_RENAME);
+	val_ptr rename = get(ISql::SQL_RENAME);
 
 	if (rename.isArray())
 	{
-		htab_mgr objset_mgr;
-		htab_write objset(objset_mgr);
+		htab_rc objset_mgr;
+		htab_wr objset(objset_mgr);
 
 		JoinTables* fromjt = getJoinTables();
 
-		zstr_mgr table_name = fromjt->getModel();
+		str_rc table_name = fromjt->getModel();
 
-		htab_read tables = fromjt->getTables();
+		htab_rd tables = fromjt->getTables();
 
-		zobj_mgr icols = fromjt->getTable(table_name);
+		obj_rc icols = fromjt->getTable(table_name);
 
 		table_name = zobj_toc<IColumns>(icols)->getAlias();
 
-		zstr_mgr mb_id = alias_str_key(table_name);
+		str_rc mb_id = alias_str_key(table_name);
 
-		htab_mgr alias_list_mgr;
-		htab_write alias_list(alias_list_mgr);
+		htab_rc alias_list_mgr;
+		htab_wr alias_list(alias_list_mgr);
 
 		htab_walk w1;
 
@@ -649,26 +649,26 @@ Bindings::select()
 		{
 			if (zs_cmp(table_name, alias_key.zstr()) != 0)
 			{
-				zstr_mgr a_key = alias_str_key(alias_key);
+				str_rc a_key = alias_str_key(alias_key);
 				alias_list.push_back(a_key);
 			}
 		}
 
 		auto r_row = w1.value();
-		htab_read relist(rename.zarray());
+		htab_rd relist(rename.zarray());
 
 		for(w1.start(hr); w1.ok(); w1.next())
 		{
-			zobj_mgr obj = JoinTables::rowSplit(r_row, relist);
-			zval_mgr recset = obj.property(mb_id);
+			obj_rc obj = JoinTables::rowSplit(r_row, relist);
+			val_rc recset = obj.property(mb_id);
 			htab_walk w2;
 			auto ai_value = w2.value();
 			// TODO: check recset ??
-			htab_write rec(recset);
+			htab_wr rec(recset);
 
 			for(w2.start(alias_list); w2.ok(); w2.next())
 			{
-				zstr_mgr key = ai_value.zstr();
+				str_rc key = ai_value.zstr();
 				rec.set(key, obj.property(key));
 			}
 			objset.push_back(rec);
@@ -680,15 +680,15 @@ Bindings::select()
 }
 
 void 
-Bindings::orderBy(zval_user colspec, bool descend)
+Bindings::orderBy(val_ptr colspec, bool descend)
 {
-	zval_mgr args;
+	val_rc args;
 
-	htab_write hw(args);
+	htab_wr hw(args);
 
 	if (colspec.isString())
 	{
-		zval_mgr ta_mgr = TableAttr::splitDot(colspec);
+		val_rc ta_mgr = TableAttr::splitDot(colspec);
 
 		hw.set(SQSTR.column, ta_mgr);
 	}
@@ -697,17 +697,17 @@ Bindings::orderBy(zval_user colspec, bool descend)
 		hw.set(SQSTR.column, colspec);
 	}
 	
-	zval_mgr boolmgr(descend); // otherwise taken as integer value
+	val_rc boolmgr(descend); // otherwise taken as integer value
 	hw.set(SQSTR.descend, boolmgr);
 
 	add(ISql::SQL_ORDER, args);
 }
 
 void 
-Bindings::update(zstr_user column, zval_user value)
+Bindings::update(str_ptr column, val_ptr value)
 {
-	htab_mgr data_mgr;
-	htab_write data(data_mgr);
+	htab_rc data_mgr;
+	htab_wr data(data_mgr);
 
 	data.set(SQSTR.column, column);
 	data.set(SQSTR.valuekey, value);
@@ -717,17 +717,17 @@ Bindings::update(zstr_user column, zval_user value)
 void 
 Bindings::limit(int lval, int offset)
 {
-	zval_mgr a1(lval);
-	zval_mgr a2(offset);
+	val_rc a1(lval);
+	val_rc a2(offset);
 	limit(a1,a2);
 }
 
 void 
-Bindings::limit(zval_user limit, zval_user offset)
+Bindings::limit(val_ptr limit, val_ptr offset)
 {
-	htab_mgr data;
+	htab_rc data;
 
-	htab_write hw(data);
+	htab_wr hw(data);
 
 	hw.set(SQSTR.limit, limit);
 	if (offset.ok())
@@ -804,7 +804,7 @@ ZEND_METHOD(Wcd_Sql_Bindings, get)
 	ZEND_PARSE_PARAMETERS_END();
 
 	Bindings* cobj = zval_toc<Bindings>(ZEND_THIS);
-	zval_user ret = cobj->get(key);
+	val_ptr ret = cobj->get(key);
 	ret.return_zv(return_value);
 }
 
@@ -818,7 +818,7 @@ ZEND_METHOD(Wcd_Sql_Bindings, getArray)
 	ZEND_PARSE_PARAMETERS_END();
 
 	Bindings* cobj = zval_toc<Bindings>(ZEND_THIS);
-	htab_mgr result;
+	htab_rc result;
 	if (cobj->getArray(key, result))
 	{
 		result.move_zv(return_value);
@@ -833,7 +833,7 @@ ZEND_METHOD(Wcd_Sql_Bindings, getData)
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	Bindings* cobj = zval_toc<Bindings>(ZEND_THIS);
-	const htab_mgr& data = cobj->getData();
+	const htab_rc& data = cobj->getData();
 	data.return_zv(return_value);
 }
 
@@ -843,7 +843,7 @@ ZEND_METHOD(Wcd_Sql_Bindings, getJoins)
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	Bindings* cobj = zval_toc<Bindings>(ZEND_THIS);
-	zobj_mgr result = cobj->getJoins();
+	obj_rc result = cobj->getJoins();
 
 	result.move_zv(return_value);
 }
@@ -854,7 +854,7 @@ ZEND_METHOD(Wcd_Sql_Bindings, getParamList)
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	Bindings* cobj = zval_toc<Bindings>(ZEND_THIS);
-	zobj_user result = cobj->getParamList();
+	obj_ptr result = cobj->getParamList();
 	result.return_zv(return_value);
 }
 
@@ -863,16 +863,16 @@ ZEND_METHOD(Wcd_Sql_Bindings, iSql)
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	Bindings* cobj = zval_toc<Bindings>(ZEND_THIS);
-	const zobj_mgr& result = cobj->isql();
+	const obj_rc& result = cobj->isql();
 
 	result.return_zv(return_value);
 }
 
 ZEND_METHOD(Wcd_Sql_Bindings, orderBy)
 {
-	zarg_exec args(execute_data);
+	zarg_rd args(execute_data);
 
-	zval_user colspec( args.need(1));
+	val_ptr colspec( args.need(1));
 	bool descend = false;
 	
 
@@ -897,7 +897,7 @@ ZEND_METHOD(Wcd_Sql_Bindings, primeJoin)
 	ZEND_PARSE_PARAMETERS_END();
 
 	Bindings* cobj = zval_toc<Bindings>(ZEND_THIS);
-	zobj_mgr jt = cobj->primeJoin(tcol);
+	obj_rc jt = cobj->primeJoin(tcol);
 	jt.move_zv(return_value);
 }
 
@@ -912,7 +912,7 @@ ZEND_METHOD(Wcd_Sql_Bindings, set)
 	Z_PARAM_ZVAL(value)
 	ZEND_PARSE_PARAMETERS_END();
 	Bindings* cobj = zval_toc<Bindings>(ZEND_THIS);
-	cobj->set(key, zval_user(value));
+	cobj->set(key, val_ptr(value));
 
 }
 
@@ -973,7 +973,7 @@ ZEND_METHOD(Wcd_Sql_Bindings, select)
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	Bindings* cobj = zval_toc<Bindings>(ZEND_THIS);
-	zval_mgr result = cobj->select();
+	val_rc result = cobj->select();
 
 	result.move_zv(return_value);
 }

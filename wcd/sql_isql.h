@@ -23,10 +23,10 @@ namespace wcd {
 
 	class JoinInfo : public base_d {
 	protected:
-		zobj_mgr leftTable_; // IColumns
-		zobj_mgr rightTable_; // ?IColumns
+		obj_rc leftTable_; // IColumns
+		obj_rc rightTable_; // ?IColumns
 		int      joinType_;  
-		htab_mgr joinExpr_;
+		htab_rc joinExpr_;
 
 	public:
 		enum {
@@ -40,21 +40,21 @@ namespace wcd {
 
 		static base_obj_mgr<JoinInfo> omg;
 		
-		static int getJoinType(zstr_user s);
-		static zstr_user  joinStr(int jid);
+		static int getJoinType(str_ptr s);
+		static str_ptr  joinStr(int jid);
 
 		IColumns* leftTable();
 		IColumns* rightTable();
 
-		void construct(zobj_user ltable, const zobj_user rtable, int jtype=J_INNER);
+		void construct(obj_ptr ltable, const obj_ptr rtable, int jtype=J_INNER);
 
-		void add(zval_user lexp, zval_user rexp, int jtype=J_INNER, int logic = JoinExpr::B_NULL);
+		void add(val_ptr lexp, val_ptr rexp, int jtype=J_INNER, int logic = JoinExpr::B_NULL);
 
-		void addExpr(zobj_user jexpr);
+		void addExpr(obj_ptr jexpr);
 
-		zstr_user joinTypeStr() const;
+		str_ptr joinTypeStr() const;
 
-		htab_read getConditions() {
+		htab_rd getConditions() {
 			return joinExpr_;
 		}
 	};
@@ -63,72 +63,72 @@ namespace wcd {
 	class JoinTables : public base_d {
 	protected:
 
-		htab_mgr byAlias_;
-		htab_mgr results_;
+		htab_rc byAlias_;
+		htab_rc results_;
 		
-		htab_mgr where_;
-		htab_mgr joins_;
-		htab_mgr orderby_;
+		htab_rc where_;
+		htab_rc joins_;
+		htab_rc orderby_;
 
-		zobj_mgr prime_;
-		zstr_mgr model_;
+		obj_rc prime_;
+		str_rc model_;
 
 
 	public:
 
 		static base_obj_mgr<JoinTables> omg;
 
-		static zobj_mgr rowSplit(htab_read row, htab_read rename);
+		static obj_rc rowSplit(htab_rd row, htab_rd rename);
 
-		void debug_info(htab_write di) override;
+		void debug_info(htab_wr di) override;
 		
-		void setPrime(zobj_user obj);
+		void setPrime(obj_ptr obj);
 
-		zobj_mgr addJoin(zobj_user jiobj);
+		obj_rc addJoin(obj_ptr jiobj);
 
 
-		void addTable(zobj_user icol);
+		void addTable(obj_ptr icol);
 
-		void addResult(zobj_user ta);
+		void addResult(obj_ptr ta);
 
-		void addWhere(zval_user leftAttr, zval_user rightAttr, int op, int logic);
+		void addWhere(val_ptr leftAttr, val_ptr rightAttr, int op, int logic);
 
-		const htab_mgr& getData()
+		const htab_rc& getData()
 		{
 			return joins_;
 		}
 
-		const zstr_mgr& getModel()
+		const str_rc& getModel()
 		{
 			return model_;
 		}
 
-		const htab_mgr& getOrder() 
+		const htab_rc& getOrder() 
 		{
 			return orderby_;
 		}
 
-	    zobj_mgr getPivot();
+	    obj_rc getPivot();
 
-		zobj_mgr getPrime()
+		obj_rc getPrime()
 		{
 			return prime_;
 		}
 
-		zobj_mgr getTable(zstr_user name);
+		obj_rc getTable(str_ptr name);
 		
-		zobj_mgr getTableAlias(zstr_user name);
+		obj_rc getTableAlias(str_ptr name);
 
-		const htab_mgr& getTables()
+		const htab_rc& getTables()
 		{
 			return byAlias_;
 		}
 
-		void order(zstr_user name, bool ascend);
+		void order(str_ptr name, bool ascend);
 
 
 
-		void setModel(zstr_user name)
+		void setModel(str_ptr name)
 		{
 			model_ = name;
 		}
@@ -140,31 +140,31 @@ namespace wcd {
 	class ParamList : public base_d {
 	protected:
 		/** IDriver object */
-		zobj_mgr	driver_;
+		obj_rc	driver_;
 		/** SQL param values */
-		htab_mgr    params_;
+		htab_rc    params_;
 		/** generated SQL */
-		zstr_mgr    sql_;
+		str_rc    sql_;
 		/** values of params */
-		htab_mgr    val_params_;
+		htab_rc    val_params_;
 		/** return values */
-		htab_mgr	ret_values_;
+		htab_rc	ret_values_;
 
-		zstr_mgr paramStr(int ct);
+		str_rc paramStr(int ct);
 
 	public:
 
 		static base_obj_mgr<ParamList>  omg;
 
-		void debug_info(htab_write di) override;
+		void debug_info(htab_wr di) override;
 
-		void construct(zobj_user driver);
-		zstr_mgr addParam(zval_user value);
-		//zstr_mgr addParam(zval_user value);
-		zstr_mgr addParamList(htab_read values);
-		zstr_mgr makeList(int start, int count);
+		void construct(obj_ptr driver);
+		str_rc addParam(val_ptr value);
+		//str_rc addParam(val_ptr value);
+		str_rc addParamList(htab_rd values);
+		str_rc makeList(int start, int count);
 
-		void setParams(htab_read replace)
+		void setParams(htab_rd replace)
 		{
 			params_ = replace;
 		}
@@ -172,14 +172,14 @@ namespace wcd {
 		void wipe();
 
 		/** add parameter or constant */
-		zstr_mgr paramLiteral(zval_user value);
+		str_rc paramLiteral(val_ptr value);
 
-		void setReturns(htab_read rets)
+		void setReturns(htab_rd rets)
 		{
 			ret_values_ = rets;
 		}
 
-		void setValues(htab_read vals)
+		void setValues(htab_rd vals)
 		{
 			
 			val_params_ = vals;
@@ -187,27 +187,27 @@ namespace wcd {
 
 		void useOwnValues();
 
-		void setSql(zstr_user s)
+		void setSql(str_ptr s)
 		{
 			sql_ = s;
 		}
 
-		zstr_user getSql() 
+		str_ptr getSql() 
 		{
 			return sql_;
 		}
 
-		htab_read getReturns() 
+		htab_rd getReturns() 
 		{
 			return ret_values_;
 		}
 
-		htab_read getValues() 
+		htab_rd getValues() 
 		{
 			return val_params_;
 		}
 
-		htab_read getParams() 
+		htab_rd getParams() 
 		{
 			return params_;
 		}
@@ -217,15 +217,15 @@ namespace wcd {
 	class ISql : public base_d 
 	{
 	protected:
-		zstr_mgr columns(htab_read bd);
-		void columnsTC(IColumns* tc, htab_write col_list); //zstr_buffer& col_list);
-		htab_read getTables(Bindings& bind);
-		zstr_mgr where(Bindings &bind, htab_read wtab);
-		zstr_mgr insert_col_params(Bindings& bind, htab_read rowbind);
-		zstr_mgr orderBy(htab_read obind);
-		zstr_mgr limit(ParamList* plist, htab_read ltab);
-		zstr_mgr fromJT(Bindings& bind, JoinTables* jt);
-		zstr_mgr select_jt(Bindings& bind, JoinTables* jt);
+		str_rc columns(htab_rd bd);
+		void columnsTC(IColumns* tc, htab_wr col_list); //str_buf& col_list);
+		htab_rd getTables(Bindings& bind);
+		str_rc where(Bindings &bind, htab_rd wtab);
+		str_rc insert_col_params(Bindings& bind, htab_rd rowbind);
+		str_rc orderBy(htab_rd obind);
+		str_rc limit(ParamList* plist, htab_rd ltab);
+		str_rc fromJT(Bindings& bind, JoinTables* jt);
+		str_rc select_jt(Bindings& bind, JoinTables* jt);
 
 	public:
 		enum {
@@ -255,31 +255,31 @@ namespace wcd {
 
 		static base_obj_mgr<ISql>  omg;
 
-		static zstr_mgr tableClass(zstr_user s);
+		static str_rc tableClass(str_ptr s);
 
-		zstr_mgr seqLastValue(zstr_user seq);
+		str_rc seqLastValue(str_ptr seq);
 
-		zstr_mgr setSeqValue(int value, htab_read data);
+		str_rc setSeqValue(int value, htab_rd data);
 		
-		zstr_mgr entityClass(zstr_user s);
+		str_rc entityClass(str_ptr s);
 
-		zobj_mgr deleteSql(Bindings& bind);
+		obj_rc deleteSql(Bindings& bind);
 
-		zobj_mgr insert(Bindings& bind);
+		obj_rc insert(Bindings& bind);
 
-		zobj_mgr select(Bindings& bind);
+		obj_rc select(Bindings& bind);
 
-		zstr_mgr truncate(Bindings& bind);
+		str_rc truncate(Bindings& bind);
 
-		zobj_mgr update(Bindings& bind);
+		obj_rc update(Bindings& bind);
 
-		zstr_mgr quoteName(zstr_user name);
+		str_rc quoteName(str_ptr name);
 
-		zstr_mgr emit(zval_user sp, Bindings* bind, zstr_user lalias, zstr_user ralias);
+		str_rc emit(val_ptr sp, Bindings* bind, str_ptr lalias, str_ptr ralias);
 
-		zstr_mgr getTruncateSql();
+		str_rc getTruncateSql();
 
-		zstr_mgr valuesDefault();
+		str_rc valuesDefault();
 
 	};
 
@@ -287,64 +287,64 @@ namespace wcd {
 	class Bindings : public base_d
 	{
 	protected:
-		htab_mgr	data_;
-		zobj_mgr    paramList_;
-		zobj_mgr	sql_;
-		zobj_mgr    db_;
+		htab_rc	data_;
+		obj_rc    paramList_;
+		obj_rc	sql_;
+		obj_rc    db_;
 
-		void addToArray(int key, zval_user value);
+		void addToArray(int key, val_ptr value);
 
 	public:
 		static base_obj_mgr<Bindings>  omg;
 
-		void debug_info(htab_write di) override;
+		void debug_info(htab_wr di) override;
 
-		void construct(zobj_user sql, zobj_user connect);
+		void construct(obj_ptr sql, obj_ptr connect);
 
-		void add(int key, zval_user value);
+		void add(int key, val_ptr value);
 
-		void addarray(int key, htab_read value);
-		void addstr(int key, zstr_user value);
+		void addarray(int key, htab_rd value);
+		void addstr(int key, str_ptr value);
 
-		bool addJoinData(htab_read data);
+		bool addJoinData(htab_rd data);
 
 		zval* get(int key);
 
-		const zobj_mgr& isql() {
+		const obj_rc& isql() {
 			return sql_;
 		}
 
 		bool aliasSelect();
 
-		void limit(zval_user limit, zval_user offset);
+		void limit(val_ptr limit, val_ptr offset);
 		void limit(int limit, int offset=0);
 
-		void whereKeyValue(zval_user keys, zval_user values);
-		void where(zval_user column, zstr_user opstr, zval_user value, zstr_user blogic);
+		void whereKeyValue(val_ptr keys, val_ptr values);
+		void where(val_ptr column, str_ptr opstr, val_ptr value, str_ptr blogic);
 
-		htab_mgr columnAlias(zobj_user tcol);
+		htab_rc columnAlias(obj_ptr tcol);
 
 		JoinTables* getJoinTables();
 
-		zobj_mgr getJoins();
+		obj_rc getJoins();
 
-		bool getArray(int key, htab_mgr& value);
+		bool getArray(int key, htab_rc& value);
 
 		void offset(int value);
 
-		void orderBy(zval_user column, bool descend=false);
+		void orderBy(val_ptr column, bool descend=false);
 
-		void update(zstr_user column, zval_user value);
+		void update(str_ptr column, val_ptr value);
 
-		const htab_mgr& getData()
+		const htab_rc& getData()
 		{
 			return data_;
 		}
 
-		zval_mgr select();
+		val_rc select();
 
 		/** Call setPrime of JoinTables, return JoinTables */
-		zobj_mgr primeJoin(zval_user tcol);
+		obj_rc primeJoin(val_ptr tcol);
 		/*
 		ParamList* paramList()
 		{
@@ -352,14 +352,14 @@ namespace wcd {
 		}
 		*/
 
-		zobj_user getParamList();
+		obj_ptr getParamList();
 
-		void set(int key, zval_user value);
+		void set(int key, val_ptr value);
 		void set(int key, int value);
-		void set(int key, htab_read value);
-		void set(int key, const zval_mgr& value);
+		void set(int key, htab_rd value);
+		void set(int key, const val_rc& value);
 
-		void setParamList(zobj_user obj)
+		void setParamList(obj_ptr obj)
 		{
 			paramList_ = obj;
 		}

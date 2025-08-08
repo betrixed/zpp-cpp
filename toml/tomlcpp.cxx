@@ -57,11 +57,11 @@ static void toml_myfree(void *p) {
  */
 struct Backing {
   char *ptr = 0;
-  zstr_mgr  zstr;
+  str_rc  zstr;
 
   toml_table_t *root = 0;
 
-  Backing(zstr_user conf) {
+  Backing(str_ptr conf) {
       zstr = conf;
       ptr = (char*) zstr.data();
   }
@@ -373,7 +373,7 @@ std::unique_ptr<vector<double>> Array::getDoubleVector() const {
 
 int Array::size() const { return toml_array_nelem(m_array); }
 
-Result parse(zstr_user conf) {
+Result parse(str_ptr conf) {
   Result ret;
   char errbuf[200];
   auto backing = std::make_shared<Backing>(conf);

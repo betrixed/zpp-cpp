@@ -44,7 +44,7 @@ public:
 
 RouteAddData radata;
 
-void RouteAdd::debug_info(htab_write di)
+void RouteAdd::debug_info(htab_wr di)
 {
 	di.set(radata.route_set, route_set_);
 	di.set(radata.module_name, module_name_);
@@ -53,7 +53,7 @@ void RouteAdd::debug_info(htab_write di)
 	di.set(radata.fallback, fallback_);
 }
 
-void RouteAdd::construct(zobj_user rset)
+void RouteAdd::construct(obj_ptr rset)
 {
 	if (rset.isNull())
 	{
@@ -64,14 +64,14 @@ void RouteAdd::construct(zobj_user rset)
 	}
 }
 
-zstr_user 
+str_ptr 
 RouteAdd::rex_url()
 {
 	return radata.rex_url;
 }
 
 void 
-RouteAdd::addRoutes(htab_read list, zstr_user prefix, zstr_user module)
+RouteAdd::addRoutes(htab_rd list, str_ptr prefix, str_ptr module)
 {
 	if (prefix.size())
 	{
@@ -104,13 +104,13 @@ RouteAdd::addRoutes(htab_read list, zstr_user prefix, zstr_user module)
 	showdata("list", list);
 	for(wk.start(list); wk.ok(); wk.next())
 	{
-		zobj_user route(value.zobject());
+		obj_ptr route(value.zobject());
 
 		showobj("route", route);
 
 		Route* r = zobj_toc<Route>(route);
 
-		zstr_user compiled = r->getCompiled();
+		str_ptr compiled = r->getCompiled();
 		//showstr("compiled", compiled);
 
 		if (!compiled.size()) {
@@ -122,30 +122,30 @@ RouteAdd::addRoutes(htab_read list, zstr_user prefix, zstr_user module)
 }
 
 
-void RouteAdd::fallback(zval_user backup)
+void RouteAdd::fallback(val_ptr backup)
 {
 	fallback_ = backup;
 }
 
-zobj_user 
+obj_ptr 
 RouteAdd::getRouteSet() const
 {
 	return route_set_;
 }
 
-void RouteAdd::methodSfx(zstr_user sfx)
+void RouteAdd::methodSfx(str_ptr sfx)
 {
 	method_sfx_ = sfx;	
 }
 
 
-void RouteAdd::module(zstr_user name)
+void RouteAdd::module(str_ptr name)
 {
 	module_name_ = name;
 }
 
 
-void RouteAdd::prefix(zstr_user start)
+void RouteAdd::prefix(str_ptr start)
 {
 	url_prefix_ = start;
 }
@@ -153,17 +153,17 @@ void RouteAdd::prefix(zstr_user start)
 
 void RouteAdd::ready(Route* route)
 {
-	htab_mgr captures;
+	htab_rc captures;
 
 	size_t   pr2;
 
-	zstr_buffer  pattern;
-	zstr_buffer  compiled;
+	str_buf  pattern;
+	str_buf  compiled;
 
-	zstr_mgr url(route->getPattern());
+	str_rc url(route->getPattern());
 	showstr("url", url);
 
-	zstr_user rex(RouteAdd::rex_url());
+	str_ptr rex(RouteAdd::rex_url());
 
 	bool slashBegins = false;
 
@@ -188,7 +188,7 @@ void RouteAdd::ready(Route* route)
 	}
 
 	// try and prevent bad double-// without pattern reset
-	zstr_user prefix(url_prefix_);
+	str_ptr prefix(url_prefix_);
 
 	if (prefix.size())
 	{
@@ -212,32 +212,32 @@ void RouteAdd::ready(Route* route)
 			}
 		}
 	}
-	//zstr_output sink;
+	//str_out sink;
 	//sink << pr2 << " pattern vstr" << pattern.vstr() << '\n';
 
-	zstr_mgr temp;
+	str_rc temp;
 
 	temp = pattern.zstr();
 	//showstr("pattern", temp);
 
 	compiled << temp; 
-	pattern << temp; // reset zstr_buffer as fresh content
+	pattern << temp; // reset str_buf as fresh content
 
 	
-	zstr_mgr name;
-	zstr_mgr blob;
-	htab_mgr params_tab;
-	htab_write params(params_tab);
+	str_rc name;
+	str_rc blob;
+	htab_rc params_tab;
+	htab_wr params(params_tab);
 
 	while (pr2 > 0) 
 	{ 
-		htab_read m2(captures);
+		htab_rd m2(captures);
 
 		if (m2.size() < 2)
 		{
 			break;
 		}
-		htab_read segs = m2.get((int) 1);
+		htab_rd segs = m2.get((int) 1);
 		htab_walk wk;
 		auto value = wk.value();
 
@@ -246,9 +246,9 @@ void RouteAdd::ready(Route* route)
 
 		for(wk.start(segs); wk.ok(); wk.next())
 		{
-			zstr_user useg = value.zstr();
+			str_ptr useg = value.zstr();
 
-			zstr_mgr seg = useg.trim();
+			str_rc seg = useg.trim();
 			useg = seg;
 
 			seg = useg.to_lower();
@@ -259,7 +259,7 @@ void RouteAdd::ready(Route* route)
 			if (firstchar == ':')
 			{
 				name = useg.substr(1);
-				zstr_buffer bb;
+				str_buf bb;
 				bb << '{' << name << '}'; 
 				blob = bb.zstr();
 			}
@@ -287,8 +287,8 @@ void RouteAdd::ready(Route* route)
 		break;
 	}
 	auto pcount = params.size();
-	zstr_mgr cpattern;
-	zstr_mgr rpattern = pattern.zstr();
+	str_rc cpattern;
+	str_rc rpattern = pattern.zstr();
 
 	if (pcount > 0)
 	{
@@ -306,17 +306,17 @@ void RouteAdd::ready(Route* route)
 	route->setPattern(rpattern);
 	route->setCompiled(cpattern);
 
-	zval_user target = route->getTarget();
+	val_ptr target = route->getTarget();
 	if (target.isObject()) {
-		zobj_user tobj = target.zobject();
+		obj_ptr tobj = target.zobject();
 
 		if (tobj.instanceof(Target::omg.classEntry())) 
 		{
 			Target* t = zobj_toc<Target>(tobj);
-			zstr_user sfx(method_sfx_);
+			str_ptr sfx(method_sfx_);
 
 			if (sfx.size() && (zs_cmp_ci(sfx, radata.none_tag)!=0)) {
-				zstr_buffer fbuf(t->getFunc());
+				str_buf fbuf(t->getFunc());
 
 				if (zs_cmp_ci(sfx, radata.verb_tag) == 0) 
 				{
@@ -325,7 +325,7 @@ void RouteAdd::ready(Route* route)
 				else {
 					fbuf << sfx;
 				}
-				zstr_mgr fname = fbuf.zstr();
+				str_rc fname = fbuf.zstr();
 				showstr("fname", fname);
 				t->setFunc(fname);
 			}
@@ -348,7 +348,7 @@ ZEND_METHOD(Wcc_RouteAdd, __construct)
 
 	RouteAdd* cobj = zval_toc<RouteAdd>(ZEND_THIS);
 
-	zobj_user param(rset_obj);
+	obj_ptr param(rset_obj);
 
 	cobj->construct(param);	
 }
@@ -366,7 +366,7 @@ ZEND_METHOD(Wcc_RouteAdd, addRoutes)
 	Z_PARAM_STR_OR_NULL(module)
 	ZEND_PARSE_PARAMETERS_END();
 
-	zval_user htab(list);
+	val_ptr htab(list);
 
 	RouteAdd* cobj = zval_toc<RouteAdd>(ZEND_THIS);
 	cobj->addRoutes(htab.zarray(), prefix, module);	
@@ -387,7 +387,7 @@ ZEND_METHOD(Wcc_RouteAdd, getRouteSet)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 	RouteAdd* cobj = zval_toc<RouteAdd>(ZEND_THIS);
-	zobj_user rset = cobj->getRouteSet();
+	obj_ptr rset = cobj->getRouteSet();
 
 	rset.return_zv(return_value);
 }

@@ -47,31 +47,31 @@ using namespace zpp;
 		static zval* get_second(zend_object* pair, zval* ret);
 		*/
 
-		zval_mgr key_;
-		zval_mgr value_;
+		val_rc key_;
+		val_rc value_;
 
-		void construct(zval_user p1, zval_user p2)
+		void construct(val_ptr p1, val_ptr p2)
 		{
 			key_ = p1;
 			value_ = p2;
 		}
 		
-		zval_user first()
+		val_ptr first()
 		{
 			return key_;
 		}
 
-		zval_user second()
+		val_ptr second()
 		{
 			return value_;
 		}
 
-		zval_user key()
+		val_ptr key()
 		{
 			return key_;
 		}
 
-		zval_user value()
+		val_ptr value()
 		{
 			return value_;
 		}
@@ -79,21 +79,21 @@ using namespace zpp;
 		double sum() const 
 		{
 			long a, b;
-			a = zval_user(key_).zlong();
-			b = zval_user(value_).zlong();
+			a = val_ptr(key_).zlong();
+			b = val_ptr(value_).zlong();
 			return (a + b) / double(a);
 		}
 		/*
-		zval_mgr key()
+		val_rc key()
 		{
-			zval_mgr result;
+			val_rc result;
 			get_first(p_zobj_, result);
 			return result;
 		}
 
-		zval_mgr value()
+		val_rc value()
 		{
-			zval_mgr result;
+			val_rc result;
 			get_second(p_zobj_, result);
 			return result;
 		}

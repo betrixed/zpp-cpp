@@ -53,11 +53,11 @@ ICacheData::setStored()
 	saved_ = true;
 }
 
-zobj_mgr 
-ICacheData::new_ICacheData(zstr_user key, 
-	zval_user value, zend_long ttl)
+obj_rc 
+ICacheData::new_ICacheData(str_ptr key, 
+	val_ptr value, zend_long ttl)
 {
-	zobj_mgr result;
+	obj_rc result;
 
 	result = ICacheData::omg.new_zobj();
 
@@ -69,8 +69,8 @@ ICacheData::new_ICacheData(zstr_user key,
 }
 
 void 
-ICacheData::construct(zstr_user key, 
-					zval_user data, zend_long ttl)
+ICacheData::construct(str_ptr key, 
+					val_ptr data, zend_long ttl)
 {
 	//showstr("key", key);
 	//showmem("construct", data);
@@ -84,7 +84,7 @@ ICacheData::construct(zstr_user key,
 }
 
 void 
-ICacheData::member_info(htab_write s, bool store)
+ICacheData::member_info(htab_wr s, bool store)
 {
 	// make expiry at front of json
 	s.set(IC_STR.expiry_key,  ttl_ + stored_);
@@ -97,31 +97,31 @@ ICacheData::member_info(htab_write s, bool store)
 	}
 }
 
-htab_mgr 
+htab_rc 
 ICacheData::serialize()
 {
-	htab_mgr s;
+	htab_rc s;
 
 	member_info(s, false);
 
 	return s;
 }
 
-void ICacheData::debug_info(htab_write hw)
+void ICacheData::debug_info(htab_wr hw)
 {
 	member_info(hw, true);
 }
 
 void 
-ICacheData::unserialize(htab_read s)
+ICacheData::unserialize(htab_rd s)
 {
 
 	//s.show_data("unserialize");
 
 	key_ = s.get(IC_STR.key_key);
 	data_ = s.get(IC_STR.data_key);
-	ttl_ = zval_user(s.get(IC_STR.ttl_key)).zlong();
-	stored_ = zval_user(s.get(IC_STR.stored_key)).zlong();
+	ttl_ = val_ptr(s.get(IC_STR.ttl_key)).zlong();
+	stored_ = val_ptr(s.get(IC_STR.stored_key)).zlong();
 	saved_ = true;
 }
 
@@ -143,7 +143,7 @@ ZEND_METHOD(Wcc_ICacheData, __construct)
 	ZEND_PARSE_PARAMETERS_END();	
 
 	ICacheData* cobj = zval_toc<ICacheData>(ZEND_THIS);
-	zval_mgr zdata(data);
+	val_rc zdata(data);
 
 	cobj->construct(skey, zdata, ttl);
 }
@@ -156,7 +156,7 @@ ZEND_METHOD(Wcc_ICacheData, __serialize)
 
 	ICacheData* cobj = zval_toc<ICacheData>(ZEND_THIS);
 
-	htab_mgr data = cobj->serialize();
+	htab_rc data = cobj->serialize();
 	data.move_zv(return_value);
 
 }
@@ -180,7 +180,7 @@ ZEND_METHOD(Wcc_ICacheData, getData)
 	ZEND_PARSE_PARAMETERS_END();	
 
 	ICacheData* cobj = zval_toc<ICacheData>(ZEND_THIS);
-	zval_user result = cobj->getData();
+	val_ptr result = cobj->getData();
 	result.return_zv(return_value);
 }
 
@@ -201,7 +201,7 @@ ZEND_METHOD(Wcc_ICacheData, getKey)
 	ZEND_PARSE_PARAMETERS_END();	
 
 	ICacheData* cobj = zval_toc<ICacheData>(ZEND_THIS);
-	zstr_user result = cobj->getKey();
+	str_ptr result = cobj->getKey();
 	result.return_zv(return_value);
 }
 
@@ -258,7 +258,7 @@ ZEND_METHOD(Wcc_ICacheData, update)
 	ZEND_PARSE_PARAMETERS_END();	
 
 	ICacheData* cobj = zval_toc<ICacheData>(ZEND_THIS);
-	zval_mgr dw(data);
+	val_rc dw(data);
 	
 	cobj->update(dw, ttl);
 }

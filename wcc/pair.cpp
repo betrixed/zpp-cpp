@@ -62,7 +62,7 @@ Pair::unset_property(zend_object *zobj, zend_string *name, void **cache_slot)
 	zval* ptr = property_ptr(zobj, name);
 	if (ptr)
 	{
-		if (zval_mgr::try_decref(ptr))
+		if (val_rc::try_decref(ptr))
 		{
 			ZVAL_NULL(ptr);
 		};
@@ -84,9 +84,9 @@ Pair::write_property(zend_object *zobj, zend_string *name,
 	zval* ptr = property_ptr(zobj, name);
 	if (ptr)
 	{
-		zval_mgr::try_decref(ptr);
+		val_rc::try_decref(ptr);
 		ZVAL_COPY(ptr, value);
-		zval_mgr::try_addref(ptr);
+		val_rc::try_addref(ptr);
 	}
 	return ptr;
 }
@@ -96,7 +96,7 @@ Pair::write_property(zend_object *zobj, zend_string *name,
 void //static
 Pair::set_first(zend_object* pair, zval* val)
 {
-	zobj_user myobj(pair);
+	obj_ptr myobj(pair);
 	myobj.property(PairSI.first, val);	
 }
 
@@ -104,14 +104,14 @@ Pair::set_first(zend_object* pair, zval* val)
 void //static
 Pair::set_second(zend_object* pair, zval* val)
 {
-	zobj_user myobj(pair);
+	obj_ptr myobj(pair);
 	myobj.property(PairSI.second, val);
 }
 
 zval*  //static
 Pair::get_first(zend_object* pair, zval* ret)
 {
-	zobj_user myobj(pair);
+	obj_ptr myobj(pair);
 	return myobj.property_get(PairSI.first, ret);
 }
 
@@ -119,7 +119,7 @@ Pair::get_first(zend_object* pair, zval* ret)
 zval*  //static
 Pair::get_second(zend_object* pair,  zval* ret)
 {
-	zobj_user myobj(pair);
+	obj_ptr myobj(pair);
 	return myobj.property_get(PairSI.second, ret);
 }
 */
@@ -141,7 +141,7 @@ Pair::Pair_omg::init_class_fn()
 	/*
 	zend_type dtype =  {nullptr, 0};
 
-	zval_mgr null_init;
+	val_rc null_init;
 
 	//ZEND_TYPE_INIT_MASK(MAY_BE_ANY);
 

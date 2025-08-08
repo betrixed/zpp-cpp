@@ -3,23 +3,23 @@
 
 
 #ifndef ZVAL_USER_H
-#include "zval_user.h"
+#include "val_ptr.h"
 #endif
 
 #ifndef ZSTR_USER_H
-#include "zstr_user.h"
+#include "str_ptr.h"
 #endif
 
 #ifndef ZVAL_MGR_H
-#include "zval_mgr.h"
+#include "val_rc.h"
 #endif
 
 #ifndef ZSTR_MGR_H
-#include "zstr_mgr.h"
+#include "str_rc.h"
 #endif
 
 #ifndef HTAB_READ_H
-#include "htab_read.h"
+#include "htab_rd.h"
 #endif
 
 extern "C" {
@@ -31,7 +31,7 @@ namespace zpp {
 	class preg_callback {
 	protected:
 		size_t 		call_count_;
-		zstr_mgr    replace_; // set this in get_replace
+		str_rc    replace_; // set this in get_replace
 	public:
 		preg_callback() : call_count_(0)
 		{
@@ -40,7 +40,7 @@ namespace zpp {
 		virtual ~preg_callback() 
 		{ }
 
-		virtual bool get_replace(htab_read captures) = 0; 
+		virtual bool get_replace(htab_rd captures) = 0; 
 
 		friend class preg;
 	};
@@ -49,8 +49,8 @@ namespace zpp {
 	class preg {
 	protected:
 		pcre_cache_entry* pce_;
-		zstr_mgr      	  regexp_;
-		zval_mgr          result_; //hold result, array of matches
+		str_rc      	  regexp_;
+		val_rc          result_; //hold result, array of matches
 		zend_long         count_;
 		bool          	  global_; //match all
 		int			 	  flags_;
@@ -69,13 +69,13 @@ namespace zpp {
 			 SPLIT_OFFSET_CAPTURE = (1<<2)
 		};
 
-		preg(zstr_user expr, int flags=0, bool global = false);
+		preg(str_ptr expr, int flags=0, bool global = false);
 		preg(const char* expr, int flags=0, bool global = false);
 
 		~preg();
 
-		int 	   matches(zstr_user subject, zend_long offset = 0);
-		zval_mgr   splits(zstr_user data, int limit = -1);
+		int 	   matches(str_ptr subject, zend_long offset = 0);
+		val_rc   splits(str_ptr data, int limit = -1);
 
 
 		void setGlobal(bool b) {
@@ -86,34 +86,34 @@ namespace zpp {
 			flags_ = f;
 		}
 
-		zstr_mgr  replace_callback(preg_callback& callback, zstr_user subject);
+		str_rc  replace_callback(preg_callback& callback, str_ptr subject);
 		
-		zstr_mgr  replace(const char* rv, zstr_user subject);
+		str_rc  replace(const char* rv, str_ptr subject);
 
-		zstr_user regex() const {
+		str_ptr regex() const {
 			return regexp_;
 		}
-		zstr_mgr  capture(size_t ix);
-		htab_read  captures(){ return htab_read(result_); };
+		str_rc  capture(size_t ix);
+		htab_rd  captures(){ return htab_rd(result_); };
 		
-		zval_mgr& results() { return result_; }
+		val_rc& results() { return result_; }
 
-		//htab_read  array() { return htab_read(result_); }
+		//htab_rd  array() { return htab_rd(result_); }
 
 	};
 
-	zval_mgr preg_split(const char* sv, zstr_user data, int limit, int flags);
+	val_rc preg_split(const char* sv, str_ptr data, int limit, int flags);
 
-	// zstr_user version
-	zstr_mgr preg_replace(zstr_user rexpr, zstr_user replace, zstr_user input, int limit = -1, size_t* rcount = nullptr);
+	// str_ptr version
+	str_rc preg_replace(str_ptr rexpr, str_ptr replace, str_ptr input, int limit = -1, size_t* rcount = nullptr);
 
-	zval_mgr explode(zstr_user sep,  zstr_user split, long limit = 0);
+	val_rc explode(str_ptr sep,  str_ptr split, long limit = 0);
 
-	zval_mgr implode(zstr_user sep, htab_read w);
+	val_rc implode(str_ptr sep, htab_rd w);
 
-	zval_mgr union_values(htab_read list1, htab_read list2);
+	val_rc union_values(htab_rd list1, htab_rd list2);
 
-	zval_mgr preg_quote(zstr_user regex, zval_user delim);
+	val_rc preg_quote(str_ptr regex, val_ptr delim);
 
 }; // end namespace zpp
 

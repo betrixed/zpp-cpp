@@ -54,7 +54,7 @@ public:
 
 HP_init HPit;
 
-void HtmlPlates::construct(zstr_user model_id)
+void HtmlPlates::construct(str_ptr model_id)
 {
 	if (!model_id.isNull()) {
 		model_svc_ = model_id;
@@ -64,7 +64,7 @@ void HtmlPlates::construct(zstr_user model_id)
 	}
 }
 
-void HtmlPlates::debug_info(htab_write di)
+void HtmlPlates::debug_info(htab_wr di)
 {
 	di.set(HPit.values_key, values_);
 	di.set(HPit.level_key, levels_);
@@ -75,8 +75,8 @@ void HtmlPlates::debug_info(htab_write di)
 
 void HtmlPlates::initValues()
 {
-	zval_mgr mtemp(getModel());
-	htab_write hw(values_);
+	val_rc mtemp(getModel());
+	htab_wr hw(values_);
 
 	hw.set(HPit.model_var, mtemp);
 	hw.set(HPit.view_key, this->vobj());
@@ -85,63 +85,63 @@ void HtmlPlates::initValues()
 /**
  * Push from inner to outer
  */
-void HtmlPlates::pushLevel(zstr_user name)
+void HtmlPlates::pushLevel(str_ptr name)
 {
-	htab_write(levels_).push_back(name);
+	htab_wr(levels_).push_back(name);
 }
 
-zobj_mgr 
+obj_rc 
 HtmlPlates::getModel()
 {
 	if (model_.isNull()) {
 
 		model_ = Services::service( model_svc_);
 
-		if (zobj_user(model_).isNull())
+		if (obj_ptr(model_).isNull())
 		{
-			model_ = Config::make(htab_read());
+			model_ = Config::make(htab_rd());
 		}
 	}
 	return  model_;
 }
 
-void HtmlPlates::setModel(zobj_user model)
+void HtmlPlates::setModel(obj_ptr model)
 {
 	model_ = model;
-	htab_write(values_).set(HPit.model_var, model);
+	htab_wr(values_).set(HPit.model_var, model);
 }
 
-void HtmlPlates::mergeData(htab_read items)
+void HtmlPlates::mergeData(htab_rd items)
 {
-	htab_write(values_).merge(items);
+	htab_wr(values_).merge(items);
 }
 
-zstr_mgr
-HtmlPlates::renderView(htab_write options) 
+str_rc
+HtmlPlates::renderView(htab_wr options) 
 {
 	options.set(HPit.final_key, false);
 	return render(options);
 }
 
-zstr_mgr HtmlPlates::render(htab_read options) 
+str_rc HtmlPlates::render(htab_rd options) 
 {
 	initValues();
-	zstr_mgr result;
+	str_rc result;
 
-	zval_user isfinal = options.get(HPit.final_key);
+	val_ptr isfinal = options.get(HPit.final_key);
 
 	if (isfinal.isTrue()) {
 		Services::service(HPit.final_key);
 	}
 
-	zval_user views = options.get(HPit.views_key);
+	val_ptr views = options.get(HPit.views_key);
 
 	if (!views.isNull())
 	{
 		if (views.isArray())
 		{
 			for_key_value fkv;
-			htab_write hw(levels_);
+			htab_wr hw(levels_);
 			for(fkv.start(views.zarray()); fkv.ok(); fkv.next())
 			{
 				hw.push_back(fkv.value());
@@ -149,7 +149,7 @@ zstr_mgr HtmlPlates::render(htab_read options)
 		}
 	}
 
-	zobj_mgr engine = Services::service(HPit.engine_key);
+	obj_rc engine = Services::service(HPit.engine_key);
 	//showobj("render call", engine);
 	
 	PlateEngine* pe = nullptr;
@@ -165,19 +165,19 @@ zstr_mgr HtmlPlates::render(htab_read options)
 	htab_walk pw;
 	auto pname = pw.value();
 
-	zval_user raw = options.get(HPit.raw_key);
+	val_ptr raw = options.get(HPit.raw_key);
 
 	int  ct = 0;
 
-	zobj_mgr   inner_obj; // ownership stored here
-	zobj_mgr   pobj;
+	obj_rc   inner_obj; // ownership stored here
+	obj_rc   pobj;
 
 	Plate*  inner_ptr = (Plate*) nullptr;
 	Plate*  prev_ptr = (Plate*) nullptr;
 
 	for (pw.start(levels_); pw.ok(); pw.next(), ct++)
 	{
-		zstr_user s = pname.zstr();
+		str_ptr s = pname.zstr();
 
 		if (!ct) {
 			inner_obj = pe->newPlate(s, false);
@@ -196,12 +196,12 @@ zstr_mgr HtmlPlates::render(htab_read options)
 
 	}
 	
-	result = inner_ptr->render(htab_read());
+	result = inner_ptr->render(htab_rd());
 
 	pe->clearPlates();
 
 	// break this circular reference to self
-	htab_write(values_).unset(HPit.view_key); 
+	htab_wr(values_).unset(HPit.view_key); 
 
 	return result;
 }
@@ -226,7 +226,7 @@ ZEND_METHOD(Wcc_HtmlPlates, getModel)
 	ZEND_PARSE_PARAMETERS_END();
 
 	auto cobj = zval_toc<HtmlPlates>(ZEND_THIS);
-	zobj_mgr result = cobj->getModel();
+	obj_rc result = cobj->getModel();
 	result.move_zv(return_value);
 }
 
@@ -251,7 +251,7 @@ ZEND_METHOD(Wcc_HtmlPlates, setModel)
 
 	auto cobj = zval_toc<HtmlPlates>(ZEND_THIS);
 
-	cobj->setModel(zobj_user(object));
+	cobj->setModel(obj_ptr(object));
 }
 
 ZEND_METHOD(Wcc_HtmlPlates, mergeData)
@@ -264,7 +264,7 @@ ZEND_METHOD(Wcc_HtmlPlates, mergeData)
 
 	auto cobj = zval_toc<HtmlPlates>(ZEND_THIS);
 
-	cobj->mergeData(zval_user(data).zarray());
+	cobj->mergeData(val_ptr(data).zarray());
 }
 
 ZEND_METHOD(Wcc_HtmlPlates, renderView)
@@ -277,9 +277,9 @@ ZEND_METHOD(Wcc_HtmlPlates, renderView)
 
 	auto cobj = zval_toc<HtmlPlates>(ZEND_THIS);
 
-	zval_mgr options_copy(options);
+	val_rc options_copy(options);
 
-	zstr_mgr result = cobj->renderView(zval_user(options_copy));
+	str_rc result = cobj->renderView(val_ptr(options_copy));
 	result.move_zv(return_value);
 
 }
@@ -295,7 +295,7 @@ ZEND_METHOD(Wcc_HtmlPlates, render)
 	auto cobj = zval_toc<HtmlPlates>(ZEND_THIS);
 
 	//showmem("render options", options);
-	zstr_mgr result = cobj->render(zval_user(options).zarray());
+	str_rc result = cobj->render(val_ptr(options).zarray());
 	result.move_zv(return_value);
 	
 }

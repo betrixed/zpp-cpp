@@ -165,20 +165,20 @@ void sql_strtab::init()
 }
 
 void 
-Literal::construct(zval_user val)
+Literal::construct(val_ptr val)
 {
 	value_ = val;
 }
 
-zstr_mgr 
+str_rc 
 Literal::toString() const
 {
 	const char k_sqt = '\'';
 
-	zval_user temp(value_);
+	val_ptr temp(value_);
 	if (temp.isString())
 	{
-		zstr_buffer buf;
+		str_buf buf;
 		buf << k_sqt << str_replace(StrView("'"), StrView("''"), temp) << k_sqt;
 		return buf.zstr();
 	}
@@ -187,7 +187,7 @@ Literal::toString() const
 	}
 }
 
-void Literal::debug_info(htab_write di)
+void Literal::debug_info(htab_wr di)
 {
 	di.set(SQSTR.partid, LIT_PID);
 	di.set(SQSTR.value, value_);
@@ -195,13 +195,13 @@ void Literal::debug_info(htab_write di)
 
 //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
-void Expr::debug_info(htab_write di)
+void Expr::debug_info(htab_wr di)
 {
 	di.set(SQSTR.partid, EXPR_PID);
 	di.set(SQSTR.value,  expr_);
 }
 
-void Expr::construct(zstr_user val)
+void Expr::construct(str_ptr val)
 {
 	expr_ = val;
 	//showstr("construct expr", expr_);
@@ -211,7 +211,7 @@ void Expr::construct(zstr_user val)
 
 
 void 
-JoinExpr::debug_info(htab_write di)
+JoinExpr::debug_info(htab_wr di)
 {
 	di.set(SQSTR.partid, JE_PID);
 	di.set(SQSTR.lhs_val, lattr_);
@@ -220,20 +220,20 @@ JoinExpr::debug_info(htab_write di)
 	di.set(SQSTR.next_op, nextop_);
 }
 
-zstr_user //static
+str_ptr //static
 JoinExpr::opStr(int op)
 {
 	return SQSTR.opstr[op];
 }
 
-zstr_user //static
+str_ptr //static
 JoinExpr::boolStr(int nextop)
 {
 	return SQSTR.boolstr[nextop];
 }
 
 void 
-JoinExpr::construct(zval_user leftval, zval_user rightval, int op, int nextop)
+JoinExpr::construct(val_ptr leftval, val_ptr rightval, int op, int nextop)
 {
 	lattr_ = leftval;
 	rattr_ = rightval;
@@ -241,13 +241,13 @@ JoinExpr::construct(zval_user leftval, zval_user rightval, int op, int nextop)
 	nextop_ = nextop;
 }
 
-zstr_mgr 
+str_rc 
 JoinExpr::emit(int ix, Bindings* bind, 
-	zstr_user Lalias, zstr_user Ralias)
+	str_ptr Lalias, str_ptr Ralias)
 {
 
-	zstr_buffer sqlbuf;
-	zstr_mgr    temp;
+	str_buf sqlbuf;
+	str_rc    temp;
 
 	const char blank = ' ';
 
@@ -259,7 +259,7 @@ JoinExpr::emit(int ix, Bindings* bind,
 		sqlbuf << blank << SQSTR.boolstr[nextop_];
 	}
 
-	zval_user L_attr(lattr_);
+	val_ptr L_attr(lattr_);
 	if (!L_attr.isNull())
 	{
 		sqlbuf << blank;
@@ -283,7 +283,7 @@ JoinExpr::emit(int ix, Bindings* bind,
 		sqlbuf << blank << SQSTR.opstr[op_];
 	}
 
-	zval_user R_attr(rattr_);
+	val_ptr R_attr(rattr_);
 
 	if (!R_attr.isNull())
 	{	
@@ -306,7 +306,7 @@ JoinExpr::emit(int ix, Bindings* bind,
 }
 
 int
-JoinExpr::toLogic(zstr_user s)
+JoinExpr::toLogic(str_ptr s)
 {
 	size_t opsize = s.size();
 
@@ -331,7 +331,7 @@ JoinExpr::toLogic(zstr_user s)
 }
 
 int
-JoinExpr::toOperator(zstr_user s)
+JoinExpr::toOperator(str_ptr s)
 {
 	size_t opsize = s.size();
 
@@ -343,8 +343,8 @@ JoinExpr::toOperator(zstr_user s)
 
 	int c1 = toupper(c[0]);
 	int c2 = 0;
-	zstr_mgr upw;
-	zstr_user ps(s);
+	str_rc upw;
+	str_ptr ps(s);
 
 	switch(c1)
 	{
@@ -418,7 +418,7 @@ JoinExpr::toOperator(zstr_user s)
 //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 void
-IColumns::debug_info(htab_write di)
+IColumns::debug_info(htab_wr di)
 {
 	di.set(SQSTR.partid, ICOL_PID);
 	di.set(SQSTR.alias, alias_);
@@ -428,7 +428,7 @@ IColumns::debug_info(htab_write di)
 }	
 
 void 
-IColumns::construct(zobj_user owner)
+IColumns::construct(obj_ptr owner)
 {
 	owner_ = owner;
 }
@@ -441,19 +441,19 @@ void IColumns::clear()
 }
 		
 void 
-IColumns::add(htab_read columns)		
+IColumns::add(htab_rd columns)		
 {
 	if (columns.ok())
 	{
 		htab_walk wk;
 
-		zval_mgr vFalse;
+		val_rc vFalse;
 
 		vFalse.set_bool(false);
 
 		auto ix = wk.key();
 		auto name = wk.value();
-		htab_write names(colnames_);
+		htab_wr names(colnames_);
 
 		for(wk.start(columns); wk.ok(); wk.next())
 		{
@@ -469,9 +469,9 @@ IColumns::add(htab_read columns)
 }
 
 void 
-IColumns::setColAlias(zstr_user name, zstr_user alias)
+IColumns::setColAlias(str_ptr name, str_ptr alias)
 {
-	zval_mgr  val;
+	val_rc  val;
 
 	if (alias.isNull())
 	{
@@ -480,31 +480,31 @@ IColumns::setColAlias(zstr_user name, zstr_user alias)
 	else {
 		val = alias;
 	}
-	htab_write hw(colnames_);
+	htab_wr hw(colnames_);
 	hw.set(name, val);
 }
 
 //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
-zobj_mgr
-TableAttr::makeTA(zstr_user t, zstr_user a)
+obj_rc
+TableAttr::makeTA(str_ptr t, str_ptr a)
 {
-	zobj_mgr result = TableAttr::omg.new_zobj();
+	obj_rc result = TableAttr::omg.new_zobj();
 	TableAttr* ta = zobj_toc<TableAttr>(result);
 	ta->construct(t, a);
 	return result;
 }
 
-zval_mgr
-TableAttr::splitDot(zstr_user s)
+val_rc
+TableAttr::splitDot(str_ptr s)
 {
 	int pos = s.find('.');
-	zval_mgr result;
+	val_rc result;
 
 	if (pos > 0)
 	{
-		zstr_mgr  tname = s.substr(0,pos);
-		zstr_mgr  tattr = s.substr(pos+1);
+		str_rc  tname = s.substr(0,pos);
+		str_rc  tattr = s.substr(pos+1);
 		result = makeTA(tname, tattr);
 	}
 	else {
@@ -514,13 +514,13 @@ TableAttr::splitDot(zstr_user s)
 }
 
 void 
-TableAttr::construct(zstr_user t, zstr_user a)
+TableAttr::construct(str_ptr t, str_ptr a)
 {
 	table_ = t;
 	attr_ = a;
 }
 
-void TableAttr::debug_info(htab_write di)
+void TableAttr::debug_info(htab_wr di)
 {
 	di.set(SQSTR.partid, TA_PID);
 	di.set(SQSTR.table, table_);
@@ -528,10 +528,10 @@ void TableAttr::debug_info(htab_write di)
 
 }
 
-zstr_mgr 
+str_rc 
 TableAttr::toString() const
 {
-	zstr_buffer buf;
+	str_buf buf;
 
 	buf << table_ << '.' << attr_;
 	return buf.zstr();
@@ -541,7 +541,7 @@ TableAttr::toString() const
 //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 void // virtual
-TColumns::debug_info(htab_write di)
+TColumns::debug_info(htab_wr di)
 {
 	IColumns::debug_info(di);
 
@@ -551,9 +551,9 @@ TColumns::debug_info(htab_write di)
 }	
 
 void 
-TColumns::construct(zstr_user tname,  zstr_user talias,  zval_user tcol)
+TColumns::construct(str_ptr tname,  str_ptr talias,  val_ptr tcol)
 {
-	zval_mgr null_owner;
+	val_rc null_owner;
 
 	this->IColumns::construct(null_owner);
 
@@ -570,17 +570,17 @@ TColumns::construct(zstr_user tname,  zstr_user talias,  zval_user tcol)
 	}
 	else if (tcol.isString())
 	{
-		zstr_user falseval;
+		str_ptr falseval;
 
 		this->setColAlias(tcol.zstr(), falseval);
 	}
 }
 
-zval_mgr
-TColumns::attr(zstr_user name)
+val_rc
+TColumns::attr(str_ptr name)
 {
-	zval_mgr result;
-	zval_user test;
+	val_rc result;
+	val_ptr test;
 
 	if (attr_map_.try_fetch(name, test))
 	{
@@ -588,16 +588,16 @@ TColumns::attr(zstr_user name)
 		return result;
 	}
 
-	zstr_user table(this->alias_);
+	str_ptr table(this->alias_);
 	if (table.isNull())
 	{
 		table = this->name_;
 	}
 
-	zobj_mgr ta = TableAttr::makeTA(table, name);
+	obj_rc ta = TableAttr::makeTA(table, name);
 
 	result = ta;
-	htab_write hw(attr_map_);
+	htab_wr hw(attr_map_);
 
 	hw.set(name, result);
 
@@ -605,29 +605,29 @@ TColumns::attr(zstr_user name)
 }
 
 void 
-TColumns::setName(zstr_user name)
+TColumns::setName(str_ptr name)
 {
 	this->name_ = name;
 }
 
-zval_mgr //static
-TColumns::tableCol(zstr_user expr)
+val_rc //static
+TColumns::tableCol(str_ptr expr)
 {
 	
 
-	zobj_mgr  zobj = omg.new_zobj();
+	obj_rc  zobj = omg.new_zobj();
 	TColumns* cobj = zobj_toc<TColumns>(zobj);
 
-	zstr_user nullstr;
-	zval_user tcol;
+	str_ptr nullstr;
+	val_ptr tcol;
 
-	zval_mgr  pair_z = explode(SQSTR.dot_char, expr);
-	zval_user pair(pair_z);
+	val_rc  pair_z = explode(SQSTR.dot_char, expr);
+	val_ptr pair(pair_z);
 
 	if (pair.isArray())
 	{
-		htab_read hpair(pair.zarray());
-		zstr_user name = hpair.get(int(0));
+		htab_rd hpair(pair.zarray());
+		str_ptr name = hpair.get(int(0));
 		
 		tcol = hpair.get(int(1));
 
@@ -636,20 +636,20 @@ TColumns::tableCol(zstr_user expr)
 	else {
 		cobj->construct(expr, nullstr, tcol);
 	}
-	return zval_mgr(zobj);
-	//zval_own explode(zstr_user sep,  zstr_user split, long limit = 0);
+	return val_rc(zobj);
+	//zval_own explode(str_ptr sep,  str_ptr split, long limit = 0);
 }
 
 //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 void 
-Param::debug_info(htab_write di)
+Param::debug_info(htab_wr di)
 {
 	di.set(SQSTR.valuekey, value_);
 }
 
 void 
-Param::construct(zval_user zp)
+Param::construct(val_ptr zp)
 {
 	value_ = zp;
 }
@@ -677,7 +677,7 @@ ZEND_METHOD(Wcd_Sql_Literal, getValue)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 	Literal* cobj = zval_toc<Literal> (ZEND_THIS);
-	zval_user value = cobj->getValue();
+	val_ptr value = cobj->getValue();
 	value.return_zv(return_value);
 }
 
@@ -691,7 +691,7 @@ ZEND_METHOD(Wcd_Sql_Literal, __toString)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 	Literal* cobj = zval_toc<Literal> (ZEND_THIS);
-	zstr_mgr result = cobj->toString();
+	str_rc result = cobj->toString();
 
 	result.move_zv(return_value);
 }
@@ -720,7 +720,7 @@ ZEND_METHOD(Wcd_Sql_Expr, __toString)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 	Expr* cobj = zval_toc<Expr> (ZEND_THIS);
-	zstr_user s = cobj->toString();
+	str_ptr s = cobj->toString();
 	s.return_zv(return_value);	
 }
 
@@ -766,7 +766,7 @@ ZEND_METHOD(Wcd_Sql_JoinExpr, emit)
 	JoinExpr* cobj = zval_toc<JoinExpr> (ZEND_THIS);
 	Bindings* bind = zval_toc<Bindings>(bindings);
 	
-	zstr_mgr s = cobj->emit(ix, bind, lalias, ralias);
+	str_rc s = cobj->emit(ix, bind, lalias, ralias);
 	s.move_zv(return_value);
 
 }
@@ -779,7 +779,7 @@ ZEND_METHOD(Wcd_Sql_JoinExpr, opstr)
 	Z_PARAM_LONG(ix)
 	ZEND_PARSE_PARAMETERS_END();
 
-	zstr_user s = JoinExpr::opStr(ix);
+	str_ptr s = JoinExpr::opStr(ix);
 	s.return_zv(return_value);
 }
 
@@ -791,7 +791,7 @@ ZEND_METHOD(Wcd_Sql_JoinExpr, boolstr)
 	Z_PARAM_LONG(ix)
 	ZEND_PARSE_PARAMETERS_END();
 
-	zstr_user s = JoinExpr::boolStr(ix);
+	str_ptr s = JoinExpr::boolStr(ix);
 	s.return_zv(return_value);
 }
 
@@ -799,10 +799,10 @@ ZEND_METHOD(Wcd_Sql_JoinExpr, boolstr)
 
 ZEND_METHOD(Wcd_Sql_IColumns, __construct)
 {
-	zarg_exec args(execute_data);
+	zarg_rd args(execute_data);
 
 
-	zobj_mgr owner;
+	obj_rc owner;
 
 	args.obj_null(owner, args.need(1));
 
@@ -830,7 +830,7 @@ ZEND_METHOD(Wcd_Sql_IColumns, getOwner)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 	IColumns* cobj = zval_toc<IColumns> (ZEND_THIS);
-	zobj_user obj = cobj->getOwner();
+	obj_ptr obj = cobj->getOwner();
 	obj.return_zv(return_value);
 }
 
@@ -839,7 +839,7 @@ ZEND_METHOD(Wcd_Sql_IColumns, getColNames)
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	IColumns* cobj = zval_toc<IColumns> (ZEND_THIS);
-	htab_read array = cobj->getColNames();
+	htab_rd array = cobj->getColNames();
 	array.return_zv(return_value);
 
 }
@@ -858,7 +858,7 @@ ZEND_METHOD(Wcd_Sql_IColumns, getAlias)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 	IColumns* cobj = zval_toc<IColumns> (ZEND_THIS);
-	zstr_user str = cobj->getAlias();
+	str_ptr str = cobj->getAlias();
 	str.return_zv(return_value);
 }
 
@@ -866,7 +866,7 @@ ZEND_METHOD(Wcd_Sql_IColumns, getName)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 	IColumns* cobj = zval_toc<IColumns> (ZEND_THIS);
-	zstr_user str = cobj->getName();
+	str_ptr str = cobj->getName();
 	str.return_zv(return_value);
 }
 
@@ -886,9 +886,9 @@ ZEND_METHOD(Wcd_Sql_IColumns, setColAlias)
 
 ZEND_METHOD(Wcd_Sql_IColumns, add)
 {
-	zarg_exec args(execute_data);
+	zarg_rd args(execute_data);
 
-	htab_read cols;
+	htab_rd cols;
 
 	args.zarray(cols, args.need(1));
 
@@ -945,7 +945,7 @@ ZEND_METHOD(Wcd_Sql_IColumns, getExpr)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 	IColumns* cobj = zval_toc<IColumns> (ZEND_THIS);
-	htab_read array = cobj->getExpr();
+	htab_rd array = cobj->getExpr();
 	array.return_zv(return_value);
 }
 
@@ -976,7 +976,7 @@ ZEND_METHOD(Wcd_Sql_TableAttr, __toString)
 
 	TableAttr* cobj = zval_toc<TableAttr> (ZEND_THIS);
 
-	zstr_mgr s = cobj->toString();
+	str_rc s = cobj->toString();
 	s.move_zv(return_value);
 
 }
@@ -985,7 +985,7 @@ ZEND_METHOD(Wcd_Sql_TableAttr, getTable)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 	TableAttr* cobj = zval_toc<TableAttr> (ZEND_THIS);
-	zstr_user s = cobj->getTable();
+	str_ptr s = cobj->getTable();
 	s.return_zv(return_value);
 
 }
@@ -994,7 +994,7 @@ ZEND_METHOD(Wcd_Sql_TableAttr, getAttr)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 	TableAttr* cobj = zval_toc<TableAttr> (ZEND_THIS);
-	zstr_user s = cobj->getAttr();
+	str_ptr s = cobj->getAttr();
 	s.return_zv(return_value);
 }
 
@@ -1005,7 +1005,7 @@ ZEND_METHOD(Wcd_Sql_TableAttr, splitDot)
 	Z_PARAM_STR(attr)
 	ZEND_PARSE_PARAMETERS_END();
 
-	zval_mgr result = TableAttr::splitDot(attr);
+	val_rc result = TableAttr::splitDot(attr);
 	result.move_zv(return_value);
 
 }
@@ -1026,14 +1026,14 @@ ZEND_METHOD(Wcd_Sql_TColumns, __construct)
 
 	TColumns* cobj = zval_toc<TColumns> (ZEND_THIS);
 
-	zval_mgr tempval;
+	val_rc tempval;
 	if (tcol)
 	{
 		tempval = tcol;
 	}
 	else if (tstr)
 	{
-		tempval = zstr_user(tstr);
+		tempval = str_ptr(tstr);
 	}
 
 	cobj->construct(tname,alias,tempval);
@@ -1049,7 +1049,7 @@ ZEND_METHOD(Wcd_Sql_TColumns, attr)
 	ZEND_PARSE_PARAMETERS_END();
 
 	TColumns* cobj = zval_toc<TColumns> (ZEND_THIS);
-	zobj_mgr obj = cobj->attr(value);
+	obj_rc obj = cobj->attr(value);
 	obj.move_zv(return_value);
 
 }
@@ -1075,7 +1075,7 @@ ZEND_METHOD(Wcd_Sql_TColumns, getName)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 	TColumns* cobj = zval_toc<TColumns> (ZEND_THIS);
-	zstr_user s = cobj->getName();
+	str_ptr s = cobj->getName();
 	s.return_zv(return_value);
 }
 
@@ -1086,7 +1086,7 @@ ZEND_METHOD(Wcd_Sql_TColumns, tableCol)
 	Z_PARAM_STR(expr)
 	ZEND_PARSE_PARAMETERS_END();
 
-	zval_mgr obj = TColumns::tableCol(expr);
+	val_rc obj = TColumns::tableCol(expr);
 
 	obj.move_zv(return_value);
 }
@@ -1115,7 +1115,7 @@ ZEND_METHOD(Wcd_Sql_Param, getValue)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 	Param* cobj = zval_toc<Param>(ZEND_THIS);
-	zval_mgr ret = cobj->getValue();
+	val_rc ret = cobj->getValue();
 
 	ret.move_zv(return_value);
 }

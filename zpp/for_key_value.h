@@ -7,7 +7,7 @@
 #endif
 
 #ifndef HTAB_MGR_H
-#include "htab_mgr.h"
+#include "htab_rc.h"
 #endif
 
 namespace zpp {
@@ -18,7 +18,7 @@ namespace zpp {
  * as values will changfor_key_valuefor_key_valuee
  * every iteration,
  */
-class for_key_value : public htab_mgr {
+class for_key_value : public htab_rc {
 protected:
 	bool       		isPacked_;
 	int        		count_; // countdown, and ok condition

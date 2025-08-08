@@ -30,17 +30,17 @@ protected:
 
 	int  timestamps_;
 
-	zobj_mgr db_;
-	//zstr_mgr name_;
-	htab_mgr pkey_options_;
-	htab_mgr seq_defs_;
-	htab_mgr class_cdefs_;
-	htab_mgr class_pkey_;
+	obj_rc db_;
+	//str_rc name_;
+	htab_rc pkey_options_;
+	htab_rc seq_defs_;
+	htab_rc class_cdefs_;
+	htab_rc class_pkey_;
 
-	zobj_mgr class_tdef_;
+	obj_rc class_tdef_;
 
-	zobj_mgr builder_;
-	zobj_mgr builder_me_;
+	obj_rc builder_;
+	obj_rc builder_me_;
 
 
 
@@ -50,95 +50,95 @@ public:
 	
 	Model();
 
-	zobj_mgr getBuilderForMe();
+	obj_rc getBuilderForMe();
 
-	zobj_mgr getBuilder();
+	obj_rc getBuilder();
 
-	zobj_mgr newRow(htab_read rdata, bool isSaved = false);
+	obj_rc newRow(htab_rd rdata, bool isSaved = false);
 
-	static Model* model_instance(zstr_user classname);
+	static Model* model_instance(str_ptr classname);
 	
-	static zstr_mgr classToTableName(zstr_user cname);
+	static str_rc classToTableName(str_ptr cname);
 
-	static zval_mgr createFromResult(zstr_user classname, htab_read results);
+	static val_rc createFromResult(str_ptr classname, htab_rd results);
 	
-	static zobj_mgr keyValue(zstr_user static_name, zval_user keynames, zval_user values);
+	static obj_rc keyValue(str_ptr static_name, val_ptr keynames, val_ptr values);
 
-	static zobj_mgr withValues(zstr_user static_name, zval_user keyvalues);
+	static obj_rc withValues(str_ptr static_name, val_ptr keyvalues);
 
-	static zval_mgr callStatic(zstr_user static_name, zstr_user method, zval_user params);
+	static val_rc callStatic(str_ptr static_name, str_ptr method, val_ptr params);
 
-	static zobj_mgr find(zstr_user static_name, zval_user id);
+	static obj_rc find(str_ptr static_name, val_ptr id);
 
-	static zstr_mgr getTableName(zstr_user cname);
+	static str_rc getTableName(str_ptr cname);
 
-	static int importFromCSV(zstr_user static_name, zstr_user filename);
+	static int importFromCSV(str_ptr static_name, str_ptr filename);
 
-	static zobj_mgr modelBuild(zstr_user static_name);
+	static obj_rc modelBuild(str_ptr static_name);
 
-	static zobj_mgr row(zstr_user static_name, htab_read data);
+	static obj_rc row(str_ptr static_name, htab_rd data);
 
-	static zobj_mgr rowSaved(zstr_user static_name, htab_read data);
+	static obj_rc rowSaved(str_ptr static_name, htab_rd data);
 
-	virtual void debug_info(htab_write di);
+	virtual void debug_info(htab_wr di);
 
-	zobj_mgr byKeyValue(zval_user keynames, zval_user values);
+	obj_rc byKeyValue(val_ptr keynames, val_ptr values);
 
-	zobj_mgr byPrimaryValue(zstr_user values);
+	obj_rc byPrimaryValue(str_ptr values);
 
-	zobj_mgr getConnect();
+	obj_rc getConnect();
 
-	htab_mgr getPKey();
+	htab_rc getPKey();
 
-	zstr_mgr getName();
+	str_rc getName();
 
-	htab_mgr getColDefs();
+	htab_rc getColDefs();
 
-	htab_mgr getSeqDefs();
+	htab_rc getSeqDefs();
 
-	zobj_mgr getTableDef();
+	obj_rc getTableDef();
 
-	zstr_mgr createdAtName();
+	str_rc createdAtName();
 
-	zstr_mgr updatedAtName();
+	str_rc updatedAtName();
 	
 	bool hasTimeStamps() const;
 
 	int getTSFlags() const;
 
-	bool exists(zobj_user rowobj);
+	bool exists(obj_ptr rowobj);
 
 	void sequenceMax();
 
-	bool saveRow(zobj_user irow, bool reload = false);
+	bool saveRow(obj_ptr irow, bool reload = false);
 
-	bool deleteRow(zobj_user irow);
+	bool deleteRow(obj_ptr irow);
 
-	zobj_mgr readRow(zobj_user irow);
+	obj_rc readRow(obj_ptr irow);
 
-	htab_mgr getKeyOptions();
+	htab_rc getKeyOptions();
 
-	htab_mgr getFieldDef(zstr_user name);
+	htab_rc getFieldDef(str_ptr name);
 
-	htab_mgr getForeignKey();
+	htab_rc getForeignKey();
 
-	zstr_mgr now() const;
+	str_rc now() const;
 
-	void setColDefs(htab_read options);
+	void setColDefs(htab_rd options);
 
-	void setKeyOptions(htab_read options);
+	void setKeyOptions(htab_rd options);
 
-	void setConnect(zobj_user db);
+	void setConnect(obj_ptr db);
 
-	void setPKey(htab_read options);
+	void setPKey(htab_rd options);
 
-	void setName(zstr_user name);
+	void setName(str_ptr name);
 
-	void setSeqDefs(htab_read options);
+	void setSeqDefs(htab_rd options);
 
 	void setTSFlags(int flags);
 
-	htab_mgr stampTime(zstr_user str_datetime, int flags=ALL_TS);
+	htab_rc stampTime(str_ptr str_datetime, int flags=ALL_TS);
 	
 	
 

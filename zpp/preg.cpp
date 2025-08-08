@@ -8,11 +8,11 @@
 
 
 #ifndef ZSTR_BUFFER_H
-#include "zstr_buffer.h"
+#include "str_buf.h"
 #endif
 
 #ifndef HTAB_MGR_H
-#include "htab_mgr.h"
+#include "htab_rc.h"
 #endif
 
 #ifndef HTAB_WALK_H
@@ -27,9 +27,9 @@ extern "C" {
 namespace zpp {
 
 
-zval_mgr explode(zstr_user sep,  zstr_user  split, long limit)
+val_rc explode(str_ptr sep,  str_ptr  split, long limit)
 {
-	zval_mgr  list;
+	val_rc  list;
 	list.new_array();
 
 	php_explode(sep, split, list, limit);
@@ -37,9 +37,9 @@ zval_mgr explode(zstr_user sep,  zstr_user  split, long limit)
 	return list;
 }
 
-zval_mgr implode(zstr_user sep, htab_read arr)
+val_rc implode(str_ptr sep, htab_rd arr)
 {
-	zval_mgr result;
+	val_rc result;
 
 	php_implode(sep, arr, result);
 
@@ -50,13 +50,13 @@ zval_mgr implode(zstr_user sep, htab_read arr)
  * manage lists of names separated by space characters, eg class attributes
  * as array lists. Ensure only one instance of each name.
  * This merge 'filters' names through a keyed array. */
-zval_mgr
-union_values(htab_read list1, htab_read list2)
+val_rc
+union_values(htab_rd list1, htab_rd list2)
 {
-	htab_mgr   keyset;
-	htab_write ks(keyset);
+	htab_rc   keyset;
+	htab_wr ks(keyset);
 
-	zval_mgr one(1);
+	val_rc one(1);
 
 	htab_walk wk;
 	// use values as keys
@@ -72,9 +72,9 @@ union_values(htab_read list1, htab_read list2)
 		ks.set(key, one);
 	}
 	// convert to list
-	zval_mgr result;
+	val_rc result;
 	result.new_array();
-	htab_write wlist(result);
+	htab_wr wlist(result);
 
 	for(wk.start(keyset); wk.ok(); wk.next())
 	{
@@ -87,21 +87,21 @@ union_values(htab_read list1, htab_read list2)
  * Calling this moves the result array.
  * Call only once for each iteration.
  
-htab_mgr  
+htab_rc  
 preg::captures()
 {
-	return htab_mgr(std::move(result_));
+	return htab_rc(std::move(result_));
 }
 */ 
-zstr_mgr  
+str_rc  
 preg::capture(size_t ix)
 {
-	zval_user test(result_);
-	zstr_mgr  result;
+	val_ptr test(result_);
+	str_rc  result;
 
 	if (test.isArray())
 	{
-		htab_write captures(test);
+		htab_wr captures(test);
 
 		if (ix < captures.size()) 
 		{
@@ -118,7 +118,7 @@ preg::preg(const char* expr, int flags, bool global)
 	//showstr("regexp_",regexp_);
 }
 
-preg::preg(zstr_user expr, int flags, bool global)
+preg::preg(str_ptr expr, int flags, bool global)
 	:  pce_(nullptr), regexp_(expr),global_(global),flags_(flags)
 {
 }
@@ -141,7 +141,7 @@ preg::pce()
 		{
 			//exception
 			zend_throw_error(zend_ce_error, "Unable to compile regular expression %s\n", 
-			     zstr_user(regexp_).data());
+			     str_ptr(regexp_).data());
 			return nullptr;
 		}
 		//zend_printf("Hold PCE %lx\n", pce_);
@@ -150,10 +150,10 @@ preg::pce()
 	return pce_;
 }
 
-zval_mgr 
-preg::splits(zstr_user data, int limit)
+val_rc 
+preg::splits(str_ptr data, int limit)
 {
-	zval_mgr retval;
+	val_rc retval;
 	/*PHPAPI void  php_pcre_split_impl(  
 	 pcre_cache_entry *pce, zend_string *subject_str, zval *return_value,
 	 zend_long limit_val, zend_long flags);*/
@@ -165,11 +165,11 @@ preg::splits(zstr_user data, int limit)
 }
 
 int 
-preg::matches(zstr_user subject, zend_long offset) 
+preg::matches(str_ptr subject, zend_long offset) 
 {
 	result_.set_null();
 
-	zval_mgr ret_val;
+	val_rc ret_val;
 
 	int isglobal = global_ ? 1 : 0;
 
@@ -193,7 +193,7 @@ preg::matches(zstr_user subject, zend_long offset)
 	php_pcre_match_impl(cre, subject, ret_val, result_,
 		 isglobal,  useflags,  flags_,  /*offset*/ offset);
 #endif
-	zval_user test(ret_val);
+	val_ptr test(ret_val);
 
 	count_ = test.isLong() ? test.zlong() : 0;
 
@@ -207,32 +207,32 @@ preg::matches(zstr_user subject, zend_long offset)
 }
 
 
-zstr_mgr
-preg::replace_callback(preg_callback& callback, zstr_user subject)
+str_rc
+preg::replace_callback(preg_callback& callback, str_ptr subject)
 {
 	flags_ = preg::OFFSET_CAPTURE;
 	global_ = true;
-	zstr_mgr  result;
+	str_rc  result;
 
 	if (matches(subject) > 0) {
-		htab_read  rtab_1(result_);
-		zstr_user  subj(subject);
+		htab_rd  rtab_1(result_);
+		str_ptr  subj(subject);
 
 		std::string_view strview = subj.vstr();
-		zstr_buffer ss;
+		str_buf ss;
 
-		zval_mgr rlist = rtab_1.get(zend_long(0));
-		htab_read replace(rlist);
+		val_rc rlist = rtab_1.get(zend_long(0));
+		htab_rd replace(rlist);
 
 		uint ipos = 0;
 		size_t ct = replace.size();
 
 		for(size_t i = 0; i < ct; i++)
 		{
-			htab_read cexp(replace.get(i));
+			htab_rd cexp(replace.get(i));
 
-			zval_user slen2 = cexp.get(zend_long(0));
-			zval_user soffset2 = cexp.get(zend_long(1));
+			val_ptr slen2 = cexp.get(zend_long(0));
+			val_ptr soffset2 = cexp.get(zend_long(1));
 
 			size_t slen = slen2.size();
 			size_t soffset = soffset2.zlong();
@@ -247,7 +247,7 @@ preg::replace_callback(preg_callback& callback, zstr_user subject)
 			
 			if (callback.get_replace(cexp))
 			{
-				ss << zstr_user(callback.replace_);
+				ss << str_ptr(callback.replace_);
 				callback.call_count_++;
 			}
 			else {
@@ -274,36 +274,36 @@ preg::replace_callback(preg_callback& callback, zstr_user subject)
 	return result;
 }	
 
-zstr_mgr 
-preg::replace(const char* rp, zstr_user subject)
+str_rc 
+preg::replace(const char* rp, str_ptr subject)
 {
 	flags_ = preg::OFFSET_CAPTURE;
 	global_ = true;
-	zstr_mgr result;
+	str_rc result;
 
 	if (matches(subject) > 0) {
-		htab_read rtab_1(result_);
-		zstr_user  subj(subject);
+		htab_rd rtab_1(result_);
+		str_ptr  subj(subject);
 
 		std::string_view strview = subj.vstr();
 		std::string_view rval(rp);
 
 		//std::stringstream ss;
-		zstr_buffer ss;
+		str_buf ss;
 		//showstr("mod init", ss);
 
-		zval_mgr rlist = rtab_1.get(zend_long(0));
-		htab_read replace(rlist);
+		val_rc rlist = rtab_1.get(zend_long(0));
+		htab_rd replace(rlist);
 
 		uint ipos = 0;
 		size_t ct = replace.size();
 		for(size_t i = 0; i < ct; i++)
 		{
-			zval_user vh2 = replace.get(i);
-			htab_read h2(vh2);
+			val_ptr vh2 = replace.get(i);
+			htab_rd h2(vh2);
 
-			zval_user slen2 = h2.get(zend_long(0));
-			zval_user soffset2 = h2.get(zend_long(1));
+			val_ptr slen2 = h2.get(zend_long(0));
+			val_ptr soffset2 = h2.get(zend_long(1));
 
 			size_t slen = slen2.size();
 			size_t soffset = soffset2.zlong();
@@ -330,23 +330,23 @@ preg::replace(const char* rp, zstr_user subject)
 }
 
 
-zval_mgr 
-reg_replace(const char* exp, const char* replace, zstr_user input)
+val_rc 
+reg_replace(const char* exp, const char* replace, str_ptr input)
 {
 	preg reg(exp, 0, true);
 
-	zstr_mgr rs = reg.replace(replace, input);
-	return zval_mgr(std::move(rs));
+	str_rc rs = reg.replace(replace, input);
+	return val_rc(std::move(rs));
 }
 
-zstr_mgr 
-preg_replace(zstr_user rexpr, zstr_user replace, zstr_user input, int limit, size_t* rcount)
+str_rc 
+preg_replace(str_ptr rexpr, str_ptr replace, str_ptr input, int limit, size_t* rcount)
 {
 	if (rcount)
 	{
 		*rcount = 0;
 	}
-	zstr_mgr result;
+	str_rc result;
 /* call the PHPAPI:  zend_string *php_pcre_replace(zend_string *regex, zend_string *subject_str, 
  const char *subject, size_t subject_len, 
  zend_string *replace_str, size_t limit, size_t *replace_count);
@@ -358,8 +358,8 @@ preg_replace(zstr_user rexpr, zstr_user replace, zstr_user input, int limit, siz
 	return result;
 }
 
-zval_mgr 
-preg_split(const char* exp, zstr_user data, int limit, int flags)
+val_rc 
+preg_split(const char* exp, str_ptr data, int limit, int flags)
 {
 	preg sp(exp, flags);
 

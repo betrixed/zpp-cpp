@@ -4,9 +4,9 @@
 #include <string>
 #include <sstream>
 
-#include "zstr_user.h"
-#include "zstr_mgr.h"
-#include "zval_user.h"
+#include "str_ptr.h"
+#include "str_rc.h"
+#include "val_ptr.h"
 #include "show_zpp.h"
 
 
@@ -201,12 +201,12 @@ PHP_FUNCTION(Wcc_route_extract_params)
 
 
 void 
-zpp_dump(zval_user zu, int level)
+zpp_dump(val_ptr zu, int level)
 {
 	dump_info::dump(zu, level);
 }
 
-zstr_mgr str_intern(zstr_user s)
+str_rc str_intern(str_ptr s)
 {
 	return zstr_intern(s.data());
 }
@@ -318,7 +318,7 @@ PHP_FUNCTION(Wcc_debug_zpp_dump)
 		Z_PARAM_ZVAL(value)
 	ZEND_PARSE_PARAMETERS_END();
 
-	zpp_dump(zval_user(value), 0);
+	zpp_dump(val_ptr(value), 0);
 }
 
 PHP_FUNCTION(Wcc_str_uncamel) {
@@ -354,14 +354,14 @@ PHP_FUNCTION(Wcc_str_intern)
 	Z_PARAM_STR(src)
 	ZEND_PARSE_PARAMETERS_END();
 
-	zstr_mgr value = str_intern(src);
+	str_rc value = str_intern(src);
 
 	value.move_zv(return_value);
 }
 /*
-static zval_mgr global_ref(const char* gname)
+static val_rc global_ref(const char* gname)
 {
-	zval_mgr gval(GLOBALS[gname].value(),true);
+	val_rc gval(GLOBALS[gname].value(),true);
 	return gval;
 }
 */
@@ -502,11 +502,11 @@ PHP_FUNCTION(Wcc_test_wcc)
 
 	showstr("p1", p1);
 
-	zstr_buffer ss;
+	str_buf ss;
 
 	zend_printf("sizeofs  base=%ld, ptr = %ld, pass = %ld, own = %ld, mod = %ld\n", 
 		sizeof(zstr_base), sizeof(zstr_ptr), sizeof(zstr_pass), sizeof(zstr_own)
-		, sizeof(zstr_buffer)); 
+		, sizeof(str_buf)); 
 	ss << "stuff";
 
 	s6 = std::move(ss);

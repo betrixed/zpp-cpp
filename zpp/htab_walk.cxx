@@ -22,7 +22,7 @@ bool htab_walk::start(HashTable* ht)
 
     if (ht)
     {
-        // zval_user are reset by invalid
+        // val_ptr are reset by invalid
     	ok_ = true;
         iterate_ = 0;
 
@@ -37,7 +37,7 @@ bool htab_walk::start(HashTable* ht)
     }
 }
 
-zval_mgr // static
+val_rc // static
 htab_walk::first(HashTable* data)
 {
     htab_walk wk;
@@ -111,7 +111,7 @@ bool htab_walk::getdata()
     zend_hash_get_current_key_zval_ex(ht, (zval*)key_, &iterate_);
 
     zend_string* keystr;
-    zval_user vkey(key_);
+    val_ptr vkey(key_);
 
     if (vkey.getStringData(&keystr))
     {

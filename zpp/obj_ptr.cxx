@@ -6,11 +6,11 @@
 #endif
 
 #ifndef ZOBJ_USER_H
-#include "zobj_user.h"
+#include "obj_ptr.h"
 #endif
 
 #ifndef ZOBJ_MGR_H
-#include "zobj_mgr.h"
+#include "obj_rc.h"
 #endif
 
 extern "C" {
@@ -18,34 +18,31 @@ extern "C" {
 #include <Zend/zend_closures.h>
 };
 
-#ifndef ZVAL_INIT_H
-#include "zval_init.h"
-#endif
 
 #ifndef HTAB_MGR_H
-#include "htab_mgr.h"
+#include "htab_rc.h"
 #endif
 
 
 namespace zpp {
 
 
-const zobj_user& 
-zobj_user::operator=(zval* rc)
+const obj_ptr& 
+obj_ptr::operator=(zval* rc)
 {
     if (!rc) {
         obj_ = nullptr;
         return *this;
     }
-    obj_ = zval_user(rc).zobject();
+    obj_ = val_ptr(rc).zobject();
     return *this;
 
 }
 /*
-const zobj_user& 
-zobj_user::operator=(const zval_mgr& rc)
+const obj_ptr& 
+obj_ptr::operator=(const val_rc& rc)
 {
-    zval_user test(rc);
+    val_ptr test(rc);
 
     if (!test.isObject()) {
         obj_ = nullptr;
@@ -57,33 +54,33 @@ zobj_user::operator=(const zval_mgr& rc)
 }
 */
 
-zobj_user::zobj_user(const zobj_mgr& rc) : obj_(rc.obj_)
+obj_ptr::obj_ptr(const obj_rc& rc) : obj_(rc.obj_)
 {
 }
 
-zobj_user::zobj_user(const zval_mgr& rc) 
+obj_ptr::obj_ptr(const val_rc& rc) 
 {
-    obj_ = zval_user(rc).zobject();
+    obj_ = val_ptr(rc).zobject();
 }
 
-const zobj_user& 
-zobj_user::operator=(zend_object* rc)
+const obj_ptr& 
+obj_ptr::operator=(zend_object* rc)
 {
     obj_ = rc;
     return *this;
 }
 
-htab_mgr 
-zobj_user::properties()
+htab_rc 
+obj_ptr::properties()
 {
-    htab_mgr result;
+    htab_rc result;
     property_list(result);
     return result;
 }
 
 // return true if something found
 bool 
-zobj_user::property_list(htab_mgr& list)
+obj_ptr::property_list(htab_rc& list)
 {
 	if (!obj_)
 	{
@@ -102,7 +99,7 @@ zobj_user::property_list(htab_mgr& list)
          obj_->handlers != &std_object_handlers ||
          GC_IS_RECURSIVE(ptab)));
 
-    htab_mgr temp;
+    htab_rc temp;
 
     temp.adopt(ptab); // allow for destroy array
 
@@ -113,7 +110,7 @@ zobj_user::property_list(htab_mgr& list)
     return false;
 }
 
-bool zobj_user::isDateTime() const
+bool obj_ptr::isDateTime() const
 {
     if (!obj_)
     {
@@ -127,7 +124,7 @@ bool zobj_user::isDateTime() const
 }
 
 void 
-zobj_user::return_zv(zval* ret) const
+obj_ptr::return_zv(zval* ret) const
 {
     if (obj_)
         ZVAL_OBJ_COPY(ret, obj_);
@@ -136,7 +133,7 @@ zobj_user::return_zv(zval* ret) const
 }
 
 zend_string* 
-zobj_user::className()
+obj_ptr::className()
 {
     if (obj_) {
         return obj_->ce->name;
@@ -149,15 +146,15 @@ void callable_failed()
    zend_throw_error(zend_ce_error, "Object callable failed "); 
 }
 
-zval_mgr
-zobj_user::callable()
+val_rc
+obj_ptr::callable()
 {
     // no args
     // for call_user_function
-    zval_mgr result;
+    val_rc result;
 
     //callable is method of no object
-    zval_mgr callme (obj_); 
+    val_rc callme (obj_); 
 
     if (!callable_fn(result, callme))
     {
@@ -166,49 +163,49 @@ zobj_user::callable()
     return result;
 }
 
-zval_mgr
-zobj_user::callable(zval* arg1)
+val_rc
+obj_ptr::callable(zval* arg1)
 {
-    zval_mgr callme (obj_);
+    val_rc callme (obj_);
 
-    zval_mgr   result;
-    zval_init  argv;
+    val_rc   result;
+    zval   argv = {0};
 
-    ZVAL_COPY_VALUE(argv, arg1);
+    ZVAL_COPY_VALUE(&argv, arg1);
 
     //showmem("callable arg1", argv);
     
-    if (!callable_fn(result, callme, 1, argv))
+    if (!callable_fn(result, callme, 1, &argv))
         callable_failed();
     return result;
 }
 
 
-zval_mgr
-zobj_user::callable(zval* arg1, zval* arg2)
+val_rc
+obj_ptr::callable(zval* arg1, zval* arg2)
 {
-    zval_mgr callme (obj_);
+    val_rc callme (obj_);
 
-    zval_mgr      result;
-    zval_init     argv[2];
+    val_rc      result;
+    zval        argv[2] = {{0},{0}};
 
-    ZVAL_COPY_VALUE(argv[0], arg1);
-    ZVAL_COPY_VALUE(argv[1], arg2);
+    ZVAL_COPY_VALUE(&argv[0], arg1);
+    ZVAL_COPY_VALUE(&argv[1], arg2);
 
-    if (!callable_fn(result, callme, 2, argv[0]))
+    if (!callable_fn(result, callme, 2, &argv[0]))
         callable_failed();
     return result;
 }
 
-void zobj_user::property(zstr_user key, zstr_user value)
+void obj_ptr::property(str_ptr key, str_ptr value)
 {
     zval temp = {0};
-    zval_user::string_bind(&temp, value);
-    property(key, zval_user(&temp));
+    val_ptr::string_bind(&temp, value);
+    property(key, val_ptr(&temp));
 
 }
 void
-zobj_user::property(zstr_user key, zval_user value)
+obj_ptr::property(str_ptr key, val_ptr value)
 {
     // zend_class_entry* scope = obj_->ce;
     zend_class_entry* scope = EG(fake_scope);
@@ -225,7 +222,7 @@ zobj_user::property(zstr_user key, zval_user value)
 
 
 bool 
-zobj_user::has_property(zstr_user name)
+obj_ptr::has_property(str_ptr name)
 {
     zend_class_entry *ce;
     zend_property_info *property_info;
@@ -254,7 +251,7 @@ zobj_user::has_property(zstr_user name)
  */
 
 zval*
-zobj_user::property_get(zstr_user key, zval* ret)
+obj_ptr::property_get(str_ptr key, zval* ret)
 {
     // I do not understand why or what scope is required, (?? private, public protected access?
     // or what would be most permissive.
@@ -285,10 +282,10 @@ zobj_user::property_get(zstr_user key, zval* ret)
  *  Relies on return value optimisation.
  *  Also result is expected to dec reference
  * */
-zval_mgr
-zobj_user::property(zstr_user key)
+val_rc
+obj_ptr::property(str_ptr key)
 {
-    zval_mgr result;
+    val_rc result;
 
     //amazing stuff from PHP-CPP Value::get(const har*, size_t)
     
@@ -309,7 +306,7 @@ zobj_user::property(zstr_user key)
      *  Execution of direct & indirect indicates one may be same as the other!
      *  
      */ 
-    //showstr("zobj_user property get", key);
+    //showstr("obj_ptr property get", key);
 
     zval* direct = zend_read_property_ex(scope, obj_, key, 1, result);
 
@@ -321,13 +318,13 @@ zobj_user::property(zstr_user key)
     return result;
 }
 
-void zobj_user::unset_property(zstr_user name)
+void obj_ptr::unset_property(str_ptr name)
 {
     zend_std_unset_property(obj_, name, nullptr);
 }
 
-zval_mgr
-zobj_user::call(zstr_user method, zval* arg1)
+val_rc
+obj_ptr::call(str_ptr method, zval* arg1)
 {
 
     fn_call_args<1> caller;
@@ -337,8 +334,8 @@ zobj_user::call(zstr_user method, zval* arg1)
     return caller.call_fn();
 }
 
-zval_mgr
-zobj_user::call(zstr_user method, 
+val_rc
+obj_ptr::call(str_ptr method, 
             zval* arg1, zval* arg2)
 {
     fn_call_args<2> caller;
@@ -351,8 +348,8 @@ zobj_user::call(zstr_user method,
     return caller.call_fn();
 }
 
-zval_mgr
-zobj_user::call(zstr_user method)
+val_rc
+obj_ptr::call(str_ptr method)
 {
     fn_call fn;
 
@@ -362,8 +359,8 @@ zobj_user::call(zstr_user method)
 }
 
 
-zval_mgr
-zobj_user::call(zstr_user method, HashTable* args)
+val_rc
+obj_ptr::call(str_ptr method, HashTable* args)
 {
     fn_call fn;
 
@@ -372,8 +369,8 @@ zobj_user::call(zstr_user method, HashTable* args)
     return fn.call_fn();
 }
 
-zval_mgr
-zobj_user::call(zstr_user method, 
+val_rc
+obj_ptr::call(str_ptr method, 
             zval*  arg1, zval*  arg2, zval*  arg3)
 {
     fn_call_args<3> caller;
@@ -389,8 +386,8 @@ zobj_user::call(zstr_user method,
 }
 
 
-zval_mgr
-zobj_user::call(zstr_user method, 
+val_rc
+obj_ptr::call(str_ptr method, 
             zval*  arg1, zval*  arg2, 
             zval*  arg3, zval*  arg4)
 {
@@ -407,18 +404,18 @@ zobj_user::call(zstr_user method,
     return caller.call_fn();
 }
 
-zobj_user::zobj_user(const zval_user& rc)
+obj_ptr::obj_ptr(const val_ptr& rc)
 {
     obj_ = rc.zobject();
 }
 
-zobj_user::zobj_user(base_d* cobj) 
+obj_ptr::obj_ptr(base_d* cobj) 
 {
     obj_ = cobj ? cobj->vobj() : nullptr;
 }
 
 bool 
-zobj_user::instanceof(zend_class_entry *ce) const
+obj_ptr::instanceof(zend_class_entry *ce) const
 {
     if (!obj_)
         return false;
@@ -429,14 +426,14 @@ zobj_user::instanceof(zend_class_entry *ce) const
 
 
 bool 
-zobj_user::method_exists(zstr_user method) const
+obj_ptr::method_exists(str_ptr method) const
 {
     if (!obj_)
         return false;
 
     zend_class_entry* ce = obj_->ce;
-    zstr_user method_name(method);
-    zstr_mgr lcname_str = method_name.to_lower();
+    str_ptr method_name(method);
+    str_rc lcname_str = method_name.to_lower();
 
    
     zend_function*  func = (zend_function*) zend_hash_find_ptr(&ce->function_table, lcname_str);
@@ -470,26 +467,26 @@ zobj_user::method_exists(zstr_user method) const
     return false;
 }
 
-zobj_user::zobj_user(zval* zp)
+obj_ptr::obj_ptr(zval* zp)
 {
     if (!zp)
     {
         obj_ = nullptr;
         return;
     }
-    obj_ = zval_user(zp).zobject();
+    obj_ = val_ptr(zp).zobject();
 }
 
-zobj_mgr
-zobj_user::clone() const 
+obj_rc
+obj_ptr::clone() const 
 {
     zend_object* copy = zend_objects_clone_obj(obj_);
 
-    zobj_mgr result;
+    obj_rc result;
     result.adopt(copy);
     return  result;
 }
 
 }; // namespace
 #endif
-//zobj_user.cpp
+//obj_ptr.cpp

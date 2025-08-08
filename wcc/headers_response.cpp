@@ -18,7 +18,7 @@ namespace wcc {
 bool Headers::send()
 {
 
-	zval_mgr issent = wis->headers_sent.callme();
+	val_rc issent = wis->headers_sent.callme();
 
 	if (issent.isTrue())
 	{
@@ -29,18 +29,18 @@ bool Headers::send()
 	auto hkey = wk.key();
 	auto hvalue = wk.value();
 
-	zval_mgr true_arg(true);
+	val_rc true_arg(true);
 
 	for(wk.start(headers_); wk.ok(); wk.next())
 	{
-		zstr_mgr harg = hkey.zstr();
+		str_rc harg = hkey.zstr();
 		if (!hvalue.isNull())
 		{
-			zstr_buffer  d2;
+			str_buf  d2;
 
 			d2 << harg << ": " << hvalue.zstr();
 
-			zval_mgr arg1 = d2.zstr();
+			val_rc arg1 = d2.zstr();
 			wis->header_key.callme(arg1,true_arg);
 		}
 		else {
@@ -50,9 +50,9 @@ bool Headers::send()
 			}
 			else 
 			{
-				zstr_buffer  d1;
+				str_buf  d1;
 				d1 << harg << ": ";
-				zval_mgr arg = d1.zstr();
+				val_rc arg = d1.zstr();
 				wis->header_key.callme(arg,true_arg);
 			}
 		}
@@ -61,9 +61,9 @@ bool Headers::send()
 }
 
 
-void Headers::Headers::setRaw(zstr_user zs)
+void Headers::Headers::setRaw(str_ptr zs)
 {
-	zval_mgr valnull;
+	val_rc valnull;
 	//showstr("set raw as key ", zs);
 
 	headers_.set(zs, valnull);
@@ -74,14 +74,14 @@ void Headers::Headers::setRaw(zstr_user zs)
 
 ZEND_METHOD(Wcc_Headers, get)
 {
-	zstr_user name;
+	str_ptr name;
 
 	ZEND_PARSE_PARAMETERS_START(1,1)
 	Z_PARAM_STR(name)
 	ZEND_PARSE_PARAMETERS_END();
 
 	auto cobj = zval_toc<Headers>(ZEND_THIS);
-	zstr_mgr result = cobj->get(name);
+	str_rc result = cobj->get(name);
 
 	result.move_zv(return_value);
 }
@@ -110,7 +110,7 @@ ZEND_METHOD(Wcc_Headers, remove)
 	auto cobj = zval_toc<Headers>(ZEND_THIS);
 	cobj->remove(name);
 
-	zobj_mgr result(ZEND_THIS);
+	obj_rc result(ZEND_THIS);
 	result.move_zv(return_value);
 }
 
@@ -120,7 +120,7 @@ ZEND_METHOD(Wcc_Headers, reset)
 
 	auto cobj = zval_toc<Headers>(ZEND_THIS);
 	cobj->reset();
-	zobj_mgr result(ZEND_THIS);
+	obj_rc result(ZEND_THIS);
 	result.move_zv(return_value);
 }
 
@@ -147,7 +147,7 @@ ZEND_METHOD(Wcc_Headers, set)
 	auto cobj = zval_toc<Headers>(ZEND_THIS);
 	cobj->set(name, value);
 
-	zobj_mgr result(ZEND_THIS);
+	obj_rc result(ZEND_THIS);
 	result.move_zv(return_value);
 }
 
@@ -162,7 +162,7 @@ ZEND_METHOD(Wcc_Headers, setRaw)
 	auto cobj = zval_toc<Headers>(ZEND_THIS);
 	cobj->setRaw(name);
 
-	zobj_mgr result(ZEND_THIS);
+	obj_rc result(ZEND_THIS);
 	result.move_zv(return_value);
 }
 
@@ -171,7 +171,7 @@ ZEND_METHOD(Wcc_Headers, toArray)
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	auto cobj = zval_toc<Headers>(ZEND_THIS);
-	const htab_mgr& result = cobj->toArray();
+	const htab_rc& result = cobj->toArray();
 
 	result.return_zv(return_value);
 }

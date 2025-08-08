@@ -8,25 +8,25 @@
 #define ZVAL_USER_CPP
 
 #ifndef ZSTR_MGR_H
-#include "zstr_mgr.h"
+#include "str_rc.h"
 #endif
 
 #ifndef ZVAL_USER_H
-#include "zval_user.h"
+#include "val_ptr.h"
 #endif
 
 #ifndef HTAB_READ_H
-#include "htab_read.h"
+#include "htab_rd.h"
 #endif
 
 #ifndef ZVAL_MGR_H
-#include "zval_mgr.h"
+#include "val_rc.h"
 #endif
 
 namespace zpp {
 	
 bool 
-zval_user::same(const zval_user& test) const
+val_ptr::same(const val_ptr& test) const
 {
 	zval* a = p_;
 	zval* b = test.p_;
@@ -55,7 +55,7 @@ zval_user::same(const zval_user& test) const
 }
 
 zval* //static 
-zval_user::real_zval(const zval* zv)
+val_ptr::real_zval(const zval* zv)
 {
     switch(Z_TYPE_P(zv)) {
         case IS_REFERENCE:
@@ -68,58 +68,58 @@ zval_user::real_zval(const zval* zv)
     return (zval*) zv;
 }
 
-zval_user zval_user::referent()
+val_ptr val_ptr::referent()
 {
 	if (p_) {
 		zval* x = p_;
 		ZVAL_DEREF(x);
-		return zval_user(x);
+		return val_ptr(x);
 	}
-	return zval_user(p_);	
+	return val_ptr(p_);	
 }
 
 
 int  
-zval_user::ref_type() const
+val_ptr::ref_type() const
 {
     if (!p_) {
         return IS_NULL;
     }
-    return Z_TYPE_P(zval_user::real_zval(p_));
+    return Z_TYPE_P(val_ptr::real_zval(p_));
 }
 
 
 bool 
-zval_user::isDouble() const
+val_ptr::isDouble() const
 {
     return (p_ && (ref_type() == IS_DOUBLE));
 }
 
 bool 
-zval_user::isLong() const
+val_ptr::isLong() const
 {
     return (p_ && (ref_type() == IS_LONG));
 }
 
 bool 
-zval_user::isArray() const
+val_ptr::isArray() const
 {
     return (p_ && (ref_type() == IS_ARRAY));
 }
 
- bool zval_user::isResource() const
+ bool val_ptr::isResource() const
  {
  	return (p_ && (ref_type() == IS_RESOURCE));
  }
 
 bool 
-zval_user::isNull() const
+val_ptr::isNull() const
 {
     return (!(p_) || (ref_type() == IS_NULL));
 }
 
 bool 
-zval_user::isObject() const
+val_ptr::isObject() const
 { 
     return (p_ && (ref_type() == IS_OBJECT));
 }
@@ -127,41 +127,41 @@ zval_user::isObject() const
 
 
 bool 
-zval_user::isString() const
+val_ptr::isString() const
 {
     return (p_ && (ref_type() == IS_STRING));
 }
 
 bool 
-zval_user::isTrue() const 
+val_ptr::isTrue() const 
 {
     return (p_ && (ref_type() == IS_TRUE));
 }
 
 bool 
-zval_user::isFalse() const 
+val_ptr::isFalse() const 
 {
     return ( !(p_) || (ref_type() == IS_FALSE));
 }
 
 bool 
-zval_user::isPointer() const
+val_ptr::isPointer() const
 {
     return (p_ && (ref_type() == IS_PTR));
 }
 
-zval_user::zval_user(const zval* rc)
+val_ptr::val_ptr(const zval* rc)
 {
     p_ = (zval*) rc;
-    //showmem("zval_user:: ", (zval*) rc);
+    //showmem("val_ptr:: ", (zval*) rc);
 }   
 
 bool 
-zval_user::empty() const 
+val_ptr::empty() const 
 {
 	if (!p_)
 		return true;
-	zval* rp = zval_user::real_zval(p_);
+	zval* rp = val_ptr::real_zval(p_);
 
 	int rtype = Z_TYPE_P(rp);
 
@@ -174,19 +174,19 @@ zval_user::empty() const
     case IS_DOUBLE:
     	return (Z_DVAL_P(rp) == 0.0) ? true : false;
 	case IS_ARRAY:
-    	return htab_read(Z_ARR_P(rp)).size() ? false : true;
+    	return htab_rd(Z_ARR_P(rp)).size() ? false : true;
     case IS_STRING:
-    	return zstr_user(Z_STR_P(rp)).size() ? false : true;
+    	return str_ptr(Z_STR_P(rp)).size() ? false : true;
 	default:
     	return false;
 	}
 }
 
 bool 
-zval_user::ok() const {
+val_ptr::ok() const {
 	if (!p_)
 		return false;
-	zval* rp = zval_user::real_zval(p_);
+	zval* rp = val_ptr::real_zval(p_);
 	int rtype = Z_TYPE_P(rp);
     if (rtype < IS_TRUE)
     {
@@ -195,21 +195,21 @@ zval_user::ok() const {
     switch(rtype)
     {
     case IS_ARRAY:
-    	return htab_read(Z_ARR_P(rp)).size() ? true : false;
+    	return htab_rd(Z_ARR_P(rp)).size() ? true : false;
     case IS_STRING:
-    	return zstr_user(Z_STR_P(rp)).size() ? true : false;
+    	return str_ptr(Z_STR_P(rp)).size() ? true : false;
     }
     // Don't care about zero values of LONG or DOUBLE
     return true;
 }
 
 zend_string* 
-zval_user::className() const
+val_ptr::className() const
 {
 	if (!p_)
 		return nullptr;
 
-	zval* zv = zval_user::real_zval(p_);
+	zval* zv = val_ptr::real_zval(p_);
 
 	if (Z_TYPE_P(zv) == IS_OBJECT)
 	{
@@ -221,12 +221,12 @@ zval_user::className() const
 }
 
 zend_object* 
-zval_user::zobject() const
+val_ptr::zobject() const
 {
 	if (!p_) {
 		return nullptr;
 	}
-	zval* zv = zval_user::real_zval(p_);
+	zval* zv = val_ptr::real_zval(p_);
 
 	if (Z_TYPE_P(zv) != IS_OBJECT) {
 		return nullptr;
@@ -234,13 +234,13 @@ zval_user::zobject() const
 	return Z_OBJ_P(zv);
 }
 
-size_t zval_user::size() const
+size_t val_ptr::size() const
 {
 	if (!p_) 
 	{
 		return 0;
 	}
-	zval* zv = zval_user::real_zval(p_);
+	zval* zv = val_ptr::real_zval(p_);
 	switch(Z_TYPE_P(zv))
 	{
 	case IS_ARRAY:
@@ -252,24 +252,24 @@ size_t zval_user::size() const
 	}
 }
 
-zval_user::zval_user(const zval_mgr& mgr) : p_((zval*) mgr)
+val_ptr::val_ptr(const val_rc& mgr) : p_((zval*) mgr)
 {
 }
 
 /*
 * Return managed string
 */
-zstr_mgr
-zval_user::to_zstr() const 
+str_rc
+val_ptr::to_zstr() const 
 {
-	zstr_mgr result;
+	str_rc result;
 
 	if (!p_)
 	{
 		return result;
 	}
 
-	zval* zv = zval_user::real_zval(p_);
+	zval* zv = val_ptr::real_zval(p_);
 
 	if (Z_TYPE_P(zv) != IS_STRING) {
 		// return a string representation
@@ -282,11 +282,11 @@ zval_user::to_zstr() const
 }
 
 zend_string*  
-zval_user::zstr() const
+val_ptr::zstr() const
 {	
 	if (!p_)
 		return nullptr;
-	zval* zv = zval_user::real_zval(p_);
+	zval* zv = val_ptr::real_zval(p_);
 	if (Z_TYPE_P(zv) != IS_STRING)
 	{
 		return nullptr;
@@ -295,30 +295,30 @@ zval_user::zstr() const
 }
 
 std::string 
-zval_user::cstr() const
+val_ptr::cstr() const
 {
-	zstr_mgr temp = to_zstr();
-	return zstr_user(temp).cstr();	
+	str_rc temp = to_zstr();
+	return str_ptr(temp).cstr();	
 }
 
 std::string_view 
-zval_user::vstr() const
+val_ptr::vstr() const
 {
-	zstr_user temp(this->zstr());
+	str_ptr temp(this->zstr());
 	return temp.vstr();
 }
 
 bool 
-zval_user::isCallable()  const
+val_ptr::isCallable()  const
 {
 	if (!p_)
 		return false;
-	zval* zv = zval_user::real_zval(p_);
+	zval* zv = val_ptr::real_zval(p_);
 	return (zend_is_callable(zv, 0, nullptr));
 }
 
 bool 
-zval_user::getStringData(zend_string** retstr) const 
+val_ptr::getStringData(zend_string** retstr) const 
 {
 	zend_string* s = this->zstr();
 
@@ -330,12 +330,12 @@ zval_user::getStringData(zend_string** retstr) const
 }
 
 double 
-zval_user::zdouble() const
+val_ptr::zdouble() const
 {
 	if (!p_) {
 		return 0.0; 
 	}
-	zval* zv = zval_user::real_zval(p_);
+	zval* zv = val_ptr::real_zval(p_);
 	if (Z_TYPE_P(zv) != IS_DOUBLE) {
 		return zval_get_double_func(zv);
 	}
@@ -343,13 +343,13 @@ zval_user::zdouble() const
 }
 
 void* 
-zval_user::voidptr() const 
+val_ptr::voidptr() const 
 {
 	if (!p_) 
 	{
 		return nullptr; 
 	}
-	zval* zv = zval_user::real_zval(p_);
+	zval* zv = val_ptr::real_zval(p_);
 	if ( Z_TYPE_P(zv) != IS_PTR) {
 		return nullptr;
 	}
@@ -357,32 +357,32 @@ zval_user::voidptr() const
 }
 
 bool
-zval_user::zbool() const {
+val_ptr::zbool() const {
 	if (!p_)
 	{
 		return false;
 	}
-	zval* zv = zval_user::real_zval(p_);
+	zval* zv = val_ptr::real_zval(p_);
 	switch(Z_TYPE_P(zv)) {
 		case IS_TRUE: return true;
 		case IS_FALSE: return false;
 		default: {
 			// become ridiculous
-			zval_mgr temp(zv);
+			val_rc temp(zv);
 			convert_to_boolean(temp);
-			return zval_user(temp).zbool();
+			return val_ptr(temp).zbool();
 		}
 	}
 }
 
 zend_long 
-zval_user::zlong() const
+val_ptr::zlong() const
 {
 	if (!p_)
 	{
 		return 0;
 	}
-	zval* zv = zval_user::real_zval(p_);
+	zval* zv = val_ptr::real_zval(p_);
 
 	switch(Z_TYPE_P(zv))
 	{
@@ -394,11 +394,11 @@ zval_user::zlong() const
 }
 
 HashTable* 
-zval_user::zarray() const
+val_ptr::zarray() const
 {
 	if (!p_)
 		return nullptr;
-	zval* zv = zval_user::real_zval(p_);
+	zval* zv = val_ptr::real_zval(p_);
 
 	if (Z_TYPE_P(zv) != IS_ARRAY) {
 		return nullptr;
@@ -407,7 +407,7 @@ zval_user::zarray() const
 }
 
 void 
-zval_user::return_zv(zval* ret)
+val_ptr::return_zv(zval* ret)
 {
 	if (p_)
 	{
@@ -418,15 +418,15 @@ zval_user::return_zv(zval* ret)
 	}
 }
 
-const zval_user& 
-zval_user::operator=(const zval_mgr& rc)
+const val_ptr& 
+val_ptr::operator=(const val_rc& rc)
 {
 	p_ = rc;
 	return *this;
 }
 
 void // protected
-zval_user::bind_string(zend_string* s)
+val_ptr::bind_string(zend_string* s)
 {
     if (s) 
     {
@@ -445,13 +445,13 @@ zval_user::bind_string(zend_string* s)
 }
 
 void // protected
-zval_user::bind_long(zend_long value)
+val_ptr::bind_long(zend_long value)
 {
     ZVAL_LONG(p_, value);
 }
 
 void // protected
-zval_user::bind_object(zend_object* obj)
+val_ptr::bind_object(zend_object* obj)
 {
     if (obj)
     {
@@ -464,7 +464,7 @@ zval_user::bind_object(zend_object* obj)
 
 
 void 
-zval_user::bind_array(HashTable* ht)
+val_ptr::bind_array(HashTable* ht)
 {
     if (ht) {
         ZVAL_ARR(p_, ht);
@@ -480,14 +480,14 @@ zval_user::bind_array(HashTable* ht)
     }
 }
 
-void zval_user::setbool(bool value)
+void val_ptr::setbool(bool value)
 {
     *p_ = {0};
     ZVAL_BOOL(p_, value);
 }
 
 int 
-zval_user::refcount() const
+val_ptr::refcount() const
 {
 	if (p_ && Z_REFCOUNTED_P(p_))
 		return Z_REFCOUNT_P(p_);
@@ -495,16 +495,16 @@ zval_user::refcount() const
 		return 0;
 }
 
-zval_user 
-zval_user::php_constant(zstr_user name)
+val_ptr 
+val_ptr::php_constant(str_ptr name)
 {
-	return zval_user(zend_get_constant(name));
+	return val_ptr(zend_get_constant(name));
 }
 
 
 // bind and set zval flags for reference counting this array
 void // static 
-zval_user::array_bind(zval* tmp, HashTable* t)
+val_ptr::array_bind(zval* tmp, HashTable* t)
 {
 	if (!t)
 	{
@@ -522,7 +522,7 @@ zval_user::array_bind(zval* tmp, HashTable* t)
 }
 
 void
-zval_user::object_bind(zval* temp, zend_object* obj)
+val_ptr::object_bind(zval* temp, zend_object* obj)
 {
 	if (!obj)
 	{
@@ -540,7 +540,7 @@ zval_user::object_bind(zval* temp, zend_object* obj)
 
 
 void // static 
-zval_user::string_bind(zval* tmp, zend_string* s)
+val_ptr::string_bind(zval* tmp, zend_string* s)
 {
 	if (s) 
     {
@@ -557,5 +557,5 @@ zval_user::string_bind(zval* tmp, zend_string* s)
 
 
 }; //namespace
-//zval_user.cpp
+//val_ptr.cpp
 #endif

@@ -19,13 +19,13 @@ namespace wcc {
 
 	class Response : public base_d {
 	protected:
-		zval_mgr events_;  // false|object|null
-		zobj_mgr headers_; // Hmap object
+		val_rc events_;  // false|object|null
+		obj_rc headers_; // Hmap object
 		Hmap*    hmap_;    // Hmap cobj for convenience
 
-		zstr_mgr file_;
-		zstr_mgr content_;
-		zobj_mgr cookies_; // some cookies interface
+		str_rc file_;
+		str_rc content_;
+		obj_rc cookies_; // some cookies interface
 		bool     sent_;
 
 		Hmap* hdrs_obj() const {
@@ -35,79 +35,79 @@ namespace wcc {
 		fn_call_args<3>  header_fn;
 
 
-		zstr_mgr attach_name(zstr_user uri, zstr_user suffix);
+		str_rc attach_name(str_ptr uri, str_ptr suffix);
 		bool send_each();
-		void make_header(zstr_user name, zstr_user value);
+		void make_header(str_ptr name, str_ptr value);
 
 	public:
 		static base_obj_mgr<Response> omg;
 
-		static zval_mgr readfile(zstr_user name);
+		static val_rc readfile(str_ptr name);
 
-		virtual void debug_info(htab_write hw);
+		virtual void debug_info(htab_wr hw);
 
 		
 		void construct(
-			zstr_user  content,
-			zval_user     code,
-			zstr_user     status);
+			str_ptr  content,
+			val_ptr     code,
+			str_ptr     status);
 
-		void appendContent(zstr_user  content);
+		void appendContent(str_ptr  content);
 		bool hasContent();
-		zstr_mgr getContent();
+		str_rc getContent();
 
-		void setCookies(zval_user bag);
+		void setCookies(val_ptr bag);
 		bool sendCookies();
 
-		void delay_redirect(zstr_user location, int delay=2);
-		void redirect(zstr_user location, bool external = false, int statusCode = 302);
+		void delay_redirect(str_ptr location, int delay=2);
+		void redirect(str_ptr location, bool external = false, int statusCode = 302);
 
-		zobj_user getHeaders();
-		void setHeaders(zval_user headers);
+		obj_ptr getHeaders();
+		void setHeaders(val_ptr headers);
 
 		void setNotModified();
 
-		void setExpires(zval_user exptime);
+		void setExpires(val_ptr exptime);
 
-		void setHeader(zstr_user key, zstr_user value);
+		void setHeader(str_ptr key, str_ptr value);
 
-		void setContentType(zstr_user ctype, zstr_user charset);
+		void setContentType(str_ptr ctype, str_ptr charset);
 		void setContentType(const std::string_view& ctype, const std::string_view& charset);
 
-		void setContent(zstr_user  content);
-		void setStatusCode(int icode, zstr_user  message);
+		void setContent(str_ptr  content);
+		void setStatusCode(int icode, str_ptr  message);
 
-		void ajaxHtml(zstr_user  content);
-		void ajaxJson(zval_user  content);
+		void ajaxHtml(str_ptr  content);
+		void ajaxJson(val_ptr  content);
 
-		void setJsonContent(zval_user content, int jsonOptions=0);
+		void setJsonContent(val_ptr content, int jsonOptions=0);
 
-		htab_write writer();
+		htab_wr writer();
 
-        htab_read reader() const;
+        htab_rd reader() const;
 
 		bool send();
 		bool sendHeaders();
 		bool isSent();
 
-		void send_header(zstr_user header, bool replace = true,
+		void send_header(str_ptr header, bool replace = true,
 			int response_code = 0);
 
 		bool headers_sent();
 
-		bool hasHeader(zstr_user name);
+		bool hasHeader(str_ptr name);
 
-		zval_mgr getStatusCode();
+		val_rc getStatusCode();
 
-		zobj_mgr getEventQueue();
+		obj_rc getEventQueue();
 
-		zval_mgr fireEvent(zstr_user eventType);
+		val_rc fireEvent(str_ptr eventType);
 
 		void resetHeaders();
 		void setContentLength(int clen);
-		void setRawHeader(zstr_user header);
+		void setRawHeader(str_ptr header);
 		
-		void setFileToSend(zstr_user path, zstr_user attachName, bool attachement=true);
+		void setFileToSend(str_ptr path, str_ptr attachName, bool attachement=true);
 	};
 
 	typedef std::map<int, zstr_intern> StatusCodeMap;
@@ -154,7 +154,7 @@ namespace wcc {
 		void init() override;
 		void end() override;
 
-		zstr_mgr getHttpCodeMsg(int code);
+		str_rc getHttpCodeMsg(int code);
 	};
 
 	extern Response_init RSPD;

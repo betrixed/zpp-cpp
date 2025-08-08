@@ -36,15 +36,15 @@ public:
 	zend_long    verbs_;
 	zend_long	 ajax_;
 
-	zstr_mgr     id_;
+	str_rc     id_;
 
-	zstr_mgr 	 pattern_;
-	zstr_mgr 	 compiled_;
+	str_rc 	 pattern_;
+	str_rc 	 compiled_;
 
-	zval_mgr 	 target_;
+	val_rc 	 target_;
 
 	// matched values of reg-expression
-	htab_mgr 	 params_;
+	htab_rc 	 params_;
 
 	class RouteMgr : public base_obj_mgr<Route> {
 	public:
@@ -57,25 +57,25 @@ public:
 
 	static RouteMgr omg;
 
-	virtual void debug_info(htab_write hw);
+	virtual void debug_info(htab_wr hw);
 
-	static bool isMyClass(zstr_user obj);
+	static bool isMyClass(str_ptr obj);
 
-	static zend_long getVerbInt(zstr_user sverb);
-	static htab_mgr  getVerbNames( zend_long flags );
+	static zend_long getVerbInt(str_ptr sverb);
+	static htab_rc  getVerbNames( zend_long flags );
 	
-	static zstr_mgr getVerb(zend_long verb);
+	static str_rc getVerb(zend_long verb);
 
-	static zobj_mgr get(zstr_user pattern, zval_user target, int ajax = ajax::AJ_NONE);
+	static obj_rc get(str_ptr pattern, val_ptr target, int ajax = ajax::AJ_NONE);
 
-	static zobj_mgr post(zstr_user pattern, zval_user target, int ajax = ajax::AJ_NONE);
+	static obj_rc post(str_ptr pattern, val_ptr target, int ajax = ajax::AJ_NONE);
 
-	static zobj_mgr methods(int verbs, zstr_user pattern, zval_user target, int ajax = ajax::AJ_NONE);
+	static obj_rc methods(int verbs, str_ptr pattern, val_ptr target, int ajax = ajax::AJ_NONE);
 
-	void construct(int verbs, zstr_user pattern, zval_user target);
+	void construct(int verbs, str_ptr pattern, val_ptr target);
 
-	void name(zstr_user name);
-	zstr_user  getName();
+	void name(str_ptr name);
+	str_ptr  getName();
 
 	zend_long getVerbs() const 
 	{
@@ -84,47 +84,47 @@ public:
 
 	bool hasParams()
 	{
-		return (htab_read(params_).size() > 0) ? true : false;
+		return (htab_rd(params_).size() > 0) ? true : false;
 	}
 
-	htab_read getParams();
+	htab_rd getParams();
 	
-	void setParams(htab_read params);
+	void setParams(htab_rd params);
 
-	zstr_mgr routeUrl(htab_read pvalues);
+	str_rc routeUrl(htab_rd pvalues);
 	
-	zstr_user getCompiled() const
+	str_ptr getCompiled() const
 	{
 		return compiled_;
 	}
 	
-	zstr_user getPattern() const
+	str_ptr getPattern() const
 	{
 		return pattern_;
 	}
 
-	zval_user getTarget() const {
+	val_ptr getTarget() const {
 		return target_;
 	}
 
-	void setTarget(zval_user tg)
+	void setTarget(val_ptr tg)
 	{
 		target_ = tg;
 	}
 	
-	void setPattern(zstr_user p)
+	void setPattern(str_ptr p)
 	{
 		pattern_ = p;
 	}
 
-	void setCompiled(zstr_user c)
+	void setCompiled(str_ptr c)
 	{
 		compiled_ = c;
 	}
 
-	htab_mgr __serialize();
+	htab_rc __serialize();
 	
-	void __unserialize(htab_read htab);
+	void __unserialize(htab_rd htab);
 
 	VIRTUAL_ZOBJPTR
 

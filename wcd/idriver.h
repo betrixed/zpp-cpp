@@ -32,57 +32,57 @@ namespace wcd {
 
 		static base_obj_mgr<IDriver> omg;
 		
-		void construct(zobj_user icfg, zstr_user name);
+		void construct(obj_ptr icfg, str_ptr name);
 		void destruct();
 
 		virtual void afterConnect();
-		virtual zstr_mgr getSqlType();
-		virtual void debug_info(htab_write di);
+		virtual str_rc getSqlType();
+		virtual void debug_info(htab_wr di);
 		
 		static int pdo_type(unsigned int ztype);
 		
 		bool begin();
 		
-		void bind(zval_user stmt, htab_read params);
+		void bind(val_ptr stmt, htab_rd params);
 		void close();
-		void closeStmt(zval_user stmt);
+		void closeStmt(val_ptr stmt);
 		bool commit();
 		void connect();
 
-		zstr_mgr escape(zstr_user value);
-		zval_mgr execute(zval_user stmt, bool close = true, bool fetch = false);
+		str_rc escape(str_ptr value);
+		val_rc execute(val_ptr stmt, bool close = true, bool fetch = false);
 
-		htab_mgr fetchAllRows(zval_user stmt, int mode);
-		zval_mgr fetchRow(zval_user stmt, int mode);
+		htab_rc fetchAllRows(val_ptr stmt, int mode);
+		val_rc fetchRow(val_ptr stmt, int mode);
 
-		zval_mgr getAttribute(int key);
+		val_rc getAttribute(int key);
 
-		zval_mgr getCaseAttribute();
+		val_rc getCaseAttribute();
 
 		void setCaseAttribute(int value);
 
-		htab_mgr getColumnNames(zstr_user tableName);
-		htab_mgr getConnectOptions();
+		htab_rc getColumnNames(str_ptr tableName);
+		htab_rc getConnectOptions();
 
-		zstr_mgr getDSN();
+		str_rc getDSN();
 
 		
 
-		zstr_mgr getDatabaseName();
+		str_rc getDatabaseName();
 
 		int getFetch();
 
-		zobj_mgr getSchema();
-		zstr_mgr getSchemaClass();
-		htab_mgr getTableColumns(zstr_user tableName);
-		zobj_mgr getTableMode(zstr_user tableName);
+		obj_rc getSchema();
+		str_rc getSchemaClass();
+		htab_rc getTableColumns(str_ptr tableName);
+		obj_rc getTableMode(str_ptr tableName);
 
-		htab_mgr getTableNames();
+		htab_rc getTableNames();
 
-		zval_mgr handle();
+		val_rc handle();
 
-		zobj_mgr isql();
-		zobj_mgr iconfig();
+		obj_rc isql();
+		obj_rc iconfig();
 		
 
 		bool inTransaction();
@@ -90,41 +90,41 @@ namespace wcd {
 		bool isConnected();
 
 
-		zval_mgr lastInsertId();
-		zval_mgr lastSeqValue(zstr_user name);
+		val_rc lastInsertId();
+		val_rc lastSeqValue(str_ptr name);
 
-		void log(htab_read info);
+		void log(htab_rd info);
 
-		zstr_mgr modelClassName(zstr_user tableName);
+		str_rc modelClassName(str_ptr tableName);
 
-		zobj_mgr newBindings();
-		zobj_mgr newDmlBuild();
-		zobj_mgr newParamList();
-		zstr_mgr param(int pno);
+		obj_rc newBindings();
+		obj_rc newDmlBuild();
+		obj_rc newParamList();
+		str_rc param(int pno);
 
-		zval_mgr prepare(zstr_user query);
-		void  	 prepareExecute(zstr_user query, htab_read values, htab_read bindTypes);
-		zval_mgr prepareQuery(zstr_user query, htab_read values, htab_read bindTypes);
+		val_rc prepare(str_ptr query);
+		void  	 prepareExecute(str_ptr query, htab_rd values, htab_rd bindTypes);
+		val_rc prepareQuery(str_ptr query, htab_rd values, htab_rd bindTypes);
 
-		zval_mgr query(zstr_user query, htab_read params);
-		zval_mgr querySingle(zstr_user query);
+		val_rc query(str_ptr query, htab_rd params);
+		val_rc querySingle(str_ptr query);
 
 		
 
-		zstr_mgr quoteName(zstr_user name);
+		str_rc quoteName(str_ptr name);
 
-		zobj_mgr readSchema();
+		obj_rc readSchema();
 
 		bool rollback();
 
-		bool setAttribute(int key, zval_user value);
+		bool setAttribute(int key, val_ptr value);
 		int  setFetch(int mode);
 
 		bool transaction();
 
-		zobj_mgr getTableModel(zstr_user tableName);
+		obj_rc getTableModel(str_ptr tableName);
 
-		zstr_mgr lastSQL() const;
+		str_rc lastSQL() const;
 		
 		IConfig* 	icfg_c();
 		ISql*       isql_c();
@@ -132,20 +132,20 @@ namespace wcd {
 
 
 
-		zobj_mgr    icfg_;
-		zstr_mgr    cfg_name_;
-		zstr_mgr	db_name_;
-		zobj_mgr    isql_;
+		obj_rc    icfg_;
+		str_rc    cfg_name_;
+		str_rc	db_name_;
+		obj_rc    isql_;
 
-		zval_mgr 	handle_;
+		val_rc 	handle_;
 
 		int         ifetch_;
 		bool        logging_;
-		zstr_mgr    lastsql_;
+		str_rc    lastsql_;
 
-		htab_mgr    table_models_;
+		htab_rc    table_models_;
 
-		zobj_mgr    schema_def_;
+		obj_rc    schema_def_;
 
 		
 

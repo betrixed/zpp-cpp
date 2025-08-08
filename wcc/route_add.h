@@ -11,32 +11,32 @@ namespace wcc {
 	class RouteAdd : public base_d 
 	{
 	protected:
-		zobj_mgr route_set_;
-		zstr_mgr module_name_;
-		zstr_mgr method_sfx_;
-		zstr_mgr url_prefix_;
-		zval_mgr fallback_;
+		obj_rc route_set_;
+		str_rc module_name_;
+		str_rc method_sfx_;
+		str_rc url_prefix_;
+		val_rc fallback_;
 	public:
 
 		static base_obj_mgr<RouteAdd> omg;
 
-		static zstr_user rex_url();
+		static str_ptr rex_url();
 		
-		virtual void debug_info(htab_write hw);
+		virtual void debug_info(htab_wr hw);
 
-		void construct(zobj_user rset);
+		void construct(obj_ptr rset);
 
-		void addRoutes(htab_read list, zstr_user prefix, zstr_user module);
+		void addRoutes(htab_rd list, str_ptr prefix, str_ptr module);
 
-		void fallback(zval_user backup);
+		void fallback(val_ptr backup);
 
-		zobj_user getRouteSet() const;
+		obj_ptr getRouteSet() const;
 
-		void methodSfx(zstr_user sfx);
+		void methodSfx(str_ptr sfx);
 
-		void module(zstr_user name);
+		void module(str_ptr name);
 
-		void prefix(zstr_user start);
+		void prefix(str_ptr start);
 
 		void ready(Route* route);
 

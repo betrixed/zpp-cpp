@@ -13,7 +13,7 @@
 
 
 #ifndef ZSTR_OUTPUT_H
-#include "zstr_output.h"
+#include "str_out.h"
 #endif
 
 #ifndef HTAB_WALK_H
@@ -28,7 +28,7 @@ extern "C" {
 
 namespace zpp {
 
-zstr_output dump_info::dumper_d;
+str_out dump_info::dumper_d;
 
 
 void 
@@ -101,7 +101,7 @@ dump_info::di_show_resource(zval* zu)
 }
 
 void // static
-dump_info::dump(zval_user val, int level)
+dump_info::dump(val_ptr val, int level)
 {
 	dump_info di;
 
@@ -110,7 +110,7 @@ dump_info::dump(zval_user val, int level)
 }
 
 void // static
-dump_info::msg_dump(const char* msg, zval_user val)
+dump_info::msg_dump(const char* msg, val_ptr val)
 {
 	dump_info di;
 
@@ -132,7 +132,7 @@ dump_info::show_properties(zend_object* zobj, HashTable* myht, int level, int re
 	zval *val;
 
 	indent(level);
-	total_ += htab_read(myht).size();
+	total_ += htab_rd(myht).size();
 
 	ss << "{\n";
 
@@ -191,7 +191,7 @@ void dump_info::array_sub(HashTable* myht, int level)
 
 	indent(level);
 
-	total_ += htab_read(myht).size();
+	total_ += htab_rd(myht).size();
 	ss << packed << "{\n";
 	
 	for (fkv.start(myht); fkv.ok(); fkv.next())
@@ -221,7 +221,7 @@ void dump_info::array_sub(HashTable* myht, int level)
 }
 
 void 
-dump_info::di_dump(zval_user zu, int level, int refadj)
+dump_info::di_dump(val_ptr zu, int level, int refadj)
 {
 	HashTable *myht = NULL;
 	//zend_string *class_name;
@@ -281,7 +281,7 @@ dump_info::di_dump(zval_user zu, int level, int refadj)
 		if (myht) 
 		{
 			//showarray("obj properties", myht);
-			htab_mgr adopter;
+			htab_rc adopter;
 
 			adopter.adopt(myht);
 
@@ -414,7 +414,7 @@ void dump_info::indent(int ct)
 			ss << "immutable ";
 		}
 		ss << iform(Numf::DEC) << "arr(" << ct <<") 0x"  << iform(Numf::HEX) << ht;
-		/* if (ht->u.flags & htab_mgr::COW_VIOLATE) {
+		/* if (ht->u.flags & htab_rc::COW_VIOLATE) {
 			ss << " vcow ";
 		}
 		else {
@@ -485,7 +485,7 @@ void dump_info::indent(int ct)
 	void dump_info::output(const char* msg)
 	{
 		ss << msg;
-		//zstr_mgr txt(std::move(ss));
+		//str_rc txt(std::move(ss));
 		//zend_printf("%s\n", txt.data());
 	} 
 	void dump_info::endl()

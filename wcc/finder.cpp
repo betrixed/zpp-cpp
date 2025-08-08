@@ -46,7 +46,7 @@ Finder::~Finder()
 }
 
 void 
-Finder::debug_info(htab_write d)
+Finder::debug_info(htab_wr d)
 {
 
 	d.set(FDit.nspaths_key, nsPaths_);
@@ -56,22 +56,22 @@ Finder::debug_info(htab_write d)
 }
 
 void 
-Finder::addFolder(zstr_user fsdir)
+Finder::addFolder(str_ptr fsdir)
 {
-	htab_write(folders_).push_back(fsdir);
+	htab_wr(folders_).push_back(fsdir);
 }
 
 void 
-Finder::addPath(zstr_user nsroot, zstr_user fspath)
+Finder::addPath(str_ptr nsroot, str_ptr fspath)
 {
 
-	htab_write(nsPaths_).set(nsroot, fspath);
+	htab_wr(nsPaths_).set(nsroot, fspath);
 }
 
 void 
-Finder::addPathArray(htab_read pathsArray)
+Finder::addPathArray(htab_rd pathsArray)
 {
-	htab_write hw(nsPaths_);
+	htab_wr hw(nsPaths_);
 
 	for_key_value wk;
 	for(wk.start(pathsArray); wk.ok(); wk.next())
@@ -83,10 +83,10 @@ Finder::addPathArray(htab_read pathsArray)
 }
 
 void 
-Finder::addClasses(htab_read classArray)
+Finder::addClasses(htab_rd classArray)
 {
 	
-	htab_write hw(classes_);
+	htab_wr hw(classes_);
 
 	for_key_value wk;
 	for(wk.start(classArray); wk.ok(); wk.next())
@@ -96,41 +96,41 @@ Finder::addClasses(htab_read classArray)
 }
 
 void 
-Finder::addClass(zstr_user cname, zstr_user fspath)
+Finder::addClass(str_ptr cname, str_ptr fspath)
 {
-	htab_write(classes_).set(cname, fspath);
+	htab_wr(classes_).set(cname, fspath);
 }
 
 // properties
-htab_read 
+htab_rd 
 Finder::getNSPaths() const
 {
 	return nsPaths_;
 }
 
-htab_read 
+htab_rd 
 Finder::getClassPaths() const
 {
 	return classes_;
 }
 
-htab_read 
+htab_rd 
 Finder::getFolders() const
 {
 	return folders_;
 }
 
-zstr_mgr 
-Finder::find(zstr_user cname)
+str_rc 
+Finder::find(str_ptr cname)
 {
-	zstr_mgr result;
-	zstr_mgr test_path;
-	zstr_mgr file_name;
-	zstr_mgr ns_key;
-	zstr_mgr sub_path;
+	str_rc result;
+	str_rc test_path;
+	str_rc file_name;
+	str_rc ns_key;
+	str_rc sub_path;
 
 	//showstr("Find class", cname);
-	result = htab_read(classes_).get(cname);
+	result = htab_rd(classes_).get(cname);
 	if (result.size()) {
 		return result;
 	}
@@ -140,13 +140,13 @@ Finder::find(zstr_user cname)
 	int ipos = epos + 1;
 
 	std::string_view vcname = cname.vstr();
-	zstr_mgr filepath(FDit.php_ext);
+	str_rc filepath(FDit.php_ext);
 
-	zstr_buffer buf;
+	str_buf buf;
 
 	//bool nsFound = false;
 
-	htab_read ns_array(nsPaths_);
+	htab_rd ns_array(nsPaths_);
 	bool nsFound = false;
 
 	while(true)
@@ -187,7 +187,7 @@ Finder::find(zstr_user cname)
 			{
 				ns_key = cname.substr(0,keylen);
 				//showstr("ns_key", ns_key);
-				zstr_user ns_path = ns_array.get(ns_key);
+				str_ptr ns_path = ns_array.get(ns_key);
 
 				if (ns_path.ok())
 				{
@@ -308,7 +308,7 @@ ZEND_METHOD(Wcc_Finder, getNSPaths)
 	ZEND_PARSE_PARAMETERS_END();
 
 	auto cobj = zval_toc<Finder>(ZEND_THIS);
-	htab_read result = cobj->getNSPaths();
+	htab_rd result = cobj->getNSPaths();
 
 	result.return_zv(return_value);
 }
@@ -319,7 +319,7 @@ ZEND_METHOD(Wcc_Finder, getClassPaths)
 	ZEND_PARSE_PARAMETERS_END();
 
 	auto cobj = zval_toc<Finder>(ZEND_THIS);
-	htab_read result = cobj->getClassPaths();
+	htab_rd result = cobj->getClassPaths();
 
 	result.return_zv(return_value);	
 }
@@ -330,7 +330,7 @@ ZEND_METHOD(Wcc_Finder, getFolders)
 	ZEND_PARSE_PARAMETERS_END();
 
 	auto cobj = zval_toc<Finder>(ZEND_THIS);
-	htab_read result = cobj->getFolders();
+	htab_rd result = cobj->getFolders();
 
 	result.return_zv(return_value);	
 }
@@ -345,7 +345,7 @@ ZEND_METHOD(Wcc_Finder, find)
 
 	auto cobj = zval_toc<Finder>(ZEND_THIS);
 
-	zstr_mgr result = cobj->find(cname);
+	str_rc result = cobj->find(cname);
 	result.move_zv(return_value);
 }
 

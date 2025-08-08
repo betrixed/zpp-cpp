@@ -119,18 +119,18 @@ namespace wcd {
 		timestamps_ = NO_TS;
 	}
 
-	zval_mgr 
-	Model::createFromResult(zstr_user classname, htab_read results)
+	val_rc 
+	Model::createFromResult(str_ptr classname, htab_rd results)
 	{
 		if (results.size()==0)
 		{
-			return htab_mgr::empty_array();
+			return htab_rc::empty_array();
 		}
 
 		Model* m = model_instance(classname);
 
-		zval_mgr rmgr;
-		htab_write r(rmgr);
+		val_rc rmgr;
+		htab_wr r(rmgr);
 
 		htab_walk wk;
 
@@ -146,7 +146,7 @@ namespace wcd {
 	}
 
 	void
-	Model::debug_info(htab_write di)
+	Model::debug_info(htab_wr di)
 	{
 
 		base_d::debug_info(di);
@@ -163,12 +163,12 @@ namespace wcd {
 	}
 
 	bool 
-	Model::deleteRow(zobj_user rowobj)
+	Model::deleteRow(obj_ptr rowobj)
 	{
 		//TODO: preconfirm exists? i.e. original_ has content
 		//zend_printf("deleteRow ");
 		//showobj("rowobj", rowobj);
-		zobj_mgr builder(getBuilderForMe());
+		obj_rc builder(getBuilderForMe());
 		IBuild* ib = zobj_toc<IBuild>(builder);
 		return ib->deleteRow(rowobj);
 	}
@@ -178,17 +178,17 @@ namespace wcd {
 		return timestamps_;
 	}
 
-	zstr_mgr 
+	str_rc 
 	Model::now() const
 	{
-		zval_mgr null_ts;
+		val_rc null_ts;
 		return datetime_obj::date(DTData.now_format, null_ts);
 	}
 
-	zobj_mgr
-	Model::newRow(htab_read data, bool isSaved)
+	obj_rc
+	Model::newRow(htab_rd data, bool isSaved)
 	{
-		zobj_mgr result = IRow::omg.new_zobj();
+		obj_rc result = IRow::omg.new_zobj();
 
 		IRow* irow = zobj_toc<IRow>(result);
 
@@ -197,24 +197,24 @@ namespace wcd {
 		return result;
 	}
 
-	zobj_mgr//static
-	Model::row(zstr_user static_name, htab_read data)
+	obj_rc//static
+	Model::row(str_ptr static_name, htab_rd data)
 	{
 		Model* m = model_instance(static_name);
 		return m->newRow(data);
 	}
 
-	zobj_mgr//static
-	Model::rowSaved(zstr_user static_name, htab_read data)
+	obj_rc//static
+	Model::rowSaved(str_ptr static_name, htab_rd data)
 	{
 		Model* m = model_instance(static_name);
-		zobj_mgr rec = m->newRow(data);
+		obj_rc rec = m->newRow(data);
 		IRow* irow = zobj_toc<IRow>(rec);
 		irow->create();
 		return rec;
 	}
 
-	zobj_mgr 
+	obj_rc 
 	Model::getConnect()
 	{
 		if (db_.ok())
@@ -222,31 +222,31 @@ namespace wcd {
 			return db_;
 		}
 
-		db_ = IServer::connect(zval_user());
+		db_ = IServer::connect(val_ptr());
 
 		return db_;
 
 	}
 
-	zstr_mgr 
+	str_rc 
 	Model::createdAtName()
 	{
 		return MIS.k_created_at;
 	}
 
-	zstr_mgr 
+	str_rc 
 	Model::updatedAtName()
 	{
 		return MIS.k_updated_at;
 	}
 
-	zobj_mgr 
+	obj_rc 
 	Model::getBuilderForMe()
 	{
 		if (!builder_me_.ok())
 		{
  
-			zobj_mgr db_mgr = getConnect();
+			obj_rc db_mgr = getConnect();
 			IDriver* db = zobj_toc<IDriver>(db_mgr);
 
 			builder_me_ = db->newDmlBuild();
@@ -255,75 +255,75 @@ namespace wcd {
 		{
 			IBuild* ib = zobj_toc<IBuild>(builder_me_);
 
-			ib->setModel(zobj_user(this->vobj()));
+			ib->setModel(obj_ptr(this->vobj()));
 		}
 		return builder_me_;
 	}
 
-	zobj_mgr
-	Model::modelBuild(zstr_user classname)
+	obj_rc
+	Model::modelBuild(str_ptr classname)
 	{
 		Model* m = model_instance(classname);
 		return m->getBuilderForMe();
 	}
 
-	zobj_mgr  
-	Model::byKeyValue(zval_user keynames, zval_user values)
+	obj_rc  
+	Model::byKeyValue(val_ptr keynames, val_ptr values)
 	{
-		zobj_mgr build = getBuilderForMe();
+		obj_rc build = getBuilderForMe();
 		IBuild* ib = zobj_toc<IBuild>(build);
 		Bindings&  bind = ib->bindings();
 		bind.limit(1);
 		bind.whereKeyValue(keynames, values);
-		zobj_mgr result(bind.select());
+		obj_rc result(bind.select());
 		//showobj("byKeyValue return", result);
 		return result;	
 	}
 
 	Model* //static
-	Model::model_instance(zstr_user classname)
+	Model::model_instance(str_ptr classname)
 	{
-		zobj_user model = Services::getOne(classname);
+		obj_ptr model = Services::getOne(classname);
 		Model* m = zobj_toc<Model>(model);
 
 		return m;
 	}
 
-	zobj_mgr //static
-	Model::keyValue(zstr_user static_class, zval_user keynames, zval_user values)
+	obj_rc //static
+	Model::keyValue(str_ptr static_class, val_ptr keynames, val_ptr values)
 	{
 		
 		Model* m = Model::model_instance(static_class);
 		return m->byKeyValue(keynames, values);
 	}
 
-	zobj_mgr 
-	Model::withValues(zstr_user static_class, zval_user keyvalues)
+	obj_rc 
+	Model::withValues(str_ptr static_class, val_ptr keyvalues)
 	{
 		Model* m = Model::model_instance(static_class);
 
-		htab_mgr kv(keyvalues.zarray());
+		htab_rc kv(keyvalues.zarray());
 
-		htab_mgr keynames = htab_mgr::getKeys(kv);
-		htab_mgr values = htab_mgr::getValues(kv);
-		zval_mgr keynames_mgr(keynames);
-		zval_mgr values_mgr(values);
+		htab_rc keynames = htab_rc::getKeys(kv);
+		htab_rc values = htab_rc::getValues(kv);
+		val_rc keynames_mgr(keynames);
+		val_rc values_mgr(values);
 		return m->byKeyValue(keynames_mgr, values_mgr);
 	}
 
-	zval_mgr 
-	Model::callStatic(zstr_user static_name, zstr_user method, zval_user params)
+	val_rc 
+	Model::callStatic(str_ptr static_name, str_ptr method, val_ptr params)
 	{
-		htab_read  parray(params.zarray());
+		htab_rd  parray(params.zarray());
 
 		Model* m = Model::model_instance(static_name);
-		zobj_mgr build = m->getBuilderForMe();
+		obj_rc build = m->getBuilderForMe();
 
 		IBuild* ib = zobj_toc<IBuild>(build);
 
-		zstr_mgr mlower = method.to_lower();
-		zstr_user nullstr;
-		zval_mgr  nullval;
+		str_rc mlower = method.to_lower();
+		str_ptr nullstr;
+		val_rc  nullval;
 		if (mlower.starts_with(MIS.find_first)) 
 		{
 			if (mlower.size()==9) 
@@ -332,13 +332,13 @@ namespace wcd {
 				return ib->oneRow();
 			}
 			else {
-				zstr_mgr bystr = mlower.substr(9);
+				str_rc bystr = mlower.substr(9);
 				if (bystr.starts_with(MIS.by_str))
 				{
-					zstr_mgr column = bystr.substr(2);
+					str_rc column = bystr.substr(2);
 
-					zval_mgr value = parray.get((int)0);
-					zval_mgr col_mgr(column);
+					val_rc value = parray.get((int)0);
+					val_rc col_mgr(column);
 					ib->where(col_mgr, MIS.eq_str, value, nullstr);
 					return ib->oneRow();
 
@@ -352,20 +352,20 @@ namespace wcd {
 				ib->where(params, nullstr, nullval, SQSTR.and_str);
 				return ib->allRows();
 			}
-			zval_mgr   result = ib->allRows();
+			val_rc   result = ib->allRows();
 
-			if (zval_user(result).isObject())
+			if (val_ptr(result).isObject())
 			{
-				htab_mgr rows_mgr;
-				htab_write rows(rows_mgr);
+				htab_rc rows_mgr;
+				htab_wr rows(rows_mgr);
 
 				rows.push_back(result);
 				result = rows_mgr;
 			}
 			return result;
 		}
-		zval_mgr obj_method;
-		htab_write arg1(obj_method);
+		val_rc obj_method;
+		htab_wr arg1(obj_method);
 
 		arg1.push_back(build);
 		arg1.push_back(mlower);
@@ -373,16 +373,16 @@ namespace wcd {
 		return FTAB.call_user_func_array.call(obj_method, params);
 	}
 
-	zstr_mgr //static
-	Model::getTableName(zstr_user cname)
+	str_rc //static
+	Model::getTableName(str_ptr cname)
 	{
 		return Model::classToTableName(cname);
 	}
 
-	zstr_mgr 
-	Model::classToTableName(zstr_user class_name)
+	str_rc 
+	Model::classToTableName(str_ptr class_name)
 	{
-		zstr_mgr result(class_name);
+		str_rc result(class_name);
 		int ix = result.rfind('\\');
 
 		if (ix >= 0) {
@@ -391,7 +391,7 @@ namespace wcd {
 
 		result = result.uncamel();
 
-		zstr_mgr rlower = result.to_lower();
+		str_rc rlower = result.to_lower();
 
 		ix = rlower.strpos(MIS.u_model);
 
@@ -402,15 +402,15 @@ namespace wcd {
 		return result;
 	}
 
-	zobj_mgr //static 
-	Model::find(zstr_user static_name, zval_user id)
+	obj_rc //static 
+	Model::find(str_ptr static_name, val_ptr id)
 	{
 		
-		zobj_mgr result;
+		obj_rc result;
 
 		Model* m = model_instance(static_name);
-		htab_mgr pkey = m->getPKey();
-		zval_mgr pkey_mgr(pkey);
+		htab_rc pkey = m->getPKey();
+		val_rc pkey_mgr(pkey);
 
 		if (!pkey.size())
 		{
@@ -418,11 +418,11 @@ namespace wcd {
 		}
 		else if (id.isArray())
 		{
-			htab_read vlist(id.zarray());
-			zval_user test = vlist.get((int)0);
+			htab_rd vlist(id.zarray());
+			val_ptr test = vlist.get((int)0);
 			if (test.isNull()) {
-				htab_mgr v2 = htab_mgr::sublist(pkey, vlist);
-				zval_mgr arg2(v2);
+				htab_rc v2 = htab_rc::sublist(pkey, vlist);
+				val_rc arg2(v2);
 				result = m->byKeyValue(pkey_mgr, arg2);
 			}
 			else {
@@ -430,8 +430,8 @@ namespace wcd {
 			}
 		}
 		else {
-			zval_mgr vlist_tab;
-			htab_write vlist(vlist_tab);
+			val_rc vlist_tab;
+			htab_wr vlist(vlist_tab);
 			vlist.push_back(id);
 			result = m->byKeyValue(pkey_mgr, vlist_tab);
 		}
@@ -441,10 +441,10 @@ namespace wcd {
 		return result;
 	}
 
-	htab_mgr 
+	htab_rc 
 	Model::getKeyOptions()
 	{
-		htab_mgr result;
+		htab_rc result;
 
 		result = pkey_options_;
 
@@ -454,14 +454,14 @@ namespace wcd {
 			return result;
 		}
 		
-		htab_mgr pkey_fields = getPKey();
+		htab_rc pkey_fields = getPKey();
 		//showdata("pkey get", pkey_fields);
 		if (pkey_fields.size())
 		{
-			htab_write pkey_options(result);
+			htab_wr pkey_options(result);
 
-			htab_mgr cdefs = getColDefs();
-			htab_mgr seqdefs = getSeqDefs();
+			htab_rc cdefs = getColDefs();
+			htab_rc seqdefs = getSeqDefs();
 
 			htab_walk wk;
 			auto pkey = wk.value();
@@ -471,16 +471,16 @@ namespace wcd {
 			{
 				//zend_printf("get pkey options ");
 				//showmem("pkey", pkey);
-				htab_mgr options_mgr;
-				htab_write options(options_mgr);
+				htab_rc options_mgr;
+				htab_wr options(options_mgr);
 
-				zstr_mgr key_name = pkey.zstr();
+				str_rc key_name = pkey.zstr();
 				key_name = key_name.to_lower();
 
-				zval_user key_def = cdefs.get(key_name);
-				zobj_mgr  pkeydef = key_def.zobject();
+				val_ptr key_def = cdefs.get(key_name);
+				obj_rc  pkeydef = key_def.zobject();
 
-				zval_mgr seq_pkey = pkeydef.property(SQSTR.id_key);
+				val_rc seq_pkey = pkeydef.property(SQSTR.id_key);
 
 				if (seq_pkey.isString())
 				{
@@ -495,11 +495,11 @@ namespace wcd {
 					if (seq_pkey.isString())
 					{
 						options.set(SQSTR.seq_key, seq_pkey);
-						zval_mgr defval = pkeydef.property(SQSTR.default_key);
+						val_rc defval = pkeydef.property(SQSTR.default_key);
 						if (defval.isString())
 						{
-							htab_mgr temp_mgr;
-							htab_write temp(temp_mgr);
+							htab_rc temp_mgr;
+							htab_wr temp(temp_mgr);
 
 							temp.push_back(SQSTR.default_key);
 							temp.push_back(defval);
@@ -510,7 +510,7 @@ namespace wcd {
 				}
 				else 
 				{
-					zval_mgr isAutoInc = pkeydef.property(SQSTR.auto_inc);
+					val_rc isAutoInc = pkeydef.property(SQSTR.auto_inc);
 					if (isAutoInc.ok()) 
 					{
 						options.set(SQSTR.returns_str, Crud::LAST_ID);
@@ -527,14 +527,14 @@ namespace wcd {
 		return result;
 	}
 
-	htab_mgr Model::getColDefs()
+	htab_rc Model::getColDefs()
 	{
 		if (class_cdefs_.ok())
 		{
 			return class_cdefs_;
 		}
 
-		zobj_mgr tabledef_mgr = getTableDef();
+		obj_rc tabledef_mgr = getTableDef();
 
 		if (tabledef_mgr.ok())
 		{
@@ -544,11 +544,11 @@ namespace wcd {
 		return class_cdefs_;
 	}
 
-	zstr_mgr Model::getName()
+	str_rc Model::getName()
 	{
-		zobj_user self(vobj());
+		obj_ptr self(vobj());
 
-		zstr_mgr result = self.property(MIS.name_str);
+		str_rc result = self.property(MIS.name_str);
 
 		if (result.ok())
 		{
@@ -560,22 +560,22 @@ namespace wcd {
 		return result;
 	}
 
-	htab_mgr 
+	htab_rc 
 	Model::getPKey()
 	{
 		//zend_printf("in getPKey()\n");
-		htab_mgr result;
+		htab_rc result;
 		if (class_pkey_.ok())
 		{
 			result = class_pkey_;
 			//showdata("class pkey", result);
 			return result;
 		}
-		zobj_mgr tdef = getTableDef();
+		obj_rc tdef = getTableDef();
 		if (tdef.ok())
 		{	
 			//zend_printf("got TDEF\n");
-			zobj_mgr pkeydef = tdef.call(MIS.get_primary_key);
+			obj_rc pkeydef = tdef.call(MIS.get_primary_key);
 			//showobj("pkeydef:", pkeydef);
 
 			if (pkeydef.ok())
@@ -586,14 +586,14 @@ namespace wcd {
 	
 		if (!result.ok())
 		{
-			result = htab_mgr::empty_array();
+			result = htab_rc::empty_array();
 		}
 		class_pkey_ = result;
 		return result;
 	}
 
 	int // static
-	Model::importFromCSV(zstr_user static_name, zstr_user filename)
+	Model::importFromCSV(str_ptr static_name, str_ptr filename)
 	{
 		if (! std::filesystem::exists(filename.vstr()) )
 		{
@@ -604,50 +604,50 @@ namespace wcd {
 
 		Model* m = model_instance(static_name);
 
-		zstr_mgr tableName = m->getName();
+		str_rc tableName = m->getName();
 
-		zobj_mgr db = m->getConnect();
+		obj_rc db = m->getConnect();
 		IDriver* driver = zobj_toc<IDriver>(db);
 
-		htab_mgr columns = m->getColDefs();
+		htab_rc columns = m->getColDefs();
 		//showdata("columns", columns);
 
-		htab_mgr fieldNames;
+		htab_rc fieldNames;
 
 		bool init = false;
 		unsigned int  colcount = 0;
 
-		zobj_mgr builder = m->getBuilderForMe();
+		obj_rc builder = m->getBuilderForMe();
 
-		zval_mgr import_mgr = FTAB.fopen.call(filename, MIS.r_arg);
+		val_rc import_mgr = FTAB.fopen.call(filename, MIS.r_arg);
 
-		zval_user import(import_mgr);
+		val_ptr import(import_mgr);
 
 		if (import.isResource())
 		{
-			htab_mgr csv_args;
-			htab_write csv(csv_args);
+			htab_rc csv_args;
+			htab_wr csv(csv_args);
 			csv.set(MIS.escape_key, MIS.escape_str);
 
 			fn_fgetcsv fgetcsv;
 			fgetcsv.set_named_args(csv_args);
 
 			fn_stripslashes stripslashes;
-			zval_mgr stmt;
+			val_rc stmt;
 
 			while(true)
 			{
-				zval_mgr line_mgr = fgetcsv.call(import);
-				zval_user line(line_mgr); 
-				zstr_mgr  cellstr;
+				val_rc line_mgr = fgetcsv.call(import);
+				val_ptr line(line_mgr); 
+				str_rc  cellstr;
 
 				if (line.isFalse())
 				{
 					break;
 				}
 
-				htab_mgr values_mgr;
-				htab_write values(values_mgr);
+				htab_rc values_mgr;
+				htab_wr values(values_mgr);
 
 				htab_walk sw;
 
@@ -675,7 +675,7 @@ namespace wcd {
 						auto vname = wk.value();
 						for(wk.start(values); wk.ok(); wk.next())
 						{
-							zval_user col = columns.get(vname);
+							val_ptr col = columns.get(vname);
 							if (!col.isNull()) {
 								colcount += 1;
 							}
@@ -695,21 +695,21 @@ namespace wcd {
 				}
 				if (datarowct == 0) {
 					//  prepaire for multi inserts
-					htab_mgr columns_mgr;
-					htab_write columns(columns_mgr);
+					htab_rc columns_mgr;
+					htab_wr columns(columns_mgr);
 
 					for(sw.start(values); sw.ok(); sw.next())
 					{
-						zstr_mgr colname = fieldNames.get(ix);
+						str_rc colname = fieldNames.get(ix);
 						columns.set(colname, item);
 					}
 					IBuild* ib = zobj_toc<IBuild>(builder);
 
-					zobj_mgr plist_mgr = ib->getInsertSql(columns_mgr);
+					obj_rc plist_mgr = ib->getInsertSql(columns_mgr);
 					ParamList* plist = zobj_toc<ParamList>(plist_mgr);
 
-					zstr_user sql(plist->getSql());
-					htab_read record(plist->getValues());
+					str_ptr sql(plist->getSql());
+					htab_rd record(plist->getValues());
 
 					//showstr("sql", sql);
 					//showdata("record", record);
@@ -734,7 +734,7 @@ namespace wcd {
 
 			FTAB.fclose.call(import);
 
-			htab_mgr seq_defs = m->getSeqDefs();
+			htab_rc seq_defs = m->getSeqDefs();
 
 			if (seq_defs.size())
 			{
@@ -748,7 +748,7 @@ namespace wcd {
 		return datarowct+1;
 	}
 
-	zobj_mgr 
+	obj_rc 
 	Model::getTableDef()
 	{
 		if (class_tdef_.ok())
@@ -756,16 +756,16 @@ namespace wcd {
 			return class_tdef_;
 		}
 
-		zstr_mgr name = getName();
+		str_rc name = getName();
 		//showstr("name", name);
 
-		zobj_mgr driver = getConnect();
+		obj_rc driver = getConnect();
 
 		IDriver* db = zobj_toc<IDriver>(driver);
 
-		zobj_mgr schema = db->getSchema();
+		obj_rc schema = db->getSchema();
 
-		htab_mgr tables = schema.call(MIS.get_tables);
+		htab_rc tables = schema.call(MIS.get_tables);
 		//showdata("tables from schema", tables);
 
 		 
@@ -773,17 +773,17 @@ namespace wcd {
 		class_tdef_ = tables.get(name);
 
 		//showobj("TDEF", class_tdef_);
-		htab_mgr columns = class_tdef_.property(MIS.columns_str);
+		htab_rc columns = class_tdef_.property(MIS.columns_str);
 
 		//showdata("columns", columns);
 
-		htab_mgr tsf_mgr;
-		htab_write tsf(tsf_mgr);
+		htab_rc tsf_mgr;
+		htab_wr tsf(tsf_mgr);
 
-		zobj_mgr self = vobj();
+		obj_rc self = vobj();
 
-		zstr_mgr ts_update = self.call(MIS.m_updated_at);
-		zstr_mgr ts_create = self.call(MIS.m_created_at);
+		str_rc ts_update = self.call(MIS.m_updated_at);
+		str_rc ts_create = self.call(MIS.m_created_at);
 
 		if (ts_update.size()) {
 			tsf.set(ts_update, int(1));
@@ -792,7 +792,7 @@ namespace wcd {
 			tsf.set(ts_create, int(2));
 		}
 
-		zstr_mgr stamp_type = class_tdef_.call(MIS.m_datetime_type);
+		str_rc stamp_type = class_tdef_.call(MIS.m_datetime_type);
 		timestamps_ = 0;
 
 		if (stamp_type.ok())
@@ -801,14 +801,14 @@ namespace wcd {
 			auto cdef_mgr = wk.value();
 			for(wk.start(columns); wk.ok(); wk.next())
 			{
-				zobj_mgr cdef = cdef_mgr.zobject();
-				zval_mgr ftype = cdef.property(MIS.type_str);
-				zval_mgr fname = cdef.property(MIS.name_str);
+				obj_rc cdef = cdef_mgr.zobject();
+				val_rc ftype = cdef.property(MIS.type_str);
+				val_rc fname = cdef.property(MIS.name_str);
 
 
 				if (ftype.isString() && zs_cmp_ci(ftype.zstr(),stamp_type)==0)
 				{
-				   zval_user test = tsf.get(fname.zstr());
+				   val_ptr test = tsf.get(fname.zstr());
 				   switch(test.zlong())
 				   {
 				   case 1:
@@ -833,7 +833,7 @@ namespace wcd {
 	}
 
 	bool 
-	Model::saveRow(zobj_user row_obj, bool reload)
+	Model::saveRow(obj_ptr row_obj, bool reload)
 	{
 		if (!row_obj.ok())
 		{
@@ -841,10 +841,10 @@ namespace wcd {
 		}
 		IRow* irow = zobj_toc<IRow>(row_obj);
 
-		htab_mgr dirty = irow->getDirty();
+		htab_rc dirty = irow->getDirty();
 		bool wasRead = irow->exists();
 
-		zobj_mgr builder = getBuilderForMe();
+		obj_rc builder = getBuilderForMe();
 		IBuild* ibuild = zobj_toc<IBuild>(builder);
 
 		if (wasRead && (dirty.size()==0) )
@@ -853,12 +853,12 @@ namespace wcd {
 		}
 		// insert operation
 		//zend_printf("save-row\n");
-		zval_mgr pkey_mgr(getPKey());
+		val_rc pkey_mgr(getPKey());
 		//showmem("pkey_mgr", pkey_mgr);
 
-		htab_read pkey(pkey_mgr);
+		htab_rd pkey(pkey_mgr);
 
-		zval_mgr saved;
+		val_rc saved;
 
 		if (wasRead) 
 		{
@@ -870,7 +870,7 @@ namespace wcd {
 				return false;
 			}
 
-			htab_mgr id = irow->getDataValues(pkey_mgr);
+			htab_rc id = irow->getDataValues(pkey_mgr);
 
 			if (id.size() == 0)
 			{
@@ -879,36 +879,36 @@ namespace wcd {
 			}
 
 			
-			zval_mgr pvalues(id);
+			val_rc pvalues(id);
 			ibuild->whereKeyValue(pkey_mgr, pvalues);
 			saved = ibuild->update(irow, dirty);
 		}
 		else {
 			//zend_printf("save-create\n");
 
-			htab_read data = irow->reader();
-			htab_read options = getKeyOptions();
+			htab_rd data = irow->reader();
+			htab_rd options = getKeyOptions();
 
 			
 
-			htab_mgr pkey_refresh_mgr;
-			htab_write pkey_refresh(pkey_refresh_mgr);
+			htab_rc pkey_refresh_mgr;
+			htab_wr pkey_refresh(pkey_refresh_mgr);
 
 			htab_walk wk;
 			auto pname = wk.value();
 
 			for(wk.start(pkey); wk.ok(); wk.next())
 			{
-				zval_user data_value = data.get(pname);
+				val_ptr data_value = data.get(pname);
 
 				if (data_value.isNull()) 
 				{
-					zval_user pkey_options = options.get(pname);
+					val_ptr pkey_options = options.get(pname);
 					if (pkey_options.isArray()) 
 					{
-						htab_read pkoption(pkey_options.zarray());
+						htab_rd pkoption(pkey_options.zarray());
 
-						zval_user option_key = pkoption.get(MIS.returns_key);
+						val_ptr option_key = pkoption.get(MIS.returns_key);
 						int option = option_key.zlong();
 						switch(option)
 						{
@@ -926,15 +926,15 @@ namespace wcd {
 				}
 			}
 
-			zval_mgr row_mgr(row_obj);
+			val_rc row_mgr(row_obj);
 			saved = ibuild->insert(row_mgr);
 			
 
 			if (saved.isArray() && (pkey_refresh_mgr.size() > 0))
 			{
 				// its a double wrap
-				htab_read values_wrap(saved.zarray());
-				htab_read values(values_wrap.get(int(0)));
+				htab_rd values_wrap(saved.zarray());
+				htab_rd values(values_wrap.get(int(0)));
 
 				//showdata("saved values", values);
 				htab_walk owk;
@@ -945,10 +945,10 @@ namespace wcd {
 
 					if (pkey_options.isArray()) 
 					{
-						htab_read pkoption(pkey_options.zarray());
+						htab_rd pkoption(pkey_options.zarray());
 						//showdata("pkoption", pkoption);
 
-						zval_user option_key = pkoption.get(MIS.returns_key);
+						val_ptr option_key = pkoption.get(MIS.returns_key);
 						int option = option_key.zlong();
 						switch(option) 
 						{
@@ -963,7 +963,7 @@ namespace wcd {
 									for(pwk.start(pkey); pwk.ok(); pwk.next())
 									{
 										//showmem("name", name);
-										zval_user vtemp = values.get(name);
+										val_ptr vtemp = values.get(name);
 
 										//showmem("vtemp", vtemp);
 										irow->set(name, vtemp);
@@ -980,36 +980,36 @@ namespace wcd {
 		irow->setExists();
 
 		if (reload) {
-			zobj_mgr rec = readRow(irow);
+			obj_rc rec = readRow(irow);
 			irow->copy(rec);
 		}
 
 		return saved.ok();
 	}
 
-	zobj_mgr 
-	Model::readRow(zobj_user row_obj)
+	obj_rc 
+	Model::readRow(obj_ptr row_obj)
 	{
 		//zend_printf("Read Row\n");
 
-		htab_mgr pkey = getPKey();
-		zobj_mgr result(row_obj);
+		htab_rc pkey = getPKey();
+		obj_rc result(row_obj);
 
 		if (pkey.size())
 		{
 			IRow* irow = zobj_toc<IRow>(row_obj);
 
-			zval_mgr key_mgr(pkey);
+			val_rc key_mgr(pkey);
 			
 
-			htab_mgr pkeyid = irow->getDataValues(key_mgr);
+			htab_rc pkeyid = irow->getDataValues(key_mgr);
 
 			
-			zval_mgr val_mgr(pkeyid);
+			val_rc val_mgr(pkeyid);
 			result = byKeyValue(key_mgr, val_mgr);
 		}
 		else {
-			zstr_mgr name = getName();
+			str_rc name = getName();
 			zend_throw_error(zend_ce_error,"No primary key for table %s", name.data());
 		}
 		return result;
@@ -1017,21 +1017,21 @@ namespace wcd {
 	}
 
 	bool 
-	Model::exists(zobj_user rowobj)
+	Model::exists(obj_ptr rowobj)
 	{
-		zobj_mgr builder = getBuilderForMe();
+		obj_rc builder = getBuilderForMe();
 		IBuild* ib = zobj_toc<IBuild>(builder);
 		IRow*   irow = zobj_toc<IRow>(rowobj);
 
-		zval_mgr pkey_mgr(getPKey());
+		val_rc pkey_mgr(getPKey());
 
-		zval_mgr pkeyid(irow->getDataValues(pkey_mgr));
+		val_rc pkeyid(irow->getDataValues(pkey_mgr));
 
-		zstr_mgr tname = getName();
+		str_rc tname = getName();
 
 		ib->table(tname);
 		ib->whereKeyValue(pkey_mgr, pkeyid);
-		zval_mgr columns(SQSTR.asterisk);
+		val_rc columns(SQSTR.asterisk);
 
 		int rowct = ib->count(columns);
 
@@ -1039,11 +1039,11 @@ namespace wcd {
 
 	}
 
-	htab_mgr 
-	Model::getFieldDef(zstr_user name)
+	htab_rc 
+	Model::getFieldDef(str_ptr name)
 	{
-		htab_mgr cdefs = getColDefs();
-		htab_mgr result;
+		htab_rc cdefs = getColDefs();
+		htab_rc result;
 
 		if (cdefs.size())
 		{
@@ -1052,33 +1052,33 @@ namespace wcd {
 		return result;
 	}
 
-	htab_mgr 
+	htab_rc 
 	Model::getForeignKey()
 	{
-		htab_mgr pkey = getPKey();
-		zstr_mgr table = Model::getTableName(vobj()->ce->name);
+		htab_rc pkey = getPKey();
+		str_rc table = Model::getTableName(vobj()->ce->name);
 
 		htab_walk wk;
 		auto name = wk.value();
 
-		htab_mgr result;
-		htab_write hw(result);
-		zstr_buffer buf;
+		htab_rc result;
+		htab_wr hw(result);
+		str_buf buf;
 
 		for(wk.start(pkey); wk.ok(); wk.next())
 		{
 			buf << table << '_' << name.zstr();
-			zstr_mgr fkey = buf.zstr();
+			str_rc fkey = buf.zstr();
 			hw.push_back(fkey);
 		}
 		return result;
 	}
 
-	htab_mgr 
+	htab_rc 
 	Model::getSeqDefs()
 	{
 
-		htab_mgr result;
+		htab_rc result;
 
 		if (seq_defs_.ok())
 		{
@@ -1086,7 +1086,7 @@ namespace wcd {
 			return result;
 		}
 
-		zobj_mgr tdef = getTableDef();
+		obj_rc tdef = getTableDef();
 
 		seq_defs_ = tdef.call(MIS.fn_getseqcols);
 		result = seq_defs_;
@@ -1094,39 +1094,39 @@ namespace wcd {
 
 	}
 
-	void Model::setConnect(zobj_user db)
+	void Model::setConnect(obj_ptr db)
 	{
 		db_ = db;
 	}
 
 	void 
-	Model::setColDefs(htab_read options)
+	Model::setColDefs(htab_rd options)
 	{
 		class_cdefs_ = options;
 	}
 
 	void 
-	Model::setKeyOptions(htab_read options)
+	Model::setKeyOptions(htab_rd options)
 	{
 		pkey_options_ = options;
 	}
 
 	void 
-	Model::setPKey(htab_read options)
+	Model::setPKey(htab_rd options)
 	{
 		class_pkey_ = options;
 	}
 
 	void 
-	Model::setName(zstr_user name)
+	Model::setName(str_ptr name)
 	{
-		zobj_mgr self(vobj());
+		obj_rc self(vobj());
 
 		self.property(MIS.name_str, name);
 	}
 
 	void 
-	Model::setSeqDefs(htab_read options)
+	Model::setSeqDefs(htab_rd options)
 	{
 		seq_defs_ = options;
 	}
@@ -1136,17 +1136,17 @@ namespace wcd {
 		timestamps_ = flags;
 	}
 
-	htab_mgr 
-	Model::stampTime(zstr_user str_datetime, int flags)
+	htab_rc 
+	Model::stampTime(str_ptr str_datetime, int flags)
 	{
 		int ts = timestamps_ & flags;
 
-		htab_mgr result(htab_mgr::empty_array());
+		htab_rc result(htab_rc::empty_array());
 
 		if (ts != 0) 
 		{
-			htab_write stamps(result);
-			zstr_mgr dkey;
+			htab_wr stamps(result);
+			str_rc dkey;
 
 			if ((ts & CREATE_TS) != 0)
 			{
@@ -1180,7 +1180,7 @@ ZEND_METHOD(Wcd_Model, KeyValue)
 
 	zend_class_entry* static_class = zend_get_called_scope(execute_data);
 
-	zobj_mgr result = Model::keyValue(static_class->name, keynames, values);
+	obj_rc result = Model::keyValue(static_class->name, keynames, values);
 
 	result.move_zv(return_value);
 }
@@ -1195,7 +1195,7 @@ ZEND_METHOD(Wcd_Model, WithValues)
 
 	zend_class_entry* static_class = zend_get_called_scope(execute_data);
 
-	zobj_mgr result = Model::withValues(static_class->name, values);
+	obj_rc result = Model::withValues(static_class->name, values);
 
 	result.move_zv(return_value);
 }
@@ -1211,7 +1211,7 @@ ZEND_METHOD(Wcd_Model, __callStatic)
 	ZEND_PARSE_PARAMETERS_END();
 
 	zend_class_entry* static_class = zend_get_called_scope(execute_data);
-	zval_mgr result = Model::callStatic(static_class->name, method, params);
+	val_rc result = Model::callStatic(static_class->name, method, params);
 	result.move_zv(return_value);
 
 }
@@ -1224,7 +1224,7 @@ ZEND_METHOD(Wcd_Model, classToTableName)
 	Z_PARAM_STR(cname)
 	ZEND_PARSE_PARAMETERS_END();
 
-	zstr_mgr result = Model::classToTableName(cname);
+	str_rc result = Model::classToTableName(cname);
 
 	result.move_zv(return_value);
 }
@@ -1239,7 +1239,7 @@ ZEND_METHOD(Wcd_Model, createFromResult)
 	Z_PARAM_ARRAY(results)
 	ZEND_PARSE_PARAMETERS_END();
 
-	zval_mgr result = Model::createFromResult(cname, results);
+	val_rc result = Model::createFromResult(cname, results);
 
 	result.move_zv(return_value);	
 }
@@ -1253,7 +1253,7 @@ ZEND_METHOD(Wcd_Model, find)
 
 	zend_class_entry* static_class = zend_get_called_scope(execute_data);
 
-	zobj_mgr result = Model::find(static_class->name, values);
+	obj_rc result = Model::find(static_class->name, values);
 
 	result.move_zv(return_value);	
 
@@ -1265,7 +1265,7 @@ ZEND_METHOD(Wcd_Model, getTableName)
 
 	zend_class_entry* static_class = zend_get_called_scope(execute_data);
 
-	zstr_mgr result = Model::getTableName(static_class->name);
+	str_rc result = Model::getTableName(static_class->name);
 	result.move_zv(return_value);	
 }
 
@@ -1289,7 +1289,7 @@ ZEND_METHOD(Wcd_Model, modelBuild)
 
 	zend_class_entry* static_class = zend_get_called_scope(execute_data);
 
-	zobj_mgr ibuild = Model::modelBuild(static_class->name);
+	obj_rc ibuild = Model::modelBuild(static_class->name);
 
 	ibuild.move_zv(return_value);
 }
@@ -1306,7 +1306,7 @@ ZEND_METHOD(Wcd_Model, row)
 	zend_class_entry* static_class = zend_get_called_scope(execute_data);
 
 
-	zobj_mgr irow = Model::row(static_class->name, data);
+	obj_rc irow = Model::row(static_class->name, data);
 
 	irow.move_zv(return_value);
 }
@@ -1321,7 +1321,7 @@ ZEND_METHOD(Wcd_Model, rowSaved)
 
 	zend_class_entry* static_class = zend_get_called_scope(execute_data);
 
-	zobj_mgr irow = Model::rowSaved(static_class->name, data);
+	obj_rc irow = Model::rowSaved(static_class->name, data);
 
 	irow.move_zv(return_value);
 }
@@ -1366,7 +1366,7 @@ ZEND_METHOD(Wcd_Model, createdAtName)
 
 	Model* model = zval_toc<Model>(ZEND_THIS);
 
-	zstr_mgr result = model->createdAtName();
+	str_rc result = model->createdAtName();
 
 	result.move_zv(return_value);
 }
@@ -1377,7 +1377,7 @@ ZEND_METHOD(Wcd_Model, updatedAtName)
 
 	Model* model = zval_toc<Model>(ZEND_THIS);
 
-	zstr_mgr result = model->updatedAtName();
+	str_rc result = model->updatedAtName();
 
 	result.move_zv(return_value);
 }
@@ -1418,7 +1418,7 @@ ZEND_METHOD(Wcd_Model, getBuilder)
 
 	Model* model = zval_toc<Model>(ZEND_THIS);
 
-	zobj_mgr result = model->getBuilder();
+	obj_rc result = model->getBuilder();
 
 	result.move_zv(return_value);	
 }
@@ -1429,7 +1429,7 @@ ZEND_METHOD(Wcd_Model, getBuilderForMe)
 
 	Model* model = zval_toc<Model>(ZEND_THIS);
 
-	zobj_mgr result = model->getBuilderForMe();
+	obj_rc result = model->getBuilderForMe();
 
 	result.move_zv(return_value);	
 }
@@ -1440,7 +1440,7 @@ ZEND_METHOD(Wcd_Model, getColDefs)
 
 	Model* model = zval_toc<Model>(ZEND_THIS);
 
-	htab_mgr result = model->getColDefs();
+	htab_rc result = model->getColDefs();
 
 	result.move_zv(return_value);	
 }
@@ -1451,7 +1451,7 @@ ZEND_METHOD(Wcd_Model, getConnect)
 
 	Model* model = zval_toc<Model>(ZEND_THIS);
 
-	zobj_mgr result = model->getConnect();
+	obj_rc result = model->getConnect();
 
 	result.move_zv(return_value);	
 }
@@ -1466,7 +1466,7 @@ ZEND_METHOD(Wcd_Model, getFieldDef)
 
 	Model* model = zval_toc<Model>(ZEND_THIS);
 
-	htab_mgr result = model->getFieldDef(data);
+	htab_rc result = model->getFieldDef(data);
 	result.move_zv(return_value);	
 
 }
@@ -1477,7 +1477,7 @@ ZEND_METHOD(Wcd_Model, getForeignKey)
 
 	Model* model = zval_toc<Model>(ZEND_THIS);
 
-	htab_mgr result = model->getForeignKey();
+	htab_rc result = model->getForeignKey();
 
 	result.move_zv(return_value);	
 }
@@ -1489,7 +1489,7 @@ ZEND_METHOD(Wcd_Model, getKeyOptions)
 
 	Model* model = zval_toc<Model>(ZEND_THIS);
 
-	htab_mgr result = model->getKeyOptions();
+	htab_rc result = model->getKeyOptions();
 
 	result.move_zv(return_value);	
 }
@@ -1501,7 +1501,7 @@ ZEND_METHOD(Wcd_Model, getName)
 
 	Model* model = zval_toc<Model>(ZEND_THIS);
 
-	zstr_mgr result = model->getName();
+	str_rc result = model->getName();
 
 	result.move_zv(return_value);	
 }
@@ -1512,7 +1512,7 @@ ZEND_METHOD(Wcd_Model, getPKey)
 
 	Model* model = zval_toc<Model>(ZEND_THIS);
 
-	htab_mgr result = model->getPKey();
+	htab_rc result = model->getPKey();
 
 	result.move_zv(return_value);
 }
@@ -1523,7 +1523,7 @@ ZEND_METHOD(Wcd_Model, getSeqDefs)
 
 	Model* model = zval_toc<Model>(ZEND_THIS);
 
-	htab_mgr result = model->getSeqDefs();
+	htab_rc result = model->getSeqDefs();
 
 	result.move_zv(return_value);
 }
@@ -1546,7 +1546,7 @@ ZEND_METHOD(Wcd_Model, getTableDef)
 
 	Model* model = zval_toc<Model>(ZEND_THIS);
 
-	zobj_mgr result = model->getTableDef();
+	obj_rc result = model->getTableDef();
 
 	result.move_zv(return_value);
 }
@@ -1576,7 +1576,7 @@ ZEND_METHOD(Wcd_Model, newRow)
 	Model* model = zval_toc<Model>(ZEND_THIS);
 
 
-	zobj_mgr result = model->newRow(rdata, isSaved);
+	obj_rc result = model->newRow(rdata, isSaved);
 
 	result.move_zv(return_value);
 }
@@ -1592,7 +1592,7 @@ ZEND_METHOD(Wcd_Model, readRow)
 
 	Model* model = zval_toc<Model>(ZEND_THIS);
 
-	zobj_mgr result = model->readRow(rdata);
+	obj_rc result = model->readRow(rdata);
 
 	result.move_zv(return_value);
 
@@ -1696,7 +1696,7 @@ ZEND_METHOD(Wcd_Model, stampTime)
 	ZEND_PARSE_PARAMETERS_END();
 
 	Model* model = zval_toc<Model>(ZEND_THIS);
-	htab_mgr result = model->stampTime(str_datetime, flags);
+	htab_rc result = model->stampTime(str_datetime, flags);
 
 	result.move_zv(return_value);
 }
@@ -1721,7 +1721,7 @@ PHP_MINIT_FUNCTION(Wcd_Model_reg)
 	/*
 	class_data  cd(Model::omg.class_entry_);
 
-	zval_mgr null_val;
+	val_rc null_val;
 
 	zend_type dtype =  {nullptr, 0};
 	cd.typed_property(MIS.name_str, null_val, IS_STRING, ZEND_ACC_PROTECTED_SET);

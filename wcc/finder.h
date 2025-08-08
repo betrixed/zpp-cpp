@@ -17,26 +17,26 @@ public:
 	
 	static base_obj_mgr<Finder> omg;
 
-	virtual void debug_info(htab_write hw);
+	virtual void debug_info(htab_wr hw);
 
 	virtual ~Finder();
 	
-	void addFolder(zstr_user fsdir);
-	void addPath(zstr_user nsroot, zstr_user fspath);
+	void addFolder(str_ptr fsdir);
+	void addPath(str_ptr nsroot, str_ptr fspath);
 
-	void addPathArray(htab_read pathsArray);
-	void addClass(zstr_user cname, zstr_user fspath);
-	void addClasses(htab_read classArray);
+	void addPathArray(htab_rd pathsArray);
+	void addClass(str_ptr cname, str_ptr fspath);
+	void addClasses(htab_rd classArray);
 
 	// properties
-	htab_read getNSPaths() const;
+	htab_rd getNSPaths() const;
 
-	htab_read getClassPaths() const;
+	htab_rd getClassPaths() const;
 
-	htab_read getFolders() const;
+	htab_rd getFolders() const;
 
 	//! return path if found or null
-	zstr_mgr find(zstr_user cname );
+	str_rc find(str_ptr cname );
 
 };
 

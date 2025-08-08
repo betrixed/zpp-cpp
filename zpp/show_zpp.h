@@ -2,7 +2,7 @@
 #define SHOW_ZPP_H
 
 #ifndef ZSTR_BUFFER_H
-#include "zstr_buffer.h"
+#include "str_buf.h"
 #endif
 
 namespace zpp {
@@ -10,10 +10,10 @@ namespace zpp {
 
 class dump_info {
 private:
-	zstr_output& ss;
+	str_out& ss;
 	size_t       total_;
 
-	static zstr_output dumper_d;
+	static str_out dumper_d;
 
 	void object_property_dump(
 		zend_property_info *prop_info, 
@@ -29,11 +29,11 @@ public:
 
 	static bool run_state_;
 
-	static void msg_dump(const char* msg, zval_user val);
+	static void msg_dump(const char* msg, val_ptr val);
 
-	static void dump(zval_user val, int level = 0);
+	static void dump(val_ptr val, int level = 0);
 
-	void di_dump(zval_user val, int level = 0, int refadj=0);
+	void di_dump(val_ptr val, int level = 0, int refadj=0);
 	void indent(int ct);
 	void di_showmem(zval *m);
 	void di_showstr(zend_string* p);
@@ -51,7 +51,7 @@ public:
 	
 	dump_info(const char* s);
 
-	dump_info(zstr_buffer& buf) : ss(buf), total_(0) {}
+	dump_info(str_buf& buf) : ss(buf), total_(0) {}
 };
 
 

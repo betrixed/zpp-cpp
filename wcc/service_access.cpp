@@ -34,13 +34,13 @@ public:
 
 SADATA SAdata;
 
-zobj_user
+obj_ptr
 ServiceAccess::getServices() {
 	return services_;
 }
 
 void 
-ServiceAccess::setServices(zval_user svc)
+ServiceAccess::setServices(val_ptr svc)
 {
 	services_ = svc.zobject();
 }
@@ -51,13 +51,13 @@ void ServiceAccess::init_access()
 }
 
 //virtual
-zstr_user
+str_ptr
 ServiceAccess::extender()
 {
 	return extender_.className();
 }
 
-void ServiceAccess::setExtender(zobj_user obj)
+void ServiceAccess::setExtender(obj_ptr obj)
 {
 	if (obj.ok())
 	{
@@ -66,7 +66,7 @@ void ServiceAccess::setExtender(zobj_user obj)
 }
 
 //virtual
-void ServiceAccess::debug_info(htab_write hw)
+void ServiceAccess::debug_info(htab_wr hw)
 {
 
 	base_d::debug_info(hw);
@@ -76,7 +76,7 @@ void ServiceAccess::debug_info(htab_write hw)
 }
 
 void 
-ServiceAccess::construct(zval_user services_obj)
+ServiceAccess::construct(val_ptr services_obj)
 {
 	if (services_obj.isObject())
 	{
@@ -86,7 +86,7 @@ ServiceAccess::construct(zval_user services_obj)
 		services_ =  Services::instance();
 	}
 
-	zobj_user caller (this);
+	obj_ptr caller (this);
 
 	caller.call(SAdata.init_access);
 }
@@ -97,13 +97,13 @@ void ServiceAccess::destruct()
 	services_.init();
 }
 
-zval_mgr
-ServiceAccess::service(zstr_user name)
+val_rc
+ServiceAccess::service(str_ptr name)
 {
-	zval_mgr result;
-	zval_user zu(result);
+	val_rc result;
+	val_ptr zu(result);
 
-	htab_write hw(cache_);
+	htab_wr hw(cache_);
 
 	result = hw.get(name);
 
@@ -134,36 +134,36 @@ ServiceAccess::service(zstr_user name)
 }
 
 void 
-ServiceAccess::set(zstr_user name, zval_user value)
+ServiceAccess::set(str_ptr name, val_ptr value)
 {
-	htab_write(cache_).set(name, value);
+	htab_wr(cache_).set(name, value);
 }
 
 bool 
-ServiceAccess::has(zstr_user name)
+ServiceAccess::has(str_ptr name)
 {
-	return htab_read(cache_).has_key(name);
+	return htab_rd(cache_).has_key(name);
 }
 
 
 void 
-ServiceAccess::unset(zstr_user name)
+ServiceAccess::unset(str_ptr name)
 {
-	htab_write(cache_).unset(name);
+	htab_wr(cache_).unset(name);
 }
 
-zval_mgr 
-ServiceAccess::nullService(zstr_user name)
+val_rc 
+ServiceAccess::nullService(str_ptr name)
 {
-	zval_mgr result;
+	val_rc result;
 
-	zstr_buffer buf;
+	str_buf buf;
 
 	buf << "get" << name.to_lower();
 
-	zstr_mgr method = buf.zstr();
+	str_rc method = buf.zstr();
 
-	zobj_user self(this);
+	obj_ptr self(this);
 	if (self.method_exists(method))
 	{
 		result = self.call(method);
@@ -207,7 +207,7 @@ ZEND_METHOD(Wcc_ServiceAccess, __get)
 	ZEND_PARSE_PARAMETERS_END();
 
 	auto cobj = zval_toc<ServiceAccess>(ZEND_THIS);
-	zval_mgr result = cobj->service(name);
+	val_rc result = cobj->service(name);
 	result.move_zv(return_value);
 }
 
@@ -219,7 +219,7 @@ ZEND_METHOD(Wcc_ServiceAccess, service)
 	ZEND_PARSE_PARAMETERS_END();
 
 	auto cobj = zval_toc<ServiceAccess>(ZEND_THIS);
-	zval_mgr result = cobj->service(name);
+	val_rc result = cobj->service(name);
 	result.move_zv(return_value);
 }
 
@@ -238,7 +238,7 @@ ZEND_METHOD(Wcc_ServiceAccess, getServices)
 	ZEND_PARSE_PARAMETERS_END();
 
 	auto cobj = zval_toc<ServiceAccess>(ZEND_THIS);
-	zobj_user result = cobj->getServices();
+	obj_ptr result = cobj->getServices();
 
 	result.return_zv(return_value);
 }

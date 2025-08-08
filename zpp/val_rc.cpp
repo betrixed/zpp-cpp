@@ -8,44 +8,44 @@
 #define ZVAL_MGR_CPP
 
 #ifndef ZVAL_MGR_H
-#include "zval_mgr.h"
+#include "val_rc.h"
 #endif
 
 #ifndef ZVAL_USER_H
-#include "zval_user.h"
+#include "val_ptr.h"
 #endif
 
 #ifndef ZSTR_MGR_H
-#include "zstr_mgr.h"
+#include "str_rc.h"
 #endif
 
 #ifndef HTAB_MGR_H
-#include "htab_mgr.h"
+#include "htab_rc.h"
 #endif
 
 #ifndef ZOBJ_MGR_H
-#include "zobj_mgr.h"
+#include "obj_rc.h"
 #endif
 
 namespace zpp {
 
-zval_mgr zval_mgr::EmptyArray = zval_mgr((HashTable*) &zend_empty_array);
+val_rc val_rc::EmptyArray = val_rc((HashTable*) &zend_empty_array);
 
 void 
-zval_mgr::init()
+val_rc::init()
 {
     zv_ = {0};
     ZVAL_NULL(&zv_);
 }
 
 int   
-zval_mgr::ref_type() const
+val_rc::ref_type() const
 {
-    return Z_TYPE_P((const zval*) zval_user::real_zval(&zv_));
+    return Z_TYPE_P((const zval*) val_ptr::real_zval(&zv_));
 }
 
 void 
-zval_mgr::make_ref()
+val_rc::make_ref()
 {
     zval *zp = &zv_;
     if (!Z_ISREF_P(zp)) { 
@@ -62,16 +62,16 @@ zval_mgr::make_ref()
     }                       
 }
 
-zval_mgr::~zval_mgr()
+val_rc::~val_rc()
 {
-    zval_mgr::try_decref(&zv_);
+    val_rc::try_decref(&zv_);
 }
 
 
 zend_string* 
-zval_mgr::zstr() const
+val_rc::zstr() const
 {
-    zval* p = zval_user::real_zval(&zv_);
+    zval* p = val_ptr::real_zval(&zv_);
     if (Z_TYPE_P(p) != IS_STRING)
     {
         return nullptr;
@@ -80,16 +80,16 @@ zval_mgr::zstr() const
 }
 
 zend_long 
-zval_mgr::zlong() const
+val_rc::zlong() const
 {
-    zval_user result(*this);
+    val_ptr result(*this);
     return result.zlong();
 }
 
 HashTable*   
-zval_mgr::zarray() const
+val_rc::zarray() const
 {
-    zval* p = zval_user::real_zval(&zv_);
+    zval* p = val_ptr::real_zval(&zv_);
     if (Z_TYPE_P(p) != IS_ARRAY)
     {
         return nullptr;
@@ -98,9 +98,9 @@ zval_mgr::zarray() const
 }
 
 zend_object*    
-zval_mgr::zobject() const
+val_rc::zobject() const
 {
-    zval* p = zval_user::real_zval(&zv_);
+    zval* p = val_ptr::real_zval(&zv_);
     zend_object* result;
 
     if (Z_TYPE_P(p) == IS_OBJECT)
@@ -115,27 +115,27 @@ zval_mgr::zobject() const
 }
 
 void 
-zval_mgr::new_array()
+val_rc::new_array()
 {
     lose();
-    HashTable* ht = htab_mgr::new_array();
+    HashTable* ht = htab_rc::new_array();
     // added with rc == 1 
-    zval_user(&zv_).bind_array(ht);  
-    htab_mgr::try_decref(ht); // because new primary mgr
+    val_ptr(&zv_).bind_array(ht);  
+    htab_rc::try_decref(ht); // because new primary mgr
     //showmem("new_array", &zv_);
 }
 
 void 
-zval_mgr::empty_array()
+val_rc::empty_array()
 {
     lose();
     // zend_empty_array has rc == 2 
-    zval_user(&zv_).bind_array((zend_array*) &zend_empty_array);
+    val_ptr(&zv_).bind_array((zend_array*) &zend_empty_array);
 }
 
 
 void
-zval_mgr::addref()
+val_rc::addref()
 {
     try_decref(&zv_);
     /*
@@ -148,15 +148,15 @@ zval_mgr::addref()
 }
 
 void // protected
-zval_mgr::lose()
+val_rc::lose()
 {
     try_decref(&zv_);
     zv_ = {0};
     ZVAL_NULL(&zv_);
 }
 
-const zval_mgr& 
-zval_mgr::operator=(zend_long value)
+const val_rc& 
+val_rc::operator=(zend_long value)
 {
     try_decref(&zv_);
     zv_ = {0};
@@ -164,8 +164,8 @@ zval_mgr::operator=(zend_long value)
     return *this;
 }
 
-const zval_mgr& 
-zval_mgr::operator=(double value)
+const val_rc& 
+val_rc::operator=(double value)
 {
     try_decref(&zv_);
     zv_ = {0};
@@ -173,37 +173,37 @@ zval_mgr::operator=(double value)
     return *this;
 }
 
-zval_mgr::zval_mgr() 
+val_rc::val_rc() 
 {
     zv_ = {0};
     ZVAL_NULL(&zv_);
 }
 
-void zval_mgr::set_null()
+void val_rc::set_null()
 {
     lose();
 }
 
-void zval_mgr::set_bool(bool value)
+void val_rc::set_bool(bool value)
 {
     try_decref(&zv_);
     zv_ = {0};
     ZVAL_BOOL(&zv_, value);
 }
 
-zval_mgr::zval_mgr(HashTable* ht)
+val_rc::val_rc(HashTable* ht)
 {
      zv_ = {0};
-     zval_user(&zv_).bind_array(ht);
+     val_ptr(&zv_).bind_array(ht);
 }
 
-zval_mgr::zval_mgr(base_d* cobj)
+val_rc::val_rc(base_d* cobj)
 {
     zv_ = {0};
-    zval_user(&zv_).bind_object(cobj->vobj());
+    val_ptr(&zv_).bind_object(cobj->vobj());
 }
 
-zval_mgr::zval_mgr(bool bval)
+val_rc::val_rc(bool bval)
 {
     zv_ = {0};
     if (bval)
@@ -215,7 +215,7 @@ zval_mgr::zval_mgr(bool bval)
     } 
 }
 
-zval_mgr::zval_mgr(zval* zv)
+val_rc::val_rc(zval* zv)
 {
     zv_ = {0};
     if (zv) {
@@ -227,7 +227,7 @@ zval_mgr::zval_mgr(zval* zv)
     }
 }
 
-zval_mgr::zval_mgr(const zval_user& rc)
+val_rc::val_rc(const val_ptr& rc)
 {
     zv_ = {0};
     if (rc.p_) {
@@ -238,8 +238,8 @@ zval_mgr::zval_mgr(const zval_user& rc)
     }    
 }
 
-const zval_mgr& 
-zval_mgr::operator=(zval* rc)
+const val_rc& 
+val_rc::operator=(zval* rc)
 {
     lose();
     if (rc) {
@@ -251,25 +251,25 @@ zval_mgr::operator=(zval* rc)
     return *this;
 }
 
-const zval_mgr& 
-zval_mgr::operator=(const htab_mgr &rc)
+const val_rc& 
+val_rc::operator=(const htab_rc &rc)
 {
     lose();
     HashTable* ht = rc.ht_;
     if (ht)
     {
-        zval_user(&zv_).bind_array(ht);
+        val_ptr(&zv_).bind_array(ht);
     }
     return *this;
 }
 
- zval_mgr::zval_mgr(int value)
+ val_rc::val_rc(int value)
  {
     zv_ = {0};
     ZVAL_LONG(&zv_, value);
  }
 
-zval_mgr::zval_mgr(const zval_mgr& rc, bool byRef) 
+val_rc::val_rc(const val_rc& rc, bool byRef) 
 {
 
     zv_ = {0};
@@ -284,7 +284,7 @@ zval_mgr::zval_mgr(const zval_mgr& rc, bool byRef)
     }
 }
 
-zval_mgr::zval_mgr(zval_mgr&& m)
+val_rc::val_rc(val_rc&& m)
 {
     ZVAL_COPY_VALUE(&zv_, &m.zv_);
     m.init();
@@ -293,13 +293,13 @@ zval_mgr::zval_mgr(zval_mgr&& m)
 
 /** copy with careful addref */
 void
-zval_mgr::copy(zval *p)
+val_rc::copy(zval *p)
 {
     ZVAL_COPY(&zv_, p);
     //try_addref(&zv_);
 }
 void 
-zval_mgr::assign_ptr(zval* p)
+val_rc::assign_ptr(zval* p)
 {
 	//avoid self assign and lose
 	if (p != &zv_)
@@ -321,13 +321,13 @@ zval_mgr::assign_ptr(zval* p)
 }
 
 bool 
-zval_mgr::ok() const
+val_rc::ok() const
 {
-    return zval_user(*this).ok();
+    return val_ptr(*this).ok();
 }
 
-const zval_mgr& 
-zval_mgr::operator=(const zval_user &rc)
+const val_rc& 
+val_rc::operator=(const val_ptr &rc)
 {
 	zval* p = (zval*) rc;
 
@@ -336,16 +336,16 @@ zval_mgr::operator=(const zval_user &rc)
 	return *this;		
 }
 
-const zval_mgr& 
-zval_mgr::operator=(const zstr_user& rc)
+const val_rc& 
+val_rc::operator=(const str_ptr& rc)
 {
     lose();
-    zval_user(&zv_).bind_string(rc.s);
+    val_ptr(&zv_).bind_string(rc.s);
     return *this;
 }
 
-zval_mgr& 
-zval_mgr::operator=(zval_mgr&& rc)
+val_rc& 
+val_rc::operator=(val_rc&& rc)
 {
 	if (&rc != this)
 	{
@@ -356,8 +356,8 @@ zval_mgr::operator=(zval_mgr&& rc)
     return *this;
 }
 
-const zval_mgr& 
-zval_mgr::operator=(const zobj_user &rc)
+const val_rc& 
+val_rc::operator=(const obj_ptr &rc)
 {
     lose();
     zend_object* obj = (zend_object*) rc;
@@ -368,8 +368,8 @@ zval_mgr::operator=(const zobj_user &rc)
     return *this;
 }
 
-const zval_mgr& 
-zval_mgr::operator=(const zval_mgr &rc)
+const val_rc& 
+val_rc::operator=(const val_rc &rc)
 {
     try_decref(&zv_); 
     ZVAL_COPY(&zv_ , &rc.zv_);
@@ -377,7 +377,7 @@ zval_mgr::operator=(const zval_mgr &rc)
 }
 
 void 
-zval_mgr::move_zv(zval* return_value)
+val_rc::move_zv(zval* return_value)
 {
     ZVAL_COPY_VALUE(return_value, &zv_);
     zv_ = {0};
@@ -385,7 +385,7 @@ zval_mgr::move_zv(zval* return_value)
 }
 
 void 
-zval_mgr::return_zv(zval* return_value)
+val_rc::return_zv(zval* return_value)
 {
     ZVAL_COPY(return_value, &zv_);
 }
@@ -393,7 +393,7 @@ zval_mgr::return_zv(zval* return_value)
 
 //! mutate value
 void 
-zval_mgr::toLong()
+val_rc::toLong()
 {
     zval* p = &zv_;
     
@@ -405,7 +405,7 @@ zval_mgr::toLong()
     }
 }
 
-void zval_mgr::toDouble()
+void val_rc::toDouble()
 {
     zval* p = &zv_;
     if (Z_TYPE_P(p) != IS_DOUBLE) {
@@ -417,7 +417,7 @@ void zval_mgr::toDouble()
 }
 
 void
-zval_mgr::toString() 
+val_rc::toString() 
 {
     zval* p = (zval*)  &zv_;
     ZVAL_DEREF(p);
@@ -429,7 +429,7 @@ zval_mgr::toString()
     }
 }
 
-zval_mgr::zval_mgr(zstr_mgr&& rc)
+val_rc::val_rc(str_rc&& rc)
 {
     if (rc.s)
     {
@@ -438,55 +438,55 @@ zval_mgr::zval_mgr(zstr_mgr&& rc)
     }
 }
 
-zval_mgr::zval_mgr(zend_string* rc)
+val_rc::val_rc(zend_string* rc)
 {
     zv_ = {0};
-    zval_user(&zv_).bind_string(rc);
+    val_ptr(&zv_).bind_string(rc);
 }
 
-zval_mgr::zval_mgr(zend_object* rc)
+val_rc::val_rc(zend_object* rc)
 {
     zv_ = {0};
-    zval_user(&zv_).bind_object(rc);
+    val_ptr(&zv_).bind_object(rc);
 }
 
-zval_mgr::zval_mgr(zend_long value)
+val_rc::val_rc(zend_long value)
 {
     zv_ = {0};
     ZVAL_LONG(&zv_, value);
 }
 
-zval_mgr::zval_mgr(const zstr_user& rc)
+val_rc::val_rc(const str_ptr& rc)
 {
-    zval_user(&zv_).bind_string(rc);
+    val_ptr(&zv_).bind_string(rc);
 }
 
-const zval_mgr& 
-zval_mgr::operator=(zend_object* rc)
+const val_rc& 
+val_rc::operator=(zend_object* rc)
 {
     lose();
-    zval_user(&zv_).bind_object(rc);
+    val_ptr(&zv_).bind_object(rc);
     return *this;
 }
 
-const zval_mgr& 
-zval_mgr::operator=(HashTable* rc)
+const val_rc& 
+val_rc::operator=(HashTable* rc)
 {
     lose();
-    zval_user(&zv_).bind_array(rc);
+    val_ptr(&zv_).bind_array(rc);
     return *this;
 }
 
-const zval_mgr& 
-zval_mgr::operator=(zend_string* rc)
+const val_rc& 
+val_rc::operator=(zend_string* rc)
 {
     lose();
-    zval_user(&zv_).bind_string(rc);
+    val_ptr(&zv_).bind_string(rc);
     return *this;
 }
 
 void 
-zval_mgr::try_addref(zval* p)
+val_rc::try_addref(zval* p)
 {
     HashTable*      ht;
     zend_object*    ob;
@@ -539,7 +539,7 @@ zval_mgr::try_addref(zval* p)
 }
 
 bool //static. Return true if contents become invalid
-zval_mgr::try_decref(zval* p)
+val_rc::try_decref(zval* p)
 {
     if (Z_REFCOUNTED_P(p))
     {
@@ -593,20 +593,20 @@ zval_mgr::try_decref(zval* p)
 
         case IS_OBJECT:
             {
-                return zobj_mgr::try_decref(Z_OBJ_P(p));
+                return obj_rc::try_decref(Z_OBJ_P(p));
             }
         }
     }
     return false;
 }
 
-zval_mgr //static 
-zval_mgr::empty_str()
+val_rc //static 
+val_rc::empty_str()
 {
-    return zval_mgr(zend_empty_string);
+    return val_rc(zend_empty_string);
 }
 
 }; // namespace Php
 
 #endif
-//zval_mgr.cpp
+//val_rc.cpp

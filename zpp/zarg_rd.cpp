@@ -2,21 +2,21 @@
 #define ZARG_EXEC_CPP
 
 #ifndef ZARG_EXEC_H
-#include "zarg_exec.h"
+#include "zarg_rd.h"
 #endif
 
 namespace zpp {
-zstr_buffer& 
-zarg_exec::error()
+str_buf& 
+zarg_rd::error()
 {
 	if (!errors_)
 	{
-		errors_ = new zstr_buffer();
+		errors_ = new str_buf();
 	}
 	return *errors_;
 }
 
-zarg_exec::~zarg_exec()
+zarg_rd::~zarg_rd()
 {
 	if (errors_) 
 	{
@@ -24,7 +24,7 @@ zarg_exec::~zarg_exec()
 	}
 }
 
-zarg_exec::zarg_exec(zend_execute_data* ze) : errors_(nullptr)
+zarg_rd::zarg_rd(zend_execute_data* ze) : errors_(nullptr)
 {
 	zptr0_ = (zval*)(ZEND_CALL_VAR_NUM(ze, 0));
 	nargs_ = ZEND_CALL_NUM_ARGS(ze);
@@ -32,7 +32,7 @@ zarg_exec::zarg_exec(zend_execute_data* ze) : errors_(nullptr)
 }
 
 zval*
-zarg_exec::option(size_t ix)
+zarg_rd::option(size_t ix)
 {
 	option_ = 1;
 	if ((ix < 1) || (ix > nargs_))
@@ -43,7 +43,7 @@ zarg_exec::option(size_t ix)
 }
 
 zval* 
-zarg_exec::need(size_t ix)
+zarg_rd::need(size_t ix)
 {
 	option_ = 0;
 	if ((ix < 1) || (ix > nargs_))
@@ -55,10 +55,10 @@ zarg_exec::need(size_t ix)
 }
 
 bool 
-zarg_exec::zstring(zstr_user& value, zval* arg)
+zarg_rd::zstring(str_ptr& value, zval* arg)
 {
 
-	zval_user test(arg);
+	val_ptr test(arg);
 	value = test.zstr();
 	if (value.ok())
 	{
@@ -72,9 +72,9 @@ zarg_exec::zstring(zstr_user& value, zval* arg)
 }
 
 bool 
-zarg_exec::zstring_null(zstr_user& value, zval* arg)
+zarg_rd::zstring_null(str_ptr& value, zval* arg)
 {
-	zval_user test(arg);
+	val_ptr test(arg);
 	value = test.zstr();
 	if (value.ok() || test.isNull())
 	{
@@ -89,9 +89,9 @@ zarg_exec::zstring_null(zstr_user& value, zval* arg)
 }
 
 bool 
-zarg_exec::zarray_null(htab_read& value, zval* arg)
+zarg_rd::zarray_null(htab_rd& value, zval* arg)
 {
-	zval_user test(arg);
+	val_ptr test(arg);
 	int itype = test.ref_type();
 	if (itype == IS_ARRAY || itype == IS_NULL)
 	{
@@ -107,9 +107,9 @@ zarg_exec::zarray_null(htab_read& value, zval* arg)
 
 
 bool 
-zarg_exec::zarray(htab_read& value, zval* arg)
+zarg_rd::zarray(htab_rd& value, zval* arg)
 {
-	zval_user test(arg);
+	val_ptr test(arg);
 	int itype = test.ref_type();
 
 	if (itype == IS_ARRAY)
@@ -125,13 +125,13 @@ zarg_exec::zarray(htab_read& value, zval* arg)
 }
 
 bool
-zarg_exec::obj_ofclass_null(zobj_user& value, zval* arg, zend_class_entry* ce)
+zarg_rd::obj_ofclass_null(obj_ptr& value, zval* arg, zend_class_entry* ce)
 {
-	value = zobj_user(arg);
+	value = obj_ptr(arg);
 	if (value.instanceof(ce) || value.isNull()) {
 		return true;
 	}
-	zstr_user name(ce->name);
+	str_ptr name(ce->name);
 	if (!option_)
 	{
 		error() << "; Expect NULL or object of class " << name;
@@ -140,9 +140,9 @@ zarg_exec::obj_ofclass_null(zobj_user& value, zval* arg, zend_class_entry* ce)
 }
 
 bool 
-zarg_exec::obj(zobj_user& value, zval* arg)
+zarg_rd::obj(obj_ptr& value, zval* arg)
 {
-	value = zobj_user(arg);
+	value = obj_ptr(arg);
 	bool result = value.ok();
 	if (!option_ && !result)
 	{
@@ -152,9 +152,9 @@ zarg_exec::obj(zobj_user& value, zval* arg)
 }
 
 bool 
-zarg_exec::obj_null(zobj_user& value, zval* arg)
+zarg_rd::obj_null(obj_ptr& value, zval* arg)
 {
-	zval_user test(arg);
+	val_ptr test(arg);
 	int itype = test.ref_type();
 	if (itype != IS_OBJECT && itype != IS_NULL)
 	{
@@ -167,13 +167,13 @@ zarg_exec::obj_null(zobj_user& value, zval* arg)
 }
 
 bool
-zarg_exec::obj_ofclass(zobj_user& value, zval* arg, zend_class_entry* ce)
+zarg_rd::obj_ofclass(obj_ptr& value, zval* arg, zend_class_entry* ce)
 {
-	value = zobj_user(arg);
+	value = obj_ptr(arg);
 	if (value.instanceof(ce)) {
 		return true;
 	}
-	zstr_user name(ce->name);
+	str_ptr name(ce->name);
 	if (!option_)
 	{
 		error() << "; Expect object of class " << name;
@@ -182,9 +182,9 @@ zarg_exec::obj_ofclass(zobj_user& value, zval* arg, zend_class_entry* ce)
 }
 
 bool 
-zarg_exec::zlong_null(zend_long& value, zval* arg)
+zarg_rd::zlong_null(zend_long& value, zval* arg)
 {
-	zval_user test(arg);
+	val_ptr test(arg);
 	int itype = test.ref_type();
 	if (itype != IS_LONG && itype != IS_NULL) 
 	{
@@ -199,9 +199,9 @@ zarg_exec::zlong_null(zend_long& value, zval* arg)
 }
 
 bool 
-zarg_exec::zbool(bool& value, zval* arg)
+zarg_rd::zbool(bool& value, zval* arg)
 {
-	zval_user test(arg);
+	val_ptr test(arg);
 	int itype = test.ref_type();
 	if (itype == IS_TRUE || itype == IS_FALSE)
 	{
@@ -217,9 +217,9 @@ zarg_exec::zbool(bool& value, zval* arg)
 
 
 bool 
-zarg_exec::zlong(zend_long& value, zval* arg)
+zarg_rd::zlong(zend_long& value, zval* arg)
 {
-	zval_user test(arg);
+	val_ptr test(arg);
 	if (!test.isLong()) 
 	{
 		if (!option_)
@@ -233,10 +233,10 @@ zarg_exec::zlong(zend_long& value, zval* arg)
 }
 
 
-zstr_mgr 
-zarg_exec::get_errors()
+str_rc 
+zarg_rd::get_errors()
 {
-	zstr_mgr result;
+	str_rc result;
 
 	if (errors_)
 	{	
@@ -248,11 +248,11 @@ zarg_exec::get_errors()
 }
 
 bool 
-zarg_exec::throw_errors()
+zarg_rd::throw_errors()
 {
 	if (errors_)
 	{
-		zstr_mgr s = errors_->zstr();
+		str_rc s = errors_->zstr();
 		zend_throw_error(zend_ce_error,"Errors %s: ", s.data());
 		delete errors_;
 		errors_ = nullptr;

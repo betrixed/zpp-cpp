@@ -2,48 +2,48 @@
 #define HTAB_READ_H
 
 #ifndef ZVAL_USER_H
-#include "zval_user.h"
+#include "val_ptr.h"
 #endif
 
 #ifndef ZSTR_USER_H
-#include "zstr_user.h"
+#include "str_ptr.h"
 #endif
 
 typedef int fn_zval(zval*);
 
 namespace zpp {
     
-    class  zval_mgr;
+    class  val_rc;
 
-    class  htab_mgr;
+    class  htab_rc;
 
-    class  htab_read {
+    class  htab_rd {
     protected:
         HashTable* ht_;
 
-        friend class zval_mgr;
-        friend class htab_mgr;
+        friend class val_rc;
+        friend class htab_rc;
         
     public:
         static HashTable* make_own(HashTable* ht);
 
-        htab_read() : ht_(nullptr) {}
+        htab_rd() : ht_(nullptr) {}
 
-        htab_read(const htab_read& rc) : ht_(rc.ht_) {}
+        htab_rd(const htab_rd& rc) : ht_(rc.ht_) {}
         
-        htab_read(HashTable* ht);
+        htab_rd(HashTable* ht);
 
         operator HashTable*() const { return ht_; }
 
         HashTable* ptr() const { return ht_; }
 
-        htab_read(const zval_mgr& zw);
+        htab_rd(const val_rc& zw);
 
-        htab_read(zval_user zu);
+        htab_rd(val_ptr zu);
         
-        htab_read(const zval* p);
+        htab_rd(const zval* p);
 
-        const htab_read& operator=(const zval* p);
+        const htab_rd& operator=(const zval* p);
 
         uint32_t size() const;
 
@@ -58,7 +58,7 @@ namespace zpp {
         bool ok() const { return (ht_); }
 
         zval* get(zend_long idx) const;
-        //zval* get(zval_user key) const;
+        //zval* get(val_ptr key) const;
         zval* get(zend_string* zkey) const;
 
         zval* get(const char* key) const;
@@ -74,32 +74,32 @@ namespace zpp {
                 return get(zkey);
         }
 
-        zval* operator[]  (const zval_mgr& key) const;
+        zval* operator[]  (const val_rc& key) const;
 
-        zval* operator[]  (zstr_user skey) const;
+        zval* operator[]  (str_ptr skey) const;
 
         bool  has_index(zend_long key) const;
 
         bool  has_key(zend_string* skey) const;
 
-        bool  has_key(zval_user skey) const;
+        bool  has_key(val_ptr skey) const;
         
-        bool try_fetch(zend_string* key, zval_user&  store) const;
-        bool try_fetch(zend_long key, zval_user& store) const;
+        bool try_fetch(zend_string* key, val_ptr&  store) const;
+        bool try_fetch(zend_long key, val_ptr& store) const;
 
-        bool try_fetch(zval_user key, zval_user& store) const;
+        bool try_fetch(val_ptr key, val_ptr& store) const;
         
         void return_zv(zval* return_value) const;
 
-        zstr_mgr print_kv(const char* label) const;
+        str_rc print_kv(const char* label) const;
 
  
-        htab_mgr slice(int offset, int length, bool preserve_keys = false);
+        htab_rc slice(int offset, int length, bool preserve_keys = false);
         /**
          * Replace string segments like @valkey with
          * the text values associated with key "valkey"
          */ 
-        zstr_mgr unhive(zstr_user subj);
+        str_rc unhive(str_ptr subj);
 
         void apply_all(fn_zval fn);
 

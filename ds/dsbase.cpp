@@ -13,7 +13,7 @@ namespace dso {
 	 {
 	 	zobj_user temp(this->zobj());
 
-	 	htab_mgr plist;
+	 	htab_rc plist;
 
 	 	if (temp.property_list(plist))
 	 	{

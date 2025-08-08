@@ -10,23 +10,23 @@ namespace wcd {
 
 	class RunSql : public base_d {
 	protected:
-		zobj_mgr  db_;
-		zstr_mgr  sql_;
-		htab_mgr  bind_;
+		obj_rc  db_;
+		str_rc  sql_;
+		htab_rc  bind_;
 		bool      retval_;
 
 	public:
 
 		static base_obj_mgr<RunSql> omg;
 
-		void construct(zobj_user db, zstr_user sql, 
-			 htab_read bind, bool rval = false);
+		void construct(obj_ptr db, str_ptr sql, 
+			 htab_rd bind, bool rval = false);
 
-		zval_mgr operation();
-		zval_mgr run();
+		val_rc operation();
+		val_rc run();
 		
-		static zval_mgr op(zobj_user db, zstr_user sql, 
-			htab_read bind = htab_read(), bool rval = false );
+		static val_rc op(obj_ptr db, str_ptr sql, 
+			htab_rd bind = htab_rd(), bool rval = false );
 
 	};
 };

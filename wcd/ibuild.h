@@ -21,39 +21,39 @@ namespace wcd {
 
 		static base_obj_mgr<IBuild> omg;
 
-		virtual void debug_info(htab_write di);
+		virtual void debug_info(htab_wr di);
 		
-		void construct(zval_user driver);
+		void construct(val_ptr driver);
 		void destruct();
 
-		zval_mgr aggregate(zstr_user agfn, htab_read columns);
-		zval_mgr get(htab_read columns);
+		val_rc aggregate(str_ptr agfn, htab_rd columns);
+		val_rc get(htab_rd columns);
 
-		zval_mgr oneRow();
-		zval_mgr allRows();
+		val_rc oneRow();
+		val_rc allRows();
 
-		zval_mgr first(htab_read columns);
-		void where(zval_user column, zstr_user bop, zval_user value, zstr_user bval);
+		val_rc first(htab_rd columns);
+		void where(val_ptr column, str_ptr bop, val_ptr value, str_ptr bval);
 
 
-		void whereKeyValue(zval_user key, zval_user value);
-		void whereRaw(zobj_user rawobj, htab_read values, zstr_user bval);
+		void whereKeyValue(val_ptr key, val_ptr value);
+		void whereRaw(obj_ptr rawobj, htab_rd values, str_ptr bval);
 		
-		zobj_mgr getInsertSql(htab_read columns);
-		zval_mgr update(zobj_user irow, htab_read dirty);
+		obj_rc getInsertSql(htab_rd columns);
+		val_rc update(obj_ptr irow, htab_rd dirty);
 
-		void setReturns(htab_read names);
-		zval_mgr insert(zval_user rdata);
+		void setReturns(htab_rd names);
+		val_rc insert(val_ptr rdata);
 
 		void limit(int lim, int offset=0);
 		void offset(int value);
-		void orderBy(zval_user colname, bool descend=false);
+		void orderBy(val_ptr colname, bool descend=false);
 		
-		zval_mgr deleteRow(zobj_user rowobj);
+		val_rc deleteRow(obj_ptr rowobj);
 		
-		int count(zval_user columns);
+		int count(val_ptr columns);
 
-		void table(zstr_user table, bool wipe=true);
+		void table(str_ptr table, bool wipe=true);
 
 		void distinct(bool set = true);
 
@@ -61,30 +61,30 @@ namespace wcd {
 			return model_.ok();
 		}
 
-		zstr_mgr now();
+		str_rc now();
 
-		zval_mgr seqLastValue(zstr_user seqname);
+		val_rc seqLastValue(str_ptr seqname);
 
-		void set(zstr_user cname, zval_user value);
+		void set(str_ptr cname, val_ptr value);
 
 		int setFetch(int mode);
 
-		void setInsert(htab_read data);
+		void setInsert(htab_rd data);
 
-		void setModel(zobj_user obj, bool bind = true);
+		void setModel(obj_ptr obj, bool bind = true);
 
-		zval_mgr setSeqValue(int value, htab_read data);
+		val_rc setSeqValue(int value, htab_rd data);
 
 		void wipe();
 		
-		zobj_mgr driver_;
-		zobj_mgr isql_;
-		zobj_mgr bindings_;
+		obj_rc driver_;
+		obj_rc isql_;
+		obj_rc bindings_;
 
-		zobj_mgr model_;
-		zstr_mgr modelClass_;
+		obj_rc model_;
+		str_rc modelClass_;
 
-		htab_mgr columns_;
+		htab_rc columns_;
 
 	protected:
 
@@ -96,13 +96,13 @@ namespace wcd {
 
 		int  ifetch_;
 
-		void where(zval_user column, zval_user bop, zval_user value, zval_user bval);
+		void where(val_ptr column, val_ptr bop, val_ptr value, val_ptr bval);
 
-		void where_unpack(htab_read aw);
-		void where_list(htab_read aw);
+		void where_unpack(htab_rd aw);
+		void where_list(htab_rd aw);
 
 		
-		zval_mgr get_first();
+		val_rc get_first();
 
 		friend class Model;
 	};

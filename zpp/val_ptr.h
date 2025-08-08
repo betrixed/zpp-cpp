@@ -22,22 +22,22 @@
 #endif
 
 #ifndef ZSTR_USER_H
-#include "zstr_user.h"
+#include "str_ptr.h"
 #endif
 
 
 namespace zpp {
 
-class zstr_mgr;
-class zval_mgr;
+class str_rc;
+class val_rc;
 
-class zval_user {
+class val_ptr {
 protected:
     zval *p_;
 
-    friend class zval_mgr;
-    friend class htab_read;
-    friend class htab_write;
+    friend class val_rc;
+    friend class htab_rd;
+    friend class htab_wr;
 
     void bind_string(zend_string* s);
 
@@ -55,21 +55,21 @@ public:
 
     static zval* real_zval(const zval* zv);
 
-    zval_user() : p_(nullptr) {}
+    val_ptr() : p_(nullptr) {}
 
-    //zval_user(const zval* rc) : p_(rc) {}
-    zval_user(const zval* rc);
+    //val_ptr(const zval* rc) : p_(rc) {}
+    val_ptr(const zval* rc);
     
-    zval_user(const zval_user &c) : p_(c.p_) {}
+    val_ptr(const val_ptr &c) : p_(c.p_) {}
 
-    zval_user(const zval_mgr& mgr);
+    val_ptr(const val_rc& mgr);
 
     operator zval*() const 
     {
         return p_;
     }
 
-    zval_user& operator=(zval* p)
+    val_ptr& operator=(zval* p)
     {
         p_ = p;
         return *this;
@@ -78,7 +78,7 @@ public:
     void setbool(bool value);
     
     // dereference if necessary
-    zval_user referent();
+    val_ptr referent();
 
     //! methods to check contained PHP type
     int  ref_type() const;
@@ -127,7 +127,7 @@ public:
     size_t size() const;
 
     /** zend_string* methods */
-    zstr_mgr  to_zstr() const;
+    str_rc  to_zstr() const;
 
     //! return  the zend_string* , else nullptr
     zend_string* zstr() const;
@@ -166,7 +166,7 @@ public:
             return 0;
         return Z_TYPE_P(p_);
     }
-    bool same(const zval_user& test) const;
+    bool same(const val_ptr& test) const;
     
     
     void init()
@@ -174,20 +174,20 @@ public:
         p_ = nullptr;
     }
     /** 
-     * This will be a mistake, for zval_mgr returned from a function.
-     * zval_user data = some_func(); where declared as zval_mgr some_func();
+     * This will be a mistake, for val_rc returned from a function.
+     * val_ptr data = some_func(); where declared as val_rc some_func();
      * 
-     * as the temporary zval_mgr will disappear, leaving zval_user with a
+     * as the temporary val_rc will disappear, leaving val_ptr with a
      * dangling pointer to its zval* memory.
      * 
      */
-    const zval_user& operator=(const zval_mgr& rc);
+    const val_ptr& operator=(const val_rc& rc);
 
-    static zval_user php_constant(zstr_user name);
+    static val_ptr php_constant(str_ptr name);
 
 };
 
-bool operator!=(const zval_user& a, const zval_user& b) 
+bool operator!=(const val_ptr& a, const val_ptr& b) 
 {
     return !a.same(b);
 }

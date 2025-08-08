@@ -2,7 +2,7 @@
 #define DATE_TIME_OBJ_CPP
 
 #ifndef ZOBJ_MGR_H
-#include "zobj_mgr.h"
+#include "obj_rc.h"
 #endif
 
 #ifndef DATE_TIME_OBJ_H
@@ -68,7 +68,7 @@ datetime_obj::make_obj()
 
 }
 
-zval_mgr
+val_rc
 datetime_obj::strtotime(zval* value)
 {
 	fn_call_args<1> strtotime;
@@ -78,14 +78,14 @@ datetime_obj::strtotime(zval* value)
 	return strtotime.call_fn();
 }
 
-zstr_mgr //static
-datetime_obj::date(zstr_user fmt, zval* value)
+str_rc //static
+datetime_obj::date(str_ptr fmt, zval* value)
 {
-	zstr_mgr result;
+	str_rc result;
 
-	zval_mgr timeval = strtotime(value);
+	val_rc timeval = strtotime(value);
 
-	if (zval_user(timeval).isLong())
+	if (val_ptr(timeval).isLong())
 	{
 		fn_call_args<2> datefmt;
 		datefmt.set_fname(DTData.date);
@@ -98,7 +98,7 @@ datetime_obj::date(zstr_user fmt, zval* value)
 }
 
 
-datetime_obj::datetime_obj(zstr_user zs)
+datetime_obj::datetime_obj(str_ptr zs)
 {
 	if (!make_obj())
 	{
@@ -173,26 +173,26 @@ datetime_obj::setTime(int hour, int minute, int second, int millisec)
 }
 
 
-zstr_mgr 
-datetime_obj::format(zstr_user dfmt)
+str_rc 
+datetime_obj::format(str_ptr dfmt)
 {
-	zobj_user caller(obj_);
-	zval_mgr  arg1(dfmt);
+	obj_ptr caller(obj_);
+	val_rc  arg1(dfmt);
 
-	zstr_mgr result = caller.call(DTData.formatkey, arg1);
+	str_rc result = caller.call(DTData.formatkey, arg1);
 
 	return result;
 }
 
-void datetime_obj::setTimeZone(zstr_user zone)
+void datetime_obj::setTimeZone(str_ptr zone)
 {
 	timezone_obj tz(zone);
-	zobj_user  temp(obj_);
+	obj_ptr  temp(obj_);
 
-	temp.call(DTData.settimezone, zval_mgr(tz));
+	temp.call(DTData.settimezone, val_rc(tz));
 }
 
-datetime_obj::datetime_obj(zobj_mgr fnret)
+datetime_obj::datetime_obj(obj_rc fnret)
 {
 	obj_ = fnret;
 	//TODO: assert is datetime object
@@ -212,14 +212,14 @@ datetime_obj::diff(datetime_obj& dtm)
 
 }
 
-timezone_obj::timezone_obj(zstr_user zone)
+timezone_obj::timezone_obj(str_ptr zone)
 {
 	if (!make_obj())
 	{
 		return;
 	}
-	zobj_user temp(obj_);
-	zval_mgr  arg1(zone);
+	obj_ptr temp(obj_);
+	val_rc  arg1(zone);
 	
 	temp.call(DTData.construct_key, arg1);
 }
@@ -246,55 +246,55 @@ timezone_obj::make_obj()
 long 
 diff_dt::years()
 {
-	zval_mgr temp = zobj_user(obj_).property(DTData.y_prop);
-	return zval_user(temp).zlong();
+	val_rc temp = obj_ptr(obj_).property(DTData.y_prop);
+	return val_ptr(temp).zlong();
 }
 
 long 
 diff_dt::months()
 {
-	zval_mgr temp = zobj_user(obj_).property(DTData.m_prop);
-	return zval_user(temp).zlong();
+	val_rc temp = obj_ptr(obj_).property(DTData.m_prop);
+	return val_ptr(temp).zlong();
 }
 long 
 diff_dt::days()
 {
-	zval_mgr temp = zobj_user(obj_).property(DTData.d_prop);
-	return zval_user(temp).zlong();
+	val_rc temp = obj_ptr(obj_).property(DTData.d_prop);
+	return val_ptr(temp).zlong();
 }
 long 
 diff_dt::hours()
 {
-	zval_mgr temp = zobj_user(obj_).property(DTData.h_prop);
-	return zval_user(temp).zlong();
+	val_rc temp = obj_ptr(obj_).property(DTData.h_prop);
+	return val_ptr(temp).zlong();
 	
 }
 long 
 diff_dt::minutes()
 {
-	zval_mgr temp = zobj_user(obj_).property(DTData.i_prop);
-	return zval_user(temp).zlong();
+	val_rc temp = obj_ptr(obj_).property(DTData.i_prop);
+	return val_ptr(temp).zlong();
 	
 }
 long 
 diff_dt::seconds()
 {
-	zval_mgr temp = zobj_user(obj_).property(DTData.s_prop);
-	return zval_user(temp).zlong();
+	val_rc temp = obj_ptr(obj_).property(DTData.s_prop);
+	return val_ptr(temp).zlong();
 }
 
 double 
 diff_dt::fraction()
 {
-	zval_mgr temp = zobj_user(obj_).property(DTData.f_prop);
-	return zval_user(temp).zdouble();
+	val_rc temp = obj_ptr(obj_).property(DTData.f_prop);
+	return val_ptr(temp).zdouble();
 	
 }
 
-zval_mgr 
+val_rc 
 diff_dt::daystotal()
 {
-	return zobj_user(obj_).property(DTData.days_prop);
+	return obj_ptr(obj_).property(DTData.days_prop);
 }
 
 

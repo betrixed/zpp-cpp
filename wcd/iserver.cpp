@@ -101,7 +101,7 @@ public:
 ISVinit ISV;
 
 void 
-IServer::debug_info(htab_write di)
+IServer::debug_info(htab_wr di)
 {
 	di.set(ISV.svckey_str, svc_key_);
 
@@ -124,18 +124,18 @@ IServer::debug_info(htab_write di)
 
 
 void 
-IServer::construct(zstr_user svckey)
+IServer::construct(str_ptr svckey)
 {
 	svc_key_ = svckey;
 
-	htab_write sw(sqlClasses_);
+	htab_wr sw(sqlClasses_);
 
 	sw.set(ISV.pdo_mysql, ISV.wcd_sql_mysql);
 	sw.set(ISV.pdo_pgsql, ISV.wcd_sql_postgres);
 	sw.set(ISV.pdo_sqlite, ISV.wcd_sql_sqlite);
 	sw.set(ISV.pdo_firebird, ISV.wcd_sql_firebird);
 
-	htab_write dw(driverClasses_);
+	htab_wr dw(driverClasses_);
 
 	dw.set(ISV.pdo_mysql, ISV.wcd_ext_mysql);
 	dw.set(ISV.pdo_pgsql, ISV.wcd_ext_postgres);
@@ -149,24 +149,24 @@ IServer::initDone()
 	svc_key_.init();
 }
 
-zobj_mgr 
+obj_rc 
 IServer::getDataCache()
 {
 	if (dbCache_.ok())
 	{
 		return dbCache_;
 	}
-	zobj_mgr cache_all = Services::service(ISV.cache_all);
-	zval_mgr arg1(ISV.sql_cache);
+	obj_rc cache_all = Services::service(ISV.cache_all);
+	val_rc arg1(ISV.sql_cache);
 	dbCache_ = cache_all.call(ISV.get_cache, arg1);
 	return dbCache_;
 }
 
-zobj_mgr 
-IServer::activate(zstr_user name)
+obj_rc 
+IServer::activate(str_ptr name)
 {
 	IConfig* cfg = needConfig(name);
-	zobj_mgr result;
+	obj_rc result;
 
 	if (!cfg)
 	{
@@ -176,7 +176,7 @@ IServer::activate(zstr_user name)
 	result = cfg->newConnect(name);
 	if (result.ok())
 	{
-		htab_write hw(active_);
+		htab_wr hw(active_);
 		hw.set(name, result);
 	}
 	else {
@@ -186,14 +186,14 @@ IServer::activate(zstr_user name)
 	return result;
 }
 
-zobj_mgr 
-IServer::getConfig(zstr_user name)
+obj_rc 
+IServer::getConfig(str_ptr name)
 {
 	//showstr("config name", name);
-	zobj_mgr result(config_.get(name));
+	obj_rc result(config_.get(name));
 
 	if (!result.ok()) {
-		zstr_user alias = alias_.get(name);
+		str_ptr alias = alias_.get(name);
 		//showstr("alias", alias);
 		if (alias.ok())
 		{
@@ -208,9 +208,9 @@ IServer::getConfig(zstr_user name)
 }
 
 IConfig*
-IServer::needConfig(zstr_user name)
+IServer::needConfig(str_ptr name)
 {
-	zobj_mgr cfg(config_.get(name));
+	obj_rc cfg(config_.get(name));
 	if (!cfg.ok())
 	{
 		zend_throw_error(zend_ce_error,"No configuration named %s", name.data());
@@ -219,12 +219,12 @@ IServer::needConfig(zstr_user name)
 }
 
 
-zobj_mgr 
-IServer::getConnect(zstr_user name)
+obj_rc 
+IServer::getConnect(str_ptr name)
 {
 	if (svc_key_.ok())
 	{
-		zstr_mgr key = svc_key_;
+		str_rc key = svc_key_;
 		// only use once
 		svc_key_.init();
 
@@ -232,7 +232,7 @@ IServer::getConnect(zstr_user name)
 		Services::service(key);
 	}
 	class_data cd(IServer::omg.class_entry_);
-	zstr_mgr   name_mgr;
+	str_rc   name_mgr;
 
 	if (!name.ok())
 	{
@@ -240,14 +240,14 @@ IServer::getConnect(zstr_user name)
 		name = name_mgr;
 	}
 
-	zobj_mgr conn(active_.get(name));
+	obj_rc conn(active_.get(name));
 
 	if (conn.ok())
 	{
 		return conn;
 	}
 
-	zstr_user alias = alias_.get(name);
+	str_ptr alias = alias_.get(name);
 	if (alias.ok())
 	{
 		conn = active_.get(alias);
@@ -261,12 +261,12 @@ IServer::getConnect(zstr_user name)
 
 }
 
-zobj_mgr //static 
-IServer::connect(zstr_user name)
+obj_rc //static 
+IServer::connect(str_ptr name)
 {
-	zstr_mgr name_mgr;
+	str_rc name_mgr;
 
-	zobj_user me = Services::getOne(IServer::omg.class_name());
+	obj_ptr me = Services::getOne(IServer::omg.class_name());
 
 	IServer* s = zobj_toc<IServer>(me);
 
@@ -279,7 +279,7 @@ IServer::connect(zstr_user name)
 		name = name_mgr;
 	}
 	else {
-		zval_mgr value(name);
+		val_rc value(name);
 		cd.static_property(ISV.active_cfg, value);
 	}
 
@@ -288,45 +288,45 @@ IServer::connect(zstr_user name)
 	return s->getConnect(name);
 }
 
-zstr_mgr 
-IServer::getSqlClass(zstr_user dkey)
+str_rc 
+IServer::getSqlClass(str_ptr dkey)
 {
 	return sqlClasses_.get(dkey);
 }
 
-zstr_mgr 
-IServer::getDriverClass(zstr_user dkey)
+str_rc 
+IServer::getDriverClass(str_ptr dkey)
 {
 	return driverClasses_.get(dkey);
 }
 
 
-htab_read 
+htab_rd 
 IServer::getSqlClasses()
 {
 	return sqlClasses_;
 }
 
-htab_read 
+htab_rd 
 IServer::getDriverClasses()
 {
 	return driverClasses_;
 }
 
 void 
-IServer::config(htab_read data)
+IServer::config(htab_rd data)
 {
-	zval_user clist = data.get(ISV.sqls_key);
+	val_ptr clist = data.get(ISV.sqls_key);
 
 	if (clist.isArray())
 	{
-		htab_write(sqlClasses_).merge(clist.zarray());
+		htab_wr(sqlClasses_).merge(clist.zarray());
 	}
 
 	clist = data.get(ISV.drivers_key);
 	if (clist.isArray())
 	{
-		htab_write(driverClasses_).merge(clist.zarray());
+		htab_wr(driverClasses_).merge(clist.zarray());
 	}
 	clist = data.get(ISV.db_config);
 	if (clist.isArray())
@@ -337,7 +337,7 @@ IServer::config(htab_read data)
 
 		for(wk.start(clist.zarray()); wk.ok(); wk.next())
 		{
-			zobj_mgr dbc_mgr = IConfig::omg.new_zobj();
+			obj_rc dbc_mgr = IConfig::omg.new_zobj();
 			IConfig* dbc = zobj_toc<IConfig>(dbc_mgr);
 			//showmem("Name", name);
 			//showmem("Values-", cfg);
@@ -349,10 +349,10 @@ IServer::config(htab_read data)
 }
 
 void 
-IServer::addConfig(zobj_mgr iconfig, zstr_user name)
+IServer::addConfig(obj_rc iconfig, str_ptr name)
 {
 	IConfig* cfg = zobj_toc<IConfig>(iconfig);
-	zstr_user key = cfg->getMyKey();
+	str_ptr key = cfg->getMyKey();
 
 	if (key.ok())
 	{
@@ -361,25 +361,25 @@ IServer::addConfig(zobj_mgr iconfig, zstr_user name)
 	}
 
 	cfg->setMyKey(name);
-	htab_write(config_).set(name, iconfig);
+	htab_wr(config_).set(name, iconfig);
 }
 
 void 
-IServer::setAlias(zstr_user alias, zstr_user name)
+IServer::setAlias(str_ptr alias, str_ptr name)
 {
-	htab_write(alias_).set(alias, name);
+	htab_wr(alias_).set(alias, name);
 }
 
-htab_read 
+htab_rd 
 IServer::getAliases()
 {
 	return alias_;
 }
 
-htab_mgr  
+htab_rc  
 IServer::getConfigNames()
 {
-	htab_mgr result = htab_mgr::getKeys(config_);
+	htab_rc result = htab_rc::getKeys(config_);
 	return result;
 }
 
@@ -387,7 +387,7 @@ IServer::getConfigNames()
 
 using namespace wcd;
 
-//static zobj_mgr connect(zstr_user name);
+//static obj_rc connect(str_ptr name);
 ZEND_METHOD(Wcd_IServer, Connect)
 {
 	zend_string* name = nullptr;
@@ -397,13 +397,13 @@ ZEND_METHOD(Wcd_IServer, Connect)
 	Z_PARAM_STR_OR_NULL(name)
 	ZEND_PARSE_PARAMETERS_END();
 
-	zobj_mgr result = IServer::connect(name);
+	obj_rc result = IServer::connect(name);
 
 	result.move_zv(return_value);
 }
 
 
-//void construct(zstr_user svckey);
+//void construct(str_ptr svckey);
 ZEND_METHOD(Wcd_IServer, __construct)
 {
 	zend_string* name;
@@ -416,7 +416,7 @@ ZEND_METHOD(Wcd_IServer, __construct)
 	cobj->construct(name);	
 }
 
-//void addConfig(zobj_mgr iconfig, zstr_user name);
+//void addConfig(obj_rc iconfig, str_ptr name);
 ZEND_METHOD(Wcd_IServer, addConfig)
 {
 	zval* config;
@@ -431,7 +431,7 @@ ZEND_METHOD(Wcd_IServer, addConfig)
 	cobj->addConfig(config, name);	
 }
 
-//zobj_mgr getConnect(zstr_user name);
+//obj_rc getConnect(str_ptr name);
 ZEND_METHOD(Wcd_IServer, getConnect)
 {
 	zend_string* name;
@@ -442,11 +442,11 @@ ZEND_METHOD(Wcd_IServer, getConnect)
 
 	IServer* cobj = zval_toc<IServer>(ZEND_THIS);
 
-	zobj_mgr result = cobj->getConnect(name);
+	obj_rc result = cobj->getConnect(name);
 	result.move_zv(return_value);
 }
 
-//void config(htab_read data);
+//void config(htab_rd data);
 ZEND_METHOD(Wcd_IServer, config)
 {
 	zval* data;
@@ -460,19 +460,19 @@ ZEND_METHOD(Wcd_IServer, config)
 	cobj->config(data);
 }
 
-//htab_read IServer::getAliases()
+//htab_rd IServer::getAliases()
 ZEND_METHOD(Wcd_IServer, getAliases)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	IServer* cobj = zval_toc<IServer>(ZEND_THIS);
 
-	htab_read result = cobj->getAliases();
+	htab_rd result = cobj->getAliases();
 
 	result.return_zv(return_value);
 }
 
-//zobj_mgr getConfig(zstr_user name);
+//obj_rc getConfig(str_ptr name);
 ZEND_METHOD(Wcd_IServer, getConfig)
 {
 	zend_string* name;
@@ -482,7 +482,7 @@ ZEND_METHOD(Wcd_IServer, getConfig)
 	ZEND_PARSE_PARAMETERS_END();
 
 	IServer* cobj = zval_toc<IServer>(ZEND_THIS);
-	zobj_mgr result = cobj->getConfig(name);	
+	obj_rc result = cobj->getConfig(name);	
 
 	result.move_zv(return_value);
 }
@@ -493,24 +493,24 @@ ZEND_METHOD(Wcd_IServer, getConfigNames)
 
 	IServer* cobj = zval_toc<IServer>(ZEND_THIS);
 
-	htab_mgr result = cobj->getConfigNames();
+	htab_rc result = cobj->getConfigNames();
 
 	result.move_zv(return_value);
 }
 
-//zobj_mgr getDataCache();
+//obj_rc getDataCache();
 ZEND_METHOD(Wcd_IServer, getDataCache)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	IServer* cobj = zval_toc<IServer>(ZEND_THIS);
 
-	zobj_mgr result = cobj->getDataCache();
+	obj_rc result = cobj->getDataCache();
 
 	result.move_zv(return_value);
 }
 
-//zstr_user getDriverClass(zstr_user dkey);
+//str_ptr getDriverClass(str_ptr dkey);
 ZEND_METHOD(Wcd_IServer, getDriverClass)
 {
 	zend_string* name;
@@ -520,19 +520,19 @@ ZEND_METHOD(Wcd_IServer, getDriverClass)
 	ZEND_PARSE_PARAMETERS_END();
 
 	IServer* cobj = zval_toc<IServer>(ZEND_THIS);
-	zstr_mgr result = cobj->getDriverClass(name);	
+	str_rc result = cobj->getDriverClass(name);	
 
 	result.move_zv(return_value);
 }
 
-//htab_read getDriverClasses();
+//htab_rd getDriverClasses();
 ZEND_METHOD(Wcd_IServer, getDriverClasses)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	IServer* cobj = zval_toc<IServer>(ZEND_THIS);
 
-	htab_read result = cobj->getDriverClasses();
+	htab_rd result = cobj->getDriverClasses();
 
 	result.return_zv(return_value);
 }
@@ -546,7 +546,7 @@ ZEND_METHOD(Wcd_IServer, getSqlClass)
 	ZEND_PARSE_PARAMETERS_END();
 
 	IServer* cobj = zval_toc<IServer>(ZEND_THIS);
-	zstr_mgr result = cobj->getSqlClass(name);	
+	str_rc result = cobj->getSqlClass(name);	
 
 	result.move_zv(return_value);
 }
@@ -557,7 +557,7 @@ ZEND_METHOD(Wcd_IServer, getSqlClasses)
 
 	IServer* cobj = zval_toc<IServer>(ZEND_THIS);
 
-	htab_read result = cobj->getSqlClasses();
+	htab_rd result = cobj->getSqlClasses();
 
 	result.return_zv(return_value);
 }
@@ -572,7 +572,7 @@ ZEND_METHOD(Wcd_IServer, initDone)
 	cobj->initDone();
 }
 
-//void setAlias(zstr_user alias, zstr_user name);
+//void setAlias(str_ptr alias, str_ptr name);
 ZEND_METHOD(Wcd_IServer, setAlias)
 {
 	zend_string* alias;

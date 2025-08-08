@@ -8,7 +8,7 @@
 #define FN_CALL_H
 
 #ifndef ZSTR_MGR_H
-#include "zstr_mgr.h"
+#include "str_rc.h"
 #endif
 
 #ifndef STATE_INIT_H
@@ -16,11 +16,11 @@
 #endif
 
 #ifndef HTAB_READ_H
-#include "htab_read.h"
+#include "htab_rd.h"
 #endif
 
 #ifndef ZVAL_MGR_H
-#include "zval_mgr.h"
+#include "val_rc.h"
 #endif
 
 
@@ -41,7 +41,7 @@ namespace zpp {
         zval*               argv_;
     public:
         //! Reserve extra number of parameters in front.
-        args_spread(htab_read args, int prefixct = 0);
+        args_spread(htab_rd args, int prefixct = 0);
         ~args_spread();
 
         size_t arg_ct() const { return argct_; }
@@ -49,15 +49,15 @@ namespace zpp {
         
     };
 
-    bool callable_fn(zval_mgr& result, zval_mgr& callme, int argct = 0, zval* argv = nullptr);
-    bool call_spread_fn(zval_mgr& result, zval_mgr& callme, htab_read args);
+    bool callable_fn(val_rc& result, val_rc& callme, int argct = 0, zval* argv = nullptr);
+    bool call_spread_fn(val_rc& result, val_rc& callme, htab_rd args);
 
     class fn_call {
     protected:
         // C-array of zvals arguments to call_user_fn
         size_t          argct_;
         zval*           argv_;
-        zval_mgr        result_;
+        val_rc        result_;
         //zstr_own        method_name_; // real owner of method name
         // PHP call cache info for multiple calls
         zend_fcall_info       fci_;
@@ -70,9 +70,9 @@ namespace zpp {
     	fn_call();
         ~fn_call();
 
-        void set_fci(zend_object* obj , zstr_user method, HashTable* nargs = nullptr);
+        void set_fci(zend_object* obj , str_ptr method, HashTable* nargs = nullptr);
         
-        void set_fname(zstr_user name);
+        void set_fname(str_ptr name);
         void set_named_args(HashTable* nargs);
 
         void wipe() const
@@ -80,7 +80,7 @@ namespace zpp {
             memset(argv_, 0, argct_*sizeof(zval));
         }
 
-        zval_mgr&& call_fn();
+        val_rc&& call_fn();
 
 
         //! This is the only means to ensure auto clean  
@@ -91,11 +91,11 @@ namespace zpp {
         /** Direct set args and return in one call. 
          *  These must be used from correct size in template<size_t ARGCT>
          *
-        zval_mgr&& call1(zval* a1);
-        zval_mgr&& call2(zval* a1, zval* a2);
-        zval_mgr&& call3(zval* a1, zval* a2, zval* a3);
-        zval_mgr&& call4(zval* a1, zval* a2, zval* a3, zval* a4);
-        zval_mgr&& call5(zval* a1, zval* a2, zval* a3, zval* a4, zval* a5);
+        val_rc&& call1(zval* a1);
+        val_rc&& call2(zval* a1, zval* a2);
+        val_rc&& call3(zval* a1, zval* a2, zval* a3);
+        val_rc&& call4(zval* a1, zval* a2, zval* a3, zval* a4);
+        val_rc&& call5(zval* a1, zval* a2, zval* a3, zval* a4, zval* a5);
         */
 
 
@@ -126,30 +126,30 @@ namespace zpp {
      */ 
     class file_content : public fn_call_args<5> {
     public:
-        zstr_mgr call(zstr_user path, 
+        str_rc call(str_ptr path, 
             int offset = 0, size_t len = 0);
     };
 
     class fn_fopen : public fn_call_args<2> {
     public:
-        zval_mgr call(zstr_user path, zstr_user modestr);
+        val_rc call(str_ptr path, str_ptr modestr);
     };
 
     class fn_fclose : public fn_call_args<1> {
     public:
-        bool call(zval_user fres);
+        bool call(val_ptr fres);
     };
 
     class fn_fgetcsv : public fn_call_args<1> {
     public:
         fn_fgetcsv();
-        zval_mgr call(zval_user file_res);
+        val_rc call(val_ptr file_res);
     };
 
     class fn_stripslashes : public fn_call_args<1> {
     public:
         fn_stripslashes();
-        zstr_mgr call(zstr_user name);
+        str_rc call(str_ptr name);
     };
 
     class PathInfo : public fn_call_args<2> 
@@ -163,34 +163,34 @@ namespace zpp {
             ALL = DIRNAME + BASENAME + EXTENSION + FILENAME
         };
 
-        zval_mgr call(zstr_user path, int flags);
+        val_rc call(str_ptr path, int flags);
     };
 
     class fnexists : public fn_call_args<1> {
     public:
-        bool call(zstr_user name);
+        bool call(str_ptr name);
     }; 
 
    
 
     class extnloaded : public fn_call_args<1> {
     public:
-        bool call(zstr_user name);
+        bool call(str_ptr name);
     };
 
     class pregquote : public fn_call_args<2> {
     public:
-        zstr_mgr call(zstr_user str, zstr_user delimiter);
+        str_rc call(str_ptr str, str_ptr delimiter);
     };
 
-    zstr_mgr addcslashes(zstr_user s, zstr_user escapes);
-    zstr_mgr mb_detect_order(const zval_mgr& encoding);
-    zstr_mgr mb_detect_encoding(zstr_user str, const zval_mgr& encodings, bool strict = false );
-    zstr_mgr rawurlencode(zstr_user s);
-    zstr_mgr strtr(zstr_user subj, zstr_user from, zstr_user to);
-    zstr_mgr ucwords(zstr_user subj);
+    str_rc addcslashes(str_ptr s, str_ptr escapes);
+    str_rc mb_detect_order(const val_rc& encoding);
+    str_rc mb_detect_encoding(str_ptr str, const val_rc& encodings, bool strict = false );
+    str_rc rawurlencode(str_ptr s);
+    str_rc strtr(str_ptr subj, str_ptr from, str_ptr to);
+    str_rc ucwords(str_ptr subj);
 
-    zval_mgr json_decode(zstr_user str, bool asArray, int flags = 0);
+    val_rc json_decode(str_ptr str, bool asArray, int flags = 0);
 
 
     class FCall2 : public fn_call_args<2>
@@ -198,8 +198,8 @@ namespace zpp {
     public:
         FCall2();
 
-        FCall2(zstr_user func);
-        zval_mgr call(zval* arg1, zval* arg2);
+        FCall2(str_ptr func);
+        val_rc call(zval* arg1, zval* arg2);
     };
 
     /** 
@@ -265,13 +265,13 @@ namespace zpp {
     extern fntable   FTAB;
     extern strtable  STAB;
 
-    bool extension_loaded(zstr_user name);
+    bool extension_loaded(str_ptr name);
 
-    bool function_exists(zstr_user name);
+    bool function_exists(str_ptr name);
 
-    zstr_mgr preg_quote(zstr_user expr, zstr_user delimiter);
+    str_rc preg_quote(str_ptr expr, str_ptr delimiter);
 
-    zstr_mgr file_get_contents(zstr_user path, int offset=0, size_t len=0);
+    str_rc file_get_contents(str_ptr path, int offset=0, size_t len=0);
 
 }; // end namespace zpp
 #endif

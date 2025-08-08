@@ -3,15 +3,15 @@
 
 // clean this zval of its reference counted value and reinitialize
 #ifndef HTAB_MGR_H
-#include "htab_mgr.h"
+#include "htab_rc.h"
 #endif
 
 #ifndef ZVAL_MGR_H
-#include "zval_mgr.h"
+#include "val_rc.h"
 #endif
 
 #ifndef ZSTR_MGR_H
-#include "zstr_mgr.h"
+#include "str_rc.h"
 #endif
 
 #ifndef HTAB_WALK_H
@@ -19,7 +19,7 @@
 #endif
 
 #ifndef HTAB_WRITE_H
-#include "htab_write.h"
+#include "htab_wr.h"
 #endif
 
 //#define HTAB_SHOW_MEMORY
@@ -28,28 +28,28 @@ namespace zpp {
 // Protected static function
 //! static, set value in _GLOBALS table
 void 
-htab_mgr::set_global(zstr_user key, zval_user value)
+htab_rc::set_global(str_ptr key, val_ptr value)
 {
 	// pre-emptive try reference count boost
-	zval_mgr::try_addref(value); 
-    zstr_mgr::try_addref(key);    
+	val_rc::try_addref(value); 
+    str_rc::try_addref(key);    
     
     // make it exist in $GLOBALS
     zend_symtable_update_ind(&EG(symbol_table), key, value);
 }
 
 //! static, get (or not) from _GLOBALS table
-zval_user  
-htab_mgr::get_global(zstr_user key)
+val_ptr  
+htab_rc::get_global(str_ptr key)
 {
 
-	zval_user result = zval_user(zend_hash_find_ind(&EG(symbol_table), key));
+	val_ptr result = val_ptr(zend_hash_find_ind(&EG(symbol_table), key));
 	//showmem("get_global", result);
 	return result;
 }
 
 void //static
-htab_mgr::try_addref(HashTable *h)
+htab_rc::try_addref(HashTable *h)
 {
 	if (!h)
 		return;
@@ -62,7 +62,7 @@ htab_mgr::try_addref(HashTable *h)
 
 
 bool  //static
-htab_mgr::try_decref(HashTable* h)
+htab_rc::try_decref(HashTable* h)
 {
 	if (!h || (h->gc.u.type_info & GC_IMMUTABLE))
 	{
@@ -83,14 +83,14 @@ htab_mgr::try_decref(HashTable* h)
 	return false;
 }
 
-void htab_mgr::own()
+void htab_rc::own()
 {
 	if (!ht_) return;
-	htab_mgr::try_addref(ht_);
+	htab_rc::try_addref(ht_);
 }
 
 HashTable* 
-htab_mgr::steal()
+htab_rc::steal()
 {
 	HashTable* result = ht_;
 	ht_ = nullptr;
@@ -98,7 +98,7 @@ htab_mgr::steal()
 }
 
 void 
-htab_mgr::adopt(HashTable *h)
+htab_rc::adopt(HashTable *h)
 {
 	if (ht_)
 		lose();
@@ -106,7 +106,7 @@ htab_mgr::adopt(HashTable *h)
 }
 
 
-void htab_mgr::lose()
+void htab_rc::lose()
 {
 	if (ht_) 
 	{
@@ -120,23 +120,23 @@ htab_empty::~htab_empty()
 {
 	//zend_printf("~htab_empty %lx\n", ht_);
 }
-htab_mgr::~htab_mgr()
+htab_rc::~htab_rc()
 {
-	//zend_printf("~htab_mgr  %lx\n", ht_);
+	//zend_printf("~htab_rc  %lx\n", ht_);
 	if (ht_) {
 		lose();
 	}
 }
 
-htab_mgr::htab_mgr(HashTable *h)
+htab_rc::htab_rc(HashTable *h)
 {
 	ht_ = h;
 	if (ht_) own();
 }
 
-htab_mgr::htab_mgr(zval_mgr&& zw)
+htab_rc::htab_rc(val_rc&& zw)
 {
-	HashTable *p = zval_user(zw).zarray();
+	HashTable *p = val_ptr(zw).zarray();
 
 	if (p != ht_)
 	{
@@ -145,23 +145,23 @@ htab_mgr::htab_mgr(zval_mgr&& zw)
 	}
 }
 
-htab_mgr::htab_mgr(const zval_mgr& zw)
+htab_rc::htab_rc(const val_rc& zw)
 {
-	ht_ = zval_user(zw).zarray();
+	ht_ = val_ptr(zw).zarray();
 	if (ht_) own();
 }
 
-htab_mgr::htab_mgr(const zval_user& zptr)
+htab_rc::htab_rc(const val_ptr& zptr)
 {
 	ht_ = zptr.zarray();
 	if (ht_) own();
 }
 
 
-htab_mgr::htab_mgr(zval* p)
+htab_rc::htab_rc(zval* p)
 {
 	if (p) {
-		ht_ = zval_user(p).zarray();
+		ht_ = val_ptr(p).zarray();
 		if (ht_) own();
 	}
 	else {
@@ -169,7 +169,7 @@ htab_mgr::htab_mgr(zval* p)
 	}
 }
 
-htab_mgr::htab_mgr(const htab_mgr& c)
+htab_rc::htab_rc(const htab_rc& c)
 {
 	ht_ = c.ht_;
 	if (ht_)
@@ -179,10 +179,10 @@ htab_mgr::htab_mgr(const htab_mgr& c)
 }
 
 
-const htab_mgr& 
-htab_mgr::operator=(const zval_mgr& zw)
+const htab_rc& 
+htab_rc::operator=(const val_rc& zw)
 {
-	HashTable* p = zval_user(zw).zarray();
+	HashTable* p = val_ptr(zw).zarray();
 
 	if (p) 
 	{
@@ -201,8 +201,8 @@ htab_mgr::operator=(const zval_mgr& zw)
 	return *this;
 }
 
-const htab_mgr& 
-htab_mgr::operator=(const zval_user& zptr)
+const htab_rc& 
+htab_rc::operator=(const val_ptr& zptr)
 {
 	lose();
 	ht_ = zptr.zarray();
@@ -210,12 +210,12 @@ htab_mgr::operator=(const zval_user& zptr)
 	return *this;
 }
 
-htab_mgr& 
-htab_mgr::operator=(zval_mgr&& zw)
+htab_rc& 
+htab_rc::operator=(val_rc&& zw)
 {
-	//showmem("htab_mgr=zw&&", zw);
+	//showmem("htab_rc=zw&&", zw);
 
-	HashTable* p = zval_user(zw).zarray();
+	HashTable* p = val_ptr(zw).zarray();
 
 	if (p != ht_)
 	{
@@ -227,8 +227,8 @@ htab_mgr::operator=(zval_mgr&& zw)
 }
 
 
-const htab_mgr& 
-htab_mgr::operator=(HashTable* htab)
+const htab_rc& 
+htab_rc::operator=(HashTable* htab)
 {
 	if (htab == ht_)
 	{
@@ -243,18 +243,18 @@ htab_mgr::operator=(HashTable* htab)
 }
 
 HashTable* //static
-htab_mgr::new_array()
+htab_rc::new_array()
 {
 	return zend_new_array(HT_MIN_SIZE);
 }
 
 HashTable* //static
-htab_mgr::empty_array()
+htab_rc::empty_array()
 {
 	return (HashTable*) &zend_empty_array;
 }
 
-void htab_mgr::init()
+void htab_rc::init()
 {
 	HashTable* empty = (HashTable*) &zend_empty_array;
 	if (ht_ && (ht_ != empty))
@@ -266,14 +266,14 @@ void htab_mgr::init()
 }
 
 bool 
-htab_mgr::isEmpty() const 
+htab_rc::isEmpty() const 
 { 
 	return  (!ht_) 
 			|| (ht_ == &zend_empty_array) 
 			|| (zend_array_count(ht_) == 0); 
 }
 
-void htab_mgr::reset()
+void htab_rc::reset()
 {
 	//zend_printf("reset\n");
 	//showarray("reset array", ht_);
@@ -303,7 +303,7 @@ void htab_mgr::reset()
 
 
 /*
-void htab_mgr::cow(const htab_mgr& c)
+void htab_rc::cow(const htab_rc& c)
 {
 	HashTable* h = c.ht_;
 	if (h == ht_)
@@ -316,14 +316,14 @@ void htab_mgr::cow(const htab_mgr& c)
 */
 
 
-htab_mgr::htab_mgr(htab_mgr&& m)
+htab_rc::htab_rc(htab_rc&& m)
 {
 	ht_ = m.ht_;
 	m.ht_ = nullptr;
 }
 
 bool //static
-htab_mgr::cowop(HashTable*& inout)
+htab_rc::cowop(HashTable*& inout)
 {
 	//printf("cowop& %lx\n", &inout);
 	HashTable* used = inout;
@@ -331,7 +331,7 @@ htab_mgr::cowop(HashTable*& inout)
 	   ||(used == const_cast<HashTable*>(&zend_empty_array)))
 	{
 		//zend_printf("New Array\n");
-		HashTable* newht = htab_mgr::new_array();
+		HashTable* newht = htab_rc::new_array();
 		#ifdef HTAB_SHOW_MEMORY
 		showarray("new array", newht);
 		#endif
@@ -347,14 +347,14 @@ htab_mgr::cowop(HashTable*& inout)
 		zend_printf("ARRAY DUPLICATE %lx of ", inout);
 		showarray("used", used);
 		#endif	
-		htab_mgr::try_decref(used);
+		htab_rc::try_decref(used);
 	    return true;
 	}
 	return false;
 }
 
-const htab_mgr& 
-htab_mgr::operator=(const htab_mgr& c)
+const htab_rc& 
+htab_rc::operator=(const htab_rc& c)
 {
 	if (ht_)
 	{
@@ -365,10 +365,10 @@ htab_mgr::operator=(const htab_mgr& c)
 	return *this;
 }
 
-htab_mgr& 
-htab_mgr::operator=(htab_mgr&& m)
+htab_rc& 
+htab_rc::operator=(htab_rc&& m)
 {
-	//zend_printf("operator=(htab_mgr&& m)  ");
+	//zend_printf("operator=(htab_rc&& m)  ");
 	if (ht_)
 	{
 		lose();
@@ -380,18 +380,18 @@ htab_mgr::operator=(htab_mgr&& m)
 }
 
 
-void htab_mgr::move_zv(zval* return_value)
+void htab_rc::move_zv(zval* return_value)
 {
 	//showarray("move_zv", ht_);
-	zval_user::array_bind(return_value, ht_);
+	val_ptr::array_bind(return_value, ht_);
 	ht_ = nullptr;
 }
 
-const htab_mgr& 
-htab_mgr::operator=(zval* zv)
+const htab_rc& 
+htab_rc::operator=(zval* zv)
 {
 	lose();
-	ht_ = zval_user(zv).zarray();
+	ht_ = val_ptr(zv).zarray();
 	own();
 	return *this;
 }
@@ -401,17 +401,17 @@ htab_mgr::operator=(zval* zv)
 
 htab_empty::htab_empty()
 {
-	ht_ = htab_mgr::empty_array();
+	ht_ = htab_rc::empty_array();
 }
 
 
-htab_mgr
-htab_mgr::getValues(htab_read hr)
+htab_rc
+htab_rc::getValues(htab_rd hr)
 {
-	 htab_mgr result;
+	 htab_rc result;
 	 if (!hr.size())
 		return result;
-	 htab_write merge(result);
+	 htab_wr merge(result);
 
 	 htab_walk wk;
 	 auto val = wk.value();
@@ -423,13 +423,13 @@ htab_mgr::getValues(htab_read hr)
 }
 
 //* return indexed array of keys
-htab_mgr 
-htab_mgr::getKeys(htab_read hr)
+htab_rc 
+htab_rc::getKeys(htab_rd hr)
 {
-	 htab_mgr result;
+	 htab_rc result;
 	 if (!hr.size())
 		return result;
-	 htab_write merge(result);
+	 htab_wr merge(result);
 
 	 htab_walk wk;
 	 auto val = wk.key();
@@ -446,18 +446,18 @@ htab_mgr::getKeys(htab_read hr)
  * from hfrom array, and returns a new array with the
  * extracted key => value found in key list exkeys.
  */
-htab_mgr //static
-htab_mgr::extract(htab_read exkeys, htab_write hfrom)
+htab_rc //static
+htab_rc::extract(htab_rd exkeys, htab_wr hfrom)
 {
 
-	htab_mgr result;
+	htab_rc result;
 
 	if (!hfrom.size())
 	{
 		return result;
 	}
 
-	htab_write merger(result);
+	htab_wr merger(result);
 	//showarray("exkeys", exkeys);
 
 	htab_walk wk;
@@ -469,7 +469,7 @@ htab_mgr::extract(htab_read exkeys, htab_write hfrom)
 		//showarray("extract from", ht_);
 		//showmem("value for key", exkey);
 
-		zval_user v2 = hfrom.get(exkey);
+		val_ptr v2 = hfrom.get(exkey);
 		
 		if (v2.ok())
 		{
@@ -487,18 +487,18 @@ htab_mgr::extract(htab_read exkeys, htab_write hfrom)
  * from hfrom array, and returns a new array with the
  * extracted key => value found in key list exkeys.
  */
-htab_mgr //static
-htab_mgr::subset(htab_read exkeys, htab_read hfrom, bool nullmiss)
+htab_rc //static
+htab_rc::subset(htab_rd exkeys, htab_rd hfrom, bool nullmiss)
 {
 
-	htab_mgr result;
+	htab_rc result;
 
 	if (!hfrom.size())
 	{
 		return result;
 	}
 
-	htab_write merger(result);
+	htab_wr merger(result);
 	//showarray("exkeys", exkeys);
 
 	htab_walk wk;
@@ -510,7 +510,7 @@ htab_mgr::subset(htab_read exkeys, htab_read hfrom, bool nullmiss)
 		//showarray("extract from", ht_);
 		//showmem("value for key", exkey);
 
-		zval_user v2 = hfrom.get(exkey);
+		val_ptr v2 = hfrom.get(exkey);
 		
 		if (v2.ok())
 		{
@@ -530,18 +530,18 @@ htab_mgr::subset(htab_read exkeys, htab_read hfrom, bool nullmiss)
  * get list of values found by exkeys in hfrom. 
  * Null in list indicates not found.
  */
-htab_mgr //static
-htab_mgr::sublist(htab_read exkeys, htab_read hfrom)
+htab_rc //static
+htab_rc::sublist(htab_rd exkeys, htab_rd hfrom)
 {
 
-	htab_mgr result;
+	htab_rc result;
 
 	if (!hfrom.size())
 	{
 		return result;
 	}
 
-	htab_write vlist(result);
+	htab_wr vlist(result);
 	//showarray("exkeys", exkeys);
 
 	htab_walk wk;
@@ -550,12 +550,12 @@ htab_mgr::sublist(htab_read exkeys, htab_read hfrom)
 	for(wk.start(exkeys); wk.ok(); wk.next()) 
 	{
 
-		zval_user v2 = hfrom.get(exkey);
+		val_ptr v2 = hfrom.get(exkey);
 		vlist.push_back(v2);
 	}
 	return result;
 }
 
 }; // namespace
-//htab_mgr.cpp
+//htab_rc.cpp
 #endif

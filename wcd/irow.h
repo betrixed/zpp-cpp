@@ -43,8 +43,8 @@ namespace wcd {
 
 	class IRow : public wcc::Hmap {
     protected:
-    	zobj_mgr    table_model_;
-    	htab_mgr  	original_;
+    	obj_rc    table_model_;
+    	htab_rc  	original_;
     public:
 
     	static IRow_mgr omg;
@@ -52,9 +52,9 @@ namespace wcd {
     	IRow();
     	virtual ~IRow();
     	
-    	virtual void debug_info(htab_write di);
+    	virtual void debug_info(htab_wr di);
 
-    	void construct(zobj_user tmodel, htab_read data = htab_read(), bool exists = false);
+    	void construct(obj_ptr tmodel, htab_rd data = htab_rd(), bool exists = false);
 
     	bool create(bool reload = false);
 
@@ -66,32 +66,32 @@ namespace wcd {
 
     	bool update(bool reload = false);
 
-    	void copy(zobj_mgr recobj);
+    	void copy(obj_rc recobj);
     	
     	void read();
 
-    	htab_read getData() const;
+    	htab_rd getData() const;
 
-    	htab_mgr getDataValues(htab_read attrlist);
+    	htab_rc getDataValues(htab_rd attrlist);
 
-    	bool hasValue(zstr_user key);
+    	bool hasValue(str_ptr key);
     	
-    	htab_mgr getDirty();
+    	htab_rc getDirty();
 
-    	zobj_user getModel() {
+    	obj_ptr getModel() {
     		return table_model_;
     	}
 
 
-    	bool isDirty(zstr_user colname);
+    	bool isDirty(str_ptr colname);
 
-    	void mergeData(htab_read attrlist);
+    	void mergeData(htab_rd attrlist);
 
-    	void setData(htab_read data, bool exists = false);
+    	void setData(htab_rd data, bool exists = false);
 
     	void setExists();
 
-    	htab_mgr stampTime(zstr_user value, int dtflags = Model::ALL_TS);
+    	htab_rc stampTime(str_ptr value, int dtflags = Model::ALL_TS);
 
 	};
 

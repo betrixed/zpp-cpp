@@ -21,7 +21,7 @@ namespace wcc {
 
 using namespace zpp;
 
-void FileUpload::debug_info(htab_write di)
+void FileUpload::debug_info(htab_wr di)
 {
 	di.set(RQit.error_key, error_);
 	di.set(RQit.namekey, name_);
@@ -34,14 +34,14 @@ void FileUpload::debug_info(htab_write di)
 }
 
 void 
-FileUpload::construct(htab_read file_data, zstr_user name)
+FileUpload::construct(htab_rd file_data, str_ptr name)
 {
 	name_ = file_data.get(RQit.namekey);
 
 	if (name_.size())
 	{
-		zval_mgr info = FTAB.pathinfo.call(name_,(PathInfo::EXTENSION));
-		ext_ = zval_user(info).zstr();
+		val_rc info = FTAB.pathinfo.call(name_,(PathInfo::EXTENSION));
+		ext_ = val_ptr(info).zstr();
 	}
 	else {
 		name_ = zend_empty_string;
@@ -49,19 +49,19 @@ FileUpload::construct(htab_read file_data, zstr_user name)
 	}
 
 	tmp_name_ = file_data.get(RQit.tmp_name);
-	size_ = zval_user(file_data.get(RQit.size_key)).zlong();
+	size_ = val_ptr(file_data.get(RQit.size_key)).zlong();
 	type_ = file_data.get(RQit.typekey);
 	error_ = file_data.get(RQit.error_key);
 	key_ = file_data.get(RQit.key_key);
 }
 
-zstr_mgr 
+str_rc 
 FileUpload::getRealType()
 {
-	zstr_mgr result;
+	str_rc result;
 
-	zval_mgr finfo = finfo_open(FILEINFO_MIME_TYPE);
-	if (!zval_user(finfo).ok())
+	val_rc finfo = finfo_open(FILEINFO_MIME_TYPE);
+	if (!val_ptr(finfo).ok())
 	{
 		result = zstr_empty();
 		return result;
@@ -82,7 +82,7 @@ FileUpload::isUploadedFile()
 }
 
 bool 
-FileUpload::moveTo(zstr_user destination)
+FileUpload::moveTo(str_ptr destination)
 {
 	if (tmp_name_.size()) {
 		return move_uploaded_file(tmp_name_, destination);
@@ -113,7 +113,7 @@ ZEND_METHOD(Wcc_FileUpload, getName)
 	ZEND_PARSE_PARAMETERS_END();
 
 	FileUpload* fobj = zval_toc<FileUpload>(ZEND_THIS);
-	zstr_user result = fobj->getName();
+	str_ptr result = fobj->getName();
 	result.return_zv(return_value);
 }
 ZEND_METHOD(Wcc_FileUpload, getKey)
@@ -122,7 +122,7 @@ ZEND_METHOD(Wcc_FileUpload, getKey)
 	ZEND_PARSE_PARAMETERS_END();
 
 	FileUpload* fobj = zval_toc<FileUpload>(ZEND_THIS);
-	zstr_user result = fobj->getKey();
+	str_ptr result = fobj->getKey();
 	result.return_zv(return_value);
 }
 
@@ -132,7 +132,7 @@ ZEND_METHOD(Wcc_FileUpload, getRealType)
 	ZEND_PARSE_PARAMETERS_END();
 
 	FileUpload* fobj = zval_toc<FileUpload>(ZEND_THIS);
-	zstr_mgr result = fobj->getRealType();
+	str_rc result = fobj->getRealType();
 	result.move_zv(return_value);
 }
 
@@ -152,7 +152,7 @@ ZEND_METHOD(Wcc_FileUpload, getTempName)
 	ZEND_PARSE_PARAMETERS_END();
 
 	FileUpload* fobj = zval_toc<FileUpload>(ZEND_THIS);
-	zstr_user result = fobj->getTempName();
+	str_ptr result = fobj->getTempName();
 	result.return_zv(return_value);
 }
 
@@ -162,7 +162,7 @@ ZEND_METHOD(Wcc_FileUpload, getType)
 	ZEND_PARSE_PARAMETERS_END();
 
 	FileUpload* fobj = zval_toc<FileUpload>(ZEND_THIS);
-	zstr_user result = fobj->getType();
+	str_ptr result = fobj->getType();
 	result.return_zv(return_value);
 }
 
@@ -182,7 +182,7 @@ ZEND_METHOD(Wcc_FileUpload, getError)
 	ZEND_PARSE_PARAMETERS_END();
 
 	FileUpload* fobj = zval_toc<FileUpload>(ZEND_THIS);
-	zstr_user result = fobj->getError();
+	str_ptr result = fobj->getError();
 	result.return_zv(return_value);
 
 }

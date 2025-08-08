@@ -29,7 +29,7 @@ namespace wcc
 		zstr_intern throw_fail;
 		zstr_intern defer_ct;
 
-		zobj_mgr	g_services;
+		obj_rc	g_services;
 
 		Services_data() : state_init() {}
 
@@ -63,10 +63,10 @@ namespace wcc
 
 	Services_data SVC_data;
 
-zval_mgr 
-Services::call_value(zobj_user callme)
+val_rc 
+Services::call_value(obj_ptr callme)
 {
-	zval_mgr self(this);
+	val_rc self(this);
 	// 1 argument
 	//showmem("self svc", self);
 	return callme.callable(self);
@@ -95,16 +95,16 @@ Services::clearObjects()
 	instances_.reset();
 }
 
-zval_mgr  
-Services::activate(zstr_user key)
+val_rc  
+Services::activate(str_ptr key)
 {
 
-	zval_mgr result;
+	val_rc result;
 	//zend_printf("activate %s\n", ZSTR_VAL(key));
 
-	htab_read defer(defer_);
+	htab_rd defer(defer_);
 
-	zval_user test;
+	val_ptr test;
 	if (!defer.try_fetch(key, test))
 	{
 		if (throw_fail_)
@@ -125,11 +125,11 @@ Services::activate(zstr_user key)
 
 	if (test.isCallable())
 	{	
-		zobj_user callme = test.zobject();
+		obj_ptr callme = test.zobject();
 
-		zval_mgr result2 = call_value(callme);
+		val_rc result2 = call_value(callme);
 
-		htab_write(active_).set(key, result2);
+		htab_wr(active_).set(key, result2);
 
 		result = get(key);
 	}
@@ -146,26 +146,26 @@ Services::Services()
 Services* 
 Services::cpp_global()
 {
-	zobj_user sv = SVC_data.g_services;
+	obj_ptr sv = SVC_data.g_services;
 
 	//showmem("instance", sv);
 	return zobj_toc<Services>(sv);
 }
 
-zobj_user
+obj_ptr
 Services::instance()
 {
 	return SVC_data.g_services;
 	/*
-	zobj_user result;
+	obj_ptr result;
 
 	Global gme = GLOBALS[Services::omg.class_name()];
 	
-	zval_user val = gme.value(); // good for while gme is around
+	val_ptr val = gme.value(); // good for while gme is around
 	showmem("read instance", val);
 
 	if (val.isNull()) {
-		zobj_mgr obj = Services::omg.new_zobj();
+		obj_rc obj = Services::omg.new_zobj();
 		showobj("new return", obj);
 		gme = obj;
 		result = (zend_object*) obj;
@@ -181,21 +181,21 @@ Services::instance()
 }
 
 /* static */
-zobj_user 
-Services::setOne(zstr_user key, zobj_user obj)
+obj_ptr 
+Services::setOne(str_ptr key, obj_ptr obj)
 {
 	Services* self = Services::cpp_global();
 	return self->setObject(obj,key);
 }
 
 /* static */
-zobj_user  
-Services::getOne(zstr_user key)
+obj_ptr  
+Services::getOne(str_ptr key)
 {
 
 	Services* self = Services::cpp_global();
 
-	zobj_user result = self->getObject(key);
+	obj_ptr result = self->getObject(key);
 
 	if (result.ok())
 	{
@@ -205,18 +205,18 @@ Services::getOne(zstr_user key)
 }
 
 // static
-zval_mgr  
-Services::service(zstr_user key)
+val_rc  
+Services::service(str_ptr key)
 {
 	Services* self = Services::cpp_global();
 	return self->get(key);
 }
 
 // static
-zval_mgr  
+val_rc  
 Services::service(const std::string_view& key)
 {
-	zval_mgr result;
+	val_rc result;
 
 	auto slen = key.size();
 	if (slen)
@@ -227,20 +227,20 @@ Services::service(const std::string_view& key)
 	return result;
 }
 
-zobj_user
-Services::newInstance(zstr_user name_class)
+obj_ptr
+Services::newInstance(str_ptr name_class)
 {
 
 	ReflectCache* rc = ReflectCache::cpp();
 
 	//showstr("newInstance of ", name_class);
 
-	zobj_mgr obj = rc->newInstance(name_class);
+	obj_rc obj = rc->newInstance(name_class);
 	
 	if (obj.ok())
 	{
 		//showarray("instances", instances_);
-		htab_write(instances_).set(name_class, obj);
+		htab_wr(instances_).set(name_class, obj);
 	}
 	else {
 		zend_throw_error(zend_ce_error, "newInstance failed for %s", name_class.data());
@@ -249,14 +249,14 @@ Services::newInstance(zstr_user name_class)
 	return obj;
 }
 
-zobj_user
-Services::getObject(zstr_user key)
+obj_ptr
+Services::getObject(str_ptr key)
 {
-	zobj_user result;
+	obj_ptr result;
 
-	zval_user test;
+	val_ptr test;
 
-	if (htab_write(instances_).try_fetch(key,test))
+	if (htab_wr(instances_).try_fetch(key,test))
 	{
 		result = test.zobject();
 	}
@@ -264,56 +264,56 @@ Services::getObject(zstr_user key)
 	return result;
 }
 
-zobj_user 
-Services::setObject(zobj_user obj, zstr_user key)
+obj_ptr 
+Services::setObject(obj_ptr obj, str_ptr key)
 {
 	if (key.isNull()) {
 		// get class name of object
 		key = obj.className();
 	}
 
-	htab_write(instances_).set(key, obj);
+	htab_wr(instances_).set(key, obj);
 	return obj;
 }
 
 
-bool Services::isActive(zstr_user name)
+bool Services::isActive(str_ptr name)
 {
 
-	return htab_read(active_).has_key(name);
+	return htab_rd(active_).has_key(name);
 }
 
-bool Services::has(zstr_user name)
+bool Services::has(str_ptr name)
 {
-	return (htab_read(active_).has_key(name) || htab_read(defer_).has_key(name));
+	return (htab_rd(active_).has_key(name) || htab_rd(defer_).has_key(name));
 }
 
 
-void Services::setDefer(zstr_user name, zval_user value)
+void Services::setDefer(str_ptr name, val_ptr value)
 {
-	htab_write(defer_).set(name, value);
+	htab_wr(defer_).set(name, value);
 }
 
-void  Services::set(zstr_user name, zval_user value)
+void  Services::set(str_ptr name, val_ptr value)
 {
 	zval* data = (zval*) value;
 	zend_string* key = (zend_string*) name;
 
-	htab_write temp(active_);
+	htab_wr temp(active_);
 
 	temp.set(key, data);
 }
 
-zval_mgr  
-Services::get(zstr_user name)
+val_rc  
+Services::get(str_ptr name)
 {
-	zval_mgr result;
+	val_rc result;
 	
-	zval_user value;
+	val_ptr value;
 
 	//showstr("services::get", name);
 
-	if (!htab_read(active_).try_fetch(name, value))
+	if (!htab_rd(active_).try_fetch(name, value))
 	{
 		result = activate(name);
 		return  result;
@@ -322,7 +322,7 @@ Services::get(zstr_user name)
 
 	if (value.isCallable())
 	{
-		zobj_user callme = value.zobject();
+		obj_ptr callme = value.zobject();
 
 		result = call_value(callme);
 	}
@@ -334,9 +334,9 @@ Services::get(zstr_user name)
 
 
 void  
-Services::unset(zstr_user name)
+Services::unset(str_ptr name)
 {
-	htab_write(active_).unset(name);
+	htab_wr(active_).unset(name);
 }
 
 
@@ -346,7 +346,7 @@ Services::setThrowFail(bool value)
 	throw_fail_ = value;
 }
 
-void Services::debug_info(htab_write info)
+void Services::debug_info(htab_wr info)
 {
 	base_d::debug_info(info);
 
@@ -372,7 +372,7 @@ ZEND_METHOD(Wcc_Services, getOne)
 
 	//showstr("getOne call", skey);
 
-	zobj_user result = Services::getOne(skey);
+	obj_ptr result = Services::getOne(skey);
 	result.return_zv(return_value);
 }
 
@@ -381,7 +381,7 @@ ZEND_METHOD(Wcc_Services, instance)
 	ZEND_PARSE_PARAMETERS_START(0, 0)
 	ZEND_PARSE_PARAMETERS_END();
 
-	zobj_user result = Services::instance();
+	obj_ptr result = Services::instance();
 	result.return_zv(return_value);
 }
 
@@ -393,7 +393,7 @@ ZEND_METHOD(Wcc_Services, service)
 		Z_PARAM_STR(skey)
 	ZEND_PARSE_PARAMETERS_END();
 
-	zval_mgr result = Services::service(skey);
+	val_rc result = Services::service(skey);
 	result.move_zv(return_value);
 }
 
@@ -409,8 +409,8 @@ ZEND_METHOD(Wcc_Services, setOne)
 
 	Services* svc = zval_toc<Services>(ZEND_THIS);
 
-	zval_user test(obj);
-	zobj_user result = svc->setOne(skey, test.zobject());
+	val_ptr test(obj);
+	obj_ptr result = svc->setOne(skey, test.zobject());
 
 	result.return_zv(return_value);
 }
@@ -438,7 +438,7 @@ ZEND_METHOD(Wcc_Services, get)
 
 	Services* svc = zval_toc<Services>(ZEND_THIS);
 
-	zval_mgr result = svc->get(skey);
+	val_rc result = svc->get(skey);
 	result.move_zv(return_value);
 
 }
@@ -452,7 +452,7 @@ ZEND_METHOD(Wcc_Services, getObject)
 	ZEND_PARSE_PARAMETERS_END();
 
 	Services* svc = zval_toc<Services>(ZEND_THIS);
-	zobj_user result = svc->getObject(skey);
+	obj_ptr result = svc->getObject(skey);
 	result.return_zv(return_value);
 }
 
@@ -492,7 +492,7 @@ ZEND_METHOD(Wcc_Services, newInstance)
 	ZEND_PARSE_PARAMETERS_END();
 
 	Services* svc = zval_toc<Services>(ZEND_THIS);
-	zobj_user result = svc->newInstance(skey);
+	obj_ptr result = svc->newInstance(skey);
 	result.return_zv(return_value);
 }
 
@@ -525,8 +525,8 @@ ZEND_METHOD(Wcc_Services, setObject)
 
 	Services* svc = zval_toc<Services>(ZEND_THIS);
 
-	zval_user test(obj);
-	zobj_user result = svc->setObject(test.zobject(), skey);
+	val_ptr test(obj);
+	obj_ptr result = svc->setObject(test.zobject(), skey);
 	result.return_zv(return_value);
 }
 

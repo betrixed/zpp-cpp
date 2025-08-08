@@ -1,9 +1,9 @@
 #ifndef HTAB_CPP
 #define HTAB_CPP
 
-#include "htab_read.cxx"
-#include "htab_write.cxx"
-#include "htab_mgr.cxx"
+#include "htab_rd.cxx"
+#include "htab_wr.cxx"
+#include "htab_rc.cxx"
 #include "htab_walk.cxx"
 
 #endif

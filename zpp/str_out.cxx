@@ -1,17 +1,17 @@
 #ifndef ZSTR_OUTPUT_CPP
 #define ZSTR_OUTPUT_CPP
 
-//zstr_output.cpp
+//str_out.cpp
 #ifndef ZSTR_OUTPUT_H
-#include "zstr_output.h"
+#include "str_out.h"
 #endif
 
 #ifndef ZSTR_USER_H
-#include "zstr_user.h"
+#include "str_ptr.h"
 #endif
 
 #ifndef ZVAL_USER_H
-#include "zval_user.h"
+#include "val_ptr.h"
 #endif
 
 
@@ -20,22 +20,22 @@ namespace zpp {
 
 fm_endl endl;
 
-zstr_output& 
-zstr_output::operator<<(const iform& form)
+str_out& 
+str_out::operator<<(const iform& form)
 {
 	nf_ = form;
 	return *this;
 }
 
-zstr_output& 
-zstr_output::operator<<(const fm_endl& el)
+str_out& 
+str_out::operator<<(const fm_endl& el)
 {
 	append('\n');
 	return *this;
 }
 
-zstr_output& 
-zstr_output::operator<<(void* vp)
+str_out& 
+str_out::operator<<(void* vp)
 {
 	zend_string* pf = strpprintf(0,"%lx", (unsigned long) vp);
 	append(pf);
@@ -44,7 +44,7 @@ zstr_output::operator<<(void* vp)
 }
 
 void 
-zstr_output::quote_name(zend_string* name)
+str_out::quote_name(zend_string* name)
 {
 	append('"');
 	append(name);
@@ -52,7 +52,7 @@ zstr_output::quote_name(zend_string* name)
 }
 
 void 
-zstr_output::quote_name(const char* name)
+str_out::quote_name(const char* name)
 {
 	append('"');
 	if (name)
@@ -60,13 +60,13 @@ zstr_output::quote_name(const char* name)
 	append('"');
 }
 
-zstr_output& 
-zstr_output::operator<<(zval_user zv)
+str_out& 
+str_out::operator<<(val_ptr zv)
 {
 	return operator<<((zval*) zv);
 }
-zstr_output& 
-zstr_output::operator<<(double d)
+str_out& 
+str_out::operator<<(double d)
 {
 	zend_string* s = zend_double_to_str(d);
 	append(s);
@@ -74,20 +74,20 @@ zstr_output::operator<<(double d)
 	return *this;
 }
 
-zstr_output& 
-zstr_output::operator<<(zval* zv) 
+str_out& 
+str_out::operator<<(zval* zv) 
 {
 	if (!zv) {
 		return *this;
 	}
-	zval_user fx(zv);
+	val_ptr fx(zv);
 
 	if (fx.isString())
 	{
 		append(fx.zstr());
 	}
 	else {
-		zstr_mgr convert;
+		str_rc convert;
 		convert.adopt(fx.to_zstr());
 
 		append((zend_string*) convert);
@@ -96,15 +96,15 @@ zstr_output::operator<<(zval* zv)
 }
 
 
-zstr_output& 
-zstr_output::operator<<(char c)
+str_out& 
+str_out::operator<<(char c)
 {
 	append(c);
 	return *this;
 }
 
-zstr_output& 
-zstr_output::operator<<(const std::string_view &v) 
+str_out& 
+str_out::operator<<(const std::string_view &v) 
 {
 	size_t slen = v.length();
 	if (slen > 0) {
@@ -113,8 +113,8 @@ zstr_output::operator<<(const std::string_view &v)
 	return *this;
 }
 
-zstr_output& 
-zstr_output::operator<<(unsigned int iv)
+str_out& 
+str_out::operator<<(unsigned int iv)
 {
 	const char* sfmt;
 
@@ -131,8 +131,8 @@ zstr_output::operator<<(unsigned int iv)
 	return *this;
 }
 
-zstr_output& 
-zstr_output::operator<<(int iv) 
+str_out& 
+str_out::operator<<(int iv) 
 {	
 	const char* sfmt;
 
@@ -149,8 +149,8 @@ zstr_output::operator<<(int iv)
 	return *this;
 }
 
-zstr_output& 
-zstr_output::operator<<(long iv)
+str_out& 
+str_out::operator<<(long iv)
 {
 	const char* sfmt;
 
@@ -168,8 +168,8 @@ zstr_output::operator<<(long iv)
 
 }
 
-zstr_output& 
-zstr_output::operator<<(size_t iv) 
+str_out& 
+str_out::operator<<(size_t iv) 
 {	
 	const char* sfmt;
 
@@ -187,7 +187,7 @@ zstr_output::operator<<(size_t iv)
 }
 
 void
-zstr_output::append(zend_string* s) 
+str_out::append(zend_string* s) 
 {
 	if (!s) {
 		return;
@@ -196,29 +196,29 @@ zstr_output::append(zend_string* s)
 }
 
 
-zstr_output& 
-zstr_output::operator<<(const zstr_mgr &w)
+str_out& 
+str_out::operator<<(const str_rc &w)
 {
 	append((zend_string*)w);
 	return *this;
 }
 
-zstr_output& 
-zstr_output::operator<<(zstr_user w)
+str_out& 
+str_out::operator<<(str_ptr w)
 {
 	append(w);
 	return *this;
 }
 
-zstr_output& 
-zstr_output::operator<<(zend_string* s)
+str_out& 
+str_out::operator<<(zend_string* s)
 {
  	append(s);
  	return *this;
 }
 
-zstr_output& 
-zstr_output::operator<<(const char* c)
+str_out& 
+str_out::operator<<(const char* c)
 {
 	append(c, strlen(c));
 	return *this;
@@ -226,13 +226,13 @@ zstr_output::operator<<(const char* c)
 
 
 void 
-zstr_output::append(const char* c, size_t slen)
+str_out::append(const char* c, size_t slen)
 {
 	zend_write(c, slen);
 }
 
 void 
-zstr_output::append(char c)
+str_out::append(char c)
 {
 	char temp[2];
 	temp[0] = c;

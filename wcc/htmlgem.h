@@ -8,23 +8,23 @@
 
 namespace wcc {
 
-	//using zstr_mgr = zstr_mgr;
+	//using str_rc = str_rc;
 
 	class HtmlGem : public base_d {
 	protected:
 		uint64_t id_add_;
 
-		zstr_mgr label_class_;
-		zstr_mgr text_class_;
-		zstr_mgr datetime_fmt_;
-		zstr_mgr date_fmt_;
+		str_rc label_class_;
+		str_rc text_class_;
+		str_rc datetime_fmt_;
+		str_rc date_fmt_;
 
-		zstr_mgr date_icon_; // html - img to display small date icon
+		str_rc date_icon_; // html - img to display small date icon
 
-		htab_mgr   styles_; // styles keyed by name, each an array of text properties
-		htab_mgr   label_keys1_; 
-		htab_mgr   label_keys2_;
-		htab_mgr   select_keys_;
+		htab_rc   styles_; // styles keyed by name, each an array of text properties
+		htab_rc   label_keys1_; 
+		htab_rc   label_keys2_;
+		htab_rc   select_keys_;
 
 		/* const char* kName = "name";
 		const char* kValue = "value";
@@ -32,13 +32,13 @@ namespace wcc {
 		const char* kLabelEnd = "</label>";
 		*/
 
-		void  outWrapDiv(zstr_buffer& out, zstr_user cname);
-		void  endWrapDiv(zstr_buffer& out);
-		htab_mgr label_method(htab_write ps, int& labeltype);
-		void outAttr(zstr_buffer& out, zstr_user name, zstr_user value);
-		void ifKeyAttr(zstr_buffer& out, zstr_user key, htab_read ps);
-		htab_read getLabelKeys1();
-		htab_read getSelectKeys();
+		void  outWrapDiv(str_buf& out, str_ptr cname);
+		void  endWrapDiv(str_buf& out);
+		htab_rc label_method(htab_wr ps, int& labeltype);
+		void outAttr(str_buf& out, str_ptr name, str_ptr value);
+		void ifKeyAttr(str_buf& out, str_ptr key, htab_rd ps);
+		htab_rd getLabelKeys1();
+		htab_rd getSelectKeys();
 
 
 	public:
@@ -48,60 +48,60 @@ namespace wcc {
 		HtmlGem();
 		virtual ~HtmlGem();
 
-		virtual void debug_info(htab_write hw);
+		virtual void debug_info(htab_wr hw);
 
 	// php 
 
-		void setLabelClass(zstr_user s);
-		void setDateIcon(zstr_user s);
-		void setTextClass(zstr_user s);
-		void setDateTimeFmt(zstr_user s);
+		void setLabelClass(str_ptr s);
+		void setDateIcon(str_ptr s);
+		void setTextClass(str_ptr s);
+		void setDateTimeFmt(str_ptr s);
 		void setDTCallback(zend_object* callback);
 
-		void setStyle(zstr_user name, zval_user map);
+		void setStyle(str_ptr name, val_ptr map);
 
 		// convert array into string
 		
-		zstr_mgr button(zval_user pset);
-		zstr_mgr checkbox(zval_user pset);
-		zstr_mgr check_value(zval_user pset);
-		zstr_mgr datetime(zval_user pset);
-		zstr_mgr datetime_value(zval_user pset);
-		zstr_mgr datetime_text(zstr_user dtvalue);
-		zstr_mgr email(zval_user pset);
-		zstr_mgr figure(zval_user pset);
-		zstr_mgr hidden(zval_user pset);
+		str_rc button(val_ptr pset);
+		str_rc checkbox(val_ptr pset);
+		str_rc check_value(val_ptr pset);
+		str_rc datetime(val_ptr pset);
+		str_rc datetime_value(val_ptr pset);
+		str_rc datetime_text(str_ptr dtvalue);
+		str_rc email(val_ptr pset);
+		str_rc figure(val_ptr pset);
+		str_rc hidden(val_ptr pset);
 
-		zstr_mgr linkTo(zval_user pset);
-		zstr_mgr money(zval_user pset);
-		zstr_mgr multiline(zval_user pset);
-		zstr_mgr password(zval_user pset);
-		zstr_mgr phone(zval_user pset);
-		zstr_mgr plaintext(zval_user pset);
-		zstr_mgr number(zval_user pset);
-		zstr_mgr output(zval_user pset);
-		zstr_mgr radio(zval_user pset);
-		zstr_mgr select(zval_user pset);
-		zstr_mgr submit(zval_user pset);
-		zstr_mgr text_value(zval_user pset);
+		str_rc linkTo(val_ptr pset);
+		str_rc money(val_ptr pset);
+		str_rc multiline(val_ptr pset);
+		str_rc password(val_ptr pset);
+		str_rc phone(val_ptr pset);
+		str_rc plaintext(val_ptr pset);
+		str_rc number(val_ptr pset);
+		str_rc output(val_ptr pset);
+		str_rc radio(val_ptr pset);
+		str_rc select(val_ptr pset);
+		str_rc submit(val_ptr pset);
+		str_rc text_value(val_ptr pset);
 
 	// none-php
-		zstr_mgr generateTag(zstr_user tag, htab_read pset);
-		zstr_mgr getTag(htab_read ps, htab_write ex, zstr_user tag);
+		str_rc generateTag(str_ptr tag, htab_rd pset);
+		str_rc getTag(htab_rd ps, htab_wr ex, str_ptr tag);
 
-		zstr_mgr inputType(zval_user pset, zstr_user itype);
-		zstr_mgr getStyle(zstr_user name);
+		str_rc inputType(val_ptr pset, str_ptr itype);
+		str_rc getStyle(str_ptr name);
 
-		zstr_mgr ensureIdValue(htab_write ps);
-		zstr_mgr label_front(htab_read ps);
-		zstr_mgr in_label(htab_read ps);
-		zstr_mgr out_label(htab_read ps);
+		str_rc ensureIdValue(htab_wr ps);
+		str_rc label_front(htab_rd ps);
+		str_rc in_label(htab_rd ps);
+		str_rc out_label(htab_rd ps);
 
-		zstr_mgr select_list(zval_user pset);
-		zstr_mgr xcheck(zval_user pset);
+		str_rc select_list(val_ptr pset);
+		str_rc xcheck(val_ptr pset);
 		
-		void image_tag(zstr_buffer& ss, zstr_user path);
-		void figcaption_tag(zstr_buffer& ss, zstr_user text);
+		void image_tag(str_buf& ss, str_ptr path);
+		void figcaption_tag(str_buf& ss, str_ptr text);
 
 		VIRTUAL_ZOBJPTR
 

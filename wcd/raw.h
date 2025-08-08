@@ -17,19 +17,19 @@ public:
 	static base_obj_mgr<Raw> omg;
 
 
-	void construct(zstr_user sql, zobj_user driver);
+	void construct(str_ptr sql, obj_ptr driver);
 
-	zval_mgr execute();
+	val_rc execute();
 
-	zobj_mgr getConnection();
+	obj_rc getConnection();
 
-	zstr_mgr getSql();
+	str_rc getSql();
 
-	void setConnection(zobj_user driver);
+	void setConnection(obj_ptr driver);
 protected:
 
-	zstr_mgr sql_;
-	zobj_mgr db_;
+	str_rc sql_;
+	obj_rc db_;
 };
 
 

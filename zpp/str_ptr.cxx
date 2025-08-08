@@ -18,7 +18,7 @@ extern "C" {
 
 namespace zpp {
 
-const char* zstr_user::empty = "\0";
+const char* str_ptr::empty = "\0";
 
 
 int 
@@ -69,36 +69,36 @@ int zs_cmp_ci(zend_string* a, zend_string* b)
 }
 
 // call php for its well-tested complex implementation
-zstr_mgr
-zstr_user::strtr(const char* from, const char* to) const
+str_rc
+str_ptr::strtr(const char* from, const char* to) const
 {
 	zstr_temp fstr(from);
 	zstr_temp tstr(to);
 	return zpp::strtr(s, fstr, tstr);
 }
 
-zstr_user::zstr_user(const zval_user& rc)
+str_ptr::str_ptr(const val_ptr& rc)
 {
     s = rc.zstr();
 }
 
-zstr_user::zstr_user(zval* p)
+str_ptr::str_ptr(zval* p)
 {
-	s = zval_user(p).zstr();
+	s = val_ptr(p).zstr();
 }
 
-zstr_user::zstr_user(const zstr_mgr& mgr)
+str_ptr::str_ptr(const str_rc& mgr)
 {
     s = mgr.s;
 }
 
-zstr_user::zstr_user(const zstr_intern& zs)
+str_ptr::str_ptr(const zstr_intern& zs)
 {
 	s = zs.s;
 }
 
 const char* 
-zstr_user::data() const
+str_ptr::data() const
 {
 	if (!s)
 	{
@@ -108,7 +108,7 @@ zstr_user::data() const
 }
 
 size_t 
-zstr_user::size() const 
+str_ptr::size() const 
 {
 	if (!s)
 	{
@@ -118,7 +118,7 @@ zstr_user::size() const
 }
 
 zend_long 
-zstr_user::getLong(int base) const
+str_ptr::getLong(int base) const
 {
 	if (!s)
 	{
@@ -129,7 +129,7 @@ zstr_user::getLong(int base) const
 }
 
 double 
-zstr_user::getDouble() const
+str_ptr::getDouble() const
 {
 	if (!s)
 	{
@@ -140,7 +140,7 @@ zstr_user::getDouble() const
 }
 
 std::string 
-zstr_user::cstr() const
+str_ptr::cstr() const
 {
     const char* ps = s ? (const char*) ZSTR_VAL(s) : empty;
 	size_t      slen = s ? ZSTR_LEN(s) : 0;
@@ -149,7 +149,7 @@ zstr_user::cstr() const
 }
 
 std::string_view 
-zstr_user::vstr() const 
+str_ptr::vstr() const 
 {
 	const char* ps = s ? (const char*) ZSTR_VAL(s) : empty;
 	size_t      slen = s ? ZSTR_LEN(s) : 0;
@@ -159,7 +159,7 @@ zstr_user::vstr() const
 
 
 std::string_view  
-zstr_user::subview(int offset, int len) const
+str_ptr::subview(int offset, int len) const
 {
 	size_t slen = size();
 	size_t pos = 0;
@@ -191,8 +191,8 @@ zstr_user::subview(int offset, int len) const
 	return vstr().substr(pos,slen);
 }
 
-zstr_mgr
-zstr_user::substr(int offset, int len) const
+str_rc
+str_ptr::substr(int offset, int len) const
 {
 	 std::string_view text(subview(offset, len));
 
@@ -203,7 +203,7 @@ zstr_user::substr(int offset, int len) const
 }
 
 bool 
-zstr_user::starts_with(zstr_user match) const
+str_ptr::starts_with(str_ptr match) const
 {
 	size_t mlen = match.size();
 	if (!mlen || size() < mlen)
@@ -214,10 +214,10 @@ zstr_user::starts_with(zstr_user match) const
 	return (this->subview(0,mlen) == mb);
 }
 
-zstr_mgr
-zstr_user::ucfirst()
+str_rc
+str_ptr::ucfirst()
 {
-	zstr_mgr result;
+	str_rc result;
 
 	if (size() < 1)
 	{
@@ -236,7 +236,7 @@ zstr_user::ucfirst()
 }
 
 bool 
-zstr_user::ends_with(zstr_user match) const
+str_ptr::ends_with(str_ptr match) const
 {
 	size_t mlen = match.size();
 	size_t mysize = size();
@@ -250,7 +250,7 @@ zstr_user::ends_with(zstr_user match) const
 }
 
 int  
-zstr_user::find(const std::string_view& needle, size_t pos) const
+str_ptr::find(const std::string_view& needle, size_t pos) const
 {
 	if (!s) {
 		return -1;
@@ -271,7 +271,7 @@ zstr_user::find(const std::string_view& needle, size_t pos) const
 }
 
 int 
-zstr_user::find(char c, size_t pos) const
+str_ptr::find(char c, size_t pos) const
 {
 	if (!s) {
 		return -1;
@@ -292,15 +292,15 @@ zstr_user::find(char c, size_t pos) const
 	return -1;
 }
 
-zstr_mgr 
-zstr_user::uncamel(const char* sep) const
+str_rc 
+str_ptr::uncamel(const char* sep) const
 {
-	zstr_mgr result;	
+	str_rc result;	
 	if (!s) {
 		return result;
 	}
 
-	zstr_buffer buf;
+	str_buf buf;
 
 	const char* marker;
 	const char* psep;
@@ -342,7 +342,7 @@ zstr_user::uncamel(const char* sep) const
 }
 
 int 
-zstr_user::rfind(char c, size_t pos) const
+str_ptr::rfind(char c, size_t pos) const
 {
 	if (!s) {
 		return -1;
@@ -369,15 +369,15 @@ zstr_user::rfind(char c, size_t pos) const
 }
 
 bool
-zstr_user::contains(zstr_user needle)
+str_ptr::contains(str_ptr needle)
 {
 	return strpos(needle) >= 0;
 }
 
-zstr_mgr
-zstr_user::to_lower() const
+str_rc
+str_ptr::to_lower() const
 {
-	zstr_mgr result;
+	str_rc result;
 	if (s)
 	{
 		zend_string* p = zend_string_tolower(s);
@@ -386,10 +386,10 @@ zstr_user::to_lower() const
 	return result;
 }
 
-zstr_mgr 
-zstr_user::to_upper() const
+str_rc 
+str_ptr::to_upper() const
 {
-	zstr_mgr result;
+	str_rc result;
 	if (s)
 	{
 		zend_string* p = zend_string_toupper(s);
@@ -398,10 +398,10 @@ zstr_user::to_upper() const
 	return result;
 }
 
-zstr_mgr
-zstr_user::trim(const char* what, int mode) const
+str_rc
+str_ptr::trim(const char* what, int mode) const
 {
-	zstr_mgr result;
+	str_rc result;
 
 	size_t slen = what ? strlen(what) : 0;
 
@@ -413,32 +413,32 @@ zstr_user::trim(const char* what, int mode) const
 }
 
 int
-zstr_user::strpos(zstr_user needle)
+str_ptr::strpos(str_ptr needle)
 {
 	std::string_view nview(needle.vstr());
 
 	return find(nview,0);
 }
 
-void zstr_user::return_zv(zval* ret)
+void str_ptr::return_zv(zval* ret)
 {
 	ZVAL_STR_COPY(ret, s);
 }
 
-const zstr_user& 
-zstr_user::operator=(zval* rc)
+const str_ptr& 
+str_ptr::operator=(zval* rc)
 {
-	s = zval_user(rc).zstr();
+	s = val_ptr(rc).zstr();
 	return *this;
 }
 
 
-zstr_mgr //static
-zstr_user::json_encode(zval_user value, int flags)
+str_rc //static
+str_ptr::json_encode(val_ptr value, int flags)
 {
 	//(smart_str *buf, zval *val, int options);
 	// TODO: consider options flags
-	zstr_mgr result;
+	str_rc result;
 
 	smart_str buf = {0};
 
@@ -460,20 +460,20 @@ zstr_user::json_encode(zval_user value, int flags)
 }
 
 
-zstr_mgr 
+str_rc 
 str_replace(
-	zstr_user mstr, 
-	zstr_user rstr, 
-	zstr_user subject )
+	str_ptr mstr, 
+	str_ptr rstr, 
+	str_ptr subject )
 {
 	return str_replace(mstr.vstr(), rstr.vstr(), subject);
 }
 
-zstr_mgr
+str_rc
 str_replace(
 	const std::string_view& src, 
 	const std::string_view& replace,
-	zstr_user subject)
+	str_ptr subject)
 {
 	std::string_view s = subject.vstr();
 	
@@ -485,7 +485,7 @@ str_replace(
 	size_t oklen = slen;
 	size_t pos = 0;
 
-	zstr_buffer  result;
+	str_buf  result;
 	while(true)
 	{
 		size_t okpos = pos;
@@ -517,5 +517,5 @@ str_replace(
 
 
 };
-//zstr_user.cpp
+//str_ptr.cpp
 #endif

@@ -10,28 +10,28 @@ namespace wcc {
 
 	class  ICacheData : public base_d {
 	protected:
-		zstr_mgr  key_;
-		zval_mgr  data_;
+		str_rc  key_;
+		val_rc  data_;
 		int       ttl_;
 		int       stored_;
 		bool      saved_;
 
-		void member_info(htab_write s, bool store);
+		void member_info(htab_wr s, bool store);
 	public:
 
 		static base_obj_mgr<ICacheData> omg;
 
-		static zobj_mgr 
-		new_ICacheData(zstr_user key, zval_user value, zend_long ttl);
+		static obj_rc 
+		new_ICacheData(str_ptr key, val_ptr value, zend_long ttl);
 
-		void construct(zstr_user key, 
-			zval_user value, zend_long ttl);
+		void construct(str_ptr key, 
+			val_ptr value, zend_long ttl);
 
-		zstr_user getKey() {
+		str_ptr getKey() {
 			return key_;
 		}
 
-		zval_user getData() {
+		val_ptr getData() {
 			return data_;
 		}
 
@@ -47,7 +47,7 @@ namespace wcc {
 			return stored_;
 		}
 
-		void update(zval_user data, int ttl)
+		void update(val_ptr data, int ttl)
 		{
 			data_ = data;
 			ttl_ = ttl;
@@ -60,11 +60,11 @@ namespace wcc {
 
 		void setStored();
 
-		htab_mgr serialize();
+		htab_rc serialize();
 
-		void unserialize(htab_read uht);
+		void unserialize(htab_rd uht);
 
-		virtual void debug_info(htab_write hw);
+		virtual void debug_info(htab_wr hw);
 
 		VIRTUAL_ZOBJPTR
 	

@@ -2,32 +2,32 @@
 #define HTAB_WALK_H
 
 #ifndef ZVAL_USER_H
-#include "zval_user.h"
+#include "val_ptr.h"
 #endif
 
 #ifndef HTAB_READ_H
-#include "htab_read.h"
+#include "htab_rd.h"
 #endif
 
 #ifndef ZVAL_MGR_H
-#include "zval_mgr.h"
+#include "val_rc.h"
 #endif
 
 namespace zpp {
 
     class htab_walk {
     private:
-        zval_mgr key_;
-        zval_mgr value_;
+        val_rc key_;
+        val_rc value_;
 
-    	htab_read  wrap_;
+    	htab_rd  wrap_;
 
         HashPosition iterate_ = 0;
 
         bool ok_ = false;
     public:
 
-        static zval_mgr first(HashTable* data);
+        static val_rc first(HashTable* data);
 
         htab_walk();
         htab_walk(const htab_walk& c);
@@ -65,12 +65,12 @@ namespace zpp {
             return (wrap_ == c.wrap_) && (iterate_ == c.iterate_);
         }
 
-        zval_user key()
+        val_ptr key()
         {
             return key_;
         }
 
-        zval_user value() 
+        val_ptr value() 
         {
         	return value_;
         }

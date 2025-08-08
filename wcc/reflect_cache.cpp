@@ -25,7 +25,7 @@ public:
 	zstr_intern new_instance_args;
 	class_data  rfc_cdata;
 
-	zobj_mgr    g_reflect_cache;
+	obj_rc    g_reflect_cache;
 	ReflectCache_data() 
 	{
 
@@ -68,16 +68,16 @@ ReflectCache::clear()
 	cache_.reset();
 }
 
-zobj_mgr 
-ReflectCache::getReflectClass(zstr_user class_name)
+obj_rc 
+ReflectCache::getReflectClass(str_ptr class_name)
 {
-	zobj_mgr result;
+	obj_rc result;
 
 	//showstr("getReflectClass", class_name);
 
-	htab_write cache(cache_);
+	htab_wr cache(cache_);
 
-	zval_user test(cache.get(class_name));
+	val_ptr test(cache.get(class_name));
 
 	result = test.zobject();
 
@@ -98,8 +98,8 @@ ReflectCache::getReflectClass(zstr_user class_name)
 		ZVAL_STR(fn.argsptr(), class_name);
 		fn.set_fci(result, RFC_data.construct_key);
 		
-		zval_mgr crc = fn.call_fn();
-		zval_user temp(crc);
+		val_rc crc = fn.call_fn();
+		val_ptr temp(crc);
 
 		if (temp.isObject())
 		{
@@ -115,12 +115,12 @@ ReflectCache::getReflectClass(zstr_user class_name)
 
 }
 
-zobj_mgr 
-ReflectCache::newInstance(zstr_user class_name)
+obj_rc 
+ReflectCache::newInstance(str_ptr class_name)
 {
-	zobj_mgr result;
+	obj_rc result;
 
-	zobj_mgr rfc_obj = getReflectClass(class_name);
+	obj_rc rfc_obj = getReflectClass(class_name);
 
 	if (rfc_obj.ok())
 	{
@@ -128,8 +128,8 @@ ReflectCache::newInstance(zstr_user class_name)
 
 		fn.set_fci(rfc_obj, RFC_data.new_instance);
 
-		zval_mgr nobj = fn.call_fn();
-		zval_user temp(nobj);
+		val_rc nobj = fn.call_fn();
+		val_ptr temp(nobj);
 
 		if (temp.isObject())
 		{
@@ -139,26 +139,26 @@ ReflectCache::newInstance(zstr_user class_name)
 	return result;
 }
 
-zobj_mgr //static
-ReflectCache::staticInstance(zstr_user class_name)
+obj_rc //static
+ReflectCache::staticInstance(str_ptr class_name)
 {
 	auto rcobj =  ReflectCache::cpp();
 	return rcobj->newInstance(class_name);
 }
 
-zobj_mgr //static
-ReflectCache::staticInstanceArgs(zstr_user class_name, htab_read args)
+obj_rc //static
+ReflectCache::staticInstanceArgs(str_ptr class_name, htab_rd args)
 {
 	auto rcobj =  ReflectCache::cpp();
 	return rcobj->newInstanceArgs(class_name, args);
 }
 
-zobj_mgr 
-ReflectCache::newInstanceArgs(zstr_user class_name, htab_read args)
+obj_rc 
+ReflectCache::newInstanceArgs(str_ptr class_name, htab_rd args)
 {
-	zobj_mgr result;
+	obj_rc result;
 
-	zobj_mgr rfc = getReflectClass(class_name);
+	obj_rc rfc = getReflectClass(class_name);
 	if (rfc.ok())
 	{
 		//showobj("RFC", rfc);
@@ -169,8 +169,8 @@ ReflectCache::newInstanceArgs(zstr_user class_name, htab_read args)
 		//showstr("fn name", RFC_data.new_instance_args);
 		
 		fn.set_fci(rfc, RFC_data.new_instance_args);
-		zval_mgr recall = fn.call_fn();
-		zval_user test(recall);
+		val_rc recall = fn.call_fn();
+		val_ptr test(recall);
 
 		if (test.isObject())
 		{
@@ -189,14 +189,14 @@ ReflectCache::newInstanceArgs(zstr_user class_name, htab_read args)
 }
 
 
-zobj_user
+obj_ptr
 ReflectCache::instance()
 {
 	return RFC_data.g_reflect_cache;
 	/*
 	Global gme = GLOBALS[ReflectCache::omg.class_name()];
 
-	zobj_mgr result;
+	obj_rc result;
 
 	if (gme.value().isNull()) {
 
@@ -215,7 +215,7 @@ ReflectCache* ReflectCache::cpp()
 }
 
 void
-ReflectCache::debug_info(htab_write hw)
+ReflectCache::debug_info(htab_wr hw)
 {	
 	hw.set(RFC_data.cache_key, cache_);
 }
@@ -230,7 +230,7 @@ PHP_METHOD(Wcc_ReflectCache, instance)
 	ZEND_PARSE_PARAMETERS_START(0, 0)
 	ZEND_PARSE_PARAMETERS_END();
 
-	zobj_user result(ReflectCache::instance());
+	obj_ptr result(ReflectCache::instance());
 	result.return_zv(return_value);
 }
 
@@ -245,7 +245,7 @@ PHP_METHOD(Wcc_ReflectCache, getReflect)
 
 	auto rcobj = zval_toc<ReflectCache>(ZEND_THIS);
 
-	zobj_mgr result = rcobj->getReflectClass(cname);
+	obj_rc result = rcobj->getReflectClass(cname);
 	result.move_zv(return_value);
 
 	//showmem("getReflect", return_value);
@@ -261,7 +261,7 @@ PHP_METHOD(Wcc_ReflectCache, newInstance)
 
 	auto rcobj = zval_toc<ReflectCache>(ZEND_THIS);
 
-	zobj_mgr result = rcobj->newInstance(cname);
+	obj_rc result = rcobj->newInstance(cname);
 	result.move_zv(return_value);
 }
 
@@ -277,7 +277,7 @@ PHP_METHOD(Wcc_ReflectCache, newInstanceArgs)
 
 	auto rcobj = zval_toc<ReflectCache>(ZEND_THIS);
 
-	zobj_mgr result = rcobj->newInstanceArgs(cname, args);
+	obj_rc result = rcobj->newInstanceArgs(cname, args);
 	result.move_zv(return_value);
 
 }
@@ -290,7 +290,7 @@ PHP_METHOD(Wcc_ReflectCache, staticInstance)
 	Z_PARAM_STR(cname)
 	ZEND_PARSE_PARAMETERS_END();
 
-	zobj_mgr result = ReflectCache::staticInstance(cname);
+	obj_rc result = ReflectCache::staticInstance(cname);
 
 	result.move_zv(return_value);
 
@@ -306,7 +306,7 @@ PHP_METHOD(Wcc_ReflectCache, staticInstanceArgs)
 	Z_PARAM_ARRAY(args)
 	ZEND_PARSE_PARAMETERS_END();	
 
-	zobj_mgr result = ReflectCache::staticInstanceArgs(cname, args);
+	obj_rc result = ReflectCache::staticInstanceArgs(cname, args);
 	result.move_zv(return_value);
 }
 
@@ -319,7 +319,7 @@ PHP_METHOD(Wcc_ReflectCache, getrc)
 	ZEND_PARSE_PARAMETERS_END();	
 
 	auto rcobj =  ReflectCache::cpp();
-	zobj_mgr result = rcobj->getReflectClass(cname);
+	obj_rc result = rcobj->getReflectClass(cname);
 	result.move_zv(return_value);
 
 }

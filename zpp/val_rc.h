@@ -15,13 +15,13 @@
 
 namespace zpp {
 
-class zval_user;
-class zobj_mgr;
+class val_ptr;
+class obj_rc;
 class base_d;
-class zstr_mgr;
-class zobj_user;
+class str_rc;
+class obj_ptr;
 
-class zval_mgr {
+class val_rc {
 protected:
     zval zv_;
 
@@ -43,14 +43,14 @@ protected:
 
     void copy(zval* p);
 
-    friend class zval_user;
-    friend class zstr_mgr;
-    friend class zobj_mgr;
-    friend class htab_mgr;
+    friend class val_ptr;
+    friend class str_rc;
+    friend class obj_rc;
+    friend class htab_rc;
     friend class htab_walk;
     
 public:
-    static zval_mgr EmptyArray;
+    static val_rc EmptyArray;
     //! Return true if contents become invalid
     static bool try_decref(zval* p);
 
@@ -59,38 +59,38 @@ public:
 
 	operator zval*() const  { return (zval*) &zv_; }
 
-	zval_mgr();
+	val_rc();
 
-    zval_mgr(zval* zv);
+    val_rc(zval* zv);
     
 
-    ~zval_mgr();
+    ~val_rc();
 
-    zval_mgr(zend_string* rc);
+    val_rc(zend_string* rc);
 
-    zval_mgr(zend_object* rc);
+    val_rc(zend_object* rc);
 
-    zval_mgr(zend_long value);
+    val_rc(zend_long value);
 
-    zval_mgr(base_d* cobj);
+    val_rc(base_d* cobj);
 
-    zval_mgr(bool value);
+    val_rc(bool value);
     
-    zval_mgr(const zval_mgr& rc, bool byRef = false);
+    val_rc(const val_rc& rc, bool byRef = false);
 
-    zval_mgr(zval_mgr&& rc);
+    val_rc(val_rc&& rc);
 
-    zval_mgr(HashTable* ht);
+    val_rc(HashTable* ht);
 
-    zval_mgr(zstr_mgr&& rc);
+    val_rc(str_rc&& rc);
 
-    zval_mgr(int value);
+    val_rc(int value);
 
-    zval_mgr(const zval_user& rc);
+    val_rc(const val_ptr& rc);
 
-    zval_mgr(const zstr_user& rc);
+    val_rc(const str_ptr& rc);
 
-    //zval_mgr(const zobj_user& rc);
+    //val_rc(const obj_ptr& rc);
 
     //! mutate in place to suggested type if necessary
     void     toLong();
@@ -108,31 +108,31 @@ public:
     void new_array();
     void empty_array();
 
-    const zval_mgr& operator=(const zval_user &rc);
+    const val_rc& operator=(const val_ptr &rc);
 
-    const zval_mgr& operator=(const zobj_user &rc);
+    const val_rc& operator=(const obj_ptr &rc);
 
-    //const zval_mgr& operator=(const zobj_mgr &rc);
+    //const val_rc& operator=(const obj_rc &rc);
 
-    const zval_mgr& operator=(const zstr_user &rc);
+    const val_rc& operator=(const str_ptr &rc);
 
-    const zval_mgr& operator=(const htab_mgr &rc);
+    const val_rc& operator=(const htab_rc &rc);
 
-    const zval_mgr& operator=(zend_long value);
+    const val_rc& operator=(zend_long value);
 
-    const zval_mgr& operator=(double value);
+    const val_rc& operator=(double value);
 
-    const zval_mgr& operator=(const zval_mgr &rc);
+    const val_rc& operator=(const val_rc &rc);
 
-    const zval_mgr& operator=(zval* rc);
+    const val_rc& operator=(zval* rc);
 
-    const zval_mgr& operator=(zend_object* rc);
+    const val_rc& operator=(zend_object* rc);
 
-    const zval_mgr& operator=(HashTable* rc);
+    const val_rc& operator=(HashTable* rc);
 
-    const zval_mgr& operator=(zend_string* rc);
+    const val_rc& operator=(zend_string* rc);
 
-    zval_mgr& operator=(zval_mgr&& rc);
+    val_rc& operator=(val_rc&& rc);
 
     void move_zv(zval* ret);
     void return_zv(zval* ret);
@@ -203,7 +203,7 @@ public:
         return (ref_type() == IS_PTR);
     }
 
-    static zval_mgr empty_str(); 
+    static val_rc empty_str(); 
 };
 
 }; // namespace Php

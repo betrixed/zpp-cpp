@@ -2,11 +2,11 @@
 #define ZOBJ_MGR_CPP
 
 #ifndef ZOBJ_MGR_H
-#include "zobj_mgr.h"
+#include "obj_rc.h"
 #endif
 
 #ifndef ZOBJ_USER_H
-#include "zobj_user.h"
+#include "obj_ptr.h"
 #endif
 
 #ifndef CLASS_DATA_H
@@ -19,13 +19,13 @@ namespace zpp {
 
 
 void
-zobj_mgr::try_addref(zend_object* ob)
+obj_rc::try_addref(zend_object* ob)
 {
 	ob->gc.refcount++;
 }
 
 bool // static
-zobj_mgr::try_decref(zend_object* ob)
+obj_rc::try_decref(zend_object* ob)
 {
 	auto rct = GC_REFCOUNT(ob);
 	if (rct==1) 
@@ -41,7 +41,7 @@ zobj_mgr::try_decref(zend_object* ob)
 	return false;	
 }
 
-void zobj_mgr::own()
+void obj_rc::own()
 {
 	if (!obj_)
 	{
@@ -51,7 +51,7 @@ void zobj_mgr::own()
 }
 
 void //protected
-zobj_mgr::lose()
+obj_rc::lose()
 {
 	if (!obj_) {
 		return;
@@ -61,7 +61,7 @@ zobj_mgr::lose()
 }
 
 void
-zobj_mgr::init()
+obj_rc::init()
 {
 	if (obj_)
 	{
@@ -70,14 +70,14 @@ zobj_mgr::init()
 }
 
 void 
-zobj_mgr::adopt(zend_object *zo)
+obj_rc::adopt(zend_object *zo)
 {
 	lose();
 	obj_ = zo;
 	//showobj("Adopted", obj_);
 }
 
-zobj_mgr::zobj_mgr(base_d* cobj) : zobj_user(cobj)
+obj_rc::obj_rc(base_d* cobj) : obj_ptr(cobj)
 {
 	if (obj_)
 	{
@@ -85,34 +85,34 @@ zobj_mgr::zobj_mgr(base_d* cobj) : zobj_user(cobj)
 	}
 }
 
-zobj_mgr::zobj_mgr(zend_object* rc) : zobj_user(rc)
+obj_rc::obj_rc(zend_object* rc) : obj_ptr(rc)
 {
     own();
 }
 
-zobj_mgr::zobj_mgr(const zobj_user& rc) : zobj_user(rc.obj_)
+obj_rc::obj_rc(const obj_ptr& rc) : obj_ptr(rc.obj_)
 {
     own();
 }
 
-zobj_mgr::zobj_mgr(const zobj_mgr& rc) : zobj_user(rc.obj_)
+obj_rc::obj_rc(const obj_rc& rc) : obj_ptr(rc.obj_)
 {
     own();
 }
 
-zobj_mgr::zobj_mgr(const zval* zp)
+obj_rc::obj_rc(const zval* zp)
 {
-	obj_ = zval_user(zp).zobject();
+	obj_ = val_ptr(zp).zobject();
 	own();
 }
 
-zobj_mgr::zobj_mgr(zobj_mgr&& rc) : zobj_user(rc.obj_)
+obj_rc::obj_rc(obj_rc&& rc) : obj_ptr(rc.obj_)
 {
     rc.obj_ = nullptr;
 }
 
-zobj_mgr& 
-zobj_mgr::operator=(const zobj_user &rc)
+obj_rc& 
+obj_rc::operator=(const obj_ptr &rc)
 {
 	if (rc.obj_ != obj_)
 	{
@@ -123,8 +123,8 @@ zobj_mgr::operator=(const zobj_user &rc)
 	return *this;
 }
 
-zobj_mgr& 
-zobj_mgr::operator=(const zobj_mgr &rc)
+obj_rc& 
+obj_rc::operator=(const obj_rc &rc)
 {
 	if (rc.obj_ != obj_)
 	{
@@ -136,8 +136,8 @@ zobj_mgr::operator=(const zobj_mgr &rc)
 }
 
 
-zobj_mgr& 
-zobj_mgr::operator=(zobj_mgr&& rc)
+obj_rc& 
+obj_rc::operator=(obj_rc&& rc)
 {
     lose();
     obj_ = rc.obj_;
@@ -145,8 +145,8 @@ zobj_mgr::operator=(zobj_mgr&& rc)
     return *this;
 }
 
-const zobj_mgr& 
-zobj_mgr::operator=(zend_object* rc)
+const obj_rc& 
+obj_rc::operator=(zend_object* rc)
 {
     if (obj_ == rc)
     {
@@ -159,7 +159,7 @@ zobj_mgr::operator=(zend_object* rc)
 }
 
 bool //static
-zobj_mgr::new_object(zstr_user classname, zobj_mgr& host)
+obj_rc::new_object(str_ptr classname, obj_rc& host)
 {
 	class_data maker(classname);
 
@@ -167,7 +167,7 @@ zobj_mgr::new_object(zstr_user classname, zobj_mgr& host)
 }
 
 void 
-zobj_mgr::move_zv(zval* ret)
+obj_rc::move_zv(zval* ret)
 {
 	if (obj_)
 	{
@@ -181,35 +181,35 @@ zobj_mgr::move_zv(zval* ret)
 }
 
 
-zobj_mgr::zobj_mgr(zval_mgr&& m) 
+obj_rc::obj_rc(val_rc&& m) 
 {
-	obj_ = zval_user(m).zobject();
+	obj_ = val_ptr(m).zobject();
 	m.init();
 }
 
-zobj_mgr& 
-zobj_mgr::operator=(zval_mgr&& rc)
+obj_rc& 
+obj_rc::operator=(val_rc&& rc)
 {
 	lose();
-	obj_ = zval_user(rc).zobject();
+	obj_ = val_ptr(rc).zobject();
 	rc.init();
 	return *this;
 }
 
-const zobj_mgr& 
-zobj_mgr::operator=(const zval* rc)
+const obj_rc& 
+obj_rc::operator=(const zval* rc)
 {
 	lose();
 	//showmem("operator= const zval*", (zval*)rc);
-	obj_ = zval_user(rc).zobject();
+	obj_ = val_ptr(rc).zobject();
 	//showobj("obj_", obj_);
 	own();
 	//showobj("obj_", obj_);
 	return *this;
 }
 
-zobj_mgr& 
-zobj_mgr::operator=(const zval_user& zv)
+obj_rc& 
+obj_rc::operator=(const val_ptr& zv)
 {
 	lose();
 	obj_ = zv.zobject();
@@ -219,5 +219,5 @@ zobj_mgr::operator=(const zval_user& zv)
 }
 
 }; //namespace zpp
-//zobj_mgr.cpp
+//obj_rc.cpp
 #endif

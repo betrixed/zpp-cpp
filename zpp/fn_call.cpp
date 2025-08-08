@@ -32,7 +32,7 @@ fn_call::~fn_call()
 
 }
 /*
-zval_mgr&& 
+val_rc&& 
 fn_call::call1(zval *vp)
 {
     assert(argct_==1);
@@ -40,7 +40,7 @@ fn_call::call1(zval *vp)
     return call_fn();
 }
 
-zval_mgr&& 
+val_rc&& 
 fn_call::call2(zval *arg0, zval* arg1)
 {
     assert(argct_==2);
@@ -49,7 +49,7 @@ fn_call::call2(zval *arg0, zval* arg1)
     return call_fn();
 }
 
-zval_mgr&& 
+val_rc&& 
 fn_call::call3(zval *arg0, zval* arg1, zval* arg2)
 {
     assert(argct_==3);
@@ -59,7 +59,7 @@ fn_call::call3(zval *arg0, zval* arg1, zval* arg2)
     return call_fn();
 }
 
-zval_mgr&& 
+val_rc&& 
 fn_call::call4(zval *arg0, zval* arg1, zval* arg2, zval* arg3)
 {
     assert(argct_==4);
@@ -70,7 +70,7 @@ fn_call::call4(zval *arg0, zval* arg1, zval* arg2, zval* arg3)
     return call_fn();
 }
 
-zval_mgr&& 
+val_rc&& 
 fn_call::call5(zval *arg0, zval* arg1, zval* arg2, zval* arg3, zval* arg4)
 {
      assert(argct_==5);
@@ -91,7 +91,7 @@ fn_call::set_named_args(HashTable* nargs)
 }
 /** reset this from the constructor information */
 void 
-fn_call::set_fci(zend_object* obj, zstr_user method, HashTable* nargs)
+fn_call::set_fci(zend_object* obj, str_ptr method, HashTable* nargs)
 {
     fci_ = {0};
     cache_ = {0}; // ensure fully wiped
@@ -132,51 +132,51 @@ fn_call::set_fname(const char* name)
 */
 
 void 
-fn_call::set_fname(zstr_user name)
+fn_call::set_fname(str_ptr name)
 {
     set_fci(nullptr, name, nullptr);
 }
 
 void fn_call::throw_failed()
 {
-    zval_user fn(&fci_.function_name);
-    zstr_user name(fn.zstr());
+    val_ptr fn(&fci_.function_name);
+    str_ptr name(fn.zstr());
     if (name.ok())
         zend_throw_error(zend_ce_error, "fn_call_failed for %s", name.data());
     else 
         zend_throw_error(zend_ce_error, "fn_call_failed, no name");
 }
 
-bool fnexists::call(zstr_user arg)
+bool fnexists::call(str_ptr arg)
 {
     ZVAL_STR(argsptr(), (zend_string*)arg);
-    zval_mgr result = call_fn();
-    return zval_user(result).zbool();
+    val_rc result = call_fn();
+    return val_ptr(result).zbool();
 }
 
-zstr_mgr 
-pregquote::call(zstr_user str, zstr_user delimiter)
+str_rc 
+pregquote::call(str_ptr str, str_ptr delimiter)
 {
     zval* pz = argsptr();
 
     ZVAL_STR(pz, (zend_string*) str);
     ZVAL_STR(pz+1, (zend_string*) delimiter);
 
-    zval_mgr result = call_fn();
-    return zstr_mgr(zval_user(result).zstr());
+    val_rc result = call_fn();
+    return str_rc(val_ptr(result).zstr());
 }
 
 bool 
-fn_fclose::call(zval_user fres)
+fn_fclose::call(val_ptr fres)
 {
     ZVAL_COPY_VALUE(argsptr(), fres);
-    zval_mgr result = call_fn();
-    return zval_user(result).isTrue();
+    val_rc result = call_fn();
+    return val_ptr(result).isTrue();
 }
 
 
-zval_mgr 
-fn_fopen::call(zstr_user path, zstr_user mode)
+val_rc 
+fn_fopen::call(str_ptr path, str_ptr mode)
 {
     zval* pz = argsptr();
 
@@ -190,15 +190,15 @@ fn_stripslashes::fn_stripslashes() : fn_call_args<1>()
     set_fname(STAB.stripslashes);
 }
 
-zstr_mgr 
-fn_stripslashes::call(zstr_user str)
+str_rc 
+fn_stripslashes::call(str_ptr str)
 {
     ZVAL_STR(argsptr(), str);
-    return zstr_mgr(call_fn());
+    return str_rc(call_fn());
 }
 
-zstr_mgr 
-file_content::call(zstr_user path, int offset, size_t len)
+str_rc 
+file_content::call(str_ptr path, int offset, size_t len)
 {
     //showmem("fn_name", &fci_.function_name);
     zval* pz = argsptr();
@@ -214,11 +214,11 @@ file_content::call(zstr_user path, int offset, size_t len)
     else {
         ZVAL_NULL(pz+4);
     }
-    return zstr_mgr(call_fn());
+    return str_rc(call_fn());
 }
 
-zval_mgr
-PathInfo::call(zstr_user path, int flags)
+val_rc
+PathInfo::call(str_ptr path, int flags)
 {
     zval* pz = argsptr();
     ZVAL_STR(pz, path);
@@ -228,13 +228,13 @@ PathInfo::call(zstr_user path, int flags)
 
 
 
-zstr_mgr 
-preg_quote(zstr_user expr, zstr_user delimiter)
+str_rc 
+preg_quote(str_ptr expr, str_ptr delimiter)
 {
     return FTAB.preg_quote.call(expr, delimiter);
 }
 
-zval_mgr&& 
+val_rc&& 
 fn_call::call_fn()
 {
     if (fci_.size==0)
@@ -260,30 +260,30 @@ fn_call::call_fn()
     return std::move(result_);
 }
 
-zstr_mgr 
-addcslashes(zstr_user s, zstr_user escapes)
+str_rc 
+addcslashes(str_ptr s, str_ptr escapes)
 {
     fn_call_args<2>  fn;
     fn.set_fci(nullptr, STAB.addcslashes, nullptr);
     zval* pz = fn.argsptr();
     ZVAL_STR(pz, (zend_string*) s);
     ZVAL_STR(pz+1, (zend_string*) escapes);
-    zstr_mgr result = fn.call_fn();
+    str_rc result = fn.call_fn();
     return result;
 }
 
- zstr_mgr 
- file_get_contents(zstr_user path, int offset, size_t len)
+ str_rc 
+ file_get_contents(str_ptr path, int offset, size_t len)
  {
     //zend_printf("file get contents for %s\n", path.data());
 
-    zstr_mgr result = FTAB.file_get_contents.call(path, offset, len);
+    str_rc result = FTAB.file_get_contents.call(path, offset, len);
 
     //showmem("contents", result);
     return result;
  }
 
-bool extension_loaded(zstr_user name)
+bool extension_loaded(str_ptr name)
 {
     return FTAB.extension_loaded.call(name);
 }
@@ -293,28 +293,28 @@ fn_fgetcsv::fn_fgetcsv() : fn_call_args<1>()
     set_fname(FTAB.s_fgetcsv);
 }
 
-zval_mgr 
-fn_fgetcsv::call(zval_user file_res)
+val_rc 
+fn_fgetcsv::call(val_ptr file_res)
 {
     ZVAL_COPY_VALUE(argsptr(), file_res);
     return call_fn();
 }
 
-bool extnloaded::call(zstr_user name)
+bool extnloaded::call(str_ptr name)
 {
     ZVAL_STR(argsptr(), (zend_string*) name);
-    zval_mgr result = call_fn();
-    return zval_user(result).isTrue();
+    val_rc result = call_fn();
+    return val_ptr(result).isTrue();
 }
 
 bool 
-function_exists(zstr_user name)
+function_exists(str_ptr name)
 {
     return FTAB.function_exists.call(name);
 }
 
-zstr_mgr 
-mb_detect_order(const zval_mgr& encoding)
+str_rc 
+mb_detect_order(const val_rc& encoding)
 {
     fn_call_args<1>  fn;
 
@@ -324,8 +324,8 @@ mb_detect_order(const zval_mgr& encoding)
     return fn.call_fn();
 }
     
-zstr_mgr 
-mb_detect_encoding(zstr_user str, const zval_mgr& encodings, bool strict)
+str_rc 
+mb_detect_encoding(str_ptr str, const val_rc& encodings, bool strict)
 {
     fn_call_args<3>  fn;
 
@@ -338,8 +338,8 @@ mb_detect_encoding(zstr_user str, const zval_mgr& encodings, bool strict)
     return fn.call_fn();
 }
 
-zstr_mgr 
-rawurlencode(zstr_user s)
+str_rc 
+rawurlencode(str_ptr s)
 {
     fn_call_args<1>  fn;
     ZVAL_STR(fn.argsptr(), s);
@@ -349,8 +349,8 @@ rawurlencode(zstr_user s)
 
 }
 
-zstr_mgr 
-ucwords(zstr_user s)
+str_rc 
+ucwords(str_ptr s)
 {
     fn_call_args<1>  fn;
     ZVAL_STR(fn.argsptr(), s);
@@ -358,8 +358,8 @@ ucwords(zstr_user s)
     return fn.call_fn();
 }
 
-zstr_mgr
-strtr(zstr_user s, zstr_user from, zstr_user to)
+str_rc
+strtr(str_ptr s, str_ptr from, str_ptr to)
 {
     fn_call_args<3>  fn;
     zval* ap = fn.argsptr();
@@ -372,14 +372,14 @@ strtr(zstr_user s, zstr_user from, zstr_user to)
     return fn.call_fn();
 }
 
-zval_mgr 
-json_decode(zstr_user str, bool asArray,  int flags)
+val_rc 
+json_decode(str_ptr str, bool asArray,  int flags)
 {
     if (asArray)
     {
         flags |= PHP_JSON_OBJECT_AS_ARRAY;
     }
-    zval_mgr result;
+    val_rc result;
 
     //zend_result check = 
     php_json_decode_ex(result, str.data(), str.size(), flags, 512);
@@ -441,7 +441,7 @@ strtable::init()
 /**
  * Dyanmic args setup, array values only
  */
-args_spread::args_spread(htab_read args, int prefixct)
+args_spread::args_spread(htab_rd args, int prefixct)
 {
     argct_ = args.size() + prefixct;
     if (argct_)
@@ -474,8 +474,8 @@ args_spread::~args_spread()
 
 
 bool callable_fn(
-    zval_mgr& result, 
-    zval_mgr& callme, 
+    val_rc& result, 
+    val_rc& callme, 
     int argct, 
     zval* argv)
 {
@@ -504,9 +504,9 @@ bool callable_fn(
 
 bool 
 call_spread_fn(
-    zval_mgr& result, 
-    zval_mgr& callme, 
-    htab_read args)
+    val_rc& result, 
+    val_rc& callme, 
+    htab_rd args)
 {
     args_spread spread(args);
     return callable_fn(result, callme, spread.arg_ct(), spread.arg_v());
@@ -516,12 +516,12 @@ FCall2::FCall2()
 {  
 }
 
-FCall2::FCall2(zstr_user func)
+FCall2::FCall2(str_ptr func)
 {
     set_fname(func);
 }
 
-zval_mgr  
+val_rc  
 FCall2::call(zval* arg1, zval* arg2)
 {
     ZVAL_COPY_VALUE(&params[0], arg1);

@@ -21,8 +21,8 @@ namespace wcd {
 	base_obj_mgr<RunSql> RunSql::omg;
 
 	void 
-	RunSql::construct(zobj_user db, zstr_user sql, 
-			 htab_read bind, bool rval)
+	RunSql::construct(obj_ptr db, str_ptr sql, 
+			 htab_rd bind, bool rval)
 	{
 		db_ = db;
 		sql_ = sql;
@@ -30,16 +30,16 @@ namespace wcd {
 		retval_ = rval;
 	}
 
-	zval_mgr 
+	val_rc 
 	RunSql::operation()
 	{
-		zval_mgr exresult;
+		val_rc exresult;
 
 		IDriver* db = zobj_toc<IDriver>(db_);
 
-		zval_mgr stmt = db->prepare(sql_);
+		val_rc stmt = db->prepare(sql_);
 
-		htab_mgr  params = bind_;
+		htab_rc  params = bind_;
 
 		//showdata("bind", params);
 
@@ -47,12 +47,12 @@ namespace wcd {
 
 		if (pct)
 		{
-			zval_user a0 = params.get(int(0));
+			val_ptr a0 = params.get(int(0));
 			if (a0.isArray())
 			{
 				if (pct > 1)
 				{
-					htab_write result(exresult);
+					htab_wr result(exresult);
 
 					htab_walk wk;
 
@@ -60,7 +60,7 @@ namespace wcd {
 					for(wk.start(params); wk.ok(); wk.next())
 					{
 						db->bind(stmt, val.zarray());
-						zval_mgr x2 = db->execute(stmt, false, retval_);
+						val_rc x2 = db->execute(stmt, false, retval_);
 						result.push_back(x2);
 					}
 					db->closeStmt(stmt);
@@ -77,22 +77,22 @@ namespace wcd {
 
 	}
 
-	zval_mgr //static 
-	RunSql::op(zobj_user db, zstr_user sql, htab_read bind, bool rval)
+	val_rc //static 
+	RunSql::op(obj_ptr db, str_ptr sql, htab_rd bind, bool rval)
 	{
 		//showstr("runsql", sql);
 		//showarray("bind", bind);
 		
-		zobj_mgr obj = RunSql::omg.new_zobj();
+		obj_rc obj = RunSql::omg.new_zobj();
 		RunSql*  rs = zobj_toc<RunSql>(obj);
 		rs->construct(db, sql, bind, rval);
 
 		return rs->run();
 	}
 
-	zval_mgr RunSql::run()
+	val_rc RunSql::run()
 	{
-		zval_mgr result = operation();
+		val_rc result = operation();
 		return result;
 	}
 }; // namespace wcd
@@ -142,7 +142,7 @@ ZEND_METHOD(Wcd_Sql_RunSql, Op)
 	Z_PARAM_BOOL(retval)
 	ZEND_PARSE_PARAMETERS_END();
 
-	zval_mgr result = RunSql::op(db, sql, binds, retval);
+	val_rc result = RunSql::op(db, sql, binds, retval);
 	result.move_zv(return_value);
 }
 
@@ -152,7 +152,7 @@ ZEND_METHOD(Wcd_Sql_RunSql, operation)
 
 	RunSql* cobj = zval_toc<RunSql>(ZEND_THIS);
 
-	zval_mgr result = cobj->operation();
+	val_rc result = cobj->operation();
 	result.move_zv(return_value);
 
 }
@@ -162,7 +162,7 @@ ZEND_METHOD(Wcd_Sql_RunSql, run)
 
 	RunSql* cobj = zval_toc<RunSql>(ZEND_THIS);
 
-	zval_mgr result = cobj->run();
+	val_rc result = cobj->run();
 	result.move_zv(return_value);
 
 }

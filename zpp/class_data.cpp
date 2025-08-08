@@ -6,7 +6,7 @@
 #endif
 
 #ifndef ZVAL_USER_H
-#include "zval_user.h"
+#include "val_ptr.h"
 #endif
 
 #ifndef SHOW_ZPP_H
@@ -23,7 +23,7 @@ namespace zpp {
 
 void 
 class_data::typed_property(
-    zstr_user name, zval_user data, 
+    str_ptr name, val_ptr data, 
     zend_type datatype, int accessflag)
 {
     zend_declare_typed_property(class_entry_,
@@ -46,7 +46,7 @@ class_data::add_constant(const char* name, const char* value)
 void 
 class_data::add_constant(const char* name,  zend_string* value)
 {
-    zval_mgr temp(value);
+    val_rc temp(value);
     zend_declare_class_constant(class_entry_, name, strlen(name), temp);
     
     //add_constant(name, value.data());
@@ -69,19 +69,19 @@ bool class_data::check(const char* msg)
     } 
     return true;  
 }
- class_data::class_data(zstr_user classname)
+ class_data::class_data(str_ptr classname)
  {
     set(classname);
  }
 
 zend_class_entry* //static
-class_data::get_class(zstr_user classname)
+class_data::get_class(str_ptr classname)
 {
     return zend_fetch_class(classname, ZEND_FETCH_CLASS_SILENT);
 }
 
  bool 
- class_data::set(zstr_user classname)
+ class_data::set(str_ptr classname)
  {
     //showstr("class_data:set", classname);
     class_entry_ =  zend_fetch_class(classname, ZEND_FETCH_CLASS_SILENT);
@@ -89,7 +89,7 @@ class_data::get_class(zstr_user classname)
  }
 
  bool  
- class_data::new_object(zobj_mgr& result)
+ class_data::new_object(obj_rc& result)
  {
    
     if (!check("class_data without class_entry"))
@@ -97,7 +97,7 @@ class_data::get_class(zstr_user classname)
         return false;
     }
 
-    zval_mgr   temp;
+    val_rc   temp;
     auto code = object_init_ex(temp, class_entry_);
 
     if (code==SUCCESS)
@@ -105,7 +105,7 @@ class_data::get_class(zstr_user classname)
         //showmem("zstr_ptr new_object", &temp);
         // The new object is already referenced.
 
-        result = zval_user(temp).zobject();
+        result = val_ptr(temp).zobject();
         return true;
     }
     zend_string* s = class_entry_->name;
@@ -113,19 +113,19 @@ class_data::get_class(zstr_user classname)
     return false;
  }
 
-zobj_mgr//static
-class_data::create_object(zstr_user classname)
+obj_rc//static
+class_data::create_object(str_ptr classname)
 {
     class_data temp(classname);
     //showstr("create_object", classname);
-    zobj_mgr result;
+    obj_rc result;
 
     temp.new_object(result);
 
     return result;
 }
 
-zstr_user
+str_ptr
 class_data::className()
 {
     if (class_entry_)
@@ -135,12 +135,12 @@ class_data::className()
     return zend_empty_string;
 }
 
-zobj_mgr//static
+obj_rc//static
 class_data::std_object()
 {
-    zval_mgr init;
+    val_rc init;
     object_init(init);
-    return zobj_mgr(std::move(init));
+    return obj_rc(std::move(init));
 }
 
 void
@@ -149,22 +149,22 @@ class_data::static_property(zend_string* pname, zval* value)
     zend_update_static_property_ex(class_entry_, pname, value);
 }
 
-zval_mgr 
+val_rc 
 class_data::static_property(zend_string* s)
 {
     zval* p = zend_read_static_property_ex(class_entry_, s, true);
 
-    return zval_mgr(p);
+    return val_rc(p);
 }
 
-zval_mgr 
+val_rc 
 class_data::constant_value(zend_string* s)
 {   
     zend_class_constant *c = NULL;
 
     c = (zend_class_constant*)zend_hash_find_ptr(CE_CONSTANTS_TABLE(class_entry_), s);
 
-    zval_mgr result;
+    val_rc result;
 
     if (c)
     {

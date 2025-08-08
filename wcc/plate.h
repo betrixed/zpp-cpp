@@ -51,33 +51,33 @@ class Plate : public base_d
 protected:
 
 	// callback with plate argument
-	zobj_mgr engine_; // Php engine instance object
+	obj_rc engine_; // Php engine instance object
 
-	zstr_mgr name_; // Plate leaf path, key for template
+	str_rc name_; // Plate leaf path, key for template
 
-	zstr_mgr path_; // full file path, when located
+	str_rc path_; // full file path, when located
 
-	htab_mgr  data_; // data assigned, key->value
+	htab_rc  data_; // data assigned, key->value
 
-	htab_mgr sections_; // section contents as strings indexed by name
+	htab_rc sections_; // section contents as strings indexed by name
 
-	zstr_mgr sectionName_; // section being rendered
+	str_rc sectionName_; // section being rendered
 
-	zstr_mgr layout_; // layout (surrounder template)
+	str_rc layout_; // layout (surrounder template)
 
-	htab_mgr  layoutData_; // data for surrounder.
+	htab_rc  layoutData_; // data for surrounder.
 
 	int   style_level_;
 
 	bool isPushed_;
 
-	zstr_mgr raw_;   // if assigned raw html string	
+	str_rc raw_;   // if assigned raw html string	
 
 	//htab_own publish_; // during render, values to be extracted
 
-	void addSection(zstr_user name, zstr_user sdata);
+	void addSection(str_ptr name, str_ptr sdata);
 	
-	zstr_mgr full_render(htab_read data);
+	str_rc full_render(htab_rd data);
 
 	// cached call methods
 
@@ -87,52 +87,52 @@ public:
 
 	static int getObLevel();
 
-	//static zobj_mgr make(zobj_user engine, zstr_user name);
+	//static obj_rc make(obj_ptr engine, str_ptr name);
 
-	virtual void debug_info(htab_write hw);
+	virtual void debug_info(htab_wr hw);
 
 	virtual ~Plate()
 	{
 		//showme();
 	}
 
-	void construct(zstr_user name, zobj_user engine);
+	void construct(str_ptr name, obj_ptr engine);
 
-	void setRaw(zstr_user html)
+	void setRaw(str_ptr html)
 	{
 		raw_ = html;
 	}
 	
-	zstr_user    getPath();
-	zstr_user    getName();
+	str_ptr    getPath();
+	str_ptr    getName();
 
-	void setData(htab_read data);
+	void setData(htab_rd data);
 
-	htab_read   getData();
-	zstr_mgr   render(htab_read data);
+	htab_rd   getData();
+	str_rc   render(htab_rd data);
 
-	zstr_mgr fetch(zstr_user name, htab_read data);
+	str_rc fetch(str_ptr name, htab_rd data);
 
-	zstr_mgr insert(zstr_user name, htab_read data);
+	str_rc insert(str_ptr name, htab_rd data);
 
-	zstr_mgr escape(zstr_user s, zstr_user func);
+	str_rc escape(str_ptr s, str_ptr func);
 	
-	zstr_mgr getContent();
+	str_rc getContent();
 
 	bool     pathExists();
 
-	htab_mgr getPublish();
+	htab_rc getPublish();
 	
-	zstr_user getSection(zstr_user name, zstr_user defaultval);
+	str_ptr getSection(str_ptr name, str_ptr defaultval);
 
-	void push(zstr_user name);
+	void push(str_ptr name);
 
 	void stop();
-	void start(zstr_user name);
-	void layout(zstr_user leaf, htab_read data);
+	void start(str_ptr name);
+	void layout(str_ptr leaf, htab_rd data);
 	
-	void setLayout(zstr_user leaf);
-	void setLayoutData(htab_read data);
+	void setLayout(str_ptr leaf);
+	void setLayoutData(htab_rd data);
 	
 	void styleBegin();
 	void styleEnd();

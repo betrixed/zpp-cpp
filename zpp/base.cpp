@@ -6,12 +6,12 @@
 #include "base.h"
 
 #ifdef ZPP_BUILD_ALL
-#include "zstr.cpp"
+#include "str.cpp"
 
-#include "zobj.cpp"
+#include "obj.cpp"
 
-#include "zval_mgr.cpp"
-#include "zval_user.cpp"
+#include "val_rc.cpp"
+#include "val_ptr.cpp"
 
 #include "htab.cpp"
 
@@ -24,25 +24,25 @@
 #include "fn_call.cpp"
 #include "preg.cpp"
 
-#include "zarg_exec.cpp"
+#include "zarg_rd.cpp"
 #else
 
-#include "htab_write.h"
+#include "htab_wr.h"
 
 #endif
 
 namespace zpp {
 
 	 void //virtual
-	 base_d::debug_info(htab_write di)
+	 base_d::debug_info(htab_wr di)
 	 {
-	 	zobj_user temp(this->vobj());
+	 	obj_ptr temp(this->vobj());
 
-	 	htab_mgr plist;
+	 	htab_rc plist;
 
 	 	if (temp.property_list(plist))
 	 	{
-	 		htab_read src(plist);
+	 		htab_rd src(plist);
 
 		 	if (src.size())
 		 	{
@@ -51,7 +51,7 @@ namespace zpp {
 		 }
 	 }
 	 
-	 zstr_user //virtual
+	 str_ptr //virtual
 	 base_d::extender()
 	 {
 	 	return zend_empty_string;

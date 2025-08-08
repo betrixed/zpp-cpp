@@ -20,10 +20,10 @@ namespace wcd {
 
 class Operation : public base_d {
 protected:
-	zobj_mgr db_;
-	zobj_mgr bind_;
-	zobj_mgr joiner_;
-	zobj_mgr plist_;
+	obj_rc db_;
+	obj_rc bind_;
+	obj_rc joiner_;
+	obj_rc plist_;
 
 	void genSql();
 
@@ -37,44 +37,44 @@ protected:
 	
 	JoinTables& joiner() 
 	{
-		zobj_user jobj = getJoiner();
+		obj_ptr jobj = getJoiner();
 		return *zobj_toc<JoinTables>(jobj);
 	}
 public:
 
 	static base_obj_mgr<Operation> omg;
 
-	virtual void debug_info(htab_write di);
+	virtual void debug_info(htab_wr di);
 	
-	void construct(zobj_user db);
+	void construct(obj_ptr db);
 	void destruct();
 
-	zobj_mgr addPrime(zstr_user table, zstr_user alias, htab_read cols);
+	obj_rc addPrime(str_ptr table, str_ptr alias, htab_rd cols);
 
-	zval_mgr firstRow(int fetch);
+	val_rc firstRow(int fetch);
 	
 
-	zobj_user getJoiner();
+	obj_ptr getJoiner();
 
-	htab_read getParams();
+	htab_rd getParams();
 
-	zval_mgr getRows(int fetch = IDriver::FETCH_ASSOC);
+	val_rc getRows(int fetch = IDriver::FETCH_ASSOC);
 
-	virtual zobj_mgr getSqlParams();
+	virtual obj_rc getSqlParams();
 
-	zstr_mgr getSql();
+	str_rc getSql();
 
-	void limit(zval_user ct, zval_user start);
+	void limit(val_ptr ct, val_ptr start);
 
-	void orderBy(zval_user column, bool descend);
+	void orderBy(val_ptr column, bool descend);
 
-	zobj_mgr prepare(int fetch);
+	obj_rc prepare(int fetch);
 
-	void returns(htab_read list);
+	void returns(htab_rd list);
 
-	zval_mgr run();
+	val_rc run();
 
-	void where(zval_user lattr, zval_user rattr, int op, int blogic);
+	void where(val_ptr lattr, val_ptr rattr, int op, int blogic);
 
 	void wipe();
 };

@@ -30,31 +30,31 @@ TargetData target_data;
 
 base_obj_mgr<Target> Target::omg;
 
-void Target::debug_info(htab_write di)
+void Target::debug_info(htab_wr di)
 {
 	di.set(target_data.class_name, class_);
 	di.set(target_data.method, func_);
 	di.set(target_data.module, module_);
 }
 	
-zobj_mgr 
-Target::go(zstr_user cname, zstr_user fname)
+obj_rc 
+Target::go(str_ptr cname, str_ptr fname)
 {
-	zobj_mgr result;
+	obj_rc result;
 
 	result = Target::omg.new_zobj();
 
 	Target* cobj = zobj_toc<Target>(result);
 
 	cobj->construct(cname, fname);
-	//zval_mgr temp(result);
+	//val_rc temp(result);
 	//dump_info::msg_dump("target go ", temp);
 	return result;
 }
 
 
 void 
-Target::construct(zstr_user cname, zstr_user fname)
+Target::construct(str_ptr cname, str_ptr fname)
 {
 	class_ = cname;
 	if (!fname.size())
@@ -68,10 +68,10 @@ Target::construct(zstr_user cname, zstr_user fname)
 
 }
 
-zobj_mgr
+obj_rc
 Target::copy()
 {
-	zobj_mgr result = Target::omg.new_zobj();
+	obj_rc result = Target::omg.new_zobj();
 
 	Target* cobj = zobj_toc<Target>( result );
 
@@ -81,40 +81,40 @@ Target::copy()
 	return result;
 }
 
-zstr_user 
+str_ptr 
 Target::getClass()
 {
 	return class_;
 }
 
-zstr_user 
+str_ptr 
 Target::getFunc()
 {
 	return func_;
 }
 
-zstr_user 
+str_ptr 
 Target::getModule()
 {
 	return module_;
 }
 
-void Target::setFunc(zstr_user name)
+void Target::setFunc(str_ptr name)
 {
 	func_ = name;
 }
 
-void Target::setModule(zstr_user name)
+void Target::setModule(str_ptr name)
 {
 	module_ = name;
 }
 
-htab_mgr
+htab_rc
 Target::serialize()
 {
-	htab_mgr result;
+	htab_rc result;
 
-	htab_write hw(result);
+	htab_wr hw(result);
 
 	this->debug_info(hw);
 
@@ -122,7 +122,7 @@ Target::serialize()
 }
 
 void 
-Target::unserialize(htab_read htab)
+Target::unserialize(htab_rd htab)
 {
 	class_ = htab.get(target_data.class_name);
 	func_ = htab.get(target_data.method);
@@ -157,12 +157,12 @@ ZEND_METHOD(Wcc_Target, go)
 	Z_PARAM_STR(func)
 	ZEND_PARSE_PARAMETERS_END();
 
-	zobj_mgr obj = Target::go(cname, func);
+	obj_rc obj = Target::go(cname, func);
 	//TODO: why needs a ref boost?
 	obj.move_zv(return_value);
 	//showobj("obj after move,", obj);
 	//showmem("return_value after move,", return_value);
-	//zval_mgr::try_addref(return_value);
+	//val_rc::try_addref(return_value);
 
 }
 
@@ -171,7 +171,7 @@ ZEND_METHOD(Wcc_Target, getClass)
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	Target* cobj = zval_toc<Target>(ZEND_THIS);
-	zstr_user cname = cobj->getClass();
+	str_ptr cname = cobj->getClass();
 
 	cname.return_zv(return_value);
 }
@@ -182,7 +182,7 @@ ZEND_METHOD(Wcc_Target, getFunc)
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	Target* cobj = zval_toc<Target>(ZEND_THIS);
-	zstr_user name = cobj->getFunc();
+	str_ptr name = cobj->getFunc();
 
 	name.return_zv(return_value);	
 }
@@ -193,7 +193,7 @@ ZEND_METHOD(Wcc_Target, getModule)
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	Target* cobj = zval_toc<Target>(ZEND_THIS);
-	zstr_user name = cobj->getModule();
+	str_ptr name = cobj->getModule();
 
 	name.return_zv(return_value);	
 }
@@ -235,7 +235,7 @@ ZEND_METHOD(Wcc_Target, __serialize)
 
 	Target* cobj = zval_toc<Target>(ZEND_THIS);
 
-	htab_mgr ret = cobj->serialize();
+	htab_rc ret = cobj->serialize();
 	ret.move_zv(return_value);
 }
 
@@ -248,7 +248,7 @@ ZEND_METHOD(Wcc_Target, __unserialize)
 	Z_PARAM_ARRAY(data)
 	ZEND_PARSE_PARAMETERS_END();
 
-	htab_read htab(Z_ARR_P(data));
+	htab_rd htab(Z_ARR_P(data));
 
 	Target* cobj = zval_toc<Target>(ZEND_THIS);
 

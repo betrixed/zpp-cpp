@@ -22,49 +22,49 @@ class IConfig : public base_d
 public:
 	static base_obj_mgr<IConfig> omg;
 
-	virtual void debug_info(htab_write di);
+	virtual void debug_info(htab_wr di);
 
-	void assign(htab_read cfg);
-	zval_mgr getValue(zval_user keys, bool required, zval_user ifnot);
-	zval_mgr getValue(zstr_user key, bool required, zval_user ifnot);
+	void assign(htab_rd cfg);
+	val_rc getValue(val_ptr keys, bool required, val_ptr ifnot);
+	val_rc getValue(str_ptr key, bool required, val_ptr ifnot);
 	
-	zstr_user getMyKey();
-	void      setMyKey(zstr_user key);
+	str_ptr getMyKey();
+	void      setMyKey(str_ptr key);
 	
-	zobj_mgr newConnect(zstr_user name);
-	zobj_mgr newSql();
-	//zobj_mgr newDmlBuild(zobj_mgr idriver);
+	obj_rc newConnect(str_ptr name);
+	obj_rc newSql();
+	//obj_rc newDmlBuild(obj_rc idriver);
 	
 	
-	zval_mgr get(zstr_user name);
-	void     set(zstr_user name, zval_user value);
-	void     set(zstr_user name, zstr_user value);
+	val_rc get(str_ptr name);
+	void     set(str_ptr name, val_ptr value);
+	void     set(str_ptr name, str_ptr value);
 	
-	htab_read getArray();
-	zstr_mgr getCharset();
-	zstr_mgr getCollation();
-	zstr_mgr getDriverClass();
-	zstr_mgr getDmlBuildClass();
+	htab_rd getArray();
+	str_rc getCharset();
+	str_rc getCollation();
+	str_rc getDriverClass();
+	str_rc getDmlBuildClass();
 
-	zstr_mgr stringVal(zstr_user key);
+	str_rc stringVal(str_ptr key);
 
-	zstr_mgr getDriverName();
-	zstr_mgr getPassword();
-	zstr_mgr getUsername();
+	str_rc getDriverName();
+	str_rc getPassword();
+	str_rc getUsername();
 	int      getPort();
-	zstr_mgr getHost();
-	zstr_mgr getDatabase();
+	str_rc getHost();
+	str_rc getDatabase();
 
-	zstr_mgr getSqlClass();
+	str_rc getSqlClass();
 
 
 protected:
 
-	void set_data(zstr_user key, zval_user values, bool required, zval_user ifnot);
+	void set_data(str_ptr key, val_ptr values, bool required, val_ptr ifnot);
 	
-	htab_mgr data_;
-	htab_mgr cfg_;
-	zstr_mgr mykey_;
+	htab_rc data_;
+	htab_rc cfg_;
+	str_rc mykey_;
 
 
 };

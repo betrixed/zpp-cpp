@@ -24,7 +24,7 @@ namespace wcd {
 base_obj_mgr<Simple> Simple::omg;
 
 void 
-Simple::construct(zobj_user db, int fetch)
+Simple::construct(obj_ptr db, int fetch)
 {
 	db_ = db;
 	fetch_ =  (fetch >= 0) ? fetch : IDriver::FETCH_ASSOC;
@@ -42,7 +42,7 @@ Simple::destruct()
 }
 
 void 
-Simple::debug_info(htab_write di)
+Simple::debug_info(htab_wr di)
 {	
 	di.set(SQSTR.driver, db_);
 	di.set(SQSTR.sql, sql_);
@@ -52,16 +52,16 @@ Simple::debug_info(htab_write di)
 	di.set(SQSTR.statement, stmt_);
 }
 
-htab_mgr 
-Simple::arrayMap(zstr_user keycol, 
-					zstr_user valcol, zstr_user table)
+htab_rc 
+Simple::arrayMap(str_ptr keycol, 
+					str_ptr valcol, str_ptr table)
 {	
 	IDriver* db = zobj_toc<IDriver>(db_);
 
 	
 	ISql* isql = db->isql_c();
 
-	zstr_buffer buf;
+	str_buf buf;
 
 	buf << "select " << isql->quoteName(keycol)
 	    << ", " << isql->quoteName(valcol)
@@ -70,21 +70,21 @@ Simple::arrayMap(zstr_user keycol,
 	sql_ = buf.zstr();
 	fetch_ = IDriver::FETCH_NUM;
 
-	htab_mgr rows = this->arraySet(sql_);
+	htab_rc rows = this->arraySet(sql_);
 
 	
 
-	zval_mgr result_mgr;
-	htab_write result(result_mgr);
+	val_rc result_mgr;
+	htab_wr result(result_mgr);
 
 	htab_walk wk;
 	auto row = wk.value();
 
 	for(wk.start(rows); wk.ok(); wk.next())
 	{
-		htab_read r(row);
-		zval_user row0(r.get(int(0)));
-		zval_user row1(r.get(int(1)));
+		htab_rd r(row);
+		val_ptr row0(r.get(int(0)));
+		val_ptr row1(r.get(int(1)));
 
 		result.set(row0, row1);
 	}
@@ -92,8 +92,8 @@ Simple::arrayMap(zstr_user keycol,
 
 }
 
-htab_mgr 
-Simple::arraySet(zstr_user sql, htab_read params)
+htab_rc 
+Simple::arraySet(str_ptr sql, htab_rd params)
 {
 	IDriver* db = zobj_toc<IDriver>(db_);
 	sql_ = sql;
@@ -106,17 +106,17 @@ Simple::arraySet(zstr_user sql, htab_read params)
 	return this->send(true);
 }
 
-zstr_mgr 
-Simple::bind(zval_user value)
+str_rc 
+Simple::bind(val_ptr value)
 {
-	htab_write hw(values_);
+	htab_wr hw(values_);
 	hw.push_back(value);
 	IDriver* db = zobj_toc<IDriver>(db_);
 	return db->param(values_.size());
 }
 
-zval_mgr 
-Simple::exec(zstr_user sql, htab_read params)
+val_rc 
+Simple::exec(str_ptr sql, htab_rd params)
 {
 	this->prepare(sql);
 	autoclose_ = true;
@@ -127,11 +127,11 @@ Simple::exec(zstr_user sql, htab_read params)
 	return this->run();
 }
 
-zval_mgr 
-Simple::firstrow(zstr_user sql, htab_read params)
+val_rc 
+Simple::firstrow(str_ptr sql, htab_rd params)
 {
-	htab_mgr aset = this->arraySet(sql, params);
-	zval_mgr result;
+	htab_rc aset = this->arraySet(sql, params);
+	val_rc result;
 
 	if (aset.size())
 	{
@@ -140,28 +140,28 @@ Simple::firstrow(zstr_user sql, htab_read params)
 	return result;
 }
 
-zval_mgr 
+val_rc 
 Simple::getRows()
 {
 	return this->send(true);
 }
 
-zstr_mgr 
+str_rc 
 Simple::getSchemaName()
 {
 	IDriver* db = zobj_toc<IDriver>(db_);
 	return db->getDatabaseName();
 }
 
-zval_mgr 
-Simple::insert(htab_read values)
+val_rc 
+Simple::insert(htab_rd values)
 {
 	setValues(values);
 	return this->send(retval_);
 }
 
 bool 
-Simple::prepare(zstr_user sql)
+Simple::prepare(str_ptr sql)
 {
 	IDriver* db = zobj_toc<IDriver>(db_);
 	if (stmt_.ok())
@@ -178,8 +178,8 @@ Simple::prepare(zstr_user sql)
 	return true;
 }
 
-zstr_mgr 
-Simple::quoteName(zstr_user name)
+str_rc 
+Simple::quoteName(str_ptr name)
 {
 	IDriver* db = zobj_toc<IDriver>(db_);
 	return db->quoteName(name);
@@ -193,16 +193,16 @@ Simple::returnsValues(bool rval)
 	retval_ = rval;
 }
 
-zval_mgr 
+val_rc 
 Simple::run()
 {
 	return this->send(retval_);
 }
 
-zval_mgr
+val_rc
 Simple::send(bool retval)
 {
-	zval_mgr result;
+	val_rc result;
 	int fsave = -1;
 	if (!stmt_.ok())
 	{
@@ -234,13 +234,13 @@ Simple::send(bool retval)
 
 
 void 
-Simple::setValues(htab_read values)
+Simple::setValues(htab_rd values)
 {
 	values_ = values;
 }
 
-zval_mgr 
-Simple::update(htab_read values)
+val_rc 
+Simple::update(htab_rd values)
 {
 	setValues(values);
 	return this->send(retval_);
@@ -249,7 +249,7 @@ Simple::update(htab_read values)
 };
 //simple.cpp
 #ifndef ZARG_EXEC_H
-#include "zpp/zarg_exec.h"
+#include "zpp/zarg_rd.h"
 #endif
 
 using namespace wcd;
@@ -257,9 +257,9 @@ using namespace zpp;
 
 ZEND_METHOD(Wcd_Sql_Simple, __construct)
 {
-	zarg_exec args(execute_data);
+	zarg_rd args(execute_data);
 
-	zobj_user db;
+	obj_ptr db;
 	zend_long fetch = IDriver::FETCH_ASSOC;
 
 	args.obj_ofclass(db, args.need(1),IDriver::omg.class_entry_);
@@ -290,21 +290,21 @@ ZEND_METHOD(Wcd_Sql_Simple, __destruct)
 
 ZEND_METHOD(Wcd_Sql_Simple, arrayMap)
 {
-	zarg_exec args(execute_data);
+	zarg_rd args(execute_data);
 
-	zstr_user keycol;
-	zstr_user valcol;
-	zstr_user table;
+	str_ptr keycol;
+	str_ptr valcol;
+	str_ptr table;
 
 	args.zstring(keycol, args.need(1));
 	args.zstring(valcol, args.need(2));
 	args.zstring(table, args.need(3));
 
-	htab_mgr result;
+	htab_rc result;
 
 	if (args.throw_errors())
 	{
-		result = htab_mgr::empty_array();
+		result = htab_rc::empty_array();
 	}
 	else {
 		Simple* sobj = zval_toc<Simple>(ZEND_THIS);
@@ -315,19 +315,19 @@ ZEND_METHOD(Wcd_Sql_Simple, arrayMap)
 
 ZEND_METHOD(Wcd_Sql_Simple, arraySet)
 {
-	zarg_exec args(execute_data);
+	zarg_rd args(execute_data);
 
-	zstr_user sql;
-	htab_read params;
+	str_ptr sql;
+	htab_rd params;
 
 	args.zstring(sql, args.need(1));
 	args.zarray_null(params, args.option(2));
 
-	htab_mgr result;
+	htab_rc result;
 
 	if (args.throw_errors())
 	{
-		result = htab_mgr::empty_array();
+		result = htab_rc::empty_array();
 	}
 	else {
 		Simple* sobj = zval_toc<Simple>(ZEND_THIS);
@@ -338,10 +338,10 @@ ZEND_METHOD(Wcd_Sql_Simple, arraySet)
 
 ZEND_METHOD(Wcd_Sql_Simple, bind)
 {
-	zarg_exec args(execute_data);
+	zarg_rd args(execute_data);
 
 	zval* arg = args.need(1);
-	zstr_mgr result;
+	str_rc result;
 	if (!args.throw_errors())
 	{
 		Simple* sobj = zval_toc<Simple>(ZEND_THIS);
@@ -353,15 +353,15 @@ ZEND_METHOD(Wcd_Sql_Simple, bind)
 
 ZEND_METHOD(Wcd_Sql_Simple, exec)
 {
-	zarg_exec args(execute_data);
+	zarg_rd args(execute_data);
 
-	zstr_user sql;
-	htab_read params;
+	str_ptr sql;
+	htab_rd params;
 
 	args.zstring(sql, args.need(1));
 	args.zarray(params, args.option(2));
 
-	zval_mgr result;
+	val_rc result;
 
 	if(!args.throw_errors())
 	{
@@ -374,15 +374,15 @@ ZEND_METHOD(Wcd_Sql_Simple, exec)
 
 ZEND_METHOD(Wcd_Sql_Simple, firstRow)
 {
-	zarg_exec args(execute_data);
+	zarg_rd args(execute_data);
 
-	zstr_user sql;
-	htab_read params;
+	str_ptr sql;
+	htab_rd params;
 
 	args.zstring(sql, args.need(1));
 	args.zarray(params, args.option(2));
 
-	zval_mgr result;
+	val_rc result;
 
 	if(!args.throw_errors())
 	{
@@ -399,7 +399,7 @@ ZEND_METHOD(Wcd_Sql_Simple, getRows)
 
 	Simple* sobj = zval_toc<Simple>(ZEND_THIS);
 
-	htab_mgr result = sobj->getRows();
+	htab_rc result = sobj->getRows();
 
 	result.move_zv(return_value);
 }
@@ -410,20 +410,20 @@ ZEND_METHOD(Wcd_Sql_Simple, getSchemaName)
 
 	Simple* sobj = zval_toc<Simple>(ZEND_THIS);
 
-	zstr_mgr result = sobj->getSchemaName();
+	str_rc result = sobj->getSchemaName();
 
 	result.move_zv(return_value);
 }
 
 ZEND_METHOD(Wcd_Sql_Simple, insert)
 {
-	zarg_exec args(execute_data);
+	zarg_rd args(execute_data);
 
-	htab_read values;
+	htab_rd values;
 
 	args.zarray(values, args.need(1));
 
-	zval_mgr result;
+	val_rc result;
 
 	if(!args.throw_errors())
 	{
@@ -437,13 +437,13 @@ ZEND_METHOD(Wcd_Sql_Simple, insert)
 
 ZEND_METHOD(Wcd_Sql_Simple, prepare)
 {
-	zarg_exec args(execute_data);
+	zarg_rd args(execute_data);
 
-	htab_read values;
+	htab_rd values;
 
 	args.zarray(values, args.need(1));
 
-	zval_mgr result;
+	val_rc result;
 
 	if(!args.throw_errors())
 	{
@@ -456,13 +456,13 @@ ZEND_METHOD(Wcd_Sql_Simple, prepare)
 
 ZEND_METHOD(Wcd_Sql_Simple, quoteName)
 {
-	zarg_exec args(execute_data);
+	zarg_rd args(execute_data);
 
-	zstr_user name;
+	str_ptr name;
 
 	args.zstring(name, args.need(1));
 
-	zstr_mgr result;
+	str_rc result;
 
 	if(!args.throw_errors())
 	{
@@ -475,7 +475,7 @@ ZEND_METHOD(Wcd_Sql_Simple, quoteName)
 
 ZEND_METHOD(Wcd_Sql_Simple, returnsValues)
 {
-	zarg_exec args(execute_data);
+	zarg_rd args(execute_data);
 
 	bool  bval;
 
@@ -493,14 +493,14 @@ ZEND_METHOD(Wcd_Sql_Simple, run)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 	Simple* sobj = zval_toc<Simple>(ZEND_THIS);
-	zval_mgr result = sobj->run();
+	val_rc result = sobj->run();
 	result.move_zv(return_value);
 }
 
 ZEND_METHOD(Wcd_Sql_Simple, setValues)
 {
-	zarg_exec args(execute_data);
-	htab_read values;
+	zarg_rd args(execute_data);
+	htab_rd values;
 
 	args.zarray(values, args.need(1));
 
@@ -514,12 +514,12 @@ ZEND_METHOD(Wcd_Sql_Simple, setValues)
 
 ZEND_METHOD(Wcd_Sql_Simple, update)
 {
-	zarg_exec args(execute_data);
-	htab_read values;
+	zarg_rd args(execute_data);
+	htab_rd values;
 
 	args.zarray(values, args.need(1));
 	
-	zval_mgr result;
+	val_rc result;
 
 	if(!args.throw_errors())
 	{
