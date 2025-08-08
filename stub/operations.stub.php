@@ -116,11 +116,11 @@ class Delete extends Operation {
 
 class Insert extends Operation {
 	public function getSqlParams() : ParamList {}
-}
+};
 
 class Update extends Operation {
 	
-	public function set(string $column, $value): void
+	public function set(string $column, mixed $value): void {}
 
 	public function getSqlParams() : ParamList {}
-}
+};

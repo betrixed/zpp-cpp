@@ -311,7 +311,7 @@ namespace wcd {
 		zval* get(int key);
 
 		const obj_rc& isql() {
-			return sql_;
+			return isql_;
 		}
 
 		bool aliasSelect();
