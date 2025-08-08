@@ -39,7 +39,7 @@ using namespace zpp;
 			#endif
 		}
 
-		virtual void debug_info(htab_wr ht);
+		virtual void debug_info(htab_rw ht);
 
 		 //! name of extended base class, if any
 		virtual zend_string* extender();
@@ -306,7 +306,7 @@ using namespace zpp;
 			/* to be deleted by zend */
 			*is_temp = 1; 
 			HashTable* ret = zend_new_array(6);
-			cobj->debug_info(htab_wr(ret));
+			cobj->debug_info(htab_rw(ret));
 
 			return ret;
 		}

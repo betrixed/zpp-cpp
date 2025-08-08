@@ -1,15 +1,15 @@
-#ifndef ZSTR_BUFFER_CPP
-#define ZSTR_BUFFER_CPP
+#ifndef STR_BUF_CPP
+#define STR_BUF_CPP
 
-#ifndef ZSTR_BUFFER_H
+#ifndef STR_BUF_H
 #include "str_buf.h"
 #endif
 
-#ifndef ZSTR_USER_H
+#ifndef STR_PTR_H
 #include "str_ptr.h"
 #endif
 
-#ifndef ZVAL_USER_H
+#ifndef VAL_PTR_H
 #include "val_ptr.h"
 #endif
 

@@ -21,7 +21,7 @@ namespace wcc {
 
 using namespace zpp;
 
-void FileUpload::debug_info(htab_wr di)
+void FileUpload::debug_info(htab_rw di)
 {
 	di.set(RQit.error_key, error_);
 	di.set(RQit.namekey, name_);

@@ -17,7 +17,7 @@ public:
 	
 	static base_obj_mgr<Finder> omg;
 
-	virtual void debug_info(htab_wr hw);
+	virtual void debug_info(htab_rw hw);
 
 	virtual ~Finder();
 	

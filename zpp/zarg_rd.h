@@ -1,11 +1,11 @@
-#ifndef ZARG_EXEC_H
-#define ZARG_EXEC_H
+#ifndef ZARG_RD_H
+#define ZARG_RD_H
 
-#ifndef ZOBJ_USER_H
+#ifndef OBJ_PTR_H
 #include "obj_ptr.h"
 #endif
 
-#ifndef ZSTR_BUFFER_H
+#ifndef STR_BUF_H
 #include "str_buf.h"
 #endif
 

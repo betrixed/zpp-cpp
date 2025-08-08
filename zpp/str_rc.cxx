@@ -4,14 +4,14 @@
   *  @copyright 2024-2025 Michael Rynn
   */
 
-#ifndef ZSTR_MGR_CPP
-#define ZSTR_MGR_CPP
+#ifndef STR_RC_CPP
+#define STR_RC_CPP
 
-#ifndef ZSTR_MGR_H
+#ifndef STR_RC_H
 #include "str_rc.h"
 #endif
 
-#ifndef ZSTR_BUFFER_H
+#ifndef STR_BUF_H
 #include "str_buf.h"
 #endif
 

@@ -216,7 +216,7 @@ Hmap_php::write_property(zend_object* object, zend_string* name, zval* value, vo
 	//{
 		Hmap* cobj = zobj_toc<Hmap>(object);
 		
-		htab_wr hw(cobj->data_);
+		htab_rw hw(cobj->data_);
 
 		zval* result = zend_hash_update(hw, name, value);
 		if (Z_TYPE_FLAGS_P(result) != 0)
@@ -256,7 +256,7 @@ Hmap_php::unset_property(zend_object* object, zend_string* name, void **cache_sl
 	}
 	*/
 	Hmap* cobj = zobj_toc<Hmap>(object);
-	htab_wr hw(cobj->data_);
+	htab_rw hw(cobj->data_);
 	zend_hash_del(hw, name);
 }
 
@@ -290,7 +290,7 @@ Hmap_php::get_properties_for(zend_object* object, zend_prop_purpose purpose)
 	case ZEND_PROP_PURPOSE_DEBUG:
 		{
 			htab_rc temp_mgr;
-			htab_wr  di(temp_mgr);
+			htab_rw  di(temp_mgr);
 
 			
 
@@ -359,7 +359,7 @@ void
 Hmap_php::write_dimension(zend_object* obj, zval* offset, zval* set_value)
 {
 	Hmap* cobj = zobj_toc<Hmap>(obj);
-	htab_wr hw(cobj->data_);
+	htab_rw hw(cobj->data_);
 	hw.set(offset, set_value);
 }
 
@@ -390,7 +390,7 @@ void
 Hmap_php::unset_dimension(zend_object* object, zval* unset)
 {
 	Hmap* cobj = zobj_toc<Hmap>(object);
-	htab_wr hw(cobj->data_);
+	htab_rw hw(cobj->data_);
 	hw.unset(unset);
 }
 
@@ -467,7 +467,7 @@ val_rc Hmap::get(val_ptr key)
 void  
 Hmap::unset(str_ptr name)
 {
-	htab_wr hw(data_);
+	htab_rw hw(data_);
 	if (hw.ok())
 	{
 		hw.unset(name);
@@ -477,12 +477,12 @@ Hmap::unset(str_ptr name)
 void   
 Hmap::set(str_ptr name, val_ptr value)
 {
-	htab_wr hw(data_);
+	htab_rw hw(data_);
 	hw.set(name, value);
 }
 
 
-void Hmap::debug_info(htab_wr hw)
+void Hmap::debug_info(htab_rw hw)
 {
 	// allow derived classes to override
 	base_d::debug_info(hw);
@@ -493,7 +493,7 @@ htab_rc
 Hmap::subsetkey(str_ptr key)
 {
 	htab_rc result;
-	htab_wr hw(result);
+	htab_rw hw(result);
 	val_rc value = get(key);
 	hw.set(key, value);
 	return result;
@@ -504,7 +504,7 @@ htab_rc
 Hmap::subset(htab_rd data)
 {
 	htab_rc result;
-	htab_wr hw(result);
+	htab_rw hw(result);
 
 	htab_walk wk;
 
@@ -521,7 +521,7 @@ void
 Hmap::addArray(htab_rd data)
 {
 	for_key_value fkv;
-	htab_wr hw(data_);
+	htab_rw hw(data_);
 
 	for(fkv.start(data); fkv.ok(); fkv.next())
 	{

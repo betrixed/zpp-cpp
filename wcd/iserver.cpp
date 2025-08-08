@@ -101,7 +101,7 @@ public:
 ISVinit ISV;
 
 void 
-IServer::debug_info(htab_wr di)
+IServer::debug_info(htab_rw di)
 {
 	di.set(ISV.svckey_str, svc_key_);
 
@@ -128,14 +128,14 @@ IServer::construct(str_ptr svckey)
 {
 	svc_key_ = svckey;
 
-	htab_wr sw(sqlClasses_);
+	htab_rw sw(sqlClasses_);
 
 	sw.set(ISV.pdo_mysql, ISV.wcd_sql_mysql);
 	sw.set(ISV.pdo_pgsql, ISV.wcd_sql_postgres);
 	sw.set(ISV.pdo_sqlite, ISV.wcd_sql_sqlite);
 	sw.set(ISV.pdo_firebird, ISV.wcd_sql_firebird);
 
-	htab_wr dw(driverClasses_);
+	htab_rw dw(driverClasses_);
 
 	dw.set(ISV.pdo_mysql, ISV.wcd_ext_mysql);
 	dw.set(ISV.pdo_pgsql, ISV.wcd_ext_postgres);
@@ -176,7 +176,7 @@ IServer::activate(str_ptr name)
 	result = cfg->newConnect(name);
 	if (result.ok())
 	{
-		htab_wr hw(active_);
+		htab_rw hw(active_);
 		hw.set(name, result);
 	}
 	else {
@@ -320,13 +320,13 @@ IServer::config(htab_rd data)
 
 	if (clist.isArray())
 	{
-		htab_wr(sqlClasses_).merge(clist.zarray());
+		htab_rw(sqlClasses_).merge(clist.zarray());
 	}
 
 	clist = data.get(ISV.drivers_key);
 	if (clist.isArray())
 	{
-		htab_wr(driverClasses_).merge(clist.zarray());
+		htab_rw(driverClasses_).merge(clist.zarray());
 	}
 	clist = data.get(ISV.db_config);
 	if (clist.isArray())
@@ -361,13 +361,13 @@ IServer::addConfig(obj_rc iconfig, str_ptr name)
 	}
 
 	cfg->setMyKey(name);
-	htab_wr(config_).set(name, iconfig);
+	htab_rw(config_).set(name, iconfig);
 }
 
 void 
 IServer::setAlias(str_ptr alias, str_ptr name)
 {
-	htab_wr(alias_).set(alias, name);
+	htab_rw(alias_).set(alias, name);
 }
 
 htab_rd 

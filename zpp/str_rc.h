@@ -4,10 +4,10 @@
   *  @copyright 2024-2025 Michael Rynn
   */
 
-#ifndef ZSTR_MGR_H
-#define ZSTR_MGR_H
+#ifndef STR_RC_H
+#define STR_RC_H
 
-#ifndef ZSTR_USER_H
+#ifndef STR_PTR_H
 #include "str_ptr.h"
 #endif
 

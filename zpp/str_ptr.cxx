@@ -4,8 +4,8 @@
   *  @copyright 2024-2025 Michael Rynn
   */
 
-#ifndef ZSTR_USER_CPP
-#define ZSTR_USER_CPP
+#ifndef STR_PTR_CPP
+#define STR_PTR_CPP
 
 #ifndef FN_CALL_H
 #include "fn_call.h"

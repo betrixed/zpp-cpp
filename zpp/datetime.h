@@ -9,7 +9,7 @@
 #include "state_init.h"
 #endif
 
-#ifndef ZSTR_MGR_H
+#ifndef STR_RC_H
 #include "str_rc.h"
 #endif
 

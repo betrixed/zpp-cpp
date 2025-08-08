@@ -4,8 +4,8 @@
   *  @copyright 2024-2025 Michael Rynn
   */
 
-#ifndef ZVAL_USER_H
-#define ZVAL_USER_H
+#ifndef VAL_PTR_H
+#define VAL_PTR_H
 
 
 /** It turns out that PHP and its zend types
@@ -21,7 +21,7 @@
 #include "php_extern.h"
 #endif
 
-#ifndef ZSTR_USER_H
+#ifndef STR_PTR_H
 #include "str_ptr.h"
 #endif
 
@@ -37,7 +37,7 @@ protected:
 
     friend class val_rc;
     friend class htab_rd;
-    friend class htab_wr;
+    friend class htab_rw;
 
     void bind_string(zend_string* s);
 

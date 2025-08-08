@@ -1,7 +1,7 @@
 #ifndef SHOW_ZPP_H
 #define SHOW_ZPP_H
 
-#ifndef ZSTR_BUFFER_H
+#ifndef STR_BUF_H
 #include "str_buf.h"
 #endif
 

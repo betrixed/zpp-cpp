@@ -49,7 +49,7 @@ public:
 PEng_init PEI;
 
 void
-PlateEngine::debug_info(htab_wr d)
+PlateEngine::debug_info(htab_rw d)
 {
 
 	d.set(PEI.search_list, search_);
@@ -86,14 +86,14 @@ bool PlateEngine::getLabel()
 
 void PlateEngine::store(str_ptr name, obj_ptr plate)
 {
-	htab_wr(stored_).set(name, plate);
+	htab_rw(stored_).set(name, plate);
 }
 
 void PlateEngine::clearPlates()
 {
 	//showobj("clearPlates1", this->zobj());
 	//* break circular references to self
-	htab_wr map(stored_);
+	htab_rw map(stored_);
 
 	if (map.size()) {
 		htab_walk wk;
@@ -110,7 +110,7 @@ void PlateEngine::clearPlates()
 
 void PlateEngine::shareWithAll(htab_rd data)
 {
-	htab_wr(shared_data_).merge(data);
+	htab_rw(shared_data_).merge(data);
 	//showobj("shareWithAll", this->zobj());
 }
 
@@ -158,7 +158,7 @@ PlateEngine::getData(str_ptr name)
 {
 	htab_rc result;
 	
-	htab_wr hw(result);
+	htab_rw hw(result);
 
 	hw.merge(shared_data_);
 
@@ -184,7 +184,7 @@ PlateEngine::getExtensions()
 void
 PlateEngine::registerFunction(str_ptr name, val_ptr callback)
 {
-	htab_wr(functions_).set(name, callback);
+	htab_rw(functions_).set(name, callback);
 }
 
 void
@@ -262,7 +262,7 @@ PlateEngine::newPlate(str_ptr name, bool store)
 
 	if (store)
 	{
-		htab_wr hw(stored_);
+		htab_rw hw(stored_);
 		hw.set(name, plate);
 	}
 	return result;
@@ -287,7 +287,7 @@ PlateEngine::getPlate(str_ptr name)
 
 void PlateEngine::storePlate(obj_ptr plate)
 {
-	htab_wr hw(stored_);
+	htab_rw hw(stored_);
 	if (plate.ok())
 	{
 		Plate* p = zobj_toc<Plate>(plate);
@@ -298,14 +298,14 @@ void PlateEngine::storePlate(obj_ptr plate)
 void 
 PlateEngine::mergePlateData(htab_rd data, str_ptr tname)
 {
-	htab_wr hw(plates_data_);
-	htab_wr pdata = hw.get(tname);
+	htab_rw hw(plates_data_);
+	htab_rw pdata = hw.get(tname);
 	if (pdata.isNull())
 	{
 		hw.set(tname, data);
 	}
 	else {
-		htab_wr ta(pdata);
+		htab_rw ta(pdata);
 		ta.merge(data);
 	}
 }
@@ -316,7 +316,7 @@ PlateEngine::shareData(htab_rd data, val_ptr where)
 {
 	if (where.isNull())
 	{
-		htab_wr(shared_data_).merge(data);
+		htab_rw(shared_data_).merge(data);
 		return;
 	}
 
@@ -324,7 +324,7 @@ PlateEngine::shareData(htab_rd data, val_ptr where)
 
 	if (where.isString())
 	{
-		htab_wr temp(tarray);
+		htab_rw temp(tarray);
 		temp.push_back(where);
 	}
 	else if (where.isArray())

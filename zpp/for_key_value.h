@@ -6,7 +6,7 @@
 #include "php_extern.h"
 #endif
 
-#ifndef HTAB_MGR_H
+#ifndef HTAB_RC_H
 #include "htab_rc.h"
 #endif
 

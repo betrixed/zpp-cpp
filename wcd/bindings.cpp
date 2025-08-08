@@ -24,11 +24,11 @@ extern "C" {
 
 namespace wcd {
 
-void Bindings::debug_info(htab_wr di)
+void Bindings::debug_info(htab_rw di)
 {
 	di.set(SQSTR.data_key, data_);
 	di.set(SQSTR.param_list, paramList_);
-	di.set(SQSTR.isql, sql_);
+	di.set(SQSTR.isql, isql_);
 	di.set(SQSTR.connect, db_);
 }
 
@@ -106,7 +106,7 @@ Bindings::primeJoin(val_ptr tcol)
 void 
 Bindings::construct(obj_ptr sql, obj_ptr connect)
 {
-	sql_ = sql;
+	isql_ = sql;
 	db_ = connect;
 }
 
@@ -128,7 +128,7 @@ Bindings::getJoins()
 
 	obj_rc result = JoinTables::omg.new_zobj();
 	
-	htab_wr(data_).set((zend_long) ISql::SQL_FROM, result);
+	htab_rw(data_).set((zend_long) ISql::SQL_FROM, result);
 	return result;
 }
 
@@ -172,11 +172,11 @@ Bindings::addToArray(int key, val_ptr value)
 	if (listown.isNull())
 	{
 		htab_rc   list_mgr;
-		htab_wr list(list_mgr);
+		htab_rw list(list_mgr);
 
 		list.push_back(value);
 
-		htab_wr mylist(data_);
+		htab_rw mylist(data_);
 		//showarray("new Array", list_mgr);
 
 		mylist.set((zend_long)key, list_mgr);
@@ -184,7 +184,7 @@ Bindings::addToArray(int key, val_ptr value)
 		
 	}
 	else { //? assert isArray() ?
-		htab_wr vlist(listown);
+		htab_rw vlist(listown);
 		vlist.push_back(value);
 		//showmem("addToArray", listown);
 	}
@@ -289,7 +289,7 @@ Bindings::aliasSelect()
 	{
 		htab_rc   cols_mgr;
 
-		htab_wr all_cols(cols_mgr);
+		htab_rw all_cols(cols_mgr);
 
 		htab_rd all = jt->getTables();
 		htab_walk wk;
@@ -329,7 +329,7 @@ Bindings::columnAlias(obj_ptr tcolobj)
 	str_rc sfx = buf.zstr();
 
 	htab_rc aliased_mgr;
-	htab_wr aliased(aliased_mgr);
+	htab_rw aliased(aliased_mgr);
 
 	if (tcol->has(SQSTR.asterisk))
 	{
@@ -374,7 +374,7 @@ void
 Bindings::offset(int value)
 {
 	val_ptr ldata = data_.get(ISql::SQL_LIMIT);
-	htab_wr hw(ldata);
+	htab_rw hw(ldata);
 
 	hw.set(SQSTR.offset, value);
 
@@ -383,7 +383,7 @@ Bindings::offset(int value)
 
 void Bindings::set(int key, val_ptr value)
 {
-	htab_wr hw(data_);
+	htab_rw hw(data_);
 
 	hw.set(key, value);
 
@@ -392,7 +392,7 @@ void Bindings::set(int key, val_ptr value)
 
 void Bindings::set(int key, int value)
 {
-	htab_wr hw(data_);
+	htab_rw hw(data_);
 	val_rc wrap(value);
 	hw.set((zend_long)key, wrap);
 	//showarray("data_int", data_);
@@ -400,14 +400,14 @@ void Bindings::set(int key, int value)
 
 void Bindings::set(int key, const val_rc& value)
 {
-	htab_wr hw(data_);
+	htab_rw hw(data_);
 	hw.set((zend_long)key, value);
 	//showarray("data_zval_mgr&", data_);
 }
 
 void Bindings::set(int key, htab_rd value)
 {
-	htab_wr hw(data_);
+	htab_rw hw(data_);
 	hw.set((zend_long)key, value);
 	//showarray("data_htab_read", data_);
 	//showdata("setdata", data_);
@@ -416,12 +416,12 @@ void Bindings::set(int key, htab_rd value)
 
 void Bindings::unset(int key)
 {
-	htab_wr(data_).unset(key);
+	htab_rw(data_).unset(key);
 }
 
 void Bindings::wipe(int key)
 {
-	htab_wr hw(data_);
+	htab_rw hw(data_);
 
 	if (key == 0)
 	{
@@ -448,7 +448,7 @@ void
 Bindings::where(val_ptr column, str_ptr opstr, val_ptr value, str_ptr blogic)
 {
 	val_rc args;
-	htab_wr wh(args);
+	htab_rw wh(args);
 
 	wh.set(SQSTR.column, column);
 
@@ -546,7 +546,7 @@ Bindings::select()
 		aliasSelect();
 	}
 
-	ISql* sql = zobj_toc<ISql>(sql_);
+	ISql* sql = zobj_toc<ISql>(isql_);
 
 	obj_rc plist = sql->select(*this);
 
@@ -625,7 +625,7 @@ Bindings::select()
 	if (rename.isArray())
 	{
 		htab_rc objset_mgr;
-		htab_wr objset(objset_mgr);
+		htab_rw objset(objset_mgr);
 
 		JoinTables* fromjt = getJoinTables();
 
@@ -640,7 +640,7 @@ Bindings::select()
 		str_rc mb_id = alias_str_key(table_name);
 
 		htab_rc alias_list_mgr;
-		htab_wr alias_list(alias_list_mgr);
+		htab_rw alias_list(alias_list_mgr);
 
 		htab_walk w1;
 
@@ -664,7 +664,7 @@ Bindings::select()
 			htab_walk w2;
 			auto ai_value = w2.value();
 			// TODO: check recset ??
-			htab_wr rec(recset);
+			htab_rw rec(recset);
 
 			for(w2.start(alias_list); w2.ok(); w2.next())
 			{
@@ -684,7 +684,7 @@ Bindings::orderBy(val_ptr colspec, bool descend)
 {
 	val_rc args;
 
-	htab_wr hw(args);
+	htab_rw hw(args);
 
 	if (colspec.isString())
 	{
@@ -707,7 +707,7 @@ void
 Bindings::update(str_ptr column, val_ptr value)
 {
 	htab_rc data_mgr;
-	htab_wr data(data_mgr);
+	htab_rw data(data_mgr);
 
 	data.set(SQSTR.column, column);
 	data.set(SQSTR.valuekey, value);
@@ -727,7 +727,7 @@ Bindings::limit(val_ptr limit, val_ptr offset)
 {
 	htab_rc data;
 
-	htab_wr hw(data);
+	htab_rw hw(data);
 
 	hw.set(SQSTR.limit, limit);
 	if (offset.ok())

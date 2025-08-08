@@ -7,11 +7,11 @@
 
 
 
-#ifndef ZSTR_BUFFER_H
+#ifndef STR_BUF_H
 #include "str_buf.h"
 #endif
 
-#ifndef HTAB_MGR_H
+#ifndef HTAB_RC_H
 #include "htab_rc.h"
 #endif
 
@@ -54,7 +54,7 @@ val_rc
 union_values(htab_rd list1, htab_rd list2)
 {
 	htab_rc   keyset;
-	htab_wr ks(keyset);
+	htab_rw ks(keyset);
 
 	val_rc one(1);
 
@@ -74,7 +74,7 @@ union_values(htab_rd list1, htab_rd list2)
 	// convert to list
 	val_rc result;
 	result.new_array();
-	htab_wr wlist(result);
+	htab_rw wlist(result);
 
 	for(wk.start(keyset); wk.ok(); wk.next())
 	{
@@ -101,7 +101,7 @@ preg::capture(size_t ix)
 
 	if (test.isArray())
 	{
-		htab_wr captures(test);
+		htab_rw captures(test);
 
 		if (ix < captures.size()) 
 		{

@@ -53,7 +53,7 @@ using namespace zpp;
 
 //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
-void ParamList::debug_info(htab_wr di)
+void ParamList::debug_info(htab_rw di)
 {
 	if (!params_.isNull())
 		di.set(SQSTR.params, params_);
@@ -82,7 +82,7 @@ ParamList::paramStr(int ct)
 str_rc 
 ParamList::addParam(val_ptr value)
 {
-	htab_wr hw(params_);
+	htab_rw hw(params_);
 	hw.push_back(value);
 
 	return paramStr((int) params_.size());
@@ -137,7 +137,7 @@ ParamList::addParamList(htab_rd values)
 
 	int bufct = 0;
 
-	htab_wr pw(params_);
+	htab_rw pw(params_);
 
 	for(wk.start(values); wk.ok(); wk.next(), bufct++)
 	{
@@ -226,7 +226,7 @@ JoinInfo::add(val_ptr lexp, val_ptr rexp, int jtype, int logic)
 void 
 JoinInfo::addExpr(obj_ptr jexpr)
 {
-	htab_wr(joinExpr_).push_back(jexpr);
+	htab_rw(joinExpr_).push_back(jexpr);
 }
 
 str_ptr// static
@@ -271,7 +271,7 @@ JoinInfo::getJoinType(str_ptr s)
 
 
 void
-JoinTables::debug_info(htab_wr di)
+JoinTables::debug_info(htab_rw di)
 {
 	di.set(SQSTR.by_alias, byAlias_);
 	di.set(SQSTR.results, results_);
@@ -294,7 +294,7 @@ JoinTables::addJoin(obj_ptr jiobj)
 {
 	obj_rc result(jiobj);
 
-	htab_wr(joins_).push_back(jiobj);
+	htab_rw(joins_).push_back(jiobj);
 
 	JoinInfo* ji = zobj_toc<JoinInfo>(jiobj);
 
@@ -317,13 +317,13 @@ JoinTables::addTable(obj_ptr icol)
 		zend_throw_error(zend_ce_error, "addTable with no Alias or Name");
 		return;
 	}
-	htab_wr(byAlias_).set(name, icol);
+	htab_rw(byAlias_).set(name, icol);
 }
 
 void 
 JoinTables::addResult(obj_ptr ta)
 {
-	htab_wr(results_).push_back(ta);
+	htab_rw(results_).push_back(ta);
 }
 
 void 
@@ -335,7 +335,7 @@ JoinTables::addWhere(val_ptr leftAttr, val_ptr rightAttr, int op, int logic)
 
 	je->construct(leftAttr, rightAttr, op, logic);
 
-	htab_wr(where_).push_back(jobj);
+	htab_rw(where_).push_back(jobj);
 }
 
 obj_rc
@@ -397,22 +397,22 @@ JoinTables::order(str_ptr name, bool ascend)
 	val_rc bval;
 
 	bval.set_bool(ascend);
-	htab_wr hw(pair);
+	htab_rw hw(pair);
 
 	hw.set(SQSTR.column, name);
 	hw.set(SQSTR.ascend, bval);
 
-	htab_wr(orderby_).push_back(pair);
+	htab_rw(orderby_).push_back(pair);
 }
 
 obj_rc //static
 JoinTables::rowSplit(htab_rd row, htab_rd rename)
 {
 	htab_rc rec_temp;
-	htab_wr rec(rec_temp);
+	htab_rw rec(rec_temp);
 
 	htab_rc ok_temp;
-	htab_wr ok(ok_temp);
+	htab_rw ok(ok_temp);
 
 	obj_rc obj = class_data::std_object();
 
@@ -432,7 +432,7 @@ JoinTables::rowSplit(htab_rd row, htab_rd rename)
 				htab_rc tails;
 
 
-				htab_wr(tails).set(orig.zstr(), val);
+				htab_rw(tails).set(orig.zstr(), val);
 				rec.set(tail, tails);
 			}
 			else {
@@ -516,7 +516,7 @@ ISql::columns(htab_rd bd)
 
 
 void  
-ISql::columnsTC(IColumns* tc, htab_wr col_list)
+ISql::columnsTC(IColumns* tc, htab_rw col_list)
 {
 	str_rc cfrag;
 
@@ -871,9 +871,9 @@ IColumns* getIColumns(val_ptr zv)
 	return nullptr;
 }
 
-void extract_params(htab_rd rowbind, htab_rd plist, htab_wr params);
+void extract_params(htab_rd rowbind, htab_rd plist, htab_rw params);
 
-void extract_params(htab_rd rowbind, htab_rd plist, htab_wr params)
+void extract_params(htab_rd rowbind, htab_rd plist, htab_rw params)
 {
 	//showarray("after create", ret_params);
 
@@ -983,7 +983,7 @@ ISql::insert(Bindings& bind)
 	htab_rd params = plist->getParams();
 
 	htab_rc   ret_params_mgr;
-	htab_wr ret_params(ret_params_mgr);
+	htab_rw ret_params(ret_params_mgr);
 
 	if (params.size())
 	{
@@ -993,7 +993,7 @@ ISql::insert(Bindings& bind)
 		if (sql_insert.size() > 1)
 		{
 			htab_rc   multirow_mgr;
-			htab_wr multirow(multirow_mgr);
+			htab_rw multirow(multirow_mgr);
 			
 
 			multirow.push_back(ret_params);
@@ -1002,7 +1002,7 @@ ISql::insert(Bindings& bind)
 				rowbind  = insert_wk.value().zarray();
 
 				htab_rc   pset_mgr;
-				htab_wr pset(pset_mgr);
+				htab_rw pset(pset_mgr);
 
 				extract_params(rowbind, params, pset);
 				multirow.push_back(pset);
@@ -1155,7 +1155,7 @@ ISql::select_jt(Bindings& bind, JoinTables* jt)
 			buf << " DISTINCT ";
 		}
 		htab_rc col_list_mgr;
-		htab_wr col_list(col_list_mgr);
+		htab_rw col_list(col_list_mgr);
 
 		htab_rd tables = jt->getTables();
 		htab_walk wk;
@@ -1563,7 +1563,7 @@ ISql::where(Bindings &bind, htab_rd wtab)
 			if (value.isArray()) {
 				htab_rd vlist(value);
 
-				htab_wr plist(params->getParams());
+				htab_rw plist(params->getParams());
 
 				plist.merge(vlist);
 				params->setParams(plist);

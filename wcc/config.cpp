@@ -62,7 +62,7 @@ Config::make(htab_rd initdata)
 }
 
 void 
-Config::debug_info(htab_wr hw)
+Config::debug_info(htab_rw hw)
 {
 	base_d::debug_info(hw);
 }
@@ -200,7 +200,7 @@ Config::subsetkey(str_ptr key)
 {
 
 	htab_rc result;
-	htab_wr hw(result);
+	htab_rw hw(result);
 	val_rc value = get(key);
 	hw.set(key, value);
 
@@ -212,7 +212,7 @@ Config::subset(htab_rd data)
 {
 	for_key_value wk;
 	htab_rc result;
-	htab_wr hw(result);
+	htab_rw hw(result);
 	val_ptr vkey;
 
 	for(wk.start(data); wk.ok(); wk.next())

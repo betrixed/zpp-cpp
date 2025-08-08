@@ -12,7 +12,7 @@
 #endif
 
 
-#ifndef ZSTR_OUTPUT_H
+#ifndef STR_OUT_H
 #include "str_out.h"
 #endif
 

@@ -42,7 +42,7 @@ namespace wcd {
 
 		static base_obj_mgr<IServer> omg;
 
-		virtual void debug_info(htab_wr di);
+		virtual void debug_info(htab_rw di);
 		
 		void construct(str_ptr svckey);
 

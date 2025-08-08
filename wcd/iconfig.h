@@ -22,7 +22,7 @@ class IConfig : public base_d
 public:
 	static base_obj_mgr<IConfig> omg;
 
-	virtual void debug_info(htab_wr di);
+	virtual void debug_info(htab_rw di);
 
 	void assign(htab_rd cfg);
 	val_rc getValue(val_ptr keys, bool required, val_ptr ifnot);

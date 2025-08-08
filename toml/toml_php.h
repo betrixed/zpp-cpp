@@ -22,13 +22,13 @@ protected:
 	htab_rc		 root_;	// returned HashTable*
 
 	struct stack_htab {
-		htab_wr 	  table_;
+		htab_rw 	  table_;
 		stack_htab*   parent_;
 		stack_htab**  top_;
 
 		//stack_htab() : table_((HashTable*)nullptr), parent_(nullptr) {}
 
-		stack_htab(htab_wr stab, stack_htab* p, stack_htab** top)
+		stack_htab(htab_rw stab, stack_htab* p, stack_htab** top)
 			: table_(stab), parent_(p), top_(top) 
 		{
 			*top_ = this;

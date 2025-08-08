@@ -64,7 +64,7 @@ void HtmlPlates::construct(str_ptr model_id)
 	}
 }
 
-void HtmlPlates::debug_info(htab_wr di)
+void HtmlPlates::debug_info(htab_rw di)
 {
 	di.set(HPit.values_key, values_);
 	di.set(HPit.level_key, levels_);
@@ -76,7 +76,7 @@ void HtmlPlates::debug_info(htab_wr di)
 void HtmlPlates::initValues()
 {
 	val_rc mtemp(getModel());
-	htab_wr hw(values_);
+	htab_rw hw(values_);
 
 	hw.set(HPit.model_var, mtemp);
 	hw.set(HPit.view_key, this->vobj());
@@ -87,7 +87,7 @@ void HtmlPlates::initValues()
  */
 void HtmlPlates::pushLevel(str_ptr name)
 {
-	htab_wr(levels_).push_back(name);
+	htab_rw(levels_).push_back(name);
 }
 
 obj_rc 
@@ -108,16 +108,16 @@ HtmlPlates::getModel()
 void HtmlPlates::setModel(obj_ptr model)
 {
 	model_ = model;
-	htab_wr(values_).set(HPit.model_var, model);
+	htab_rw(values_).set(HPit.model_var, model);
 }
 
 void HtmlPlates::mergeData(htab_rd items)
 {
-	htab_wr(values_).merge(items);
+	htab_rw(values_).merge(items);
 }
 
 str_rc
-HtmlPlates::renderView(htab_wr options) 
+HtmlPlates::renderView(htab_rw options) 
 {
 	options.set(HPit.final_key, false);
 	return render(options);
@@ -141,7 +141,7 @@ str_rc HtmlPlates::render(htab_rd options)
 		if (views.isArray())
 		{
 			for_key_value fkv;
-			htab_wr hw(levels_);
+			htab_rw hw(levels_);
 			for(fkv.start(views.zarray()); fkv.ok(); fkv.next())
 			{
 				hw.push_back(fkv.value());
@@ -201,7 +201,7 @@ str_rc HtmlPlates::render(htab_rd options)
 	pe->clearPlates();
 
 	// break this circular reference to self
-	htab_wr(values_).unset(HPit.view_key); 
+	htab_rw(values_).unset(HPit.view_key); 
 
 	return result;
 }

@@ -22,7 +22,7 @@ namespace wcc {
 
 		static base_obj_mgr<ServiceAccess> omg;
 
-		virtual void debug_info(htab_wr hw);
+		virtual void debug_info(htab_rw hw);
 
 		virtual void init_access();
 

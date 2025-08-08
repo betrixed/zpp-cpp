@@ -272,7 +272,7 @@ using namespace zpp;
 	}
 
 	void 
-	IBuild::debug_info(htab_wr di)
+	IBuild::debug_info(htab_rw di)
 	{
 		di.set(SQSTR.driver, driver_);
 		di.set(SQSTR.isql, isql_);
@@ -290,7 +290,7 @@ using namespace zpp;
 		model_.init();
 
 		htab_rc args_mgr;
-		htab_wr args(args_mgr);
+		htab_rw args(args_mgr);
 
 		args.set(SQSTR.function, agfn);
 		args.set(SQSTR.columns, columns);
@@ -386,11 +386,11 @@ using namespace zpp;
 	IBuild::count(val_ptr columns)
 	{
 		htab_rc names_mgr;
-		htab_wr names(names_mgr);
+		htab_rw names(names_mgr);
 
 		if (columns.isString())
 		{
-			htab_wr hw(names);
+			htab_rw hw(names);
 			names.push_back(columns.zstr());
 		}
 		else if (columns.isArray()) {

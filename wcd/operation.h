@@ -44,7 +44,7 @@ public:
 
 	static base_obj_mgr<Operation> omg;
 
-	virtual void debug_info(htab_wr di);
+	virtual void debug_info(htab_rw di);
 	
 	void construct(obj_ptr db);
 	void destruct();

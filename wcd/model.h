@@ -80,7 +80,7 @@ public:
 
 	static obj_rc rowSaved(str_ptr static_name, htab_rd data);
 
-	virtual void debug_info(htab_wr di);
+	virtual void debug_info(htab_rw di);
 
 	obj_rc byKeyValue(val_ptr keynames, val_ptr values);
 

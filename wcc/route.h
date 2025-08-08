@@ -57,7 +57,7 @@ public:
 
 	static RouteMgr omg;
 
-	virtual void debug_info(htab_wr hw);
+	virtual void debug_info(htab_rw hw);
 
 	static bool isMyClass(str_ptr obj);
 

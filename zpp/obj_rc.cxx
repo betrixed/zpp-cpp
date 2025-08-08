@@ -1,11 +1,11 @@
-#ifndef ZOBJ_MGR_CPP
-#define ZOBJ_MGR_CPP
+#ifndef OBJ_RC_CPP
+#define OBJ_RC_CPP
 
-#ifndef ZOBJ_MGR_H
+#ifndef OBJ_RC_H
 #include "obj_rc.h"
 #endif
 
-#ifndef ZOBJ_USER_H
+#ifndef OBJ_PTR_H
 #include "obj_ptr.h"
 #endif
 

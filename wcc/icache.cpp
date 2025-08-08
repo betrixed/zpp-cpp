@@ -97,7 +97,7 @@ void ICache::construct(val_ptr options, val_ptr services)
 
 
 
-void ICache::debug_info(htab_wr s)
+void ICache::debug_info(htab_rw s)
 {
 	base_d::debug_info(s);
 	s.set(IC_STR.cached, cached_);
@@ -110,7 +110,7 @@ void ICache::debug_info(htab_wr s)
 
 void ICache::addLocal(val_ptr pkg)
 {
-	htab_wr hw(cached_);
+	htab_rw hw(cached_);
 
 	ICacheData* icd = zval_toc<ICacheData>(pkg);
 	hw.set(icd->getKey(), pkg);
@@ -119,7 +119,7 @@ void ICache::addLocal(val_ptr pkg)
 
 bool ICache::clear()
 {
-	htab_wr(cached_).clear();
+	htab_rw(cached_).clear();
 	return true;
 }
 
@@ -128,7 +128,7 @@ bool ICache::clearPrefix(str_ptr prefix)
 {
 	htab_rc del_array;
 
-	htab_wr  delkeys(del_array);
+	htab_rw  delkeys(del_array);
 
 	htab_rd  allkeys(cached_);
 	htab_walk  htw;
@@ -159,7 +159,7 @@ bool ICache::clearPrefix(str_ptr prefix)
 bool 
 ICache::deleteKey(str_ptr key)
 {
-	return htab_wr(cached_).unset(key);
+	return htab_rw(cached_).unset(key);
 }
 
 int 
@@ -167,7 +167,7 @@ ICache::deleteExpired()
 {
 	htab_rc hset = getExpired();
 	htab_rd  expired(hset);
-	htab_wr cache(cached_);
+	htab_rw cache(cached_);
 
 	int result = expired.size();
 
@@ -189,7 +189,7 @@ htab_rc
 ICache::getExpired()
 {
 	htab_rc  result;
-	htab_wr rtab(result);
+	htab_rw rtab(result);
 	htab_rd  cache(cached_);
 
 	htab_walk htw;
@@ -267,7 +267,7 @@ ICache::getMultiple(htab_rd keys, val_ptr noval)
 	val_rc result;
 	val_rc nullvalue;
 
-	htab_wr newtab(result);
+	htab_rw newtab(result);
 
 	htab_walk iter;
 	auto k = iter.key();
@@ -296,7 +296,7 @@ ICache::getService(str_ptr key)
 	val_rc result;
 	val_ptr test;
 
-	htab_wr svc(svc_cache_);
+	htab_rw svc(svc_cache_);
 
 	if (svc.try_fetch(key,test))
 	{
@@ -320,7 +320,7 @@ ICache::getUnsaved()
 {
 	htab_rc rlist;
 	
-	htab_wr rtab(rlist);
+	htab_rw rtab(rlist);
 
 	htab_walk htw;
 	auto value = htw.value();
@@ -349,7 +349,7 @@ ICache::getOption(str_ptr key)
 void 
 ICache::setOption(str_ptr key, val_ptr value)
 {
-	htab_wr(options_).set(key, value);
+	htab_rw(options_).set(key, value);
 }
 
 bool 
@@ -369,7 +369,7 @@ ICache::setCached(str_ptr key, val_ptr data, zend_long ttl)
 		ttl = ttl_;
 	}
 	obj_rc icd = ICacheData::new_ICacheData(key, data, ttl);
-	htab_wr(cached_).set(key, icd);
+	htab_rw(cached_).set(key, icd);
 	return icd;	
 }
 

@@ -1,11 +1,11 @@
-#ifndef HTAB_READ_H
-#define HTAB_READ_H
+#ifndef HTAB_RD_H
+#define HTAB_RD_H
 
-#ifndef ZVAL_USER_H
+#ifndef VAL_PTR_H
 #include "val_ptr.h"
 #endif
 
-#ifndef ZSTR_USER_H
+#ifndef STR_PTR_H
 #include "str_ptr.h"
 #endif
 

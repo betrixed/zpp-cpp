@@ -138,7 +138,7 @@ IDriver::construct(obj_ptr icfgobj, str_ptr name)
 }
 
 void 
-IDriver::debug_info(htab_wr di)
+IDriver::debug_info(htab_rw di)
 {
 	/*
 obj_rc    icfg_;
@@ -222,7 +222,7 @@ IDriver::getConnectOptions()
 {
 	htab_rc result;
 
-	htab_wr options(result);
+	htab_rw options(result);
 
 	options.push_back((int)PDO_ATTR_ERRMODE);
 	options.push_back((int)PDO_ERRMODE_EXCEPTION);
@@ -247,7 +247,7 @@ IDriver::connect()
 	str_rc pw = cfg->getPassword();
 
 	htab_rc  args_mgr;
-	htab_wr args(args_mgr);
+	htab_rw args(args_mgr);
 
 	args.push_back(dsn);
 	args.push_back(user);
@@ -543,7 +543,7 @@ IDriver::newDmlBuild()
 	str_rc bclass =  cfg->getDmlBuildClass();
 
 	htab_rc args_mgr;
-	htab_wr args(args_mgr);
+	htab_rw args(args_mgr);
 	args.push_back(obj_ptr(vobj()));
 	return ReflectCache::staticInstanceArgs(bclass,args);
 }
@@ -704,7 +704,7 @@ IDriver::getTableModel(str_ptr tableName)
 		m->setConnect(self);
 		m->setName(tableName);
 		
-		htab_wr hw(table_models_);
+		htab_rw hw(table_models_);
 		hw.set(tableName, result);
 	}
 	return result;

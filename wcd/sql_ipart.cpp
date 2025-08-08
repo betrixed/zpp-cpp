@@ -187,7 +187,7 @@ Literal::toString() const
 	}
 }
 
-void Literal::debug_info(htab_wr di)
+void Literal::debug_info(htab_rw di)
 {
 	di.set(SQSTR.partid, LIT_PID);
 	di.set(SQSTR.value, value_);
@@ -195,7 +195,7 @@ void Literal::debug_info(htab_wr di)
 
 //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
-void Expr::debug_info(htab_wr di)
+void Expr::debug_info(htab_rw di)
 {
 	di.set(SQSTR.partid, EXPR_PID);
 	di.set(SQSTR.value,  expr_);
@@ -211,7 +211,7 @@ void Expr::construct(str_ptr val)
 
 
 void 
-JoinExpr::debug_info(htab_wr di)
+JoinExpr::debug_info(htab_rw di)
 {
 	di.set(SQSTR.partid, JE_PID);
 	di.set(SQSTR.lhs_val, lattr_);
@@ -418,7 +418,7 @@ JoinExpr::toOperator(str_ptr s)
 //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 void
-IColumns::debug_info(htab_wr di)
+IColumns::debug_info(htab_rw di)
 {
 	di.set(SQSTR.partid, ICOL_PID);
 	di.set(SQSTR.alias, alias_);
@@ -453,7 +453,7 @@ IColumns::add(htab_rd columns)
 
 		auto ix = wk.key();
 		auto name = wk.value();
-		htab_wr names(colnames_);
+		htab_rw names(colnames_);
 
 		for(wk.start(columns); wk.ok(); wk.next())
 		{
@@ -480,7 +480,7 @@ IColumns::setColAlias(str_ptr name, str_ptr alias)
 	else {
 		val = alias;
 	}
-	htab_wr hw(colnames_);
+	htab_rw hw(colnames_);
 	hw.set(name, val);
 }
 
@@ -520,7 +520,7 @@ TableAttr::construct(str_ptr t, str_ptr a)
 	attr_ = a;
 }
 
-void TableAttr::debug_info(htab_wr di)
+void TableAttr::debug_info(htab_rw di)
 {
 	di.set(SQSTR.partid, TA_PID);
 	di.set(SQSTR.table, table_);
@@ -541,7 +541,7 @@ TableAttr::toString() const
 //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 void // virtual
-TColumns::debug_info(htab_wr di)
+TColumns::debug_info(htab_rw di)
 {
 	IColumns::debug_info(di);
 
@@ -597,7 +597,7 @@ TColumns::attr(str_ptr name)
 	obj_rc ta = TableAttr::makeTA(table, name);
 
 	result = ta;
-	htab_wr hw(attr_map_);
+	htab_rw hw(attr_map_);
 
 	hw.set(name, result);
 
@@ -643,7 +643,7 @@ TColumns::tableCol(str_ptr expr)
 //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 void 
-Param::debug_info(htab_wr di)
+Param::debug_info(htab_rw di)
 {
 	di.set(SQSTR.valuekey, value_);
 }

@@ -1,12 +1,12 @@
-#ifndef ZOBJ_USER_H
-#define ZOBJ_USER_H
+#ifndef OBJ_PTR_H
+#define OBJ_PTR_H
 
 
-#ifndef ZVAL_MGR_H
+#ifndef VAL_RC_H
 #include "val_rc.h"
 #endif
 
-#ifndef ZSTR_USER_H
+#ifndef STR_PTR_H
 #include "str_ptr.h"
 #endif
 

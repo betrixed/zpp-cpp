@@ -28,7 +28,7 @@ namespace wcc {
 
 		static base_obj_mgr<MoneyFmt> omg;
 
-		virtual void debug_info(htab_wr hw);
+		virtual void debug_info(htab_rw hw);
 		
 		void construct(str_ptr slang);
 

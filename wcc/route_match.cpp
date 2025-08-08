@@ -84,7 +84,7 @@ RouteMatch_init RM_data;
 
 
 void
-RouteMatch::debug_info(htab_wr hw)
+RouteMatch::debug_info(htab_rw hw)
 {
 	hw.set(RM_data.cc_route_obj, route_);
 	hw.set(RM_data.cc_match_args, match_args_);
@@ -252,7 +252,7 @@ RouteMatch::call(htab_rd extra, obj_ptr before, obj_ptr after)
 
 		if (hr.size())
 		{
-			htab_wr(ob_args_).merge(extra);
+			htab_rw(ob_args_).merge(extra);
 		}
 		else {
 			ob_args_ = extra;
@@ -397,7 +397,7 @@ void RouteMatch::set_tuple14(htab_rd tg)
 	mobj = tg.get(3);
 	if (mobj.isArray()) {
 		
-		htab_wr targs(mobj);
+		htab_rw targs(mobj);
 		htab_rd  obargs(ob_args_);
 
 		if (obargs.size() > 0) 
@@ -411,7 +411,7 @@ void RouteMatch::set_tuple14(htab_rd tg)
 
 void RouteMatch::error_context(Route* r)
 {
-	htab_wr errors_ht(errors_);
+	htab_rw errors_ht(errors_);
 
 	errors_ht.push_back((zend_string*)uri_);
 	errors_ht.push_back((zend_string*)r->compiled_);
@@ -450,7 +450,7 @@ htab_rc RouteMatch::fetchArgs()
 		long mct = margs_ht.size();
 		if (mct != ct) {
 			error_msg.adopt(strpprintf(0, "Route matches count should be %u", ct));
-			htab_wr(errors_).push_back(error_msg);
+			htab_rw(errors_).push_back(error_msg);
 			error_context(route);
 		}
 
@@ -465,12 +465,12 @@ htab_rc RouteMatch::fetchArgs()
 			{
 				str_rc svalue(val.to_zstr());
 				error_msg.adopt(strpprintf(0, "Null value arg# %s", svalue.data()));
-				htab_wr(errors_).push_back(error_msg);
+				htab_rw(errors_).push_back(error_msg);
 				error_context(route);
 			}
 			else 
 			{
-				htab_wr args(result);
+				htab_rw args(result);
 				if (test.isString()) {
 					str_rc decoded = call_url_decode(test);
 					args.set(name,decoded);
@@ -574,7 +574,7 @@ bool RouteMatch::prepare_call()
 
 	if (!clen || !mlen)
 	{
-		htab_wr etab(errors_);
+		htab_rw etab(errors_);
 		str_rc error_msg;
 
 		if (!clen)

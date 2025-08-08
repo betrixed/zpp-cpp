@@ -75,7 +75,7 @@ ReflectCache::getReflectClass(str_ptr class_name)
 
 	//showstr("getReflectClass", class_name);
 
-	htab_wr cache(cache_);
+	htab_rw cache(cache_);
 
 	val_ptr test(cache.get(class_name));
 
@@ -215,7 +215,7 @@ ReflectCache* ReflectCache::cpp()
 }
 
 void
-ReflectCache::debug_info(htab_wr hw)
+ReflectCache::debug_info(htab_rw hw)
 {	
 	hw.set(RFC_data.cache_key, cache_);
 }

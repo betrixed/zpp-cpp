@@ -21,7 +21,7 @@ namespace wcc {
 		str_rc module_;
 
 
-		virtual void debug_info(htab_wr di);
+		virtual void debug_info(htab_rw di);
 	
 		static obj_rc go(str_ptr cname, str_ptr fname);
 		

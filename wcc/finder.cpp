@@ -46,7 +46,7 @@ Finder::~Finder()
 }
 
 void 
-Finder::debug_info(htab_wr d)
+Finder::debug_info(htab_rw d)
 {
 
 	d.set(FDit.nspaths_key, nsPaths_);
@@ -58,20 +58,20 @@ Finder::debug_info(htab_wr d)
 void 
 Finder::addFolder(str_ptr fsdir)
 {
-	htab_wr(folders_).push_back(fsdir);
+	htab_rw(folders_).push_back(fsdir);
 }
 
 void 
 Finder::addPath(str_ptr nsroot, str_ptr fspath)
 {
 
-	htab_wr(nsPaths_).set(nsroot, fspath);
+	htab_rw(nsPaths_).set(nsroot, fspath);
 }
 
 void 
 Finder::addPathArray(htab_rd pathsArray)
 {
-	htab_wr hw(nsPaths_);
+	htab_rw hw(nsPaths_);
 
 	for_key_value wk;
 	for(wk.start(pathsArray); wk.ok(); wk.next())
@@ -86,7 +86,7 @@ void
 Finder::addClasses(htab_rd classArray)
 {
 	
-	htab_wr hw(classes_);
+	htab_rw hw(classes_);
 
 	for_key_value wk;
 	for(wk.start(classArray); wk.ok(); wk.next())
@@ -98,7 +98,7 @@ Finder::addClasses(htab_rd classArray)
 void 
 Finder::addClass(str_ptr cname, str_ptr fspath)
 {
-	htab_wr(classes_).set(cname, fspath);
+	htab_rw(classes_).set(cname, fspath);
 }
 
 // properties

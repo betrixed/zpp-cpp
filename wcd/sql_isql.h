@@ -80,7 +80,7 @@ namespace wcd {
 
 		static obj_rc rowSplit(htab_rd row, htab_rd rename);
 
-		void debug_info(htab_wr di) override;
+		void debug_info(htab_rw di) override;
 		
 		void setPrime(obj_ptr obj);
 
@@ -156,7 +156,7 @@ namespace wcd {
 
 		static base_obj_mgr<ParamList>  omg;
 
-		void debug_info(htab_wr di) override;
+		void debug_info(htab_rw di) override;
 
 		void construct(obj_ptr driver);
 		str_rc addParam(val_ptr value);
@@ -218,7 +218,7 @@ namespace wcd {
 	{
 	protected:
 		str_rc columns(htab_rd bd);
-		void columnsTC(IColumns* tc, htab_wr col_list); //str_buf& col_list);
+		void columnsTC(IColumns* tc, htab_rw col_list); //str_buf& col_list);
 		htab_rd getTables(Bindings& bind);
 		str_rc where(Bindings &bind, htab_rd wtab);
 		str_rc insert_col_params(Bindings& bind, htab_rd rowbind);
@@ -288,16 +288,16 @@ namespace wcd {
 	{
 	protected:
 		htab_rc	data_;
-		obj_rc    paramList_;
-		obj_rc	sql_;
-		obj_rc    db_;
+		obj_rc  paramList_;
+		obj_rc	isql_;
+		obj_rc  db_;
 
 		void addToArray(int key, val_ptr value);
 
 	public:
 		static base_obj_mgr<Bindings>  omg;
 
-		void debug_info(htab_wr di) override;
+		void debug_info(htab_rw di) override;
 
 		void construct(obj_ptr sql, obj_ptr connect);
 

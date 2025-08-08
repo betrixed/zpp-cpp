@@ -1,7 +1,7 @@
-#ifndef ZARG_EXEC_CPP
-#define ZARG_EXEC_CPP
+#ifndef ZARG_RD_CPP
+#define ZARG_RD_CPP
 
-#ifndef ZARG_EXEC_H
+#ifndef ZARG_RD_H
 #include "zarg_rd.h"
 #endif
 

@@ -56,7 +56,7 @@ enum {
 };
 
 void 
-MoneyFmt::debug_info(htab_wr hw)
+MoneyFmt::debug_info(htab_rw hw)
 {
 	hw.set(MFI.lang,   lang_str_);
 	hw.set(MFI.symbol, money_sym_);

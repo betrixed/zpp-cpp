@@ -30,7 +30,7 @@ TargetData target_data;
 
 base_obj_mgr<Target> Target::omg;
 
-void Target::debug_info(htab_wr di)
+void Target::debug_info(htab_rw di)
 {
 	di.set(target_data.class_name, class_);
 	di.set(target_data.method, func_);
@@ -114,7 +114,7 @@ Target::serialize()
 {
 	htab_rc result;
 
-	htab_wr hw(result);
+	htab_rw hw(result);
 
 	this->debug_info(hw);
 

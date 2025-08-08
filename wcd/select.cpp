@@ -96,7 +96,7 @@ Select::getRenamed()
 	if (results.isArray() && rename.isArray())
 	{
 		htab_rc objset;
-		htab_wr hw(objset);
+		htab_rw hw(objset);
 
 		htab_rd rows(results);
 		htab_rd rtab(rename);

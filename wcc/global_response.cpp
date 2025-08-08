@@ -214,7 +214,7 @@ Response::send_header(str_ptr header, bool replace,
 	header_fn.call_fn();
 }
 
-htab_wr 
+htab_rw 
 Response::writer()
 {
 	return hmap_->writer();
@@ -227,7 +227,7 @@ htab_rd Response::reader() const
 
 
 void
-Response::debug_info(htab_wr hw)
+Response::debug_info(htab_rw hw)
 {
 	// might as well reuse headers_key
 	hw.set(RSPD.headers_key, headers_);
@@ -256,7 +256,7 @@ void Response::setHeaders(val_ptr headers)
 	Hmap* hto = hdrs_obj();
 
 	if (hto != hfrom) {
-		htab_wr hw = hto->writer();
+		htab_rw hw = hto->writer();
 		htab_rd data(hfrom->toArray());
 		htab_walk wk;
 		auto  name = wk.key();
@@ -284,7 +284,7 @@ Response::setExpires(val_ptr exptime)
 
 	str_rc time = buf.zstr();
 
-	htab_wr hw = writer();
+	htab_rw hw = writer();
 	hw.set(RSPD.Expires, time);
 }
 
@@ -364,7 +364,7 @@ Response::send()
 void 
 Response::setHeader(str_ptr key, str_ptr value)
 {
-	htab_wr hw(writer());
+	htab_rw hw(writer());
 
 	hw.set(key, value);
 }
@@ -372,7 +372,7 @@ Response::setHeader(str_ptr key, str_ptr value)
 void 
 Response::delay_redirect(str_ptr location, int delay)
 {
-	htab_wr hw(writer());
+	htab_rw hw(writer());
 
 	str_buf buf;
 	buf << delay;
@@ -421,7 +421,7 @@ Response::redirect(str_ptr location, bool external, int statusCode)
 		statusCode = 302;
 	}
 	setStatusCode(302, zstr_empty());
-	htab_wr hw(writer());
+	htab_rw hw(writer());
 
 	hw.set(RSPD.Location, location);
 }
@@ -435,7 +435,7 @@ Response::setContentType(str_ptr ctype, str_ptr charset)
 void 
 Response::resetHeaders()
 {
-	htab_wr hw(writer());
+	htab_rw hw(writer());
 	hw.clear();
 }
 
@@ -462,7 +462,7 @@ Response::setContentType(
 	str_rc hvalue(buf.zstr());
 	//showstr("hvalue", hvalue);
 
-	htab_wr hw(writer());
+	htab_rw hw(writer());
 	hw.set(RSPD.Content_Type, hvalue);
 }
 
@@ -481,7 +481,7 @@ Response::setStatusCode(int icode, str_ptr  message)
 	auto  key = wk.key();
 
 	htab_rc   keylist;
-	htab_wr rkeys(keylist);
+	htab_rw rkeys(keylist);
 
 	std::string_view needle = RSPD.HTTP_FS.vstr();
 
@@ -499,7 +499,7 @@ Response::setStatusCode(int icode, str_ptr  message)
 		}
 	}
 
-	htab_wr hw = writer();
+	htab_rw hw = writer();
 	if (rkeys.size()) 
 	{
 		hw.removal(rkeys);
@@ -835,7 +835,7 @@ void Response::setFileToSend(
 void 
 Response::setRawHeader(str_ptr header)
 {
-	htab_wr hw(writer());
+	htab_rw hw(writer());
 	val_rc null_value;
 
 	hw.set(header,null_value);

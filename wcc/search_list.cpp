@@ -28,7 +28,7 @@ SearchListInit SLdata;
 
 namespace fs = std::filesystem;
 
-void SearchList::debug_info(htab_wr hw)
+void SearchList::debug_info(htab_rw hw)
 {
 	hw.set(SLdata.paths_key, paths_);
 }
@@ -87,7 +87,7 @@ SearchList::addPath(str_ptr p)
 {
 	if (!hasPath(p))
 	{
-		htab_wr hw(paths_);
+		htab_rw hw(paths_);
 		hw.push_back(p);
 	}
 }

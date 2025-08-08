@@ -30,7 +30,7 @@ namespace wcc {
 
 		static base_obj_mgr<Day24> omg;
 
-		virtual void debug_info(htab_wr di);
+		virtual void debug_info(htab_rw di);
 		
 		void construct(str_ptr sval);
 

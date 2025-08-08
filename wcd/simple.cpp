@@ -42,7 +42,7 @@ Simple::destruct()
 }
 
 void 
-Simple::debug_info(htab_wr di)
+Simple::debug_info(htab_rw di)
 {	
 	di.set(SQSTR.driver, db_);
 	di.set(SQSTR.sql, sql_);
@@ -75,7 +75,7 @@ Simple::arrayMap(str_ptr keycol,
 	
 
 	val_rc result_mgr;
-	htab_wr result(result_mgr);
+	htab_rw result(result_mgr);
 
 	htab_walk wk;
 	auto row = wk.value();
@@ -109,7 +109,7 @@ Simple::arraySet(str_ptr sql, htab_rd params)
 str_rc 
 Simple::bind(val_ptr value)
 {
-	htab_wr hw(values_);
+	htab_rw hw(values_);
 	hw.push_back(value);
 	IDriver* db = zobj_toc<IDriver>(db_);
 	return db->param(values_.size());
@@ -248,7 +248,7 @@ Simple::update(htab_rd values)
 
 };
 //simple.cpp
-#ifndef ZARG_EXEC_H
+#ifndef ZARG_RD_H
 #include "zpp/zarg_rd.h"
 #endif
 

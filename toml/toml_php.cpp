@@ -39,11 +39,11 @@ void
 Toml::name_table(toml_table_t* st)
 {
 		//zend_printf("In name_table\n");
-		htab_wr  array(top_->table_);
+		htab_rw  array(top_->table_);
 		//showarray("old top", top_->table_);
 
 		htab_rc 	 ztab; // new table
-		htab_wr   hw(ztab); //writer to it.
+		htab_rw   hw(ztab); //writer to it.
 
 		zstr_temp tkey(st->key);
 		//zend_printf("New table named %s\n", st->key);
@@ -63,10 +63,10 @@ Toml::array_table(toml_table_t* st)
 {
 		//zend_printf("In array_table\n");
 
-	  htab_wr  array(top_->table_);
+	  htab_rw  array(top_->table_);
 
 	  htab_rc ztab;
-	  htab_wr hw(ztab); //make writable array
+	  htab_rw hw(ztab); //make writable array
 	  array.push_back(ztab);
 
 	  stack_htab levelup(hw, top_, &top_);
@@ -101,13 +101,13 @@ Toml::z_table(toml_table_t* st)
 void 
 Toml::z_array(toml_array_t* arr)
 {
-		htab_wr ctop(top_->table_);
+		htab_rw ctop(top_->table_);
 
 		int kind = arr->kind;
 		int vtype = arr->type;
 
 		htab_rc   ztab;
-		htab_wr hw(ztab);
+		htab_rw hw(ztab);
 
 		if (arr->key)
 		{
@@ -176,7 +176,7 @@ Toml::z_value(toml_keyval_t* st, int expect)
 
 	//zend_printf("In z_value for %lx\n", key);
 
-	htab_wr table = top_->table_;
+	htab_rw table = top_->table_;
 
 	int  checked = -1; // not checked!
 	val_rc 	  store; // managed zval struct

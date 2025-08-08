@@ -1,16 +1,16 @@
-#ifndef ZSTR_OUTPUT_CPP
-#define ZSTR_OUTPUT_CPP
+#ifndef STR_OUT_CPP
+#define STR_OUT_CPP
 
 //str_out.cpp
-#ifndef ZSTR_OUTPUT_H
+#ifndef STR_OUT_H
 #include "str_out.h"
 #endif
 
-#ifndef ZSTR_USER_H
+#ifndef STR_PTR_H
 #include "str_ptr.h"
 #endif
 
-#ifndef ZVAL_USER_H
+#ifndef VAL_PTR_H
 #include "val_ptr.h"
 #endif
 

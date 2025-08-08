@@ -52,7 +52,7 @@ namespace wcd {
 			{
 				if (pct > 1)
 				{
-					htab_wr result(exresult);
+					htab_rw result(exresult);
 
 					htab_walk wk;
 

@@ -6,7 +6,7 @@
 #endif
 
 
-#ifndef ZOBJ_MGR_H
+#ifndef OBJ_RC_H
 #include "obj_rc.h"
 #endif
 

@@ -67,7 +67,7 @@ CfgInit::init()
 }
 
 void 
-IConfig::debug_info(htab_wr di)
+IConfig::debug_info(htab_rw di)
 {
 	di.set(ICS.mykey, mykey_);
 	di.set(ICS.data_str, data_);
@@ -77,7 +77,7 @@ IConfig::debug_info(htab_wr di)
 void
 IConfig::set_data(str_ptr key, val_ptr values, bool required, val_ptr ifnot)
 {
-	htab_wr hw(data_);
+	htab_rw hw(data_);
 	//showarray("data_ - ", data_);
 	val_rc dput = getValue(values, required, ifnot);
 	hw.set(key, dput);
@@ -91,7 +91,7 @@ IConfig::assign(htab_rd cfg)
 	val_rc value;
 
 	val_rc   keys_mgr;   // if passing list of values
-	htab_wr keys(keys_mgr); // do not reassign to keys_mgr!!
+	htab_rw keys(keys_mgr); // do not reassign to keys_mgr!!
 
 	val_rc   skey; // if passing single value
 	//showarray("assign - ", sarray);
@@ -247,7 +247,7 @@ IConfig::get(str_ptr name)
 void     
 IConfig::set(str_ptr name, val_ptr value)
 {
-	htab_wr hw(data_);
+	htab_rw hw(data_);
 
 	hw.set(name, value);
 }
@@ -255,7 +255,7 @@ IConfig::set(str_ptr name, val_ptr value)
 void     
 IConfig::set(str_ptr name, str_ptr value)
 {
-	htab_wr hw(data_);
+	htab_rw hw(data_);
 
 	hw.set(name, value);
 }
@@ -285,7 +285,7 @@ IConfig::newConnect(str_ptr name)
 	//showstr("dclass", dclass);
 
 	htab_rc args_mgr;
-	htab_wr args(args_mgr);
+	htab_rw args(args_mgr);
 	args.push_back(vobj());
 	args.push_back(name);
 	//showdata("dclass args", args_mgr);
@@ -358,7 +358,7 @@ str_rc
 IConfig::getDatabase()
 {
 	val_rc list_mgr;
-	htab_wr list(list_mgr);
+	htab_rw list(list_mgr);
 	list.push_items(ICS.k_dbname, ICS.k_database);
 
 	val_rc result = getValue(list_mgr, true, val_rc::empty_str());

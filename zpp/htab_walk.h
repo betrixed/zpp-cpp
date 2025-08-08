@@ -1,15 +1,15 @@
 #ifndef HTAB_WALK_H
 #define HTAB_WALK_H
 
-#ifndef ZVAL_USER_H
+#ifndef VAL_PTR_H
 #include "val_ptr.h"
 #endif
 
-#ifndef HTAB_READ_H
+#ifndef HTAB_RD_H
 #include "htab_rd.h"
 #endif
 
-#ifndef ZVAL_MGR_H
+#ifndef VAL_RC_H
 #include "val_rc.h"
 #endif
 

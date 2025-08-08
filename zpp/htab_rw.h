@@ -1,11 +1,11 @@
-#ifndef HTAB_WRITE_H
-#define HTAB_WRITE_H
+#ifndef HTAB_RW_H
+#define HTAB_RW_H
 
-#ifndef HTAB_READ_H
+#ifndef HTAB_RD_H
 #include "htab_rd.h"
 #endif 
 
-#ifndef ZSTR_MGR_H
+#ifndef STR_RC_H
 #include "str_rc.h"
 #endif
 
@@ -13,7 +13,7 @@ namespace zpp {
 
     class zstr_intern;
 
-    class htab_wr : public htab_rd 
+    class htab_rw : public htab_rd 
     {
     protected:
         void giveback(zval* mgr);
@@ -25,20 +25,20 @@ namespace zpp {
          *  to ensure its reference count is 1.
          */
 
-        htab_wr(htab_rc& mgr);
-        htab_wr(val_rc& mgr);
-        htab_wr(val_ptr mgr);
-        htab_wr(HashTable* h);
-        htab_wr(const zval* p);
+        htab_rw(htab_rc& mgr);
+        htab_rw(val_rc& mgr);
+        htab_rw(val_ptr mgr);
+        htab_rw(HashTable* h);
+        htab_rw(const zval* p);
         
-        htab_wr(const htab_wr& w)
+        htab_rw(const htab_rw& w)
         {
             ht_ = w.ht_;
         }
 
 
 
-        const htab_wr& operator=(const zval* p);
+        const htab_rw& operator=(const zval* p);
         
         
         void merge(HashTable* src);
@@ -119,5 +119,5 @@ namespace zpp {
 
 };
 
-//htab_wr.h
+//htab_rw.h
 #endif

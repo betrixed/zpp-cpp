@@ -89,7 +89,7 @@ public:
 
 	//static obj_rc make(obj_ptr engine, str_ptr name);
 
-	virtual void debug_info(htab_wr hw);
+	virtual void debug_info(htab_rw hw);
 
 	virtual ~Plate()
 	{

@@ -37,7 +37,7 @@ namespace wcd {
 
 		virtual void afterConnect();
 		virtual str_rc getSqlType();
-		virtual void debug_info(htab_wr di);
+		virtual void debug_info(htab_rw di);
 		
 		static int pdo_type(unsigned int ztype);
 		

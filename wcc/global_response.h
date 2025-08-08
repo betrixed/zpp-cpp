@@ -44,7 +44,7 @@ namespace wcc {
 
 		static val_rc readfile(str_ptr name);
 
-		virtual void debug_info(htab_wr hw);
+		virtual void debug_info(htab_rw hw);
 
 		
 		void construct(
@@ -82,7 +82,7 @@ namespace wcc {
 
 		void setJsonContent(val_ptr content, int jsonOptions=0);
 
-		htab_wr writer();
+		htab_rw writer();
 
         htab_rd reader() const;
 

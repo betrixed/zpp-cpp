@@ -7,7 +7,7 @@
 #ifndef FN_CALL_H
 #define FN_CALL_H
 
-#ifndef ZSTR_MGR_H
+#ifndef STR_RC_H
 #include "str_rc.h"
 #endif
 
@@ -15,11 +15,11 @@
 #include "state_init.h"
 #endif
 
-#ifndef HTAB_READ_H
+#ifndef HTAB_RD_H
 #include "htab_rd.h"
 #endif
 
-#ifndef ZVAL_MGR_H
+#ifndef VAL_RC_H
 #include "val_rc.h"
 #endif
 
@@ -88,15 +88,6 @@ namespace zpp {
         //! call only once for each function call.
         zval* argsptr() const { wipe(); return (zval*) argv_; }
 
-        /** Direct set args and return in one call. 
-         *  These must be used from correct size in template<size_t ARGCT>
-         *
-        val_rc&& call1(zval* a1);
-        val_rc&& call2(zval* a1, zval* a2);
-        val_rc&& call3(zval* a1, zval* a2, zval* a3);
-        val_rc&& call4(zval* a1, zval* a2, zval* a3, zval* a4);
-        val_rc&& call5(zval* a1, zval* a2, zval* a3, zval* a4, zval* a5);
-        */
 
 
     };

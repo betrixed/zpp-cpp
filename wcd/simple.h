@@ -36,7 +36,7 @@ public:
 
 	static base_obj_mgr<Simple> omg;
 	
-	virtual void debug_info(htab_wr di);
+	virtual void debug_info(htab_rw di);
 
 	void construct(obj_ptr db, int fetch = IDriver::FETCH_ASSOC);
 	void destruct();

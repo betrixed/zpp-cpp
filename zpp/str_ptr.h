@@ -4,8 +4,8 @@
   *  @copyright 2024-2025 Michael Rynn
   */
 
-#ifndef ZSTR_USER_H
-#define ZSTR_USER_H
+#ifndef STR_PTR_H
+#define STR_PTR_H
 
 #ifndef PHP_EXTERN_H
 #include "php_extern.h"

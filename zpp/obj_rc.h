@@ -1,7 +1,7 @@
-#ifndef ZOBJ_MGR_H
-#define ZOBJ_MGR_H
+#ifndef OBJ_RC_H
+#define OBJ_RC_H
 
-#ifndef ZOBJ_USER_H
+#ifndef OBJ_PTR_H
 #include "obj_ptr.h"
 #endif
 

@@ -4,26 +4,26 @@
   *  @copyright 2024-2025 Michael Rynn
   */
 
-#ifndef ZVAL_MGR_CPP
-#define ZVAL_MGR_CPP
+#ifndef VAL_RC_CPP
+#define VAL_RC_CPP
 
-#ifndef ZVAL_MGR_H
+#ifndef VAL_RC_H
 #include "val_rc.h"
 #endif
 
-#ifndef ZVAL_USER_H
+#ifndef VAL_PTR_H
 #include "val_ptr.h"
 #endif
 
-#ifndef ZSTR_MGR_H
+#ifndef STR_RC_H
 #include "str_rc.h"
 #endif
 
-#ifndef HTAB_MGR_H
+#ifndef HTAB_RC_H
 #include "htab_rc.h"
 #endif
 
-#ifndef ZOBJ_MGR_H
+#ifndef OBJ_RC_H
 #include "obj_rc.h"
 #endif
 

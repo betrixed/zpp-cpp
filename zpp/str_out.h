@@ -1,11 +1,11 @@
-#ifndef ZSTR_OUTPUT_H
-#define ZSTR_OUTPUT_H
+#ifndef STR_OUT_H
+#define STR_OUT_H
 
-#ifndef ZSTR_MGR_H
+#ifndef STR_RC_H
 #include "str_rc.h"
 #endif
 
-#ifndef ZSTR_USER_H
+#ifndef STR_PTR_H
 #include "str_ptr.h"
 #endif
 

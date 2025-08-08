@@ -19,7 +19,7 @@ namespace wcc {
 		htab_rc paths_;
 	public:
 
-		virtual void debug_info(htab_wr hw);
+		virtual void debug_info(htab_rw hw);
 		
 		static base_obj_mgr<SearchList> omg;
 

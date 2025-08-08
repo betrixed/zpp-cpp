@@ -138,19 +138,19 @@ public:
             return data_;
 	}
 
-	htab_wr writer()
+	htab_rw writer()
 	{
-	    return htab_wr(data_);
+	    return htab_rw(data_);
 	}
 	static Hmap_mgr omg;
 	
-	//void debug_info(htab_wr hw) override;
+	//void debug_info(htab_rw hw) override;
 	
 	//! Create a new Hmap constructed witn HashTable/zend_array
 	static obj_rc newFromArray(val_ptr init);
 	static obj_rc new_hmap();
 	
-	virtual void debug_info(htab_wr hw);
+	virtual void debug_info(htab_rw hw);
 
 	void construct(htab_rd values);
 

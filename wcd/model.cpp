@@ -130,7 +130,7 @@ namespace wcd {
 		Model* m = model_instance(classname);
 
 		val_rc rmgr;
-		htab_wr r(rmgr);
+		htab_rw r(rmgr);
 
 		htab_walk wk;
 
@@ -146,7 +146,7 @@ namespace wcd {
 	}
 
 	void
-	Model::debug_info(htab_wr di)
+	Model::debug_info(htab_rw di)
 	{
 
 		base_d::debug_info(di);
@@ -357,7 +357,7 @@ namespace wcd {
 			if (val_ptr(result).isObject())
 			{
 				htab_rc rows_mgr;
-				htab_wr rows(rows_mgr);
+				htab_rw rows(rows_mgr);
 
 				rows.push_back(result);
 				result = rows_mgr;
@@ -365,7 +365,7 @@ namespace wcd {
 			return result;
 		}
 		val_rc obj_method;
-		htab_wr arg1(obj_method);
+		htab_rw arg1(obj_method);
 
 		arg1.push_back(build);
 		arg1.push_back(mlower);
@@ -431,7 +431,7 @@ namespace wcd {
 		}
 		else {
 			val_rc vlist_tab;
-			htab_wr vlist(vlist_tab);
+			htab_rw vlist(vlist_tab);
 			vlist.push_back(id);
 			result = m->byKeyValue(pkey_mgr, vlist_tab);
 		}
@@ -458,7 +458,7 @@ namespace wcd {
 		//showdata("pkey get", pkey_fields);
 		if (pkey_fields.size())
 		{
-			htab_wr pkey_options(result);
+			htab_rw pkey_options(result);
 
 			htab_rc cdefs = getColDefs();
 			htab_rc seqdefs = getSeqDefs();
@@ -472,7 +472,7 @@ namespace wcd {
 				//zend_printf("get pkey options ");
 				//showmem("pkey", pkey);
 				htab_rc options_mgr;
-				htab_wr options(options_mgr);
+				htab_rw options(options_mgr);
 
 				str_rc key_name = pkey.zstr();
 				key_name = key_name.to_lower();
@@ -499,7 +499,7 @@ namespace wcd {
 						if (defval.isString())
 						{
 							htab_rc temp_mgr;
-							htab_wr temp(temp_mgr);
+							htab_rw temp(temp_mgr);
 
 							temp.push_back(SQSTR.default_key);
 							temp.push_back(defval);
@@ -626,7 +626,7 @@ namespace wcd {
 		if (import.isResource())
 		{
 			htab_rc csv_args;
-			htab_wr csv(csv_args);
+			htab_rw csv(csv_args);
 			csv.set(MIS.escape_key, MIS.escape_str);
 
 			fn_fgetcsv fgetcsv;
@@ -647,7 +647,7 @@ namespace wcd {
 				}
 
 				htab_rc values_mgr;
-				htab_wr values(values_mgr);
+				htab_rw values(values_mgr);
 
 				htab_walk sw;
 
@@ -696,7 +696,7 @@ namespace wcd {
 				if (datarowct == 0) {
 					//  prepaire for multi inserts
 					htab_rc columns_mgr;
-					htab_wr columns(columns_mgr);
+					htab_rw columns(columns_mgr);
 
 					for(sw.start(values); sw.ok(); sw.next())
 					{
@@ -778,7 +778,7 @@ namespace wcd {
 		//showdata("columns", columns);
 
 		htab_rc tsf_mgr;
-		htab_wr tsf(tsf_mgr);
+		htab_rw tsf(tsf_mgr);
 
 		obj_rc self = vobj();
 
@@ -892,7 +892,7 @@ namespace wcd {
 			
 
 			htab_rc pkey_refresh_mgr;
-			htab_wr pkey_refresh(pkey_refresh_mgr);
+			htab_rw pkey_refresh(pkey_refresh_mgr);
 
 			htab_walk wk;
 			auto pname = wk.value();
@@ -1062,7 +1062,7 @@ namespace wcd {
 		auto name = wk.value();
 
 		htab_rc result;
-		htab_wr hw(result);
+		htab_rw hw(result);
 		str_buf buf;
 
 		for(wk.start(pkey); wk.ok(); wk.next())
@@ -1145,7 +1145,7 @@ namespace wcd {
 
 		if (ts != 0) 
 		{
-			htab_wr stamps(result);
+			htab_rw stamps(result);
 			str_rc dkey;
 
 			if ((ts & CREATE_TS) != 0)

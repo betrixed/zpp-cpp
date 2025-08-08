@@ -5,6 +5,21 @@
 #include "operation.h"
 #endif
 
+#ifndef WCD_SELECT_H
+#include "select.h"
+#endif
+
+#ifndef WCD_DELETE_H
+#include "delete.h"
+#endif
+
+#ifndef WCD_UPDATE_H
+#include "update.h"
+#endif
+
+#ifndef WCD_INSERT_H
+#include "insert.h"
+#endif
 
 #ifndef SQL_PART_H
 #include "sql_ipart.h"
@@ -19,7 +34,7 @@ using namespace wcc;
 base_obj_mgr<Operation> Operation::omg;
 
 void 
-Operation::debug_info(htab_wr di)
+Operation::debug_info(htab_rw di)
 {
 	base_d::debug_info(di);
 	di.set(SQSTR.driver, db_);
@@ -202,7 +217,7 @@ Operation::where(val_ptr lattr, val_ptr rattr, int op, int blogic)
 {
 	htab_rc data;
 
-	htab_wr hw(data);
+	htab_rw hw(data);
 
 	if(op < 0)
 	{
@@ -492,7 +507,17 @@ ZEND_METHOD(Wcd_Sql_Operation, wipe)
 
 PHP_MINIT_FUNCTION(Wcd_Operation_reg)
 {
-	Operation::omg.classEntry(register_class_Wcd_Sql_Operation());
+	zend_class_entry* temp;
+
+	temp = register_class_Wcd_Sql_Operation();
+
+	Operation::omg.classEntry(temp);
+
+	Select::omg.classEntry(register_class_Wcd_Sql_Select(temp));
+	Delete::omg.classEntry(register_class_Wcd_Sql_Delete(temp));
+	Insert::omg.classEntry(register_class_Wcd_Sql_Insert(temp));
+	Update::omg.classEntry(register_class_Wcd_Sql_Update(temp));
+
 	return SUCCESS;
 }
 

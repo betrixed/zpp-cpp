@@ -1,7 +1,7 @@
-#ifndef ZSTR_BUFFER_H
-#define ZSTR_BUFFER_H
+#ifndef STR_BUF_H
+#define STR_BUF_H
 
-#ifndef ZSTR_OUTPUT_H
+#ifndef STR_OUT_H
 #include "str_out.h"
 #endif
 

@@ -5,7 +5,7 @@
 #include "class_data.h"
 #endif
 
-#ifndef ZVAL_USER_H
+#ifndef VAL_PTR_H
 #include "val_ptr.h"
 #endif
 

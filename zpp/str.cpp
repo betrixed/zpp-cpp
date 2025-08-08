@@ -1,5 +1,5 @@
-#ifndef ZSTR_CPP
-#define ZSTR_CPP
+#ifndef ZPP_STR_CPP
+#define ZPP_STR_CPP
 
 #include "str_ptr.cxx"
 #include "str_rc.cxx"

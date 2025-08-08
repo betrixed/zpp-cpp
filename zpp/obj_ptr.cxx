@@ -1,15 +1,15 @@
-#ifndef ZOBJ_USER_CPP
-#define ZOBJ_USER_CPP
+#ifndef OBJ_PTR_CPP
+#define OBJ_PTR_CPP
 
 #ifndef FN_CALL_H
 #include "fn_call.h"
 #endif
 
-#ifndef ZOBJ_USER_H
+#ifndef OBJ_PTR_H
 #include "obj_ptr.h"
 #endif
 
-#ifndef ZOBJ_MGR_H
+#ifndef OBJ_RC_H
 #include "obj_rc.h"
 #endif
 
@@ -19,7 +19,7 @@ extern "C" {
 };
 
 
-#ifndef HTAB_MGR_H
+#ifndef HTAB_RC_H
 #include "htab_rc.h"
 #endif
 

@@ -129,7 +129,7 @@ Services::activate(str_ptr key)
 
 		val_rc result2 = call_value(callme);
 
-		htab_wr(active_).set(key, result2);
+		htab_rw(active_).set(key, result2);
 
 		result = get(key);
 	}
@@ -240,7 +240,7 @@ Services::newInstance(str_ptr name_class)
 	if (obj.ok())
 	{
 		//showarray("instances", instances_);
-		htab_wr(instances_).set(name_class, obj);
+		htab_rw(instances_).set(name_class, obj);
 	}
 	else {
 		zend_throw_error(zend_ce_error, "newInstance failed for %s", name_class.data());
@@ -256,7 +256,7 @@ Services::getObject(str_ptr key)
 
 	val_ptr test;
 
-	if (htab_wr(instances_).try_fetch(key,test))
+	if (htab_rw(instances_).try_fetch(key,test))
 	{
 		result = test.zobject();
 	}
@@ -272,7 +272,7 @@ Services::setObject(obj_ptr obj, str_ptr key)
 		key = obj.className();
 	}
 
-	htab_wr(instances_).set(key, obj);
+	htab_rw(instances_).set(key, obj);
 	return obj;
 }
 
@@ -291,7 +291,7 @@ bool Services::has(str_ptr name)
 
 void Services::setDefer(str_ptr name, val_ptr value)
 {
-	htab_wr(defer_).set(name, value);
+	htab_rw(defer_).set(name, value);
 }
 
 void  Services::set(str_ptr name, val_ptr value)
@@ -299,7 +299,7 @@ void  Services::set(str_ptr name, val_ptr value)
 	zval* data = (zval*) value;
 	zend_string* key = (zend_string*) name;
 
-	htab_wr temp(active_);
+	htab_rw temp(active_);
 
 	temp.set(key, data);
 }
@@ -336,7 +336,7 @@ Services::get(str_ptr name)
 void  
 Services::unset(str_ptr name)
 {
-	htab_wr(active_).unset(name);
+	htab_rw(active_).unset(name);
 }
 
 
@@ -346,7 +346,7 @@ Services::setThrowFail(bool value)
 	throw_fail_ = value;
 }
 
-void Services::debug_info(htab_wr info)
+void Services::debug_info(htab_rw info)
 {
 	base_d::debug_info(info);
 

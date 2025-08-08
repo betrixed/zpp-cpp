@@ -130,7 +130,7 @@ htab_rc RouteSet::serialize()
 {
 	htab_rc result;
 
-	htab_wr hw(result);
+	htab_rw hw(result);
 
 	//showarray("fixed 1", fixed_);
 	hw.set(radata.cc_fixed, fixed_);
@@ -176,7 +176,7 @@ RouteSet::indexRouteKey(obj_ptr ro)
 	str_ptr  key = route->id_;
 	if (key.size())
 	{	
-		htab_wr(nameIndex_).set(key, ro);
+		htab_rw(nameIndex_).set(key, ro);
 	}	
 }
 
@@ -283,7 +283,7 @@ void  RouteSet::addRouteList(htab_rd list, str_ptr prefix, str_ptr module)
 }
 
 void RouteSet::appendRoute(
-	htab_wr rarr, 
+	htab_rw rarr, 
 	str_ptr key, 
 	Route* myroute)
 {
@@ -303,7 +303,7 @@ void RouteSet::appendRoute(
 		// Already one stored as object, convert to list of 2 objects
 		htab_rc sublist;
 
-		htab_wr hw(sublist);
+		htab_rw hw(sublist);
 
 		hw.push_back(zip); 
 		hw.push_back(store);
@@ -316,14 +316,14 @@ void RouteSet::appendRoute(
 	else if (zip.isArray())
 	{
 		// Add to list of objects, add object
-		htab_wr sublist(zip);
+		htab_rw sublist(zip);
 		sublist.push_back(store);
 	}
 
 	return;
 }
 
-void RouteSet::debug_info(htab_wr hw)
+void RouteSet::debug_info(htab_rw hw)
 {
 	hw.set(radata.cc_fixed, fixed_);
 
@@ -516,7 +516,7 @@ RouteSet::compile(Route* route)
 	str_rc name;
 	str_rc blob;
 	htab_rc params_tab;
-	htab_wr params(params_tab);
+	htab_rw params(params_tab);
 
 	while (pr2 > 0) 
 	{ 

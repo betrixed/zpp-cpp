@@ -16,7 +16,7 @@ namespace wcc {
 		int       stored_;
 		bool      saved_;
 
-		void member_info(htab_wr s, bool store);
+		void member_info(htab_rw s, bool store);
 	public:
 
 		static base_obj_mgr<ICacheData> omg;
@@ -64,7 +64,7 @@ namespace wcc {
 
 		void unserialize(htab_rd uht);
 
-		virtual void debug_info(htab_wr hw);
+		virtual void debug_info(htab_rw hw);
 
 		VIRTUAL_ZOBJPTR
 	

@@ -1,17 +1,17 @@
-#ifndef HTAB_READ_CPP
-#define HTAB_READ_CPP
+#ifndef HTAB_RD_CPP
+#define HTAB_RD_CPP
 
-#ifndef ZSTR_MGR_H
+#ifndef STR_RC_H
 #include "str_rc.h"
 #endif
 
 
-#ifndef HTAB_READ_H
+#ifndef HTAB_RD_H
 #include "htab_rd.h"
 #endif
 
-#ifndef HTAB_WRITE_H
-#include "htab_wr.h"
+#ifndef HTAB_RW_H
+#include "htab_rw.h"
 #endif
 
 #ifndef WC_PREG_H
@@ -22,7 +22,7 @@
 #include "htab_walk.h"
 #endif
 
-#ifndef ZSTR_BUFFER_H
+#ifndef STR_BUF_H
 #include "str_buf.h"
 #endif
 
@@ -355,7 +355,7 @@ htab_rc
 htab_rd::slice(int offset, int length, bool preserve_keys)
 {
 	htab_rc result_mgr;
-	htab_wr hw(result_mgr);
+	htab_rw hw(result_mgr);
 
 	auto src_len = size();
 

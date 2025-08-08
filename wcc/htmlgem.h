@@ -34,7 +34,7 @@ namespace wcc {
 
 		void  outWrapDiv(str_buf& out, str_ptr cname);
 		void  endWrapDiv(str_buf& out);
-		htab_rc label_method(htab_wr ps, int& labeltype);
+		htab_rc label_method(htab_rw ps, int& labeltype);
 		void outAttr(str_buf& out, str_ptr name, str_ptr value);
 		void ifKeyAttr(str_buf& out, str_ptr key, htab_rd ps);
 		htab_rd getLabelKeys1();
@@ -48,7 +48,7 @@ namespace wcc {
 		HtmlGem();
 		virtual ~HtmlGem();
 
-		virtual void debug_info(htab_wr hw);
+		virtual void debug_info(htab_rw hw);
 
 	// php 
 
@@ -87,12 +87,12 @@ namespace wcc {
 
 	// none-php
 		str_rc generateTag(str_ptr tag, htab_rd pset);
-		str_rc getTag(htab_rd ps, htab_wr ex, str_ptr tag);
+		str_rc getTag(htab_rd ps, htab_rw ex, str_ptr tag);
 
 		str_rc inputType(val_ptr pset, str_ptr itype);
 		str_rc getStyle(str_ptr name);
 
-		str_rc ensureIdValue(htab_wr ps);
+		str_rc ensureIdValue(htab_rw ps);
 		str_rc label_front(htab_rd ps);
 		str_rc in_label(htab_rd ps);
 		str_rc out_label(htab_rd ps);

@@ -78,7 +78,7 @@ public:
 		ttl_ = ttl;
 	}
 
- 	virtual void debug_info(htab_wr s);
+ 	virtual void debug_info(htab_rw s);
  	
 	VIRTUAL_ZOBJPTR
 

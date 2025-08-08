@@ -56,7 +56,7 @@ public:
 
 	void setCallInfo(str_ptr obclass, str_ptr obmethod, val_ptr args);
 
-	virtual void debug_info(htab_wr di);
+	virtual void debug_info(htab_rw di);
 
 	obj_ptr getMatch() const
 	{

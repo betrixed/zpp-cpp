@@ -27,14 +27,14 @@
 #include "zarg_rd.cpp"
 #else
 
-#include "htab_wr.h"
+#include "htab_rw.h"
 
 #endif
 
 namespace zpp {
 
 	 void //virtual
-	 base_d::debug_info(htab_wr di)
+	 base_d::debug_info(htab_rw di)
 	 {
 	 	obj_ptr temp(this->vobj());
 

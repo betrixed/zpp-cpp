@@ -1,16 +1,16 @@
-#ifndef HTAB_MGR_CPP
-#define HTAB_MGR_CPP
+#ifndef HTAB_RC_CPP
+#define HTAB_RC_CPP
 
 // clean this zval of its reference counted value and reinitialize
-#ifndef HTAB_MGR_H
+#ifndef HTAB_RC_H
 #include "htab_rc.h"
 #endif
 
-#ifndef ZVAL_MGR_H
+#ifndef VAL_RC_H
 #include "val_rc.h"
 #endif
 
-#ifndef ZSTR_MGR_H
+#ifndef STR_RC_H
 #include "str_rc.h"
 #endif
 
@@ -18,8 +18,8 @@
 #include "htab_walk.h"
 #endif
 
-#ifndef HTAB_WRITE_H
-#include "htab_wr.h"
+#ifndef HTAB_RW_H
+#include "htab_rw.h"
 #endif
 
 //#define HTAB_SHOW_MEMORY
@@ -411,7 +411,7 @@ htab_rc::getValues(htab_rd hr)
 	 htab_rc result;
 	 if (!hr.size())
 		return result;
-	 htab_wr merge(result);
+	 htab_rw merge(result);
 
 	 htab_walk wk;
 	 auto val = wk.value();
@@ -429,7 +429,7 @@ htab_rc::getKeys(htab_rd hr)
 	 htab_rc result;
 	 if (!hr.size())
 		return result;
-	 htab_wr merge(result);
+	 htab_rw merge(result);
 
 	 htab_walk wk;
 	 auto val = wk.key();
@@ -447,7 +447,7 @@ htab_rc::getKeys(htab_rd hr)
  * extracted key => value found in key list exkeys.
  */
 htab_rc //static
-htab_rc::extract(htab_rd exkeys, htab_wr hfrom)
+htab_rc::extract(htab_rd exkeys, htab_rw hfrom)
 {
 
 	htab_rc result;
@@ -457,7 +457,7 @@ htab_rc::extract(htab_rd exkeys, htab_wr hfrom)
 		return result;
 	}
 
-	htab_wr merger(result);
+	htab_rw merger(result);
 	//showarray("exkeys", exkeys);
 
 	htab_walk wk;
@@ -498,7 +498,7 @@ htab_rc::subset(htab_rd exkeys, htab_rd hfrom, bool nullmiss)
 		return result;
 	}
 
-	htab_wr merger(result);
+	htab_rw merger(result);
 	//showarray("exkeys", exkeys);
 
 	htab_walk wk;
@@ -541,7 +541,7 @@ htab_rc::sublist(htab_rd exkeys, htab_rd hfrom)
 		return result;
 	}
 
-	htab_wr vlist(result);
+	htab_rw vlist(result);
 	//showarray("exkeys", exkeys);
 
 	htab_walk wk;

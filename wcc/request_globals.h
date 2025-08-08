@@ -62,7 +62,7 @@ namespace wcc {
 		
 		static base_obj_mgr<RequestGlobals> omg;
 
-		virtual void debug_info(htab_wr di);
+		virtual void debug_info(htab_rw di);
 		
 		void construct();
 

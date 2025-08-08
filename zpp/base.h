@@ -16,7 +16,7 @@
 
 #include "htab_rd.h"
 #include "htab_rc.h"
-#include "htab_wr.h"
+#include "htab_rw.h"
 
 #include "obj_rc.h"
 #include "obj_ptr.h"
@@ -239,7 +239,7 @@ namespace zpp {
 		{
 		}
 		
-		virtual void debug_info(htab_wr ht);
+		virtual void debug_info(htab_rw ht);
 
 		virtual str_rc toString() const {
 			return str_rc();
@@ -536,7 +536,7 @@ namespace zpp {
 			
 			//showobj("obj = ", object);
 			//showarray("base_debug_info", ret);
-			htab_wr hw(ret);
+			htab_rw hw(ret);
 			//showarray("base_debug_info write", ret);
 			T* cobj = cpp(object);
 			//zend_printf("2 T* %lx zobj %lx\n", cobj, cobj->zobj());

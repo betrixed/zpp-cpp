@@ -1,7 +1,7 @@
 #ifndef DATE_TIME_OBJ_CPP
 #define DATE_TIME_OBJ_CPP
 
-#ifndef ZOBJ_MGR_H
+#ifndef OBJ_RC_H
 #include "obj_rc.h"
 #endif
 

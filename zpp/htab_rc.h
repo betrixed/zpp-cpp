@@ -1,17 +1,17 @@
-#ifndef HTAB_MGR_H
-#define HTAB_MGR_H
+#ifndef HTAB_RC_H
+#define HTAB_RC_H
 
-#ifndef HTAB_READ_H
+#ifndef HTAB_RD_H
 #include "htab_rd.h"
 #endif
 
-#ifndef HTAB_WRITE_H
-#include "htab_wr.h"
+#ifndef HTAB_RW_H
+#include "htab_rw.h"
 #endif
 
 namespace zpp {
 
-    class htab_wr;
+    class htab_rw;
 
     class htab_rc : public htab_rd {
     protected:
@@ -20,7 +20,7 @@ namespace zpp {
         static bool cowop(HashTable*& inout);
 
         friend class htab_rd;
-        friend class htab_wr;
+        friend class htab_rw;
 
     public:
         
@@ -89,7 +89,7 @@ namespace zpp {
         static htab_rc getKeys(htab_rd hr);
 
         // extract subset using keylist with removal from original hfrom
-        static htab_rc extract(htab_rd exkeys, htab_wr hfrom);
+        static htab_rc extract(htab_rd exkeys, htab_rw hfrom);
 
         // extract subset using keylist without removal from original hfrom
         static htab_rc subset(htab_rd exkeys, htab_rd hfrom, bool nullmiss = false);

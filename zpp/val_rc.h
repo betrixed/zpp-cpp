@@ -4,8 +4,8 @@
   *  @copyright 2024-2025 Michael Rynn
   */
 
-#ifndef ZVAL_MGR_H
-#define ZVAL_MGR_H
+#ifndef VAL_RC_H
+#define VAL_RC_H
 
 #ifndef PHP_EXTERN_H
 #include "php_extern.h"
@@ -207,5 +207,5 @@ public:
 };
 
 }; // namespace Php
-#endif //ZVAL_MGR_H
+#endif //VAL_RC_H
 

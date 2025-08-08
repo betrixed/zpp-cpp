@@ -44,7 +44,7 @@ public:
 
 RouteAddData radata;
 
-void RouteAdd::debug_info(htab_wr di)
+void RouteAdd::debug_info(htab_rw di)
 {
 	di.set(radata.route_set, route_set_);
 	di.set(radata.module_name, module_name_);
@@ -227,7 +227,7 @@ void RouteAdd::ready(Route* route)
 	str_rc name;
 	str_rc blob;
 	htab_rc params_tab;
-	htab_wr params(params_tab);
+	htab_rw params(params_tab);
 
 	while (pr2 > 0) 
 	{ 

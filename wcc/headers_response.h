@@ -21,7 +21,7 @@ namespace wcc {
 	public:
 		static Hmap_mgr<Headers> omg;
 		
-		virtual void debug_info(htab_wr ht);
+		virtual void debug_info(htab_rw ht);
 		 
 		void reset();
 		bool send();
