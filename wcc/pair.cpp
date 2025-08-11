@@ -7,25 +7,33 @@
 
 namespace wcc {
 
-Pair::Pair_omg Pair::omg;
+base_obj_mgr<Pair> Pair::omg;
 
 class PairInit : public state_init {
 public:
-
-	zstr_intern key;
-	zstr_intern first;
-	zstr_intern value;
-	zstr_intern second;
+	zstr_intern one;
+	zstr_intern two;
 
 	void init() override
 	{
-		key = "key";
-		value = "value";
+		one = "one";
+		two = "two";
 	}
 };
 
 PairInit PairSI;
 
+void Pair::construct(val_ptr p1, val_ptr p2)
+{
+	 obj_ptr self(vobj());
+
+	 self.property(PairSI.one, p1);
+	 self.property(PairSI.two, p2);
+
+	 one_ = self.property_ptr(PairSI.one); 
+	 two_ = self.property_ptr(PairSI.two);
+}
+/*
 zval* 
 property_ptr(zend_object* zobj, zend_string* name)
 {
@@ -91,6 +99,7 @@ Pair::write_property(zend_object *zobj, zend_string *name,
 	return ptr;
 }
 
+*/
 
 /*
 void //static
@@ -124,6 +133,7 @@ Pair::get_second(zend_object* pair,  zval* ret)
 }
 */
 
+/*
 void
 Pair::Pair_omg::init_class_fn()
 {
@@ -138,7 +148,6 @@ Pair::Pair_omg::init_class_fn()
 //zend_declare_typed_property
 	//mydef::class_entry_->ce_flags |= ZEND_ACC_FINAL;
 
-	/*
 	zend_type dtype =  {nullptr, 0};
 
 	val_rc null_init;
@@ -154,8 +163,11 @@ Pair::Pair_omg::init_class_fn()
 									ZEND_ACC_PUBLIC, nullptr, (zend_type) ZEND_TYPE_INIT_NONE(0));
 	// zend_declare_typed_property(mydef::class_entry_, PairSI.second, null_init,
 									ZEND_ACC_PUBLIC, nullptr, (zend_type) ZEND_TYPE_INIT_NONE(0)); 
-	*/
+
 }
+	*/
+
+
 
 }; // namespace wcc
 
@@ -182,7 +194,7 @@ ZEND_METHOD(Wcc_Pair, first)
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	Pair* cobj = zval_toc<Pair>(ZEND_THIS);
-	cobj->key_.return_zv(return_value);
+	cobj->one_.return_zv(return_value);
 
 }
 
@@ -191,7 +203,7 @@ ZEND_METHOD(Wcc_Pair, second)
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	Pair* cobj = zval_toc<Pair>(ZEND_THIS);
-	cobj->value_.return_zv(return_value);
+	cobj->two_.return_zv(return_value);
 }
 
 ZEND_METHOD(Wcc_Pair, key)
@@ -199,7 +211,7 @@ ZEND_METHOD(Wcc_Pair, key)
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	Pair* cobj = zval_toc<Pair>(ZEND_THIS);
-	cobj->key_.return_zv(return_value);
+	cobj->one_.return_zv(return_value);
 
 }
 
@@ -208,7 +220,7 @@ ZEND_METHOD(Wcc_Pair, value)
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	Pair* cobj = zval_toc<Pair>(ZEND_THIS);
-	cobj->value_.return_zv(return_value);
+	cobj->two_.return_zv(return_value);
 }
 
 ZEND_METHOD(Wcc_Pair, sum)

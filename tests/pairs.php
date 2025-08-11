@@ -2,8 +2,6 @@
 //pairs.php
 namespace Wcc;
 
-use DS\Pair as dspair;
-use DS\Map as map;
 use ArrayObject;
 
 require "bootstrap.php";
@@ -18,43 +16,27 @@ function row(string $s, float $x, float $y)
 	printf("%-40s %8.4f %8.4f\n", $s, $x, $y);
 }
 
+$check;
+
 function test_a()
 {
-	$count = 1000;
-	$a = new dspair(123,  2345);
+	global $check;
 
-	echo print_r($a, true) . PHP_EOL;
-	$result = ($a->key + $a->value) / $a->key;
-	echo "sum dspair = " . $result . PHP_EOL;
-	
-	$start = microtime(true);
-
-	for($ix = 0; $ix < $count; $ix++)
-	{
-		$result = ($a->key + $a->value) / $a->key;
-	}
-
-	$end = microtime(true);
-
-	$itime = (($end - $start) / $count) * 1000_000.0;
-	echo "iter = " . chop($itime) . PHP_EOL;
-	echo "----------------------------" . PHP_EOL;
-	return $itime;
-}
-
-function test_b()
-{
 	$count = 1000;
 	$b = new Pair(123,2345);
 
 	echo print_r($b, true) . PHP_EOL;
-	$result = ($b->key + $b->value) / $b->key;
-	echo "sum property handlers = " . $result . PHP_EOL;
+	$result = ($b->one + $b->two) / $b->one;
+	if ($b->one !== $b->key())
+	{
+		throw new Exception("property not same as function");
+	}
+	$check = $result;
 
 	$start = microtime(true);
 	for($ix = 0; $ix < $count; $ix++)
 	{
-		$result = ($b->key + $b->value) / $b->key;
+		$result = ($b->one + $b->two) / $b->one;
 	}
 	$end = microtime(true);
 
@@ -67,12 +49,15 @@ function test_b()
 
 function test_c()
 {
+	global $check;
 	$count = 1000;
 	$b = new Pair(123,2345);
 
 	echo print_r($b, true) . PHP_EOL;
 	$result = $b->sum();
-	echo "sum C++ function = " . $result . PHP_EOL;
+	if ($result !== $check) {
+		throw new Exception("Result not the same! $result");
+	}
 
 	$start = microtime(true);
 	for($ix = 0; $ix < $count; $ix++)
@@ -90,6 +75,8 @@ function test_c()
 
 function test_d()
 {
+	global $check;
+
 	$count = 1000;
 
 	$c = new Config();
@@ -99,7 +86,9 @@ function test_d()
 
 	echo print_r($c, true) . PHP_EOL;
 	$result = ($c->key + $c->value) / $c->key;
-	echo "sum dynamic properties = " . $result . PHP_EOL;
+	if ($result !== $check) {
+		throw new Exception("Result not the same! $result");
+	}
 	
 	$start = microtime(true);
 
@@ -119,6 +108,8 @@ function test_d()
 
 function test_e()
 {
+	global $check;
+
 	$count = 1000;
 	
 	$key = 123;
@@ -128,7 +119,9 @@ function test_e()
 	$result = ($key + $value) / $key;
 
 	echo print_r(get_defined_vars(), true) . PHP_EOL;
-	echo "locals set once = " . $result . PHP_EOL;
+	if ($result !== $check) {
+		throw new Exception("Result not the same! $result");
+	}
 	
 	$start = microtime(true);
 
@@ -148,6 +141,7 @@ function test_e()
 
 function test_f()
 {
+	global $check;
 	$count = 1000;
 
 	$c = new Hmap();
@@ -158,7 +152,9 @@ function test_f()
 	echo print_r($c, true) . PHP_EOL;
 	$result = ($c->key + $c->value) / $c->key;
 	echo "Zend object dynamic propertites = " . $result . PHP_EOL;
-	
+	if ($result !== $check) {
+		throw new Exception("Result not the same! $result");
+	}
 	$start = microtime(true);
 
 	for($ix = 0; $ix < $count; $ix++)
@@ -177,6 +173,7 @@ function test_f()
 
 function test_g()
 {
+	global $check;
 	$count = 1000;
 
 	$c = [];
@@ -187,7 +184,9 @@ function test_g()
 	echo print_r($c, true) . PHP_EOL;
 	$result = ($c["key"] + $c["value"]) / $c["key"];
 	echo "Local array set and lookups = " . $result . PHP_EOL;
-	
+		if ($result !== $check) {
+		throw new Exception("Result not the same! $result");
+	}
 	$start = microtime(true);
 
 	for($ix = 0; $ix < $count; $ix++)
@@ -208,6 +207,7 @@ function test_g()
 
 function test_h()
 {
+	global $check;
 	$count = 1000;
 
 	$c = new ConfigStd();
@@ -219,7 +219,9 @@ function test_h()
 	echo print_r($c, true) . PHP_EOL;
 	$result = ($c->data["key"] + $c->data["value"]) / $c->data["key"];
 	echo "Extend stdClass = " . $result . PHP_EOL;
-	
+		if ($result !== $check) {
+		throw new Exception("Result not the same! $result");
+	}
 	$start = microtime(true);
 
 	for($ix = 0; $ix < $count; $ix++)
@@ -237,6 +239,7 @@ function test_h()
 
 function test_i()
 {
+	global $check;
 	$count = 1000;
 
 	$c = new EmptyTest();
@@ -246,7 +249,9 @@ function test_i()
 	echo print_r($c, true) . PHP_EOL;
 	$result = ($c->key + $c->value) / $c->key;
 	echo "objects declared properties = " . $result . PHP_EOL;
-	
+		if ($result !== $check) {
+		throw new Exception("Result not the same! $result");
+	}
 	$start = microtime(true);
 
 	for($ix = 0; $ix < $count; $ix++)
@@ -264,37 +269,11 @@ function test_i()
 	return $itime;
 }
 
-function test_j()
-{
-	$count = 1000;
-
-	$c = new Map();
-	$c['key'] = 123;
-	$c['value'] = 2345;
-
-	echo print_r($c, true) . PHP_EOL;
-	$result = ($c['key'] + $c['value']) / $c['key'];
-	echo "objects declared array = " . $result . PHP_EOL;
-	
-	$start = microtime(true);
-
-	for($ix = 0; $ix < $count; $ix++)
-	{
-		//$temp = $c->empty;
-		$result = ($c['key'] + $c['value']) / $c['key'];
-		//$result = ($temp["key"] + $temp["value"]) / $temp["key"];
-	}
-
-	$end = microtime(true);
-
-	$itime = (($end - $start) / $count) * 1000_000.0;
-	echo "iter = " . chop($itime) . PHP_EOL;
-	echo "----------------------------" . PHP_EOL;
-	return $itime;
-}
 
 function test_k()
 {
+	global $check;
+
 	$count = 1000;
 
 	$c = new ArrayObject([],  ArrayObject::ARRAY_AS_PROPS);
@@ -308,7 +287,9 @@ function test_k()
 	//$result = ($c->key + $c->value) / $c->key;
 	$result = ($c['key'] + $c['value']) / $c['key'];
 	echo "objects declared properties = " . $result . PHP_EOL;
-	
+		if ($result !== $check) {
+		throw new Exception("Result not the same! $result");
+	}
 	$start = microtime(true);
 
 	for($ix = 0; $ix < $count; $ix++)
@@ -328,7 +309,7 @@ function test_k()
 }
 
 $a = test_a();
-$b = test_b();
+
 $c = test_c();
 $d = test_d();
 $e = test_e();
@@ -336,11 +317,11 @@ $f = test_f();
 $g = test_g();
 $h = test_h();
 $i = test_i();
-$j = test_j();
+
 $k = test_k();
 
 row("use locals set once (e)", $e/$e, $e/$a);
-row("DS\\Pair declared properties (a)", $a/$e, $a/$a);
+row("Wcc\\Pair declared properties (a)", $a/$e, $a/$a);
 row("EmptyTest declared properties (i)", $i/$e, $i/$a);
 row("Wcc\Pair call sum() (c)", $c/$e, $c/$a);
 row("Wcc\\Config dynamic properties", $d/$e, $d/$a);
@@ -348,7 +329,9 @@ row("Wcc\\Config dynamic properties", $d/$e, $d/$a);
 row("Use local array (g)", $g/$e, $g/$a);
 
 row("Extend stdClass (h)", $h/$e, $h/$a);
-row("Wcc\Pair property (b)", $b/$e, $b/$a);
+
 row("Hmap property handler (f)", $f/$e, $f/$a);
-row("DS\\Map  (j)", $j/$e, $j/$a);
+
 row("ArrayObject  (k)", $k/$e, $k/$a);
+
+echo "Versions - PHP " . phpversion() . " Wcc " . phpversion("Wcc") . " XDebug " . phpversion("XDebug") . PHP_EOL;

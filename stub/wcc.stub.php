@@ -111,6 +111,10 @@ final class  Route {
 };
 
 final class Pair {
+
+	public mixed $one;
+	public mixed $two;
+
 	public function __construct(mixed $first, mixed $second);
 
 	public function first() : mixed {}

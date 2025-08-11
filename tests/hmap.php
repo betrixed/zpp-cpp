@@ -7,7 +7,7 @@ use ArrayAccess;
 use stdClass;
 use Wcd\IStore;
 
-$values = ["key1" => "test-1", 
+$values = [ "key1" => "test-1", 
 	        "key2" => "test-2", 
 			"key3" => "test-3",
 		     150 => "xvalue",

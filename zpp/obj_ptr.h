@@ -59,6 +59,8 @@ namespace zpp {
 		val_rc  property(str_ptr key);
 		zval* 	  property_get(str_ptr key, zval* ret);
 
+		zval*     property_ptr(str_ptr key);
+		
 		//! set a property value
 		void      property(str_ptr key, val_ptr value);
 		void      property(str_ptr key, str_ptr value);

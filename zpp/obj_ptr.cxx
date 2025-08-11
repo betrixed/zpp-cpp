@@ -197,6 +197,12 @@ obj_ptr::callable(zval* arg1, zval* arg2)
     return result;
 }
 
+zval* 
+obj_ptr::property_ptr(str_ptr name)
+{
+    return zend_std_get_property_ptr_ptr(obj_, name, BP_VAR_IS, nullptr);
+}
+
 void obj_ptr::property(str_ptr key, str_ptr value)
 {
     zval temp = {0};

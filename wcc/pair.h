@@ -15,6 +15,8 @@ using namespace zpp;
 	{
 	public:
 
+		/*
+
 		static zval* get_property_ptr_ptr(zend_object *zobj, zend_string *name, 
 						int type, void **cache_slot);
 
@@ -29,15 +31,16 @@ using namespace zpp;
 			             int has_set_exists, void **cache_slot);
 
 		static void unset_property(zend_object *zobj, zend_string *name, void **cache_slot);
+	    */
 
-
-
+		/*
 		class Pair_omg : public base_obj_mgr<Pair> {
 		public:
 			void init_class_fn() override;
 
 
 		};
+		*/
 
 		/*
 		static void set_first(zend_object* pair, zval* val);
@@ -47,40 +50,36 @@ using namespace zpp;
 		static zval* get_second(zend_object* pair, zval* ret);
 		*/
 
-		val_rc key_;
-		val_rc value_;
+		val_ptr one_;
+		val_ptr two_;
 
-		void construct(val_ptr p1, val_ptr p2)
-		{
-			key_ = p1;
-			value_ = p2;
-		}
+		void construct(val_ptr p1, val_ptr p2);
 		
 		val_ptr first()
 		{
-			return key_;
+			return one_;
 		}
 
 		val_ptr second()
 		{
-			return value_;
+			return two_;
 		}
 
 		val_ptr key()
 		{
-			return key_;
+			return one_;
 		}
 
 		val_ptr value()
 		{
-			return value_;
+			return two_;
 		}
 		
 		double sum() const 
 		{
 			long a, b;
-			a = val_ptr(key_).zlong();
-			b = val_ptr(value_).zlong();
+			a = val_ptr(one_).zlong();
+			b = val_ptr(two_).zlong();
 			return (a + b) / double(a);
 		}
 		/*
@@ -100,7 +99,7 @@ using namespace zpp;
 		*/
 
 	public:
-		static Pair_omg omg;
+		static base_obj_mgr<Pair> omg;
 		
 		VIRTUAL_ZOBJPTR
 
