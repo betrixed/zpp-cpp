@@ -19,6 +19,7 @@ public:
 
 	void init() override
 	{
+		// "protected property names"
 		class_name = "class_name";
 		method = "func_name";
 		module = "module_name";
@@ -124,6 +125,7 @@ Target::serialize()
 void 
 Target::unserialize(htab_rd htab)
 {
+	//showdata("Target", htab);
 	class_ = htab.get(target_data.class_name);
 	func_ = htab.get(target_data.method);
 	module_ = htab.get(target_data.module);

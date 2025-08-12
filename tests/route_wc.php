@@ -6,25 +6,42 @@ use DateTime;
 
 require "bootstrap.php";
 
+$wcc_v = phpversion("wcc");
+
+echo "Wcc v. " . $wcc_v . PHP_EOL;
+
+	function dumpme(mixed $v)
+	{
+		debug_zval_dump($v);
+	}
+
+if (strlen($wcc_v)==0) 
+{
+	$dumper = "Wcc\dumpme";
+} else {
+
+	$dumper = "Wcc\debug_zpp_dump";
+}
+
 function init_test()
 {
 	$now = new DateTime();
-	debug_zpp_dump($now);
+	$dumper($now);
 
 	$str1 = (string) $now->format("Y-M-jS");
 
 	$data = ["today" => $str1];
 
-	debug_zpp_dump($str1);
+	//debug_zpp_dump($str1);
 
 	$str2 = str_camel("today_only_test");
 	$str3 = str_uncamel($str2);
 
-	debug_zpp_dump($str2);
-	debug_zpp_dump($str3);
+	$dumper($str2);
+	$dumper($str3);
 
 	$str4 = str_intern($str1);
-	debug_zpp_dump($str4);
+	$dumper($str4);
 }
 
 //init_test();
@@ -36,12 +53,12 @@ $s = "STRING " . EmptyTest::class;
 
 
 $targ1 = Target::go(EmptyTest::class, "target");
-debug_zpp_dump($targ1);
+$dumper($targ1);
 
 
 echo "make route\n";
 $r1 = Route::get( "/target", $targ1, Route::AJAX_ONLY)->name("default");
-debug_zpp_dump($r1);
+$dumper($r1);
 
 //0
 $list[] = $r1;
@@ -71,7 +88,7 @@ $radd->methodSfx("<verb>");
 $radd->addRoutes(module:"default", list:$list);
 
 echo "show routeset\n";
-debug_zpp_dump($radd);
+$dumper($radd);
 
 //echo " rset = " . print_r($rset,true) . PHP_EOL;
 
@@ -125,7 +142,10 @@ if ($rm3->findRoute($radd))
 {
 	echo "found" . PHP_EOL;
 	$r = $rm3->getMatch();
+	$ser = serialize($r);
 	echo print_r($r,true) . PHP_EOL;
+	$ser = serialize($r);
+	echo "Serialized " . $ser . PHP_EOL;
 }
 else {
 	
@@ -133,9 +153,14 @@ else {
 	echo "not found" . PHP_EOL;
 }
 
+//$tag = serialize($targ1);
+
 $url = $radd->routeUrl("revisions.list", ['bid' => 1488]);
 
 echo "route url is " . $url . PHP_EOL;
+
+echo "Wcc v. " . $wcc_v . PHP_EOL;
+
 
 //$services = Services::instance();
 

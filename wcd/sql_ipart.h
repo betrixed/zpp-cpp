@@ -284,8 +284,6 @@ namespace wcd {
 
 	class Param : public SqlPartId
 	{
-	protected:
-		val_rc  value_;
 	public:
 
 		static base_obj_mgr<Param> omg;
@@ -296,17 +294,12 @@ namespace wcd {
 
 		void construct(val_ptr zp);
 
-		val_ptr getValue() const {
-			return value_;
-		}
+		val_ptr getValue() const;
 	};
 
 	class Literal : public SqlPartId 
 	{
 	public:
-
-		val_rc   value_;
-
 		// Is this needed for an abstract class?
 		static base_obj_mgr<Literal> omg;
 
@@ -316,7 +309,7 @@ namespace wcd {
 
 		void construct(val_ptr val);
 
-		val_ptr getValue() const { return value_; }
+		val_ptr getValue() const;
 
 		str_rc toString() const override;
 	};

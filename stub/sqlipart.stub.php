@@ -50,6 +50,8 @@ class Expr implements IfSqlPart {
 };
 
 class Literal implements IfSqlPart {
+    public mixed $value;
+
 	public function __construct(mixed $val) {}
 
     public function getPartId() : int {}
@@ -159,6 +161,8 @@ class TColumns extends IColumns implements IfSqlPart {
 
 class Param implements IfSqlPart 
 {
+    public mixed $value;
+    
     public function __construct(mixed $value);
 
     public function getPartId() : int {}

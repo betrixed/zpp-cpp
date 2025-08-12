@@ -167,7 +167,15 @@ void sql_strtab::init()
 void 
 Literal::construct(val_ptr val)
 {
-	value_ = val;
+	obj_ptr self(vobj());
+	self.property(SQSTR.value, val);
+}
+
+val_ptr
+Literal::getValue() const
+{
+	obj_ptr self(vobj());
+	return self.property_ptr(SQSTR.value);
 }
 
 str_rc 
@@ -175,7 +183,7 @@ Literal::toString() const
 {
 	const char k_sqt = '\'';
 
-	val_ptr temp(value_);
+	val_ptr temp = getValue();
 	if (temp.isString())
 	{
 		str_buf buf;
@@ -189,8 +197,9 @@ Literal::toString() const
 
 void Literal::debug_info(htab_rw di)
 {
+	base_d::debug_info(di);
 	di.set(SQSTR.partid, LIT_PID);
-	di.set(SQSTR.value, value_);
+	//di.set(SQSTR.value, value_);
 }
 
 //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
@@ -645,15 +654,25 @@ TColumns::tableCol(str_ptr expr)
 void 
 Param::debug_info(htab_rw di)
 {
-	di.set(SQSTR.valuekey, value_);
+	base_d::debug_info(di);
+	//di.set(SQSTR.valuekey, value_);
 }
 
 void 
 Param::construct(val_ptr zp)
 {
-	value_ = zp;
+	// first make value_ point to actual property
+
+	obj_ptr self(vobj());
+	self.property(SQSTR.value, zp);
 }
 
+val_ptr
+Param::getValue() const
+{
+	obj_ptr self(vobj());
+	return self.property_ptr(SQSTR.value); // for reads only
+}
 
 }; //namespace wcd
 

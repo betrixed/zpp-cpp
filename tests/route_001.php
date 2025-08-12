@@ -1,4 +1,4 @@
-<?php
+php<?php
 namespace Wcc;
 
 use ReflectionClass;

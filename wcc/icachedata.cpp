@@ -84,7 +84,7 @@ ICacheData::construct(str_ptr key,
 }
 
 void 
-ICacheData::member_info(htab_rw s, bool store)
+ICacheData::member_info(htab_rw s, bool dinfo)
 {
 	// make expiry at front of json
 	s.set(IC_STR.expiry_key,  ttl_ + stored_);
@@ -92,7 +92,7 @@ ICacheData::member_info(htab_rw s, bool store)
 	s.set(IC_STR.data_key, data_);
 	s.set(IC_STR.ttl_key, ttl_);
 	s.set(IC_STR.stored_key, stored_);
-	if (!store) {
+	if (dinfo) {
 		s.set(IC_STR.saved, saved_);
 	}
 }

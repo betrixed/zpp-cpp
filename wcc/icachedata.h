@@ -16,7 +16,7 @@ namespace wcc {
 		int       stored_;
 		bool      saved_;
 
-		void member_info(htab_rw s, bool store);
+		void member_info(htab_rw s, bool dinfo);
 	public:
 
 		static base_obj_mgr<ICacheData> omg;

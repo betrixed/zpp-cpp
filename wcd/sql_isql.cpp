@@ -98,7 +98,7 @@ ParamList::useOwnValues()
 str_rc 
 ParamList::paramLiteral(val_ptr value)
 {
-	val_rc temp;
+	val_ptr temp;
 
 	if (value.isObject())
 	{
