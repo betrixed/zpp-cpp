@@ -9,9 +9,14 @@ require "bootstrap.php";
 
 $etest = new EmptyTest();
 
-debug_zval_dump($etest);
+$dump = "debug_zval_dump";
 
-debug_zpp_dump($etest);
+if (extension_loaded("Wcc"))
+{
+	$dump = "debug_zval_dump";
+}
+
+//debug_zpp_dump($etest);
 
 function hide1() {
 	if (class_exists(EmptyTest::class)) {
@@ -115,22 +120,32 @@ function hide1() {
 
 
 class testsa extends ServiceAccess {
+	public string $info;
+
 	public function __construct(?Services $svc = null)
 	{
 		parent::__construct($svc);
+
+		$info = "show in debug info";
 	}
 };
 
 function hide2()
 {
+	global $dump;
+
 	$svc = Services::instance();
 	$test1 = new testsa();
 
 	$test2 = new testsa($svc);
 
+
 	$safetch = $test1->config;
 
+
 	echo "service access $safetch->test" . PHP_EOL;
+
+	$dump($test2);
 }
 
 class depends extends ServiceAccess {
@@ -167,12 +182,12 @@ echo "icache" . PHP_EOL;
 
 echo 'has = ' . $svc->has('cache') . PHP_EOL;
 
-debug_zpp_dump($ic);
-debug_zval_dump($ic);
+//debug_zpp_dump($ic);
+//debug_zval_dump($ic);
 
 //$cfg = $ic->getService('config');
 
 $helper = new LoginHelper();
 
-debug_zpp_dump($helper);
+//debug_zpp_dump($helper);
 //echo "service $cfg->test" . PHP_EOL;

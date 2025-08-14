@@ -33,12 +33,29 @@
 
 namespace zpp {
 
+	class base_init : public state_init {
+	public:
+		base_init() : state_init() {}
+
+		zstr_intern class_name;
+
+		virtual void init()
+		{
+			class_name = "class";
+		}
+	};
+
+base_init BI_str;
+
 	 void //virtual
 	 base_d::debug_info(htab_rw di)
 	 {
 	 	obj_ptr temp(this->vobj());
 
 	 	htab_rc plist;
+
+
+	 	di.set(BI_str.class_name, str_ptr(temp.className()));
 
 	 	if (temp.property_list(plist))
 	 	{
