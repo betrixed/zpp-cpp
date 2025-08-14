@@ -126,7 +126,7 @@ class testsa extends ServiceAccess {
 	{
 		parent::__construct($svc);
 
-		$info = "show in debug info";
+		$this->info = "show in debug info";
 	}
 };
 
@@ -135,6 +135,15 @@ function hide2()
 	global $dump;
 
 	$svc = Services::instance();
+
+	$svc->set("config", new Config());
+
+	$d2 = $svc->get("config");
+	$d2->test = "test value";
+
+	echo "set config" . PHP_EOL;
+
+
 	$test1 = new testsa();
 
 	$test2 = new testsa($svc);
@@ -145,7 +154,7 @@ function hide2()
 
 	echo "service access $safetch->test" . PHP_EOL;
 
-	$dump($test2);
+	$dump($test1);
 }
 
 class depends extends ServiceAccess {
@@ -166,9 +175,9 @@ function itdepends()
 	$d = null;
 }
 
-hide1();
+//hide1();
 hide2();
-itdepends();
+//itdepends();
 
 $svc = Services::instance();
 //debug_zval_dump($svc);
@@ -187,7 +196,7 @@ echo 'has = ' . $svc->has('cache') . PHP_EOL;
 
 //$cfg = $ic->getService('config');
 
-$helper = new LoginHelper();
+//$helper = new LoginHelper();
 
 //debug_zpp_dump($helper);
 //echo "service $cfg->test" . PHP_EOL;

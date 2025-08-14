@@ -85,29 +85,43 @@ obj_ptr::property_list(htab_rc& list)
 	if (!obj_)
 	{
 		return false;
-	}
+	}  
 
-	HashTable *ptab = obj_->handlers->get_properties(obj_);
+    HashTable* ptab = obj_->properties;
+
+    if (!ptab)
+    {
+        //zend_printf("No properties yet\n");
+        ptab = zend_std_get_properties(obj_);
+    }
+    else {
+        //zend_printf("Has properties now\n");
+    }
 
     if (!ptab) {
         return false;
     }
+    
 
+   
     //! second argument bool can force duplication
-    ptab = zend_proptable_to_symtable(ptab,
+    /** ptab = zend_proptable_to_symtable(ptab,
         (obj_->ce->default_properties_count ||
          obj_->handlers != &std_object_handlers ||
-         GC_IS_RECURSIVE(ptab)));
+         GC_IS_RECURSIVE(ptab))); */
 
-    htab_rc temp;
+    htab_rc temp(ptab);// borrow array
 
-    temp.adopt(ptab); // allow for destroy array
+    //temp.adopt(ptab); 
 
-    if (zend_array_count(ptab)) {
-        list = std::move(temp);
-        return true;
+    if (!temp.size())
+    {
+        return false;
     }
-    return false;
+
+    list = std::move(temp);
+
+    return true;
 }
 
 bool obj_ptr::isDateTime() const

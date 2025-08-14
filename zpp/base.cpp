@@ -59,12 +59,13 @@ base_init BI_str;
 
 	 	if (temp.property_list(plist))
 	 	{
+	 		//showdata("prop class:", plist);
+
 	 		htab_rd src(plist);
 
-		 	if (src.size())
-		 	{
-		 		di.merge(src);
-		 	}
+		 	di.merge(src);
+
+		 	//showdata("properties:", di);
 		 }
 	 }
 	 
