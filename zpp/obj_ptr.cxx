@@ -78,6 +78,48 @@ obj_ptr::properties()
     return result;
 }
 
+bool 
+obj_ptr::get_proplist(htab_rc& mgr)
+{
+    auto zobj = obj_;
+    if (!zobj)
+    {
+        return false;
+    }
+    zend_property_info *prop_info;
+    zend_class_entry *ce = obj_->ce;
+    val_rc  retval;
+
+    size_t ct = ce->default_properties_count;
+
+    if (!ct)
+    {
+        return false;
+    }
+
+    htab_rw pstore(retval, ct);
+    for (size_t i = 0; i < ct; i++) 
+    {
+        prop_info = ce->properties_info_table[i];
+
+        if (!prop_info) {
+            continue;
+        }
+
+        zval* propzval = OBJ_PROP(zobj, prop_info->offset);
+
+        //showmem("prop ptr", propzval);
+
+        pstore.set(prop_info->name, propzval);
+
+        /* _zend_hash_append_ind(zobj->properties, prop_info->name,
+            OBJ_PROP(zobj, prop_info->offset));
+        */
+    }
+    mgr = retval;
+
+    return true;
+}
 // return true if something found
 bool 
 obj_ptr::property_list(htab_rc& list)

@@ -27,7 +27,7 @@
 namespace zpp {
 
 void 
-htab_rw::giveback(zval* mgr)
+htab_rw::giveback(zval* mgr, size_t init)
 {
 	//printf("htab_rw giveback\n");
 	val_ptr test(mgr);
@@ -39,19 +39,22 @@ htab_rw::giveback(zval* mgr)
 		val_rc::try_decref(mgr);
 		*mgr = {0};
 
-		h = zend_new_array(HT_MIN_SIZE);
-		#ifdef HTAB_SHOW_MEMORY
+		h = zend_new_array(init);
+		/* #ifdef HTAB_SHOW_MEMORY
 		showarray("giveback", h);
 		#endif
+		*/
 		//comes with refcount ==1
 		
 	}
 	else 
 	{
 		htab_rc::cowop(h);
+		/*
 		#ifdef HTAB_SHOW_MEMORY
 		zend_printf("cowop array %lx to zval %lx\n", h, mgr);	
 		#endif
+		*/
 	}
 	ZVAL_ARR(mgr, h);
 	ht_ = h;
@@ -66,14 +69,14 @@ htab_rw::htab_rw(htab_rc& mgr)
 }
 
 
-htab_rw::htab_rw(val_rc& mgr)
+htab_rw::htab_rw(val_rc& mgr, size_t init)
 {
-	giveback(mgr);
+	giveback(mgr, init);
 }
 
-htab_rw::htab_rw(val_ptr mgr)
+htab_rw::htab_rw(val_ptr mgr, size_t init)
 {
-	giveback(mgr);
+	giveback(mgr, init);
 }
 
 htab_rw::htab_rw(HashTable* h)
@@ -374,6 +377,7 @@ void htab_rw::set(zend_long idx, zval* value)
 void
 htab_rw::merge(HashTable* src)
 {
+	//showarray("src ,merge", src);
 	htab_walk w;
 	auto key = w.key();
 	auto value = w.value();

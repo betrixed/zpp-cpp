@@ -33,17 +33,17 @@
 
 namespace zpp {
 
-	class base_init : public state_init {
-	public:
-		base_init() : state_init() {}
+class base_init : public state_init {
+public:
+	base_init() : state_init() {}
 
-		zstr_intern class_name;
+	zstr_intern class_name;
 
-		virtual void init()
-		{
-			class_name = "class";
-		}
-	};
+	virtual void init()
+	{
+		class_name = "class";
+	}
+};
 
 base_init BI_str;
 
@@ -54,14 +54,14 @@ base_init BI_str;
 
 	 	htab_rc plist;
 
-
-	 	di.set(BI_str.class_name, str_ptr(temp.className()));
+	 	//di.set(BI_str.class_name, str_ptr(temp.className()));
 
 	 	if (temp.property_list(plist))
 	 	{
 	 		//showdata("prop class:", plist);
 
 	 		htab_rd src(plist);
+
 
 		 	di.merge(src);
 

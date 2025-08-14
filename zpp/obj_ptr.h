@@ -48,6 +48,8 @@ namespace zpp {
 		
 		bool property_list(htab_rc& mgr);
 
+		bool get_proplist(htab_rc& mgr);
+
 		//! Closures, isCallables
 		val_rc callable();
 		val_rc callable(zval* arg1);

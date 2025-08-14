@@ -7,7 +7,7 @@ $workdir = dirname(__DIR__);
 
 chdir($workdir);
 
-//echo "Current directory is $workdir" .  PHP_EOL;
+echo "Current directory is $workdir" .  PHP_EOL;
 
 $wcc_root = "php/Wcc";
 

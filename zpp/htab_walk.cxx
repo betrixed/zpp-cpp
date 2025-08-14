@@ -111,26 +111,33 @@ bool htab_walk::getdata()
     zend_hash_get_current_key_zval_ex(ht, (zval*)key_, &iterate_);
 
     zend_string* keystr;
-    val_ptr vkey(key_);
+    val_ptr vkey(key_); // check what it is
 
-    if (vkey.getStringData(&keystr))
+    if (!vkey.getStringData(&keystr))
     {
-        const char* zero = ZSTR_VAL(keystr);
+
+        // const char* zero = ZSTR_VAL(keystr);
         /* 
         * reason for this was not well explained in PHP-CPP,
         * but an empty string key may be an empty storage slot
+        * especially private and protected object property names
         */
-        if (*zero == (char)0)
+
+        //return false;
+
+        //if (*zero == (char)0)
+        //{
+        //    return false;
+        //}
+
+        // integer key expected
+        if (vkey.isNull()) 
         {
-            return false;
+            return invalid();
         }
     }
 
     // if the key is set to NULL, it means that the object is not at a valid position
-    if (vkey.isNull()) 
-    {
-    	return invalid();
-    }
 
     // iterator is at a valid position,  fetch data, add reference
  

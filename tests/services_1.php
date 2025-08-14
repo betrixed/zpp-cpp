@@ -2,6 +2,8 @@
 //services_1.php
 namespace Wcc;
 
+use Wc\Assets;
+
 use Wcc\RequestGlobals;
 use Wc\Link\LoginHelper;
 
@@ -120,7 +122,7 @@ function hide1() {
 
 
 class testsa extends ServiceAccess {
-	public string $info;
+	protected string $info;
 
 	public function __construct(?Services $svc = null)
 	{
@@ -140,6 +142,7 @@ function hide2()
 
 	$d2 = $svc->get("config");
 	$d2->test = "test value";
+	$d2->web_dir = __DIR__;
 
 	echo "set config" . PHP_EOL;
 
@@ -190,6 +193,11 @@ echo "icache" . PHP_EOL;
 //$svc->set('cache', $ic);
 
 echo 'has = ' . $svc->has('cache') . PHP_EOL;
+
+
+$assets = new Assets("tests/assets_full.xml");
+
+$dump($assets);
 
 //debug_zpp_dump($ic);
 //debug_zval_dump($ic);

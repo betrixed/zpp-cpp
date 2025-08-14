@@ -16,7 +16,7 @@ namespace zpp {
     class htab_rw : public htab_rd 
     {
     protected:
-        void giveback(zval* mgr);
+        void giveback(zval* mgr, size_t init = HT_MIN_SIZE);
         // Mark zval type flags if reference counted or not
 
         
@@ -26,11 +26,14 @@ namespace zpp {
          */
 
         htab_rw(htab_rc& mgr);
-        htab_rw(val_rc& mgr);
-        htab_rw(val_ptr mgr);
-        htab_rw(HashTable* h);
+        
+        htab_rw(val_rc& mgr, size_t init=HT_MIN_SIZE);
+        htab_rw(val_ptr mgr, size_t init=HT_MIN_SIZE);
+        
         htab_rw(const zval* p);
         
+        htab_rw(HashTable* h);
+
         htab_rw(const htab_rw& w)
         {
             ht_ = w.ht_;
