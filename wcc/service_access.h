@@ -15,8 +15,8 @@ namespace wcc {
 	 */ 
 	class ServiceAccess : public base_d {
 	protected:
-		obj_rc    	services_;
-		htab_rc    	cache_;
+		obj_rc    		services_;
+		htab_rc    		cache_;
 		class_data      extender_;
 	public:
 
