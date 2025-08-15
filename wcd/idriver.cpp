@@ -642,7 +642,7 @@ IDriver::getAttribute(int key)
 val_rc 
 IDriver::querySingle(str_ptr query)
 {
-	obj_ptr pdo(handle_);
+	obj_ptr pdo(handle());
 
 	val_rc arg1(query);
 
