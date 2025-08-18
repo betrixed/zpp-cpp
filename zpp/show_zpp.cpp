@@ -132,7 +132,7 @@ dump_info::show_properties(zend_object* zobj, HashTable* myht, int level, int re
 	zval *val;
 
 	indent(level);
-	total_ += htab_rd(myht).size();
+	total_ += htab_ptr(myht).size();
 
 	ss << "{\n";
 
@@ -191,7 +191,7 @@ void dump_info::array_sub(HashTable* myht, int level)
 
 	indent(level);
 
-	total_ += htab_rd(myht).size();
+	total_ += htab_ptr(myht).size();
 	ss << packed << "{\n";
 	
 	for (fkv.start(myht); fkv.ok(); fkv.next())

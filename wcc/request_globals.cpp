@@ -198,14 +198,14 @@ bool
 }
 
 //protected
-htab_rd RequestGlobals::readServer()
+htab_ptr RequestGlobals::readServer()
 {
 	return Hmap::map_htab(server_);
 }
 
 //protected
 int 
-RequestGlobals::fileCounter(htab_rd data, bool onlySuccessful)
+RequestGlobals::fileCounter(htab_ptr data, bool onlySuccessful)
 {
 	int result = 0;
 
@@ -216,7 +216,7 @@ RequestGlobals::fileCounter(htab_rd data, bool onlySuccessful)
 		val_ptr value(wk.value());
 		if (value.isArray())
 		{
-			htab_rd fsub(value);
+			htab_ptr fsub(value);
 
 			result += fileCounter(fsub,onlySuccessful);
 			continue; 
@@ -230,7 +230,7 @@ RequestGlobals::fileCounter(htab_rd data, bool onlySuccessful)
 }
 
 obj_rc
-RequestGlobals::makeFile(htab_rd fdata, str_ptr name)
+RequestGlobals::makeFile(htab_ptr fdata, str_ptr name)
 {
 	obj_rc result = FileUpload::omg.new_zobj();
 	FileUpload* fup = zobj_toc<FileUpload>(result);
@@ -240,7 +240,7 @@ RequestGlobals::makeFile(htab_rd fdata, str_ptr name)
 }
 
 str_rc 
-RequestGlobals::getBestQuality(htab_rd parts, str_ptr name)
+RequestGlobals::getBestQuality(htab_ptr parts, str_ptr name)
 {
 	int i = 0;
 	double quality = 0.0;
@@ -256,7 +256,7 @@ RequestGlobals::getBestQuality(htab_rd parts, str_ptr name)
 
 		if (!value.isArray()) continue;
 
-		htab_rd accept(value);
+		htab_ptr accept(value);
 
 		val_ptr dval( accept.get(RQit.quality) );
 		val_ptr sval( accept.get(name) );
@@ -285,7 +285,7 @@ RequestGlobals::getQualityHeader(str_ptr key, str_ptr name)
 	htab_rc result;
 	htab_rw qh(result);
 
-	htab_rd server(readServer());
+	htab_ptr server(readServer());
 
 	str_ptr data = server.get(key);
 
@@ -371,7 +371,7 @@ RequestGlobals::resolveAuthorizationHeaders()
 		}
 	}
 
-	htab_rd server(readServer());
+	htab_ptr server(readServer());
 	val_ptr user = server.get(RQit.PHP_AUTH_USER);
 	val_ptr apw =  server.get(RQit.PHP_AUTH_PW);
 
@@ -410,7 +410,7 @@ RequestGlobals::resolveAuthorizationHeaders()
 
 				if (parts.isArray())
 				{
-					htab_rd parts2(parts);
+					htab_ptr parts2(parts);
 					headers.set(RQit.Php_Auth_User, parts2.get((int)0));
 					headers.set(RQit.Php_Auth_Pw, parts2.get((int)1));
 				}
@@ -476,9 +476,9 @@ RequestGlobals::resolveAuthorizationHeaders()
 }
 
 htab_rc 
-RequestGlobals::smoothFiles(htab_rd names, htab_rd types,
-	htab_rd tmp_names, htab_rd sizes,
-	htab_rd errors, str_ptr prefix)
+RequestGlobals::smoothFiles(htab_ptr names, htab_ptr types,
+	htab_ptr tmp_names, htab_ptr sizes,
+	htab_ptr errors, str_ptr prefix)
 {
 	htab_rc result;
 
@@ -584,7 +584,7 @@ RequestGlobals::getBasicAuth()
 {
 	htab_rc result;
 
-	htab_rd server(readServer());
+	htab_ptr server(readServer());
 
 	val_ptr uname = server.get(RQit.PHP_AUTH_USER);
 	val_ptr upwd = server.get(RQit.PHP_AUTH_PW);
@@ -621,7 +621,7 @@ RequestGlobals::getClientAddress(bool trustHeader)
 	str_rc result;
 	str_ptr address;
 
-	htab_rd server(readServer());
+	htab_ptr server(readServer());
 
 	if (trustHeader)
 	{
@@ -646,7 +646,7 @@ RequestGlobals::getClientAddress(bool trustHeader)
 	if (address.find(',') >= 0) 
 	{
 		htab_rc parts = explode(RQit.comma_key, address, 2);
-		htab_rd pa(parts);
+		htab_ptr pa(parts);
 
 		val_ptr p1 = pa.get(zend_long(0));
 		if (p1.isString()) {
@@ -674,7 +674,7 @@ RequestGlobals::getClientCharsets()
 str_rc 
 RequestGlobals::getContentType()
 {
-	htab_rd server(readServer());
+	htab_ptr server(readServer());
 
 	return server.get(RQit.CONTENT_TYPE);
 }
@@ -684,7 +684,7 @@ RequestGlobals::getDigestAuth()
 {
 	htab_rc result;
 
-	htab_rd server(readServer());
+	htab_ptr server(readServer());
 
 	val_ptr dval = server.get(RQit.PHP_AUTH_DIGEST);
 
@@ -704,7 +704,7 @@ RequestGlobals::getDigestAuth()
 
 			for(wk.start(results); wk.ok(); wk.next())
 			{
-				htab_rd match(wk.value());
+				htab_ptr match(wk.value());
 				str_ptr skey(match.get(int(1)));
 				val_ptr sval(match.get(int(3)));
 				auth.set(skey, sval);
@@ -717,14 +717,14 @@ RequestGlobals::getDigestAuth()
 str_rc 
 RequestGlobals::getHTTPReferer()
 {
-	htab_rd server(readServer());
+	htab_ptr server(readServer());
 	return str_rc(server.get(RQit.HTTP_REFERER));
 }
 
 val_rc
 RequestGlobals::getHeader(str_ptr header)
 {
-	htab_rd server(readServer());
+	htab_ptr server(readServer());
 	val_ptr value = server.get(header);
 	if (!value.isNull())
 	{
@@ -785,7 +785,7 @@ RequestGlobals::getHeaders()
 
 	for_key_value wk;
 
-	htab_rd server(readServer());
+	htab_ptr server(readServer());
 
 	for(wk.start(server); wk.ok(); wk.next())
 	{
@@ -821,7 +821,7 @@ RequestGlobals::getHttpHost()
 {
 	str_rc result;
 
-	htab_rd server(readServer());
+	htab_ptr server(readServer());
 	str_ptr host = server.get(RQit.HTTP_HOST);
 
 	if (!host.size())
@@ -896,7 +896,7 @@ int RequestGlobals::getMethod()
 	if (verb_ > 0)
 		return verb_;
 
-	htab_rd server(readServer());
+	htab_ptr server(readServer());
 
 	val_ptr method = server.get(RQit.REQUEST_METHOD);
 
@@ -909,7 +909,7 @@ int RequestGlobals::getMethod()
 
 	if (verb_ == html::V_POST)
 	{
-		htab_rd req(Hmap::map_htab(request_));
+		htab_ptr req(Hmap::map_htab(request_));
 
 		str_rc override = getHeader(RQit.X_HTTP_METHOD_OVERRIDE);
 
@@ -942,7 +942,7 @@ void RequestGlobals::setMethodOverride(bool value)
 int 
 RequestGlobals::getPort()
 {
-	htab_rd server(readServer());
+	htab_ptr server(readServer());
 
 	str_ptr host = server.get(RQit.HTTP_HOST);
 	if (host.size())
@@ -984,7 +984,7 @@ RequestGlobals::getRawBody()
 str_ptr
 RequestGlobals::getScheme()
 {
-	htab_rd server(readServer());
+	htab_ptr server(readServer());
 
 	str_ptr scheme = server.get(RQit.HTTPS);
 	if (scheme.size())
@@ -1003,7 +1003,7 @@ RequestGlobals::getScheme()
 str_rc 
 RequestGlobals::getServerAddress()
 {
-	htab_rd server(readServer());
+	htab_ptr server(readServer());
 
 	str_ptr serverAddr = server.get(RQit.SERVER_ADDR);
 	if (serverAddr.size()) {
@@ -1016,7 +1016,7 @@ RequestGlobals::getServerAddress()
 str_rc 
 RequestGlobals::getServerName()
 {
-	htab_rd server(readServer());
+	htab_ptr server(readServer());
 
 	str_rc name = server.get(RQit.SERVER_NAME);
 
@@ -1042,7 +1042,7 @@ RequestGlobals::getURI(bool onlyPath)
 {	
 	str_rc result;
 
-	htab_rd server(readServer());
+	htab_ptr server(readServer());
 
 	result = server.get(RQit.REQUEST_URI);
 
@@ -1075,7 +1075,7 @@ RequestGlobals::getUploadedFiles(bool onlySuccess, bool namekeys)
 	htab_rc result;
 	htab_rw fileobjs(result);
 
-	htab_rd files(Hmap::map_htab(files_));
+	htab_ptr files(Hmap::map_htab(files_));
 
 	if (files.size())
 	{
@@ -1093,7 +1093,7 @@ RequestGlobals::getUploadedFiles(bool onlySuccess, bool namekeys)
 
 		for(wk.start(files); wk.ok(); wk.next())
 		{
-			htab_rd input(value);
+			htab_ptr input(value);
 
 			val_ptr nv = input.get(namekey);
 
@@ -1119,7 +1119,7 @@ RequestGlobals::getUploadedFiles(bool onlySuccess, bool namekeys)
 
 				for(sh.start(smooth); sh.ok(); sh.next())
 				{
-					htab_rd file = shval.zarray();
+					htab_ptr file = shval.zarray();
 					int error_val = val_ptr(file.get(errorkey)).zlong();
 
 					if ((!onlySuccess) || (error_val == Upload::ERROR_OK))
@@ -1163,7 +1163,7 @@ RequestGlobals::getUploadedFiles(bool onlySuccess, bool namekeys)
 str_rc 
 RequestGlobals::getUserAgent()
 {
-	htab_rd server(readServer());
+	htab_ptr server(readServer());
 	return server.get(RQit.HTTP_USER_AGENT);
 }
 
@@ -1183,7 +1183,7 @@ RequestGlobals::hasHeader(str_ptr header)
 bool 
 RequestGlobals::hasQuery(str_ptr key)
 {
-	htab_rd query(Hmap::map_htab(get_));
+	htab_ptr query(Hmap::map_htab(get_));
 
 	return val_ptr(query.get(key)).ok();
 }
@@ -1191,7 +1191,7 @@ RequestGlobals::hasQuery(str_ptr key)
 bool 
 RequestGlobals::hasRequest(str_ptr key)
 {
-	htab_rd req(Hmap::map_htab(request_));
+	htab_ptr req(Hmap::map_htab(request_));
 
 	return val_ptr(req.get(key)).ok();
 }
@@ -1199,7 +1199,7 @@ RequestGlobals::hasRequest(str_ptr key)
 bool 
 RequestGlobals::isAjax()
 {
-	htab_rd server(readServer());
+	htab_ptr server(readServer());
 
 	str_ptr check = server.get(RQit.HTTP_X_REQUESTED_WITH);
 
@@ -1230,7 +1230,7 @@ RequestGlobals::isMethod(val_ptr methods, bool strict)
 
 	if (methods.isArray())
 	{
-		htab_rd list(methods.zarray());
+		htab_ptr list(methods.zarray());
 
 		htab_walk wk;
 		auto method = wk.value();
@@ -1296,7 +1296,7 @@ RequestGlobals::isSecure()
 bool 
 RequestGlobals::isSoap()
 {
-	htab_rd server(readServer());
+	htab_ptr server(readServer());
 
 	str_ptr soap = server.get(RQit.HTTP_SOAPACTION);
 	if (soap.size())
@@ -1317,7 +1317,7 @@ RequestGlobals::isSoap()
 int 
 RequestGlobals::numFiles(bool onlySuccess)
 {
-	htab_rd files(Hmap::map_htab(files_));
+	htab_ptr files(Hmap::map_htab(files_));
 
 	if (!files.size())
 	{
@@ -1331,7 +1331,7 @@ RequestGlobals::numFiles(bool onlySuccess)
 	{
 		if (value.isArray())
 		{
-			htab_rd file(value);
+			htab_ptr file(value);
 
 			val_ptr error = file.get(RQit.error_key);
 
@@ -1367,19 +1367,19 @@ RequestGlobals::server()
 	return server_;
 }
 
-htab_rd
+htab_ptr
 RequestGlobals::getPost()
 {
 	return Hmap::map_htab(post_);
 }
 
-htab_rd 
+htab_ptr 
 RequestGlobals::getQuery()
 {
 	return Hmap::map_htab(get_);
 }
 
-htab_rd
+htab_ptr
 RequestGlobals::getServer()
 {
 	return Hmap::map_htab(server_);
@@ -1825,7 +1825,7 @@ ZEND_METHOD(Wcc_RequestGlobals, getPost)
 	ZEND_PARSE_PARAMETERS_END();
 
 	RequestGlobals* cobj = zval_toc<RequestGlobals>(ZEND_THIS);
-	htab_rd result = cobj->getPost();
+	htab_ptr result = cobj->getPost();
 	result.return_zv(return_value);
 
 }
@@ -1836,7 +1836,7 @@ ZEND_METHOD(Wcc_RequestGlobals, getQuery)
 	ZEND_PARSE_PARAMETERS_END();
 
 	RequestGlobals* cobj = zval_toc<RequestGlobals>(ZEND_THIS);
-	htab_rd result = cobj->getQuery();
+	htab_ptr result = cobj->getQuery();
 	//showmem("getQuery result", result);
 	result.return_zv(return_value);
 
@@ -1848,7 +1848,7 @@ ZEND_METHOD(Wcc_RequestGlobals, getServer)
 	ZEND_PARSE_PARAMETERS_END();
 
 	RequestGlobals* cobj = zval_toc<RequestGlobals>(ZEND_THIS);
-	htab_rd result = cobj->getServer();
+	htab_ptr result = cobj->getServer();
 	//showmem("getQuery result", result);
 	result.return_zv(return_value);
 

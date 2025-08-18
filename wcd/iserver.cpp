@@ -301,20 +301,20 @@ IServer::getDriverClass(str_ptr dkey)
 }
 
 
-htab_rd 
+htab_ptr 
 IServer::getSqlClasses()
 {
 	return sqlClasses_;
 }
 
-htab_rd 
+htab_ptr 
 IServer::getDriverClasses()
 {
 	return driverClasses_;
 }
 
 void 
-IServer::config(htab_rd data)
+IServer::config(htab_ptr data)
 {
 	val_ptr clist = data.get(ISV.sqls_key);
 
@@ -370,7 +370,7 @@ IServer::setAlias(str_ptr alias, str_ptr name)
 	htab_rw(alias_).set(alias, name);
 }
 
-htab_rd 
+htab_ptr 
 IServer::getAliases()
 {
 	return alias_;
@@ -446,7 +446,7 @@ ZEND_METHOD(Wcd_IServer, getConnect)
 	result.move_zv(return_value);
 }
 
-//void config(htab_rd data);
+//void config(htab_ptr data);
 ZEND_METHOD(Wcd_IServer, config)
 {
 	zval* data;
@@ -460,14 +460,14 @@ ZEND_METHOD(Wcd_IServer, config)
 	cobj->config(data);
 }
 
-//htab_rd IServer::getAliases()
+//htab_ptr IServer::getAliases()
 ZEND_METHOD(Wcd_IServer, getAliases)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	IServer* cobj = zval_toc<IServer>(ZEND_THIS);
 
-	htab_rd result = cobj->getAliases();
+	htab_ptr result = cobj->getAliases();
 
 	result.return_zv(return_value);
 }
@@ -525,14 +525,14 @@ ZEND_METHOD(Wcd_IServer, getDriverClass)
 	result.move_zv(return_value);
 }
 
-//htab_rd getDriverClasses();
+//htab_ptr getDriverClasses();
 ZEND_METHOD(Wcd_IServer, getDriverClasses)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	IServer* cobj = zval_toc<IServer>(ZEND_THIS);
 
-	htab_rd result = cobj->getDriverClasses();
+	htab_ptr result = cobj->getDriverClasses();
 
 	result.return_zv(return_value);
 }
@@ -557,7 +557,7 @@ ZEND_METHOD(Wcd_IServer, getSqlClasses)
 
 	IServer* cobj = zval_toc<IServer>(ZEND_THIS);
 
-	htab_rd result = cobj->getSqlClasses();
+	htab_ptr result = cobj->getSqlClasses();
 
 	result.return_zv(return_value);
 }

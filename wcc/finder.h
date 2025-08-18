@@ -24,16 +24,16 @@ public:
 	void addFolder(str_ptr fsdir);
 	void addPath(str_ptr nsroot, str_ptr fspath);
 
-	void addPathArray(htab_rd pathsArray);
+	void addPathArray(htab_ptr pathsArray);
 	void addClass(str_ptr cname, str_ptr fspath);
-	void addClasses(htab_rd classArray);
+	void addClasses(htab_ptr classArray);
 
 	// properties
-	htab_rd getNSPaths() const;
+	htab_ptr getNSPaths() const;
 
-	htab_rd getClassPaths() const;
+	htab_ptr getClassPaths() const;
 
-	htab_rd getFolders() const;
+	htab_ptr getFolders() const;
 
 	//! return path if found or null
 	str_rc find(str_ptr cname );

@@ -144,7 +144,7 @@ htab_rc RouteSet::serialize()
 }
 
 void     
-RouteSet::unserialize(htab_rd hr)
+RouteSet::unserialize(htab_ptr hr)
 {
 	fixed_ = hr.get(radata.cc_fixed);
 	vary_ = hr.get(radata.cc_vary);
@@ -218,7 +218,7 @@ RouteSet::getRoute(str_ptr name)
 {
 
 	obj_rc result;
-	htab_rd idx(nameIndex_);
+	htab_ptr idx(nameIndex_);
 
 	if (idx.size()==0) 
 	{
@@ -235,7 +235,7 @@ RouteSet::getRoute(str_ptr name)
 }
 
 
-void  RouteSet::addRouteList(htab_rd list, str_ptr prefix, str_ptr module)
+void  RouteSet::addRouteList(htab_ptr list, str_ptr prefix, str_ptr module)
 {
 	this->prefix(prefix);
 
@@ -346,7 +346,7 @@ void RouteSet::methodSfx(str_ptr name)
 }
 
 str_rc 
-RouteSet::routeUrl(str_ptr name, htab_rd params)
+RouteSet::routeUrl(str_ptr name, htab_ptr params)
 {
 	str_rc result;
 
@@ -521,13 +521,13 @@ RouteSet::compile(Route* route)
 	while (pr2 > 0) 
 	{ 
 
-		htab_rd m2(captures);
+		htab_ptr m2(captures);
 
 		if (m2.size() < 2)
 		{
 			break;
 		}
-		htab_rd segs = m2.get((int) 1);
+		htab_ptr segs = m2.get((int) 1);
 		htab_walk wk;
 		auto value = wk.value();
 
@@ -623,7 +623,7 @@ PHP_METHOD(Wcc_RouteSet, __unserialize)
 	Z_PARAM_ARRAY(data)
 	ZEND_PARSE_PARAMETERS_END();
 
-	htab_rd hw(Z_ARR_P(data));
+	htab_ptr hw(Z_ARR_P(data));
 
 	RouteSet*   cobj = zval_toc<RouteSet>(ZEND_THIS);
 
@@ -658,7 +658,7 @@ PHP_METHOD(Wcc_RouteSet, getFixed)
 	ZEND_PARSE_PARAMETERS_NONE();
 	
 	RouteSet* cobj = zval_toc<RouteSet>(ZEND_THIS);
-	htab_rd fixed =cobj->getFixed();
+	htab_ptr fixed =cobj->getFixed();
 
 	fixed.return_zv(return_value);
 }
@@ -669,7 +669,7 @@ PHP_METHOD(Wcc_RouteSet, getVary)
 	
 	RouteSet* cobj = zval_toc<RouteSet>(ZEND_THIS);
 
-	htab_rd vary = cobj->getVary();
+	htab_ptr vary = cobj->getVary();
 
 	vary.return_zv(return_value);
 }
@@ -796,7 +796,7 @@ PHP_METHOD(Wcc_RouteSet, routeUrl)
 	RouteSet* cobj = zval_toc<RouteSet>(ZEND_THIS);
 
 	//showmem("addRoutes", ZEND_THIS);
-	htab_rd plist;
+	htab_ptr plist;
 	if (params) {
 		plist = params;
 	}

@@ -120,7 +120,7 @@ namespace wcd {
 	}
 
 	val_rc 
-	Model::createFromResult(str_ptr classname, htab_rd results)
+	Model::createFromResult(str_ptr classname, htab_ptr results)
 	{
 		if (results.size()==0)
 		{
@@ -186,7 +186,7 @@ namespace wcd {
 	}
 
 	obj_rc
-	Model::newRow(htab_rd data, bool isSaved)
+	Model::newRow(htab_ptr data, bool isSaved)
 	{
 		obj_rc result = IRow::omg.new_zobj();
 
@@ -198,14 +198,14 @@ namespace wcd {
 	}
 
 	obj_rc//static
-	Model::row(str_ptr static_name, htab_rd data)
+	Model::row(str_ptr static_name, htab_ptr data)
 	{
 		Model* m = model_instance(static_name);
 		return m->newRow(data);
 	}
 
 	obj_rc//static
-	Model::rowSaved(str_ptr static_name, htab_rd data)
+	Model::rowSaved(str_ptr static_name, htab_ptr data)
 	{
 		Model* m = model_instance(static_name);
 		obj_rc rec = m->newRow(data);
@@ -314,7 +314,7 @@ namespace wcd {
 	val_rc 
 	Model::callStatic(str_ptr static_name, str_ptr method, val_ptr params)
 	{
-		htab_rd  parray(params.zarray());
+		htab_ptr  parray(params.zarray());
 
 		Model* m = Model::model_instance(static_name);
 		obj_rc build = m->getBuilderForMe();
@@ -418,7 +418,7 @@ namespace wcd {
 		}
 		else if (id.isArray())
 		{
-			htab_rd vlist(id.zarray());
+			htab_ptr vlist(id.zarray());
 			val_ptr test = vlist.get((int)0);
 			if (test.isNull()) {
 				htab_rc v2 = htab_rc::sublist(pkey, vlist);
@@ -709,7 +709,7 @@ namespace wcd {
 					ParamList* plist = zobj_toc<ParamList>(plist_mgr);
 
 					str_ptr sql(plist->getSql());
-					htab_rd record(plist->getValues());
+					htab_ptr record(plist->getValues());
 
 					//showstr("sql", sql);
 					//showdata("record", record);
@@ -856,7 +856,7 @@ namespace wcd {
 		val_rc pkey_mgr(getPKey());
 		//showmem("pkey_mgr", pkey_mgr);
 
-		htab_rd pkey(pkey_mgr);
+		htab_ptr pkey(pkey_mgr);
 
 		val_rc saved;
 
@@ -886,8 +886,8 @@ namespace wcd {
 		else {
 			//zend_printf("save-create\n");
 
-			htab_rd data = irow->reader();
-			htab_rd options = getKeyOptions();
+			htab_ptr data = irow->reader();
+			htab_ptr options = getKeyOptions();
 
 			
 
@@ -906,7 +906,7 @@ namespace wcd {
 					val_ptr pkey_options = options.get(pname);
 					if (pkey_options.isArray()) 
 					{
-						htab_rd pkoption(pkey_options.zarray());
+						htab_ptr pkoption(pkey_options.zarray());
 
 						val_ptr option_key = pkoption.get(MIS.returns_key);
 						int option = option_key.zlong();
@@ -933,8 +933,8 @@ namespace wcd {
 			if (saved.isArray() && (pkey_refresh_mgr.size() > 0))
 			{
 				// its a double wrap
-				htab_rd values_wrap(saved.zarray());
-				htab_rd values(values_wrap.get(int(0)));
+				htab_ptr values_wrap(saved.zarray());
+				htab_ptr values(values_wrap.get(int(0)));
 
 				//showdata("saved values", values);
 				htab_walk owk;
@@ -945,7 +945,7 @@ namespace wcd {
 
 					if (pkey_options.isArray()) 
 					{
-						htab_rd pkoption(pkey_options.zarray());
+						htab_ptr pkoption(pkey_options.zarray());
 						//showdata("pkoption", pkoption);
 
 						val_ptr option_key = pkoption.get(MIS.returns_key);
@@ -1100,19 +1100,19 @@ namespace wcd {
 	}
 
 	void 
-	Model::setColDefs(htab_rd options)
+	Model::setColDefs(htab_ptr options)
 	{
 		class_cdefs_ = options;
 	}
 
 	void 
-	Model::setKeyOptions(htab_rd options)
+	Model::setKeyOptions(htab_ptr options)
 	{
 		pkey_options_ = options;
 	}
 
 	void 
-	Model::setPKey(htab_rd options)
+	Model::setPKey(htab_ptr options)
 	{
 		class_pkey_ = options;
 	}
@@ -1126,7 +1126,7 @@ namespace wcd {
 	}
 
 	void 
-	Model::setSeqDefs(htab_rd options)
+	Model::setSeqDefs(htab_ptr options)
 	{
 		seq_defs_ = options;
 	}

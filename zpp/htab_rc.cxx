@@ -407,7 +407,7 @@ htab_empty::htab_empty()
 
 
 htab_rc
-htab_rc::getValues(htab_rd hr)
+htab_rc::getValues(htab_ptr hr)
 {
 	 htab_rc result;
 	 if (!hr.size())
@@ -425,7 +425,7 @@ htab_rc::getValues(htab_rd hr)
 
 //* return indexed array of keys
 htab_rc 
-htab_rc::getKeys(htab_rd hr)
+htab_rc::getKeys(htab_ptr hr)
 {
 	 htab_rc result;
 	 if (!hr.size())
@@ -448,7 +448,7 @@ htab_rc::getKeys(htab_rd hr)
  * extracted key => value found in key list exkeys.
  */
 htab_rc //static
-htab_rc::extract(htab_rd exkeys, htab_rw hfrom)
+htab_rc::extract(htab_ptr exkeys, htab_rw hfrom)
 {
 
 	htab_rc result;
@@ -489,7 +489,7 @@ htab_rc::extract(htab_rd exkeys, htab_rw hfrom)
  * extracted key => value found in key list exkeys.
  */
 htab_rc //static
-htab_rc::subset(htab_rd exkeys, htab_rd hfrom, bool nullmiss)
+htab_rc::subset(htab_ptr exkeys, htab_ptr hfrom, bool nullmiss)
 {
 
 	htab_rc result;
@@ -532,7 +532,7 @@ htab_rc::subset(htab_rd exkeys, htab_rd hfrom, bool nullmiss)
  * Null in list indicates not found.
  */
 htab_rc //static
-htab_rc::sublist(htab_rd exkeys, htab_rd hfrom)
+htab_rc::sublist(htab_ptr exkeys, htab_ptr hfrom)
 {
 
 	htab_rc result;

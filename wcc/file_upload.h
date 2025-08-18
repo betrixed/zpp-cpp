@@ -29,7 +29,7 @@ namespace wcc {
 
 		virtual void debug_info(htab_rw hw);
 		
-		void construct(htab_rd file_data, str_ptr name);
+		void construct(htab_ptr file_data, str_ptr name);
 
 		str_rc getRealType();
 

@@ -54,9 +54,9 @@ class Plate; // forward
 		void 	  setLoadHtml(obj_ptr obj);
 		obj_ptr getLoadHtml();
 
-		void mergePlateData(htab_rd data, str_ptr name);
-		void shareWithAll(htab_rd data);
-		void shareData(htab_rd data, val_ptr templates);
+		void mergePlateData(htab_ptr data, str_ptr name);
+		void shareWithAll(htab_ptr data);
+		void shareData(htab_ptr data, val_ptr templates);
 
 		htab_rc getData(str_ptr name);
 
@@ -73,7 +73,7 @@ class Plate; // forward
 
 		//obj_rc makeRaw(str_ptr name, str_ptr raw, bool store = false);
 
-		str_rc render(str_ptr name, htab_rd data);
+		str_rc render(str_ptr name, htab_ptr data);
 
 		void clearPlates();
 		void clearPaths();

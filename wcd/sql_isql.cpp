@@ -126,7 +126,7 @@ ParamList::paramLiteral(val_ptr value)
 }
 
 str_rc 
-ParamList::addParamList(htab_rd values)
+ParamList::addParamList(htab_ptr values)
 {
 	str_buf buf;
 
@@ -406,7 +406,7 @@ JoinTables::order(str_ptr name, bool ascend)
 }
 
 obj_rc //static
-JoinTables::rowSplit(htab_rd row, htab_rd rename)
+JoinTables::rowSplit(htab_ptr row, htab_ptr rename)
 {
 	htab_rc rec_temp;
 	htab_rw rec(rec_temp);
@@ -483,7 +483,7 @@ ISql::quoteName(str_ptr name)
 }
 
 str_rc 
-ISql::columns(htab_rd bd)
+ISql::columns(htab_ptr bd)
 {
 	str_buf buf;
 
@@ -522,7 +522,7 @@ ISql::columnsTC(IColumns* tc, htab_rw col_list)
 
 	str_ptr alias = tc->getAlias();
 	{
-		htab_rd colNames(tc->getColNames());
+		htab_ptr colNames(tc->getColNames());
 		htab_walk wk;
 		auto name = wk.key();
 		auto rename = wk.value();
@@ -555,7 +555,7 @@ ISql::columnsTC(IColumns* tc, htab_rw col_list)
 		}
 	}
 	{
-		htab_rd expr = tc->getExpr();
+		htab_ptr expr = tc->getExpr();
 		htab_walk wk;
 		auto exalias = wk.key();
 		auto exfn = wk.value();
@@ -573,7 +573,7 @@ ISql::columnsTC(IColumns* tc, htab_rw col_list)
 
 // 
 str_rc
-ISql::orderBy(htab_rd obind)
+ISql::orderBy(htab_ptr obind)
 {
 	str_buf buf;
 
@@ -589,7 +589,7 @@ ISql::orderBy(htab_rd obind)
 	{
 		if (order_tab.isArray())
 		{
-			htab_rd order(order_tab.zarray());
+			htab_ptr order(order_tab.zarray());
 			if (ix.zlong() > 0)
 			{
 				buf << ", ";
@@ -627,7 +627,7 @@ ISql::deleteSql(Bindings& bind)
 
 	buf << "DELETE FROM";
 
-	htab_rd tables = this->getTables(bind);
+	htab_ptr tables = this->getTables(bind);
 
 	htab_walk pos;
 	// first table
@@ -643,7 +643,7 @@ ISql::deleteSql(Bindings& bind)
 
 	if (wh.isArray())
 	{
-		htab_rd wbind( wh.zarray());
+		htab_ptr wbind( wh.zarray());
 
 		if (wbind.size())
 		{
@@ -662,7 +662,7 @@ ISql::deleteSql(Bindings& bind)
 
 	obj_rc paramList = bind.getParamList();
 	ParamList* plist = zobj_toc<ParamList> (paramList);
-	//htab_rd params = plist->getParams();
+	//htab_ptr params = plist->getParams();
 
 	str_rc sql = buf.zstr();
 	plist->setSql(sql);
@@ -746,7 +746,7 @@ ISql::getTruncateSql()
 	return SQSTR.delete_from;
 }
 
-htab_rd
+htab_ptr
 ISql::getTables(Bindings& bind)
 {
 	JoinTables* jt = bind.getJoinTables();
@@ -775,7 +775,7 @@ ISql::truncate(Bindings& bind)
 }
 
 str_rc
-ISql::insert_col_params(Bindings& bind, htab_rd rowbind)
+ISql::insert_col_params(Bindings& bind, htab_ptr rowbind)
 {
 	htab_walk wk;
 
@@ -811,7 +811,7 @@ ISql::insert_col_params(Bindings& bind, htab_rd rowbind)
 		
 		if (val.isArray()) //TODO: maybe string would do here
 		{
-			htab_rd vdata(val.zarray());
+			htab_ptr vdata(val.zarray());
 			place = vdata.get(int(0));
 			if (place.vstr() == "default")
 			{
@@ -834,7 +834,7 @@ ISql::insert_col_params(Bindings& bind, htab_rd rowbind)
 }
 
 str_rc
-ISql::setSeqValue(int value, htab_rd data)
+ISql::setSeqValue(int value, htab_ptr data)
 {
 	str_rc seq_name = data.get(SQSTR.seq_key);
 
@@ -871,9 +871,9 @@ IColumns* getIColumns(val_ptr zv)
 	return nullptr;
 }
 
-void extract_params(htab_rd rowbind, htab_rd plist, htab_rw params);
+void extract_params(htab_ptr rowbind, htab_ptr plist, htab_rw params);
 
-void extract_params(htab_rd rowbind, htab_rd plist, htab_rw params)
+void extract_params(htab_ptr rowbind, htab_ptr plist, htab_rw params)
 {
 	//showarray("after create", ret_params);
 
@@ -899,7 +899,7 @@ ISql::insert(Bindings& bind)
 
 	buf << "INSERT INTO";
 
-	htab_rd jtables = this->getTables(bind);
+	htab_ptr jtables = this->getTables(bind);
 
 	if (!jtables.size()) {
 		zend_throw_error(zend_ce_error, "No tables set");
@@ -925,7 +925,7 @@ ISql::insert(Bindings& bind)
 	//showdata("insert bind", sql_insert);
 
 	htab_walk  insert_wk;
-	htab_rd  rowbind;
+	htab_ptr  rowbind;
 
 
 	int pcount = 0;
@@ -980,7 +980,7 @@ ISql::insert(Bindings& bind)
 
 	ParamList* plist = zobj_toc<ParamList>(pobj);
 
-	htab_rd params = plist->getParams();
+	htab_ptr params = plist->getParams();
 
 	htab_rc   ret_params_mgr;
 	htab_rw ret_params(ret_params_mgr);
@@ -1037,7 +1037,7 @@ ISql::fromJT(Bindings& bind, JoinTables* jt)
 	buf << " FROM";
 	//zend_printf("buflen %ld, %ld\n", buf.size(), buf.len());
 
-	htab_rd joins(jt->getData());
+	htab_ptr joins(jt->getData());
 
 	obj_rc prime_obj(jt->getPrime());
 
@@ -1089,7 +1089,7 @@ ISql::fromJT(Bindings& bind, JoinTables* jt)
 		}
 		buf << ' ' << l_alias;
 
-		htab_rd  expr = ji->getConditions();
+		htab_ptr  expr = ji->getConditions();
 		if (expr.size())
 		{
 			buf << " ON ";
@@ -1127,7 +1127,7 @@ ISql::select_jt(Bindings& bind, JoinTables* jt)
 
 	if (aggregate.isArray())
 	{
-		htab_rd agg(aggregate.zarray());
+		htab_ptr agg(aggregate.zarray());
 		str_rc function = agg.get(SQSTR.function);
 
 		buf << ' ' << function << '(';
@@ -1157,7 +1157,7 @@ ISql::select_jt(Bindings& bind, JoinTables* jt)
 		htab_rc col_list_mgr;
 		htab_rw col_list(col_list_mgr);
 
-		htab_rd tables = jt->getTables();
+		htab_ptr tables = jt->getTables();
 		htab_walk wk;
 		
 		auto tc = wk.value();
@@ -1184,7 +1184,7 @@ ISql::select_jt(Bindings& bind, JoinTables* jt)
 
 
 str_rc 
-ISql::limit(ParamList* plist, htab_rd ltab)
+ISql::limit(ParamList* plist, htab_ptr ltab)
 {
 	val_ptr limit_val = ltab.get(SQSTR.limit);
 	val_ptr offset_val = ltab.get(SQSTR.offset);
@@ -1264,7 +1264,7 @@ ISql::update(Bindings& bind)
 	str_buf buf;
 
 	JoinTables* joins = bind.getJoinTables();
-	htab_rd   tables = joins->getTables();
+	htab_ptr   tables = joins->getTables();
 
 	htab_walk wk;
 
@@ -1288,7 +1288,7 @@ ISql::update(Bindings& bind)
 		int ix = 0;
 		for (wk.start(upset.zarray()); wk.ok(); wk.next(), ix++)
 		{
-			htab_rd pair = current.zarray();
+			htab_ptr pair = current.zarray();
 			str_ptr col_name = pair.get(SQSTR.column);
 			val_ptr col_value = pair.get(SQSTR.value);
 
@@ -1307,7 +1307,7 @@ ISql::update(Bindings& bind)
 		obj_rc prime = joins->getPrime();
 		IColumns* icol = zobj_toc<IColumns>(prime);
 
-		htab_rd uset = icol->getColNames();
+		htab_ptr uset = icol->getColNames();
 		val_rc bfalse;
 		bfalse.set_bool(false);
 
@@ -1386,14 +1386,14 @@ ISql::entityClass(str_ptr s)
 }
 
 str_rc
-ISql::where(Bindings &bind, htab_rd wtab)
+ISql::where(Bindings &bind, htab_ptr wtab)
 {
 	str_buf buf;
 
 	// TODO: jtables set wether needed or not!
 	JoinTables* jtab = bind.getJoinTables();
 
-	htab_rd jtables(jtab->getTables());
+	htab_ptr jtables(jtab->getTables());
 
 	obj_rc paramList = bind.getParamList();
 	ParamList* params = zobj_toc<ParamList> (paramList);
@@ -1419,7 +1419,7 @@ ISql::where(Bindings &bind, htab_rd wtab)
 	for(wk.start(wtab); wk.ok(); wk.next())
 	{
 		//showmem("where_zval", where_zval);
-		htab_rd where_tab(where_zval.zarray());
+		htab_ptr where_tab(where_zval.zarray());
 
 		if (wix.zlong() > 0)
 		{
@@ -1526,7 +1526,7 @@ ISql::where(Bindings &bind, htab_rd wtab)
 			{
 				throw std::runtime_error("Between data needs 2 values");
 			}
-			htab_rd duo(harray.zarray());
+			htab_ptr duo(harray.zarray());
 			buf << " BETWEEN " << params->addParam(duo[int(0)]) << " AND " << params->addParam(duo[int(1)]);
 		}
 		else if (wtype == "in")
@@ -1561,7 +1561,7 @@ ISql::where(Bindings &bind, htab_rd wtab)
 			buf << exp->toString();
 			value = where_tab[SQSTR.values_key]; // if associated parameters
 			if (value.isArray()) {
-				htab_rd vlist(value);
+				htab_ptr vlist(value);
 
 				htab_rw plist(params->getParams());
 
@@ -1641,7 +1641,7 @@ ZEND_METHOD(Wcd_Sql_JoinInfo, getConditions)
 	ZEND_PARSE_PARAMETERS_NONE();
 	JoinInfo* cobj = zval_toc<JoinInfo>(ZEND_THIS);
 
-	htab_rd htab = cobj->getConditions();
+	htab_ptr htab = cobj->getConditions();
 	htab.return_zv(return_value);
 }
 
@@ -2089,7 +2089,7 @@ ZEND_METHOD(Wcd_Sql_ParamList, getParams)
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	ParamList* cobj = zval_toc<ParamList>(ZEND_THIS);
-	htab_rd htab = cobj->getParams();
+	htab_ptr htab = cobj->getParams();
 	htab.return_zv(return_value);
 }
 
@@ -2098,7 +2098,7 @@ ZEND_METHOD(Wcd_Sql_ParamList, getReturns)
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	ParamList* cobj = zval_toc<ParamList>(ZEND_THIS);
-	htab_rd htab = cobj->getReturns();
+	htab_ptr htab = cobj->getReturns();
 	htab.return_zv(return_value);
 }
 
@@ -2116,7 +2116,7 @@ ZEND_METHOD(Wcd_Sql_ParamList, getValues)
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	ParamList* cobj = zval_toc<ParamList>(ZEND_THIS);
-	htab_rd htab = cobj->getValues();
+	htab_ptr htab = cobj->getValues();
 	htab.return_zv(return_value);
 }
 

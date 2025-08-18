@@ -17,8 +17,8 @@ class RouteMatch : public base_d {
 
 protected:
 
-	void set_tuple12(htab_rd tg);
-	void set_tuple14(htab_rd tg);
+	void set_tuple12(htab_ptr tg);
+	void set_tuple14(htab_ptr tg);
 	htab_rc fetchArgs();
 
 	obj_ptr    testRoute(obj_ptr robj);
@@ -47,7 +47,7 @@ public:
 
 	static base_obj_mgr<RouteMatch> omg;
 
-	static val_rc call_method(obj_ptr obj, str_ptr method, htab_rd args);
+	static val_rc call_method(obj_ptr obj, str_ptr method, htab_ptr args);
 
 	//public function __construct(string $uri, int $verb_flag, mixed $ajax_flag);
 	void construct(str_ptr uri, int verbs, int ajax);
@@ -68,7 +68,7 @@ public:
 		route_ = ro;
 	}
 	
-	htab_rd getErrors() const
+	htab_ptr getErrors() const
 	{
 		return errors_;
 	}
@@ -78,12 +78,12 @@ public:
 		return uri_;
 	}
 
-	htab_rd getRoles() const
+	htab_ptr getRoles() const
 	{
 		return roles_;
 	}
 
-	htab_rd getObjArgs() const
+	htab_ptr getObjArgs() const
 	{
 		return ob_args_;
 	}
@@ -112,7 +112,7 @@ public:
 
 	bool prepare_call();
 
-	val_rc call(htab_rd extra, obj_ptr before, obj_ptr after);
+	val_rc call(htab_ptr extra, obj_ptr before, obj_ptr after);
 
 #ifndef BASE_ZOBJPTR
 	VIRTUAL_ZOBJPTR

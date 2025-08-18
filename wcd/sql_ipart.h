@@ -338,7 +338,7 @@ namespace wcd {
 			return owner_;
 		}
 
-		htab_rd getColNames() const
+		htab_ptr getColNames() const
 		{
 			return colnames_;
 		}
@@ -361,7 +361,7 @@ namespace wcd {
 
 		void setColAlias(str_ptr name, str_ptr alias);
 
-		void add(htab_rd columns);
+		void add(htab_ptr columns);
 
 		void unsetCol(str_ptr key)
 		{
@@ -385,7 +385,7 @@ namespace wcd {
 			exp_w.set(alias, expr);
 		}
 
-		htab_rd getExpr() const
+		htab_ptr getExpr() const
 		{
 			return expr_;
 		}

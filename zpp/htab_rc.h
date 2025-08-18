@@ -1,8 +1,8 @@
 #ifndef HTAB_RC_H
 #define HTAB_RC_H
 
-#ifndef HTAB_RD_H
-#include "htab_rd.h"
+#ifndef HTAB_PTR_H
+#include "htab_ptr.h"
 #endif
 
 #ifndef HTAB_RW_H
@@ -13,13 +13,13 @@ namespace zpp {
 
     class htab_rw;
 
-    class htab_rc : public htab_rd {
+    class htab_rc : public htab_ptr {
     protected:
         void  own();
         void  lose();
         static bool cowop(HashTable*& inout);
 
-        friend class htab_rd;
+        friend class htab_ptr;
         friend class htab_rw;
 
     public:
@@ -35,7 +35,7 @@ namespace zpp {
         static val_ptr  get_global(str_ptr key);
         
         ~htab_rc();
-        htab_rc() : htab_rd() {}
+        htab_rc() : htab_ptr() {}
 
         htab_rc(htab_rc&& m);
         htab_rc(val_rc&& zw);
@@ -83,19 +83,19 @@ namespace zpp {
         HashTable* steal();
 
                //* return indexed array of values
-        static htab_rc getValues(htab_rd hr);
+        static htab_rc getValues(htab_ptr hr);
 
         //* return indexed array of keys
-        static htab_rc getKeys(htab_rd hr);
+        static htab_rc getKeys(htab_ptr hr);
 
         // extract subset using keylist with removal from original hfrom
-        static htab_rc extract(htab_rd exkeys, htab_rw hfrom);
+        static htab_rc extract(htab_ptr exkeys, htab_rw hfrom);
 
         // extract subset using keylist without removal from original hfrom
-        static htab_rc subset(htab_rd exkeys, htab_rd hfrom, bool nullmiss = false);
+        static htab_rc subset(htab_ptr exkeys, htab_ptr hfrom, bool nullmiss = false);
 
         // extract values list using keylist. Missing values as null
-        static htab_rc sublist(htab_rd exkeys, htab_rd hfrom);
+        static htab_rc sublist(htab_ptr exkeys, htab_ptr hfrom);
 
         
  

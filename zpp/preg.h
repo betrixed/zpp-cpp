@@ -18,8 +18,8 @@
 #include "str_rc.h"
 #endif
 
-#ifndef HTAB_RD_H
-#include "htab_rd.h"
+#ifndef HTAB_PTR_H
+#include "htab_ptr.h"
 #endif
 
 extern "C" {
@@ -40,7 +40,7 @@ namespace zpp {
 		virtual ~preg_callback() 
 		{ }
 
-		virtual bool get_replace(htab_rd captures) = 0; 
+		virtual bool get_replace(htab_ptr captures) = 0; 
 
 		friend class preg;
 	};
@@ -94,11 +94,11 @@ namespace zpp {
 			return regexp_;
 		}
 		str_rc  capture(size_t ix);
-		htab_rd  captures(){ return htab_rd(result_); };
+		htab_ptr  captures(){ return htab_ptr(result_); };
 		
 		val_rc& results() { return result_; }
 
-		//htab_rd  array() { return htab_rd(result_); }
+		//htab_ptr  array() { return htab_ptr(result_); }
 
 	};
 
@@ -109,9 +109,9 @@ namespace zpp {
 
 	val_rc explode(str_ptr sep,  str_ptr split, long limit = 0);
 
-	val_rc implode(str_ptr sep, htab_rd w);
+	val_rc implode(str_ptr sep, htab_ptr w);
 
-	val_rc union_values(htab_rd list1, htab_rd list2);
+	val_rc union_values(htab_ptr list1, htab_ptr list2);
 
 	val_rc preg_quote(str_ptr regex, val_ptr delim);
 

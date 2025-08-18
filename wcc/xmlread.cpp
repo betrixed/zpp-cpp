@@ -392,7 +392,7 @@ Wcc_XmlRead::loop()
 
 				if (!result) {
 
-					str_rc classname = htab_rd(tag_objs_).get(tagstr);
+					str_rc classname = htab_ptr(tag_objs_).get(tagstr);
 
 					if (classname.isNull()) {
 						zend_throw_error(zend_ce_exception, "Unmapped tag %s", tagstr.data());
@@ -620,7 +620,7 @@ void Wcc_XmlRead::tag_end(str_ptr tag)
     	return;
     }
 
-	val_ptr otag(htab_rd(tag_objs_).get(tag));
+	val_ptr otag(htab_ptr(tag_objs_).get(tag));
 
 	if (otag.isString())
 	{

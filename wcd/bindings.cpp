@@ -33,7 +33,7 @@ void Bindings::debug_info(htab_rw di)
 }
 
 void 
-Bindings::addarray(int key, htab_rd value)
+Bindings::addarray(int key, htab_ptr value)
 {
 	val_rc adapt(value);
 	//showarray("Add Array", value);
@@ -192,7 +192,7 @@ Bindings::addToArray(int key, val_ptr value)
 }
 
 bool 
-Bindings::addJoinData(htab_rd data)
+Bindings::addJoinData(htab_ptr data)
 {
 	str_rc atype = data.get(SQSTR.typekey);
 	if (atype.isNull())
@@ -206,7 +206,7 @@ Bindings::addJoinData(htab_rd data)
 		obj_rc prime;
 
 		JoinTables* joins = getJoinTables();
-		htab_rd jia = joins->getData();
+		htab_ptr jia = joins->getData();
 
 		size_t jcount = jia.size();
 		if (jcount==0)
@@ -236,7 +236,7 @@ Bindings::addJoinData(htab_rd data)
 
 		joins->addJoin(jiobj);
 
-		htab_rd nested = data.get(SQSTR.nested);
+		htab_ptr nested = data.get(SQSTR.nested);
 		if (nested.size())
 		{
 			htab_walk wk;
@@ -247,7 +247,7 @@ Bindings::addJoinData(htab_rd data)
 			for(wk.start(nested); wk.ok(); wk.next())
 			{
 				// must be array
-				htab_rd jah = jc.zarray();
+				htab_ptr jah = jc.zarray();
 
 				if (!jah.size())
 				{
@@ -284,14 +284,14 @@ bool
 Bindings::aliasSelect()
 {
 	JoinTables* jt = getJoinTables();
-	htab_rd tables = jt->getData();
+	htab_ptr tables = jt->getData();
 	if (tables.size())
 	{
 		htab_rc   cols_mgr;
 
 		htab_rw all_cols(cols_mgr);
 
-		htab_rd all = jt->getTables();
+		htab_ptr all = jt->getTables();
 		htab_walk wk;
 
 		auto tcol = wk.value();
@@ -339,7 +339,7 @@ Bindings::columnAlias(obj_ptr tcolobj)
 
 		obj_rc model = db_.call(SQSTR.getTableModel, tname);
 
-		htab_rd columns = model.call(SQSTR.getColDefs);
+		htab_ptr columns = model.call(SQSTR.getColDefs);
 
 		htab_walk wk;
 		auto cname = wk.key();
@@ -352,7 +352,7 @@ Bindings::columnAlias(obj_ptr tcolobj)
 		}
 	}
 	else {
-		htab_rd columns = tcol->getColNames();
+		htab_ptr columns = tcol->getColNames();
 		htab_walk wk;
 		auto cname = wk.key();	
 		auto alias = wk.value();
@@ -405,7 +405,7 @@ void Bindings::set(int key, const val_rc& value)
 	//showarray("data_zval_mgr&", data_);
 }
 
-void Bindings::set(int key, htab_rd value)
+void Bindings::set(int key, htab_ptr value)
 {
 	htab_rw hw(data_);
 	hw.set((zend_long)key, value);
@@ -485,8 +485,8 @@ Bindings::whereKeyValue(val_ptr key, val_ptr value)
 	}
 	if (key.isArray() && value.isArray())
 	{
-		htab_rd keys(key.zarray());
-		htab_rd values(value.zarray());
+		htab_ptr keys(key.zarray());
+		htab_ptr values(value.zarray());
 
 		auto kct = keys.size();
 		if ((kct > 0) && (kct == values.size()))
@@ -587,7 +587,7 @@ Bindings::select()
 		}
 	}
 
-	htab_rd hr(val_ptr(rows).zarray());
+	htab_ptr hr(val_ptr(rows).zarray());
 	if (hr.ok())
 	{
 		size_t rct = hr.size();
@@ -618,7 +618,7 @@ Bindings::select()
 	/*
 	eager_load not implemented
 	val_rc  eager_load_mgr = prop.property(SQSTR.eager_load);
-	htab_rd eager_load(eager_load_mgr);
+	htab_ptr eager_load(eager_load_mgr);
 	*/
 	val_ptr rename = get(ISql::SQL_RENAME);
 
@@ -631,7 +631,7 @@ Bindings::select()
 
 		str_rc table_name = fromjt->getModel();
 
-		htab_rd tables = fromjt->getTables();
+		htab_ptr tables = fromjt->getTables();
 
 		obj_rc icols = fromjt->getTable(table_name);
 
@@ -655,7 +655,7 @@ Bindings::select()
 		}
 
 		auto r_row = w1.value();
-		htab_rd relist(rename.zarray());
+		htab_ptr relist(rename.zarray());
 
 		for(w1.start(hr); w1.ok(); w1.next())
 		{

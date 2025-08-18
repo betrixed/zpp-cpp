@@ -84,7 +84,7 @@ IConfig::set_data(str_ptr key, val_ptr values, bool required, val_ptr ifnot)
 	//showarray("data_ - ", data_);
 }
 void 
-IConfig::assign(htab_rd cfg)
+IConfig::assign(htab_ptr cfg)
 {
 	cfg_ = cfg;
 	val_rc null_val;
@@ -260,7 +260,7 @@ IConfig::set(str_ptr name, str_ptr value)
 	hw.set(name, value);
 }
 
-htab_rd 
+htab_ptr 
 IConfig::getArray()
 {
 	return data_;
@@ -394,7 +394,7 @@ IConfig::getSqlClass()
 
 using namespace wcd;
 
-//void assign(htab_rd cfg);
+//void assign(htab_ptr cfg);
 ZEND_METHOD(Wcd_IConfig, assign)
 {
 	zval* data;
@@ -443,7 +443,7 @@ ZEND_METHOD(Wcd_IConfig, getArray)
 
 	IConfig* cobj = zval_toc<IConfig>(ZEND_THIS);
 
-	htab_rd result = cobj->getArray();
+	htab_ptr result = cobj->getArray();
 
 	result.return_zv(return_value);
 }

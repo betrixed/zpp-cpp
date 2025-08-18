@@ -77,7 +77,7 @@ protected:
 
 	void addSection(str_ptr name, str_ptr sdata);
 	
-	str_rc full_render(htab_rd data);
+	str_rc full_render(htab_ptr data);
 
 	// cached call methods
 
@@ -106,14 +106,14 @@ public:
 	str_ptr    getPath();
 	str_ptr    getName();
 
-	void setData(htab_rd data);
+	void setData(htab_ptr data);
 
-	htab_rd   getData();
-	str_rc   render(htab_rd data);
+	htab_ptr   getData();
+	str_rc   render(htab_ptr data);
 
-	str_rc fetch(str_ptr name, htab_rd data);
+	str_rc fetch(str_ptr name, htab_ptr data);
 
-	str_rc insert(str_ptr name, htab_rd data);
+	str_rc insert(str_ptr name, htab_ptr data);
 
 	str_rc escape(str_ptr s, str_ptr func);
 	
@@ -129,10 +129,10 @@ public:
 
 	void stop();
 	void start(str_ptr name);
-	void layout(str_ptr leaf, htab_rd data);
+	void layout(str_ptr leaf, htab_ptr data);
 	
 	void setLayout(str_ptr leaf);
-	void setLayoutData(htab_rd data);
+	void setLayoutData(htab_ptr data);
 	
 	void styleBegin();
 	void styleEnd();

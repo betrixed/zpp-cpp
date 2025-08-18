@@ -36,7 +36,7 @@ Insert::getSqlParams()
 		if (ptable.ok())
 		{
 			IColumns* icols = zobj_toc<IColumns>(ptable);
-			htab_rd names = icols->getColNames();
+			htab_ptr names = icols->getColNames();
 
 			htab_rc coldata_rc;
 			htab_rw coldata(coldata_rc);

@@ -62,7 +62,7 @@ namespace wcc {
 
 		htab_rc serialize();
 
-		void unserialize(htab_rd uht);
+		void unserialize(htab_ptr uht);
 
 		virtual void debug_info(htab_rw hw);
 

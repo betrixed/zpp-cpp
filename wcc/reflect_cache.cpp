@@ -147,14 +147,14 @@ ReflectCache::staticInstance(str_ptr class_name)
 }
 
 obj_rc //static
-ReflectCache::staticInstanceArgs(str_ptr class_name, htab_rd args)
+ReflectCache::staticInstanceArgs(str_ptr class_name, htab_ptr args)
 {
 	auto rcobj =  ReflectCache::cpp();
 	return rcobj->newInstanceArgs(class_name, args);
 }
 
 obj_rc 
-ReflectCache::newInstanceArgs(str_ptr class_name, htab_rd args)
+ReflectCache::newInstanceArgs(str_ptr class_name, htab_ptr args)
 {
 	obj_rc result;
 

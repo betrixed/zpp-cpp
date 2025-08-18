@@ -133,7 +133,7 @@ public:
 	virtual ~Hmap();
 
 
-	htab_rd reader() const 
+	htab_ptr reader() const 
 	{
             return data_;
 	}
@@ -152,7 +152,7 @@ public:
 	
 	virtual void debug_info(htab_rw hw);
 
-	void construct(htab_rd values);
+	void construct(htab_ptr values);
 
 	/** Avoid warning for missing property */
 	val_rc getOrNot(str_ptr name, val_ptr ifnot);
@@ -173,25 +173,25 @@ public:
 	// for ArrayAccess interface, dimensions interface
 
 	htab_rc subsetkey(str_ptr key);
-	htab_rc subset(htab_rd data);
+	htab_rc subset(htab_ptr data);
 
-	void   addArray(htab_rd data);
-	void   assign(htab_rd data);
+	void   addArray(htab_ptr data);
+	void   assign(htab_ptr data);
 
-	htab_rd toArray();
+	htab_ptr toArray();
 
 	zend_long count() const;
 
 	str_rc unhive(str_ptr data);
 
 	htab_rc serialize();
-	void     unserialize(htab_rd htab);
+	void     unserialize(htab_ptr htab);
 
 	void      clear();
 
 	VIRTUAL_ZOBJPTR
 
-	static htab_rd map_htab(obj_rc mobj) 
+	static htab_ptr map_htab(obj_rc mobj) 
 	{
 		Hmap* hmap = zobj_toc<Hmap>(mobj);
 		return hmap->reader();

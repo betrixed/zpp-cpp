@@ -37,7 +37,7 @@ val_rc explode(str_ptr sep,  str_ptr  split, long limit)
 	return list;
 }
 
-val_rc implode(str_ptr sep, htab_rd arr)
+val_rc implode(str_ptr sep, htab_ptr arr)
 {
 	val_rc result;
 
@@ -51,7 +51,7 @@ val_rc implode(str_ptr sep, htab_rd arr)
  * as array lists. Ensure only one instance of each name.
  * This merge 'filters' names through a keyed array. */
 val_rc
-union_values(htab_rd list1, htab_rd list2)
+union_values(htab_ptr list1, htab_ptr list2)
 {
 	htab_rc   keyset;
 	htab_rw ks(keyset);
@@ -215,21 +215,21 @@ preg::replace_callback(preg_callback& callback, str_ptr subject)
 	str_rc  result;
 
 	if (matches(subject) > 0) {
-		htab_rd  rtab_1(result_);
+		htab_ptr  rtab_1(result_);
 		str_ptr  subj(subject);
 
 		std::string_view strview = subj.vstr();
 		str_buf ss;
 
 		val_rc rlist = rtab_1.get(zend_long(0));
-		htab_rd replace(rlist);
+		htab_ptr replace(rlist);
 
 		uint ipos = 0;
 		size_t ct = replace.size();
 
 		for(size_t i = 0; i < ct; i++)
 		{
-			htab_rd cexp(replace.get(i));
+			htab_ptr cexp(replace.get(i));
 
 			val_ptr slen2 = cexp.get(zend_long(0));
 			val_ptr soffset2 = cexp.get(zend_long(1));
@@ -282,7 +282,7 @@ preg::replace(const char* rp, str_ptr subject)
 	str_rc result;
 
 	if (matches(subject) > 0) {
-		htab_rd rtab_1(result_);
+		htab_ptr rtab_1(result_);
 		str_ptr  subj(subject);
 
 		std::string_view strview = subj.vstr();
@@ -293,14 +293,14 @@ preg::replace(const char* rp, str_ptr subject)
 		//showstr("mod init", ss);
 
 		val_rc rlist = rtab_1.get(zend_long(0));
-		htab_rd replace(rlist);
+		htab_ptr replace(rlist);
 
 		uint ipos = 0;
 		size_t ct = replace.size();
 		for(size_t i = 0; i < ct; i++)
 		{
 			val_ptr vh2 = replace.get(i);
-			htab_rd h2(vh2);
+			htab_ptr h2(vh2);
 
 			val_ptr slen2 = h2.get(zend_long(0));
 			val_ptr soffset2 = h2.get(zend_long(1));

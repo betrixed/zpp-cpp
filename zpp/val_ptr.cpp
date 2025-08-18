@@ -15,8 +15,8 @@
 #include "val_ptr.h"
 #endif
 
-#ifndef HTAB_RD_H
-#include "htab_rd.h"
+#ifndef HTAB_PTR_H
+#include "htab_ptr.h"
 #endif
 
 #ifndef VAL_RC_H
@@ -174,7 +174,7 @@ val_ptr::empty() const
     case IS_DOUBLE:
     	return (Z_DVAL_P(rp) == 0.0) ? true : false;
 	case IS_ARRAY:
-    	return htab_rd(Z_ARR_P(rp)).size() ? false : true;
+    	return htab_ptr(Z_ARR_P(rp)).size() ? false : true;
     case IS_STRING:
     	return str_ptr(Z_STR_P(rp)).size() ? false : true;
 	default:
@@ -195,7 +195,7 @@ val_ptr::ok() const {
     switch(rtype)
     {
     case IS_ARRAY:
-    	return htab_rd(Z_ARR_P(rp)).size() ? true : false;
+    	return htab_ptr(Z_ARR_P(rp)).size() ? true : false;
     case IS_STRING:
     	return str_ptr(Z_STR_P(rp)).size() ? true : false;
     }

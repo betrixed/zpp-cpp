@@ -331,7 +331,7 @@ IDriver::closeStmt(val_ptr stmt)
 }
 
 
-void IDriver::bind(val_ptr stmt, htab_rd params)
+void IDriver::bind(val_ptr stmt, htab_ptr params)
 {
 	//showdata("bind ", params);
 	obj_ptr spdo(stmt);
@@ -784,13 +784,13 @@ IDriver::lastSeqValue(str_ptr name)
 
 	buf << "select lastval(" << name << ")";
 	str_rc  sql = buf.zstr();
-	htab_rd empty;
+	htab_ptr empty;
 
 	val_rc srow = query(sql, empty);
 	val_rc result;
 	if (srow.isArray())
 	{
-		htab_rd rows(srow);
+		htab_ptr rows(srow);
 		result = rows.get(int(0));
 	}
 	return result;
@@ -820,7 +820,7 @@ IDriver::prepare(str_ptr query)
 
 
 val_rc
-IDriver::prepareQuery(str_ptr query, htab_rd values, htab_rd bindTypes)
+IDriver::prepareQuery(str_ptr query, htab_ptr values, htab_ptr bindTypes)
 {
 	val_rc stmt_mgr = prepare(query);
 
@@ -870,9 +870,9 @@ IDriver::prepareQuery(str_ptr query, htab_rd values, htab_rd bindTypes)
 }
 
 val_rc 
-IDriver::query(str_ptr query, htab_rd params)
+IDriver::query(str_ptr query, htab_ptr params)
 {
-	htab_rd btypes;
+	htab_ptr btypes;
 
 	obj_rc stmt = prepareQuery(query, params, btypes);
 

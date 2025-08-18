@@ -49,14 +49,14 @@ public:
 	void construct(obj_ptr db);
 	void destruct();
 
-	obj_rc addPrime(str_ptr table, str_ptr alias, htab_rd cols);
+	obj_rc addPrime(str_ptr table, str_ptr alias, htab_ptr cols);
 
 	val_rc firstRow(int fetch);
 	
 
 	obj_ptr getJoiner();
 
-	htab_rd getParams();
+	htab_ptr getParams();
 
 	val_rc getRows(int fetch = IDriver::FETCH_ASSOC);
 
@@ -70,7 +70,7 @@ public:
 
 	obj_rc prepare(int fetch);
 
-	void returns(htab_rd list);
+	void returns(htab_ptr list);
 
 	val_rc run();
 

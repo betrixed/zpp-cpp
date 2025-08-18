@@ -84,7 +84,7 @@ namespace wcc {
 
 		htab_rw writer();
 
-        htab_rd reader() const;
+        htab_ptr reader() const;
 
 		bool send();
 		bool sendHeaders();

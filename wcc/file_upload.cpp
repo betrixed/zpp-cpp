@@ -34,7 +34,7 @@ void FileUpload::debug_info(htab_rw di)
 }
 
 void 
-FileUpload::construct(htab_rd file_data, str_ptr name)
+FileUpload::construct(htab_ptr file_data, str_ptr name)
 {
 	name_ = file_data.get(RQit.namekey);
 

@@ -26,23 +26,23 @@ namespace wcd {
 		void construct(val_ptr driver);
 		void destruct();
 
-		val_rc aggregate(str_ptr agfn, htab_rd columns);
-		val_rc get(htab_rd columns);
+		val_rc aggregate(str_ptr agfn, htab_ptr columns);
+		val_rc get(htab_ptr columns);
 
 		val_rc oneRow();
 		val_rc allRows();
 
-		val_rc first(htab_rd columns);
+		val_rc first(htab_ptr columns);
 		void where(val_ptr column, str_ptr bop, val_ptr value, str_ptr bval);
 
 
 		void whereKeyValue(val_ptr key, val_ptr value);
-		void whereRaw(obj_ptr rawobj, htab_rd values, str_ptr bval);
+		void whereRaw(obj_ptr rawobj, htab_ptr values, str_ptr bval);
 		
-		obj_rc getInsertSql(htab_rd columns);
-		val_rc update(obj_ptr irow, htab_rd dirty);
+		obj_rc getInsertSql(htab_ptr columns);
+		val_rc update(obj_ptr irow, htab_ptr dirty);
 
-		void setReturns(htab_rd names);
+		void setReturns(htab_ptr names);
 		val_rc insert(val_ptr rdata);
 
 		void limit(int lim, int offset=0);
@@ -69,11 +69,11 @@ namespace wcd {
 
 		int setFetch(int mode);
 
-		void setInsert(htab_rd data);
+		void setInsert(htab_ptr data);
 
 		void setModel(obj_ptr obj, bool bind = true);
 
-		val_rc setSeqValue(int value, htab_rd data);
+		val_rc setSeqValue(int value, htab_ptr data);
 
 		void wipe();
 		
@@ -98,8 +98,8 @@ namespace wcd {
 
 		void where(val_ptr column, val_ptr bop, val_ptr value, val_ptr bval);
 
-		void where_unpack(htab_rd aw);
-		void where_list(htab_rd aw);
+		void where_unpack(htab_ptr aw);
+		void where_list(htab_ptr aw);
 
 		
 		val_rc get_first();

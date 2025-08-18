@@ -82,7 +82,7 @@ Simple::arrayMap(str_ptr keycol,
 
 	for(wk.start(rows); wk.ok(); wk.next())
 	{
-		htab_rd r(row);
+		htab_ptr r(row);
 		val_ptr row0(r.get(int(0)));
 		val_ptr row1(r.get(int(1)));
 
@@ -93,7 +93,7 @@ Simple::arrayMap(str_ptr keycol,
 }
 
 htab_rc 
-Simple::arraySet(str_ptr sql, htab_rd params)
+Simple::arraySet(str_ptr sql, htab_ptr params)
 {
 	IDriver* db = zobj_toc<IDriver>(db_);
 	sql_ = sql;
@@ -116,7 +116,7 @@ Simple::bind(val_ptr value)
 }
 
 val_rc 
-Simple::exec(str_ptr sql, htab_rd params)
+Simple::exec(str_ptr sql, htab_ptr params)
 {
 	this->prepare(sql);
 	autoclose_ = true;
@@ -128,7 +128,7 @@ Simple::exec(str_ptr sql, htab_rd params)
 }
 
 val_rc 
-Simple::firstrow(str_ptr sql, htab_rd params)
+Simple::firstrow(str_ptr sql, htab_ptr params)
 {
 	htab_rc aset = this->arraySet(sql, params);
 	val_rc result;
@@ -154,7 +154,7 @@ Simple::getSchemaName()
 }
 
 val_rc 
-Simple::insert(htab_rd values)
+Simple::insert(htab_ptr values)
 {
 	setValues(values);
 	return this->send(retval_);
@@ -234,13 +234,13 @@ Simple::send(bool retval)
 
 
 void 
-Simple::setValues(htab_rd values)
+Simple::setValues(htab_ptr values)
 {
 	values_ = values;
 }
 
 val_rc 
-Simple::update(htab_rd values)
+Simple::update(htab_ptr values)
 {
 	setValues(values);
 	return this->send(retval_);
@@ -318,7 +318,7 @@ ZEND_METHOD(Wcd_Sql_Simple, arraySet)
 	zarg_rd args(execute_data);
 
 	str_ptr sql;
-	htab_rd params;
+	htab_ptr params;
 
 	args.zstring(sql, args.need(1));
 	args.zarray_null(params, args.option(2));
@@ -356,7 +356,7 @@ ZEND_METHOD(Wcd_Sql_Simple, exec)
 	zarg_rd args(execute_data);
 
 	str_ptr sql;
-	htab_rd params;
+	htab_ptr params;
 
 	args.zstring(sql, args.need(1));
 	args.zarray(params, args.option(2));
@@ -377,7 +377,7 @@ ZEND_METHOD(Wcd_Sql_Simple, firstRow)
 	zarg_rd args(execute_data);
 
 	str_ptr sql;
-	htab_rd params;
+	htab_ptr params;
 
 	args.zstring(sql, args.need(1));
 	args.zarray(params, args.option(2));
@@ -419,7 +419,7 @@ ZEND_METHOD(Wcd_Sql_Simple, insert)
 {
 	zarg_rd args(execute_data);
 
-	htab_rd values;
+	htab_ptr values;
 
 	args.zarray(values, args.need(1));
 
@@ -439,7 +439,7 @@ ZEND_METHOD(Wcd_Sql_Simple, prepare)
 {
 	zarg_rd args(execute_data);
 
-	htab_rd values;
+	htab_ptr values;
 
 	args.zarray(values, args.need(1));
 
@@ -500,7 +500,7 @@ ZEND_METHOD(Wcd_Sql_Simple, run)
 ZEND_METHOD(Wcd_Sql_Simple, setValues)
 {
 	zarg_rd args(execute_data);
-	htab_rd values;
+	htab_ptr values;
 
 	args.zarray(values, args.need(1));
 
@@ -515,7 +515,7 @@ ZEND_METHOD(Wcd_Sql_Simple, setValues)
 ZEND_METHOD(Wcd_Sql_Simple, update)
 {
 	zarg_rd args(execute_data);
-	htab_rd values;
+	htab_ptr values;
 
 	args.zarray(values, args.need(1));
 	

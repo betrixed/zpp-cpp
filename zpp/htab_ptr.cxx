@@ -1,13 +1,13 @@
-#ifndef HTAB_RD_CPP
-#define HTAB_RD_CPP
+#ifndef htab_ptr_CPP
+#define htab_ptr_CPP
 
 #ifndef STR_RC_H
 #include "str_rc.h"
 #endif
 
 
-#ifndef HTAB_RD_H
-#include "htab_rd.h"
+#ifndef HTAB_PTR_H
+#include "htab_ptr.h"
 #endif
 
 #ifndef HTAB_RW_H
@@ -28,11 +28,11 @@
 
 namespace zpp {
 
-htab_rd::htab_rd(HashTable* ht) : ht_(ht)
+htab_ptr::htab_ptr(HashTable* ht) : ht_(ht)
 {
 }
 
-htab_rd::htab_rd(const zval* p)
+htab_ptr::htab_ptr(const zval* p)
 {
 	if (p) {
 		ht_ = val_ptr((zval*)p).zarray();
@@ -42,10 +42,10 @@ htab_rd::htab_rd(const zval* p)
 	}
 }
 
-const htab_rd& 
-htab_rd::operator=(const zval* p)
+const htab_ptr& 
+htab_ptr::operator=(const zval* p)
 {
-	// htab_rd doesn't do reference counting
+	// htab_ptr doesn't do reference counting
 	if (p) {
 		ht_ = val_ptr((zval*)p).zarray();
 	}
@@ -55,12 +55,12 @@ htab_rd::operator=(const zval* p)
 	return *this;
 }
 
-htab_rd::htab_rd(const val_rc& zw)
+htab_ptr::htab_ptr(const val_rc& zw)
 {
 	ht_ = val_ptr(zw).zarray();
 }
 /**
-htab_rd::htab_rd(zval* p)
+htab_ptr::htab_ptr(zval* p)
 {
 	if (Z_TYPE_P(p) == IS_ARRAY)
 	{
@@ -70,7 +70,7 @@ htab_rd::htab_rd(zval* p)
 **/
 
 bool  
-htab_rd::has_key(zend_string* skey) const
+htab_ptr::has_key(zend_string* skey) const
 {
     if (!ht_ || !skey) {
             return false;
@@ -79,7 +79,7 @@ htab_rd::has_key(zend_string* skey) const
 }
 
 void 
-htab_rd::apply_all(fn_zval fn)
+htab_ptr::apply_all(fn_zval fn)
 {
 	if (!ht_)
 	{
@@ -89,7 +89,7 @@ htab_rd::apply_all(fn_zval fn)
 }
 
  str_rc 
- htab_rd::print_kv(const char* label) const
+ htab_ptr::print_kv(const char* label) const
  {
  	str_rc result;
 
@@ -119,7 +119,7 @@ htab_rd::apply_all(fn_zval fn)
 
 
 str_rc
-htab_rd::unhive(str_ptr subj)
+htab_ptr::unhive(str_ptr subj)
 {
 	str_rc result;
 
@@ -130,10 +130,10 @@ htab_rd::unhive(str_ptr subj)
 
 	int ct = sfind.matches(subj);
 	if (ct > 0) {
-		htab_rd m = sfind.results();
+		htab_ptr m = sfind.results();
 
-		htab_rd replace_list = m[(int)0];
-		htab_rd keys_list = m[1];
+		htab_ptr replace_list = m[(int)0];
+		htab_ptr keys_list = m[1];
 
 		std::string_view original = subj.vstr();
 
@@ -142,14 +142,14 @@ htab_rd::unhive(str_ptr subj)
 
 		for(int i = 0; i < ct; i++)
 		{
-			htab_rd  k1 = keys_list[i];
+			htab_ptr  k1 = keys_list[i];
 			val_ptr fkey(k1[(int)0]);
 
 			val_ptr rval(get(fkey));
 
 			zend_string* replace_str = rval.zstr();
 
-			htab_rd f1 = replace_list[i];
+			htab_ptr f1 = replace_list[i];
 			val_ptr  slen_f1(f1[(int)0]);
 			val_ptr  soffset_f1(f1[1]);
 
@@ -177,7 +177,7 @@ htab_rd::unhive(str_ptr subj)
 	}
 }
 
-htab_rd::htab_rd(val_ptr zptr) 
+htab_ptr::htab_ptr(val_ptr zptr) 
 {
 	if (zptr.isArray())
 	{
@@ -194,7 +194,7 @@ htab_rd::htab_rd(val_ptr zptr)
 }
 
 uint32_t 
-htab_rd::size() const {
+htab_ptr::size() const {
 	if (!ht_) {
 		return 0;
 	}
@@ -204,7 +204,7 @@ htab_rd::size() const {
 
 /*
 str_rc
-htab_rd::print_all(const char* label)
+htab_ptr::print_all(const char* label)
 {
 	htab_walk walk;
 	str_buf  ss;
@@ -229,7 +229,7 @@ htab_rd::print_all(const char* label)
 
 
 zval* 
-htab_rd::get(zend_long idx) const
+htab_ptr::get(zend_long idx) const
 {
 	if (!ht_)
 		return nullptr;
@@ -237,7 +237,7 @@ htab_rd::get(zend_long idx) const
 }
 
 zval*  
-htab_rd::get(zend_string* zkey) const
+htab_ptr::get(zend_string* zkey) const
 {
 	if (!ht_)
 		return nullptr;
@@ -245,7 +245,7 @@ htab_rd::get(zend_string* zkey) const
 }
 
 zval*  
-htab_rd::get(const std::string_view& key) const
+htab_ptr::get(const std::string_view& key) const
 {
 	//zend_printf("get:string_view %s %d\n", key.data(), key.size());
 	if (!ht_)
@@ -257,7 +257,7 @@ htab_rd::get(const std::string_view& key) const
 }
 
 zval* 
-htab_rd::get(const char* key) const
+htab_ptr::get(const char* key) const
 {
 	if (!ht_)
 		return nullptr;
@@ -266,7 +266,7 @@ htab_rd::get(const char* key) const
 }
 /*
 zval* 
-htab_rd::get(val_ptr key) const
+htab_ptr::get(val_ptr key) const
 {
 	if (!ht_)
 		return nullptr;
@@ -275,7 +275,7 @@ htab_rd::get(val_ptr key) const
 */
 
 zval* 
-htab_rd::get(zval* key) const
+htab_ptr::get(zval* key) const
 {
 	if (!ht_)
 		return nullptr;
@@ -291,7 +291,7 @@ htab_rd::get(zval* key) const
 	return nullptr;
 }
 
-bool htab_rd::try_fetch(zend_long key, val_ptr& store) const
+bool htab_ptr::try_fetch(zend_long key, val_ptr& store) const
 {
 	if (!ht_)
 		return false;
@@ -307,14 +307,14 @@ bool htab_rd::try_fetch(zend_long key, val_ptr& store) const
 	return false;
 }
 
-bool htab_rd::has_index(zend_long key) const
+bool htab_ptr::has_index(zend_long key) const
 {
 	if (!ht_)
 		return false;
 	return (zend_hash_index_find(ht_, key) != nullptr);
 }
 
-bool htab_rd::try_fetch(val_ptr key, val_ptr& store) const
+bool htab_ptr::try_fetch(val_ptr key, val_ptr& store) const
 {
 	if (!ht_)
 		return false;
@@ -331,7 +331,7 @@ bool htab_rd::try_fetch(val_ptr key, val_ptr& store) const
 }
 
 
-bool htab_rd::try_fetch(zend_string* key, val_ptr& store) const
+bool htab_ptr::try_fetch(zend_string* key, val_ptr& store) const
 {
 	//showstr("try_fetch zs key", key);
 	if (!ht_)
@@ -352,7 +352,7 @@ bool htab_rd::try_fetch(zend_string* key, val_ptr& store) const
 }
 
 htab_rc 
-htab_rd::slice(int offset, int length, bool preserve_keys)
+htab_ptr::slice(int offset, int length, bool preserve_keys)
 {
 	htab_rc result_mgr;
 	htab_rw hw(result_mgr);
@@ -417,21 +417,21 @@ htab_rd::slice(int offset, int length, bool preserve_keys)
 	return result_mgr;
 }
 
-void htab_rd::return_zv(zval* return_value) const
+void htab_ptr::return_zv(zval* return_value) const
 {
 	 val_ptr(return_value).bind_array(ht_);
 }
 
 
 zval* 
-htab_rd::operator[]  (const val_rc& key) const
+htab_ptr::operator[]  (const val_rc& key) const
         {
                 //zend_printf("[zval_own&]\n");
                 return get((zval*)key);
         }
 
 zval* 
-htab_rd::operator[]  (str_ptr skey) const
+htab_ptr::operator[]  (str_ptr skey) const
 {
         //zend_printf("[zstr_ptr&]\n");
         return get( (zend_string*) skey);

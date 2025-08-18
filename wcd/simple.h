@@ -43,19 +43,19 @@ public:
 
 	htab_rc arrayMap(str_ptr keycol, str_ptr valcol, str_ptr table);
 
-	htab_rc arraySet(str_ptr sql, htab_rd params = htab_rd());
+	htab_rc arraySet(str_ptr sql, htab_ptr params = htab_ptr());
 
 	str_rc bind(val_ptr value);
 
-	val_rc exec(str_ptr sql, htab_rd params);
+	val_rc exec(str_ptr sql, htab_ptr params);
 
-	val_rc firstrow(str_ptr sql, htab_rd params);
+	val_rc firstrow(str_ptr sql, htab_ptr params);
 
 	val_rc getRows();
 
 	str_rc getSchemaName();
 
-	val_rc insert(htab_rd values);
+	val_rc insert(htab_ptr values);
 
 	bool prepare(str_ptr sql);
 
@@ -65,9 +65,9 @@ public:
 
 	val_rc run();
 
-	void setValues(htab_rd values);
+	void setValues(htab_ptr values);
 
-	val_rc update(htab_rd values);
+	val_rc update(htab_ptr values);
 };
 
 }; //namespace wcd

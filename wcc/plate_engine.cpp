@@ -108,7 +108,7 @@ void PlateEngine::clearPlates()
 	stored_.init();
 }
 
-void PlateEngine::shareWithAll(htab_rd data)
+void PlateEngine::shareWithAll(htab_ptr data)
 {
 	htab_rw(shared_data_).merge(data);
 	//showobj("shareWithAll", this->zobj());
@@ -135,7 +135,7 @@ PlateEngine::dumpPaths()
 	}
 	val_rc ptab = obj_ptr(search_).call(PEI.getpaths);
 
-	htab_rd paths(ptab);
+	htab_ptr paths(ptab);
 
 	size_t pcount = paths.size();
 	str_buf dump;
@@ -162,7 +162,7 @@ PlateEngine::getData(str_ptr name)
 
 	hw.merge(shared_data_);
 
-	htab_rd pdata = htab_rd(plates_data_).get(name);
+	htab_ptr pdata = htab_ptr(plates_data_).get(name);
 	if (pdata.ok())
 	{
 		hw.merge(pdata);
@@ -212,7 +212,7 @@ val_rc
 PlateEngine::getFunction(str_ptr name)
 {
 	val_rc result;
-	htab_rd hr(functions_);
+	htab_ptr hr(functions_);
 
 	if (hr.ok())
 	{
@@ -231,7 +231,7 @@ str_rc PlateEngine::fileLabel(str_ptr file)
 }
 
 str_rc 
-PlateEngine::render(str_ptr name, htab_rd data)
+PlateEngine::render(str_ptr name, htab_ptr data)
 {
 	obj_rc plate = getPlate(name);
 	if (!plate.ok())
@@ -273,7 +273,7 @@ PlateEngine::getPlate(str_ptr name)
 {
 	obj_rc result;
 
-	htab_rd hw(stored_);
+	htab_ptr hw(stored_);
 
 	obj_ptr test = hw.get(name);
 
@@ -296,7 +296,7 @@ void PlateEngine::storePlate(obj_ptr plate)
 }
 
 void 
-PlateEngine::mergePlateData(htab_rd data, str_ptr tname)
+PlateEngine::mergePlateData(htab_ptr data, str_ptr tname)
 {
 	htab_rw hw(plates_data_);
 	htab_rw pdata = hw.get(tname);
@@ -312,7 +312,7 @@ PlateEngine::mergePlateData(htab_rd data, str_ptr tname)
 
 // templates should be  Array - list of names, or name
 void 
-PlateEngine::shareData(htab_rd data, val_ptr where)
+PlateEngine::shareData(htab_ptr data, val_ptr where)
 {
 	if (where.isNull())
 	{

@@ -71,7 +71,7 @@ RouteAdd::rex_url()
 }
 
 void 
-RouteAdd::addRoutes(htab_rd list, str_ptr prefix, str_ptr module)
+RouteAdd::addRoutes(htab_ptr list, str_ptr prefix, str_ptr module)
 {
 	if (prefix.size())
 	{
@@ -231,13 +231,13 @@ void RouteAdd::ready(Route* route)
 
 	while (pr2 > 0) 
 	{ 
-		htab_rd m2(captures);
+		htab_ptr m2(captures);
 
 		if (m2.size() < 2)
 		{
 			break;
 		}
-		htab_rd segs = m2.get((int) 1);
+		htab_ptr segs = m2.get((int) 1);
 		htab_walk wk;
 		auto value = wk.value();
 

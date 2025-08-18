@@ -43,7 +43,7 @@ namespace wcd {
 		
 		bool begin();
 		
-		void bind(val_ptr stmt, htab_rd params);
+		void bind(val_ptr stmt, htab_ptr params);
 		void close();
 		void closeStmt(val_ptr stmt);
 		bool commit();
@@ -93,7 +93,7 @@ namespace wcd {
 		val_rc lastInsertId();
 		val_rc lastSeqValue(str_ptr name);
 
-		void log(htab_rd info);
+		void log(htab_ptr info);
 
 		str_rc modelClassName(str_ptr tableName);
 
@@ -103,10 +103,10 @@ namespace wcd {
 		str_rc param(int pno);
 
 		val_rc prepare(str_ptr query);
-		void  	 prepareExecute(str_ptr query, htab_rd values, htab_rd bindTypes);
-		val_rc prepareQuery(str_ptr query, htab_rd values, htab_rd bindTypes);
+		void  	 prepareExecute(str_ptr query, htab_ptr values, htab_ptr bindTypes);
+		val_rc prepareQuery(str_ptr query, htab_ptr values, htab_ptr bindTypes);
 
-		val_rc query(str_ptr query, htab_rd params);
+		val_rc query(str_ptr query, htab_ptr params);
 		val_rc querySingle(str_ptr query);
 
 		

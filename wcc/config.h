@@ -44,7 +44,7 @@ public:
 
 	static Config_Mgr omg;
 	
-	static obj_rc make(htab_rd initdata);
+	static obj_rc make(htab_ptr initdata);
 
 		/*
 	static zval* read_dimension(zend_object* obj, zval* offset, int type,  zval* return_value);
@@ -60,7 +60,7 @@ public:
 	static HashTable* get_gc(zend_object *obj, zval **gc_data, int *gc_data_count);
 	static ZEND_RESULT_CODE count_elements(zend_object *object, zend_long *count);
 		*/
-	void construct(htab_rd values);
+	void construct(htab_ptr values);
 
 	/** Avoid warning for missing property */
 	val_rc getOrNot(str_ptr name, val_ptr ifnot);
@@ -83,9 +83,9 @@ public:
 	// for ArrayAccess interface, dimensions interface
 
 	htab_rc  subsetkey(str_ptr key);
-	htab_rc  subset(htab_rd data);
+	htab_rc  subset(htab_ptr data);
 
-	void      addArray(htab_rd data);
+	void      addArray(htab_ptr data);
 
 	htab_rc  toArray();
 

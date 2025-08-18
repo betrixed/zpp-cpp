@@ -54,13 +54,13 @@ public:
 
 	obj_rc getBuilder();
 
-	obj_rc newRow(htab_rd rdata, bool isSaved = false);
+	obj_rc newRow(htab_ptr rdata, bool isSaved = false);
 
 	static Model* model_instance(str_ptr classname);
 	
 	static str_rc classToTableName(str_ptr cname);
 
-	static val_rc createFromResult(str_ptr classname, htab_rd results);
+	static val_rc createFromResult(str_ptr classname, htab_ptr results);
 	
 	static obj_rc keyValue(str_ptr static_name, val_ptr keynames, val_ptr values);
 
@@ -76,9 +76,9 @@ public:
 
 	static obj_rc modelBuild(str_ptr static_name);
 
-	static obj_rc row(str_ptr static_name, htab_rd data);
+	static obj_rc row(str_ptr static_name, htab_ptr data);
 
-	static obj_rc rowSaved(str_ptr static_name, htab_rd data);
+	static obj_rc rowSaved(str_ptr static_name, htab_ptr data);
 
 	virtual void debug_info(htab_rw di);
 
@@ -124,17 +124,17 @@ public:
 
 	str_rc now() const;
 
-	void setColDefs(htab_rd options);
+	void setColDefs(htab_ptr options);
 
-	void setKeyOptions(htab_rd options);
+	void setKeyOptions(htab_ptr options);
 
 	void setConnect(obj_ptr db);
 
-	void setPKey(htab_rd options);
+	void setPKey(htab_ptr options);
 
 	void setName(str_ptr name);
 
-	void setSeqDefs(htab_rd options);
+	void setSeqDefs(htab_ptr options);
 
 	void setTSFlags(int flags);
 

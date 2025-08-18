@@ -42,17 +42,17 @@ namespace wcc {
 		val_rc authCallback_;
 
 	// hidden methods
-		int fileCounter(htab_rd data, bool onlySuccessful);
-		str_rc getBestQuality(htab_rd parts, str_ptr name);
+		int fileCounter(htab_ptr data, bool onlySuccessful);
+		str_rc getBestQuality(htab_ptr parts, str_ptr name);
 
 		htab_rc getQualityHeader(str_ptr key, str_ptr name);
 		htab_rc resolveAuthorizationHeaders();
 
-		htab_rc smoothFiles(htab_rd names, htab_rd types,
-			htab_rd tmp_names, htab_rd sizes,
-			htab_rd errors, str_ptr prefix);
+		htab_rc smoothFiles(htab_ptr names, htab_ptr types,
+			htab_ptr tmp_names, htab_ptr sizes,
+			htab_ptr errors, str_ptr prefix);
 
-		htab_rd readServer();
+		htab_ptr readServer();
 
 	public:
 
@@ -70,11 +70,11 @@ namespace wcc {
 		obj_ptr query();
 		obj_ptr server();
 
-		htab_rd getPost();
-		htab_rd getQuery();
-		htab_rd getServer();
+		htab_ptr getPost();
+		htab_ptr getQuery();
+		htab_ptr getServer();
 
-		obj_rc makeFile(htab_rd data, str_ptr name);
+		obj_rc makeFile(htab_ptr data, str_ptr name);
 
 		void setAuthCallback(val_ptr callback);
 

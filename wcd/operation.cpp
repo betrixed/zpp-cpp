@@ -65,7 +65,7 @@ Operation::destruct()
 }
 
 obj_rc 
-Operation::addPrime(str_ptr table, str_ptr alias, htab_rd cols)
+Operation::addPrime(str_ptr table, str_ptr alias, htab_ptr cols)
 {
 	obj_rc tc = TColumns::omg.new_zobj();
 	TColumns* tcobj = zobj_toc<TColumns>(tc);
@@ -83,7 +83,7 @@ Operation::firstRow(int fetch)
 {
 	val_rc result = getRows(fetch);
 
-	htab_rd rows(result.zarray());
+	htab_ptr rows(result.zarray());
 	if (rows.size())
 	{
 		return rows.get(int(0));
@@ -186,7 +186,7 @@ Operation::prepare(int fetch)
 
 	sobj->prepare(sql);
 
-	htab_rd values( plist->getValues());
+	htab_ptr values( plist->getValues());
 
 	if (values.size())
 	{
@@ -198,7 +198,7 @@ Operation::prepare(int fetch)
 }
 
 void 
-Operation::returns(htab_rd list)
+Operation::returns(htab_ptr list)
 {
 	Bindings& bind = bindings();
 	bind.addarray(ISql::SQL_RETURN, list);
@@ -287,7 +287,7 @@ ZEND_METHOD(Wcd_Sql_Operation, addPrime)
 
 	str_ptr table;
 	str_ptr alias;
-	htab_rd cols;
+	htab_ptr cols;
 
 	args.zstring(table, args.need(1));
 	args.zstring_null(alias, args.option(2));
@@ -310,7 +310,7 @@ ZEND_METHOD(Wcd_Sql_Operation, firstRow)
 
 	str_ptr table;
 	str_ptr alias;
-	htab_rd cols;
+	htab_ptr cols;
 
 	args.zstring(table, args.need(1));
 	args.zstring_null(alias, args.option(2));
@@ -344,7 +344,7 @@ ZEND_METHOD(Wcd_Sql_Operation, getParams)
 
 	Operation* cobj = zval_toc<Operation>(ZEND_THIS);
 	
-	htab_rd result = cobj->getParams();
+	htab_ptr result = cobj->getParams();
 
 	result.return_zv(return_value);
 }
@@ -453,7 +453,7 @@ ZEND_METHOD(Wcd_Sql_Operation, returns)
 {
 	zarg_rd args(execute_data);
 
-	htab_rd rvalues;
+	htab_ptr rvalues;
 
 	args.zarray(rvalues, args.need(1));
 

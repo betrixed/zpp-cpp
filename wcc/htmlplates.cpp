@@ -99,7 +99,7 @@ HtmlPlates::getModel()
 
 		if (obj_ptr(model_).isNull())
 		{
-			model_ = Config::make(htab_rd());
+			model_ = Config::make(htab_ptr());
 		}
 	}
 	return  model_;
@@ -111,7 +111,7 @@ void HtmlPlates::setModel(obj_ptr model)
 	htab_rw(values_).set(HPit.model_var, model);
 }
 
-void HtmlPlates::mergeData(htab_rd items)
+void HtmlPlates::mergeData(htab_ptr items)
 {
 	htab_rw(values_).merge(items);
 }
@@ -123,7 +123,7 @@ HtmlPlates::renderView(htab_rw options)
 	return render(options);
 }
 
-str_rc HtmlPlates::render(htab_rd options) 
+str_rc HtmlPlates::render(htab_ptr options) 
 {
 	initValues();
 	str_rc result;
@@ -196,7 +196,7 @@ str_rc HtmlPlates::render(htab_rd options)
 
 	}
 	
-	result = inner_ptr->render(htab_rd());
+	result = inner_ptr->render(htab_ptr());
 
 	pe->clearPlates();
 

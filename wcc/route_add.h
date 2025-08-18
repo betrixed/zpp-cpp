@@ -26,7 +26,7 @@ namespace wcc {
 
 		void construct(obj_ptr rset);
 
-		void addRoutes(htab_rd list, str_ptr prefix, str_ptr module);
+		void addRoutes(htab_ptr list, str_ptr prefix, str_ptr module);
 
 		void fallback(val_ptr backup);
 

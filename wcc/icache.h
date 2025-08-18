@@ -38,7 +38,7 @@ public:
 	
 	int  deleteExpired();
 
-	bool deleteMultiple(htab_rd keys);
+	bool deleteMultiple(htab_ptr keys);
 
 	val_rc get(str_ptr key, val_ptr noval = val_ptr());
 
@@ -46,7 +46,7 @@ public:
 
 	val_rc getData(str_ptr key);
 
-	val_rc getMultiple(htab_rd keys, val_ptr noval);
+	val_rc getMultiple(htab_ptr keys, val_ptr noval);
 
 	str_ptr getPrefix()
 	{

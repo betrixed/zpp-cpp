@@ -20,13 +20,13 @@ namespace wcd {
 		static base_obj_mgr<RunSql> omg;
 
 		void construct(obj_ptr db, str_ptr sql, 
-			 htab_rd bind, bool rval = false);
+			 htab_ptr bind, bool rval = false);
 
 		val_rc operation();
 		val_rc run();
 		
 		static val_rc op(obj_ptr db, str_ptr sql, 
-			htab_rd bind = htab_rd(), bool rval = false );
+			htab_ptr bind = htab_ptr(), bool rval = false );
 
 	};
 };

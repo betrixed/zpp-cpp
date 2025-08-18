@@ -60,15 +60,15 @@ namespace wcd {
 		str_rc getSqlClass(str_ptr dkey);
 		str_rc getDriverClass(str_ptr dkey);
 
-		htab_rd getSqlClasses();
-		htab_rd getDriverClasses();
+		htab_ptr getSqlClasses();
+		htab_ptr getDriverClasses();
 
-		void config(htab_rd data);
+		void config(htab_ptr data);
 
 		void addConfig(obj_rc iconfig, str_ptr name);
 
 		void setAlias(str_ptr alias, str_ptr name);
-		htab_rd getAliases();
+		htab_ptr getAliases();
 		htab_rc  getConfigNames();
 
 	};

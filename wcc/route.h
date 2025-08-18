@@ -84,14 +84,14 @@ public:
 
 	bool hasParams()
 	{
-		return (htab_rd(params_).size() > 0) ? true : false;
+		return (htab_ptr(params_).size() > 0) ? true : false;
 	}
 
-	htab_rd getParams();
+	htab_ptr getParams();
 	
-	void setParams(htab_rd params);
+	void setParams(htab_ptr params);
 
-	str_rc routeUrl(htab_rd pvalues);
+	str_rc routeUrl(htab_ptr pvalues);
 	
 	str_ptr getCompiled() const
 	{
@@ -124,7 +124,7 @@ public:
 
 	htab_rc __serialize();
 	
-	void __unserialize(htab_rd htab);
+	void __unserialize(htab_ptr htab);
 
 	VIRTUAL_ZOBJPTR
 

@@ -1,5 +1,5 @@
-#ifndef HTAB_RD_H
-#define HTAB_RD_H
+#ifndef HTAB_PTR_H
+#define HTAB_PTR_H
 
 #ifndef VAL_PTR_H
 #include "val_ptr.h"
@@ -17,7 +17,7 @@ namespace zpp {
 
     class  htab_rc;
 
-    class  htab_rd {
+    class  htab_ptr {
     protected:
         HashTable* ht_;
 
@@ -27,23 +27,23 @@ namespace zpp {
     public:
         static HashTable* make_own(HashTable* ht);
 
-        htab_rd() : ht_(nullptr) {}
+        htab_ptr() : ht_(nullptr) {}
 
-        htab_rd(const htab_rd& rc) : ht_(rc.ht_) {}
+        htab_ptr(const htab_ptr& rc) : ht_(rc.ht_) {}
         
-        htab_rd(HashTable* ht);
+        htab_ptr(HashTable* ht);
 
         operator HashTable*() const { return ht_; }
 
         HashTable* ptr() const { return ht_; }
 
-        htab_rd(const val_rc& zw);
+        htab_ptr(const val_rc& zw);
 
-        htab_rd(val_ptr zu);
+        htab_ptr(val_ptr zu);
         
-        htab_rd(const zval* p);
+        htab_ptr(const zval* p);
 
-        const htab_rd& operator=(const zval* p);
+        const htab_ptr& operator=(const zval* p);
 
         uint32_t size() const;
 

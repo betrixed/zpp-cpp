@@ -42,7 +42,7 @@ SearchList::construct(val_ptr paths)
 	}
 }
 
-htab_rd
+htab_ptr
 SearchList::getPaths()
 {
 	return paths_;
@@ -57,7 +57,7 @@ SearchList::clear()
 bool 
 SearchList::hasPath(str_ptr name)
 {
-	htab_rd hr(paths_);
+	htab_ptr hr(paths_);
 
 	size_t pcount = hr.size();
 
@@ -95,7 +95,7 @@ SearchList::addPath(str_ptr p)
 void 
 SearchList::addPaths(val_ptr sp)
 {
-	htab_rd list(sp.zarray());
+	htab_ptr list(sp.zarray());
 	size_t pcount = list.size();
 	while(pcount > 0) 
 	{
@@ -129,7 +129,7 @@ SearchList::findLeaf(str_ptr leaf, val_ptr extensions)
 
 	str_rc result;
 
-	htab_rd hr(paths_);
+	htab_ptr hr(paths_);
 
 	size_t pcount = hr.size();
 	if (pcount == 0)
@@ -139,7 +139,7 @@ SearchList::findLeaf(str_ptr leaf, val_ptr extensions)
 	fs::path pleaf(leaf.vstr());
 	fs::path pext = pleaf.extension();
 
-	htab_rd exlist(extensions.zarray());
+	htab_ptr exlist(extensions.zarray());
 	while(pcount)
 	{
 		--pcount;
@@ -259,7 +259,7 @@ ZEND_METHOD(Wcc_SearchList, getPaths)
 
 	SearchList* cobj = zval_toc<SearchList>(ZEND_THIS);
 
-	htab_rd result = cobj->getPaths();
+	htab_ptr result = cobj->getPaths();
 	result.return_zv(return_value); 
 }
 

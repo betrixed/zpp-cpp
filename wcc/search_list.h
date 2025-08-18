@@ -44,7 +44,7 @@ namespace wcc {
 		
 		str_ptr getName();
 
-		htab_rd getPaths();
+		htab_ptr getPaths();
 
 		VIRTUAL_ZOBJPTR
 

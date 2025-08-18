@@ -172,14 +172,14 @@ Plate::make(obj_ptr engine, str_ptr name)
 }
 */
 
-void Plate::setData(htab_rd data)
+void Plate::setData(htab_ptr data)
 {
 	//showmem("setData arg", data);
 	data_ = data;
 	//showarray("setData data", data_);
 }
 
-htab_rd 
+htab_ptr 
 Plate::getData()
 {
 	return data_;
@@ -250,7 +250,7 @@ Plate::getPublish()
 	htab_rc plate_data = pe->getData(name_);
 	publish.merge(plate_data);
 
-	htab_rd owndata(data_);
+	htab_ptr owndata(data_);
 	if (owndata.size() > 0) {
 		publish.merge(owndata);
 	}
@@ -265,7 +265,7 @@ void Plate::addSection(str_ptr name, str_ptr val)
 
 str_ptr Plate::getSection(str_ptr name, str_ptr defaultval)
 {
-	str_ptr result = htab_rd(sections_).get(name);
+	str_ptr result = htab_ptr(sections_).get(name);
 	if (result.isNull())
 	{
 		result = defaultval;
@@ -276,7 +276,7 @@ str_ptr Plate::getSection(str_ptr name, str_ptr defaultval)
 
 // sub-routine for internal
 str_rc
-Plate::full_render(htab_rd rdata)
+Plate::full_render(htab_ptr rdata)
 {	
 	str_rc result;
 
@@ -321,7 +321,7 @@ void Plate::clean()
 	engine_.init(); 
 }
 
-str_rc Plate::render(htab_rd data)
+str_rc Plate::render(htab_ptr data)
 {
 	//showstr("plate render for ", leaf_);
 
@@ -356,7 +356,7 @@ str_rc Plate::render(htab_rd data)
 }
 
 str_rc 
-Plate::insert(str_ptr name, htab_rd data)
+Plate::insert(str_ptr name, htab_ptr data)
 {
 	PlateEngine* pe = zobj_toc<PlateEngine>(engine_);
 	if (data.isNull())
@@ -366,14 +366,14 @@ Plate::insert(str_ptr name, htab_rd data)
 	return pe->render(name, data);
 }
 
-str_rc Plate::fetch(str_ptr name, htab_rd data)
+str_rc Plate::fetch(str_ptr name, htab_ptr data)
 {
 	return insert(name, data);
 }
 
 str_rc Plate::getContent()
 {
-	val_ptr content = htab_rd(sections_).get(PLD.content_key);
+	val_ptr content = htab_ptr(sections_).get(PLD.content_key);
 	if (content.isNull())
 	{
 		return zstr_temp("<pre>\n-- Missing Content--\n</pre>\n");
@@ -464,7 +464,7 @@ void Plate::styleEnd()
 	}
 }
 
-void Plate::layout(str_ptr leaf, htab_rd data)
+void Plate::layout(str_ptr leaf, htab_ptr data)
 {
 	layout_ = leaf;
 
@@ -477,7 +477,7 @@ void Plate::setLayout(str_ptr leaf)
 	layout_ = leaf;
 }
 
-void Plate::setLayoutData(htab_rd data)
+void Plate::setLayoutData(htab_ptr data)
 {
 	layoutData_ = data;
 }
@@ -520,7 +520,7 @@ ZEND_METHOD(Wcc_Plate, getData)
 	ZEND_PARSE_PARAMETERS_END();
 
 	auto cobj = zval_toc<Plate>(ZEND_THIS);
-	htab_rd data = cobj->getData();
+	htab_ptr data = cobj->getData();
 	//showarray("Plate getData", data);
 	data.return_zv(return_value);
 }

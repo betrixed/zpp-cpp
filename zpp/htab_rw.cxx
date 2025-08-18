@@ -404,7 +404,7 @@ htab_rw::merge(HashTable* src)
 
 
 void
-htab_rw::removal(htab_rd exkeys)
+htab_rw::removal(htab_ptr exkeys)
 {
 	//showarray("exkeys", exkeys);
 

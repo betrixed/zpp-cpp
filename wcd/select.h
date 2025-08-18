@@ -33,11 +33,11 @@ public:
 
 	void destruct();
 
-	void add(htab_rd cols);
+	void add(htab_ptr cols);
 
 	obj_rc addJoin(obj_ptr ltable, obj_ptr rtable, int jtype);
 
-	obj_rc addTable(str_ptr table, str_ptr alias, htab_rd cols);
+	obj_rc addTable(str_ptr table, str_ptr alias, htab_ptr cols);
 
 	val_rc getRenamed();
 

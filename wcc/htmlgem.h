@@ -36,9 +36,9 @@ namespace wcc {
 		void  endWrapDiv(str_buf& out);
 		htab_rc label_method(htab_rw ps, int& labeltype);
 		void outAttr(str_buf& out, str_ptr name, str_ptr value);
-		void ifKeyAttr(str_buf& out, str_ptr key, htab_rd ps);
-		htab_rd getLabelKeys1();
-		htab_rd getSelectKeys();
+		void ifKeyAttr(str_buf& out, str_ptr key, htab_ptr ps);
+		htab_ptr getLabelKeys1();
+		htab_ptr getSelectKeys();
 
 
 	public:
@@ -86,16 +86,16 @@ namespace wcc {
 		str_rc text_value(val_ptr pset);
 
 	// none-php
-		str_rc generateTag(str_ptr tag, htab_rd pset);
-		str_rc getTag(htab_rd ps, htab_rw ex, str_ptr tag);
+		str_rc generateTag(str_ptr tag, htab_ptr pset);
+		str_rc getTag(htab_ptr ps, htab_rw ex, str_ptr tag);
 
 		str_rc inputType(val_ptr pset, str_ptr itype);
 		str_rc getStyle(str_ptr name);
 
 		str_rc ensureIdValue(htab_rw ps);
-		str_rc label_front(htab_rd ps);
-		str_rc in_label(htab_rd ps);
-		str_rc out_label(htab_rd ps);
+		str_rc label_front(htab_ptr ps);
+		str_rc in_label(htab_ptr ps);
+		str_rc out_label(htab_ptr ps);
 
 		str_rc select_list(val_ptr pset);
 		str_rc xcheck(val_ptr pset);

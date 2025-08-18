@@ -14,7 +14,7 @@
 #include "str_ptr.h"
 #include "str_rc.h"
 
-#include "htab_rd.h"
+#include "htab_ptr.h"
 #include "htab_rc.h"
 #include "htab_rw.h"
 

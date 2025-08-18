@@ -25,7 +25,7 @@ public:
 
 	static obj_rc staticInstance(str_ptr class_name);
 
-	static obj_rc staticInstanceArgs(str_ptr class_name, htab_rd args);
+	static obj_rc staticInstanceArgs(str_ptr class_name, htab_ptr args);
 	
 	ReflectCache();
 
@@ -33,7 +33,7 @@ public:
 
 	obj_rc newInstance(str_ptr class_name);
 
-	obj_rc newInstanceArgs(str_ptr class_name, htab_rd args);
+	obj_rc newInstanceArgs(str_ptr class_name, htab_ptr args);
 
 	void clear();
 	

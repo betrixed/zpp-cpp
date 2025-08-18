@@ -64,7 +64,7 @@ IRow::~IRow()
 }
 
 void 
-IRow::construct(obj_ptr tmodel, htab_rd data, bool exists)
+IRow::construct(obj_ptr tmodel, htab_ptr data, bool exists)
 {
 	table_model_ = tmodel;
 	setData(data, exists);
@@ -80,7 +80,7 @@ void IRow::debug_info(htab_rw di)
 }
 
 void 
-IRow::setData(htab_rd data, bool exists)
+IRow::setData(htab_ptr data, bool exists)
 {
 	if (data.size())
 	{
@@ -150,7 +150,7 @@ IRow::read()
 
 
 htab_rc 
-IRow::getDataValues(htab_rd attrlist)
+IRow::getDataValues(htab_ptr attrlist)
 {
 	htab_rc result;
 
@@ -196,7 +196,7 @@ IRow::getDirty()
 	return result;
 }
 
-htab_rd 
+htab_ptr 
 IRow::getData() const
 {
 	return data_;
@@ -237,7 +237,7 @@ IRow::isDirty(str_ptr colname)
 
 
 void 
-IRow::mergeData(htab_rd attrs)
+IRow::mergeData(htab_ptr attrs)
 {
 	if (attrs.size() == 0)
 	{
@@ -353,7 +353,7 @@ ZEND_METHOD(Wcd_IRow, getData)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 	auto cobj = zval_toc<IRow>(ZEND_THIS);
-	htab_rd data = cobj->toArray();
+	htab_ptr data = cobj->toArray();
 	data.return_zv(return_value);
 
 }

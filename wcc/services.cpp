@@ -102,7 +102,7 @@ Services::activate(str_ptr key)
 	val_rc result;
 	//zend_printf("activate %s\n", ZSTR_VAL(key));
 
-	htab_rd defer(defer_);
+	htab_ptr defer(defer_);
 
 	val_ptr test;
 	if (!defer.try_fetch(key, test))
@@ -280,12 +280,12 @@ Services::setObject(obj_ptr obj, str_ptr key)
 bool Services::isActive(str_ptr name)
 {
 
-	return htab_rd(active_).has_key(name);
+	return htab_ptr(active_).has_key(name);
 }
 
 bool Services::has(str_ptr name)
 {
-	return (htab_rd(active_).has_key(name) || htab_rd(defer_).has_key(name));
+	return (htab_ptr(active_).has_key(name) || htab_ptr(defer_).has_key(name));
 }
 
 
@@ -313,7 +313,7 @@ Services::get(str_ptr name)
 
 	//showstr("services::get", name);
 
-	if (!htab_rd(active_).try_fetch(name, value))
+	if (!htab_ptr(active_).try_fetch(name, value))
 	{
 		result = activate(name);
 		return  result;

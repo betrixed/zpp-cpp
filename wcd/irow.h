@@ -54,7 +54,7 @@ namespace wcd {
     	
     	virtual void debug_info(htab_rw di);
 
-    	void construct(obj_ptr tmodel, htab_rd data = htab_rd(), bool exists = false);
+    	void construct(obj_ptr tmodel, htab_ptr data = htab_ptr(), bool exists = false);
 
     	bool create(bool reload = false);
 
@@ -70,9 +70,9 @@ namespace wcd {
     	
     	void read();
 
-    	htab_rd getData() const;
+    	htab_ptr getData() const;
 
-    	htab_rc getDataValues(htab_rd attrlist);
+    	htab_rc getDataValues(htab_ptr attrlist);
 
     	bool hasValue(str_ptr key);
     	
@@ -85,9 +85,9 @@ namespace wcd {
 
     	bool isDirty(str_ptr colname);
 
-    	void mergeData(htab_rd attrlist);
+    	void mergeData(htab_ptr attrlist);
 
-    	void setData(htab_rd data, bool exists = false);
+    	void setData(htab_ptr data, bool exists = false);
 
     	void setExists();
 

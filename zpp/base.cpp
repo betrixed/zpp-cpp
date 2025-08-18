@@ -60,7 +60,7 @@ base_init BI_str;
 	 	{
 	 		//showdata("prop class:", plist);
 
-	 		htab_rd src(plist);
+	 		htab_ptr src(plist);
 
 
 		 	di.merge(src);

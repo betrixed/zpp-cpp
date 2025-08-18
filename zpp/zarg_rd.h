@@ -38,8 +38,8 @@ public:
 	bool obj_ofclass(obj_ptr& value, zval* arg, zend_class_entry* ce);
 	bool obj_ofclass_null(obj_ptr& value, zval* arg, zend_class_entry* ce);
 	
-	bool zarray_null(htab_rd& value, zval* arg);
-	bool zarray(htab_rd& value, zval* arg);
+	bool zarray_null(htab_ptr& value, zval* arg);
+	bool zarray(htab_ptr& value, zval* arg);
 
 	bool zlong(zend_long& value, zval* arg);
 	bool zlong_null(zend_long& value, zval* arg);

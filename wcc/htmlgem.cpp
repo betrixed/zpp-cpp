@@ -338,7 +338,7 @@ HtmlGem::output(val_ptr item)
 }
 
 str_rc
-HtmlGem::generateTag(str_ptr tag, htab_rd pset)
+HtmlGem::generateTag(str_ptr tag, htab_ptr pset)
 {
 	str_buf out;
 
@@ -398,7 +398,7 @@ HtmlGem::generateTag(str_ptr tag, htab_rd pset)
 }
 
 str_rc 
-HtmlGem::getTag(htab_rd ps, htab_rw ex, str_ptr tag)
+HtmlGem::getTag(htab_ptr ps, htab_rw ex, str_ptr tag)
 {
 	ex.merge(ps);
 	val_ptr test = ex.get(HTG.classkey);
@@ -434,8 +434,8 @@ HtmlGem::getTag(htab_rd ps, htab_rw ex, str_ptr tag)
 				cdef.new_array();
 			}
 
-			htab_rd cset_ht(cset);
-			htab_rd cdef_ht(cdef);
+			htab_ptr cset_ht(cset);
+			htab_ptr cdef_ht(cdef);
 
 			if ((cdef_ht.size() > 0)  && (cset_ht.size() > 0))
 			{
@@ -453,7 +453,7 @@ HtmlGem::getTag(htab_rd ps, htab_rw ex, str_ptr tag)
 	return HtmlGem::generateTag(tag, ex);
 }
 
-str_rc HtmlGem::label_front(htab_rd ps)
+str_rc HtmlGem::label_front(htab_ptr ps)
 {
 	str_buf out;
 
@@ -481,7 +481,7 @@ str_rc HtmlGem::label_front(htab_rd ps)
 }
 
 str_rc 
-HtmlGem::in_label(htab_rd ps)
+HtmlGem::in_label(htab_ptr ps)
 {
 	str_buf out;
 
@@ -492,7 +492,7 @@ HtmlGem::in_label(htab_rd ps)
 
 	out << HTG.blank;
 	if (label.isArray()) {
-		htab_rd hlab(label);
+		htab_ptr hlab(label);
 		label = hlab.get(HTG.labelkey);
 	}
 	out << label.zstr();
@@ -504,7 +504,7 @@ HtmlGem::in_label(htab_rd ps)
 	return  out.zstr();
 }; 
 
-str_rc HtmlGem::out_label(htab_rd  ps)
+str_rc HtmlGem::out_label(htab_ptr  ps)
 {
 	str_buf out;
 	//zend_printf("out_label\n");
@@ -515,7 +515,7 @@ str_rc HtmlGem::out_label(htab_rd  ps)
 	Value content = ps.get(HTG.content_key);
 
 	if (label.isArray()) {
-		htab_rd wl(label);
+		htab_ptr wl(label);
 		label = wl.get(HTG.labelkey);
 	}
 	str_ptr temp(label);
@@ -647,7 +647,7 @@ str_rc
 HtmlGem::check_value(val_ptr pset)
 {
 	str_buf out;
-	htab_rd ps(pset.zarray());
+	htab_ptr ps(pset.zarray());
 
 	str_ptr label = ps.get(HTG.labelkey);
 
@@ -676,7 +676,7 @@ str_rc HtmlGem::submit(val_ptr pset)
 	list.set(HTG.typekey,HTG.submit);
 	list.set(HTG.valuekey, HTG.Submit);
 
-	return getTag(htab_rd(pset), list, HTG.inputtag);
+	return getTag(htab_ptr(pset), list, HTG.inputtag);
 }
 
 str_rc HtmlGem::datetime_value(val_ptr pset)
@@ -788,7 +788,7 @@ HtmlGem::text_value(val_ptr pset)
 	return out.zstr();
 }
 
-htab_rd 
+htab_ptr 
 HtmlGem::getLabelKeys1() 
 {
 	htab_rw hw(label_keys1_);
@@ -804,7 +804,7 @@ HtmlGem::getLabelKeys1()
 htab_rc
 HtmlGem::label_method(htab_rw ps, int& labeltype)
 {
-	htab_rd kist = getLabelKeys1();
+	htab_ptr kist = getLabelKeys1();
 	htab_rc  result = htab_rc::extract(kist, ps);
 	htab_rw hw_label(result);
 
@@ -1092,7 +1092,7 @@ HtmlGem::linkTo(val_ptr pset)
 	return out.zstr();
 }
 
-void HtmlGem::ifKeyAttr(str_buf& out, str_ptr key, htab_rd ps)
+void HtmlGem::ifKeyAttr(str_buf& out, str_ptr key, htab_ptr ps)
 {
 	str_ptr val = ps.get(key);
 	if (val.ok()) {
@@ -1100,9 +1100,9 @@ void HtmlGem::ifKeyAttr(str_buf& out, str_ptr key, htab_rd ps)
 	}
 }
 
-htab_rd HtmlGem::getSelectKeys()
+htab_ptr HtmlGem::getSelectKeys()
 {
-	if (htab_rd(select_keys_).size()==0)
+	if (htab_ptr(select_keys_).size()==0)
 	{
 		htab_rw hw(select_keys_);
 
@@ -1128,7 +1128,7 @@ HtmlGem::select_list(val_ptr pset)
 	test = list;
 
 	if (test.isArray()) {
-		htab_rd options(list);
+		htab_ptr options(list);
 
 		val_rc selected = ps.get(HTG.valuekey);
 
@@ -1148,7 +1148,7 @@ HtmlGem::select_list(val_ptr pset)
 		ifKeyAttr(out, HTG.classkey, ps);
 		ifKeyAttr(out, HTG.namekey, ps);
 		{
-			htab_rd select_keys = getSelectKeys();
+			htab_ptr select_keys = getSelectKeys();
 
 			// any other attributes?
 			htab_walk wk;
@@ -1258,7 +1258,7 @@ style_toArray(str_ptr style)
 {
 
 	val_rc pairs_val = explode(HTG.semicolon, style, 0);
-	htab_rd pairs(pairs_val);
+	htab_ptr pairs(pairs_val);
 
 	htab_rc result;
 	htab_rw hw(result);
@@ -1304,7 +1304,7 @@ mergeStyles(val_ptr list1, val_ptr list2)
 		hw.merge(merge2);
 	}
 	else if (list2.isArray()) {
-		htab_rd ht2(list2);
+		htab_ptr ht2(list2);
 		if (ht2.size())
 			hw.merge(ht2);
 	}
@@ -1312,7 +1312,7 @@ mergeStyles(val_ptr list1, val_ptr list2)
 }
 
 str_rc 
-array_toStyle(htab_rd slist)
+array_toStyle(htab_ptr slist)
 {
 	str_buf ss;
 
@@ -1330,7 +1330,7 @@ array_toStyle(htab_rd slist)
 str_rc
 HtmlGem::getStyle(str_ptr skey)
 {
-	val_ptr style = htab_rd(styles_).get(skey);
+	val_ptr style = htab_ptr(styles_).get(skey);
 	if (style.isArray())
 	{
 		return array_toStyle(style);
@@ -1527,7 +1527,7 @@ str_rc
 HtmlGem::multiline(val_ptr pset)
 {
 	str_buf out;
-	htab_rd temp(pset);
+	htab_ptr temp(pset);
 	//showarray("pset", temp);
 	htab_rc pscopy(temp);
 	//showarray("pscopy", pscopy);

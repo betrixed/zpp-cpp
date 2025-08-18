@@ -36,7 +36,7 @@ protected:
     zval *p_;
 
     friend class val_rc;
-    friend class htab_rd;
+    friend class htab_ptr;
     friend class htab_rw;
 
     void bind_string(zend_string* s);

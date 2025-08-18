@@ -450,7 +450,7 @@ void IColumns::clear()
 }
 		
 void 
-IColumns::add(htab_rd columns)		
+IColumns::add(htab_ptr columns)		
 {
 	if (columns.ok())
 	{
@@ -635,7 +635,7 @@ TColumns::tableCol(str_ptr expr)
 
 	if (pair.isArray())
 	{
-		htab_rd hpair(pair.zarray());
+		htab_ptr hpair(pair.zarray());
 		str_ptr name = hpair.get(int(0));
 		
 		tcol = hpair.get(int(1));
@@ -858,7 +858,7 @@ ZEND_METHOD(Wcd_Sql_IColumns, getColNames)
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	IColumns* cobj = zval_toc<IColumns> (ZEND_THIS);
-	htab_rd array = cobj->getColNames();
+	htab_ptr array = cobj->getColNames();
 	array.return_zv(return_value);
 
 }
@@ -907,7 +907,7 @@ ZEND_METHOD(Wcd_Sql_IColumns, add)
 {
 	zarg_rd args(execute_data);
 
-	htab_rd cols;
+	htab_ptr cols;
 
 	args.zarray(cols, args.need(1));
 
@@ -964,7 +964,7 @@ ZEND_METHOD(Wcd_Sql_IColumns, getExpr)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 	IColumns* cobj = zval_toc<IColumns> (ZEND_THIS);
-	htab_rd array = cobj->getExpr();
+	htab_ptr array = cobj->getExpr();
 	array.return_zv(return_value);
 }
 

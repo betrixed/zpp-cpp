@@ -22,7 +22,7 @@ namespace wcd {
 
 	void 
 	RunSql::construct(obj_ptr db, str_ptr sql, 
-			 htab_rd bind, bool rval)
+			 htab_ptr bind, bool rval)
 	{
 		db_ = db;
 		sql_ = sql;
@@ -78,7 +78,7 @@ namespace wcd {
 	}
 
 	val_rc //static 
-	RunSql::op(obj_ptr db, str_ptr sql, htab_rd bind, bool rval)
+	RunSql::op(obj_ptr db, str_ptr sql, htab_ptr bind, bool rval)
 	{
 		//showstr("runsql", sql);
 		//showarray("bind", bind);

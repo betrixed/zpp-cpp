@@ -113,7 +113,7 @@ void ICacheData::debug_info(htab_rw hw)
 }
 
 void 
-ICacheData::unserialize(htab_rd s)
+ICacheData::unserialize(htab_ptr s)
 {
 
 	//s.show_data("unserialize");

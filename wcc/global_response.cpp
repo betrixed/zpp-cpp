@@ -220,7 +220,7 @@ Response::writer()
 	return hmap_->writer();
 }
 
-htab_rd Response::reader() const
+htab_ptr Response::reader() const
 {
 	return hmap_->reader();
 }
@@ -257,7 +257,7 @@ void Response::setHeaders(val_ptr headers)
 
 	if (hto != hfrom) {
 		htab_rw hw = hto->writer();
-		htab_rd data(hfrom->toArray());
+		htab_ptr data(hfrom->toArray());
 		htab_walk wk;
 		auto  name = wk.key();
 		auto  value = wk.value();
@@ -475,7 +475,7 @@ Response::setContent(str_ptr  content)
 void 
 Response::setStatusCode(int icode, str_ptr  message)
 {
-	htab_rd rawhdrs(reader());
+	htab_ptr rawhdrs(reader());
 
 	htab_walk wk;
 	auto  key = wk.key();
@@ -554,7 +554,7 @@ Response::hasContent()
 bool
 Response::hasHeader(str_ptr name)
 {
-	htab_rd rd(reader());
+	htab_ptr rd(reader());
 	return rd.has_key(name);
 }
 
@@ -614,7 +614,7 @@ Response::attach_name(str_ptr uri, str_ptr suffix)
 
 	if (filename_match.matches(t_uri))
 	{
-		htab_rd htab(filename_match.captures());
+		htab_ptr htab(filename_match.captures());
 		filename = htab[int(0)];
 	}
 
@@ -703,7 +703,7 @@ Response::send_each()
 	auto hkey = wk.key();
 	auto hvalue = wk.value();
 
-	htab_rd rd(reader());
+	htab_ptr rd(reader());
 
 	std::string_view http_prefix = RSPD.HTTP_FS.vstr();
 

@@ -441,7 +441,7 @@ strtable::init()
 /**
  * Dyanmic args setup, array values only
  */
-args_spread::args_spread(htab_rd args, int prefixct)
+args_spread::args_spread(htab_ptr args, int prefixct)
 {
     argct_ = args.size() + prefixct;
     if (argct_)
@@ -506,7 +506,7 @@ bool
 call_spread_fn(
     val_rc& result, 
     val_rc& callme, 
-    htab_rd args)
+    htab_ptr args)
 {
     args_spread spread(args);
     return callable_fn(result, callme, spread.arg_ct(), spread.arg_v());

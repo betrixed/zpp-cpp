@@ -142,7 +142,7 @@ ServiceAccess::set(str_ptr name, val_ptr value)
 bool 
 ServiceAccess::has(str_ptr name)
 {
-	return htab_rd(cache_).has_key(name);
+	return htab_ptr(cache_).has_key(name);
 }
 
 

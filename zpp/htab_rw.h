@@ -1,8 +1,8 @@
 #ifndef HTAB_RW_H
 #define HTAB_RW_H
 
-#ifndef HTAB_RD_H
-#include "htab_rd.h"
+#ifndef HTAB_PTR_H
+#include "htab_ptr.h"
 #endif 
 
 #ifndef STR_RC_H
@@ -13,7 +13,7 @@ namespace zpp {
 
     class zstr_intern;
 
-    class htab_rw : public htab_rd 
+    class htab_rw : public htab_ptr 
     {
     protected:
         void giveback(zval* mgr, size_t init = HT_MIN_SIZE);
@@ -117,7 +117,7 @@ namespace zpp {
         
 
         /** Delete the keys in the exkeys list */
-        void removal(htab_rd exkeys);
+        void removal(htab_ptr exkeys);
     };
 
 };

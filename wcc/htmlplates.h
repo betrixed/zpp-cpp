@@ -43,9 +43,9 @@ using namespace zpp;
 
 		void setModel(obj_ptr model);
 
-		void mergeData(htab_rd items);
+		void mergeData(htab_ptr items);
 
-		str_rc render(htab_rd options);
+		str_rc render(htab_ptr options);
 
 		str_rc renderView(htab_rw options);
 

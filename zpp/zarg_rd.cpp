@@ -89,7 +89,7 @@ zarg_rd::zstring_null(str_ptr& value, zval* arg)
 }
 
 bool 
-zarg_rd::zarray_null(htab_rd& value, zval* arg)
+zarg_rd::zarray_null(htab_ptr& value, zval* arg)
 {
 	val_ptr test(arg);
 	int itype = test.ref_type();
@@ -107,7 +107,7 @@ zarg_rd::zarray_null(htab_rd& value, zval* arg)
 
 
 bool 
-zarg_rd::zarray(htab_rd& value, zval* arg)
+zarg_rd::zarray(htab_ptr& value, zval* arg)
 {
 	val_ptr test(arg);
 	int itype = test.ref_type();

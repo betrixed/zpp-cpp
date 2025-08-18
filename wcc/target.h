@@ -37,7 +37,7 @@ namespace wcc {
 		void setModule(str_ptr name);
 
 		htab_rc serialize();
-		void unserialize(htab_rd htab);
+		void unserialize(htab_ptr htab);
 
 		obj_rc copy();
 

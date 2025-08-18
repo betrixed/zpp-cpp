@@ -123,7 +123,7 @@ Target::serialize()
 }
 
 void 
-Target::unserialize(htab_rd htab)
+Target::unserialize(htab_ptr htab)
 {
 	//showdata("Target", htab);
 	class_ = htab.get(target_data.class_name);
@@ -250,7 +250,7 @@ ZEND_METHOD(Wcc_Target, __unserialize)
 	Z_PARAM_ARRAY(data)
 	ZEND_PARSE_PARAMETERS_END();
 
-	htab_rd htab(Z_ARR_P(data));
+	htab_ptr htab(Z_ARR_P(data));
 
 	Target* cobj = zval_toc<Target>(ZEND_THIS);
 

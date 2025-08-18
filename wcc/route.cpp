@@ -219,7 +219,7 @@ Route::__serialize()
 }
 
 void
-Route::__unserialize(htab_rd htab)
+Route::__unserialize(htab_ptr htab)
 {
 	val_ptr temp;
 
@@ -326,7 +326,7 @@ Route::getVerbInt(str_ptr sverb)
 {
 	str_rc verbstr = sverb.to_upper();
 
-	htab_rd hr(&route_data.route_verbs);
+	htab_ptr hr(&route_data.route_verbs);
 
 	val_ptr test;
 
@@ -350,14 +350,14 @@ Route::getName()
 	return id_;
 }
 
-htab_rd 
+htab_ptr 
 Route::getParams()
 {
 	return params_;
 }
 
 void 
-Route::setParams(htab_rd params)
+Route::setParams(htab_ptr params)
 {
 	params_ = params;
 }
@@ -366,13 +366,13 @@ class param_replace : public preg_callback {
 public:
 	htab_rc params_;
 
-	param_replace(htab_rd plist) : params_(plist)
+	param_replace(htab_ptr plist) : params_(plist)
 	{			
 	}
 
-	virtual bool get_replace(htab_rd captures)
+	virtual bool get_replace(htab_ptr captures)
 	{
-		htab_rd plist(params_);
+		htab_ptr plist(params_);
 		//showdata("params_", plist);
 
 		if (call_count_ < plist.size())
@@ -403,12 +403,12 @@ public:
 };
 
 str_rc
-Route::routeUrl(htab_rd pvalues)
+Route::routeUrl(htab_ptr pvalues)
 {
 	str_rc result;
 
 
-	if (htab_rd(this->params_).size() == 0)
+	if (htab_ptr(this->params_).size() == 0)
 	{
 		result = pattern_;
 	}
@@ -439,7 +439,7 @@ Route::getVerbNames( zend_long flags )
 
 	htab_rw rval(result);
 
-	htab_rd names(&route_data.verb_names);
+	htab_ptr names(&route_data.verb_names);
 
 	size_t nct = names.size();
 	for( size_t mix = 0; mix < nct; mix++) {
@@ -461,7 +461,7 @@ Route::getVerbNames( zend_long flags )
 str_rc 
 Route::getVerb(zend_long verb)
 {
-	htab_rd names(&route_data.verb_names);
+	htab_ptr names(&route_data.verb_names);
 	str_rc rval;
 
 	for( zend_long mix = 0; mix < 9; mix++) {
@@ -640,7 +640,7 @@ PHP_METHOD(Wcc_Route, getParams)
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	Route* cobj = zval_toc<Route>(ZEND_THIS);
-	htab_rd hr = cobj->getParams();
+	htab_ptr hr = cobj->getParams();
 	hr.return_zv(return_value);
 }
 
@@ -822,7 +822,7 @@ PHP_METHOD(Wcc_Route, routeUrl)
 	Z_PARAM_ARRAY_OR_NULL(params);
 	ZEND_PARSE_PARAMETERS_END();
 
-	htab_rd plist;
+	htab_ptr plist;
 
 	if (params)
 	{
@@ -864,7 +864,7 @@ PHP_METHOD(Wcc_Route, __unserialize)
 	Z_PARAM_ARRAY(data)
 	ZEND_PARSE_PARAMETERS_END();
 
-	htab_rd hr(data);
+	htab_ptr hr(data);
 
 	Route* cobj = zval_toc<Route>(ZEND_THIS);
 

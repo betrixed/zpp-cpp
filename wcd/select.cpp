@@ -52,7 +52,7 @@ Select::destruct()
 }
 
 void 
-Select::add(htab_rd cols)
+Select::add(htab_ptr cols)
 {
 	icol().add(cols);
 }
@@ -72,7 +72,7 @@ Select::addJoin(obj_ptr ltable, obj_ptr rtable, int jtype)
 }
 
 obj_rc 
-Select::addTable(str_ptr table, str_ptr alias, htab_rd cols)
+Select::addTable(str_ptr table, str_ptr alias, htab_ptr cols)
 {
 	obj_rc tc_mgr = TColumns::omg.new_zobj();
 	TColumns* tc = zobj_toc<TColumns>(tc_mgr);
@@ -98,8 +98,8 @@ Select::getRenamed()
 		htab_rc objset;
 		htab_rw hw(objset);
 
-		htab_rd rows(results);
-		htab_rd rtab(rename);
+		htab_ptr rows(results);
+		htab_ptr rtab(rename);
 		htab_walk wk;
 
 		for(wk.start(rows); wk.ok(); wk.next())
@@ -161,7 +161,7 @@ ZEND_METHOD(Wcd_Sql_Select, add)
 {
 	zarg_rd args(execute_data);
 
-	htab_rd cols;
+	htab_ptr cols;
 
 	args.zarray(cols, args.need(1));
 
@@ -203,7 +203,7 @@ ZEND_METHOD(Wcd_Sql_Select, addTable)
 
 	str_ptr tname;
 	str_ptr talias;
-	htab_rd cols;
+	htab_ptr cols;
 
 	obj_rc result;
 

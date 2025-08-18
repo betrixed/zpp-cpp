@@ -165,7 +165,7 @@ Hmap_php::get_property_ptr_ptr(zend_object* object, zend_string* name,
 {
 	//if (!zend_std_has_property(object, name, ZEND_PROPERTY_EXISTS, cache_slot)) {
 		Hmap* cobj = zobj_toc<Hmap>(object);
-		htab_rd look(cobj->data_);
+		htab_ptr look(cobj->data_);
 		if (look.isNull())
 		{
 			return nullptr;
@@ -184,7 +184,7 @@ Hmap_php::read_property(zend_object* object, zend_string* name, int type,
 	//if (!zend_std_has_property(object, name, ZEND_PROPERTY_EXISTS, cache_slot)) 
 	//{
 		Hmap* cobj = zobj_toc<Hmap>(object);
-		htab_rd look(cobj->data_);
+		htab_ptr look(cobj->data_);
 
 		if (look.isNull())
 		{
@@ -238,7 +238,7 @@ Hmap_php::has_property(zend_object* object, zend_string* name, int has_set_exist
 	}*/
 
 	Hmap* cobj = zobj_toc<Hmap>(object);
-	htab_rd look(cobj->data_);
+	htab_ptr look(cobj->data_);
 	if (look.isNull())
 	{
 		  return false;
@@ -265,7 +265,7 @@ ZEND_RESULT_CODE
 Hmap_php::count_elements(zend_object* object, zend_long *count)
 {
 	Hmap* cobj = zobj_toc<Hmap>(object);
-	htab_rd look(cobj->data_);
+	htab_ptr look(cobj->data_);
 	*count = look.size();
 	return SUCCESS;
 }
@@ -276,7 +276,7 @@ HashTable*
 Hmap::get_properties(zend_object* object)
 {
 	Hmap* cobj = zobj_toc<Hmap>(object);
-	htab_rd look(cobj->data_);
+	htab_ptr look(cobj->data_);
 	return look;
 }
 */
@@ -338,7 +338,7 @@ Hmap::new_hmap()
 {
 	obj_rc result = Hmap::omg.new_zobj();
 	Hmap* cobj = zobj_toc<Hmap>(result);
-	htab_rd nullarray;
+	htab_ptr nullarray;
 	cobj->construct(nullarray);
 	return result;
 }
@@ -347,7 +347,7 @@ zval*
 Hmap_php::read_dimension(zend_object* obj, zval* offset, int type, zval* return_value)
 {
 	Hmap* cobj = zobj_toc<Hmap>(obj);
-	htab_rd look(cobj->data_);
+	htab_ptr look(cobj->data_);
 	if (look.isNull())
 	{
 		return nullptr;
@@ -367,7 +367,7 @@ int
 Hmap_php::has_dimension(zend_object* object, zval* offset, int check_empty)
 {
 	Hmap* cobj = zobj_toc<Hmap>(object);
-	htab_rd look(cobj->data_);
+	htab_ptr look(cobj->data_);
 	if (look.isNull())
 	{
 		return false;
@@ -405,7 +405,7 @@ Hmap::~Hmap()
 {}
 
 void 
-Hmap::construct(htab_rd values)
+Hmap::construct(htab_ptr values)
 {
 	//showarray("Hmap::construct", values);
 	if (values.size() > 0)
@@ -420,7 +420,7 @@ Hmap::getOrNot(str_ptr name, val_ptr ifnot)
 {
 	val_ptr result;
 
-	htab_rd look(data_);
+	htab_ptr look(data_);
 
 	if (look.ok())
 	{
@@ -435,7 +435,7 @@ Hmap::getOrNot(str_ptr name, val_ptr ifnot)
 bool   
 Hmap::has(str_ptr name)
 {
-	htab_rd look(data_);
+	htab_ptr look(data_);
 	return look.ok() && look.has_key(name);
 }
 
@@ -443,7 +443,7 @@ val_rc
 Hmap::get(str_ptr name)
 {	
 	val_rc result;
-	htab_rd look(data_);
+	htab_ptr look(data_);
 	if (look.ok())
 	{
 		result = look.get(name);
@@ -455,7 +455,7 @@ val_rc Hmap::get(val_ptr key)
 {
 	val_rc result;
 
-	htab_rd look(data_);
+	htab_ptr look(data_);
 	if (look.ok())
 	{
 		result = look.get(key);
@@ -501,7 +501,7 @@ Hmap::subsetkey(str_ptr key)
 
 // keys as list values in data
 htab_rc 
-Hmap::subset(htab_rd data)
+Hmap::subset(htab_ptr data)
 {
 	htab_rc result;
 	htab_rw hw(result);
@@ -518,7 +518,7 @@ Hmap::subset(htab_rd data)
 }
 
 void   
-Hmap::addArray(htab_rd data)
+Hmap::addArray(htab_ptr data)
 {
 	for_key_value fkv;
 	htab_rw hw(data_);
@@ -530,7 +530,7 @@ Hmap::addArray(htab_rd data)
 }
 
 void
-Hmap::assign(htab_rd data)
+Hmap::assign(htab_ptr data)
 {
 	(htab_rc&) data_ = data;
 }
@@ -538,13 +538,13 @@ Hmap::assign(htab_rd data)
 zend_long 
 Hmap::count() const
 {
-		return htab_rd(data_).size();
+		return htab_ptr(data_).size();
 }
 
-htab_rd 
+htab_ptr 
 Hmap::toArray()
 {
-	return htab_rd(data_);
+	return htab_ptr(data_);
 }
 
 str_rc 
@@ -554,21 +554,21 @@ Hmap::unhive(str_ptr subj)
 
 	int ct = sfind.matches(subj);
 	if (ct > 0) {
-		htab_rd m = sfind.results();
+		htab_ptr m = sfind.results();
 
-		htab_rd replace_list = m.get((int)0);
-		htab_rd keys_list = m.get(1);
+		htab_ptr replace_list = m.get((int)0);
+		htab_ptr keys_list = m.get(1);
 
 		std::string_view original = subj.vstr();
 
 		str_buf result;
 		size_t ipos = 0;
 
-		htab_rd mydata(data_);
+		htab_ptr mydata(data_);
 
 		for(int i = 0; i < ct; i++)
 		{
-			htab_rd k1 = keys_list.get(i);
+			htab_ptr k1 = keys_list.get(i);
 			val_ptr fkey = k1.get((int)0);
 			//showmem("get key", fkey);
 			
@@ -577,7 +577,7 @@ Hmap::unhive(str_ptr subj)
 			//showmem("replace value", rval);
 			str_ptr replace_str = val_ptr(rval).zstr();
 
-			htab_rd f1 = replace_list.get(i);
+			htab_ptr f1 = replace_list.get(i);
 			str_ptr slen_f1 = f1.get((int)0);
 			val_ptr soffset_f1 = f1.get(1);
 
@@ -619,7 +619,7 @@ Hmap::serialize()
 }
 
 void 
-Hmap::unserialize(htab_rd htab)
+Hmap::unserialize(htab_ptr htab)
 {
 
 	(htab_rc&)data_ = htab;
@@ -645,7 +645,7 @@ ZEND_METHOD(Wcc_Hmap, __construct)
 
 	auto cobj = zval_toc<Hmap>(ZEND_THIS);
 
-	htab_rd arg1;
+	htab_ptr arg1;
 
 	if (data) {
 		arg1 = val_ptr(data).zarray();
@@ -802,7 +802,7 @@ ZEND_METHOD(Wcc_Hmap, toArray)
 
 	auto cobj = zval_toc<Hmap>(ZEND_THIS);
 
-	htab_rd result = cobj->toArray();
+	htab_ptr result = cobj->toArray();
 	result.return_zv(return_value);
 }
 
@@ -907,7 +907,7 @@ ZEND_METHOD(Wcc_Hmap, __unserialize)
 	Z_PARAM_ARRAY(data)
 	ZEND_PARSE_PARAMETERS_END();
 
-	htab_rd hw(Z_ARR_P(data));
+	htab_ptr hw(Z_ARR_P(data));
 
 	Hmap*   cobj = zval_toc<Hmap>(ZEND_THIS);
 

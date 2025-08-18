@@ -30,7 +30,7 @@ ICache::make_cache( val_ptr options, val_ptr services)
 {
 	//showmem("options", options);
 	//return val_rc();
-    htab_rd opt(options);
+    htab_ptr opt(options);
     obj_rc  result;
 
     str_rc aclass = opt.get(IC_STR.class_key);
@@ -73,7 +73,7 @@ void ICache::construct(val_ptr options, val_ptr services)
 
 	options_ = options.zarray();
 
-	htab_rd hread(options_);
+	htab_ptr hread(options_);
 
 	val_ptr value;
 
@@ -130,7 +130,7 @@ bool ICache::clearPrefix(str_ptr prefix)
 
 	htab_rw  delkeys(del_array);
 
-	htab_rd  allkeys(cached_);
+	htab_ptr  allkeys(cached_);
 	htab_walk  htw;
 
 	str_ptr spref(prefix);
@@ -166,7 +166,7 @@ int
 ICache::deleteExpired()
 {
 	htab_rc hset = getExpired();
-	htab_rd  expired(hset);
+	htab_ptr  expired(hset);
 	htab_rw cache(cached_);
 
 	int result = expired.size();
@@ -190,7 +190,7 @@ ICache::getExpired()
 {
 	htab_rc  result;
 	htab_rw rtab(result);
-	htab_rd  cache(cached_);
+	htab_ptr  cache(cached_);
 
 	htab_walk htw;
 
@@ -214,7 +214,7 @@ ICache::getExpired()
 	return result;
 }
 
-bool ICache::deleteMultiple(htab_rd keys)
+bool ICache::deleteMultiple(htab_ptr keys)
 {
 	bool result = true;
 
@@ -234,7 +234,7 @@ bool ICache::deleteMultiple(htab_rd keys)
 val_rc 
 ICache::get(str_ptr key, val_ptr noval)
 {
-	htab_rd cache(cached_);
+	htab_ptr cache(cached_);
 	val_ptr result = cache.get(key);
 	if (result.isObject())
 	{
@@ -248,7 +248,7 @@ ICache::get(str_ptr key, val_ptr noval)
 val_rc 
 ICache::getCached(str_ptr key)
 {
-	htab_rd cache(cached_);
+	htab_ptr cache(cached_);
 
 	return cache.get(key);
 }
@@ -262,7 +262,7 @@ ICache::getData(str_ptr key)
 }
 
 val_rc 
-ICache::getMultiple(htab_rd keys, val_ptr noval)
+ICache::getMultiple(htab_ptr keys, val_ptr noval)
 {
 	val_rc result;
 	val_rc nullvalue;
@@ -343,7 +343,7 @@ ICache::getUnsaved()
 val_rc 
 ICache::getOption(str_ptr key)
 {
-	return htab_rd(options_).get(key);
+	return htab_ptr(options_).get(key);
 }
 
 void 
@@ -379,7 +379,7 @@ ICache::setMultiple(val_ptr values, zend_long ttl)
 {
 	bool result = true;
 
-	htab_rd list_w(values);
+	htab_ptr list_w(values);
 
 	htab_walk walk;
 	auto k=walk.key();

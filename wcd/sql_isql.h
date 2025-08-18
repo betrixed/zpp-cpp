@@ -54,7 +54,7 @@ namespace wcd {
 
 		str_ptr joinTypeStr() const;
 
-		htab_rd getConditions() {
+		htab_ptr getConditions() {
 			return joinExpr_;
 		}
 	};
@@ -78,7 +78,7 @@ namespace wcd {
 
 		static base_obj_mgr<JoinTables> omg;
 
-		static obj_rc rowSplit(htab_rd row, htab_rd rename);
+		static obj_rc rowSplit(htab_ptr row, htab_ptr rename);
 
 		void debug_info(htab_rw di) override;
 		
@@ -161,10 +161,10 @@ namespace wcd {
 		void construct(obj_ptr driver);
 		str_rc addParam(val_ptr value);
 		//str_rc addParam(val_ptr value);
-		str_rc addParamList(htab_rd values);
+		str_rc addParamList(htab_ptr values);
 		str_rc makeList(int start, int count);
 
-		void setParams(htab_rd replace)
+		void setParams(htab_ptr replace)
 		{
 			params_ = replace;
 		}
@@ -174,12 +174,12 @@ namespace wcd {
 		/** add parameter or constant */
 		str_rc paramLiteral(val_ptr value);
 
-		void setReturns(htab_rd rets)
+		void setReturns(htab_ptr rets)
 		{
 			ret_values_ = rets;
 		}
 
-		void setValues(htab_rd vals)
+		void setValues(htab_ptr vals)
 		{
 			
 			val_params_ = vals;
@@ -197,17 +197,17 @@ namespace wcd {
 			return sql_;
 		}
 
-		htab_rd getReturns() 
+		htab_ptr getReturns() 
 		{
 			return ret_values_;
 		}
 
-		htab_rd getValues() 
+		htab_ptr getValues() 
 		{
 			return val_params_;
 		}
 
-		htab_rd getParams() 
+		htab_ptr getParams() 
 		{
 			return params_;
 		}
@@ -217,13 +217,13 @@ namespace wcd {
 	class ISql : public base_d 
 	{
 	protected:
-		str_rc columns(htab_rd bd);
+		str_rc columns(htab_ptr bd);
 		void columnsTC(IColumns* tc, htab_rw col_list); //str_buf& col_list);
-		htab_rd getTables(Bindings& bind);
-		str_rc where(Bindings &bind, htab_rd wtab);
-		str_rc insert_col_params(Bindings& bind, htab_rd rowbind);
-		str_rc orderBy(htab_rd obind);
-		str_rc limit(ParamList* plist, htab_rd ltab);
+		htab_ptr getTables(Bindings& bind);
+		str_rc where(Bindings &bind, htab_ptr wtab);
+		str_rc insert_col_params(Bindings& bind, htab_ptr rowbind);
+		str_rc orderBy(htab_ptr obind);
+		str_rc limit(ParamList* plist, htab_ptr ltab);
 		str_rc fromJT(Bindings& bind, JoinTables* jt);
 		str_rc select_jt(Bindings& bind, JoinTables* jt);
 
@@ -259,7 +259,7 @@ namespace wcd {
 
 		str_rc seqLastValue(str_ptr seq);
 
-		str_rc setSeqValue(int value, htab_rd data);
+		str_rc setSeqValue(int value, htab_ptr data);
 		
 		str_rc entityClass(str_ptr s);
 
@@ -303,10 +303,10 @@ namespace wcd {
 
 		void add(int key, val_ptr value);
 
-		void addarray(int key, htab_rd value);
+		void addarray(int key, htab_ptr value);
 		void addstr(int key, str_ptr value);
 
-		bool addJoinData(htab_rd data);
+		bool addJoinData(htab_ptr data);
 
 		zval* get(int key);
 
@@ -356,7 +356,7 @@ namespace wcd {
 
 		void set(int key, val_ptr value);
 		void set(int key, int value);
-		void set(int key, htab_rd value);
+		void set(int key, htab_ptr value);
 		void set(int key, const val_rc& value);
 
 		void setParamList(obj_ptr obj)

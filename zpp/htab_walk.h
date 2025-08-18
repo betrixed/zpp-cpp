@@ -5,8 +5,8 @@
 #include "val_ptr.h"
 #endif
 
-#ifndef HTAB_RD_H
-#include "htab_rd.h"
+#ifndef HTAB_PTR_H
+#include "htab_ptr.h"
 #endif
 
 #ifndef VAL_RC_H
@@ -20,7 +20,7 @@ namespace zpp {
         val_rc key_;
         val_rc value_;
 
-    	htab_rd  wrap_;
+    	htab_ptr  wrap_;
 
         HashPosition iterate_ = 0;
 

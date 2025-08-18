@@ -52,7 +52,7 @@ Config::unset_dimension(zend_object *object, zval *unset)
 
 
 obj_rc // static
-Config::make(htab_rd initdata)
+Config::make(htab_ptr initdata)
 {
 	obj_rc result = Config::omg.new_zobj();
 	Config* cobj = zobj_toc<Config>(result);
@@ -68,7 +68,7 @@ Config::debug_info(htab_rw hw)
 }
 
 void 
-Config::construct(htab_rd values)
+Config::construct(htab_ptr values)
 {
 	if (values.size() > 0)
 	{
@@ -208,7 +208,7 @@ Config::subsetkey(str_ptr key)
 }
 
 htab_rc  
-Config::subset(htab_rd data)
+Config::subset(htab_ptr data)
 {
 	for_key_value wk;
 	htab_rc result;
@@ -227,7 +227,7 @@ Config::subset(htab_rd data)
 }
 
 void      
-Config::addArray(htab_rd data)
+Config::addArray(htab_ptr data)
 {
 	for_key_value fkv;
 	for(fkv.start(data); fkv.ok(); fkv.next())
@@ -251,7 +251,7 @@ Config::clear()
 {
 	htab_rc temp = toArray();
 
-	htab_rd look(temp);
+	htab_ptr look(temp);
 
 	for_key_value wk;
 
@@ -270,10 +270,10 @@ Config::unhive(str_ptr subj)
 
 	int ct = sfind.matches(subj);
 	if (ct > 0) {
-		htab_rd m = sfind.results();
+		htab_ptr m = sfind.results();
 
-		htab_rd replace_list = m.get((int)0);
-		htab_rd keys_list = m.get(1);
+		htab_ptr replace_list = m.get((int)0);
+		htab_ptr keys_list = m.get(1);
 
 		std::string_view original = subj.vstr();
 
@@ -282,7 +282,7 @@ Config::unhive(str_ptr subj)
 
 		for(int i = 0; i < ct; i++)
 		{
-			htab_rd  k1 = keys_list.get(i);
+			htab_ptr  k1 = keys_list.get(i);
 			val_ptr fkey = k1.get((int)0);
 			//showmem("get key", fkey);
 			
@@ -290,7 +290,7 @@ Config::unhive(str_ptr subj)
 			//showmem("replace value", rval);
 			str_ptr replace_str = val_ptr(rval).zstr();
 
-			htab_rd f1 = replace_list.get(i);
+			htab_ptr f1 = replace_list.get(i);
 			str_ptr  slen_f1 = f1.get((int)0);
 			val_ptr  soffset_f1 = f1.get(1);
 
@@ -330,7 +330,7 @@ ZEND_METHOD(Wcc_Config, __construct)
 
 	auto cobj = zval_toc<Config>(ZEND_THIS);
 
-	htab_rd arg1;
+	htab_ptr arg1;
 
 	if (data) {
 		arg1 = val_ptr(data).zarray();

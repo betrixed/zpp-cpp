@@ -24,7 +24,7 @@ public:
 
 	virtual void debug_info(htab_rw di);
 
-	void assign(htab_rd cfg);
+	void assign(htab_ptr cfg);
 	val_rc getValue(val_ptr keys, bool required, val_ptr ifnot);
 	val_rc getValue(str_ptr key, bool required, val_ptr ifnot);
 	
@@ -40,7 +40,7 @@ public:
 	void     set(str_ptr name, val_ptr value);
 	void     set(str_ptr name, str_ptr value);
 	
-	htab_rd getArray();
+	htab_ptr getArray();
 	str_rc getCharset();
 	str_rc getCollation();
 	str_rc getDriverClass();

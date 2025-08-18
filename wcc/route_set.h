@@ -56,13 +56,13 @@ public:
 	void notFound(val_ptr target);
 	
 	htab_rc serialize();
-	void     unserialize(htab_rd htab);
+	void     unserialize(htab_ptr htab);
 
-	void  addRouteList(htab_rd list, str_ptr prefix, str_ptr module);
+	void  addRouteList(htab_ptr list, str_ptr prefix, str_ptr module);
 	void  addRoute(obj_ptr route);
 
 	obj_rc getRoute(str_ptr name);
-	str_rc routeUrl(str_ptr name, htab_rd params);
+	str_rc routeUrl(str_ptr name, htab_ptr params);
 	
 	void setFile(str_ptr name) {
 		file_ = name;
@@ -72,11 +72,11 @@ public:
 		return file_;
 	}
 
-	htab_rd getFixed() {
+	htab_ptr getFixed() {
 		return fixed_;
 	}
 
-	htab_rd getVary() {
+	htab_ptr getVary() {
 		return vary_;
 	}
 	static void  appendRoute(htab_rw array, str_ptr key, Route* route);

@@ -15,8 +15,8 @@
 #include "state_init.h"
 #endif
 
-#ifndef HTAB_RD_H
-#include "htab_rd.h"
+#ifndef HTAB_PTR_H
+#include "htab_ptr.h"
 #endif
 
 #ifndef VAL_RC_H
@@ -41,7 +41,7 @@ namespace zpp {
         zval*               argv_;
     public:
         //! Reserve extra number of parameters in front.
-        args_spread(htab_rd args, int prefixct = 0);
+        args_spread(htab_ptr args, int prefixct = 0);
         ~args_spread();
 
         size_t arg_ct() const { return argct_; }
@@ -50,7 +50,7 @@ namespace zpp {
     };
 
     bool callable_fn(val_rc& result, val_rc& callme, int argct = 0, zval* argv = nullptr);
-    bool call_spread_fn(val_rc& result, val_rc& callme, htab_rd args);
+    bool call_spread_fn(val_rc& result, val_rc& callme, htab_ptr args);
 
     class fn_call {
     protected:
