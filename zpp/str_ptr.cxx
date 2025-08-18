@@ -420,7 +420,7 @@ str_ptr::strpos(str_ptr needle)
 	return find(nview,0);
 }
 
-void str_ptr::return_zv(zval* ret)
+void str_ptr::return_zv(zval* ret) const
 {
 	ZVAL_STR_COPY(ret, s);
 }

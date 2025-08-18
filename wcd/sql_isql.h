@@ -93,17 +93,17 @@ namespace wcd {
 
 		void addWhere(val_ptr leftAttr, val_ptr rightAttr, int op, int logic);
 
-		const htab_rc& getData()
+		htab_ptr getData()
 		{
 			return joins_;
 		}
 
-		const str_rc& getModel()
+		str_ptr getModel()
 		{
 			return model_;
 		}
 
-		const htab_rc& getOrder() 
+		htab_ptr getOrder() 
 		{
 			return orderby_;
 		}
@@ -119,7 +119,7 @@ namespace wcd {
 		
 		obj_rc getTableAlias(str_ptr name);
 
-		const htab_rc& getTables()
+		htab_ptr getTables()
 		{
 			return byAlias_;
 		}
@@ -336,7 +336,7 @@ namespace wcd {
 
 		void update(str_ptr column, val_ptr value);
 
-		const htab_rc& getData()
+		htab_ptr getData()
 		{
 			return data_;
 		}

@@ -1723,7 +1723,7 @@ ZEND_METHOD(Wcd_Sql_JoinTables, getData)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 	JoinTables* cobj = zval_toc<JoinTables>(ZEND_THIS);
-	const htab_rc& htab = cobj->getData();
+	htab_ptr htab = cobj->getData();
 	htab.return_zv(return_value);
 }
 
@@ -1741,7 +1741,7 @@ ZEND_METHOD(Wcd_Sql_JoinTables, getOrder)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 	JoinTables* cobj = zval_toc<JoinTables>(ZEND_THIS);
-	const htab_rc& htab = cobj->getOrder();
+	htab_ptr htab = cobj->getOrder();
 	htab.return_zv(return_value);
 }
 
@@ -1794,7 +1794,7 @@ ZEND_METHOD(Wcd_Sql_JoinTables, getTables)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 	JoinTables* cobj = zval_toc<JoinTables>(ZEND_THIS);
-	const htab_rc& htab = cobj->getTables();
+	htab_ptr htab = cobj->getTables();
 	htab.return_zv(return_value);
 }
 

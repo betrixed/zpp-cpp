@@ -211,6 +211,7 @@ str_rc::~str_rc()
     lose();
 }
 
+
 void 
 str_rc::move_zv(zval* ret)
 {

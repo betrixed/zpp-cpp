@@ -15,7 +15,7 @@ namespace zpp {
 class zarg_rd 
 {
 protected:
-	str_buf*          errors_;
+	str_buf*          	  errors_;
 	zval*				  zptr0_;
 	uint32_t              nargs_;
 	uint32_t              option_;

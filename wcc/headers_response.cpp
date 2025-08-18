@@ -171,7 +171,7 @@ ZEND_METHOD(Wcc_Headers, toArray)
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	auto cobj = zval_toc<Headers>(ZEND_THIS);
-	const htab_rc& result = cobj->toArray();
+	htab_ptr result = cobj->toArray();
 
 	result.return_zv(return_value);
 }

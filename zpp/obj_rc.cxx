@@ -166,6 +166,21 @@ obj_rc::new_object(str_ptr classname, obj_rc& host)
 	return maker.new_object(host);
 }
 
+// return must do a move
+void 
+obj_rc::return_zv(zval* ret)
+{
+	if (obj_)
+	{
+		ZVAL_OBJ(ret, obj_); 
+		//Z_TYPE_FLAGS_P(ret) = 0; // Not allowed to dereference
+		obj_ = nullptr;// give up ownership privilege
+	}
+	else {
+		ZVAL_NULL(ret);
+	}	
+}
+
 void 
 obj_rc::move_zv(zval* ret)
 {

@@ -70,6 +70,7 @@ namespace zpp {
 
 		void move_zv(zval* ret);
 
+		void return_zv(zval* ret);
 
 		static bool new_object(str_ptr classname, obj_rc& host);
 	};

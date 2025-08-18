@@ -833,7 +833,7 @@ ZEND_METHOD(Wcd_Sql_Bindings, getData)
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	Bindings* cobj = zval_toc<Bindings>(ZEND_THIS);
-	const htab_rc& data = cobj->getData();
+	htab_ptr data = cobj->getData();
 	data.return_zv(return_value);
 }
 

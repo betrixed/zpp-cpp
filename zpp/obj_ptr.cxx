@@ -180,7 +180,7 @@ bool obj_ptr::isDateTime() const
 }
 
 void 
-obj_ptr::return_zv(zval* ret) const
+obj_ptr::return_zv(zval* ret) const 
 {
     if (obj_)
         ZVAL_OBJ_COPY(ret, obj_);
