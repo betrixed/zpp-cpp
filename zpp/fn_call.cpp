@@ -23,65 +23,26 @@ strtable STAB;
 
 
 fn_call::fn_call() 
-	: argct_(0), argv_(nullptr), autowipe_(false)
 {
+    fci_ = {0};
+    cache_ = {0};  
+    fci_.retval = (zval*) result_;
 }
 
 fn_call::~fn_call()
 {
-
-}
-/*
-val_rc&& 
-fn_call::call1(zval *vp)
-{
-    assert(argct_==1);
-    ZVAL_COPY_VALUE(argv_[0],vp);
-    return call_fn();
 }
 
-val_rc&& 
-fn_call::call2(zval *arg0, zval* arg1)
+void fn_call::wipe()
 {
-    assert(argct_==2);
-    ZVAL_COPY_VALUE(argv_[0],arg0);
-    ZVAL_COPY_VALUE(argv_[1],arg1);
-    return call_fn();
+    zval* ptr = fci_.params;
+    auto ct =   fci_.param_count;
+    if (ptr && ct) {
+        memset(ptr, 0, ct*sizeof(zval));
+    }
+    // in case previous result was not cleared
+    result_.set_null(); 
 }
-
-val_rc&& 
-fn_call::call3(zval *arg0, zval* arg1, zval* arg2)
-{
-    assert(argct_==3);
-    ZVAL_COPY_VALUE(argv_[0],arg0);
-    ZVAL_COPY_VALUE(argv_[1],arg1);
-    ZVAL_COPY_VALUE(argv_[2],arg2);
-    return call_fn();
-}
-
-val_rc&& 
-fn_call::call4(zval *arg0, zval* arg1, zval* arg2, zval* arg3)
-{
-    assert(argct_==4);
-    ZVAL_COPY_VALUE(argv_[0],arg0);
-    ZVAL_COPY_VALUE(argv_[1],arg1);
-    ZVAL_COPY_VALUE(argv_[2],arg2);
-    ZVAL_COPY_VALUE(argv_[3],arg3);
-    return call_fn();
-}
-
-val_rc&& 
-fn_call::call5(zval *arg0, zval* arg1, zval* arg2, zval* arg3, zval* arg4)
-{
-     assert(argct_==5);
-    ZVAL_COPY_VALUE(argv_[0],arg0);
-    ZVAL_COPY_VALUE(argv_[1],arg1);
-    ZVAL_COPY_VALUE(argv_[2],arg2);
-    ZVAL_COPY_VALUE(argv_[3],arg3);
-    ZVAL_COPY_VALUE(argv_[4],arg4);
-    return call_fn();
-}
-*/
 
 
 void 
@@ -93,23 +54,18 @@ fn_call::set_named_args(HashTable* nargs)
 void 
 fn_call::set_fci(zend_object* obj, str_ptr method, HashTable* nargs)
 {
-    fci_ = {0};
-    cache_ = {0}; // ensure fully wiped
 
     //method_name_ = method;
 
     fci_.size = sizeof(fci_);
     fci_.object = obj;
     //showstr("method", method);
-    
 
     zval *p = &fci_.function_name;
     *p = {0};
     // fci_.function_name is a COPY_VALUE
     ZVAL_STR(p, method);  
-    fci_.retval =  (zval*)result_; 
-    fci_.param_count = argct_; //  set by constructor
-    fci_.params = (zval*) argv_; //  set by constructor
+
     fci_.named_params = nargs; 
 }
 
@@ -145,6 +101,7 @@ void fn_call::throw_failed()
         zend_throw_error(zend_ce_error, "fn_call_failed for %s", name.data());
     else 
         zend_throw_error(zend_ce_error, "fn_call_failed, no name");
+    result_.set_null();
 }
 
 bool fnexists::call(str_ptr arg)
@@ -159,7 +116,7 @@ pregquote::call(str_ptr str, str_ptr delimiter)
 {
     zval* pz = argsptr();
 
-    ZVAL_STR(pz, (zend_string*) str);
+    ZVAL_STR(pz,   (zend_string*) str);
     ZVAL_STR(pz+1, (zend_string*) delimiter);
 
     val_rc result = call_fn();
@@ -234,27 +191,21 @@ preg_quote(str_ptr expr, str_ptr delimiter)
     return FTAB.preg_quote.call(expr, delimiter);
 }
 
-val_rc&& 
+val_rc&&
 fn_call::call_fn()
 {
     if (fci_.size==0)
     {
         zend_throw_error(zend_ce_error,"call_fn() fci is not initialized");
-        return std::move(result_);
     }
-    /*
-        showobj("call_fn(obj)", fci_.object);
-        showmem("call_fn()", &fci_.function_name);
-        zend_printf("fn handler %lx\n", cache_.function_handler);
-        zend_printf("argct %ld params %lx np %lx\n", 
-        fci_.param_count, fci_.params, fci_.named_params);
-    */
-
-    zend_result ok =  zend_call_function(&fci_, &cache_);
-
-    if (ok != SUCCESS)
+    else
     {
-        throw_failed();
+        zend_result ok =  zend_call_function(&fci_, &cache_);
+
+        if (ok != SUCCESS)
+        {
+            throw_failed();
+        }
     }
     //showmem("call_fn result", result_);
     return std::move(result_);

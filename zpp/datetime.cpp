@@ -92,7 +92,7 @@ datetime_obj::date(str_ptr fmt, zval* value)
 		zval* pz = datefmt.argsptr();
 		ZVAL_STR(pz, fmt);
 		ZVAL_COPY_VALUE(pz+1, timeval);
-		result = datefmt.call_fn();
+		return datefmt.call_fn();
 	}
 	return result;
 }

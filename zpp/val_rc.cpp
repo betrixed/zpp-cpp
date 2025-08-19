@@ -181,7 +181,9 @@ val_rc::val_rc()
 
 void val_rc::set_null()
 {
-    lose();
+    try_decref(&zv_);
+    zv_ = {0};
+    ZVAL_NULL(&zv_);
 }
 
 void val_rc::set_bool(bool value)
@@ -536,6 +538,11 @@ val_rc::try_addref(zval* p)
             break;
         }
     }
+}
+
+void val_rc::decref()
+{
+    try_decref(&zv_);
 }
 
 bool //static. Return true if contents become invalid

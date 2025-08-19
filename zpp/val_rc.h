@@ -21,6 +21,9 @@ class base_d;
 class str_rc;
 class obj_ptr;
 
+/**
+ * 
+ */
 class val_rc {
 protected:
     zval zv_;
@@ -100,9 +103,9 @@ public:
     void     decref();
     void     addref();
 
-    void make_ref();
-    void set_bool(bool value);
-    void set_null();
+    void    make_ref();
+    void    set_bool(bool value);
+    void    set_null();
 
 
     void new_array();

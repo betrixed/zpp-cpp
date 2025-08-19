@@ -52,17 +52,19 @@ namespace zpp {
     bool callable_fn(val_rc& result, val_rc& callme, int argct = 0, zval* argv = nullptr);
     bool call_spread_fn(val_rc& result, val_rc& callme, htab_ptr args);
 
+    /**
+     * Helper class to set up function calls.
+     * This stores internal pointers to its members,
+     * and so objects of this class must not be moved around in memory.
+     */
     class fn_call {
     protected:
         // C-array of zvals arguments to call_user_fn
-        size_t          argct_;
-        zval*           argv_;
-        val_rc        result_;
         //zstr_own        method_name_; // real owner of method name
         // PHP call cache info for multiple calls
         zend_fcall_info       fci_;
         zend_fcall_info_cache cache_;
-        bool                  autowipe_;
+        val_rc     result_;
     public:
 
         void throw_failed();
@@ -75,25 +77,20 @@ namespace zpp {
         void set_fname(str_ptr name);
         void set_named_args(HashTable* nargs);
 
-        void wipe() const
-        {
-            memset(argv_, 0, argct_*sizeof(zval));
-        }
+        void wipe();
 
+        // fetching result as move operator result also clears it.
         val_rc&& call_fn();
 
+        //! Since this calls wipe,
+        //! must call only once for each call setup.
+        //! 
+        zval* argsptr() { wipe(); return fci_.params; }
 
-        //! This is the only means to ensure auto clean  
-        //! of arg space, prior to setting parameters
-        //! call only once for each function call.
-        zval* argsptr() const { wipe(); return (zval*) argv_; }
-
+        
 
 
     };
-
-
-
 
     template <size_t ARGCT>
     class fn_call_args : public fn_call {
@@ -101,8 +98,8 @@ namespace zpp {
         zval  params[ARGCT];
         fn_call_args() : fn_call()
         {
-            argv_ =  (zval*) &params;
-            argct_ = ARGCT;
+            fci_.param_count = ARGCT; 
+            fci_.params = (zval*) &params; 
         }
     };
 

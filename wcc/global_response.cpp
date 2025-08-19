@@ -647,13 +647,12 @@ Response::fireEvent(str_ptr eventType)
 		zval* args = fire.argsptr();
 		ZVAL_STR(args, eventType);
 		ZVAL_OBJ(args+1, this->vobj());
-
 		result = fire.call_fn();
-
-		return result;
 	}
-	
-	val_ptr(result).setbool(true); // pretend
+	else {
+		// pretend it happened
+		val_ptr(result).setbool(true); 
+	}
 	return result;
 };
 
