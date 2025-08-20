@@ -20,16 +20,16 @@ class PEng_init : public state_init {
 public:
 	PEng_init() : state_init() {}
 
-	zstr_intern search_list;
-	zstr_intern shared_data;
-	zstr_intern plate_data;
-	zstr_intern extensions;
-	zstr_intern stored_key;
-	zstr_intern load_html;
-	zstr_intern label_str;
-	zstr_intern getpaths;
-	zstr_intern clear_key;
-	zstr_intern find_leaf;
+	str_intern search_list;
+	str_intern shared_data;
+	str_intern plate_data;
+	str_intern extensions;
+	str_intern stored_key;
+	str_intern load_html;
+	str_intern label_str;
+	str_intern getpaths;
+	str_intern clear_key;
+	str_intern find_leaf;
 
 	virtual void init()
 	{

@@ -45,20 +45,20 @@ class RouteMatch_init : public state_init {
 public:
 	RouteMatch_init() : state_init() {}
 
-	zstr_intern cc_route_obj;
-	zstr_intern cc_match_args;
-	zstr_intern cc_roles;
-	zstr_intern cc_ob_args;
-	zstr_intern cc_errors;
+	str_intern cc_route_obj;
+	str_intern cc_match_args;
+	str_intern cc_roles;
+	str_intern cc_ob_args;
+	str_intern cc_errors;
 
-	zstr_intern cc_uri;
-	zstr_intern cc_module_name;
-	zstr_intern cc_ob_class;
-	zstr_intern cc_ob_method;
+	str_intern cc_uri;
+	str_intern cc_module_name;
+	str_intern cc_ob_class;
+	str_intern cc_ob_method;
 
-	zstr_intern cc_verb_flag;
-	zstr_intern cc_ajax_flag;
-	zstr_intern cc_route_id;
+	str_intern cc_verb_flag;
+	str_intern cc_ajax_flag;
+	str_intern cc_route_id;
 
 	virtual void init()
 	{

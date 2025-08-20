@@ -37,21 +37,21 @@ namespace wcc {
 class RouteSetData : public state_init 
 {
 public:
-	zstr_intern module_name;
-	zstr_intern prefix;
-	zstr_intern method_sfx;
-	zstr_intern fallback;
-	zstr_intern route_set;
+	str_intern module_name;
+	str_intern prefix;
+	str_intern method_sfx;
+	str_intern fallback;
+	str_intern route_set;
 	
-	zstr_intern none_tag;
-	zstr_intern verb_tag;
-	zstr_intern forward_slash;
+	str_intern none_tag;
+	str_intern verb_tag;
+	str_intern forward_slash;
 
-	zstr_intern rex_url;
+	str_intern rex_url;
 
-	zstr_intern cc_fixed;
-	zstr_intern cc_vary;
-	zstr_intern cc_file;
+	str_intern cc_fixed;
+	str_intern cc_vary;
+	str_intern cc_file;
 
 	RouteSetData() : state_init() {}
 
@@ -403,7 +403,7 @@ RouteSet::copy_target(Route* route)
 			if ( test.size() 
 				  && (zs_cmp_ci(test, radata.none_tag)==0)) 
 			{
-				suffix = zstr_empty();
+				suffix = str_empty();
 			}
 			else {
 				suffix = test;

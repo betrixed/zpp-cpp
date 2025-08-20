@@ -44,12 +44,11 @@ htab_rw::giveback(zval* mgr, size_t init)
 		showarray("giveback", h);
 		#endif
 		*/
-		//comes with refcount ==1
 		
 	}
 	else 
 	{
-		htab_rc::cowop(h);
+		htab_rc::cowop(h, init);
 		/*
 		#ifdef HTAB_SHOW_MEMORY
 		zend_printf("cowop array %lx to zval %lx\n", h, mgr);	
@@ -60,11 +59,11 @@ htab_rw::giveback(zval* mgr, size_t init)
 	ht_ = h;
 }
 
-htab_rw::htab_rw(htab_rc& mgr)
+htab_rw::htab_rw(htab_rc& mgr, size_t init)
 {
 	// ensure both mgr, and write have same array rc==1
 	//printf("htab_rw htab_rc& mgr\n");
-	htab_rc::cowop(mgr.ht_);
+	htab_rc::cowop(mgr.ht_, init);
 	ht_ = mgr.ht_;
 }
 
@@ -85,14 +84,9 @@ htab_rw::htab_rw(HashTable* h)
 	ht_ = h;
 }
 
-htab_rw::htab_rw(const zval* p)
+htab_rw::htab_rw(zval* p, size_t init)
 {
-	if (p) {
-		ht_ = val_ptr((zval*)p).zarray();
-	}
-	else {
-		ht_ = nullptr;
-	}
+	giveback(p, init);
 }
 
 
@@ -151,7 +145,7 @@ void htab_rw::push_back(zval* zv)
 
 void htab_rw::push_back(const char* s, std::size_t slen)
 {
-	zstr_temp temp(s, slen);
+	str_temp temp(s, slen);
 	push_back((zend_string*)temp);
 }
 

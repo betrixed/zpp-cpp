@@ -51,7 +51,7 @@ class class_data {
 
         void typed_property(str_ptr name, val_ptr data, 
                         zend_type datatype, int accessflag = ZEND_ACC_PUBLIC);
-        //void add_constant(const zstr_intern& name,  val_ptr value, int flags = ZEND_ACC_PUBLIC);
+        //void add_constant(const str_intern& name,  val_ptr value, int flags = ZEND_ACC_PUBLIC);
 
         // read
         val_rc static_property(zend_string* s);

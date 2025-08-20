@@ -72,23 +72,23 @@ namespace wcc {
 
 class icache_str : public state_init {
 public:
-	zstr_intern expiry_key;
-	zstr_intern expire_key;
-	zstr_intern prefix_key;
-	zstr_intern key_key;
-	zstr_intern data_key;
+	str_intern expiry_key;
+	str_intern expire_key;
+	str_intern prefix_key;
+	str_intern key_key;
+	str_intern data_key;
 	
-	zstr_intern ttl_key;
-	zstr_intern stored_key;
-	zstr_intern saved;
-	zstr_intern class_key;
-	zstr_intern service_key;
+	str_intern ttl_key;
+	str_intern stored_key;
+	str_intern saved;
+	str_intern class_key;
+	str_intern service_key;
 
-	zstr_intern cached;
-	zstr_intern svc_cache;
-	zstr_intern options;
-	zstr_intern services;
-	zstr_intern ttl;
+	str_intern cached;
+	str_intern svc_cache;
+	str_intern options;
+	str_intern services;
+	str_intern ttl;
     
     virtual void init();
 };

@@ -77,8 +77,10 @@ namespace zpp {
 
 		zend_string* className();
 
-
-		//! calling methods
+		/** Calling methods of obj_ptr.
+  			If obj_ptr contains a nullptr, its a global function call.
+  			else its a call to a method of its zend_object
+		*/
 		val_rc call(str_ptr method);
 
 		val_rc call(str_ptr method, HashTable* args);

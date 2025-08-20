@@ -206,9 +206,9 @@ zpp_dump(val_ptr zu, int level)
 	dump_info::dump(zu, level);
 }
 
-str_rc str_intern(str_ptr s)
+str_rc phiz_intern(str_ptr s)
 {
-	return zstr_intern(s.data());
+	return str_intern(s.data());
 }
 
 /** Only does one character seperator */
@@ -354,7 +354,7 @@ PHP_FUNCTION(Wcc_str_intern)
 	Z_PARAM_STR(src)
 	ZEND_PARSE_PARAMETERS_END();
 
-	str_rc value = str_intern(src);
+	str_rc value = phiz_intern(src);
 
 	value.move_zv(return_value);
 }
@@ -365,6 +365,8 @@ static val_rc global_ref(const char* gname)
 	return gval;
 }
 */
+
+// may have occasional real test code
 PHP_FUNCTION(Wcc_test_wcc)
 {	
 
@@ -374,7 +376,7 @@ PHP_FUNCTION(Wcc_test_wcc)
 	/**
 
 	preg regex("/\\G([-A-Z_a-z0-9]+)/u");
-	zstr_temp    test("[[fruit.blah]]");
+	str_temp    test("[[fruit.blah]]");
 	zend_long    offset = 2;
 
 	int count = regex.matches(test,offset);

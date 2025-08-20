@@ -170,108 +170,108 @@ namespace wcc {
 
 	class request_init : public state_init {
 	public:
-		zstr_intern	   PHP_AUTH_USER;
-		zstr_intern	   Php_Auth_User;
+		str_intern	   PHP_AUTH_USER;
+		str_intern	   Php_Auth_User;
 
-		zstr_intern	   PHP_AUTH_PW;
-		zstr_intern	   Php_Auth_Pw;
+		str_intern	   PHP_AUTH_PW;
+		str_intern	   Php_Auth_Pw;
 
-		zstr_intern    PHP_AUTH_DIGEST;
-		zstr_intern    Php_Auth_Digest;
+		str_intern    PHP_AUTH_DIGEST;
+		str_intern    Php_Auth_Digest;
 
 
-		zstr_intern	   HTTP_AUTHORIZATION;
-		zstr_intern	   REDIRECT_HTTP_AUTHORIZATION;
+		str_intern	   HTTP_AUTHORIZATION;
+		str_intern	   REDIRECT_HTTP_AUTHORIZATION;
 
-		zstr_intern    Authorization;
+		str_intern    Authorization;
 		
-		zstr_intern    key_key;
+		str_intern    key_key;
 		
-		zstr_intern	   tmp_name;
-		zstr_intern	   size_key;
-		zstr_intern	   error_key;
-		zstr_intern	   accept;
-		zstr_intern	   username;
-		zstr_intern	   password;
-		zstr_intern	   language;
-		zstr_intern    charset;
-		zstr_intern    quality;
-		zstr_intern    namekey;
-		zstr_intern    typekey;
-		zstr_intern    ext_key;
-		zstr_intern    realtype_key;
-		zstr_intern    equals_key;
+		str_intern	   tmp_name;
+		str_intern	   size_key;
+		str_intern	   error_key;
+		str_intern	   accept;
+		str_intern	   username;
+		str_intern	   password;
+		str_intern	   language;
+		str_intern    charset;
+		str_intern    quality;
+		str_intern    namekey;
+		str_intern    typekey;
+		str_intern    ext_key;
+		str_intern    realtype_key;
+		str_intern    equals_key;
 
-		zstr_intern    basic_sp;
-		zstr_intern    bearer_sp;
-		zstr_intern    digest_sp;
-		zstr_intern    step_key;
-		zstr_intern    server_key;
-		zstr_intern    colon_key;
-		zstr_intern    headers_key;
+		str_intern    basic_sp;
+		str_intern    bearer_sp;
+		str_intern    digest_sp;
+		str_intern    step_key;
+		str_intern    server_key;
+		str_intern    colon_key;
+		str_intern    headers_key;
 
-		zstr_intern    get_key;
-		zstr_intern    post_key;
-		zstr_intern    request_key;
-		zstr_intern    files_key;
-		zstr_intern    spoof_key;
-		zstr_intern    verb_key;
-		zstr_intern    strict_host;
-		zstr_intern    method_override;
+		str_intern    get_key;
+		str_intern    post_key;
+		str_intern    request_key;
+		str_intern    files_key;
+		str_intern    spoof_key;
+		str_intern    verb_key;
+		str_intern    strict_host;
+		str_intern    method_override;
 
-		zstr_intern    G_SERVER;
-		zstr_intern    G_GET;
-		zstr_intern    G_REQUEST;
-		zstr_intern    G_POST;
-		zstr_intern    G_FILES;
+		str_intern    G_SERVER;
+		str_intern    G_GET;
+		str_intern    G_REQUEST;
+		str_intern    G_POST;
+		str_intern    G_FILES;
 
-		zstr_intern    HTTP_ACCEPT;
-		zstr_intern    HTTP_X_FORWARDED_FOR;
-		zstr_intern    HTTP_CLIENT_IP;
-		zstr_intern    REMOTE_ADDR;
-		zstr_intern    comma_key;
-		zstr_intern    HTTP_ACCEPT_CHARSET;
-		zstr_intern    CONTENT_TYPE;
-		zstr_intern    CONTENT_LENGTH;
-		zstr_intern    CONTENT_MD5; 
+		str_intern    HTTP_ACCEPT;
+		str_intern    HTTP_X_FORWARDED_FOR;
+		str_intern    HTTP_CLIENT_IP;
+		str_intern    REMOTE_ADDR;
+		str_intern    comma_key;
+		str_intern    HTTP_ACCEPT_CHARSET;
+		str_intern    CONTENT_TYPE;
+		str_intern    CONTENT_LENGTH;
+		str_intern    CONTENT_MD5; 
 
-		zstr_intern    HTTP_REFERER;
+		str_intern    HTTP_REFERER;
 
-		zstr_intern    hyphen_key;
-		zstr_intern    underscore;
-		zstr_intern    blank_key;
-		zstr_intern    HTTP_;
-		zstr_intern    HTTP_HOST;
-		zstr_intern    SERVER_NAME;
-		zstr_intern    SERVER_ADDR;
-		zstr_intern    SERVER_PORT;
-		zstr_intern    REQUEST_URI;
+		str_intern    hyphen_key;
+		str_intern    underscore;
+		str_intern    blank_key;
+		str_intern    HTTP_;
+		str_intern    HTTP_HOST;
+		str_intern    SERVER_NAME;
+		str_intern    SERVER_ADDR;
+		str_intern    SERVER_PORT;
+		str_intern    REQUEST_URI;
 
-		zstr_intern    HTTP_ACCEPT_LANGUAGE;
-		zstr_intern    REQUEST_METHOD;
-		zstr_intern    X_HTTP_METHOD_OVERRIDE;
+		str_intern    HTTP_ACCEPT_LANGUAGE;
+		str_intern    REQUEST_METHOD;
+		str_intern    X_HTTP_METHOD_OVERRIDE;
 
 
-		zstr_intern    _method;
-		zstr_intern    php_input;
-		zstr_intern    HTTPS;
-		zstr_intern    https;
-		zstr_intern    http;
-		zstr_intern    off_key;
-		zstr_intern    localhost;
+		str_intern    _method;
+		str_intern    php_input;
+		str_intern    HTTPS;
+		str_intern    https;
+		str_intern    http;
+		str_intern    off_key;
+		str_intern    localhost;
 
-		zstr_intern    HTTP_X_REQUESTED_WITH;
-		zstr_intern    HTTP_USER_AGENT;
-		zstr_intern    XMLHttpRequest;
-		zstr_intern    HTTP_SOAPACTION;
-		zstr_intern    soap_mime;
+		str_intern    HTTP_X_REQUESTED_WITH;
+		str_intern    HTTP_USER_AGENT;
+		str_intern    XMLHttpRequest;
+		str_intern    HTTP_SOAPACTION;
+		str_intern    soap_mime;
 
-		zstr_intern    gethostbyname;
-		zstr_intern    finfo_open;
-		zstr_intern    finfo_file;
-		zstr_intern    finfo_close;	
-		zstr_intern    is_uploaded_file;
-		zstr_intern    move_uploaded_file;
+		str_intern    gethostbyname;
+		str_intern    finfo_open;
+		str_intern    finfo_file;
+		str_intern    finfo_close;	
+		str_intern    is_uploaded_file;
+		str_intern    move_uploaded_file;
 		
 
 

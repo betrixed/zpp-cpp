@@ -114,7 +114,7 @@ preg::capture(size_t ix)
 preg::preg(const char* expr, int flags, bool global)
 	:  pce_(nullptr),global_(global),flags_(flags)
 {
-	regexp_ =  zstr_temp(expr);
+	regexp_ =  str_temp(expr);
 	//showstr("regexp_",regexp_);
 }
 

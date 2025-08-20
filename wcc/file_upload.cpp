@@ -63,7 +63,7 @@ FileUpload::getRealType()
 	val_rc finfo = finfo_open(FILEINFO_MIME_TYPE);
 	if (!val_ptr(finfo).ok())
 	{
-		result = zstr_empty();
+		result = str_empty();
 		return result;
 	}
 	result = finfo_file(finfo, tmp_name_);

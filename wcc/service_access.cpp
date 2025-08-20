@@ -20,9 +20,9 @@ class SADATA : public state_init {
 public:
 	SADATA() : state_init() {}
 
-	zstr_intern services;
-	zstr_intern cache;
-	zstr_intern init_access;
+	str_intern services;
+	str_intern cache;
+	str_intern init_access;
 
 	virtual void init()
 	{

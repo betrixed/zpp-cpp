@@ -198,7 +198,7 @@ datetime_obj::datetime_obj(obj_rc fnret)
 	//TODO: assert is datetime object
 }
 
-diff_dt 
+dt_interval 
 datetime_obj::diff(datetime_obj& dtm)
 {
 
@@ -208,7 +208,7 @@ datetime_obj::diff(datetime_obj& dtm)
 
 	ZVAL_OBJ(diffobj.argsptr(),(zend_object*) dtm);
 
-	return diff_dt(diffobj.call_fn());
+	return dt_interval(diffobj.call_fn());
 
 }
 
@@ -244,47 +244,47 @@ timezone_obj::make_obj()
 }
 
 long 
-diff_dt::years()
+dt_interval::years()
 {
 	val_rc temp = obj_ptr(obj_).property(DTData.y_prop);
 	return val_ptr(temp).zlong();
 }
 
 long 
-diff_dt::months()
+dt_interval::months()
 {
 	val_rc temp = obj_ptr(obj_).property(DTData.m_prop);
 	return val_ptr(temp).zlong();
 }
 long 
-diff_dt::days()
+dt_interval::days()
 {
 	val_rc temp = obj_ptr(obj_).property(DTData.d_prop);
 	return val_ptr(temp).zlong();
 }
 long 
-diff_dt::hours()
+dt_interval::hours()
 {
 	val_rc temp = obj_ptr(obj_).property(DTData.h_prop);
 	return val_ptr(temp).zlong();
 	
 }
 long 
-diff_dt::minutes()
+dt_interval::minutes()
 {
 	val_rc temp = obj_ptr(obj_).property(DTData.i_prop);
 	return val_ptr(temp).zlong();
 	
 }
 long 
-diff_dt::seconds()
+dt_interval::seconds()
 {
 	val_rc temp = obj_ptr(obj_).property(DTData.s_prop);
 	return val_ptr(temp).zlong();
 }
 
 double 
-diff_dt::fraction()
+dt_interval::fraction()
 {
 	val_rc temp = obj_ptr(obj_).property(DTData.f_prop);
 	return val_ptr(temp).zdouble();
@@ -292,7 +292,7 @@ diff_dt::fraction()
 }
 
 val_rc 
-diff_dt::daystotal()
+dt_interval::daystotal()
 {
 	return obj_ptr(obj_).property(DTData.days_prop);
 }

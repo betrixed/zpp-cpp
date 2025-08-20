@@ -45,7 +45,7 @@ Toml::name_table(toml_table_t* st)
 		htab_rc 	 ztab; // new table
 		htab_rw   hw(ztab); //writer to it.
 
-		zstr_temp tkey(st->key);
+		str_temp tkey(st->key);
 		//zend_printf("New table named %s\n", st->key);
 		array.set(tkey, ztab);
 
@@ -111,7 +111,7 @@ Toml::z_array(toml_array_t* arr)
 
 		if (arr->key)
 		{
-			zstr_temp akey(arr->key);
+			str_temp akey(arr->key);
 			//zend_printf("Array key %s\n", arr->key);
 			ctop.set(akey, hw);
 		}
@@ -199,7 +199,7 @@ Toml::z_value(toml_keyval_t* st, int expect)
 			checked = toml_rtos(val, &p.u.s);
 			if (checked==0)
 			{
-				store = zstr_temp(p.u.s);
+				store = str_temp(p.u.s);
 				xfree(p.u.s);
 				break;
 			} // fall through!
@@ -256,7 +256,7 @@ Toml::z_value(toml_keyval_t* st, int expect)
 		{
 				if (key)
 				{
-					 zstr_temp vkey(key);
+					 str_temp vkey(key);
 					 table.set(vkey, store);
 				}
 				else {

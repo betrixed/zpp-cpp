@@ -30,8 +30,8 @@ class Hmap_init : public state_init {
 public:
 	Hmap_init() : state_init() {}
             
-	zstr_intern data_key;
-	zstr_intern obj_key;
+	str_intern data_key;
+	str_intern obj_key;
 
 	void init() override {
 		data_key = "data";

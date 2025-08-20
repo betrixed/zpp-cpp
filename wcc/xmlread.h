@@ -34,27 +34,27 @@ namespace zpp {
     	xmlreader_open    xml_file;
     	xmlreader_xml	  xml_parse;
 
-    	zstr_intern   	  xmlreader;
-    	zstr_intern   	  fromString;
-    	zstr_intern   	  open;
-        zstr_intern    	  get_attribute;
-        zstr_intern    	  read_string;
-        zstr_intern    	  read;
+    	str_intern   	  xmlreader;
+    	str_intern   	  fromString;
+    	str_intern   	  open;
+        str_intern    	  get_attribute;
+        str_intern    	  read_string;
+        str_intern    	  read;
 
-		zstr_intern 	  k_nodeType;
-		zstr_intern	      k_attribute;
-		zstr_intern	      k_name;
+		str_intern 	  k_nodeType;
+		str_intern	      k_attribute;
+		str_intern	      k_name;
 		
-		zstr_intern 	  k_c;
-		zstr_intern	      k_k;
+		str_intern 	  k_c;
+		str_intern	      k_k;
 
-		zstr_intern	      k_close;
+		str_intern	      k_close;
 
-		zstr_intern       reader;
+		str_intern       reader;
 
-		zstr_intern       root;
+		str_intern       root;
 
-		zstr_intern       tags;
+		str_intern       tags;
 		
 		xml_fns();
 		

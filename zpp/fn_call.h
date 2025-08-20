@@ -201,22 +201,22 @@ namespace zpp {
     class fntable : public state_init {
     public:
 
-        zstr_intern  s_function_exists;
-        zstr_intern  s_file_get_contents;
-        zstr_intern  s_extension_loaded;
-        zstr_intern  s_preg_quote;
-        zstr_intern  s_pathinfo;
-        zstr_intern  s_call_user_func_array;
-        zstr_intern  s_fgetcsv;
-        zstr_intern  s_fopen;
-        zstr_intern  s_fclose;
+        str_intern  s_function_exists;
+        str_intern  s_file_get_contents;
+        str_intern  s_extension_loaded;
+        str_intern  s_preg_quote;
+        str_intern  s_pathinfo;
+        str_intern  s_call_user_func_array;
+        str_intern  s_fgetcsv;
+        str_intern  s_fopen;
+        str_intern  s_fclose;
 
         extnloaded    extension_loaded;
         fnexists      function_exists;
         pregquote     preg_quote;
         file_content  file_get_contents;
         fn_fopen      fopen;
-        fn_fclose      fclose;
+        fn_fclose     fclose;
 
         PathInfo      pathinfo;
         FCall2        call_user_func_array;
@@ -228,19 +228,19 @@ namespace zpp {
 
     class strtable : public state_init {
     public:
-        zstr_intern  construct_key;
-        zstr_intern  mb_detect_order;
-        zstr_intern  mb_detect_encoding;
-        zstr_intern  setdate;
-        zstr_intern  settime;
-        zstr_intern  diff;
-        zstr_intern  date;
-        zstr_intern  strtotime;
-        zstr_intern  addcslashes;
-        zstr_intern  rawurlencode;
-        zstr_intern  strtr;
-        zstr_intern  ucwords;
-        zstr_intern  stripslashes;
+        str_intern  construct_key;
+        str_intern  mb_detect_order;
+        str_intern  mb_detect_encoding;
+        str_intern  setdate;
+        str_intern  settime;
+        str_intern  diff;
+        str_intern  date;
+        str_intern  strtotime;
+        str_intern  addcslashes;
+        str_intern  rawurlencode;
+        str_intern  strtr;
+        str_intern  ucwords;
+        str_intern  stripslashes;
 
         
         virtual void init();

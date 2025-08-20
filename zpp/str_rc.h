@@ -18,7 +18,7 @@ namespace zpp {
 	class val_ptr;
 	
 	class str_buf;
-	class zstr_temp;
+	class str_temp;
 	
 	class str_rc  : public str_ptr
 	{
@@ -95,7 +95,7 @@ namespace zpp {
 
 	    str_rc& operator=(val_rc&& rc);
 	    str_rc& operator=(str_rc&& rc);
-	    str_rc& operator=(zstr_temp&& rc);
+	    str_rc& operator=(str_temp&& rc);
 
 	    void move_zv(zval* ret);
 
@@ -113,42 +113,42 @@ namespace zpp {
 
 	};
 
-	class zstr_empty : public str_rc
+	class str_empty : public str_rc
 	{
 	public:
-		zstr_empty();
+		str_empty();
 	};
 	
 	/** A "persistent" string, not using emalloc and efree */
-	class zstr_perm : public str_rc {
+	class str_perm : public str_rc {
 	public:
-		zstr_perm() : str_rc() {}
-		zstr_perm(const char* c, size_t slen = 0);
+		str_perm() : str_rc() {}
+		str_perm(const char* c, size_t slen = 0);
 
 		operator zend_string*() const { return (zend_string*) s; }
 	};
 
 	/** A "temporary" string, during a request, uses emalloc and efree */
-	class zstr_temp : public str_rc {
+	class str_temp : public str_rc {
 	public:
-		zstr_temp() : str_rc() {}
-		zstr_temp(const char* c, size_t slen = 0);
+		str_temp() : str_rc() {}
+		str_temp(const char* c, size_t slen = 0);
 
 		operator zend_string*() const { return (zend_string*) s; }
 	};
 	
 	/** A "persistent" string stored as "interned", for module/class initialize */
-	class zstr_intern : public str_rc {
+	class str_intern : public str_rc {
 	public:
-		zstr_intern() : str_rc() {}
-		zstr_intern(const char* c, size_t slen = 0);
+		str_intern() : str_rc() {}
+		str_intern(const char* c, size_t slen = 0);
 
-		~zstr_intern() { 
+		~str_intern() { 
 			// let PHP take care of it
 			s = nullptr; 
 		}
 
-		const zstr_intern& operator=(const char* cp);
+		const str_intern& operator=(const char* cp);
 		
 		operator zend_string*() const { return (zend_string*) s; }
 	};

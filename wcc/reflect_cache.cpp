@@ -18,11 +18,11 @@ namespace wcc
 
 class ReflectCache_data : public state_init {
 public:
-	zstr_intern cache_key;
-	zstr_intern construct_key;
-	zstr_intern reflection_class;
-	zstr_intern new_instance;
-	zstr_intern new_instance_args;
+	str_intern cache_key;
+	str_intern construct_key;
+	str_intern reflection_class;
+	str_intern new_instance;
+	str_intern new_instance_args;
 	class_data  rfc_cdata;
 
 	obj_rc    g_reflect_cache;

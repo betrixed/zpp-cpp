@@ -31,88 +31,88 @@ class HTGInit : public state_init {
 public:
 	HTGInit() : state_init() {}
 
-	zstr_intern date_icon;
-	zstr_intern date_fmt;
-	zstr_intern datetime_fmt;
-	zstr_intern text_class;
-	zstr_intern label_class;
-	zstr_intern styles;
+	str_intern date_icon;
+	str_intern date_fmt;
+	str_intern datetime_fmt;
+	str_intern text_class;
+	str_intern label_class;
+	str_intern styles;
 
-	zstr_intern date_fmt_d;
-	zstr_intern datetime_fmt_d;
+	str_intern date_fmt_d;
+	str_intern datetime_fmt_d;
 
-	zstr_intern label_d;
-	zstr_intern text_d;
-	zstr_intern figurekey;
-	zstr_intern figcaption;
-	zstr_intern idkey;
-	zstr_intern namekey;
-	zstr_intern format;
+	str_intern label_d;
+	str_intern text_d;
+	str_intern figurekey;
+	str_intern figcaption;
+	str_intern idkey;
+	str_intern namekey;
+	str_intern format;
 
-	zstr_intern classkey;
-	zstr_intern blank;
-	zstr_intern labelkey;
-	zstr_intern content_key;
-	zstr_intern endtag;
-	zstr_intern buttonkey;
-	zstr_intern divkey;
-	zstr_intern tagendl;
-	zstr_intern valuekey;
-	zstr_intern textkey;
-	zstr_intern checked;
+	str_intern classkey;
+	str_intern blank;
+	str_intern labelkey;
+	str_intern content_key;
+	str_intern endtag;
+	str_intern buttonkey;
+	str_intern divkey;
+	str_intern tagendl;
+	str_intern valuekey;
+	str_intern textkey;
+	str_intern checked;
 
-	zstr_intern typekey;
-	zstr_intern checkboxkey;
-	zstr_intern inputtag;
-	zstr_intern forkey;
-	zstr_intern emptyset;
-	zstr_intern checkmark;
-	zstr_intern nbspace;
-	zstr_intern submit;
-	zstr_intern Submit;
+	str_intern typekey;
+	str_intern checkboxkey;
+	str_intern inputtag;
+	str_intern forkey;
+	str_intern emptyset;
+	str_intern checkmark;
+	str_intern nbspace;
+	str_intern submit;
+	str_intern Submit;
 
-	zstr_intern inlabel;
-	zstr_intern number;
-	zstr_intern radio;
-	zstr_intern email;
-	zstr_intern hidden;
-	zstr_intern placehold;
-	zstr_intern aria_describe;
+	str_intern inlabel;
+	str_intern number;
+	str_intern radio;
+	str_intern email;
+	str_intern hidden;
+	str_intern placehold;
+	str_intern aria_describe;
 
-	zstr_intern placehold_d;
-	zstr_intern aria_describe_d;
-	zstr_intern money;
-	zstr_intern tel;
-	zstr_intern password;
-	zstr_intern xcheck;
-	zstr_intern hrefkey;
-	zstr_intern iconkey;
-	zstr_intern glyphkey;
-	zstr_intern hash_char;
+	str_intern placehold_d;
+	str_intern aria_describe_d;
+	str_intern money;
+	str_intern tel;
+	str_intern password;
+	str_intern xcheck;
+	str_intern hrefkey;
+	str_intern iconkey;
+	str_intern glyphkey;
+	str_intern hash_char;
 
-	zstr_intern listkey;
-	zstr_intern optionkey;
-	zstr_intern begintag;
-	zstr_intern selectkey;
-	zstr_intern semicolon;
-	zstr_intern imgkey;
-	zstr_intern srckey;
-	zstr_intern stylekey;
-	zstr_intern caption_str;
+	str_intern listkey;
+	str_intern optionkey;
+	str_intern begintag;
+	str_intern selectkey;
+	str_intern semicolon;
+	str_intern imgkey;
+	str_intern srckey;
+	str_intern stylekey;
+	str_intern caption_str;
 
-	zstr_intern file_key;
-	zstr_intern level_key;
-	zstr_intern nearest_key;
-	zstr_intern data_target;
-	zstr_intern data_toggle;
-	zstr_intern level_item;
-	zstr_intern fmt_key;
-	zstr_intern datetime_class;
-	zstr_intern size_key;
-	zstr_intern maxlength;
+	str_intern file_key;
+	str_intern level_key;
+	str_intern nearest_key;
+	str_intern data_target;
+	str_intern data_toggle;
+	str_intern level_item;
+	str_intern fmt_key;
+	str_intern datetime_class;
+	str_intern size_key;
+	str_intern maxlength;
 
 
-	zstr_intern textarea;
+	str_intern textarea;
 
 	virtual void init()
 	{
@@ -223,16 +223,16 @@ HtmlGem::HtmlGem() : base_d()
 	text_class_ =  HTG.text_d;
 	datetime_fmt_ = HTG.datetime_fmt_d;
 	date_fmt_ = HTG.date_fmt_d;
-	date_icon_ = zstr_temp("@theme/calendar-50.png");
+	date_icon_ = str_temp("@theme/calendar-50.png");
 
 	id_add_ = 0;
 
 	htab_rw hw(styles_);
 
-	zstr_temp figure_style("float:left;width:47%;margin:10px;");
+	str_temp figure_style("float:left;width:47%;margin:10px;");
 	hw.set(HTG.figurekey, figure_style);
 
-	zstr_temp caption_style("border-style:solid; padding:4px;font-size:0.9em;");
+	str_temp caption_style("border-style:solid; padding:4px;font-size:0.9em;");
 	hw.set(HTG.figcaption, caption_style);
 }
 
@@ -737,7 +737,7 @@ HtmlGem::datetime_text(str_ptr dtvalue)
 	datetime_obj before(dstr);
 	datetime_obj now;
 
-	diff_dt diff = now.diff(before);
+	dt_interval diff = now.diff(before);
 
 	int years = diff.years();
 	int months = diff.months();
@@ -1061,7 +1061,7 @@ HtmlGem::linkTo(val_ptr pset)
 			text = glyph_out(test);
 		}
 		else {
-			text = zstr_empty();
+			text = str_empty();
 		}
 	}
 	str_buf out;
@@ -1474,7 +1474,7 @@ HtmlGem::datetime(val_ptr pset)
 
 	attrlist.set(HTG.data_target, atarg_str);
 
-	zstr_temp s24("24");
+	str_temp s24("24");
 
 	attrlist.set(HTG.size_key,s24);
 	attrlist.set(HTG.maxlength,s24);
@@ -2014,7 +2014,7 @@ ZEND_METHOD(Wcc_HtmlGem, moneyFormat)
 	str_rc temp;
 
 	if (!slang) {
-		temp = zstr_temp("en_AU");
+		temp = str_temp("en_AU");
 	}
 	else {
 		temp = slang;

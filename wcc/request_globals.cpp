@@ -1050,7 +1050,7 @@ RequestGlobals::getURI(bool onlyPath)
 
 	if (uri.isNull())
 	{
-		result = zstr_empty();
+		result = str_empty();
 	}
 	else {
 		size_t slen = uri.size();

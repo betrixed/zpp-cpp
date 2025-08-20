@@ -20,27 +20,27 @@ namespace zpp {
 		Date_init() : state_init() {}
 		void init() override;
 
-		zstr_intern formatkey;
-		zstr_intern construct_key;
-		zstr_intern settime;
-		zstr_intern diff;
-		zstr_intern date;
-		zstr_intern setdate;
-		zstr_intern strtotime;
-		zstr_intern settimezone;
+		str_intern formatkey;
+		str_intern construct_key;
+		str_intern settime;
+		str_intern diff;
+		str_intern date;
+		str_intern setdate;
+		str_intern strtotime;
+		str_intern settimezone;
 
-		zstr_intern y_prop;
-		zstr_intern m_prop;
-		zstr_intern d_prop;
-		zstr_intern h_prop;
-		zstr_intern i_prop;
-		zstr_intern s_prop;
-		zstr_intern f_prop;
-		zstr_intern days_prop;
-		zstr_intern invert_prop;
-		zstr_intern from_string;
-		zstr_intern date_string;
-		zstr_intern now_format;
+		str_intern y_prop;
+		str_intern m_prop;
+		str_intern d_prop;
+		str_intern h_prop;
+		str_intern i_prop;
+		str_intern s_prop;
+		str_intern f_prop;
+		str_intern days_prop;
+		str_intern invert_prop;
+		str_intern from_string;
+		str_intern date_string;
+		str_intern now_format;
 	};
 
 	extern Date_init DTData;
@@ -53,7 +53,7 @@ namespace zpp {
 	};
 
 
-	class diff_dt : public obj_rc {
+	class dt_interval : public obj_rc {
 	public:
 		long years();
 		long months();
@@ -81,7 +81,7 @@ namespace zpp {
 		/** Now constructor */
 		datetime_obj();
 		
-		diff_dt diff(datetime_obj& dtm);
+		dt_interval diff(datetime_obj& dtm);
 
 		str_rc format(str_ptr dfmt);
 

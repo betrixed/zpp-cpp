@@ -85,7 +85,7 @@ bool str_rc::try_decref(zend_string* zs)
 
 
 str_rc& 
-str_rc::operator=(zstr_temp&& rc)
+str_rc::operator=(str_temp&& rc)
 {
 
     zend_string* p = rc.s;
@@ -94,7 +94,7 @@ str_rc::operator=(zstr_temp&& rc)
     	lose();
     }
     s = p;
-    //showstr("operator= zstr_temp&&", s);
+    //showstr("operator= str_temp&&", s);
     rc.s = nullptr;
     return *this;
 }
@@ -225,7 +225,7 @@ str_rc::move_zv(zval* ret)
 	}
 }
 
-zstr_perm::zstr_perm(const char* c, size_t slen)
+str_perm::str_perm(const char* c, size_t slen)
 {
 	if (!slen)
 	{
@@ -234,18 +234,18 @@ zstr_perm::zstr_perm(const char* c, size_t slen)
 	s = zend_string_init(c, slen, 1);
 }
 
-zstr_temp::zstr_temp(const char* c, size_t slen)
+str_temp::str_temp(const char* c, size_t slen)
 {
 	if (!slen)
 	{
 		slen = strlen(c);
 	}
 	s = zend_string_init(c, slen, 0);
-	//showstr("zstr_temp", s);
+	//showstr("str_temp", s);
 
 }
 
-zstr_intern::zstr_intern(const char* c, size_t slen)
+str_intern::str_intern(const char* c, size_t slen)
 {
 	if (!slen)
 	{
@@ -259,8 +259,8 @@ zstr_intern::zstr_intern(const char* c, size_t slen)
 }
 
 
-const zstr_intern& 
-zstr_intern::operator=(const char* cp)
+const str_intern& 
+str_intern::operator=(const char* cp)
 {
 	auto slen = strlen(cp);
 	if (slen)
@@ -272,7 +272,7 @@ zstr_intern::operator=(const char* cp)
 }
 
 
-zstr_empty::zstr_empty() {
+str_empty::str_empty() {
 	s = zend_empty_string;
 }
 

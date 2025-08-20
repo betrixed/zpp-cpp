@@ -23,13 +23,13 @@ namespace wcc {
 	public:
 		MFInit() : state_init() {}
 
-		zstr_intern lang;
-		zstr_intern symbol;
-		zstr_intern iformat;
-		zstr_intern numfmt_create;
-		zstr_intern currency_key;
-		zstr_intern intl_currency;
-		zstr_intern getsymbol;
+		str_intern lang;
+		str_intern symbol;
+		str_intern iformat;
+		str_intern numfmt_create;
+		str_intern currency_key;
+		str_intern intl_currency;
+		str_intern getsymbol;
 
 		virtual void init()
 		{

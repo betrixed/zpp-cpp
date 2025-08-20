@@ -11,8 +11,8 @@ base_obj_mgr<Pair> Pair::omg;
 
 class PairInit : public state_init {
 public:
-	zstr_intern one;
-	zstr_intern two;
+	str_intern one;
+	str_intern two;
 
 	void init() override
 	{

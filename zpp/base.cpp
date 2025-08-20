@@ -37,7 +37,7 @@ class base_init : public state_init {
 public:
 	base_init() : state_init() {}
 
-	zstr_intern class_name;
+	str_intern class_name;
 
 	virtual void init()
 	{

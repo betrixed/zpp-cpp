@@ -12,16 +12,16 @@ base_obj_mgr<RouteAdd> RouteAdd::omg;
 class RouteAddData : public state_init 
 {
 public:
-	zstr_intern module_name;
-	zstr_intern prefix;
-	zstr_intern method_sfx;
-	zstr_intern fallback;
-	zstr_intern route_set;
+	str_intern module_name;
+	str_intern prefix;
+	str_intern method_sfx;
+	str_intern fallback;
+	str_intern route_set;
 	
-	zstr_intern none_tag;
-	zstr_intern verb_tag;
+	str_intern none_tag;
+	str_intern verb_tag;
 
-	zstr_intern rex_url;
+	str_intern rex_url;
 
 	RouteAddData() : state_init() {}
 

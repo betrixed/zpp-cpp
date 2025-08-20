@@ -44,35 +44,35 @@ namespace wcd {
 	public:
 		Model_init() : state_init() {}
 
-		zstr_intern find_first;
-		zstr_intern find_all;
-		zstr_intern by_str;
+		str_intern find_first;
+		str_intern find_all;
+		str_intern by_str;
 
-		zstr_intern eq_str;
-		zstr_intern u_model;
-		zstr_intern r_arg;
-		zstr_intern escape_key;
-		zstr_intern escape_str;
-		zstr_intern get_tables;
-		zstr_intern columns_str;
-		zstr_intern m_updated_at;
-		zstr_intern m_created_at;
-		zstr_intern m_datetime_type;
-		zstr_intern type_str;
-		zstr_intern name_str;
-		zstr_intern returns_key;
-		zstr_intern get_primary_key;
-		zstr_intern fn_getseqcols;
-		zstr_intern k_created_at;
-		zstr_intern k_updated_at;
+		str_intern eq_str;
+		str_intern u_model;
+		str_intern r_arg;
+		str_intern escape_key;
+		str_intern escape_str;
+		str_intern get_tables;
+		str_intern columns_str;
+		str_intern m_updated_at;
+		str_intern m_created_at;
+		str_intern m_datetime_type;
+		str_intern type_str;
+		str_intern name_str;
+		str_intern returns_key;
+		str_intern get_primary_key;
+		str_intern fn_getseqcols;
+		str_intern k_created_at;
+		str_intern k_updated_at;
 
-		zstr_intern k_pkey_options;
-		zstr_intern k_seq_defs;
-		zstr_intern k_col_defs;
-		zstr_intern k_pkey;
-		zstr_intern k_tdef;
-		zstr_intern k_buildme;
-		zstr_intern k_driver;
+		str_intern k_pkey_options;
+		str_intern k_seq_defs;
+		str_intern k_col_defs;
+		str_intern k_pkey;
+		str_intern k_tdef;
+		str_intern k_buildme;
+		str_intern k_driver;
 
 
 

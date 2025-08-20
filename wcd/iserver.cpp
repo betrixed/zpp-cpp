@@ -24,41 +24,41 @@ class ISVinit : public state_init {
 public:
 	ISVinit() : state_init() {}
 
-	zstr_intern  wcd_sql_mysql;
-	zstr_intern  wcd_sql_postgres;
-	zstr_intern  wcd_sql_sqlite;
-	zstr_intern  wcd_sql_firebird;
+	str_intern  wcd_sql_mysql;
+	str_intern  wcd_sql_postgres;
+	str_intern  wcd_sql_sqlite;
+	str_intern  wcd_sql_firebird;
 
-	zstr_intern  wcd_ext_mysql;
-	zstr_intern  wcd_ext_postgres;
-	zstr_intern  wcd_ext_sqlite;
-	zstr_intern  wcd_ext_firebird;
+	str_intern  wcd_ext_mysql;
+	str_intern  wcd_ext_postgres;
+	str_intern  wcd_ext_sqlite;
+	str_intern  wcd_ext_firebird;
 
-	zstr_intern  pdo_mysql;
-	zstr_intern  pdo_pgsql;
-	zstr_intern  pdo_sqlite;
-	zstr_intern  pdo_firebird;
+	str_intern  pdo_mysql;
+	str_intern  pdo_pgsql;
+	str_intern  pdo_sqlite;
+	str_intern  pdo_firebird;
 
-	zstr_intern  default_name;
+	str_intern  default_name;
 
-	zstr_intern  sqls_key;
-	zstr_intern  drivers_key;
-	zstr_intern  db_config;
-	zstr_intern  cache_all;
-	zstr_intern  sql_cache;
-	zstr_intern  get_cache;
+	str_intern  sqls_key;
+	str_intern  drivers_key;
+	str_intern  db_config;
+	str_intern  cache_all;
+	str_intern  sql_cache;
+	str_intern  get_cache;
 
-	zstr_intern  svckey_str;
-	zstr_intern  active_str;
-	zstr_intern  config_str;
+	str_intern  svckey_str;
+	str_intern  active_str;
+	str_intern  config_str;
 		
-	zstr_intern  active_cfg;
+	str_intern  active_cfg;
 
-	zstr_intern  alias_str;
-	zstr_intern  dbcache_str;
+	str_intern  alias_str;
+	str_intern  dbcache_str;
 
-	zstr_intern  sql_classes;
-	zstr_intern  ext_classes;
+	str_intern  sql_classes;
+	str_intern  ext_classes;
 
 	void init() override {
 

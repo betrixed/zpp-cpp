@@ -17,11 +17,11 @@ class Finder_init : public state_init
 public:
 	Finder_init() : state_init() {}
 
-	zstr_intern nspaths_key;
-	zstr_intern classes_key;
-	zstr_intern folders_key;
-	zstr_intern php_ext;
-	zstr_intern dir_sep;
+	str_intern nspaths_key;
+	str_intern classes_key;
+	str_intern folders_key;
+	str_intern php_ext;
+	str_intern dir_sep;
 
 
 	void init() override 

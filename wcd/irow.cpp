@@ -25,14 +25,14 @@ public:
 
 	void init() override;
 
-	zstr_intern  model;
-	zstr_intern  data_str;
-	zstr_intern  original_data;
-	zstr_intern  save_key;
-	zstr_intern  read_key;
-	zstr_intern  delete_key;
-	zstr_intern  getcoldefs;
-	zstr_intern  stamptime;
+	str_intern  model;
+	str_intern  data_str;
+	str_intern  original_data;
+	str_intern  save_key;
+	str_intern  read_key;
+	str_intern  delete_key;
+	str_intern  getcoldefs;
+	str_intern  stamptime;
 
 };
 

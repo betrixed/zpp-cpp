@@ -110,7 +110,7 @@ namespace wcc {
 		void setFileToSend(str_ptr path, str_ptr attachName, bool attachement=true);
 	};
 
-	typedef std::map<int, zstr_intern> StatusCodeMap;
+	typedef std::map<int, str_intern> StatusCodeMap;
 
 	class Response_init : public state_init 
 	{
@@ -118,38 +118,38 @@ namespace wcc {
 
 		StatusCodeMap gStatusCodes;
 
-		zstr_intern    headers_key;
-		zstr_intern    file_key;
-		zstr_intern    content_key;
-		zstr_intern    cookies_key;
-		zstr_intern    events_key;
-		zstr_intern    sent_key;
-		zstr_intern    Expires;
-		zstr_intern    json_mime;
-		zstr_intern    utf8;
-		zstr_intern    Status;
-		zstr_intern    readfile;
-		zstr_intern    Refresh;
-		zstr_intern    url_key;
-		zstr_intern    Content_Type;
-		zstr_intern    Location;
-		zstr_intern    Content_Length;
-		zstr_intern    HTTP_FS;
-		zstr_intern    text_html;
-		zstr_intern    eventqueue;
-		zstr_intern    DIR_SEP;
-		zstr_intern    AT_CHAR;
-		zstr_intern    fire_key;
-		zstr_intern    before_send;
-		zstr_intern    after_send;
-		zstr_intern    headers_sent;
-		zstr_intern    headerfn_key;
-		zstr_intern    Content_Description;
-		zstr_intern    Content_Transfer_Encoding;
-		zstr_intern    Content_Disposition;
-		zstr_intern    binary_key;
-		zstr_intern    file_transfer_key;
-		zstr_intern    application_stream;
+		str_intern    headers_key;
+		str_intern    file_key;
+		str_intern    content_key;
+		str_intern    cookies_key;
+		str_intern    events_key;
+		str_intern    sent_key;
+		str_intern    Expires;
+		str_intern    json_mime;
+		str_intern    utf8;
+		str_intern    Status;
+		str_intern    readfile;
+		str_intern    Refresh;
+		str_intern    url_key;
+		str_intern    Content_Type;
+		str_intern    Location;
+		str_intern    Content_Length;
+		str_intern    HTTP_FS;
+		str_intern    text_html;
+		str_intern    eventqueue;
+		str_intern    DIR_SEP;
+		str_intern    AT_CHAR;
+		str_intern    fire_key;
+		str_intern    before_send;
+		str_intern    after_send;
+		str_intern    headers_sent;
+		str_intern    headerfn_key;
+		str_intern    Content_Description;
+		str_intern    Content_Transfer_Encoding;
+		str_intern    Content_Disposition;
+		str_intern    binary_key;
+		str_intern    file_transfer_key;
+		str_intern    application_stream;
 
 		void init() override;
 		void end() override;

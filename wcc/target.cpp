@@ -10,10 +10,10 @@ namespace wcc {
 class TargetData : public state_init {
 public:
 
-	zstr_intern class_name;
-	zstr_intern method;
-	zstr_intern module;
-	zstr_intern index;
+	str_intern class_name;
+	str_intern method;
+	str_intern module;
+	str_intern index;
 
 	TargetData() : state_init() {}
 

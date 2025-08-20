@@ -20,7 +20,6 @@ namespace zpp {
         static state_init* first_;
         static state_init* last_;
 
-
         state_init* next_;
     public:
         virtual ~state_init();

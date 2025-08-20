@@ -14,8 +14,8 @@ class SearchListInit : public state_init {
 public:
 	SearchListInit() : state_init() {}
 
-	zstr_intern paths_key;
-	zstr_intern name_key;
+	str_intern paths_key;
+	str_intern name_key;
 
 	virtual void init()
 	{
@@ -117,7 +117,7 @@ SearchList::try_path(
 	if (fs::is_regular_file(fpath)) 
 	{
 		std::string temp = fpath.string();
-		result = zstr_temp(temp.data(), temp.size());
+		result = str_temp(temp.data(), temp.size());
 		return true;
 	}
 	return false;

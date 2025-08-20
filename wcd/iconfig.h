@@ -73,35 +73,35 @@ class CfgInit : public state_init {
 public:
 	CfgInit();
 
-	zstr_intern msg_or;
-	zstr_intern k_driver;
-	zstr_intern k_host;
-	zstr_intern k_port;
-	zstr_intern k_database;
-	zstr_intern k_dbname;
+	str_intern msg_or;
+	str_intern k_driver;
+	str_intern k_host;
+	str_intern k_port;
+	str_intern k_database;
+	str_intern k_dbname;
 
-	zstr_intern k_username;
-	zstr_intern k_password;
-	zstr_intern k_charset;
-	zstr_intern k_collation;
-	zstr_intern k_sql_class;
-	zstr_intern k_dml_class;
-	zstr_intern k_rel_class;
-	zstr_intern k_model_ns;
-	zstr_intern k_model;
-	zstr_intern k_processor;
-	zstr_intern k_hostname;
-	zstr_intern k_localhost;
-	zstr_intern k_adapter;
-	zstr_intern k_user;
+	str_intern k_username;
+	str_intern k_password;
+	str_intern k_charset;
+	str_intern k_collation;
+	str_intern k_sql_class;
+	str_intern k_dml_class;
+	str_intern k_rel_class;
+	str_intern k_model_ns;
+	str_intern k_model;
+	str_intern k_processor;
+	str_intern k_hostname;
+	str_intern k_localhost;
+	str_intern k_adapter;
+	str_intern k_user;
 
-	zstr_intern k_prepare;
-	zstr_intern k_execute;
-	zstr_intern db_models_ns;
+	str_intern k_prepare;
+	str_intern k_execute;
+	str_intern db_models_ns;
 
-	zstr_intern mykey;
-	zstr_intern data_str;
-	zstr_intern cfg_str;
+	str_intern mykey;
+	str_intern data_str;
+	str_intern cfg_str;
 
 	void init() override;
 };

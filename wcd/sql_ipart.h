@@ -14,117 +14,117 @@ namespace wcd {
 
 	class sql_strtab : public state_init {
 	public:
-		zstr_intern  str_space;
-		zstr_intern  partid;
-		zstr_intern  value;
-		zstr_intern  values_key;
+		str_intern  str_space;
+		str_intern  partid;
+		str_intern  value;
+		str_intern  values_key;
 
 
-		zstr_intern  dot_char;
-		zstr_intern  comma_char;
-		zstr_intern  single_quote;
-		zstr_intern  single_q2;
+		str_intern  dot_char;
+		str_intern  comma_char;
+		str_intern  single_quote;
+		str_intern  single_q2;
 
-		zstr_intern  mysql_empty;
-		zstr_intern  default_values;
-		zstr_intern  delete_from;
+		str_intern  mysql_empty;
+		str_intern  default_values;
+		str_intern  delete_from;
 
-		zstr_intern  emit;
+		str_intern  emit;
 
-		zstr_intern  lhs_val;
-		zstr_intern  rhs_val;
-		zstr_intern  val_op;
-		zstr_intern  next_op;
+		str_intern  lhs_val;
+		str_intern  rhs_val;
+		str_intern  val_op;
+		str_intern  next_op;
 
-		zstr_intern  namekey;
-		zstr_intern  valuekey;
-		zstr_intern  quotename;
-		zstr_intern  alias;
-		zstr_intern  columns;
+		str_intern  namekey;
+		str_intern  valuekey;
+		str_intern  quotename;
+		str_intern  alias;
+		str_intern  columns;
 
-		zstr_intern  colexpr;
-		zstr_intern  owner;
-		zstr_intern  table;
-		zstr_intern  attr;
+		str_intern  colexpr;
+		str_intern  owner;
+		str_intern  table;
+		str_intern  attr;
 
-		zstr_intern  isql;
-		zstr_intern  param;
+		str_intern  isql;
+		str_intern  param;
 
-		zstr_intern  ok;
-		zstr_intern  ascend;
-		zstr_intern  descend;
+		str_intern  ok;
+		str_intern  ascend;
+		str_intern  descend;
 
-		zstr_intern  limit;
-		zstr_intern  offset;
+		str_intern  limit;
+		str_intern  offset;
 
-		zstr_intern  column;
-		zstr_intern  boolean;
-		zstr_intern  operator_key;
-		zstr_intern  nested;
+		str_intern  column;
+		str_intern  boolean;
+		str_intern  operator_key;
+		str_intern  nested;
 
-		zstr_intern  function;
-		zstr_intern  seq_key;
+		str_intern  function;
+		str_intern  seq_key;
 
-		zstr_intern  condition1;
-		zstr_intern  condition2;
+		str_intern  condition1;
+		str_intern  condition2;
 
-		zstr_intern  not_key;
-		zstr_intern  asterisk;
-		zstr_intern  basic;
-		zstr_intern  jointype;
+		str_intern  not_key;
+		str_intern  asterisk;
+		str_intern  basic;
+		str_intern  jointype;
 
-		zstr_intern  typekey;
-		zstr_intern  data_key;
+		str_intern  typekey;
+		str_intern  data_key;
 
-		zstr_intern  is_null;
-		zstr_intern  is_not_null;
-		zstr_intern  op_like;
-		zstr_intern  op_and;
-		zstr_intern  op_or;
-		zstr_intern  cmp_equal;
+		str_intern  is_null;
+		str_intern  is_not_null;
+		str_intern  op_like;
+		str_intern  op_and;
+		str_intern  op_or;
+		str_intern  cmp_equal;
 
 
-		zstr_intern getTableModel;
-		zstr_intern getColDefs;
+		str_intern getTableModel;
+		str_intern getColDefs;
 
-		zstr_intern param_list;
-		zstr_intern connect;
+		str_intern param_list;
+		str_intern connect;
 
-		zstr_intern driver;
-		zstr_intern params;
-		zstr_intern sql;
-		zstr_intern returns_str;
-		zstr_intern return_str;
-		zstr_intern bind_key;
-		zstr_intern id_key;
-		zstr_intern default_key;
-		zstr_intern auto_inc;
+		str_intern driver;
+		str_intern params;
+		str_intern sql;
+		str_intern returns_str;
+		str_intern return_str;
+		str_intern bind_key;
+		str_intern id_key;
+		str_intern default_key;
+		str_intern auto_inc;
 
-		zstr_intern  results;
-		zstr_intern  by_alias;
-		zstr_intern  model;
-		zstr_intern  joins;
-		zstr_intern  prime;
-		zstr_intern  orderby;
-		zstr_intern  where;
+		str_intern  results;
+		str_intern  by_alias;
+		str_intern  model;
+		str_intern  joins;
+		str_intern  prime;
+		str_intern  orderby;
+		str_intern  where;
 
-		zstr_intern  get_sql_params;	
-		zstr_intern  idriver;
-		zstr_intern  getfetch;
-		zstr_intern  setfetch;
+		str_intern  get_sql_params;	
+		str_intern  idriver;
+		str_intern  getfetch;
+		str_intern  setfetch;
 
-		zstr_intern  fetch_key;
-		zstr_intern  modelclass;
-		zstr_intern  join_tables;
-		zstr_intern  valuesdefault;
-		zstr_intern  eager_load;
-		zstr_intern  and_str;
-		zstr_intern  count_str;
-		zstr_intern  statement;
+		str_intern  fetch_key;
+		str_intern  modelclass;
+		str_intern  join_tables;
+		str_intern  valuesdefault;
+		str_intern  eager_load;
+		str_intern  and_str;
+		str_intern  count_str;
+		str_intern  statement;
 		
-		std::vector<zstr_intern> opstr;
-		std::vector<zstr_intern> boolstr;
-		std::vector<zstr_intern> joinstr;
+		std::vector<str_intern> opstr;
+		std::vector<str_intern> boolstr;
+		std::vector<str_intern> joinstr;
 
 
 		void init() override;

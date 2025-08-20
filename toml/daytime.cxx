@@ -24,8 +24,8 @@ public:
 		format_str = "format_str";
 	}
 
-	zstr_intern value_key;
-	zstr_intern format_str;
+	str_intern value_key;
+	str_intern format_str;
 
 };
 

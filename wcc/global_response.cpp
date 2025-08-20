@@ -179,7 +179,7 @@ Response::construct(
 
 	if (content.isNull())
 	{
-		content_ = zstr_empty();// zend empty string
+		content_ = str_empty();// zend empty string
 	}
 	else {
 		content_ = content;
@@ -276,11 +276,11 @@ Response::setExpires(val_ptr exptime)
 
 	datetime_obj utc(expires.clone());
 
-	utc.setTimeZone(zstr_temp("UTC"));
+	utc.setTimeZone(str_temp("UTC"));
 
 	str_buf buf;
 
-	buf << utc.format(zstr_temp("D, d M Y H:i:s")) << " GMT";
+	buf << utc.format(str_temp("D, d M Y H:i:s")) << " GMT";
 
 	str_rc time = buf.zstr();
 
@@ -290,7 +290,7 @@ Response::setExpires(val_ptr exptime)
 
 void Response::setNotModified()
 {
-	setStatusCode(304, zstr_temp("Not modified"));
+	setStatusCode(304, str_temp("Not modified"));
 }
 
 void Response::setJsonContent(
@@ -300,7 +300,7 @@ void Response::setJsonContent(
 	setContentType(RSPD.json_mime, RSPD.utf8);
 	str_rc json = str_ptr::json_encode(content, jsonOptions);
 	setContent(json);
-	setStatusCode(200,zstr_empty());
+	setStatusCode(200,str_empty());
 }
 
 val_rc 
@@ -382,7 +382,7 @@ Response::delay_redirect(str_ptr location, int delay)
 	hw.set(RSPD.Refresh, delaystr);
 	hw.set(RSPD.url_key, location);
 
-	setStatusCode(303,zstr_empty());
+	setStatusCode(303,str_empty());
 
 	buf << "<!DOCTYPE html><html style><head>" 
 		<< "<meta http-equiv=\"refresh\" content=\""
@@ -406,7 +406,7 @@ Response::sendCookies()
 {
 	if (!cookies_.isNull())
 	{
-		val_rc result = cookies_.call(zstr_temp("send"));
+		val_rc result = cookies_.call(str_temp("send"));
 		return val_ptr(result).isTrue();
 	}
 	return true;
@@ -420,7 +420,7 @@ Response::redirect(str_ptr location, bool external, int statusCode)
 	{
 		statusCode = 302;
 	}
-	setStatusCode(302, zstr_empty());
+	setStatusCode(302, str_empty());
 	htab_rw hw(writer());
 
 	hw.set(RSPD.Location, location);
@@ -542,7 +542,7 @@ Response::ajaxHtml(str_ptr  content)
 {
 	setContentType(RSPD.text_html, RSPD.utf8);
 	setContent(content);
-	setStatusCode(200,zstr_empty());
+	setStatusCode(200,str_empty());
 }
 
 bool 
@@ -785,7 +785,7 @@ void Response::setFileToSend(
 		basePath = attachName;
 	}
 	else {
-		basePath = this->attach_name(path, zstr_empty());
+		basePath = this->attach_name(path, str_empty());
 	}
 
 	if (attachment) {
@@ -819,7 +819,7 @@ void Response::setFileToSend(
 			make_header(RSPD.Content_Disposition, temp);
 		}
 		else {
-			basePath = addcslashes(basePath,zstr_temp("\15\17\\\""));
+			basePath = addcslashes(basePath,str_temp("\15\17\\\""));
 
 			const char dquote = '"';
 			buf << disposition << dquote << basePath << dquote;

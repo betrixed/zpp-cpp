@@ -244,9 +244,9 @@ htab_rc::operator=(HashTable* htab)
 }
 
 HashTable* //static
-htab_rc::new_array()
+htab_rc::new_array(size_t init)
 {
-	return zend_new_array(HT_MIN_SIZE);
+	return zend_new_array(init);
 }
 
 HashTable* //static
@@ -324,7 +324,7 @@ htab_rc::htab_rc(htab_rc&& m)
 }
 
 bool //static
-htab_rc::cowop(HashTable*& inout)
+htab_rc::cowop(HashTable*& inout, size_t init)
 {
 	//printf("cowop& %lx\n", &inout);
 	HashTable* used = inout;
@@ -332,7 +332,7 @@ htab_rc::cowop(HashTable*& inout)
 	   ||(used == const_cast<HashTable*>(&zend_empty_array)))
 	{
 		//zend_printf("New Array\n");
-		HashTable* newht = htab_rc::new_array();
+		HashTable* newht = zend_new_array(init);
 		#ifdef HTAB_SHOW_MEMORY
 		showarray("new array", newht);
 		#endif

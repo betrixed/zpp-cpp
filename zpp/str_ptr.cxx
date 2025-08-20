@@ -72,8 +72,8 @@ int zs_cmp_ci(zend_string* a, zend_string* b)
 str_rc
 str_ptr::strtr(const char* from, const char* to) const
 {
-	zstr_temp fstr(from);
-	zstr_temp tstr(to);
+	str_temp fstr(from);
+	str_temp tstr(to);
 	return zpp::strtr(s, fstr, tstr);
 }
 
@@ -92,7 +92,7 @@ str_ptr::str_ptr(const str_rc& mgr)
     s = mgr.s;
 }
 
-str_ptr::str_ptr(const zstr_intern& zs)
+str_ptr::str_ptr(const str_intern& zs)
 {
 	s = zs.s;
 }
@@ -196,7 +196,7 @@ str_ptr::substr(int offset, int len) const
 {
 	 std::string_view text(subview(offset, len));
 
-	 zstr_temp result(text.data(), text.size());
+	 str_temp result(text.data(), text.size());
 
 	 //showstr("substr", result);
 	 return std::move(result);

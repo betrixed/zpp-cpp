@@ -24,18 +24,18 @@ class HP_init : public state_init
 public:
 	HP_init() : state_init() {}
 
-	zstr_intern  view_model;
-	zstr_intern  model_svc;
-	zstr_intern  model_key;
-	zstr_intern  model_var;
+	str_intern  view_model;
+	str_intern  model_svc;
+	str_intern  model_key;
+	str_intern  model_var;
 
-	zstr_intern  values_key;
-	zstr_intern  level_key;
-	zstr_intern  views_key;
-	zstr_intern  view_key;
-	zstr_intern  final_key;
-	zstr_intern  engine_key;
-	zstr_intern  raw_key;
+	str_intern  values_key;
+	str_intern  level_key;
+	str_intern  views_key;
+	str_intern  view_key;
+	str_intern  final_key;
+	str_intern  engine_key;
+	str_intern  raw_key;
 
 	void init() override {
 		view_model = "view_model";

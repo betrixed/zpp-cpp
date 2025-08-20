@@ -133,41 +133,41 @@ public:
 
 
 
-//typedef std::vector<zstr_perm> HttpVerbNames;
-//typedef std::map<zstr_perm, int, MapComparator > HttpVerbBits;
+//typedef std::vector<str_perm> HttpVerbNames;
+//typedef std::map<str_perm, int, MapComparator > HttpVerbBits;
 
 class Route_init : public zpp::state_init {
 public:
-	zstr_intern GET_S;
-	zstr_intern POST_S;
-	zstr_intern PUT_S;
-	zstr_intern PATCH_S;
-	zstr_intern OPTIONS_S;
-	zstr_intern DELETE_S;
-	zstr_intern HEAD_S;
-	zstr_intern CONNECT_S;
-	zstr_intern TRACE_S;
-	zstr_intern PURGE_S;
+	str_intern GET_S;
+	str_intern POST_S;
+	str_intern PUT_S;
+	str_intern PATCH_S;
+	str_intern OPTIONS_S;
+	str_intern DELETE_S;
+	str_intern HEAD_S;
+	str_intern CONNECT_S;
+	str_intern TRACE_S;
+	str_intern PURGE_S;
 
 			// route
-	zstr_intern cc_verbs;
-	zstr_intern cc_ajax;
-	zstr_intern cc_params;
-	zstr_intern cc_compiled;
-	zstr_intern cc_pattern;
-	zstr_intern cc_target;
-	zstr_intern cc_id;
+	str_intern cc_verbs;
+	str_intern cc_ajax;
+	str_intern cc_params;
+	str_intern cc_compiled;
+	str_intern cc_pattern;
+	str_intern cc_target;
+	str_intern cc_id;
 
 	// values for RouteSet
-	zstr_intern ARG_S;
-	zstr_intern FUN_S;
-	zstr_intern FUNX_S;
-	zstr_intern HITS_S;
-	zstr_intern MOD_S;
-	zstr_intern NSP_S;
-	zstr_intern OBJ_S;
-	zstr_intern OBJX_S;
-	zstr_intern ROLE_S;
+	str_intern ARG_S;
+	str_intern FUN_S;
+	str_intern FUNX_S;
+	str_intern HITS_S;
+	str_intern MOD_S;
+	str_intern NSP_S;
+	str_intern OBJ_S;
+	str_intern OBJX_S;
+	str_intern ROLE_S;
 	
 
 

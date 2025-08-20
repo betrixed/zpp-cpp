@@ -23,11 +23,11 @@ namespace wcc
 
 	class Services_data : public state_init {
 	public:
-		zstr_intern active;
-		zstr_intern defer;
-		zstr_intern instances;
-		zstr_intern throw_fail;
-		zstr_intern defer_ct;
+		str_intern active;
+		str_intern defer;
+		str_intern instances;
+		str_intern throw_fail;
+		str_intern defer_ct;
 
 		obj_rc	g_services;
 
@@ -221,7 +221,7 @@ Services::service(const std::string_view& key)
 	auto slen = key.size();
 	if (slen)
 	{
-		zstr_temp skey(key.data(), slen);
+		str_temp skey(key.data(), slen);
 		result = Services::service(skey);
 	}
 	return result;

@@ -40,29 +40,29 @@ class PlateInit : public state_init {
 public:
 	PlateInit() : state_init(){}
 
-	zstr_intern engine_key;
-	zstr_intern name_key;
-	zstr_intern data_key;
-	zstr_intern raw_key;
-	zstr_intern plate_key;
+	str_intern engine_key;
+	str_intern name_key;
+	str_intern data_key;
+	str_intern raw_key;
+	str_intern plate_key;
 
-	zstr_intern layout_key;
-	zstr_intern layout_data;
-	zstr_intern style_level;
-	zstr_intern sections;
-	zstr_intern get_html;
+	str_intern layout_key;
+	str_intern layout_data;
+	str_intern style_level;
+	str_intern sections;
+	str_intern get_html;
 
-	zstr_intern content_key;
-	zstr_intern obgetclean_fn;
-	zstr_intern obstart_fn;
-	zstr_intern obgetlevel_fn;
+	str_intern content_key;
+	str_intern obgetclean_fn;
+	str_intern obstart_fn;
+	str_intern obgetlevel_fn;
 
-	zstr_intern obendclean_fn;
-	zstr_intern obgetcontents_fn;
+	str_intern obendclean_fn;
+	str_intern obgetcontents_fn;
 
-	zstr_intern pushed_key;
-	zstr_intern addstyle_fn;
-	zstr_intern assets_key;
+	str_intern pushed_key;
+	str_intern addstyle_fn;
+	str_intern assets_key;
 
 	void init() override
 	{
@@ -376,7 +376,7 @@ str_rc Plate::getContent()
 	val_ptr content = htab_ptr(sections_).get(PLD.content_key);
 	if (content.isNull())
 	{
-		return zstr_temp("<pre>\n-- Missing Content--\n</pre>\n");
+		return str_temp("<pre>\n-- Missing Content--\n</pre>\n");
 	}
 	return content;
 }

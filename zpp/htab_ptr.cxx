@@ -250,7 +250,7 @@ htab_ptr::get(const std::string_view& key) const
 	//zend_printf("get:string_view %s %d\n", key.data(), key.size());
 	if (!ht_)
 		return nullptr;
-	zstr_temp skey(key.data(), key.size());
+	str_temp skey(key.data(), key.size());
 	//showstr("get string_view&", skey);
 
 	return zend_hash_find(ht_, skey);
@@ -261,7 +261,7 @@ htab_ptr::get(const char* key) const
 {
 	if (!ht_)
 		return nullptr;
-	zstr_temp skey(key);
+	str_temp skey(key);
 	return zend_hash_find(ht_, skey);
 }
 /*

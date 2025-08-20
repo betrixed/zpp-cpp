@@ -17,7 +17,7 @@ namespace zpp {
     protected:
         void  own();
         void  lose();
-        static bool cowop(HashTable*& inout);
+        static bool cowop(HashTable*& inout, size_t init = HT_MIN_SIZE);
 
         friend class htab_ptr;
         friend class htab_rw;
@@ -25,7 +25,7 @@ namespace zpp {
     public:
         
         
-        static HashTable* new_array();
+        static HashTable* new_array(size_t init = HT_MIN_SIZE);
         static HashTable* empty_array();
         static void try_addref(HashTable* h);
         static bool try_decref(HashTable* h);

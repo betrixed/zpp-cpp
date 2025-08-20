@@ -11,7 +11,7 @@
 
 namespace zpp {
 
-    class zstr_intern;
+    class str_intern;
 
     class htab_rw : public htab_ptr 
     {
@@ -25,12 +25,11 @@ namespace zpp {
          *  to ensure its reference count is 1.
          */
 
-        htab_rw(htab_rc& mgr);
-        
+        htab_rw(htab_rc& mgr, size_t init=HT_MIN_SIZE);
         htab_rw(val_rc& mgr, size_t init=HT_MIN_SIZE);
         htab_rw(val_ptr mgr, size_t init=HT_MIN_SIZE);
         
-        htab_rw(const zval* p);
+        htab_rw(zval* p, size_t init=HT_MIN_SIZE);
         
         htab_rw(HashTable* h);
 
@@ -38,9 +37,6 @@ namespace zpp {
         {
             ht_ = w.ht_;
         }
-
-
-
         const htab_rw& operator=(const zval* p);
         
         
@@ -70,7 +66,7 @@ namespace zpp {
 
         void push_back(int value);
 
-        void push_back(const zstr_intern& si)
+        void push_back(const str_intern& si)
         {
             push_back((zend_string*) si);
         }

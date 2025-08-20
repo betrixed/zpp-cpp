@@ -16,7 +16,7 @@ namespace zpp {
 	class str_rc;
 	class val_ptr;
 
-	class zstr_intern;
+	class str_intern;
 
 	class str_ptr {
 	protected:
@@ -53,7 +53,7 @@ namespace zpp {
 
 	    str_ptr(const str_rc& mgr);
 
-	    str_ptr(const zstr_intern& zs);
+	    str_ptr(const str_intern& zs);
 
 	    //const str_ptr& operator=(const str_rc& zm);
 

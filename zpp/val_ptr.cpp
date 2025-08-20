@@ -512,11 +512,15 @@ val_ptr::array_bind(zval* tmp, HashTable* t)
 	}
 	else
 	{	
-		
-		ZVAL_ARR(tmp, t);
+		Z_ARR_P(tmp)=t;
+		//ZVAL_ARR
 		if (GC_FLAGS(t) & GC_IMMUTABLE)
 		{
-			Z_TYPE_FLAGS_P(tmp) = 0; // mark as not reference counted
+			Z_TYPE_INFO_P(tmp) = IS_ARRAY;
+			//Z_TYPE_FLAGS_P(tmp) = 0; // mark as not reference counted
+		}
+		else {
+			Z_TYPE_INFO_P(tmp) = IS_ARRAY_EX;
 		}
 	}
 }
@@ -530,10 +534,15 @@ val_ptr::object_bind(zval* temp, zend_object* obj)
 	}
 	else
 	{	
-		ZVAL_OBJ(temp, obj);
+		Z_OBJ_P(temp) = obj;
+		//ZVAL_OBJ(temp, obj);
 		if (GC_FLAGS(obj) & GC_IMMUTABLE)
 		{
-			Z_TYPE_FLAGS_P(temp) = 0; // mark as not reference counted
+			Z_TYPE_INFO_P(temp) = IS_OBJECT;
+			//Z_TYPE_FLAGS_P(temp) = 0; // mark as not reference counted
+		}
+		else {
+			Z_TYPE_INFO_P(temp) = IS_OBJECT_EX;
 		}
 	}
 }
@@ -544,10 +553,15 @@ val_ptr::string_bind(zval* tmp, zend_string* s)
 {
 	if (s) 
     {
-    	ZVAL_STR(tmp, s);
+    	//ZVAL_STR(tmp, s);
+    	Z_STR_P(tmp) = s;
     	if ((GC_FLAGS(s) & IS_STR_INTERNED))
     	{
-    		Z_TYPE_FLAGS_P(tmp) = 0; 
+    		Z_TYPE_INFO_P(tmp) = IS_STRING;
+    		//Z_TYPE_FLAGS_P(tmp) = 0; 
+	    }
+	    else {
+	    	Z_TYPE_INFO_P(tmp) = IS_STRING_EX;
 	    }
     }
     else {

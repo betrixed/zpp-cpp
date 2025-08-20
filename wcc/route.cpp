@@ -52,7 +52,7 @@ void Route_init::end()
 
 void Route_init::nodestroy(zval* val)
 {
-	// Allow zend to clean up zstr_intern
+	// Allow zend to clean up str_intern
 }
 void Route_init::init() 
 {
@@ -169,10 +169,10 @@ void Route::RouteMgr::init_class_fn()
 
 Route::Route() : base_d(), verbs_(html::V_GET), ajax_(ajax::AJ_NONE)
 {
-	id_ = zstr_empty();
+	id_ = str_empty();
 	//showstr("Route name", id_);
-	compiled_ = zstr_empty();
-	pattern_ = zstr_empty();
+	compiled_ = str_empty();
+	pattern_ = str_empty();
 	params_ = htab_empty();
 }
 
