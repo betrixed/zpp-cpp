@@ -63,8 +63,6 @@ void ServiceAccess::debug_info(htab_rw hw)
 {
 
 	base_d::debug_info(hw);
-
-	hw.set(SAdata.services, services_);
 	hw.set(SAdata.cache, cache_);
 }
 

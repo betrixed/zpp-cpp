@@ -290,8 +290,6 @@ class ServiceAccess {
 
     public function setExtender(object $obj) : void {}
 
-    public function init_access() : void {}
-
 };
 
 class Str {
