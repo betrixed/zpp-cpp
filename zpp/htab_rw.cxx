@@ -35,7 +35,7 @@ htab_rw::giveback(zval* mgr, size_t init)
 	HashTable* h = test.zarray();
 	if (!h)
 	{
-		// try to clean
+		// try to clean whatever
 		val_rc::try_decref(mgr);
 		*mgr = {0};
 
@@ -48,6 +48,7 @@ htab_rw::giveback(zval* mgr, size_t init)
 	}
 	else 
 	{
+		// Make it refcount==1
 		htab_rc::cowop(h, init);
 		/*
 		#ifdef HTAB_SHOW_MEMORY
@@ -93,11 +94,10 @@ htab_rw::htab_rw(zval* p, size_t init)
 void htab_rw::push_back(HashTable* t)
 {
 	zval tmp = {0};
-	val_ptr::array_bind(&tmp, t);
+	htab_rc::array_bind(&tmp, t);
 	if (zend_hash_next_index_insert(ht_, &tmp))
 	{
-		if (Z_TYPE_FLAGS(tmp) != 0)
-			val_rc::try_addref(&tmp);
+		htab_rc::try_addref(t);
 	}
 }
 
@@ -108,10 +108,7 @@ void htab_rw::push_back(zend_string* zs)
 
 	if (zend_hash_next_index_insert(ht_, &tmp))
 	{
-		if (Z_TYPE_FLAGS(tmp) != 0) {
-			val_rc::try_addref(&tmp);
-		}
-		
+		str_rc::try_addref(zs);	
 	}
 }
 
@@ -122,7 +119,7 @@ void htab_rw::push_back(zend_object* zo)
 
 	if (zend_hash_next_index_insert(ht_, &tmp))
 	{
-		val_rc::try_addref(&tmp);
+		obj_rc::try_addref(zo);
 	}
 }
 
@@ -189,16 +186,15 @@ htab_rw::set(zend_string* key, zend_string* value)
 */
 
 
-void htab_rw::set(zend_string* key, HashTable* t)
+void htab_rw::set(zend_string* key, HashTable* htab)
 {
 	//showstr("htab_rw::set  key", key);
 
 	zval tmp = {0};
-	val_ptr::array_bind(&tmp, t);
+	htab_rc::array_bind(&tmp, htab);
 	if (zend_hash_update(ht_, key, &tmp))
 	{	 
-		 if (Z_REFCOUNTED(tmp)) 
-			htab_rc::try_addref(t);
+		htab_rc::try_addref(htab);
 	}
 	//showarray("htab_rw::set  HashTable* ", value);
 }
@@ -322,14 +318,11 @@ void htab_rw::set(zend_long idx, val_ptr value)
 void htab_rw::set(zend_long idx, HashTable* value)
 {
 	zval temp = {0};
-	val_ptr::array_bind(&temp,value);
+	htab_rc::array_bind(&temp,value);
 	
 	if (zend_hash_index_update(ht_, idx, &temp))
 	{
-		if (Z_TYPE_FLAGS(temp) != 0)
-		{
-			htab_rc::try_addref(value);
-		}
+		htab_rc::try_addref(value);
 	}
 }
 

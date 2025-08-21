@@ -49,10 +49,49 @@ protected:
 
 
 public:
-    //should be done on zeroed zval
-    static void array_bind(zval* tmp, HashTable* ht);
-    static void string_bind(zval* tmp, zend_string* s);
-    static void object_bind(zval* temp, zend_object* obj);
+   
+    
+
+    static void set_global(str_ptr key, val_ptr value);
+    static val_ptr get_global(str_ptr key);
+
+     // potential inlines
+    static void string_bind(zval* zt, zend_string* s)
+    {
+        if (s) 
+        {
+            Z_STR_P(zt) = s;
+            Z_TYPE_INFO_P(zt) = (GC_FLAGS(s) & IS_STR_INTERNED) ? IS_STRING : IS_STRING_EX;
+        }
+        else {
+            ZVAL_NULL(zt);
+        }
+    }
+    static void array_bind(zval* zt, HashTable* ht)
+    {
+        if (ht)
+        {
+            Z_ARR_P(zt)=ht;
+            Z_TYPE_INFO_P(zt) = (GC_FLAGS(ht) & GC_IMMUTABLE) ? IS_ARRAY : IS_ARRAY_EX;       
+        }
+        else
+        {   
+            ZVAL_NULL(zt);
+        }
+    }
+        
+    static void object_bind(zval* zt, zend_object* obj)
+    {
+        if (obj)
+        {
+            Z_OBJ_P(zt) = obj;
+            Z_TYPE_INFO_P(zt) = (GC_FLAGS(obj) & GC_IMMUTABLE) ? IS_OBJECT : IS_OBJECT_EX;
+        }
+        else
+        {   
+            ZVAL_NULL(zt);
+        }
+    }
 
     static zval* real_zval(const zval* zv);
 

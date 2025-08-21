@@ -1,198 +1,19 @@
 #ifndef STRFNS_CPP
 #define STRFNS_CPP
 
-#include <string>
-#include <sstream>
+#include "strfns.h"
 
-#include "str_ptr.h"
-#include "str_rc.h"
-#include "val_ptr.h"
-#include "show_zpp.h"
+#ifndef WCC_ARGINFO_H
+#define WCC_ARGINFO_H
+extern "C" {
+#include "stub/wcc_arginfo.h"
+}
+#endif
 
+zend_class_entry* wcc_str_ce;
 
 using namespace zpp;
 
-/**
- * route_extract_paramsstring( string $s): array 
- */
-/*
-PHP_FUNCTION(Wcc_route_extract_params)
-{
-	zend_string* pattern;
-	const char*  pat;
-	size_t       pat_len;
-
-	int 		 itemLen;
-	const char*  itemStr;
-
-	ZEND_PARSE_PARAMETERS_START(1, 1)
-	Z_PARAM_STR(pattern)
-	ZEND_PARSE_PARAMETERS_END();
-
-	std::stringstream route_str;
-
-	std::string_view regex_str;
-	std::string_view variable;
-
-	zval_own   tmp;
-
-	const char* k_route = "([^/]*)";
-
-	char ch = 0, prevCh = 0, xch = 0;
-	int  bracketCount = 0,  parenCount = 0,  	foundPattern = 0;
-	int  intermediate = 0,  matchCount = 0;		
-	int  cursor = 0, 		cursorVar = 0;
-	int  marker = 0,     	middle = 0;
-	int  invalid = 0;
-	long  tmpCount = 0;
-	int  found = 0;
-
-    zval_own     matches;
-    zval_own     list2;
-
-    matches.init_array(4);
-    list2.init_array(2);
-
-    pat_len = ZSTR_LEN(pattern);
-    pat = ZSTR_VAL(pattern);
-
-    htab_ptr ht_m(matches);
-    htab_ptr ht_2(list2);
-
-	for (cursor = 0; cursor < pat_len; cursor++)
-	{
-		ch = *(pat + cursor);
-		if (parenCount == 0) {
-			if (ch == '{') {
-				if (bracketCount == 0) {
-					marker = cursor+1;
-					middle = 0;
-					invalid = 0;
-				}
-				bracketCount++;
-			}
-			else if (ch == '}') {
-				bracketCount--;
-				if (middle > 0) {
-					if (bracketCount==0) {
-						matchCount++;
-						itemStr = (pat + marker);
-						itemLen = cursor - marker;
-						for(cursorVar = 0; cursorVar < itemLen; cursorVar++) {
-							xch = *(itemStr + cursorVar);
-							if (xch==0) {
-								break;
-							}
-							if ((cursorVar == 0) && !isalpha(xch)) {
-								invalid = 1;
-								break;
-							}
-							if (isalnum(xch) || xch=='-' || xch=='_' || xch==':') 
-							{
-								if (xch == ':') {
-									// destroy any previous and init
-									variable = std::string_view(itemStr,cursorVar);
-									regex_str =  std::string_view(itemStr+cursorVar,itemLen-cursorVar);
-								}
-							}
-							else {
-								invalid = 1;
-								break;
-							}
-						}
-						if (!invalid) {
-							tmpCount = matchCount;
-							if ( (variable.size() > 0) 
-								&& (regex_str.size() > 0) )
-							{
-								found = 0;
-								for(char const &xch: regex_str)
-								{
-									if (xch==0) {
-										break;
-									}
-									if (!found) {
-										if (xch == '(') {
-											found = 1;
-										}
-									} 
-									else {
-										if (xch == ')') {
-											found = 2;
-											break;
-										}
-									}
-								}
-								if (found != 2) {
-									route_str << '(' << regex_str << ')';
-								}
-								else {
-									route_str << regex_str;
-								}
-								// save it, variable as string key, tmpCount as value
-								tmp.set((long)tmpCount);
-								ht_m.set(variable.data(), variable.size(), tmp); 
-							}
-							else {
-								route_str << k_route;
-								tmp.set((long)tmpCount);
-								ht_m.set(regex_str.data(), regex_str.size(), tmp); 
-							}
-						}
-						else {
-							route_str << '{' << regex_str << '}';
-						}
-						continue;
-					}
-				}
-
-			}
-		}
-		if (bracketCount == 0) {
-			if (ch == '(') {
-				parenCount++;
-			}
-			else if (ch == ')')
-			{
-				parenCount--;
-				if (parenCount == 0) {
-					matchCount++;
-				}
-			}
-
-		}
-		if (bracketCount > 0) {
-			middle++;
-		}
-		else {
-			if ((parenCount==0) && (prevCh != '\\')) {
-				switch(ch) {
-					case '.':
-					case '+':
-					case '|':
-					case '#':
-						route_str << '\\';
-						break;
-					default:
-						break;
-				}
-			}
-			route_str << ch;
-			prevCh = ch;
-		}
-	}
-
-	std::string route = route_str.str();
-	//printf("Route Params %s\n", route.data());
-
-	// push route match string
-	ht_2.push_back(route.data(), route.size());
-	// push index of parameters
-	ht_2.push_back(matches);
-
-	list2.move_zv(return_value);
-}
-*/
 
 /* 
  *	Emulate debug_zval_dump, except accumulate.
@@ -212,7 +33,8 @@ str_rc phiz_intern(str_ptr s)
 }
 
 /** Only does one character seperator */
-void phiz_uncamel(zval* return_value, const zend_string *src, const zend_string *sep)
+str_rc 
+phiz_uncamel(const zend_string *src, const zend_string *sep)
 {
 	smart_str uncamel_str = {0};
 	const char *marker;
@@ -222,7 +44,6 @@ void phiz_uncamel(zval* return_value, const zend_string *src, const zend_string 
 	int src_len;
 	char ch, sepch;
 
-	ZVAL_UNDEF(return_value);
 	if (sep!=NULL) {
 		psep = ZSTR_VAL(sep);
 		sep_len = ZSTR_LEN(sep);
@@ -254,18 +75,20 @@ void phiz_uncamel(zval* return_value, const zend_string *src, const zend_string 
 		marker++;
 	}
 
+	str_rc result;
+
 	if (uncamel_str.s) {
-		zend_string* result = smart_str_extract(&uncamel_str);
-		RETURN_STR(result);
-	} else {
-		RETURN_EMPTY_STRING();
+		zend_string* sse = smart_str_extract(&uncamel_str);
+		result.adopt(sse);
 	}
+	return result;
 }
 /**
  * Convert dash/underscored texts returning camelized
  * (an optional delimiter can be specified as character-mask as for ltrim)
  */
-void phiz_camel(zval* return_value, const zend_string *src, const zend_string *sep)
+str_rc 
+phiz_camel(const zend_string *src, const zend_string *sep)
 {
 	smart_str camel_str = {0};
 	const char* marker;
@@ -274,7 +97,6 @@ void phiz_camel(zval* return_value, const zend_string *src, const zend_string *s
 	int i, len, found = 1;
 	char ch;
 
-	ZVAL_UNDEF(return_value);
 	marker = ZSTR_VAL(src);
 	len    = ZSTR_LEN(src);
 
@@ -302,13 +124,12 @@ void phiz_camel(zval* return_value, const zend_string *src, const zend_string *s
 			smart_str_appendc(&camel_str, tolower(ch));
 		}
 	}
-
+	str_rc result;
 	if (camel_str.s) {
-		zend_string* result = smart_str_extract(&camel_str);
-		RETURN_STR(result);
-	} else {
-		RETURN_EMPTY_STRING();
+		zend_string* sse = smart_str_extract(&camel_str);
+		result.adopt(sse);
 	}
+	return result;
 }
 
 PHP_FUNCTION(Wcc_debug_zpp_dump) 
@@ -321,7 +142,9 @@ PHP_FUNCTION(Wcc_debug_zpp_dump)
 	zpp_dump(val_ptr(value), 0);
 }
 
-PHP_FUNCTION(Wcc_str_uncamel) {
+;
+
+ZEND_METHOD(Wcc_Str, uncamel) {
 	zend_string* src = NULL;
 	zend_string* sep = NULL;
 
@@ -331,10 +154,11 @@ PHP_FUNCTION(Wcc_str_uncamel) {
 		Z_PARAM_STR(sep)
 	ZEND_PARSE_PARAMETERS_END();
 
-	phiz_uncamel(return_value, src, sep );
+	str_rc result = phiz_uncamel(src, sep );
+	result.move_zv(return_value);
 }
 
-PHP_FUNCTION(Wcc_str_camel) {
+ZEND_METHOD(Wcc_Str, camel) {
 	zend_string* src = NULL;
 	zend_string* sep = NULL;
 
@@ -344,7 +168,8 @@ PHP_FUNCTION(Wcc_str_camel) {
 		Z_PARAM_STR(sep)
 	ZEND_PARSE_PARAMETERS_END();
 
-	phiz_camel(return_value, src, sep );
+	str_rc result = phiz_camel(src, sep );
+	result.move_zv(return_value);
 }
 
 PHP_FUNCTION(Wcc_str_intern)
@@ -369,10 +194,6 @@ static val_rc global_ref(const char* gname)
 // may have occasional real test code
 PHP_FUNCTION(Wcc_test_wcc)
 {	
-
-
-
-
 	/**
 
 	preg regex("/\\G([-A-Z_a-z0-9]+)/u");
@@ -517,4 +338,9 @@ PHP_FUNCTION(Wcc_test_wcc)
 	*/
 }
 
+PHP_MINIT_FUNCTION(Strfns_reg)
+{
+	wcc_str_ce = register_class_Wcc_Str();
+	return SUCCESS;
+}
 #endif//strfns.cpp

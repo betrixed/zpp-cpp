@@ -30,10 +30,16 @@
 	ZEND_PARSE_PARAMETERS_END()
 #endif
 
+#ifndef WCC_ARGINFO_H
+#define WCC_ARGINFO_H
+extern "C" {
+#include "stub/wcc_arginfo.h"
+}
+#endif
+
 extern "C" {
 
 #include "php_wcc.h"
-#include "stub/wcc_arginfo.h"
 
 /* For compatibility with older PHP versions */
 #ifndef ZEND_PARSE_PARAMETERS_NONE
@@ -45,7 +51,7 @@ extern "C" {
 };
 
 
-#define DEBUG_EXTRA
+//#define DEBUG_EXTRA
 
 #include "zpp/base.cpp"
 #include "zpp/show_zpp.cpp"
@@ -168,7 +174,7 @@ extern "C" {
 #include "wcc/route_add.cpp"
 
 */
-#include "zpp/strfns.cpp"
+#include "wcc/strfns.cpp"
 
 PHP_FUNCTION(Wcc_init_globals)
 {
@@ -210,6 +216,13 @@ PHP_MINIT_FUNCTION(wcc)
 #ifdef FILTER_WCF_CPP
 	PHP_MINIT(FilterObj_reg)(INIT_FUNC_ARGS_PASSTHRU);
 #endif
+
+#ifdef STRFNS_CPP
+	PHP_MINIT(Strfns_reg)(INIT_FUNC_ARGS_PASSTHRU);
+#endif
+
+
+
 
 #ifdef REQUEST_GLOBALS_CPP
 	PHP_MINIT(RequestGlobals_reg)(INIT_FUNC_ARGS_PASSTHRU);
@@ -342,6 +355,9 @@ PHP_MINIT(wcc_route_add)(INIT_FUNC_ARGS_PASSTHRU);
 #ifdef WCD_IBUILD_CPP
 	PHP_MINIT(Wcd_IBuild_reg)(INIT_FUNC_ARGS_PASSTHRU);
 #endif
+
+
+
 	return SUCCESS;
 }
 

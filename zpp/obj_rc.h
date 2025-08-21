@@ -18,9 +18,30 @@ namespace zpp {
 
 
 	public:
+		static void try_decref(zend_object* ob)
+		{
+			if (!ob || (GC_FLAGS(ob) & GC_IMMUTABLE))
+            {
+                return;
+            }
+			auto& rct = ob->gc.refcount;
+			if (rct==1) 
+			{
+				zend_object_release(ob);
+				return;
+			}
+			rct--;	
+		}
 
-		static void try_addref(zend_object* zo);
-		static bool try_decref(zend_object* zo);
+		static void try_addref(zend_object* ob)
+		{
+			if (!ob || (GC_FLAGS(ob) & GC_IMMUTABLE))
+            {
+                return;
+            }
+            ob->gc.refcount++;
+		}
+
 
 		obj_rc() : obj_ptr() {}
 

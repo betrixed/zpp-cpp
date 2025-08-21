@@ -63,6 +63,7 @@ str_rc::own()
 	//showstr("zstr own ", s);
 }
 
+/*
 void str_rc::try_addref(zend_string* zs)
 {
 	if (zs->gc.u.type_info & IS_STR_INTERNED)
@@ -71,7 +72,9 @@ void str_rc::try_addref(zend_string* zs)
 	}
 	++zs->gc.refcount;
 }
+*/
 
+/*
 bool str_rc::try_decref(zend_string* zs)
 {
 	if (zs->gc.u.type_info & IS_STR_INTERNED)
@@ -82,7 +85,7 @@ bool str_rc::try_decref(zend_string* zs)
 	zend_string_release(zs);
 	return !(rc);
 }
-
+*/
 
 str_rc& 
 str_rc::operator=(str_temp&& rc)

@@ -47,7 +47,7 @@ htab_rc::get_global(str_ptr key)
 	//showmem("get_global", result);
 	return result;
 }
-
+/*
 void //static
 htab_rc::try_addref(HashTable *h)
 {
@@ -59,29 +59,7 @@ htab_rc::try_addref(HashTable *h)
     }
     h->gc.refcount++;
 }
-
-
-bool  //static
-htab_rc::try_decref(HashTable* h)
-{
-	if (!h || (h->gc.u.type_info & GC_IMMUTABLE))
-	{
-		return false;
-	}
-	int rct =  h->gc.refcount-1;
-	if (!rct) {
-		#ifdef HTAB_SHOW_MEMORY
-		showarray("destroy", h);
-		#endif
-		/* zend_hash_destroy did 
-		   not do a complete job 
-		*/
-		zend_array_destroy(h);
-		return true;
-	}
-	h->gc.refcount--;
-	return false;
-}
+*/
 
 void htab_rc::own()
 {
@@ -111,7 +89,6 @@ void htab_rc::lose()
 	if (ht_) 
 	{
 		try_decref(ht_);
-
 		ht_ = (HashTable*) nullptr;
 	}
 }
@@ -189,14 +166,14 @@ htab_rc::operator=(const val_rc& zw)
 		if (p == ht_)
 			return *this;
 		if (ht_)
-			try_decref(ht_);
+			lose();
 		ht_ = p;
 		own();
 		showarray("=move2 val_rc&&", p);
 	}
 	else {
 		if (ht_)
-			try_decref(ht_);
+			lose();
 		ht_ = (HashTable*) nullptr;
 	}
 	return *this;

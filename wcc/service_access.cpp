@@ -23,27 +23,20 @@ public:
 	str_intern services;
 	str_intern cache;
 	str_intern init_access;
+	str_intern gservices;
 
 	virtual void init()
 	{
 		services = "services";
 		cache = "cache";
 		init_access = "init_access";
+		gservices = "gservices";
 	}
 };
 
 SADATA SAdata;
 
-obj_ptr
-ServiceAccess::getServices() {
-	return services_;
-}
 
-void 
-ServiceAccess::setServices(val_ptr svc)
-{
-	services_ = svc.zobject();
-}
 
 void ServiceAccess::init_access()
 {
@@ -78,16 +71,23 @@ void ServiceAccess::debug_info(htab_rw hw)
 void 
 ServiceAccess::construct(val_ptr services_obj)
 {
+	gservices_ =  Services::instance();
 	if (services_obj.isObject())
 	{
 		services_ = services_obj.zobject();
 	}
 	else {
-		services_ =  Services::instance();
+		services_ =  gservices_;
 	}
 
-	obj_ptr caller (this);
+	obj_ptr self(vobj());
+	val_rc arg(gservices_);
+	self.property(SAdata.gservices, arg);
 
+	arg = services_;
+	self.property(SAdata.services, arg);
+
+	obj_ptr caller (this);
 	caller.call(SAdata.init_access);
 }
 
@@ -104,7 +104,6 @@ ServiceAccess::service(str_ptr name)
 	val_ptr zu(result);
 
 	htab_rw hw(cache_);
-
 	result = hw.get(name);
 
 	if (!zu.isNull())
@@ -121,15 +120,17 @@ ServiceAccess::service(str_ptr name)
 		return result;
 	}
 
-	Services* gobj = Services::cpp_global();
+	if ((zend_object*) services_ != (zend_object*) gservices_)
+	{
+		 cobj = zobj_toc<Services>(gservices_);
 
-	if (gobj != cobj) {
-		result = gobj->get(name);
+		result = cobj->get(name);
 		if (!zu.isNull())
 		{
 			hw.set(name, result);
 		}
 	}
+
 	return result;
 }
 
@@ -142,7 +143,8 @@ ServiceAccess::set(str_ptr name, val_ptr value)
 bool 
 ServiceAccess::has(str_ptr name)
 {
-	return htab_ptr(cache_).has_key(name);
+	val_rc test = service(name);
+	return !test.isNull();
 }
 
 
@@ -314,7 +316,7 @@ ZEND_METHOD(Wcc_ServiceAccess, unset)
 	cobj->unset(name);
 
 }
-
+/*
 ZEND_METHOD(Wcc_ServiceAccess, setServices)
 {
 	zval*        sobj;
@@ -328,6 +330,7 @@ ZEND_METHOD(Wcc_ServiceAccess, setServices)
 
 	cobj->setServices(sobj);
 }
+*/
 
 ZEND_METHOD(Wcc_ServiceAccess, setExtender)
 {

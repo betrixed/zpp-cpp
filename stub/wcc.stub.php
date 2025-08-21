@@ -264,6 +264,10 @@ final class Services {
 };
 
 class ServiceAccess {
+
+	public readonly Services $gservices;
+	public readonly Services $services;
+
     public function __construct(?Services $svc = null) {}
 
     public function __destruct();
@@ -282,14 +286,17 @@ class ServiceAccess {
 
     public function init_access() : void {}
 
-    public function getServices() : Services {}
-
     public function hasService(string $name) : bool {}
-
-    public function setServices(Services $svc) : void {}
 
     public function setExtender(object $obj) : void {}
 
+    public function init_access() : void {}
+
+};
+
+class Str {
+	static public function camel(string $s, string $seperate = "_"): string {}
+	static public function uncamel(string $s, string $seperate = "_"): string {}
 };
 
 function debug_zpp_dump(mixed $val) : void {}
@@ -297,10 +304,6 @@ function debug_zpp_dump(mixed $val) : void {}
 function init_globals() : void {}
 
 //function route_extract_params(string $s): array {}
-
-function str_camel(string $s, string $seperate = "_"): string {}
-
-function str_uncamel(string $s, string $seperate = "_"): string {}
 
 function str_intern(string $s) : string {}
 

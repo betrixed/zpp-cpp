@@ -17,7 +17,7 @@
 
 namespace zpp {
 
-
+/*
 void
 obj_rc::try_addref(zend_object* ob)
 {
@@ -40,7 +40,7 @@ obj_rc::try_decref(zend_object* ob)
 	}
 	return false;	
 }
-
+*/
 void obj_rc::own()
 {
 	if (!obj_)

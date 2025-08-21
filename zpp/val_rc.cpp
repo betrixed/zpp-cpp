@@ -545,7 +545,7 @@ void val_rc::decref()
     try_decref(&zv_);
 }
 
-bool //static. Return true if contents become invalid
+void //static.
 val_rc::try_decref(zval* p)
 {
     if (Z_REFCOUNTED_P(p))
@@ -557,14 +557,9 @@ val_rc::try_decref(zval* p)
         case IS_STRING:
             {
                 zend_string* s = Z_STR_P(p);
-                if (GC_FLAGS(s) & IS_STR_INTERNED)
-                {
-                    return false;
-                }
-                zend_string_release(s);
-                return (rct==1);
+                str_rc::try_decref(s);
             }
-            
+            break;
         case IS_REFERENCE:
             {
                 auto zref = Z_REF_P(p);
@@ -572,39 +567,27 @@ val_rc::try_decref(zval* p)
                 {
                     zval_ptr_dtor(&zref->val);
                     efree_size(zref, sizeof(zend_reference));
-                    return true;
+                    return;
                 }
                 zref->gc.refcount--;
-                return false;
             }
-            
+            break;
         case IS_ARRAY:
             {
 
                 HashTable* ht = Z_ARR_P(p);
-                //showarray("try_decref", ht);
-                if (ht->gc.u.type_info & GC_IMMUTABLE)
-                {
-                    return false;
-                }
-                if (rct<=1) 
-                {
-                    zend_array_destroy(ht);
-                    return true;
-                }
-                rct = GC_DELREF(ht);
-                //zend_printf("new rct %d for %lx\n", rct, ht);
+                htab_rc::try_decref(ht);
             }
-           
-            return false;
+            break;
 
         case IS_OBJECT:
             {
-                return obj_rc::try_decref(Z_OBJ_P(p));
+                obj_rc::try_decref(Z_OBJ_P(p));
             }
+            break;
         }
     }
-    return false;
+    return;
 }
 
 val_rc //static 

@@ -16,6 +16,8 @@ namespace wcc {
 	class ServiceAccess : public base_d {
 	protected:
 		obj_rc    		services_;
+		obj_rc          gservices_;
+
 		htab_rc    		cache_;
 		class_data      extender_;
 	public:
@@ -33,8 +35,6 @@ namespace wcc {
 		void destruct();
 		
 		obj_ptr getServices();
-
-		void setServices(val_ptr svc);
 
 		val_rc service(str_ptr name);
 

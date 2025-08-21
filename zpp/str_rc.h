@@ -33,8 +33,19 @@ namespace zpp {
 
 	public:
 
-		static void try_addref(zend_string* zs);
-		static bool try_decref(zend_string* zs);
+		static void try_addref(zend_string* zs)
+		{
+			if (zs->gc.u.type_info & IS_STR_INTERNED)
+			{
+				return;
+			}
+			++zs->gc.refcount;
+		}
+
+		static void try_decref(zend_string* zs)
+     	{
+			zend_string_release(zs);
+		}
 
 		~str_rc();
 

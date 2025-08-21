@@ -55,7 +55,7 @@ protected:
 public:
     static val_rc EmptyArray;
     //! Return true if contents become invalid
-    static bool try_decref(zval* p);
+    static void try_decref(zval* p);
 
     //! Increment reference if not interned or immutable
     static void try_addref(zval* p);
