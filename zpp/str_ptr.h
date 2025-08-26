@@ -108,6 +108,8 @@ namespace zpp {
 		const str_ptr& operator=(zval* rc);
 
 		static str_rc json_encode(val_ptr value, int flags);
+
+		static str_ptr empty_str();
 	};
 
 	int zs_cmp(zend_string* a, zend_string* b);

@@ -318,11 +318,7 @@ str_rc::base64_encode(const unsigned char* c, size_t slen)
 	return result;
 }
 
-str_rc //static
-str_rc::empty_str()
-{
-	return str_rc(zend_empty_string);
-}
+
 
 };
 

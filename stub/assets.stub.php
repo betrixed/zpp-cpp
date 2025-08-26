@@ -15,34 +15,27 @@ class Assets {
  	public function addBlob(string $blob, bool $header = false) : void {}
 
  	public  function addSourcePath(string $path) : array {}
- 	
- 	public function getSearchList() : SearchList {}
 
  	public function addStyle(string $style) : void {}
+ 	
+ 	public function footer() : string {}
 
- 	public function clearCache() : void {}
+ 	public function getSearchList() : SearchList {}
 
- 	public function cssHeader() : string {}
-
- 	public function cssMinify() : void {}
+ 	public function getWebList(string $selector, bool $list = true, ?array $names = null) : array {}
 
  	public function has(string $key) : bool {}
 
+ 	public function header() : string {}
+
  	public function inline_css(string $name): string {}
 
- 	public function jsMinify() : void {}
+ 	public function link() : string {}
 
  	public function loadAssetFile(string $file) : void {}
 
  	public function reset() {} void {}
 
- 	public function setMinify(string $name) : void {}
-
  	public function styleHeader() : string {}
-
- 	public function footer() : string {}
-
- 	public function header() : string {}
-
 
 };

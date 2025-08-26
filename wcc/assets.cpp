@@ -5,6 +5,10 @@
 #include "assets.h"
 #endif
 
+#ifndef WCC_CONFIG_H
+#include "config.h"
+#endif
+
 #ifndef SEARCH_LIST_H
 #include "search_list.h"
 #endif
@@ -19,28 +23,101 @@ class ASinit : public state_init {
 public:
 	ASinit() : state_init() {}
 
-	str_intern run_str;
-	str_intern web_dir;
 	str_intern assets_cfg;
+	str_intern requires_str;
+	str_intern run_str;
+	str_intern script_end;
+	str_intern script_tag;
+	str_intern style_end;
+	str_intern style_tag;
+	str_intern web_dir;
+	str_intern js_inline;
+
+
+
+
+	
 
 	void init() override 
 	{
-		run_str = "run";
-		web_dir = "web_dir";
 		assets_cfg = "assets_cfg";
+		requires_str = "requires";
+		run_str = "run";
+		script_tag = "<script>";
+		script_end = "</script>";
+		style_end = "</style>";
+		style_tag = "<style>";
+		web_dir = "web_dir";
+		js_inline = "js-inline";
+		
+		
 	}
-
-
 };
 
 ASinit  ASI;
+
+htab_rc  
+Assets::getWebList(str_ptr selector, bool list = true, htab_ptr names)
+{
+	htab_rc result;
+
+	htab_rc order = names.size() ? names : order_;
+
+	for_key_value w1;
+
+	for(w1.start(); w1.ok(); w1.next())
+	{
+		str_ptr name = w1.value();
+		htab_rc asset = assets_.property(name);
+		if (asset.size())
+		{
+			htab_rc items = asset.get(selector);
+			if (items.size())
+			{
+				if (list)
+				{
+					htab_walk w2;
+					auto wpath = w2.value();
+					for(w2.start(items); w2.ok(); w2.next())
+					{
+						result.push_back(wpath);
+					}
+				}
+				else {
+					result.push_back(items);
+				}
+			}
+		}
+	}
+	return result;
+}
+
+void Assets::jsInline()
+{
+	htab_rc ipaths = getWebList(ASI.js_inline);
+	for_key_value w1;
+	for(w1.start(ipaths); w1.ok(); w1.next())
+	{
+		str_rc path = w1.value();
+
+		if (warn_missing_)
+		{
+			verify(path);
+		}
+		str_rc script = file_get_contents(path);
+		str_buf buf;
+		buf << ASI.script_tag << script << ASI.script_end;
+		script = buf.zstr();
+		addBlob(script);
+	}
+}
 
 /*
 	bool warn_missing_;
 	bool render_lock_;
 	bool minify_;
 */
-Assets::Assets() : ServiceAccess(), warn_missing_(true), render_lock_(false), minify_(false)
+Assets::Assets() : ServiceAccess(), warn_missing_(true), render_lock_(false)
 {
 }
 
@@ -69,53 +146,124 @@ Assets::construct()
 	else {
 		assets_ = Config::omg.new_zobj();
 	}
+}
 
+str_rc //static 
+Assets::link_css(str_ptr webpath)
+{
+	str_buf buf;
 
+	buf << R"(<link rel="stylesheet" type="text/css" href=")"
+	    << webpath << R"(">)" << '\n';
+	return buf.zstr();
+}
 
+bool 
+Assets::markAdd(str_ptr item)
+{
+	if (!mark_.has(item))
+	{
+		Config* cfg = zobj_toc<Config>(assets_);
+
+		val_rc data;
+
+		data = cfg->getOrNot(item, data);
+
+		if (data.isNull())
+		{
+			zend_throw_error(zend_ce_error, "Asset Key '%s' not found.", item.data());
+			return false;
+		}
+		htab_ptr alist = data.zarray();
+		if (alist.size())
+		{
+			val_ptr requires = alist.get(ASI.requires_str);
+			if (requires.ok())
+			{
+				this->add(requires);
+			}
+			this->order_.push_back(item);
+			this->mark_.setbool(item,true);
+		}
+	}
 }
 
 void 
-Assets::add(val_ptr list)
+Assets::add(val_ptr nlist)
 {
+	if (render_lock_) {
+		zend_throw_error(zend_ce_error, "Assets locked during render");
+		return;
+	}
+	if (nlist.isArray())
+	{
+		for_key_value loop;
+		for(loop.start(nlist.zarray()), loop.ok(), loop.next())
+		{
+			str_rc name = loop.value().zstr();
+			this->markAdd(name);
+		}
+	}
+	else if (nlist.isString())
+	{
+		this->markAdd(nlist);
+	}
 }
 
 void 
 Assets::addAssets(htab_ptr data)
 {
+	htab_walk wk;
+	auto key = wk.key();
+	auto value = wk.value();
+
+	for(wk.start(data); wk.ok(); wk.next())
+	{
+		assets_.property(key, value);
+	}
 }
 
 void 
 Assets::addBlob(str_rc blob, bool header = false)
 {
+	if (header)
+	{
+		headBlob_.push_back(blob);
+	}
+	else {
+		bodyBlob_.push_back(blob);
+	}
 }
 
 htab_ptr 
 Assets::addSourcePath(str_ptr path)
 {
+	SourceList* paths = zobj_toc<SourceList>(src_paths_);
+	paths->addPath(path);
+	return paths->getPaths();
 }
 
 void 
 Assets::addStyle(str_ptr style)
 {
-}
-
-void 
-Assets::clearCache()
-{
-	
+	str_rc sct = str_replace(ASI.style_tag, str_rc::empty_str, style);
+	sct = str_replace(ASI.style_end, str_rc::empty_str, sct);
+	inline_styles_.push_back(sct);
 }
 
 str_rc 
-Assets::cssHeader()
+Assets::footer()
 {
-	
+	render_lock_ = true;
+	this->jsInline();
 }
 
-void 
-Assets::cssMinify()
+obj_ptr 
+Assets::getSearchList()
 {
-	
+	return src_paths_;
 }
+
 
 bool 
 Assets::has(str_ptr key)
@@ -124,9 +272,22 @@ Assets::has(str_ptr key)
 }
 
 str_rc 
+Assets::header()
+{
+	
+}
+
+
+str_rc 
 Assets::inline_css(str_ptr name)
 {
 	
+}
+
+str_rc 
+Assets::link()
+{
+
 }
 
 void 
@@ -141,29 +302,12 @@ Assets::reset()
 	
 }
 
-void 
-Assets::setMinify(str_ptr name)
-{
-	
-}
-
 str_rc 
 Assets::styleHeader()
 {
 	
 }
 
-str_rc 
-Assets::footer()
-{
-	
-}
-
-str_rc 
-Assets::header()
-{
-	
-}
 
 }; //end namespace wcc
 

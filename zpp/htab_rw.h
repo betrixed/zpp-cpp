@@ -86,6 +86,7 @@ namespace zpp {
         void set(zend_string* key, zend_object* obj);
         void set(zend_string* key, int value);
         void set(zend_string* key, double value);
+        void setbool(zend_string* key, bool value);
         
         void set(zval* key, zval* value);
         void set(zval* key, zend_string* value);

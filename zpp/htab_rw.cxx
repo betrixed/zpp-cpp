@@ -232,6 +232,13 @@ void htab_rw::setnull(zend_string* key)
 	zend_hash_update(ht_, key, &temp);
 }
 
+void 
+htab_rw::setbool(zend_string* key, bool value)
+{
+	zval temp = {0};
+	ZVAL_BOOL(&temp, value);
+	zend_hash_update(ht_, key, &temp);
+}
 void htab_rw::set(zend_string* key, zval* val)
 {
 	//showmem("htab_rw::set zval*", val);

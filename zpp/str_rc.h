@@ -119,8 +119,6 @@ namespace zpp {
 	    static str_rc base64_decode(const unsigned char* c, size_t slen);
 	    static str_rc base64_encode(const unsigned char* c, size_t slen);
 
-		static str_rc empty_str();
-
 
 	};
 

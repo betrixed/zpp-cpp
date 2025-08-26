@@ -514,7 +514,11 @@ str_replace(
 	return result.zstr();
 }
 
-
+str_ptr //static
+str_ptr::empty_str()
+{
+	return str_ptr(zend_empty_string);
+}
 
 };
 //str_ptr.cpp

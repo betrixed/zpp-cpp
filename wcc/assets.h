@@ -15,7 +15,6 @@ class  Assets : public ServiceAccess {
 protected:
 	bool warn_missing_;
 	bool render_lock_;
-	bool minify_;
 
 	obj_rc   config_;
 	obj_rc   src_paths_;
@@ -28,7 +27,12 @@ protected:
 
 	htab_rc  inline_styles_;
 	str_rc   web_;
-	str_rc   minify_name_;
+
+protected:
+	void markAdd(str_ptr item);
+	void jsInline();
+
+	static str_rc link_css(str_ptr webpath);
 
 public:
 	Assets();
@@ -49,30 +53,25 @@ public:
 
 	htab_ptr addSourcePath(str_ptr path);
 
+	htab_rc  getWebList(str_ptr selector, bool list = true, htab_ptr names);
+
 	void addStyle(str_ptr style);
 
- 	void clearCache();
-
- 	str_rc cssHeader();
-
- 	void cssMinify();
+	str_rc footer();
 
  	bool has(str_ptr key);
 
+ 	str_rc header();
+
  	str_rc inline_css(str_ptr name);
+
+ 	str_rc link();
 
  	void loadAssetFile(str_ptr file);
 
  	void reset();
 
- 	void setMinify(str_ptr name);
-
  	str_rc styleHeader();
-
- 	str_rc footer();
-
- 	str_rc header();
-
 };
 
 }; // namespace wcc
