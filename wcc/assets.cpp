@@ -24,6 +24,7 @@ public:
 	ASinit() : state_init() {}
 
 	str_intern assets_cfg;
+	str_intern css_str;
 	str_intern requires_str;
 	str_intern run_str;
 	str_intern script_end;
@@ -41,6 +42,7 @@ public:
 	void init() override 
 	{
 		assets_cfg = "assets_cfg";
+		css_str = "css";
 		requires_str = "requires";
 		run_str = "run";
 		script_tag = "<script>";
@@ -56,16 +58,37 @@ public:
 
 ASinit  ASI;
 
+
+str_rc 
+Assets::findSourceFile(str_ptr path)
+{
+	SearchList* sp = zobj_toc<SearchList>(src_paths_);
+	str_rc test = sp->findLeaf(path);
+	return test;
+}
+
 htab_rc  
-Assets::getWebList(str_ptr selector, bool list = true, htab_ptr names)
+Assets::getWebList(str_ptr selector,
+	 val_ptr names, bool list)
 {
 	htab_rc result;
-
-	htab_rc order = names.size() ? names : order_;
+	htab_rc order;
+	if (names.isNull() || names.isEmpty())
+	{
+		order = order_;
+	}
+	else if (names.isString())
+	{
+		htab_write hw(order);
+		hw.push_back(names.zstr());
+	}
+	else {
+		order = names.zarray();
+	}
 
 	for_key_value w1;
 
-	for(w1.start(); w1.ok(); w1.next())
+	for(w1.start(order); w1.ok(); w1.next())
 	{
 		str_ptr name = w1.value();
 		htab_rc asset = assets_.property(name);
@@ -268,20 +291,45 @@ Assets::getSearchList()
 bool 
 Assets::has(str_ptr key)
 {
-	
+	return assets_.has(key);
 }
 
 str_rc 
 Assets::header()
 {
-	
+	render_lock_ = true;
+	return getHeadBlob();
 }
 
 
 str_rc 
 Assets::inline_css(str_ptr name)
 {
-	
+	htab_rc paths = getWebList(ASI.css_str, name);
+	str_buf buf;
+
+	if (paths.size())
+	{
+		for_key_value w1;
+
+		for(w1.start(paths); w1.ok(); w1.next())
+		{
+			str_rc css_path = w1.value();
+			if (css_path.size())
+			{
+				css_path = findSourceFile(css_path);
+
+				str_rc data = file_get_contents(css_path);
+				buf << endl << ASI.style_tag << endl;
+				buf << data << endl << ASI.style_end << endl;
+			}
+			else {
+				zend_throw_error(zend_ce_error,"Empty css path for %s", name.data());
+				break;
+			}
+		}
+	}
+	return buf.zstr();
 }
 
 str_rc 

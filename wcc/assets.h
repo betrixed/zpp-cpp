@@ -29,8 +29,10 @@ protected:
 	str_rc   web_;
 
 protected:
+	str_rc findSourceFile(str_ptr path);
 	void markAdd(str_ptr item);
 	void jsInline();
+	
 
 	static str_rc link_css(str_ptr webpath);
 
@@ -53,7 +55,10 @@ public:
 
 	htab_ptr addSourcePath(str_ptr path);
 
-	htab_rc  getWebList(str_ptr selector, bool list = true, htab_ptr names);
+	htab_rc  getWebList(
+		str_ptr selector, 
+		val_ptr names = val_ptr(), 
+		bool list=true);
 
 	void addStyle(str_ptr style);
 

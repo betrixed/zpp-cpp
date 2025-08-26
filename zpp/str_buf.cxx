@@ -183,6 +183,10 @@ str_buf::zstr()
 		zend_string* value = smart_str_extract_ex(&buf, 0);
 		result.adopt(value);
 	}
+	else {
+		//TODO: EMPTY or null?
+		result = str_ptr::empty_str();
+	}
 	return result;
 }
 

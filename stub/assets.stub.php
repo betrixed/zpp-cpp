@@ -22,7 +22,10 @@ class Assets {
 
  	public function getSearchList() : SearchList {}
 
- 	public function getWebList(string $selector, bool $list = true, ?array $names = null) : array {}
+ 	public function getWebList(
+ 		string $selector, 
+ 		null|string|array $names = null,
+ 		bool $list = true) : array {}
 
  	public function has(string $key) : bool {}
 
@@ -38,4 +41,8 @@ class Assets {
 
  	public function styleHeader() : string {}
 
+};
+
+class Replace {
+	public static function property(object $obj, string $data): string {}
 };
