@@ -9,6 +9,7 @@ do
 echo $f
 done
 
+make ./stub/assets_arginfo.h
 make ./stub/config_arginfo.h
 make ./stub/sqlipart_arginfo.h
 make ./stub/bindings_arginfo.h

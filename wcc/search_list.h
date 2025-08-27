@@ -33,14 +33,14 @@ namespace wcc {
 
 		void addPath(str_ptr p);
 
-		void addPaths(val_ptr sp);
+		void addPaths(htab_ptr sp);
 
 		bool try_path(
 			const fs::path& dir, 
 			const fs::path& file,  
 			str_rc& result);
 
-		str_rc findLeaf(str_ptr leaf, val_ptr extensions);
+		str_rc findLeaf(str_ptr leaf, htab_ptr extensions = htab_ptr());
 		
 		str_ptr getName();
 

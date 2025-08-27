@@ -37,12 +37,16 @@ class Assets {
 
  	public function loadAssetFile(string $file) : void {}
 
- 	public function reset() {} void {}
+ 	public function reset() : void {}
 
  	public function styleHeader() : string {}
 
 };
 
 class Replace {
-	public static function property(object $obj, string $data): string {}
+	public function __construct(object $obj, ?string $rexpr = null);
+	
+	public function eval(string $subj): string {}
+
+	static public function property(object $obj, string $data) : string {}
 };

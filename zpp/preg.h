@@ -28,9 +28,26 @@ extern "C" {
 
 namespace zpp {
 
+	class PRInit : public state_init {
+	public:
+
+		str_intern prop_expr;
+
+		PRInit() : state_init() {}
+
+
+		void init() override;
+
+		
+	};
+
+	
+
+	extern PRInit PRI;
+
 	class preg_callback {
 	protected:
-		size_t 		call_count_;
+		size_t 	  call_count_;
 		str_rc    replace_; // set this in get_replace
 	public:
 		preg_callback() : call_count_(0)
@@ -109,11 +126,21 @@ namespace zpp {
 
 	val_rc explode(str_ptr sep,  str_ptr split, long limit = 0);
 
-	val_rc implode(str_ptr sep, htab_ptr w);
+	str_rc implode(str_ptr sep, htab_ptr w);
 
 	val_rc union_values(htab_ptr list1, htab_ptr list2);
 
 	val_rc preg_quote(str_ptr regex, val_ptr delim);
+
+	class Replace {
+	protected:
+		preg   expr_;
+		obj_rc src_;
+	public:
+		Replace(obj_ptr obj, str_ptr exp);
+
+		str_rc eval(str_ptr src);
+	};
 
 }; // end namespace zpp
 

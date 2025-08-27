@@ -20,8 +20,6 @@
 #include "htab_walk.h"
 #endif
 
-
-
 extern "C" {
 	#include <Zend/zend_lazy_objects.h>
 }

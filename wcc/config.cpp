@@ -266,55 +266,11 @@ Config::clear()
 str_rc 
 Config::unhive(str_ptr subj)
 {
-	preg sfind("#@([a-zA-Z][\\w\\d]*)#", preg::OFFSET_CAPTURE, true);
+	obj_ptr self(vobj());
 
-	int ct = sfind.matches(subj);
-	if (ct > 0) {
-		htab_ptr m = sfind.results();
+	Replace propnames(self, PRI.prop_expr);
 
-		htab_ptr replace_list = m.get((int)0);
-		htab_ptr keys_list = m.get(1);
-
-		std::string_view original = subj.vstr();
-
-		str_buf result;
-		size_t ipos = 0;
-
-		for(int i = 0; i < ct; i++)
-		{
-			htab_ptr  k1 = keys_list.get(i);
-			val_ptr fkey = k1.get((int)0);
-			//showmem("get key", fkey);
-			
-			val_rc rval = this->get(fkey);
-			//showmem("replace value", rval);
-			str_ptr replace_str = val_ptr(rval).zstr();
-
-			htab_ptr f1 = replace_list.get(i);
-			str_ptr  slen_f1 = f1.get((int)0);
-			val_ptr  soffset_f1 = f1.get(1);
-
-			size_t slen = slen_f1.size();
-			zend_long soffset = soffset_f1.zlong();
-
-			if (!replace_str)
-			{
-				result << original.substr(ipos, soffset-ipos);
-			} 
-			else {
-				result << original.substr(ipos, soffset-ipos);
-				result << replace_str;
-			}
-			ipos = soffset + slen;
-		}
-		if (ipos < original.size()) {
-			result << original.substr(ipos);
-		}
-		return result.zstr();
-	}
-	else {
-		return str_rc(subj);
-	}
+	return propnames.eval(subj);
 }
 
 }; // namespace wcc //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@&&&&&&&&&&&&&&&&&&&&&&&&@@@@@@@@@@@@@@@

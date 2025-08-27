@@ -59,6 +59,7 @@ extern "C" {
 #include "wcc/pair.cpp"
 #include "wcc/config.cpp"
 
+#include "wcc/assets.cpp"
 
 #include "wcc/target.cpp"
 #include "wcc/route.cpp"

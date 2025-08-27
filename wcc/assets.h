@@ -13,10 +13,9 @@ namespace wcc {
 
 class  Assets : public ServiceAccess {
 protected:
-	bool warn_missing_;
 	bool render_lock_;
 
-	obj_rc   config_;
+	obj_rc   assets_;
 	obj_rc   src_paths_;
 
 	htab_rc  mark_;
@@ -30,9 +29,12 @@ protected:
 
 protected:
 	str_rc findSourceFile(str_ptr path);
-	void markAdd(str_ptr item);
+	htab_rc filterPaths(htab_ptr paths);
+
+	bool markAdd(str_ptr item);
 	void jsInline();
-	
+	str_rc jsPut();
+	str_rc verify_path(str_ptr path);
 
 	static str_rc link_css(str_ptr webpath);
 
@@ -40,6 +42,8 @@ public:
 	Assets();
 
 	static base_obj_mgr<Assets>	omg;
+
+	static str_rc implode_blob(htab_ptr blobs);
 
 	VIRTUAL_ZOBJPTR
 
@@ -55,6 +59,8 @@ public:
 
 	htab_ptr addSourcePath(str_ptr path);
 
+	str_rc cssHeader();
+
 	htab_rc  getWebList(
 		str_ptr selector, 
 		val_ptr names = val_ptr(), 
@@ -65,6 +71,8 @@ public:
 	str_rc footer();
 
  	bool has(str_ptr key);
+
+ 	obj_ptr getSearchList();
 
  	str_rc header();
 

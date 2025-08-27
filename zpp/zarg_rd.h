@@ -47,7 +47,7 @@ public:
 	bool zbool(bool& value, zval* arg);
 	
 	bool     has_errors() const { return (errors_); }
-	str_rc get_errors();
+	str_rc   get_errors();
 	bool     throw_errors();
 
 	size_t size() const {

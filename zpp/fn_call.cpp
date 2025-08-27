@@ -15,6 +15,8 @@
 #include "htab_walk.h"
 #endif
 
+#include <filesystem>
+
 namespace zpp {
 
 // static and externals
@@ -234,7 +236,13 @@ addcslashes(str_ptr s, str_ptr escapes)
     return result;
  }
 
-bool extension_loaded(str_ptr name)
+bool 
+file_exists(str_ptr path)
+{
+    return std::filesystem::exists(path.vstr());
+}
+bool 
+extension_loaded(str_ptr name)
 {
     return FTAB.extension_loaded.call(name);
 }

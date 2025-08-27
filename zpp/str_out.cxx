@@ -47,7 +47,7 @@ void
 str_out::quote_name(zend_string* name)
 {
 	append('"');
-	append(name);
+	if (name) { append(name); }
 	append('"');
 }
 
@@ -55,8 +55,7 @@ void
 str_out::quote_name(const char* name)
 {
 	append('"');
-	if (name)
-		append(name,strlen(name));
+	if (name) { append(name,strlen(name)); }
 	append('"');
 }
 

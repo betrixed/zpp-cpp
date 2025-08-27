@@ -93,9 +93,8 @@ SearchList::addPath(str_ptr p)
 }
 
 void 
-SearchList::addPaths(val_ptr sp)
+SearchList::addPaths(htab_ptr list)
 {
-	htab_ptr list(sp.zarray());
 	size_t pcount = list.size();
 	while(pcount > 0) 
 	{
@@ -124,7 +123,7 @@ SearchList::try_path(
 }
 
 str_rc 
-SearchList::findLeaf(str_ptr leaf, val_ptr extensions)
+SearchList::findLeaf(str_ptr leaf, htab_ptr exlist)
 {
 
 	str_rc result;
@@ -139,7 +138,6 @@ SearchList::findLeaf(str_ptr leaf, val_ptr extensions)
 	fs::path pleaf(leaf.vstr());
 	fs::path pext = pleaf.extension();
 
-	htab_ptr exlist(extensions.zarray());
 	while(pcount)
 	{
 		--pcount;
@@ -149,15 +147,18 @@ SearchList::findLeaf(str_ptr leaf, val_ptr extensions)
 		{
 			return result;
 		}
-		size_t extct = exlist.size();
-		for(size_t i = 0; i < extct; i++)
+		if (exlist.size())
 		{
-			str_ptr extry(exlist.get(i));
-			fs::path fext(extry.vstr());
-			pleaf.replace_extension(fext);
-			if (try_path(fpath, pleaf, result))
+			for_key_value kv1;
+			for(kv1.start(exlist); kv1.ok(); kv1.next())
 			{
-				return result;
+				str_ptr extry(kv1.value());
+				fs::path fext(extry.vstr());
+				pleaf.replace_extension(fext);
+				if (try_path(fpath, pleaf, result))
+				{
+					return result;
+				}
 			}
 		}
 	}
@@ -193,12 +194,10 @@ ZEND_METHOD(Wcc_SearchList, addPath)
 
 ZEND_METHOD(Wcc_SearchList, addPaths)
 {
-	zval*        paths;
+	htab_ptr	paths;
+	zarg_rd args(execute_data);
 
-	ZEND_PARSE_PARAMETERS_START(1, 1)
-	Z_PARAM_ARRAY(paths)
-	ZEND_PARSE_PARAMETERS_END();
-
+	args.zarray(paths, args.need(1));
 	SearchList* cobj = zval_toc<SearchList>(ZEND_THIS);
 	cobj->addPaths(paths);
 }

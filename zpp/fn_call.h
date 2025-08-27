@@ -257,6 +257,8 @@ namespace zpp {
 
     bool function_exists(str_ptr name);
 
+    bool file_exists(str_ptr fname);
+    
     str_rc preg_quote(str_ptr expr, str_ptr delimiter);
 
     str_rc file_get_contents(str_ptr path, int offset=0, size_t len=0);
