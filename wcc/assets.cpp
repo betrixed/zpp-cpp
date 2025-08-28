@@ -17,55 +17,55 @@
 #include "services.h"
 #endif
 
+#ifndef ASSETS_ARGINFO_H
+#define ASSETS_ARGINFO_H
+
+extern "C" {
+	#include "stub/assets_arginfo.h"
+}
+#endif
+
 namespace wcc {
 
 using namespace zpp;
 
 base_obj_mgr<Assets> Assets::omg;
+base_obj_mgr<Replace> Replace::omg;
 
-class ASinit : public state_init {
-public:
-	ASinit() : state_init() {}
 
-	str_intern assets_cfg;
-	str_intern assets_str;
-	str_intern cache_all;
-	str_intern css_str;
-	str_intern file_cache;
-	str_intern link_str;
-	str_intern read_cache;
-	str_intern requires_str;
-	str_intern run_str;
-
-	str_intern script_end;
-	str_intern script_tag;
-	str_intern src_paths;
-	str_intern style_end;
-	str_intern style_tag;
-	str_intern web_dir;
-	str_intern js_inline;
-	
-
-	void init() override 
+void ASinit::init() 
 	{
 		assets_cfg = "assets_cfg";
 		assets_str = "assets";
-		cache_all = "cache_all";
-		css_str = "css";
+		body_blob = "bodyBlobs";
+
+		cache_all =  "cache_all";
+		css_str =    "css";
 		file_cache = "file_cache";
+		fwd_slash = "/";
+
+		head_blob = "headBlobs";
+		inline_styles = "inline_styles";
+
+		js_inline = "js-inline";
 		link_str = "link";
+		mark_str = "mark";
+		order_str = "order";
+
+		prop_expr = R"(#@([a-zA-Z][\w\d]*)#)";
 		read_cache = "readcache";
 		requires_str = "requires";
 		run_str = "run";
+
 		script_tag = "<script>";
 		src_paths = "src_paths";
 		script_end = "</script>";
 		style_end = "</style>";
 		style_tag = "<style>";
 		web_dir = "web_dir";
-		js_inline = "js-inline";
+		
+
 	}
-};
 
 ASinit  ASI;
 
@@ -143,7 +143,7 @@ void Assets::jsInline()
 	}
 }
 
-Assets::Assets() : ServiceAccess(), render_lock_(false)
+Assets::Assets() : base_d(), render_lock_(false)
 {
 }
 
@@ -152,14 +152,13 @@ Assets::construct()
 {
 	val_rc nullval; // null value
 
-	ServiceAccess::construct(nullval);
-
 	src_paths_ = SearchList::omg.new_zobj();
-	
 	SearchList* slist = zobj_toc<SearchList>(src_paths_);
 	slist->construct(nullval);
 
-	obj_rc run = this->service(ASI.run_str);
+
+	run_ = Services::service(ASI.run_str);
+	obj_ptr run = run_;
 
 	web_ = run.property(ASI.web_dir);
 
@@ -172,6 +171,25 @@ Assets::construct()
 	else {
 		assets_ = Config::omg.new_zobj();
 	}
+}
+
+void 
+Assets::debug_info(htab_rw di)
+{
+	di.set(ASI.src_paths, src_paths_);
+	di.set(ASI.assets_str, assets_);
+	di.set(ASI.order_str, order_);
+	di.set(ASI.mark_str, mark_);
+	di.set(ASI.inline_styles, inline_styles_);
+	di.set(ASI.web_dir, web_);
+	di.set(ASI.head_blob, headBlob_);
+	di.set(ASI.body_blob, bodyBlob_);
+}
+
+void Assets::destruct()
+{
+	run_.init();
+	src_paths_.init();
 }
 
 str_rc 
@@ -193,8 +211,6 @@ Assets::cssHeader()
 		}
 	}
 	return buf.zstr();
-
-
 }
 
 str_rc //static 
@@ -239,6 +255,34 @@ Assets::markAdd(str_ptr item)
 		}
 	}
 	return true;
+}
+
+str_rc 
+Assets::verify_path(str_ptr path)
+{
+	str_rc fpath(path);
+	Replace path_subst(run_);
+
+	if (fpath.starts_with(ASI.fwd_slash)) 
+	{
+		int check = fpath.find('/');
+		if (check >= 0)
+		{
+			fpath = path_subst.eval(fpath);
+		}
+
+		str_rc webpath = web_ + fpath;
+		if (!file_exists(webpath)) 
+		{
+			// check if @substitute property
+			str_rc srcfile = findSourceFile(webpath);
+			if (srcfile.size())
+			{
+				obj_rc dos = Services::service(ASI.dos_svc);
+				val_rc exists = dos.call()
+			}
+		}
+	}
 }
 
 void 
@@ -367,8 +411,7 @@ Assets::inline_css(str_ptr name)
 	htab_rc paths = getWebList(ASI.css_str, temp);
 	str_buf buf;
 
-	obj_rc run = Services::service(ASI.run_str);
-	Replace pathnames(run, PRI.prop_expr);
+	Replace pathnames(run_, ASI.prop_expr);
 
 	if (paths.size())
 	{
@@ -430,13 +473,12 @@ Assets::link()
 htab_rc 
 Assets::filterPaths(htab_ptr paths)
 {
-	obj_rc run = Services::service(ASI.run_str);
 	htab_rc result;
 
 	if (paths.size())
 	{
 		htab_rw hw(result);
-		Replace pathnames(run, PRI.prop_expr);
+		Replace pathnames(run_, ASI.prop_expr);
 		for_key_value kv1;
 		for(kv1.start(paths); kv1.ok(); kv1.next())
 		{
@@ -495,6 +537,7 @@ Assets::loadAssetFile(str_ptr file)
 void 
 Assets::reset()
 {
+	render_lock_ = false;
 	order_.init();
 	mark_.init();
 }
@@ -518,6 +561,91 @@ Assets::styleHeader()
 	return buf.zstr();
 }
 
+//============================================================================================
+
+
+Replace::Replace(obj_ptr obj, str_ptr exp) 
+	: base_d(), expr_(exp, preg::OFFSET_CAPTURE, true)
+	, src_(obj)
+{
+	if (!exp.size())
+	{
+		expr_.setExpr(ASI.prop_expr);
+	}
+}
+
+Replace::Replace() : base_d(), expr_()
+{
+}
+
+void 
+Replace::construct(obj_ptr obj, str_ptr rexpr)
+{
+	expr_.init(rexpr, preg::OFFSET_CAPTURE, true);
+	src_ = obj;
+}
+
+str_rc //static
+Replace::property(obj_ptr obj, str_ptr data)
+{
+	Replace temp(obj, ASI.prop_expr);
+
+	return temp.eval(data);
+}
+
+str_rc 
+Replace::eval(str_ptr subj)
+{
+	int ct = expr_.matches(subj);
+	if (ct > 0) {
+		htab_ptr m = expr_.results();
+
+		htab_ptr replace_list = m.get((int)0);
+		htab_ptr keys_list = m.get(1);
+
+		std::string_view original = subj.vstr();
+
+		str_buf result;
+		size_t ipos = 0;
+
+		for(int i = 0; i < ct; i++)
+		{
+			htab_ptr  k1 = keys_list.get(i);
+			val_ptr fkey = k1.get((int)0);
+			//showmem("get key", fkey);
+			
+			val_rc rval = src_.property(fkey);
+			
+			//showmem("replace value", rval);
+			str_ptr replace_str = val_ptr(rval).zstr();
+
+			htab_ptr f1 = replace_list.get(i);
+			str_ptr  slen_f1 = f1.get((int)0);
+			val_ptr  soffset_f1 = f1.get(1);
+
+			size_t slen = slen_f1.size();
+			zend_long soffset = soffset_f1.zlong();
+
+			if (!replace_str)
+			{
+				result << original.substr(ipos, soffset-ipos);
+			} 
+			else {
+				result << original.substr(ipos, soffset-ipos);
+				result << replace_str;
+			}
+			ipos = soffset + slen;
+		}
+		if (ipos < original.size()) {
+			result << original.substr(ipos);
+		}
+		return result.zstr();
+	}
+	else {
+		return str_rc(subj);
+	}
+}
+
 
 }; //end namespace wcc
 
@@ -531,6 +659,15 @@ ZEND_METHOD(Wcc_Assets, __construct)
 	Assets* cobj = zval_toc<Assets>(ZEND_THIS);
 
 	cobj->construct();
+}
+
+ZEND_METHOD(Wcc_Assets, __destruct)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	Assets* cobj = zval_toc<Assets>(ZEND_THIS);
+
+	cobj->destruct();
 }
 
 ZEND_METHOD(Wcc_Assets, add)
@@ -601,6 +738,16 @@ ZEND_METHOD(Wcc_Assets, addStyle)
 	}
 }
 
+ZEND_METHOD(Wcc_Assets, cssHeader)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	Assets* cobj = zval_toc<Assets>(ZEND_THIS);
+
+	str_rc text = cobj->cssHeader();
+	text.move_zv(return_value);
+}
+
 ZEND_METHOD(Wcc_Assets, footer)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
@@ -636,7 +783,8 @@ ZEND_METHOD(Wcc_Assets, getWebList)
 
 	args.zstring(typekey, args.need(1));
 
-	val_ptr names = args.option(2);
+    names = args.option(2);
+
 	if (names.ok() && (names.isString() || names.isArray())) {
 		args.zbool(aslist, args.option(3));
 	}
@@ -708,8 +856,7 @@ ZEND_METHOD(Wcc_Assets, loadAssetFile)
 	if (!args.throw_errors())
 	{
 		Assets* cobj = zval_toc<Assets>(ZEND_THIS);
-		str_rc text = cobj->loadAssetFile(file);
-		text.move_zv(return_value);
+		cobj->loadAssetFile(file);
 	}
 }
 
@@ -730,7 +877,7 @@ ZEND_METHOD(Wcc_Assets, styleHeader)
 
 	str_rc text = cobj->styleHeader();
 
-	text.move_zv(text);
+	text.move_zv(return_value);
 }
 
 /*public function __construct(object $obj, ?string $rexpr = null);*/
@@ -741,11 +888,11 @@ ZEND_METHOD(Wcc_Replace, __construct)
 	obj_ptr obj;
 	str_ptr rexpr;
 
-	args.zobject(obj, args.need(1));
+	args.obj(obj, args.need(1));
 	args.zstring_null(rexpr, args.option(2));
 	if (!args.throw_errors())
 	{
-		Assets* cobj = zval_toc<Assets>(ZEND_THIS);
+		Replace* cobj = zval_toc<Replace>(ZEND_THIS);
 		cobj->construct(obj, rexpr);
 	}
 }
@@ -761,7 +908,7 @@ ZEND_METHOD(Wcc_Replace, eval)
 	args.zstring(subj, args.need(1));
 	if (!args.throw_errors())
 	{
-		Assets* cobj = zval_toc<Assets>(ZEND_THIS);
+		Replace* cobj = zval_toc<Replace>(ZEND_THIS);
 		str_rc value = cobj->eval(subj);
 		value.move_zv(return_value);
 	}
@@ -774,7 +921,7 @@ ZEND_METHOD(Wcc_Replace, property)
 	obj_ptr obj;
 	str_ptr subj;
 
-	if (args.zobject(obj, args.need(1)))
+	if (args.obj(obj, args.need(1)))
 	{
 		args.zstring(subj, args.need(2));
 	}
@@ -785,5 +932,14 @@ ZEND_METHOD(Wcc_Replace, property)
 	}
 }
 
+PHP_MINIT_FUNCTION(wcc_assets_reg)
+{
 
+	Assets::omg.classEntry(register_class_Wcc_Assets());
+
+	Replace::omg.classEntry(register_class_Wcc_Replace());
+
+	return SUCCESS;
+
+}
 #endif

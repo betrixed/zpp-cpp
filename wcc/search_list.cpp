@@ -40,6 +40,9 @@ SearchList::construct(val_ptr paths)
 	{
 		paths_ = paths.zarray();
 	}
+	else {
+		paths_ = htab_ptr::empty_array();
+	}
 }
 
 htab_ptr

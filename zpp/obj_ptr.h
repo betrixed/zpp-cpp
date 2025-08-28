@@ -100,7 +100,7 @@ namespace zpp {
 		bool method_exists(str_ptr method) const;
 		bool isDateTime() const;
 
-		
+	
 		zend_object* operator->() const { return obj_; }
 		operator zend_object* () const { return (zend_object*) obj_; }
 	};

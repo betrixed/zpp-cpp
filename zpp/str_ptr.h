@@ -121,6 +121,8 @@ namespace zpp {
 						 const std::string_view& replace,
 						 str_ptr subject);
 
+	str_rc operator+(str_ptr lhs, str_ptr rhs);
+
 };
 
 

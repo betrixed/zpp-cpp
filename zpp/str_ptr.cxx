@@ -520,6 +520,16 @@ str_ptr::empty_str()
 	return str_ptr(zend_empty_string);
 }
 
+str_rc 
+obj_ptr::operator+(str_ptr lhs, str_ptr rhs)
+{
+    str_buf buf;
+
+    buf << lhs << rhs;
+
+    return buf.zstr();
+}
+
 };
 //str_ptr.cpp
 #endif

@@ -11,12 +11,54 @@
 
 namespace wcc {
 
-class  Assets : public ServiceAccess {
+class ASinit : public state_init {
+public:
+	ASinit() : state_init() {}
+
+	str_intern assets_cfg;
+	str_intern assets_str;
+	str_intern body_blob;
+
+	str_intern cache_all;
+	str_intern css_str;
+	str_intern file_cache;
+	str_intern fwd_slash;
+
+	str_intern head_blob;
+	str_intern inline_styles;
+
+	str_intern js_inline;
+	str_intern link_str;
+	str_intern mark_str;
+	str_intern order_str;
+
+	str_intern prop_expr;
+	str_intern read_cache;
+	str_intern requires_str;
+	str_intern run_str;
+
+	str_intern script_end;
+	str_intern script_tag;
+	str_intern src_paths;
+	str_intern style_end;
+	str_intern style_tag;
+	str_intern web_dir;
+	
+	
+
+	void init() override;
+
+};
+
+extern ASinit ASI;
+
+class  Assets : public base_d {
 protected:
 	bool render_lock_;
 
 	obj_rc   assets_;
 	obj_rc   src_paths_;
+	obj_rc   run_;
 
 	htab_rc  mark_;
 	htab_rc  order_;
@@ -50,6 +92,7 @@ public:
 	virtual   void debug_info(htab_rw hw);
 
 	void construct();
+	void destruct();
 
 	void add(val_ptr list);
 
@@ -87,6 +130,24 @@ public:
  	str_rc styleHeader();
 };
 
+class Replace : public base_d {
+	protected:
+		preg   expr_;
+		obj_rc src_;
+	public:
+
+		static base_obj_mgr<Replace> omg;
+
+		static str_rc property(obj_ptr obj, str_ptr data);
+
+		Replace(obj_ptr obj, str_ptr expr = str_ptr());
+
+		Replace();
+
+		void   construct(obj_ptr obj, str_ptr rexpr);
+
+		str_rc eval(str_ptr src);
+	};
 }; // namespace wcc
 
 #endif

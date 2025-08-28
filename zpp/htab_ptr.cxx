@@ -116,8 +116,6 @@ htab_ptr::apply_all(fn_zval fn)
 	return result;
 }
 
-
-
 str_rc
 htab_ptr::unhive(str_ptr subj)
 {
@@ -382,7 +380,7 @@ htab_ptr::slice(int offset, int length, bool preserve_keys)
 
 	if ((unsigned int)offset > src_len)
 	{
-		return htab_rc::empty_array();
+		return htab_ptr::empty_array();
 	}
 
 	htab_walk wk;
@@ -438,6 +436,11 @@ htab_ptr::operator[]  (str_ptr skey) const
 }
 //* return indexed array of values
 
+HashTable* 
+htab_ptr::empty_array()
+{
+	return (HashTable*) &zend_empty_array;
+}
 
 };
 

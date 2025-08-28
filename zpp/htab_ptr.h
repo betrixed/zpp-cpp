@@ -103,6 +103,8 @@ namespace zpp {
 
         void apply_all(fn_zval fn);
 
+        static HashTable* empty_array();
+
     };
 
 }; // namespace zpp

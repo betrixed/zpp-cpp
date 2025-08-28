@@ -8,6 +8,8 @@ namespace Wcc;
 class Assets {
 	public function __construct();
 
+	public function __destruct();
+	
 	public function add(array|string $list) : void {}
 
  	public function addAssets(array $add) : void {}
@@ -17,6 +19,8 @@ class Assets {
  	public  function addSourcePath(string $path) : array {}
 
  	public function addStyle(string $style) : void {}
+ 	
+ 	public function cssHeader() : string {}
  	
  	public function footer() : string {}
 

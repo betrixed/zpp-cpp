@@ -5,6 +5,10 @@
 #include "config.h"
 #endif
 
+#ifndef WCC_ASSETS_H
+#include "assets.h"
+#endif
+
 extern "C" {
 	#include <Zend/zend_attributes.h>
 	#include "stub/config_arginfo.h"
@@ -268,7 +272,7 @@ Config::unhive(str_ptr subj)
 {
 	obj_ptr self(vobj());
 
-	Replace propnames(self, PRI.prop_expr);
+	Replace propnames(self, ASI.prop_expr);
 
 	return propnames.eval(subj);
 }

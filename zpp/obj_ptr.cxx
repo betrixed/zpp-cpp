@@ -549,6 +549,7 @@ obj_ptr::clone() const
     return  result;
 }
 
+
 }; // namespace
 #endif
 //obj_ptr.cpp

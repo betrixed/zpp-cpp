@@ -26,8 +26,6 @@ namespace zpp {
         
         
         static HashTable* new_array(size_t init = HT_MIN_SIZE);
-        static HashTable* empty_array();
-        
 
         static void try_addref(HashTable *ht)
         {

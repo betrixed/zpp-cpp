@@ -51,9 +51,11 @@ protected:
     friend class obj_rc;
     friend class htab_rc;
     friend class htab_walk;
-    
-public:
+
     static val_rc EmptyArray;
+
+public:
+    
     //! Return true if contents become invalid
     static void try_decref(zval* p);
 

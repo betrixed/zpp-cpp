@@ -28,22 +28,7 @@ extern "C" {
 
 namespace zpp {
 
-	class PRInit : public state_init {
-	public:
-
-		str_intern prop_expr;
-
-		PRInit() : state_init() {}
-
-
-		void init() override;
-
-		
-	};
-
 	
-
-	extern PRInit PRI;
 
 	class preg_callback {
 	protected:
@@ -67,7 +52,7 @@ namespace zpp {
 	protected:
 		pcre_cache_entry* pce_;
 		str_rc      	  regexp_;
-		val_rc          result_; //hold result, array of matches
+		val_rc            result_; //hold result, array of matches
 		zend_long         count_;
 		bool          	  global_; //match all
 		int			 	  flags_;
@@ -88,13 +73,17 @@ namespace zpp {
 
 		preg(str_ptr expr, int flags=0, bool global = false);
 		preg(const char* expr, int flags=0, bool global = false);
+		preg();
 
 		~preg();
 
 		int 	   matches(str_ptr subject, zend_long offset = 0);
 		val_rc   splits(str_ptr data, int limit = -1);
 
-
+		void init(str_ptr expr, int flags = 0, bool global = false);
+		
+		void setExpr(str_ptr expr);
+		
 		void setGlobal(bool b) {
 			global_ = b;
 		}
@@ -132,15 +121,7 @@ namespace zpp {
 
 	val_rc preg_quote(str_ptr regex, val_ptr delim);
 
-	class Replace {
-	protected:
-		preg   expr_;
-		obj_rc src_;
-	public:
-		Replace(obj_ptr obj, str_ptr exp);
-
-		str_rc eval(str_ptr src);
-	};
+	
 
 }; // end namespace zpp
 

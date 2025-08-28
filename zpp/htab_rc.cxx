@@ -226,11 +226,7 @@ htab_rc::new_array(size_t init)
 	return zend_new_array(init);
 }
 
-HashTable* //static
-htab_rc::empty_array()
-{
-	return (HashTable*) &zend_empty_array;
-}
+
 
 void htab_rc::init()
 {
@@ -379,7 +375,8 @@ htab_rc::operator=(zval* zv)
 
 htab_empty::htab_empty()
 {
-	ht_ = htab_rc::empty_array();
+	ht_ = htab_ptr::empty_array();
+	showarray("htab_empty()", ht_);
 }
 
 
