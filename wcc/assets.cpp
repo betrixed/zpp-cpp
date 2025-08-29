@@ -48,6 +48,7 @@ void ASinit::init()
 		inline_styles = "inline_styles";
 
 		js_inline = "js-inline";
+		js_str = "js";
 		link_str = "link";
 		mark_str = "mark";
 		order_str = "order";
@@ -127,6 +128,27 @@ Assets::getWebList(str_ptr selector,
 	return result;
 }
 
+str_rc 
+Assets::jsPut()
+{
+	str_buf buf;
+
+	render_lock_ = true;
+	htab_rc paths = getWebList(ASI.js_str);
+	for_key_value kv1;
+
+	for(kv1.start(paths); kv1.ok(); kv1.next())
+	{
+		str_rc wpath = kv1.value();
+		if (verify_path(wpath)) {
+			buf << script_wrap(wpath);
+		}
+		else 
+			break;
+	}
+	return buf.zstr();
+}
+
 void Assets::jsInline()
 {
 	htab_rc ipaths = getWebList(ASI.js_inline);
@@ -134,7 +156,10 @@ void Assets::jsInline()
 	for(w1.start(ipaths); w1.ok(); w1.next())
 	{
 		str_rc path = w1.value();
-		path = verify_path(path);
+		if (!verify_path(path))
+		{
+			break;
+		}
 		str_rc script = file_get_contents(path);
 		str_buf buf;
 		buf << ASI.script_tag << script << ASI.script_end;
@@ -206,10 +231,23 @@ Assets::cssHeader()
 		for(kv1.start(paths); kv1.ok(); kv1.next())
 		{
 			str_rc wpath = kv1.value();
-			wpath = verify_path(wpath);
+			if (!verify_path(wpath))
+			{
+				break;
+			}
 			buf << link_css(wpath);
 		}
 	}
+	return buf.zstr();
+}
+
+str_rc //static 
+Assets::script_wrap(str_ptr path)
+{
+	str_buf buf;
+
+	buf << R"(<script src=")" << path << R"("></script>")" << endl;
+
 	return buf.zstr();
 }
 
@@ -257,20 +295,24 @@ Assets::markAdd(str_ptr item)
 	return true;
 }
 
-str_rc 
-Assets::verify_path(str_ptr path)
+bool 
+Assets::verify_path(str_rc& p_inout)
 {
-	str_rc fpath(path);
+	
 	Replace path_subst(run_);
 
+	str_rc fpath(p_inout);
+	bool exists = true;
+	//TODO: ?? paths not starting with '/'
 	if (fpath.starts_with(ASI.fwd_slash)) 
 	{
 		int check = fpath.find('/');
 		if (check >= 0)
 		{
 			fpath = path_subst.eval(fpath);
+			p_inout = fpath;
 		}
-
+		// check implied public folder path
 		str_rc webpath = web_ + fpath;
 		if (!file_exists(webpath)) 
 		{
@@ -278,11 +320,23 @@ Assets::verify_path(str_ptr path)
 			str_rc srcfile = findSourceFile(webpath);
 			if (srcfile.size())
 			{
-				obj_rc dos = Services::service(ASI.dos_svc);
-				val_rc exists = dos.call()
+				zend_result copied = php_copy_file(srcfile.data(), webpath.data());
+				if (copied != SUCCESS)
+				{
+					exists = false;
+				}
+			}
+			else {
+				exists = false;
+			}
+			if (!exists)
+			{
+				zend_throw_error(zend_ce_error,"File '%s' not found", webpath.data());
 			}
 		}
+
 	}
+	return exists;
 }
 
 void 
@@ -649,6 +703,17 @@ Replace::eval(str_ptr subj)
 
 }; //end namespace wcc
 
+str_rc Assets::implode_blob(htab_ptr blobs)
+{
+	str_ptr estr = str_ptr::empty_str();
+	if (blobs.size())
+	{
+		return implode(estr, blobs);
+	}
+	else {
+		return estr;
+	}
+}
 using namespace wcc;
 using namespace zpp;
 

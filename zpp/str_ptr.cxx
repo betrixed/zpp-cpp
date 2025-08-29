@@ -16,6 +16,10 @@ extern "C" {
 	#include <ext/json/php_json.h>
 };
 
+#ifndef STR_RC_H
+#include "str_rc.h"
+#endif
+
 namespace zpp {
 
 const char* str_ptr::empty = "\0";
@@ -520,8 +524,7 @@ str_ptr::empty_str()
 	return str_ptr(zend_empty_string);
 }
 
-str_rc 
-obj_ptr::operator+(str_ptr lhs, str_ptr rhs)
+str_rc  operator+(str_ptr lhs, str_ptr rhs)
 {
     str_buf buf;
 

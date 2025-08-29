@@ -126,5 +126,6 @@ namespace zpp {
 };
 
 
+
 //str_ptr.h
 #endif

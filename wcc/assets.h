@@ -27,6 +27,7 @@ public:
 	str_intern head_blob;
 	str_intern inline_styles;
 
+	str_intern js_str;
 	str_intern js_inline;
 	str_intern link_str;
 	str_intern mark_str;
@@ -76,10 +77,11 @@ protected:
 	bool markAdd(str_ptr item);
 	void jsInline();
 	str_rc jsPut();
-	str_rc verify_path(str_ptr path);
+	bool verify_path(str_rc& p_inout);
 
 	static str_rc link_css(str_ptr webpath);
-
+	static str_rc script_wrap(str_ptr path);
+	
 public:
 	Assets();
 
