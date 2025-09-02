@@ -41,7 +41,7 @@ public:
 	str_intern script_end;
 	str_intern script_tag;
 	str_intern source;
-	
+
 	str_intern src_paths;
 	str_intern style_end;
 	str_intern style_tag;
@@ -82,6 +82,8 @@ protected:
 	str_rc jsPut();
 	bool verify_path(str_rc& p_inout);
 	str_rc web_path(str_ptr path);
+	bool   source_path(str_ptr path);
+
 
 	static str_rc link_css(str_ptr webpath);
 	static str_rc script_wrap(str_ptr path);

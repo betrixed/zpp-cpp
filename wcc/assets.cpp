@@ -60,7 +60,7 @@ void ASinit::init()
 
 		script_tag = "<script>";
 		source = "source";
-		
+
 		src_paths = "src_paths";
 		script_end = "</script>";
 		style_end = "</style>";
@@ -313,6 +313,26 @@ Assets::markAdd(str_ptr item)
 	return true;
 }
 
+bool
+Assets::source_path(str_ptr wpath)
+{
+	str_rc srcfile = findSourceFile(wpath);
+	bool exists = (srcfile.size()) ? true : false;
+	if (exists)
+	{
+		zend_result copied = php_copy_file(srcfile.data(), wpath.data());
+		if (copied != SUCCESS)
+		{
+			exists = false;
+		}
+	}
+	if (!exists)
+	{
+		zend_throw_error(zend_ce_error,"File '%s' not found", wpath.data());
+	}
+	return exists;
+}
+
 str_rc 
 Assets::web_path(str_ptr path)
 {
@@ -325,7 +345,15 @@ Assets::web_path(str_ptr path)
 			Replace path_subst(run_);
 			fpath = path_subst.eval(fpath);
 		}
-		fpath = web_ + fpath;
+		str_rc wpath = web_ + fpath;
+
+		if(!file_exists(wpath))
+		{
+			if (this->source_path(wpath))
+			{
+				return wpath;
+			}
+		}
 	}
 	return fpath;
 }
@@ -334,42 +362,32 @@ bool
 Assets::verify_path(str_rc& p_inout)
 {
 	str_rc fpath(p_inout);
-	bool exists = true;
-	//TODO: ?? paths not starting with '/'
+
+	int check = fpath.find('@');
+	if (check >= 0)
+	{
+		Replace path_subst(run_);
+		fpath = path_subst.eval(fpath);
+		p_inout = fpath;
+	}
+	str_rc real_path = fpath;
+	// starting with '/'
 	if (fpath.starts_with(ASI.fwd_slash)) 
 	{
-		int check = fpath.find('@');
-		if (check >= 0)
-		{
-			Replace path_subst(run_);
-			fpath = path_subst.eval(fpath);
-			p_inout = fpath;
-		}
-		// check implied public folder path
-		str_rc webpath = web_ + fpath;
-		if (!file_exists(webpath)) 
-		{
-			// check if @substitute property
-			str_rc srcfile = findSourceFile(webpath);
-			if (srcfile.size())
-			{
-				zend_result copied = php_copy_file(srcfile.data(), webpath.data());
-				if (copied != SUCCESS)
-				{
-					exists = false;
-				}
-			}
-			else {
-				exists = false;
-			}
-			if (!exists)
-			{
-				zend_throw_error(zend_ce_error,"File '%s' not found", webpath.data());
-			}
-		}
-
+		real_path = web_ + real_path;
 	}
-	return exists;
+
+	if (!file_exists(real_path)) 
+	{
+		if (this->source_path(real_path))
+		{
+			return true;
+		}
+		else {
+			return false;
+		}
+	}
+	return true;
 }
 
 void 
