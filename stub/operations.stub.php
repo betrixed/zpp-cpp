@@ -88,6 +88,8 @@ class Select extends Operation {
 
 	public function add(array $cols) : void {}
 
+	public function aggregate(string $fn, string $as, ?array $args) : void {}
+
 	public function addJoin(
 		  IColumns $ltable, 
 		  ?IColumns $rtable = null, 

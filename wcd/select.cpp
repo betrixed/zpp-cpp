@@ -44,6 +44,28 @@ Select::construct(obj_ptr db, bool autoAlias)
 
 }
 
+void
+Select::aggregate(str_ptr aggfn, str_ptr alias, htab_ptr aggargs)
+{
+	htab_rc data;
+
+	htab_rw hw(data);
+
+	hw.set(SQSTR.function, aggfn);
+	hw.set(SQSTR.alias, alias);
+	
+	if (!aggargs.size())
+	{
+		hw.set(SQSTR.columns, SQSTR.asterisk);
+	}
+	else {
+		hw.set(SQSTR.columns, aggargs);
+	}
+
+	Bindings& bind = this->bindings();
+	bind.set(ISql::SQL_AGGREGATE, data);
+}
+
 void 
 Select::destruct()
 {
@@ -170,6 +192,30 @@ ZEND_METHOD(Wcd_Sql_Select, add)
 		Select* sobj = zval_toc<Select>(ZEND_THIS);
 
 		sobj->add(cols);
+	}
+}
+
+
+//public function aggregate(string $fn, string $as, ?array $args) : void {}
+ZEND_METHOD(Wcd_Sql_Select, aggregate)
+{
+	zarg_rd args(execute_data);
+
+	str_ptr aggfn;
+	str_ptr alias;
+
+	htab_ptr aggcols;
+
+	args.zstring(aggfn, args.need(1));
+	args.zstring(alias, args.need(2));
+
+	args.zarray_null(aggcols, args.option(3));
+
+	if (!args.throw_errors())
+	{
+		Select* sobj = zval_toc<Select>(ZEND_THIS);
+
+		sobj->aggregate(aggfn, alias, aggcols);
 	}
 }
 

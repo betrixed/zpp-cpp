@@ -40,9 +40,12 @@ public:
 
 	str_intern script_end;
 	str_intern script_tag;
+	str_intern source;
+	
 	str_intern src_paths;
 	str_intern style_end;
 	str_intern style_tag;
+
 	str_intern web_dir;
 	
 	
@@ -75,12 +78,14 @@ protected:
 	htab_rc filterPaths(htab_ptr paths);
 
 	bool markAdd(str_ptr item);
-	void jsInline();
+	bool jsInline();
 	str_rc jsPut();
 	bool verify_path(str_rc& p_inout);
+	str_rc web_path(str_ptr path);
 
 	static str_rc link_css(str_ptr webpath);
 	static str_rc script_wrap(str_ptr path);
+
 	
 public:
 	Assets();

@@ -33,6 +33,8 @@ public:
 
 	void destruct();
 
+	void aggregate(str_ptr fn, str_ptr alias, htab_ptr args);
+
 	void add(htab_ptr cols);
 
 	obj_rc addJoin(obj_ptr ltable, obj_ptr rtable, int jtype);

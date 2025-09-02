@@ -1144,7 +1144,12 @@ ISql::select_jt(Bindings& bind, JoinTables* jt)
 			buf << this->columns(columns.zarray());
 		}
 
-		buf << ") AS " << this->quoteName(function);
+		str_ptr alias = agg.get(SQSTR.alias);
+		if (!alias.ok())
+		{
+			alias = function;
+		}
+		buf << ") AS " << this->quoteName(alias);
 
 		//zend_printf("Aggregate %s\n" , buf.data());
 	}

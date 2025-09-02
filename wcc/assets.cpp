@@ -59,6 +59,8 @@ void ASinit::init()
 		run_str = "run";
 
 		script_tag = "<script>";
+		source = "source";
+		
 		src_paths = "src_paths";
 		script_end = "</script>";
 		style_end = "</style>";
@@ -149,23 +151,39 @@ Assets::jsPut()
 	return buf.zstr();
 }
 
-void Assets::jsInline()
+bool
+Assets::jsInline()
 {
-	htab_rc ipaths = getWebList(ASI.js_inline);
+	htab_rc ipaths = getWebList(ASI.js_inline, val_ptr(), false);
 	for_key_value w1;
 	for(w1.start(ipaths); w1.ok(); w1.next())
 	{
-		str_rc path = w1.value();
-		if (!verify_path(path))
+		htab_rc jsline = w1.value();
+		htab_rc slist = jsline.get(ASI.source);
+		if (slist.size())
 		{
-			break;
-		}
-		str_rc script = file_get_contents(path);
-		str_buf buf;
-		buf << ASI.script_tag << script << ASI.script_end;
-		script = buf.zstr();
-		addBlob(script);
+			for_key_value w2;
+			for(w2.start(slist); w2.ok(); w2.next())
+			{
+				str_rc wpath = w2.value();
+				wpath = web_path(wpath);
+
+				str_rc script =  file_get_contents(wpath);
+				if (script.size())
+				{
+					str_buf buf;
+					buf << ASI.script_tag << script << ASI.script_end;
+					script = buf.zstr();
+					addBlob(script);
+				}
+				else {
+					zend_throw_error(zend_ce_error,"js-inline source %s not found.", wpath.data());
+					return false;
+				}
+			}
+		}	
 	}
+	return true;
 }
 
 Assets::Assets() : base_d(), render_lock_(false)
@@ -295,20 +313,35 @@ Assets::markAdd(str_ptr item)
 	return true;
 }
 
+str_rc 
+Assets::web_path(str_ptr path)
+{
+	str_rc fpath(path);
+	if (fpath.starts_with(ASI.fwd_slash))
+	{
+		int check = fpath.find('@');
+		if (check >= 0)
+		{
+			Replace path_subst(run_);
+			fpath = path_subst.eval(fpath);
+		}
+		fpath = web_ + fpath;
+	}
+	return fpath;
+}
+
 bool 
 Assets::verify_path(str_rc& p_inout)
 {
-	
-	Replace path_subst(run_);
-
 	str_rc fpath(p_inout);
 	bool exists = true;
 	//TODO: ?? paths not starting with '/'
 	if (fpath.starts_with(ASI.fwd_slash)) 
 	{
-		int check = fpath.find('/');
+		int check = fpath.find('@');
 		if (check >= 0)
 		{
+			Replace path_subst(run_);
 			fpath = path_subst.eval(fpath);
 			p_inout = fpath;
 		}
@@ -412,8 +445,13 @@ Assets::addStyle(str_ptr style)
 str_rc 
 Assets::footer()
 {
+	str_rc result;
+
 	render_lock_ = true;
-	this->jsInline();
+	if (!this->jsInline())
+	{
+		return result;
+	}
 	str_buf buf;
 
 	str_rc temp = jsPut();
@@ -421,8 +459,9 @@ Assets::footer()
 
 	temp = implode_blob(bodyBlob_);
 	buf << temp;
+	result = buf.zstr();
 
-	return buf.zstr();
+	return result;
 }
 
 str_rc implode_blob(htab_ptr blobs)
