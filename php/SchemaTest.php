@@ -38,7 +38,7 @@ class SchemaTest extends Asserts
     public function testCreateScript()
     {
 
-        $si = Services::getOne(IServer::class);
+        $si = Services::service('db');
 
         $cfg = $si->getConfig("default");
 

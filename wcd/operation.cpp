@@ -62,6 +62,8 @@ Operation::destruct()
 {
 	joiner_.init();
 	db_.init();
+	bind_.init();
+
 }
 
 obj_rc 

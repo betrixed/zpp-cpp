@@ -23,8 +23,7 @@ protected:
 	obj_rc db_;
 	obj_rc bind_;
 	obj_rc joiner_;
-	obj_rc plist_;
-
+	
 	void genSql();
 
 	Bindings& bindings() {

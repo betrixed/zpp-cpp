@@ -42,7 +42,7 @@
 
 
 #ifdef DEBUG_EXTRA
-#define BASE_DEBUG
+//#define BASE_DEBUG
 #endif
 
 
