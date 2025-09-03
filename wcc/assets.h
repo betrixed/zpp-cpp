@@ -81,8 +81,8 @@ protected:
 	bool jsInline();
 	str_rc jsPut();
 	bool verify_path(str_rc& p_inout);
-	str_rc web_path(str_ptr path);
-	bool   source_path(str_ptr path);
+	bool web_path(str_rc& path);
+	bool source_path(str_ptr path);
 
 
 	static str_rc link_css(str_ptr webpath);

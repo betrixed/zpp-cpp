@@ -317,10 +317,10 @@ namespace wcd {
 	class IColumns : public SqlPartId 
 	{
 	protected:
-		str_rc 	alias_;
+		str_rc 		alias_;
 		htab_rc  	colnames_;
 		htab_rc 	expr_;
-		obj_rc 	owner_;
+		obj_rc 		owner_;
 	public:
 
 		static base_obj_mgr<IColumns> omg;

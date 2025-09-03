@@ -42,6 +42,8 @@ class IServer {
 
     public function __construct(string $svkey) {}
 
+    public function __destruct() {}
+
     public function addConfig(IConfig $cfg, string $name = "default") : void {}
 
     public function getConnect(?string $name = null): ?IDriver {}

@@ -134,18 +134,17 @@ namespace wcd {
 
 		obj_rc    icfg_;
 		str_rc    cfg_name_;
-		str_rc	db_name_;
+		str_rc	  db_name_;
 		obj_rc    isql_;
 
-		val_rc 	handle_;
+		val_rc 	   handle_;
 
 		int         ifetch_;
 		bool        logging_;
-		str_rc    lastsql_;
+		str_rc      lastsql_;
 
 		htab_rc    table_models_;
-
-		obj_rc    schema_def_;
+		obj_rc     schema_def_;
 
 		
 

@@ -60,7 +60,7 @@ str_rc::own()
 		return;
 	}
 	GC_ADDREF(s);
-	//showstr("zstr own ", s);
+	showstr("zstr own ", s);
 }
 
 /*

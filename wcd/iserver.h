@@ -45,7 +45,8 @@ namespace wcd {
 		virtual void debug_info(htab_rw di);
 		
 		void construct(str_ptr svckey);
-
+		void destruct();
+		
 		void initDone();
 
 		obj_rc getDataCache();

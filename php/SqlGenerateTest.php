@@ -156,7 +156,7 @@ class SqlGenerateTest extends Asserts
          $servers = Services::getOne(IServer::class);
          $db = $servers->getConnect("pcanex");
 
-        $sel = new Select($db);
+        $sel = new Select($db, FALSE);
         $c = $sel->addPrime('blog_category', 'C', ['id', 'name', 'name_clean']);
         $b = $sel->addTable('blog_to_category', 'B', ['blog_id']);
         $j1 = $sel->addJoin($b, $c, JoinInfo::J_LEFT);

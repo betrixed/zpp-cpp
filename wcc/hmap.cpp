@@ -486,7 +486,7 @@ void Hmap::debug_info(htab_rw hw)
 {
 	// allow derived classes to override
 	base_d::debug_info(hw);
-	//di.set(HMAPit.data_key, data_);
+	hw.set(HMAPit.data_key, data_);
 }
 
 htab_rc 

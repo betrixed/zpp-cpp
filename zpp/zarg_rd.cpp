@@ -29,29 +29,47 @@ zarg_rd::zarg_rd(zend_execute_data* ze) : errors_(nullptr)
 	zptr0_ = (zval*)(ZEND_CALL_VAR_NUM(ze, 0));
 	nargs_ = ZEND_CALL_NUM_ARGS(ze);
 	option_ = 0;
+/*
+	#if ZEND_DEBUG
+		ze_ = ze;
+	#endif
+*/
 }
 
 zval*
 zarg_rd::option(size_t ix)
 {
 	option_ = 1;
+	zval* zptr = zptr0_ + (ix-1);
+	/*
+	#if ZEND_DEBUG
+		argptr_ = zptr;
+	#endif
+	*/
+
 	if ((ix < 1) || (ix > nargs_))
 	{
-		return (zval*)nullptr;
+		zptr = (zval*) nullptr;
 	}
-	return zptr0_ + (ix-1);
+	return zptr;
 }
 
 zval* 
 zarg_rd::need(size_t ix)
 {
 	option_ = 0;
+	zval* zptr = zptr0_ + (ix-1);
+	/*
+	#if ZEND_DEBUG
+		argptr_ = zptr;
+	#endif
+	*/
 	if ((ix < 1) || (ix > nargs_))
 	{
 		error() << "; Bad argument index " << ix;
-		return (zval*)nullptr;
+		zptr = (zval*) nullptr;
 	}
-	return zptr0_ + (ix-1);
+	return zptr;
 }
 
 bool 
@@ -212,6 +230,7 @@ zarg_rd::zbool(bool& value, zval* arg)
 	{
 		error() << "; Expected bool value";
 	}
+
 	return false;
 }
 
@@ -253,6 +272,7 @@ zarg_rd::throw_errors()
 	if (errors_)
 	{
 		str_rc s = errors_->zstr();
+		showstr("***** ZARG_RD ERRORS *****", s);
 		zend_throw_error(zend_ce_error,"Errors %s: ", s.data());
 		delete errors_;
 		errors_ = nullptr;

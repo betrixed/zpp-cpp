@@ -19,7 +19,13 @@ protected:
 	zval*				  zptr0_;
 	uint32_t              nargs_;
 	uint32_t              option_;
-
+/*
+#if ZEND_DEBUG
+	zend_execute_data* 	  ze_;
+	zval*                 argptr_;
+#endif
+*/
+	
 public:
 	zarg_rd(zend_execute_data* ze);
 	~zarg_rd();
@@ -53,6 +59,20 @@ public:
 	size_t size() const {
 		return nargs_;
 	}
+
+/*
+	#if ZEND_DEBUG 
+		void setArgCt(int ct)
+		{
+			(ze_)->This.u2.num_args = ct;
+		}
+
+		zval* argPtr()
+		{
+			return argptr_;
+		}
+	#endif
+*/
 };
 
 }; //namespace zpp

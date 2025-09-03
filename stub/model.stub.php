@@ -46,6 +46,7 @@ class Model implements IfCrud {
 
     public ?string $name = null;
     
+
     public static function KeyValue(array $key, array $value): ?IRow {}
 
     public static function WithValues(array $values) : ?IRow {}
@@ -68,6 +69,8 @@ class Model implements IfCrud {
     public static function row(array $data = []) : IRow{}
 
     public static function rowSaved(array $data = []) : IRow{}
+
+    public function __destruct() {}
 
     public function createRow(IRow $row, bool $reload = false) : bool {}
 

@@ -36,11 +36,8 @@ void
 Select::construct(obj_ptr db, bool autoAlias)
 {
 	Operation::construct(db);
-	autoAlias_ = autoAlias;
-	obj_ptr self(vobj());
 
-	icols_ = IColumns::omg.new_zobj();
-	icol().construct(self);
+	autoAlias_ = autoAlias;
 
 }
 
@@ -137,6 +134,13 @@ Select::getRenamed()
 obj_ptr
 Select::iCols()
 {
+	if (!icols_.ok())
+	{
+		icols_ = IColumns::omg.new_zobj();
+		IColumns* ip = zobj_toc<IColumns>(icols_);
+		obj_ptr self(vobj());
+		ip->construct(self);
+	}
 	return icols_;
 }
 
@@ -154,21 +158,40 @@ using namespace wcd;
 ZEND_METHOD(Wcd_Sql_Select, __construct)
 {
 	zarg_rd args(execute_data);
-
-	obj_ptr db;
+	obj_ptr   db;
 	bool      auto_alias = false;
 
 	args.obj_ofclass(db, args.need(1), IDriver::omg.class_entry_);
 
-	args.zbool(auto_alias, args.option(2));
+	if (!args.zbool(auto_alias, args.option(2)))
+	{
+		/*#if ZEND_DEBUG
+		zend_printf("Arg 2 using default\n");
+		#endif
+		*/
+	};
 
 	if (!args.throw_errors())
 	{
 		Select* sobj = zval_toc<Select>(ZEND_THIS);
 
 		sobj->construct(db, auto_alias);
+		//showobj("DB object", db);
 	}
 
+	/*zval*     dbobj;
+	bool      auto_alias = false;
+	zend_class_entry* ce = IDriver::omg.class_entry_;
+
+	ZEND_PARSE_PARAMETERS_START(1,2)
+	Z_PARAM_OBJECT_OF_CLASS(dbobj, ce)
+	Z_PARAM_OPTIONAL
+	Z_PARAM_BOOL(auto_alias)
+	ZEND_PARSE_PARAMETERS_END();
+
+	Select* sobj = zval_toc<Select>(ZEND_THIS);
+	sobj->construct(dbobj, auto_alias);
+	*/
 }
 
 ZEND_METHOD(Wcd_Sql_Select, __destruct)

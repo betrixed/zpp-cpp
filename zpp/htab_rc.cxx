@@ -160,7 +160,7 @@ const htab_rc&
 htab_rc::operator=(const val_rc& zw)
 {
 	HashTable* p = val_ptr(zw).zarray();
-	showarray("=move1 val_rc&&", p);
+
 	if (p) 
 	{
 		if (p == ht_)
@@ -169,7 +169,6 @@ htab_rc::operator=(const val_rc& zw)
 			lose();
 		ht_ = p;
 		own();
-		showarray("=move2 val_rc&&", p);
 	}
 	else {
 		if (ht_)
@@ -376,7 +375,7 @@ htab_rc::operator=(zval* zv)
 htab_empty::htab_empty()
 {
 	ht_ = htab_ptr::empty_array();
-	showarray("htab_empty()", ht_);
+	//showarray("htab_empty()", ht_);
 }
 
 

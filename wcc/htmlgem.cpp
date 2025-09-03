@@ -1406,6 +1406,7 @@ str_rc
 HtmlGem::datetime(val_ptr pset)
 {
 	str_buf out;
+	str_rc  temp;
 
 	htab_rc pscopy(pset.zarray());
 	htab_rw ps(pscopy);
@@ -1461,7 +1462,8 @@ HtmlGem::datetime(val_ptr pset)
 
 	dtinput << dt_class_str << "-input";
 
-	val_rc value = dtinput.zstr();
+	str_rc value =  dtinput.zstr(); 
+	//val_rc value = dtinput.zstr();
 
 	//zend_printf("dtinput\n");
 	attrlist.set(HTG.classkey,value);
@@ -1485,12 +1487,14 @@ HtmlGem::datetime(val_ptr pset)
 
 	if (method == OUT_LABEL) {
 		label.set(HTG.content_key, input);
-		out << out_label(label);
+		temp = in_label(label);
+		out << temp;
 	}
 	else if (method == IN_LABEL) 
 	{
 		label.set(HTG.content_key, input);
-		out << in_label(label);
+		temp = in_label(label);
+		out << temp;
 	}
 	else {
 		out << input;

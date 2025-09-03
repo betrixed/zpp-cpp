@@ -50,6 +50,8 @@ public:
 	
 	Model();
 
+	void destruct();
+	
 	obj_rc getBuilderForMe();
 
 	obj_rc getBuilder();

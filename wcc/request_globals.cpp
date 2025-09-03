@@ -1376,7 +1376,7 @@ RequestGlobals::getPost()
 htab_ptr 
 RequestGlobals::getQuery()
 {
-	return Hmap::map_htab(get_);
+	return Hmap::map_htab(request_);
 }
 
 htab_ptr

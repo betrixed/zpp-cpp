@@ -8,7 +8,7 @@ namespace Wcd\Sql;
 class Simple {
 	
 
-	public function __construct(IDriver $db, ?int $fetch = null);
+	public function __construct(\Wcd\IDriver $db, ?int $fetch = null);
 
 	public function __destruct();
 
@@ -47,7 +47,7 @@ class Simple {
 class Operation {
 	public readonly ?Bindings $bind;
 
-	public function __construct(IDriver $db);
+	public function __construct(\Wcd\IDriver $db);
 
 	public function __destruct();
 
@@ -82,7 +82,7 @@ class Operation {
 };
 
 class Select extends Operation {
-	public function __construct(IDriver $db, bool $autoAlias = false);
+	public function __construct(\Wcd\IDriver $db, bool $autoAlias = false);
 
 	public function __destruct();
 

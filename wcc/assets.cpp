@@ -158,6 +158,7 @@ Assets::jsInline()
 	for_key_value w1;
 	for(w1.start(ipaths); w1.ok(); w1.next())
 	{
+		
 		htab_rc jsline = w1.value();
 		htab_rc slist = jsline.get(ASI.source);
 		if (slist.size())
@@ -166,15 +167,17 @@ Assets::jsInline()
 			for(w2.start(slist); w2.ok(); w2.next())
 			{
 				str_rc wpath = w2.value();
-				wpath = web_path(wpath);
 
-				str_rc script =  file_get_contents(wpath);
-				if (script.size())
+				if ( web_path(wpath) )
 				{
-					str_buf buf;
-					buf << ASI.script_tag << script << ASI.script_end;
-					script = buf.zstr();
-					addBlob(script);
+					str_rc script =  file_get_contents(wpath);
+					if (script.size())
+					{
+						str_buf buf;
+						buf << ASI.script_tag << script << ASI.script_end;
+						script = buf.zstr();
+						addBlob(script);
+					}
 				}
 				else {
 					zend_throw_error(zend_ce_error,"js-inline source %s not found.", wpath.data());
@@ -182,6 +185,7 @@ Assets::jsInline()
 				}
 			}
 		}	
+		
 	}
 	return true;
 }
@@ -316,7 +320,10 @@ Assets::markAdd(str_ptr item)
 bool
 Assets::source_path(str_ptr wpath)
 {
+
 	str_rc srcfile = findSourceFile(wpath);
+
+	showstr("srcfile", srcfile);
 	bool exists = (srcfile.size()) ? true : false;
 	if (exists)
 	{
@@ -333,29 +340,33 @@ Assets::source_path(str_ptr wpath)
 	return exists;
 }
 
-str_rc 
-Assets::web_path(str_ptr path)
+bool 
+Assets::web_path(str_rc& path)
 {
 	str_rc fpath(path);
+	int check = fpath.find('@');
+	if (check >= 0)
+	{
+		Replace path_subst(run_);
+		fpath = path_subst.eval(fpath);
+	}
 	if (fpath.starts_with(ASI.fwd_slash))
 	{
-		int check = fpath.find('@');
-		if (check >= 0)
-		{
-			Replace path_subst(run_);
-			fpath = path_subst.eval(fpath);
-		}
-		str_rc wpath = web_ + fpath;
-
-		if(!file_exists(wpath))
-		{
-			if (this->source_path(wpath))
-			{
-				return wpath;
-			}
-		}
+		fpath = web_ + fpath;
 	}
-	return fpath;
+
+	bool exists = file_exists(fpath);
+
+	if(!exists)
+	{
+		exists = this->source_path(fpath);
+	}
+
+	if (exists)
+	{
+		path = fpath;
+	}
+	return exists;
 }
 
 bool 
@@ -464,7 +475,7 @@ str_rc
 Assets::footer()
 {
 	str_rc result;
-
+	
 	render_lock_ = true;
 	if (!this->jsInline())
 	{
@@ -478,7 +489,7 @@ Assets::footer()
 	temp = implode_blob(bodyBlob_);
 	buf << temp;
 	result = buf.zstr();
-
+	
 	return result;
 }
 

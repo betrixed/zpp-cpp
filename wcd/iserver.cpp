@@ -144,6 +144,17 @@ IServer::construct(str_ptr svckey)
 }
 
 void 
+IServer::destruct()
+{
+	active_.init();
+	config_.init();
+	alias_.init();
+	sqlClasses_.init();
+	driverClasses_.init();
+	dbCache_.init();
+}
+
+void 
 IServer::initDone()
 {
 	svc_key_.init();
@@ -414,6 +425,14 @@ ZEND_METHOD(Wcd_IServer, __construct)
 
 	IServer* cobj = zval_toc<IServer>(ZEND_THIS);
 	cobj->construct(name);	
+}
+
+//void construct(str_ptr svckey);
+ZEND_METHOD(Wcd_IServer, __destruct)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+	IServer* cobj = zval_toc<IServer>(ZEND_THIS);
+	cobj->destruct();	
 }
 
 //void addConfig(obj_rc iconfig, str_ptr name);

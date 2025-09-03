@@ -119,6 +119,13 @@ namespace wcd {
 		timestamps_ = NO_TS;
 	}
 
+	void 
+	Model::destruct()
+	{
+		db_.init();
+		builder_.init();
+		builder_me_.init();
+	}
 	val_rc 
 	Model::createFromResult(str_ptr classname, htab_ptr results)
 	{
@@ -1167,6 +1174,16 @@ namespace wcd {
 }; // namespace wcd
 
 using namespace wcd;
+
+ZEND_METHOD(Wcd_Model, __destruct)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	Model* model = zval_toc<Model>(ZEND_THIS);
+
+	model->destruct();
+}
+
 
 ZEND_METHOD(Wcd_Model, KeyValue)
 {

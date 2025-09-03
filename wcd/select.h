@@ -21,6 +21,10 @@ protected:
 	obj_rc icols_;
 
 	IColumns& icol() {
+		if (!icols_.ok())
+		{
+			this->iCols();
+		}
 		return *zobj_toc<IColumns>(icols_);
 	}
 public:
