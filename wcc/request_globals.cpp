@@ -838,11 +838,10 @@ RequestGlobals::getHttpHost()
 	if (host.size() && strictHost_) 
 	{
 		// regulations want lowercase
-		result = host.trim();
-		//showstr("after trim", host);
-		host = result;
-		result = host.to_lower();
+		result = host;
 
+		result.trim();
+		result.lowercase();
 		host = result;
 
 		//showstr("host2", host);

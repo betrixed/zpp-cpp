@@ -16,10 +16,11 @@ use Wcd\Sql\ParamList;
 
 class IDriver {
 
+    public readonly string $name;
+
     public function __construct(IConfig $cfg, string $name);
 
     public function __destruct();
-
 
     public function begin(): bool {}
 
@@ -172,8 +173,6 @@ class IBuild {
     public function seqLastValue(string $seqname): ?int {}
 
     public function set(string $column, mixed $value): void {}
-
-    public function setFetch(int $mode): int {}
 
     public function setInsert(array $data) : void  {}
 

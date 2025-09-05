@@ -598,8 +598,9 @@ Response::attach_name(str_ptr uri, str_ptr suffix)
 {
 	val_ptr DIR_SEP = val_ptr::php_constant(RSPD.DIR_SEP); 
 	str_ptr sDIR_SEP(DIR_SEP);
-	
-	str_rc t_uri = uri.trim(sDIR_SEP.data(), str_ptr::RTRIM);
+	str_rc t_uri = uri;
+
+	t_uri.trim(sDIR_SEP.data(), str_ptr::RTRIM);
 
 	str_rc QREGEX = preg_quote(DIR_SEP, RSPD.AT_CHAR);
 

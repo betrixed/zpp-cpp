@@ -243,11 +243,10 @@ IServer::getConnect(str_ptr name)
 		Services::service(key);
 	}
 	class_data cd(IServer::omg.class_entry_);
-	str_rc   name_mgr;
 
 	if (!name.ok())
 	{
-		name_mgr = cd.static_property(ISV.active_cfg);
+		str_rc name_mgr = cd.static_property(ISV.active_cfg);
 		name = name_mgr;
 	}
 
@@ -275,8 +274,6 @@ IServer::getConnect(str_ptr name)
 obj_rc //static 
 IServer::connect(str_ptr name)
 {
-	str_rc name_mgr;
-
 	obj_ptr me = Services::getOne(IServer::omg.class_name());
 
 	IServer* s = zobj_toc<IServer>(me);
@@ -286,7 +283,7 @@ IServer::connect(str_ptr name)
 	if (!name.ok())
 	{
 		
-		name_mgr = cd.static_property(ISV.active_cfg);
+		str_rc name_mgr = cd.static_property(ISV.active_cfg);
 		name = name_mgr;
 	}
 	else {
@@ -308,7 +305,9 @@ IServer::getSqlClass(str_ptr dkey)
 str_rc 
 IServer::getDriverClass(str_ptr dkey)
 {
-	return driverClasses_.get(dkey);
+	str_rc result = driverClasses_.get(dkey);
+	//showstr("Driver class", result);
+	return result;
 }
 
 

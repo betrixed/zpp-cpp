@@ -138,6 +138,61 @@ namespace zpp {
 	 *     eg call parent virtual debug_info, or  the function handling constructor, internal function of parent.
 	 */
 
+	template<typename T>
+	struct base_dlink {
+		typedef base_dlink<T> olink;
+
+		base_dlink() : obj_(nullptr), next_(nullptr), prev_(nullptr) {}
+		base_dlink(T* val) : obj_(val), next_(nullptr), prev_(nullptr) {}
+		T*     obj_;
+		olink* next_;
+		olink* prev_;
+
+		void linkup(olink& base)
+		{
+			this->prev_ = &base;
+
+			/*
+				this is linked as next after base.
+
+				old_next = base.next_;
+
+				this.prev_ = base
+				this.next_ = old_next;
+				base.next_ = this
+				old_next.prev_ = this
+
+			*/
+			olink* old_next = base.next_;
+			base.next_ = this;
+			if(old_next)
+			{
+				this->next_ = old_next;
+				old_next->prev_ = this;
+			}
+			else {
+				/* first linkup */
+				this->next_ = nullptr;
+			}
+		}
+
+		void unlink()
+		{
+			olink* p = this->prev_;
+			olink* n = this->next_;
+
+			if (p)
+			{
+				p->next_ = n;
+				this->prev_ = nullptr;
+			}
+			if (n)
+			{
+				n->prev_ = p;
+				this->next_ = nullptr;
+			}
+		}
+	};
 
 	class   base_d {
 	#ifdef BASE_ZOBJPTR
@@ -251,7 +306,8 @@ namespace zpp {
 	};
 
 
-	
+
+
 
 	template<typename T>
 	T* zobj_toc(zend_object* zobj)
@@ -346,9 +402,11 @@ namespace zpp {
 	public:
 		typedef base_obj_mgr<T> mydef;
 
+
 		static zend_class_entry* 	    class_entry_;
 		static zend_object_handlers     handlers_;
 
+		static base_dlink<T>			obj_list_;
 		/**
 		 *  self_ not likely to be used, because this base_obj_mgr object has no data members 
 		 */
@@ -417,6 +475,10 @@ namespace zpp {
 			return result;
 		}
 
+		static void obj_dlink(T* obj)
+		{
+
+		}
 		static zend_string* class_name()
 		{
 			return (mydef::class_entry_->name);
@@ -598,6 +660,8 @@ template<typename T> zend_object_handlers base_obj_mgr<T>::handlers_;
 template<typename T> size_t  base_obj_mgr<T>::self_count_ = 0;
 template<typename T> size_t  base_obj_mgr<T>::sizeoft_ = sizeof(T);
 template<typename T> size_t  base_obj_mgr<T>::neg_space_ = sizeof(T) + sizeof(base_d*);
+
+template<typename T> base_dlink<T> base_obj_mgr<T>::obj_list_;
 
 #ifdef BASE_DEBUG
 template<typename T> size_t  base_obj_mgr<T>::obj_count_ = 0;

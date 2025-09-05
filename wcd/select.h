@@ -27,10 +27,23 @@ protected:
 		}
 		return *zobj_toc<IColumns>(icols_);
 	}
+
+	base_dlink<Select> dlink_;
+
 public:
+
+	static htab_rc getAlive();
 
 	static base_obj_mgr<Select> omg;
 
+	Select() : dlink_(this) 
+	{
+		dlink_.linkup(omg.obj_list_);
+	}
+
+	virtual ~Select() {
+		dlink_.unlink();
+	}
 	virtual obj_rc getSqlParams();
 
 	void construct(obj_ptr db, bool autoAlias = false);
@@ -48,6 +61,8 @@ public:
 	val_rc getRenamed();
 
 	obj_ptr iCols();
+
+	void wipe() override;
 
 	void setAlias(str_ptr alias);
 

@@ -30,7 +30,7 @@ protected:
 
 	int  timestamps_;
 
-	obj_rc db_;
+	str_rc db_;
 	//str_rc name_;
 	htab_rc pkey_options_;
 	htab_rc seq_defs_;

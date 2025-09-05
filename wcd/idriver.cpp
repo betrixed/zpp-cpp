@@ -112,11 +112,12 @@ void DBSInit::init() {
 		rollback_fn = "rollback";
 		setattribute_fn = "setattribute";
 
-		cfg_name = "cfg_name";
+		cfg_name = "name";
 		db_name = "db_name";
 		tbl_models = "table_models";
 		iconfig_key = "cfg";
 		schema_def = "schemaDef";
+
 
 	}
 
@@ -131,7 +132,13 @@ IDriver::construct(obj_ptr icfgobj, str_ptr name)
 	ifetch_ = PDO_FETCH_ASSOC;
 
 	icfg_ = icfgobj;
-	cfg_name_ = name;
+	name_ = name;
+
+	obj_ptr self(vobj());
+
+	val_rc parg(name);
+	self.property(DBS.cfg_name, parg);
+
 	IConfig* cfg = icfg_c();
 	db_name_ = cfg->getDatabase();
 	isql_ = cfg->newSql();
@@ -140,24 +147,9 @@ IDriver::construct(obj_ptr icfgobj, str_ptr name)
 void 
 IDriver::debug_info(htab_rw di)
 {
-	/*
-obj_rc    icfg_;
-		str_rc    cfg_name_;
-		str_rc	db_name_;
-		obj_rc    isql_;
 
-		val_rc 	handle_;
 
-		int         ifetch_;
-		bool        logging_;
-		str_rc    lastsql_;
-
-		htab_rc    table_models_;
-
-		obj_rc    schema_def_;
-*/
-
-	di.set(DBS.cfg_name, cfg_name_);
+	di.set(DBS.cfg_name, name_);
 	di.set(DBS.db_name, db_name_);
 	di.set(DBS.tbl_models, table_models_);
 	di.set(DBS.iconfig_key, icfg_);
@@ -190,13 +182,17 @@ IDriver::destruct()
 	table_models_.init();
 	isql_.init();
 	icfg_.init();
+	//showobj("IDriver destruct ", vobj());
+	//zend_printf("IDriver destruct\n");
 }
 
 str_rc 
 IDriver::getDSN()
 {
+	str_rc result;
 	str_rc dname = icfg_c()->getDriverName();
-	dname = dname.to_lower();
+	
+	dname.lowercase();
 
 	if (dname.starts_with(DBS.pdo_prefix)) {
 		dname = dname.substr(4);
@@ -205,16 +201,19 @@ IDriver::getDSN()
 		zend_throw_error(zend_ce_error,"PDO Driver names need to begin with 'pdo_'");
 		return dname;
 	}
+	//showstr("after sub", dname);
 	IConfig* cfg = icfg_c();
 	str_rc host = cfg->getHost();
 	str_rc dbname = cfg->getDatabase();
+	//showstr("database", dname);
 
 	str_buf buf;
 
 	buf << dname << ':' << "host=" << host
 	    << ";dbname=" << dbname;
-
-	return buf.zstr();
+	result = buf.zstr();
+	//showstr("getDSN()", result);
+	return result;
 }
 
 htab_rc 

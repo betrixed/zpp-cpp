@@ -25,13 +25,20 @@ namespace zpp {
 void //protected
 str_rc::lose()
 {
-	zend_string* p = s;
-	s = nullptr;
-	if (!p || (GC_FLAGS(p) & IS_STR_INTERNED)) {
+	if (!s) {
 		return;
 	}
-	zend_string_release(p);
-	
+	zend_string* p = s;
+	s = nullptr;
+	if ((GC_FLAGS(p) & IS_STR_INTERNED)) {
+		return;
+	}
+	if (GC_DELREF(p) == 0) {
+		//showstr("free-", p);
+		pefree(p, GC_FLAGS(p) & IS_STR_PERSISTENT);
+	} else {
+		//showstr("lose-", p);
+	}
 }
 
 void 
@@ -176,6 +183,56 @@ void str_rc::adopt(zend_string* rc)
 		s = rc;
 	}
 }
+
+void
+str_rc::lowercase() 
+{
+	if (s)
+	{
+		zend_string* p = zend_string_tolower(s);
+		if (p == s)
+		{
+			try_decref(p);
+		}
+		else {
+			adopt(p);
+		}
+	}
+}
+
+void
+str_rc::trim(const char* what, int mode) 
+{
+	if (s)
+	{
+		size_t slen = what ? strlen(what) : 0;
+		zend_string* p = php_trim(s, what, slen, mode);
+		if (p == s)
+		{
+			try_decref(p);
+		}
+		else {
+			bind(p);
+		}
+	}
+}
+
+void
+str_rc::uppercase() 
+{
+	if (s)
+	{
+		zend_string* p = zend_string_toupper(s);
+		if (p == s)
+		{
+			try_decref(p);
+		}
+		else {
+			bind(p);
+		}
+	}
+}
+
 
 str_rc::str_rc(zval* copy) : str_ptr()
 {

@@ -78,16 +78,14 @@ namespace zpp {
 
 		str_rc substr(int offset, int len=INT_MAX) const;
 
-		str_rc to_lower() const;
+		
+		str_rc to_lower();
 
-		str_rc to_upper() const;
+		str_rc to_upper();
 
-		str_rc uncamel(const char* sep = nullptr) const;
+		str_rc uncamel(const char* sep = nullptr);
 
-		str_rc trim(const char* what = (const char*) nullptr,
-		 				int mode = LRTRIM) const;
-
-		str_rc strtr(const char* from, const char* to) const;
+		str_rc strtr(const char* from, const char* to);
 		
 		str_rc ucfirst();
 

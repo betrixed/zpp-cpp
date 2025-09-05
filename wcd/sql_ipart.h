@@ -83,9 +83,10 @@ namespace wcd {
 		str_intern  op_or;
 		str_intern  cmp_equal;
 
-
 		str_intern getTableModel;
 		str_intern getColDefs;
+		str_intern get_str;
+		str_intern weakref_create;
 
 		str_intern param_list;
 		str_intern connect;
@@ -121,7 +122,8 @@ namespace wcd {
 		str_intern  and_str;
 		str_intern  count_str;
 		str_intern  statement;
-		
+		str_intern  db_name;
+
 		std::vector<str_intern> opstr;
 		std::vector<str_intern> boolstr;
 		std::vector<str_intern> joinstr;
@@ -240,7 +242,7 @@ namespace wcd {
 
 
 		void construct(val_ptr leftval, val_ptr rightval, int op, int nextop);
-
+		void destruct();
 	
 		/*zstr_own emit(int ix, zobj_own bindobj, 
 				str_ptr Lalias, str_ptr Ralias);*/
@@ -320,7 +322,7 @@ namespace wcd {
 		str_rc 		alias_;
 		htab_rc  	colnames_;
 		htab_rc 	expr_;
-		obj_rc 		owner_;
+		obj_rc 		owner_; // a WeakReference
 	public:
 
 		static base_obj_mgr<IColumns> omg;
@@ -331,12 +333,13 @@ namespace wcd {
 
 		void construct(obj_ptr owner);
 
+		virtual void destruct();
+
 		void clear();
 
-		obj_ptr getOwner() const
-		{
-			return owner_;
-		}
+		obj_rc getOwner();
+
+		void setOwner(obj_ptr obj);
 
 		htab_ptr getColNames() const
 		{
@@ -389,13 +392,12 @@ namespace wcd {
 		{
 			return expr_;
 		}
-
 	};
 
 	class TColumns : public IColumns 
 	{
 	protected:
-		str_rc 	name_;
+		str_rc 		name_;
 		htab_rc 	attr_map_;
 	public:
 		virtual void debug_info(htab_rw di);
@@ -410,6 +412,7 @@ namespace wcd {
 		}
 
 		void construct(str_ptr tname, str_ptr talias,  val_ptr tcol);
+		void destruct() override;
 
 		// return/create TableAttr of name
 		val_rc attr(str_ptr name); 

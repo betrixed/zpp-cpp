@@ -536,7 +536,8 @@ RouteSet::compile(Route* route)
 		for(wk.start(segs); wk.ok(); wk.next())
 		{
 			str_rc useg = value.zstr();
-			useg = useg.trim();
+			useg.trim();
+			
 			if (!useg.size())
 			{
 				zend_throw_error(zend_ce_error,"Route has bad URL segment %s",url.data());

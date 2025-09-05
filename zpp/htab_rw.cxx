@@ -125,7 +125,7 @@ void htab_rw::push_back(zend_object* zo)
 
 void htab_rw::clear()
 {
-	if (ht_) {
+	if (size()) {
 		//showarray("htab_rw clear", ht_);
 		zend_hash_clean(ht_);
 	}

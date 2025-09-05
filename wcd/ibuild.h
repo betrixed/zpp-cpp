@@ -26,6 +26,8 @@ namespace wcd {
 		void construct(val_ptr driver);
 		void destruct();
 
+		obj_rc    getDb();
+
 		val_rc aggregate(str_ptr agfn, htab_ptr columns);
 		val_rc get(htab_ptr columns);
 
@@ -77,7 +79,7 @@ namespace wcd {
 
 		void wipe();
 		
-		obj_rc driver_;
+		str_rc driver_;
 		obj_rc isql_;
 		obj_rc bindings_;
 
@@ -91,7 +93,6 @@ namespace wcd {
 		Bindings& bindings();
 		ISql&     isql();
 		IDriver&  idb();
-
 
 
 		int  ifetch_;

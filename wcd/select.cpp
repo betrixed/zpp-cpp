@@ -29,6 +29,12 @@ Select::getSqlParams()
 
 	obj_rc plist_mgr = isq->select(bind);
 	bind.wipe();
+
+	//showobj("getSQLParams", vobj());
+	ParamList* plist = zobj_toc<ParamList>(plist_mgr);
+
+	str_rc sql = plist->getSql();
+	//showstr("sql: ", sql);
 	return plist_mgr;
 }
 
@@ -38,8 +44,26 @@ Select::construct(obj_ptr db, bool autoAlias)
 	Operation::construct(db);
 
 	autoAlias_ = autoAlias;
+	//showobj("Select::construct", vobj());
+}	
 
-}
+ htab_rc // static
+ Select::getAlive()
+ {
+ 	htab_rc values;
+
+ 	htab_rw hw(values);
+
+ 	base_dlink<Select>& dref = omg.obj_list_;
+
+ 	auto n = dref.next_;
+ 	while(n)
+ 	{
+ 		hw.push_back(n->obj_);
+ 		n = n->next_;
+ 	}
+ 	return values;
+ }
 
 void
 Select::aggregate(str_ptr aggfn, str_ptr alias, htab_ptr aggargs)
@@ -66,8 +90,16 @@ Select::aggregate(str_ptr aggfn, str_ptr alias, htab_ptr aggargs)
 void 
 Select::destruct()
 {
+	//showobj("~Select", vobj());
+	this->wipe();
+}
+
+void
+Select::wipe()
+{
+	//showobj("Select::wipe", vobj());
 	icols_.init();
-	Operation::destruct();
+	Operation::wipe();
 }
 
 void 
@@ -202,6 +234,16 @@ ZEND_METHOD(Wcd_Sql_Select, __destruct)
 
 }
 
+ZEND_METHOD(Wcd_Sql_Select, getAlive)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	htab_rc data = Select::getAlive();
+	
+	data.move_zv(return_value);
+
+}
+
 ZEND_METHOD(Wcd_Sql_Select, add)
 {
 	zarg_rd args(execute_data);
@@ -310,6 +352,7 @@ ZEND_METHOD(Wcd_Sql_Select, getSqlParams)
 
 	obj_rc result = sobj->getSqlParams();
 
+
 	result.move_zv(return_value);
 }
 
@@ -322,6 +365,15 @@ ZEND_METHOD(Wcd_Sql_Select, icols)
 	obj_ptr result = sobj->iCols();
 
 	result.return_zv(return_value);
+}
+
+ZEND_METHOD(Wcd_Sql_Select, wipe)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	Select* sobj = zval_toc<Select>(ZEND_THIS);
+
+	sobj->wipe();
 }
 
 ZEND_METHOD(Wcd_Sql_Select, setAlias)

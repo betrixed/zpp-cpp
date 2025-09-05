@@ -226,13 +226,16 @@ namespace wcd {
 	{
 		if (db_.ok())
 		{
-			return db_;
+			return IServer::connect(db_);
 		}
 
-		db_ = IServer::connect(val_ptr());
-
-		return db_;
-
+		obj_rc dbobj = IServer::connect(val_ptr());
+		if (dbobj.ok())
+		{
+			IDriver* driver = zobj_toc<IDriver>(dbobj);
+			db_ = driver->getName();
+		}
+		return dbobj;
 	}
 
 	str_rc 
@@ -482,7 +485,7 @@ namespace wcd {
 				htab_rw options(options_mgr);
 
 				str_rc key_name = pkey.zstr();
-				key_name = key_name.to_lower();
+				key_name.lowercase();
 
 				val_ptr key_def = cdefs.get(key_name);
 				obj_rc  pkeydef = key_def.zobject();
@@ -1103,7 +1106,8 @@ namespace wcd {
 
 	void Model::setConnect(obj_ptr db)
 	{
-		db_ = db;
+		IDriver* driver = zobj_toc<IDriver>(db);
+		db_ = driver->getName();
 	}
 
 	void 

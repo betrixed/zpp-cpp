@@ -117,6 +117,8 @@ void sql_strtab::init()
 
 	getTableModel = "getTableModel";
 	getColDefs = "getColDefs";
+	get_str = "get";
+	weakref_create = "weakreference::create";
 
 	param_list = "param_list";
 	connect = "connect";
@@ -149,7 +151,8 @@ void sql_strtab::init()
 	valuesdefault = "valuesdefault";
 	eager_load = "eager_load";
 	statement = "stmt";
-	
+	db_name = "dbname";
+
 	opstr = {
 		{"="}, {"<>"}, {">"}, {"<"}, {">="}, {"<="}, {op_like},
         {op_and}, {op_or}, {is_null}, {is_not_null}, {str_space}
@@ -248,6 +251,13 @@ JoinExpr::construct(val_ptr leftval, val_ptr rightval, int op, int nextop)
 	rattr_ = rightval;
 	op_ = op;
 	nextop_ = nextop;
+}
+
+void
+JoinExpr::destruct()
+{
+	lattr_.set_null();
+	rattr_.set_null();
 }
 
 str_rc 
@@ -439,7 +449,51 @@ IColumns::debug_info(htab_rw di)
 void 
 IColumns::construct(obj_ptr owner)
 {
-	owner_ = owner;
+	setOwner(owner);
+}
+
+obj_rc 
+IColumns::getOwner()
+{
+	obj_rc ref;
+
+	if (owner_.ok())
+	{
+		val_rc wref = owner_.call(SQSTR.get_str);
+		if (wref.isObject())
+		{
+			ref = std::move(wref);
+		}
+	}
+	return ref;
+}
+
+void IColumns::setOwner(obj_ptr obj)
+{
+	//showobj("Set Owner", obj);
+
+	if (obj.ok())
+	{
+		val_rc result;
+		val_rc fnstr(SQSTR.weakref_create);
+		zval   arg = {0};
+		ZVAL_OBJ(&arg, obj);
+		if (callable_fn(result, fnstr, 1, &arg))
+		{
+			owner_ = std::move(result);
+		}
+		//showobj("WeakReference ??", owner_);
+	}
+	else {
+		owner_.init();
+	}
+}
+
+void
+IColumns::destruct()
+{
+	//showobj("IColumns owner", owner_);
+	owner_.init();
 }
 
 void IColumns::clear()
@@ -518,8 +572,11 @@ TableAttr::splitDot(str_ptr s)
 	}
 	else {
 		result = s;
+
 	}
+	//showmem("SplitDot result", result);
 	return result;
+
 }
 
 void 
@@ -527,6 +584,8 @@ TableAttr::construct(str_ptr t, str_ptr a)
 {
 	table_ = t;
 	attr_ = a;
+	//showstr("table_", table_);
+	//showstr("attr_", attr_);
 }
 
 void TableAttr::debug_info(htab_rw di)
@@ -583,6 +642,13 @@ TColumns::construct(str_ptr tname,  str_ptr talias,  val_ptr tcol)
 
 		this->setColAlias(tcol.zstr(), falseval);
 	}
+}
+
+void
+TColumns::destruct()
+{
+	//showstr("~TColumns ", name_);
+	IColumns::destruct();
 }
 
 val_rc
@@ -762,6 +828,14 @@ ZEND_METHOD(Wcd_Sql_JoinExpr, __construct)
 	cobj->construct(LAttr, RAttr, op, nextop);
 }
 
+ZEND_METHOD(Wcd_Sql_JoinExpr, __destruct)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+	JoinExpr* cobj = zval_toc<JoinExpr> (ZEND_THIS);
+	cobj->destruct();
+}
+
+
 ZEND_METHOD(Wcd_Sql_JoinExpr, getPartId)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
@@ -832,6 +906,13 @@ ZEND_METHOD(Wcd_Sql_IColumns, __construct)
 	}
 }
 
+ZEND_METHOD(Wcd_Sql_IColumns, __destruct)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+	IColumns* cobj = zval_toc<IColumns> (ZEND_THIS);
+	cobj->destruct();
+}
+
 ZEND_METHOD(Wcd_Sql_IColumns, getPartId)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
@@ -849,9 +930,10 @@ ZEND_METHOD(Wcd_Sql_IColumns, getOwner)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 	IColumns* cobj = zval_toc<IColumns> (ZEND_THIS);
-	obj_ptr obj = cobj->getOwner();
-	obj.return_zv(return_value);
+	obj_rc obj = cobj->getOwner();
+	obj.move_zv(return_value);
 }
+
 
 ZEND_METHOD(Wcd_Sql_IColumns, getColNames)
 {
@@ -901,6 +983,22 @@ ZEND_METHOD(Wcd_Sql_IColumns, setColAlias)
 	ZEND_PARSE_PARAMETERS_END();
 	IColumns* cobj = zval_toc<IColumns> (ZEND_THIS);
 	cobj->setColAlias(name,alias);
+}
+
+ZEND_METHOD(Wcd_Sql_IColumns, setOwner)
+{
+	zarg_rd args(execute_data);
+
+	obj_ptr owner;
+
+	args.obj_null(owner, args.need(1));
+
+	if (!args.throw_errors())
+	{
+		IColumns* cobj = zval_toc<IColumns> (ZEND_THIS);
+		cobj->setOwner(cobj);
+	}
+	
 }
 
 ZEND_METHOD(Wcd_Sql_IColumns, add)
@@ -1057,6 +1155,13 @@ ZEND_METHOD(Wcd_Sql_TColumns, __construct)
 
 	cobj->construct(tname,alias,tempval);
 
+}
+
+ZEND_METHOD(Wcd_Sql_TColumns, __destruct)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+	TColumns* cobj = zval_toc<TColumns> (ZEND_THIS);
+	cobj->destruct();
 }
 
 ZEND_METHOD(Wcd_Sql_TColumns, attr)

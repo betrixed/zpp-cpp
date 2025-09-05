@@ -47,6 +47,7 @@ namespace wcd {
 		IColumns* rightTable();
 
 		void construct(obj_ptr ltable, const obj_ptr rtable, int jtype=J_INNER);
+		void destruct();
 
 		void add(val_ptr lexp, val_ptr rexp, int jtype=J_INNER, int logic = JoinExpr::B_NULL);
 
@@ -79,6 +80,8 @@ namespace wcd {
 		static base_obj_mgr<JoinTables> omg;
 
 		static obj_rc rowSplit(htab_ptr row, htab_ptr rename);
+
+		void destruct();
 
 		void debug_info(htab_rw di) override;
 		
@@ -290,9 +293,11 @@ namespace wcd {
 		htab_rc	data_;
 		obj_rc  paramList_;
 		obj_rc	isql_;
-		obj_rc  db_;
+		str_rc  db_;
 
 		void addToArray(int key, val_ptr value);
+		obj_rc getDb();
+		IDriver& dbref();
 
 	public:
 		static base_obj_mgr<Bindings>  omg;
@@ -313,6 +318,8 @@ namespace wcd {
 		obj_ptr isql() {
 			return isql_;
 		}
+
+		
 
 		bool aliasSelect();
 
@@ -366,7 +373,7 @@ namespace wcd {
 
 		void unset(int key);
 
-		void wipe(int key = 0);
+		void wipe(int key = -1);
 	};
 
 	extern zend_class_entry* zintf_ce_Sql_IfSql;

@@ -244,7 +244,7 @@ class SchemaTest extends Asserts
         $bind = $builder->getBindings();
         
         $builder->table('test');
-        $builder->setFetch(IDriver::FETCH_OBJECT);
+        $con->setFetch(IDriver::FETCH_OBJECT);
         $builder->where('name', '=', 'ezDB');
         $result = $builder->get();
 

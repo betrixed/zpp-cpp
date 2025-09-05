@@ -37,33 +37,50 @@ void
 Operation::debug_info(htab_rw di)
 {
 	base_d::debug_info(di);
-	di.set(SQSTR.driver, db_);
+	di.set(SQSTR.db_name, db_name_);
+	di.set(SQSTR.driver, driver_);
 	di.set(SQSTR.join_tables, joiner_);
+}
+
+obj_ptr
+Operation::getDb()
+{
+	if (!driver_.ok())
+	{
+		//zend_printf("get Driver");
+		driver_ = IServer::connect(db_name_);
+		//showobj("Driver", driver_);
+	}
+	return driver_;
+}
+
+obj_ptr
+Operation::getBind()
+{
+	if (!bind_.ok())
+	{
+		IDriver& dv = driver();
+		bind_ = dv.newBindings();
+	}
+	return bind_;
 }
 
 void 
 Operation::construct(obj_ptr db)
 {
-	db_ = db;
+	IDriver* dv = zobj_toc<IDriver>(db);
 
-	IDriver& dr = driver();
-
-	bind_ = dr.newBindings();
-
-	obj_ptr self(vobj());
-	val_rc arg(bind_);
-	self.property(SQSTR.bind_key, arg);
-	wipe();
-
+	db_name_ = dv->getName();
 }
 
 void 
 Operation::destruct()
 {
-	joiner_.init();
-	db_.init();
 	bind_.init();
-
+	joiner_.init();
+	driver_.init();
+	db_name_.init();
+	
 }
 
 obj_rc 
@@ -75,8 +92,10 @@ Operation::addPrime(str_ptr table, str_ptr alias, htab_ptr cols)
 	val_rc tval(cols);
 	tcobj->construct(table, alias, tval);
 
-	JoinTables* jt = zobj_toc<JoinTables>(joiner_);
-	jt->setPrime(tc);
+	//showobj("tcobj", tc);
+
+	JoinTables& jt = joiner();
+	jt.setPrime(tc);
 	return tc;
 }
 
@@ -97,6 +116,14 @@ Operation::firstRow(int fetch)
 obj_ptr
 Operation::getJoiner()
 {
+	if (!joiner_.ok())
+	{
+		joiner_ = JoinTables::omg.new_zobj();
+		Bindings& bind = bindings();
+
+		val_rc arg(joiner_);
+		bind.set(ISql::SQL_FROM, arg);
+	}
 	return joiner_;
 }
 
@@ -120,7 +147,9 @@ obj_rc
 Operation::getSqlParams()
 {
 	Bindings& bind = bindings();
-	return bind.getParamList();
+	obj_rc plist = bind.getParamList();
+	this->wipe();
+	return plist;
 }
 
 /* this throws away the ParamList object
@@ -131,6 +160,7 @@ Operation::getSql()
 	str_rc sql;
 
 	obj_ptr self(vobj());
+	// call via php method name
 	obj_rc pobj = self.call(SQSTR.get_sql_params);
 	if (pobj.ok())
 	{
@@ -143,15 +173,14 @@ Operation::getSql()
 void 
 Operation::limit(val_ptr ct, val_ptr start)
 {
-	Bindings& bind = *zobj_toc<Bindings>(bind_);
-
+	Bindings& bind = bindings();
 	bind.limit(ct, start);
 }
 
 void 
 Operation::orderBy(val_ptr column, bool descend)
 {
-	Bindings& bind = *zobj_toc<Bindings>(bind_);
+	Bindings& bind = bindings();
 	bind.orderBy(column, descend);
 }
 
@@ -166,7 +195,8 @@ Operation::prepare(int fetch)
 	obj_rc s = Simple::omg.new_zobj();
 
 	Simple* sobj = zobj_toc<Simple>(s);
-	sobj->construct(db_, fetch);
+	sobj->construct(getDb(), fetch);
+
 	//showobj("Simple", s);
 
 	Bindings& bind = bindings();
@@ -181,7 +211,8 @@ Operation::prepare(int fetch)
 
 	obj_rc pobj_mgr = self.call(SQSTR.get_sql_params);
 	ParamList* plist = zobj_toc<ParamList>(pobj_mgr);
-	bind.wipe();
+
+	this->wipe();
 
 	str_rc sql = plist->getSql();
 	//showstr("prepare", sql);
@@ -239,19 +270,15 @@ Operation::where(val_ptr lattr, val_ptr rattr, int op, int blogic)
 void 
 Operation::wipe()
 {
-	Bindings& bind = bindings();
-	bind.wipe();
-
-	joiner_ = JoinTables::omg.new_zobj();
-	
-	if (joiner_.ok())
+	if (bind_.ok())
 	{
-		val_rc a1(joiner_);
-		
-		bind.set(ISql::SQL_FROM, a1);
-		
+		Bindings& bind = *zobj_toc<Bindings>(bind_);
+		bind.wipe();
+		bind_.init();
 	}
-	
+	//showobj("Joiner init", joiner_);
+	joiner_.init();
+	driver_.init();
 }
 
 
@@ -329,6 +356,28 @@ ZEND_METHOD(Wcd_Sql_Operation, firstRow)
 	}
 }
 
+ZEND_METHOD(Wcd_Sql_Operation, getBind)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	Operation* cobj = zval_toc<Operation>(ZEND_THIS);
+
+	obj_ptr result = cobj->getBind();
+
+	result.return_zv(return_value);
+}
+
+ZEND_METHOD(Wcd_Sql_Operation, getDb)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	Operation* cobj = zval_toc<Operation>(ZEND_THIS);
+
+	obj_ptr result = cobj->getDb();
+
+	result.return_zv(return_value);
+}
+
 ZEND_METHOD(Wcd_Sql_Operation, getJoiner)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
@@ -340,16 +389,6 @@ ZEND_METHOD(Wcd_Sql_Operation, getJoiner)
 	result.return_zv(return_value);
 }
 
-ZEND_METHOD(Wcd_Sql_Operation, getParams)
-{
-	ZEND_PARSE_PARAMETERS_NONE();
-
-	Operation* cobj = zval_toc<Operation>(ZEND_THIS);
-	
-	htab_ptr result = cobj->getParams();
-
-	result.return_zv(return_value);
-}
 
 ZEND_METHOD(Wcd_Sql_Operation, getRows)
 {

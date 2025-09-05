@@ -40,7 +40,7 @@ class Bindings
 
     public function update(string $column, mixed $value) : void {}
 
-    public function wipe(int $ix = 0) : void {}
+    public function wipe(int $ix = -1) : void {}
 
     public function select(object $prop) : mixed {}
 

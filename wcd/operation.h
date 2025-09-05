@@ -20,18 +20,23 @@ namespace wcd {
 
 class Operation : public base_d {
 protected:
-	obj_rc db_;
+
+	str_rc db_name_;
+	obj_rc driver_;
 	obj_rc bind_;
 	obj_rc joiner_;
 	
 	void genSql();
 
 	Bindings& bindings() {
-		return *zobj_toc<Bindings>(bind_);
+		obj_ptr bind = getBind();
+		return *zobj_toc<Bindings>(bind);
 	}
 
-	IDriver& driver() {
-		return *zobj_toc<IDriver>(db_);
+	IDriver& driver()
+	{
+		obj_ptr db = getDb();
+		return  *zobj_toc<IDriver>(db);
 	}
 	
 	JoinTables& joiner() 
@@ -52,10 +57,11 @@ public:
 
 	val_rc firstRow(int fetch);
 	
+	obj_ptr getBind();
+
+	obj_ptr getDb();
 
 	obj_ptr getJoiner();
-
-	htab_ptr getParams();
 
 	val_rc getRows(int fetch = IDriver::FETCH_ASSOC);
 
@@ -75,7 +81,7 @@ public:
 
 	void where(val_ptr lattr, val_ptr rattr, int op, int blogic);
 
-	void wipe();
+	virtual void wipe();
 };
 
 }; //namespace

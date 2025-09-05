@@ -188,6 +188,15 @@ JoinInfo::construct(obj_ptr ltable, obj_ptr rtable, int jtype)
 	this->joinType_ = jtype;
 }
 
+void
+JoinInfo::destruct()
+{
+	//showobj("Left table - ", leftTable_);
+	//showobj("Right table - ", rightTable_);
+	leftTable_.init();
+	rightTable_.init();
+}
+
 IColumns* 
 JoinInfo::leftTable()
 {
@@ -282,6 +291,18 @@ JoinTables::debug_info(htab_rw di)
 	di.set(SQSTR.model, model_);
 
 }
+
+void
+JoinTables::destruct()
+{
+	prime_.init();
+	//showarray("joins_", joins_);
+	htab_rw hw(joins_);
+
+	hw.clear();
+	byAlias_.init();
+}
+
 void 
 JoinTables::setPrime(obj_ptr obj)
 {
@@ -1603,6 +1624,12 @@ ZEND_METHOD(Wcd_Sql_JoinInfo, __construct)
 	cobj->construct(left_tab, right_tab, jtype);
 }
 
+ZEND_METHOD(Wcd_Sql_JoinInfo, __destruct)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+	JoinInfo* cobj = zval_toc<JoinInfo>(ZEND_THIS);
+	cobj->destruct();
+}
 /*  public function add(
             mixed $lattr,   
             mixed $rattr = null, 
@@ -1662,7 +1689,15 @@ ZEND_METHOD(Wcd_Sql_JoinInfo, toJoinType)
 
 }
 
+ZEND_METHOD(Wcd_Sql_JoinTables, __destruct)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+	JoinTables* cobj = zval_toc<JoinTables>(ZEND_THIS);
+	cobj->destruct();
+
+}
 /* public function addJoin(JoinInfo $ji) : JoinInfo {} */
+
 ZEND_METHOD(Wcd_Sql_JoinTables, addJoin)
 {
 	zval* jinfo;

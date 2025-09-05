@@ -74,7 +74,7 @@ int zs_cmp_ci(zend_string* a, zend_string* b)
 
 // call php for its well-tested complex implementation
 str_rc
-str_ptr::strtr(const char* from, const char* to) const
+str_ptr::strtr(const char* from, const char* to)
 {
 	str_temp fstr(from);
 	str_temp tstr(to);
@@ -297,7 +297,7 @@ str_ptr::find(char c, size_t pos) const
 }
 
 str_rc 
-str_ptr::uncamel(const char* sep) const
+str_ptr::uncamel(const char* sep)
 {
 	str_rc result;	
 	if (!s) {
@@ -378,43 +378,32 @@ str_ptr::contains(str_ptr needle)
 	return strpos(needle) >= 0;
 }
 
-str_rc
-str_ptr::to_lower() const
+str_rc 
+str_ptr::to_lower() 
 {
 	str_rc result;
 	if (s)
 	{
-		zend_string* p = zend_string_tolower(s);
-		result.adopt(p);	
+		str_rc temp(s);
+		temp.lowercase();
+		result = std::move(temp);
 	}
 	return result;
 }
 
 str_rc 
-str_ptr::to_upper() const
+str_ptr::to_upper() 
 {
 	str_rc result;
 	if (s)
 	{
-		zend_string* p = zend_string_toupper(s);
-		result.adopt(p);	
+		str_rc temp(s);
+		temp.uppercase();
+		result = std::move(temp);
 	}
 	return result;
 }
 
-str_rc
-str_ptr::trim(const char* what, int mode) const
-{
-	str_rc result;
-
-	size_t slen = what ? strlen(what) : 0;
-
-	if (s) {
-		zend_string* p = php_trim(s, what, slen, mode);
-		result.adopt(p);
-	}
-	return result;
-}
 
 int
 str_ptr::strpos(str_ptr needle)

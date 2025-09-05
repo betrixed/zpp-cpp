@@ -35,11 +35,11 @@ using namespace zpp;
 
 	void IBuild::construct(val_ptr driver)
 	{
-		driver_ = driver;
-		IDriver* db = zobj_toc<IDriver>(driver_);
+		obj_rc dbobj(driver.zobject());
+		IDriver* db = zobj_toc<IDriver>(dbobj);
 
+		driver_ = db->getName();
 		bindings_ = db->newBindings();
-		
 		isql_ = db->isql_;
 
 	}
@@ -156,16 +156,22 @@ using namespace zpp;
 		return *(zobj_toc<Bindings>(bindings_));
 	}
 
+	obj_rc
+	IBuild::getDb()
+	{
+		return IServer::connect(driver_);
+	}
+
 	IDriver& 
 	IBuild::idb()
 	{
-		return *(zobj_toc<IDriver>(driver_));
+		obj_rc db = IServer::connect(driver_);
+		return *(zobj_toc<IDriver>(db));
 	}
 
 	void IBuild::destruct()
 	{
 		isql_.init();
-		driver_.init();
 		bindings_.init();
 		model_.init();
 	}
@@ -263,7 +269,7 @@ using namespace zpp;
 
 			int fetch = db.setFetch(IDriver::FETCH_ASSOC);
 
-			result = RunSql::op(driver_, sql, values, (rets.size() > 0));
+			result = RunSql::op(getDb(), sql, values, (rets.size() > 0));
 
 			//showmem("result", result);
 			db.setFetch(fetch);
@@ -354,7 +360,7 @@ using namespace zpp;
 			str_ptr sql(plist->getSql());
 			htab_ptr params(plist->getValues());
 
-			result = RunSql::op(driver_, sql, params);
+			result = RunSql::op(getDb(), sql, params);
 		}
 
 		return result;
@@ -449,7 +455,7 @@ using namespace zpp;
 	    htab_ptr params(plist->getValues());
 	    //showdata("delete params", params);
 
-	    return RunSql::op(driver_, sql, params);
+	    return RunSql::op(getDb(), sql, params);
 
 
 	}
@@ -628,7 +634,7 @@ using namespace zpp;
 
 		str_ptr sql = isql().seqLastValue(seqname);
 
-		val_rc result = RunSql::op(driver_, sql);
+		val_rc result = RunSql::op(getDb(), sql);
 
 		if (result.ok()) {
 			htab_ptr rows(result);
@@ -645,14 +651,6 @@ using namespace zpp;
 	{
 		Bindings& bind = bindings();
 		bind.update(cname, value);	
-	}
-
-	int
-	IBuild::setFetch(int mode)
-	{
-		IDriver& db = idb();
-
-		return db.setFetch(mode);
 	}
 
 	void 
@@ -695,7 +693,7 @@ using namespace zpp;
 	IBuild::setSeqValue(int value, htab_ptr data)
 	{
 		str_rc sql = isql().setSeqValue(value, data);
-		val_rc result = RunSql::op(driver_, sql);
+		val_rc result = RunSql::op(getDb(), sql);
 
 		if (result.isArray()) {
 			htab_ptr rows(result);
@@ -853,7 +851,7 @@ ZEND_METHOD(Wcd_IBuild, getDriver)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 	IBuild* cobj = zval_toc<IBuild>(ZEND_THIS);
-	obj_rc result = cobj->driver_;
+	obj_rc result = cobj->getDb();
 	result.move_zv(return_value);
 }
 

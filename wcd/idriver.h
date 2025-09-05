@@ -128,12 +128,14 @@ namespace wcd {
 		
 		IConfig* 	icfg_c();
 		ISql*       isql_c();
+
+		str_ptr getName() const { return name_; }
 	protected:
 
 
 
 		obj_rc    icfg_;
-		str_rc    cfg_name_;
+		str_rc    name_;
 		str_rc	  db_name_;
 		obj_rc    isql_;
 

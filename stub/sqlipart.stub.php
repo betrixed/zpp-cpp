@@ -85,6 +85,8 @@ class JoinExpr implements IfSqlPart {
         int $op = JoinExpr::OP_EQ, 
         int $jop = JoinExpr::B_AND );
 
+    public function __destruct() {}
+
     public function getPartId() : int {}
 
     public static function opstr(int $op) : string {}
@@ -96,7 +98,11 @@ class JoinExpr implements IfSqlPart {
 
 class IColumns implements IfSqlPart {
 
-    public function __construct(Object|null $owner);
+    public function __construct(?Object $owner);
+
+    public function __destruct() {}
+
+    public function setOwner(?Object $owner) : ?Object {}
 
     public function getPartId() : int {}
 
@@ -148,6 +154,8 @@ class TColumns extends IColumns implements IfSqlPart {
         string|null $alias=null, 
         array|string|null $tcol=null);
 
+    public function __destruct() {}
+
     public function attr(string $name) : TableAttr;
 
     public function getPartId() : int {}
@@ -177,6 +185,9 @@ class JoinInfo {
     const int J_FULL = 3;
 
     public function __construct(IColumns $LTable, ?IColumns $RTable, int $jtype = JoinInfo::J_INNER);
+
+    public function __destruct();
+
     public function add(
             mixed $lattr,   
             mixed $rattr = null, 
@@ -188,6 +199,8 @@ class JoinInfo {
 };
 
 class JoinTables {
+
+    public function __destruct() {}
 
     public function addJoin(JoinInfo $ji) : JoinInfo {}
 

@@ -7,6 +7,8 @@ use Wcc\{
 
 };
 
+use Wcd\Sql\Select;
+
 use function Wcc\debug_zpp_dump;
 
 use Wcc\Cache\SFile;
@@ -143,4 +145,13 @@ $run->runObject(new BaseModelTest());
 
 $run->runObject(new SqlGenerateTest());
 
+
 Services::service('die');
+
+$remains = Select::getAlive();
+/*
+if (!empty($remains)) {
+    echo debug_zpp_dump($remains);
+} */
+
+echo "\nremains = " . count($remains) . PHP_EOL;

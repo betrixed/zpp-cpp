@@ -153,7 +153,7 @@ IConfig::assign(htab_ptr cfg)
 val_rc 
 IConfig::getValue(str_ptr key, bool required, val_ptr ifnot)
 {
-	val_rc result = cfg_.get(key);
+	val_ptr result = cfg_.get(key);
 	if (!result.isNull())
 	{
 		return result;
@@ -304,6 +304,7 @@ IConfig::stringVal(str_ptr key)
 		return str_rc::empty_str();
 	}
 	else {
+		//showmem("StringVal result", result);
 		return result;
 	}
 }
@@ -311,13 +312,16 @@ IConfig::stringVal(str_ptr key)
 str_rc
 IConfig::getDriverName()
 {
-	return stringVal(ICS.k_driver);
+	str_rc result = stringVal(ICS.k_driver);
+	return result;
 }
 
 str_rc
 IConfig::getDriverClass()
 {
 	str_rc dname = getDriverName();
+	//showstr("Driver Name", dname);
+
 	obj_ptr servers = Services::getOne(IServer::omg.class_name());
 	IServer* sv = zobj_toc<IServer>(servers);
 	return sv->getDriverClass(dname);

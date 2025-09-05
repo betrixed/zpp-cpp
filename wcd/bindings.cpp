@@ -32,6 +32,20 @@ void Bindings::debug_info(htab_rw di)
 	di.set(SQSTR.connect, db_);
 }
 
+obj_rc 
+Bindings::getDb()
+{
+	return  IServer::connect(db_);
+}
+
+IDriver& 
+Bindings::dbref()
+{
+	obj_rc db = IServer::connect(db_);
+	//TODO: ?? check for exception
+	return *zobj_toc<IDriver>(db);
+}
+
 void 
 Bindings::addarray(int key, htab_ptr value)
 {
@@ -107,7 +121,7 @@ void
 Bindings::construct(obj_ptr sql, obj_ptr connect)
 {
 	isql_ = sql;
-	db_ = connect;
+	db_ = connect.property(SQSTR.namekey);
 }
 
 JoinTables* 
@@ -140,8 +154,9 @@ Bindings::getParamList()
 		return paramList_;
 	}
 
-	IDriver* db = zobj_toc<IDriver>(db_);
-	paramList_ = db->newParamList();
+	IDriver& db = dbref();
+
+	paramList_ = db.newParamList();
 	return paramList_;
 }
 
@@ -337,7 +352,8 @@ Bindings::columnAlias(obj_ptr tcolobj)
 
 		val_rc tname(tcol->getName());
 
-		obj_rc model = db_.call(SQSTR.getTableModel, tname);
+		obj_rc db = getDb();
+		obj_rc model = db.call(SQSTR.getTableModel, tname);
 
 		htab_ptr columns = model.call(SQSTR.getColDefs);
 
@@ -423,13 +439,12 @@ void Bindings::wipe(int key)
 {
 	htab_rw hw(data_);
 
-	if (key == 0)
+	if (key >= 0)
 	{
-		hw.clear();
-		//showarray("after wipe", data_);
+		hw.unset(key);
 	}
 	else {
-		hw.unset(key);
+		hw.clear();
 	}
 
 	paramList_.init();
@@ -555,20 +570,20 @@ Bindings::select()
 	int old_fetch = -1;
 	int fetch_as = fetch_z.ok() ? fetch_z.zlong() : -1;
 
-	IDriver* db = zobj_toc<IDriver>(db_);
+
+	IDriver& db = dbref();
 	if (fetch_as >= 0)
 	{
-		old_fetch = db->setFetch(fetch_as);
+		old_fetch = db.setFetch(fetch_as);
 	}
 
 	ParamList* pobj = zobj_toc<ParamList>(plist);
 
-	val_rc rows = RunSql::op(db_, pobj->getSql(), pobj->getValues(), true);
-
+	val_rc rows = RunSql::op(obj_ptr(db.vobj()), pobj->getSql(), pobj->getValues(), true);
 
 	if (fetch_as != old_fetch)
 	{
-		db->setFetch(old_fetch);
+		db.setFetch(old_fetch);
 	}
 	str_rc mclass;
 
@@ -958,7 +973,7 @@ ZEND_METHOD(Wcd_Sql_Bindings, update)
 /* public function wipe(int $ix = 0) : void {}*/
 ZEND_METHOD(Wcd_Sql_Bindings, wipe)
 {
-	zend_long key = 0;
+	zend_long key = -1;
 	ZEND_PARSE_PARAMETERS_START(0,1)
 	Z_PARAM_OPTIONAL
 	Z_PARAM_LONG(key)

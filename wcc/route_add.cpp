@@ -246,13 +246,11 @@ void RouteAdd::ready(Route* route)
 
 		for(wk.start(segs); wk.ok(); wk.next())
 		{
-			str_ptr useg = value.zstr();
+			str_ptr seg = value.zstr();
 
-			str_rc seg = useg.trim();
-			useg = seg;
+			str_rc useg = seg.trim();	
+			useg.lowercase();
 
-			seg = useg.to_lower();
-			useg = seg;
 
 			int firstchar = useg.data()[0];
 
