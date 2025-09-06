@@ -404,25 +404,29 @@ JoinExpr::toOperator(str_ptr s)
 		//error
 		break;
 	case 'L':
-		upw = ps.to_upper();
+		upw = ps;
+		upw.uppercase();
 		if (upw.vstr() == SQSTR.op_like.vstr())
 			return OP_LIKE;
 		//error
 		break;
 	case 'A':
-		upw = ps.to_upper();
+		upw = ps;
+		upw.uppercase();
 		if (upw.vstr() == SQSTR.op_and.vstr())
 			return OP_AND;
 		//error
 		break;
 	case 'O':
-		upw = ps.to_upper();
+		upw = ps;
+		upw.uppercase();
 		if (upw.vstr() == SQSTR.op_or.vstr())
 			return OP_OR;
 		//error
 		break;
 	case 'I':
-		upw = ps.to_upper();
+		upw = ps;
+		upw.uppercase();
 		if (upw.vstr() == SQSTR.is_null.vstr())
 			return OP_ISNULL;
 		if (upw.vstr() == SQSTR.is_not_null.vstr())

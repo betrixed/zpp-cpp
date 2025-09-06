@@ -78,11 +78,6 @@ namespace zpp {
 
 		str_rc substr(int offset, int len=INT_MAX) const;
 
-		
-		str_rc to_lower();
-
-		str_rc to_upper();
-
 		str_rc uncamel(const char* sep = nullptr);
 
 		str_rc strtr(const char* from, const char* to);

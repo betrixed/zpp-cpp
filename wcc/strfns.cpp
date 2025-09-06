@@ -195,6 +195,21 @@ static val_rc global_ref(const char* gname)
 PHP_FUNCTION(Wcc_test_wcc)
 {	
 	/**
+	 * 
+	 */
+
+	str_temp start("START");
+	showstr("start", start);
+
+	str_rc copy(start);
+	showstr("copy",copy);
+
+	copy = copy.to_lower();
+	showstr("lower",copy);
+		
+	copy = copy.to_lower();
+	showstr("lower2",copy);	
+	/**
 
 	preg regex("/\\G([-A-Z_a-z0-9]+)/u");
 	str_temp    test("[[fruit.blah]]");

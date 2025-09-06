@@ -52,6 +52,7 @@ $loader = new Loader("", $finder);
 $loader->register();
 
 
+
 class EmptyTest {
     public array $empty = [];
     public $key;

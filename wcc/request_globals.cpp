@@ -396,7 +396,8 @@ RequestGlobals::resolveAuthorizationHeaders()
 		}
 		if ( auth_hdr.size() ) 
 		{
-			str_rc lc_auth_hdr = auth_hdr.to_lower();
+			str_rc lc_auth_hdr(auth_hdr);
+			lc_auth_hdr.lowercase();
 
 			str_ptr test(lc_auth_hdr);
 
@@ -761,12 +762,13 @@ static str_rc make_key(str_ptr endstr)
 {
 	// turn into "words"
 	str_rc trans = zpp::strtr(endstr, RQit.underscore, RQit.blank_key);
-	trans = str_ptr(trans).to_lower();
 
-	trans = zpp::ucwords(trans);
+	trans.lowercase();
+
+	str_rc trans2(zpp::ucwords(trans));
 
 	// join the words
-	trans = zpp::strtr(trans,RQit.blank_key, RQit.hyphen_key);
+	trans = zpp::strtr(trans2, RQit.blank_key, RQit.hyphen_key);
 	return trans;
 } 
 
@@ -792,7 +794,7 @@ RequestGlobals::getHeaders()
 		val_ptr value(wk.value());
 		val_ptr name(wk.key());
 
-		str_ptr np(name.zstr());
+		str_rc np(name.zstr());
 
 		if (np.starts_with(RQit.HTTP_))
 		{
@@ -801,7 +803,8 @@ RequestGlobals::getHeaders()
 			continue;
 		}
 
-		np = np.to_upper();
+		np.uppercase();
+
 		if (content.has_key(np))
 		{
 			str_rc hkey = make_key(np);
@@ -910,9 +913,7 @@ int RequestGlobals::getMethod()
 	{
 		htab_ptr req(Hmap::map_htab(request_));
 
-		str_rc override = getHeader(RQit.X_HTTP_METHOD_OVERRIDE);
-
-		str_ptr test(override);
+		str_rc test = getHeader(RQit.X_HTTP_METHOD_OVERRIDE);
 
 		if (!test.size() && methodOverride_)
 		{
@@ -920,9 +921,8 @@ int RequestGlobals::getMethod()
 		}
 		if (test.size())
 		{
-			override = test.to_upper();
-
-			verb_ = Route::getVerbInt(override);
+			test.uppercase();
+			verb_ = Route::getVerbInt(test);
 		}
 	}
 	return verb_;

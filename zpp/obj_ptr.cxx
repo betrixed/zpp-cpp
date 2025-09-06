@@ -494,10 +494,9 @@ obj_ptr::method_exists(str_ptr method) const
         return false;
 
     zend_class_entry* ce = obj_->ce;
-    str_ptr method_name(method);
-    str_rc lcname_str = method_name.to_lower();
+    str_rc lcname_str(method);
+    lcname_str.lowercase();
 
-   
     zend_function*  func = (zend_function*) zend_hash_find_ptr(&ce->function_table, lcname_str);
 
     if (func) {

@@ -324,8 +324,9 @@ Route::methods(int verbs, str_ptr pattern, val_ptr target, int ajax)
 zend_long //static
 Route::getVerbInt(str_ptr sverb)
 {
-	str_rc verbstr = sverb.to_upper();
-
+	str_rc verbstr(sverb);
+	verbstr.uppercase();
+	
 	htab_ptr hr(&route_data.route_verbs);
 
 	val_ptr test;

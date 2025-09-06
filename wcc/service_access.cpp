@@ -159,7 +159,9 @@ ServiceAccess::nullService(str_ptr name)
 
 	str_buf buf;
 
-	buf << "get" << name.to_lower();
+	str_rc temp(name);
+	temp.lowercase();
+	buf << "get" << temp;
 
 	str_rc method = buf.zstr();
 

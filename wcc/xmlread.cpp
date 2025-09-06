@@ -793,9 +793,8 @@ void Wcc_XmlRead::setBool(str_ptr key)
 
 	data.toString();
 
-	str_ptr su(val_ptr(data).zstr());
-	str_rc  lcstr = su.to_lower();
-	su = lcstr;
+	str_rc su(val_ptr(data).zstr());
+	su.lowercase();
 
 	auto c = su.vstr();
 

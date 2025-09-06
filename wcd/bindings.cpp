@@ -68,7 +68,9 @@ Bindings::addstr(int key, str_ptr tname)
 	{
 		str_rc talias;
 
-		str_rc  lcase = tname.to_lower();
+		str_rc  lcase(tname);
+		lcase.lowercase();
+		
 		int pos = lcase.find(std::string_view(" as "),0);
 		if (pos >= 0)
 		{

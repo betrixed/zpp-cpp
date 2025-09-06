@@ -121,6 +121,10 @@ namespace zpp {
 
 	    void  lowercase();
 	    void  uppercase();
+
+		str_rc to_lower();
+		str_rc to_upper();
+
 	    void  trim(const char* what = (const char*) nullptr, int mode = LRTRIM);
 	};
 

@@ -331,7 +331,9 @@ namespace wcd {
 
 		IBuild* ib = zobj_toc<IBuild>(build);
 
-		str_rc mlower = method.to_lower();
+		str_rc mlower(method);
+		mlower.lowercase();
+		
 		str_ptr nullstr;
 		val_rc  nullval;
 		if (mlower.starts_with(MIS.find_first)) 

@@ -99,12 +99,13 @@ str_rc::operator=(str_temp&& rc)
 {
 
     zend_string* p = rc.s;
+    showstr("operator= str_temp&&", p);
     if (p != s)
     {
     	lose();
     }
     s = p;
-    //showstr("operator= str_temp&&", s);
+    
     rc.s = nullptr;
     return *this;
 }
@@ -114,6 +115,7 @@ str_rc::operator=(str_rc&& rc)
 {
 
     zend_string* p = rc.s;
+    showstr("operator= str_rc&&", p);
     if (p != s)
     {
     	lose();
@@ -127,6 +129,7 @@ str_rc::operator=(str_rc&& rc)
 const str_rc& 
 str_rc::operator=(const str_ptr& rc)
 {
+	showstr("operator= str_ptr&", rc.s);
 	bind(rc.s);
 	return *this;
 }
@@ -140,6 +143,7 @@ str_rc::operator=(const str_ptr& rc)
 const str_rc& 
 str_rc::operator=(zend_string* rc)
 {
+	showstr("operator= zend_string*", rc);
 	bind(rc);
 	return *this;
 }
@@ -162,6 +166,7 @@ str_rc::operator=(val_rc&& rc)
 const str_rc& 
 str_rc::operator=(const str_rc& rc)
 {
+	showstr("operator= str_rc&", rc.s);
 	bind(rc.s);
 	//showstr("operator= &", s);
 	return *this;
@@ -182,6 +187,35 @@ void str_rc::adopt(zend_string* rc)
 		lose();
 		s = rc;
 	}
+}
+
+
+str_rc 
+str_rc::to_lower() 
+{
+	str_rc result;
+	if (s)
+	{
+		str_rc temp(std::move(*this));
+		temp.lowercase();
+		result = std::move(temp);
+	}
+	return result;
+}
+
+str_rc 
+str_rc::to_upper() 
+{
+	str_rc result;
+	if (s)
+	{
+		zend_string* p = s;
+		str_rc temp(p);
+		lose();
+		temp.uppercase();
+		result = std::move(temp);
+	}
+	return result;
 }
 
 void

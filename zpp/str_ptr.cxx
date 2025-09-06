@@ -378,33 +378,6 @@ str_ptr::contains(str_ptr needle)
 	return strpos(needle) >= 0;
 }
 
-str_rc 
-str_ptr::to_lower() 
-{
-	str_rc result;
-	if (s)
-	{
-		str_rc temp(s);
-		temp.lowercase();
-		result = std::move(temp);
-	}
-	return result;
-}
-
-str_rc 
-str_ptr::to_upper() 
-{
-	str_rc result;
-	if (s)
-	{
-		str_rc temp(s);
-		temp.uppercase();
-		result = std::move(temp);
-	}
-	return result;
-}
-
-
 int
 str_ptr::strpos(str_ptr needle)
 {
