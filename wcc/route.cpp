@@ -366,38 +366,28 @@ class param_replace : public preg_callback {
 public:
 	htab_rc params_;
 
-	param_replace(htab_ptr plist) : params_(plist)
+	param_replace(const char* expr, htab_ptr plist)
+	   : preg_callback(expr), params_(plist)
 	{			
 	}
 
-	virtual bool get_replace(htab_ptr captures)
+	bool callback() override
 	{
-		htab_ptr plist(params_);
-		//showdata("params_", plist);
-
-		if (call_count_ < plist.size())
+		int ix = call_ct_;
+		//showdata("\ncaptures_",captures_);
+		if ((int)captures_.size() > ix)
 		{
-			str_ptr key = captures.get(int(0));
-			//showstr("key", key);
-
-			//TODO: remove check for case of ordered list of values??
-			val_ptr value = plist.get(call_count_);
-			//showmem("value 1", value);
-			if (value.isNull())
+			htab_ptr key_expr = captures_.get(int(ix));
+			str_ptr  key = key_expr.get(int(0));
+			//showstr("key ", key);
+			if (key.ok())
 			{
-				value = plist.get(key);
-				//showmem("value 2", value);
-			}
-			if (!value.isNull())
-			{
-				replace_ = value.to_zstr();
-
+				val_ptr vp = params_.get(key);
+				replace_ = vp.to_zstr();
 				return true;
 			}
-			else {
-				return false;
-			}
 		}
+		replace_.init();
 		return false;
 	}
 };
@@ -413,12 +403,10 @@ Route::routeUrl(htab_ptr pvalues)
 		result = pattern_;
 	}
 	else {
+		
+		param_replace pcb(R"x(#\{([a-zA-Z][\w\d]*)\}#)x", pvalues);
 
-		preg url_params( R"x(#\{([a-zA-Z][\w\d]*)\}#)x" );
-
-		param_replace replace(pvalues);
-
-		result = url_params.replace_callback(replace, pattern_);
+		result = pcb.replace(pattern_);
 	}
 	return result;
 

@@ -232,35 +232,48 @@ preg::matches(str_ptr subject, zend_long offset)
 
 
 str_rc
-preg::replace_callback(preg_callback& callback, str_ptr subject)
+preg_callback::replace(str_ptr subject)
 {
-	flags_ = preg::OFFSET_CAPTURE;
-	global_ = true;
+	//showstr("replace ", subject);
+
+	regexp_.setFlags(preg::OFFSET_CAPTURE);
+	regexp_.setGlobal(true);
+
 	str_rc  result;
 
-	if (matches(subject) > 0) {
-		htab_ptr  rtab_1(result_);
-		str_ptr  subj(subject);
+	int ct = regexp_.matches(subject);
 
-		std::string_view strview = subj.vstr();
+	//zend_printf("\nmatched %d\n", ct);
+	if (ct > 0) 
+	{
+		val_rc& test = regexp_.results();
+
+
+		all_list_ = test.zarray();
+
+		//showdata("all_list_", all_list_);
+
+		wholes_ = all_list_.get(int(0));
+		captures_ = all_list_.get(int(1));
+
+
+		std::string_view strview = subject.vstr();
+
 		str_buf ss;
 
-		val_rc rlist = rtab_1.get(zend_long(0));
-		htab_ptr replace(rlist);
-
 		uint ipos = 0;
-		size_t ct = replace.size();
+		ct = wholes_.size();
 
-		for(size_t i = 0; i < ct; i++)
+		for(call_ct_ = 0; call_ct_ < ct; call_ct_++)
 		{
-			htab_ptr cexp(replace.get(i));
+			htab_ptr w1 = wholes_.get(int(call_ct_));
 
-			val_ptr slen2 = cexp.get(zend_long(0));
-			val_ptr soffset2 = cexp.get(zend_long(1));
+ 			str_ptr ctext    = w1.get(zend_long(0));
+			val_ptr coffset  = w1.get(zend_long(1));
 
-			size_t slen = slen2.size();
-			size_t soffset = soffset2.zlong();
-			// prior text first
+			size_t slen =    ctext.size();
+			size_t soffset = coffset.zlong();
+		// add prior text first
 
 			int prior_len = soffset - ipos;
 			if (prior_len > 0)
@@ -268,30 +281,31 @@ preg::replace_callback(preg_callback& callback, str_ptr subject)
 				ss << strview.substr(ipos, soffset - ipos);
 				ipos += prior_len;
 			}
-			
-			if (callback.get_replace(cexp))
+		
+			/* Work with callback to create replace_ string 
+			   from the current match data.
+			*/
+			if (this->callback())
 			{
-				ss << str_ptr(callback.replace_);
-				callback.call_count_++;
+				ss << str_ptr(replace_);
 			}
-			else {
-				break;
-			}
-					
+				
 			// callback to get replace;
 
 			ipos = soffset + slen;
-		}
-		if (ipos < strview.size()) {
-			ss << strview.substr(ipos);
-		}
 
+			// add remaining unmatched text
+			if (ipos < strview.size()) {
+				ss << strview.substr(ipos);
+			}
+		}
 		if (ss.size() == 0)
 		{
 			//zend_printf("empty replace result\n");
 			return result;
 		}
-		result.adopt(ss.zstr());
+
+		result = ss.zstr();
 		return result;
 	}
 	result = subject;

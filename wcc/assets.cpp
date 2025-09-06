@@ -317,13 +317,14 @@ Assets::markAdd(str_ptr item)
 	return true;
 }
 
+// create file at wpath, by topy from
+// one of listed source folders
 bool
 Assets::source_path(str_ptr wpath)
 {
 
 	str_rc srcfile = findSourceFile(wpath);
 
-	showstr("srcfile", srcfile);
 	bool exists = (srcfile.size()) ? true : false;
 	if (exists)
 	{

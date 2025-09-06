@@ -30,22 +30,6 @@ namespace zpp {
 
 	
 
-	class preg_callback {
-	protected:
-		size_t 	  call_count_;
-		str_rc    replace_; // set this in get_replace
-	public:
-		preg_callback() : call_count_(0)
-		{
-		}
-
-		virtual ~preg_callback() 
-		{ }
-
-		virtual bool get_replace(htab_ptr captures) = 0; 
-
-		friend class preg;
-	};
 
 
 	class preg {
@@ -77,7 +61,7 @@ namespace zpp {
 
 		~preg();
 
-		int 	   matches(str_ptr subject, zend_long offset = 0);
+		int 	 matches(str_ptr subject, zend_long offset = 0);
 		val_rc   splits(str_ptr data, int limit = -1);
 
 		void init(str_ptr expr, int flags = 0, bool global = false);
@@ -92,7 +76,7 @@ namespace zpp {
 			flags_ = f;
 		}
 
-		str_rc  replace_callback(preg_callback& callback, str_ptr subject);
+		
 		
 		str_rc  replace(const char* rv, str_ptr subject);
 
@@ -107,6 +91,37 @@ namespace zpp {
 		//htab_ptr  array() { return htab_ptr(result_); }
 
 	};
+
+	class preg_callback {
+	protected:
+		preg      regexp_;
+
+		htab_ptr  all_list_;	
+		// update before each callback
+
+		htab_ptr  wholes_;  
+		htab_ptr  captures_;
+		// set by callback
+		str_rc    replace_; 
+		// update after callback
+		int 	  call_ct_;
+		
+	public:
+		preg_callback(const char* expr) 
+		    : regexp_(expr)
+		{
+		}
+
+		virtual ~preg_callback() 
+		{ }
+
+		virtual str_rc replace(str_ptr subject);
+
+		virtual bool callback() = 0; 
+
+		friend class preg;
+	};
+
 
 	val_rc preg_split(const char* sv, str_ptr data, int limit, int flags);
 

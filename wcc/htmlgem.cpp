@@ -1409,15 +1409,20 @@ HtmlGem::datetime(val_ptr pset)
 	str_rc  temp;
 
 	htab_rc pscopy(pset.zarray());
+	//showarray("pscopy", pscopy);
+	
 	htab_rw ps(pscopy);
 
 	str_rc idstr = ensureIdValue(ps);
+	//showstr("idstr", idstr);
 
 	str_buf dateid;
 
 	dateid << "pick" << idstr;
 
 	str_rc dateid_str = dateid.zstr();
+	//showstr("dateid_str", dateid_str);
+
 
 	out << '<' << HTG.divkey; // level 
 
