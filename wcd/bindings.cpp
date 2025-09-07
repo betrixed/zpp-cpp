@@ -29,19 +29,24 @@ void Bindings::debug_info(htab_rw di)
 	di.set(SQSTR.data_key, data_);
 	di.set(SQSTR.param_list, paramList_);
 	di.set(SQSTR.isql, isql_);
+	di.set(SQSTR.db_name, dbname_);
 	di.set(SQSTR.connect, db_);
 }
 
 obj_rc 
 Bindings::getDb()
 {
-	return  IServer::connect(db_);
+	if (!db_.ok())
+	{
+		db_ = IServer::connect(dbname_);
+	}
+	return  db_;
 }
 
 IDriver& 
 Bindings::dbref()
 {
-	obj_rc db = IServer::connect(db_);
+	obj_rc db = getDb();
 	//TODO: ?? check for exception
 	return *zobj_toc<IDriver>(db);
 }
@@ -123,7 +128,15 @@ void
 Bindings::construct(obj_ptr sql, obj_ptr connect)
 {
 	isql_ = sql;
-	db_ = connect.property(SQSTR.namekey);
+	dbname_ = connect.property(SQSTR.namekey);
+}
+
+
+void 
+Bindings::destruct()
+{
+	wipe();
+	isql_.init();
 }
 
 JoinTables* 
@@ -446,9 +459,10 @@ void Bindings::wipe(int key)
 		hw.unset(key);
 	}
 	else {
+
 		hw.clear();
 	}
-
+	db_.init();
 	paramList_.init();
 }
 
@@ -773,6 +787,14 @@ ZEND_METHOD(Wcd_Sql_Bindings, __construct)
 
 	Bindings* cobj = zval_toc<Bindings>(ZEND_THIS);
 	cobj->construct(gen,connect);
+}
+
+/* public function aliasSelect(): bool {} */
+ZEND_METHOD(Wcd_Sql_Bindings, __destruct)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+	Bindings* cobj = zval_toc<Bindings>(ZEND_THIS);
+	cobj->destruct();
 }
 
 /* public function add(int $key, mixed $value) : void {} */

@@ -10,6 +10,8 @@ class Bindings
 {
     public function __construct(ISql $gen, \Wcd\IDriver $connect);
 
+    public function __destruct();
+
     public function add(int $key, mixed $value) : void {}
 
     public function addJoinData(array $data) : bool {}

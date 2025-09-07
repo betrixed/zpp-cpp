@@ -293,7 +293,8 @@ namespace wcd {
 		htab_rc	data_;
 		obj_rc  paramList_;
 		obj_rc	isql_;
-		str_rc  db_;
+		obj_rc  db_;
+		str_rc  dbname_;
 
 		void addToArray(int key, val_ptr value);
 		obj_rc getDb();
@@ -305,6 +306,7 @@ namespace wcd {
 		void debug_info(htab_rw di) override;
 
 		void construct(obj_ptr sql, obj_ptr connect);
+		void destruct();
 
 		void add(int key, val_ptr value);
 

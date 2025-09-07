@@ -255,7 +255,7 @@ Simple::update(htab_ptr values)
 using namespace wcd;
 using namespace zpp;
 
-ZEND_METHOD(Wcd_Sql_Simple, __construct)
+ZEND_METHOD(Wcd_Simple, __construct)
 {
 	zarg_rd args(execute_data);
 
@@ -279,7 +279,7 @@ ZEND_METHOD(Wcd_Sql_Simple, __construct)
 
 }
 
-ZEND_METHOD(Wcd_Sql_Simple, __destruct)
+ZEND_METHOD(Wcd_Simple, __destruct)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
@@ -288,7 +288,7 @@ ZEND_METHOD(Wcd_Sql_Simple, __destruct)
 	sobj->destruct();
 }
 
-ZEND_METHOD(Wcd_Sql_Simple, arrayMap)
+ZEND_METHOD(Wcd_Simple, arrayMap)
 {
 	zarg_rd args(execute_data);
 
@@ -313,7 +313,7 @@ ZEND_METHOD(Wcd_Sql_Simple, arrayMap)
 	result.move_zv(return_value);
 }
 
-ZEND_METHOD(Wcd_Sql_Simple, arraySet)
+ZEND_METHOD(Wcd_Simple, arraySet)
 {
 	zarg_rd args(execute_data);
 
@@ -336,7 +336,7 @@ ZEND_METHOD(Wcd_Sql_Simple, arraySet)
 	result.move_zv(return_value);
 }
 
-ZEND_METHOD(Wcd_Sql_Simple, bind)
+ZEND_METHOD(Wcd_Simple, bind)
 {
 	zarg_rd args(execute_data);
 
@@ -351,7 +351,7 @@ ZEND_METHOD(Wcd_Sql_Simple, bind)
 	result.move_zv(return_value);
 }
 
-ZEND_METHOD(Wcd_Sql_Simple, exec)
+ZEND_METHOD(Wcd_Simple, exec)
 {
 	zarg_rd args(execute_data);
 
@@ -372,7 +372,7 @@ ZEND_METHOD(Wcd_Sql_Simple, exec)
 	result.move_zv(return_value);
 }
 
-ZEND_METHOD(Wcd_Sql_Simple, firstRow)
+ZEND_METHOD(Wcd_Simple, firstRow)
 {
 	zarg_rd args(execute_data);
 
@@ -393,7 +393,7 @@ ZEND_METHOD(Wcd_Sql_Simple, firstRow)
 	result.move_zv(return_value);
 }
 
-ZEND_METHOD(Wcd_Sql_Simple, getRows)
+ZEND_METHOD(Wcd_Simple, getRows)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
@@ -404,7 +404,7 @@ ZEND_METHOD(Wcd_Sql_Simple, getRows)
 	result.move_zv(return_value);
 }
 
-ZEND_METHOD(Wcd_Sql_Simple, getSchemaName)
+ZEND_METHOD(Wcd_Simple, getSchemaName)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
@@ -415,7 +415,7 @@ ZEND_METHOD(Wcd_Sql_Simple, getSchemaName)
 	result.move_zv(return_value);
 }
 
-ZEND_METHOD(Wcd_Sql_Simple, insert)
+ZEND_METHOD(Wcd_Simple, insert)
 {
 	zarg_rd args(execute_data);
 
@@ -435,7 +435,7 @@ ZEND_METHOD(Wcd_Sql_Simple, insert)
 	result.move_zv(return_value);
 }
 
-ZEND_METHOD(Wcd_Sql_Simple, prepare)
+ZEND_METHOD(Wcd_Simple, prepare)
 {
 	zarg_rd args(execute_data);
 
@@ -454,7 +454,7 @@ ZEND_METHOD(Wcd_Sql_Simple, prepare)
 	result.move_zv(return_value);
 }
 
-ZEND_METHOD(Wcd_Sql_Simple, quoteName)
+ZEND_METHOD(Wcd_Simple, quoteName)
 {
 	zarg_rd args(execute_data);
 
@@ -473,7 +473,7 @@ ZEND_METHOD(Wcd_Sql_Simple, quoteName)
 	result.move_zv(return_value);
 }
 
-ZEND_METHOD(Wcd_Sql_Simple, returnsValues)
+ZEND_METHOD(Wcd_Simple, returnsValues)
 {
 	zarg_rd args(execute_data);
 
@@ -489,7 +489,7 @@ ZEND_METHOD(Wcd_Sql_Simple, returnsValues)
 	}
 }
 
-ZEND_METHOD(Wcd_Sql_Simple, run)
+ZEND_METHOD(Wcd_Simple, run)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 	Simple* sobj = zval_toc<Simple>(ZEND_THIS);
@@ -497,7 +497,7 @@ ZEND_METHOD(Wcd_Sql_Simple, run)
 	result.move_zv(return_value);
 }
 
-ZEND_METHOD(Wcd_Sql_Simple, setValues)
+ZEND_METHOD(Wcd_Simple, setValues)
 {
 	zarg_rd args(execute_data);
 	htab_ptr values;
@@ -512,7 +512,7 @@ ZEND_METHOD(Wcd_Sql_Simple, setValues)
 	}
 }
 
-ZEND_METHOD(Wcd_Sql_Simple, update)
+ZEND_METHOD(Wcd_Simple, update)
 {
 	zarg_rd args(execute_data);
 	htab_ptr values;
@@ -532,7 +532,7 @@ ZEND_METHOD(Wcd_Sql_Simple, update)
 
 PHP_MINIT_FUNCTION(Wcd_Simple_reg)
 {
-	Simple::omg.classEntry(register_class_Wcd_Sql_Simple());
+	Simple::omg.classEntry(register_class_Wcd_Simple());
 	return SUCCESS;
 }
 
