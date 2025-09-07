@@ -20,7 +20,7 @@ $dref =& $data;
 
 $d2ref =& $data;
 
-test_wcc($dref);
+test_wcc();
 
 $data["first key"] = 100;
 

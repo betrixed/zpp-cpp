@@ -33,6 +33,12 @@ namespace zpp {
 
 	public:
 
+		enum {
+			LTRIM = 1,
+			RTRIM = 2,
+			LRTRIM = 3
+		};
+
 		static void try_addref(zend_string* zs)
 		{
 			if (zs->gc.u.type_info & IS_STR_INTERNED)
@@ -125,7 +131,9 @@ namespace zpp {
 		str_rc to_lower();
 		str_rc to_upper();
 
-	    void  trim(const char* what = (const char*) nullptr, int mode = LRTRIM);
+		str_rc trim(const char* what = (const char*) nullptr, int mode = LRTRIM);
+
+	    void  trim_self(const char* what = (const char*) nullptr, int mode = LRTRIM);
 	};
 
 	class str_empty : public str_rc

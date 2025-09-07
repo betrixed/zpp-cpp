@@ -119,10 +119,14 @@ str_rc::operator=(str_rc&& rc)
     if (p != s)
     {
     	lose();
+    	s = p;
     }
-    s = p;
+    else {
+    	try_decref(s); // 1 instance disappears
+    }
     //showstr("operator= &&", s);
     rc.s = nullptr;
+
     return *this;
 }
 
@@ -189,16 +193,13 @@ void str_rc::adopt(zend_string* rc)
 	}
 }
 
-
 str_rc 
 str_rc::to_lower() 
 {
-	str_rc result;
-	if (s)
+	str_rc result(*this);
+	if (result.ok())
 	{
-		str_rc temp(std::move(*this));
-		temp.lowercase();
-		result = std::move(temp);
+		result.lowercase();
 	}
 	return result;
 }
@@ -206,14 +207,10 @@ str_rc::to_lower()
 str_rc 
 str_rc::to_upper() 
 {
-	str_rc result;
-	if (s)
+	str_rc result(*this);
+	if (result.ok())
 	{
-		zend_string* p = s;
-		str_rc temp(p);
-		lose();
-		temp.uppercase();
-		result = std::move(temp);
+		result.uppercase();
 	}
 	return result;
 }
@@ -223,30 +220,44 @@ str_rc::lowercase()
 {
 	if (s)
 	{
+		// always added reference count
 		zend_string* p = zend_string_tolower(s);
+		if (p == s)
+		{
+			try_decref(p); // undo
+		}
+		else {
+			adopt(p); 
+		}
+	}
+}
+
+str_rc
+str_rc::trim(const char* what, int mode) 
+{
+	str_rc result(*this);
+
+	if (result.ok())
+	{
+		result.trim_self(what, mode);
+	}
+	return result;
+}
+
+void
+str_rc::trim_self(const char* what, int mode) 
+{
+	if (s)
+	{
+		size_t slen = what ? strlen(what) : 0;
+		zend_string* p = php_trim(s, what, slen, mode);
+		showstr("php_trim", p);
 		if (p == s)
 		{
 			try_decref(p);
 		}
 		else {
 			adopt(p);
-		}
-	}
-}
-
-void
-str_rc::trim(const char* what, int mode) 
-{
-	if (s)
-	{
-		size_t slen = what ? strlen(what) : 0;
-		zend_string* p = php_trim(s, what, slen, mode);
-		if (p == s)
-		{
-			try_decref(p);
-		}
-		else {
-			bind(p);
 		}
 	}
 }
@@ -262,7 +273,7 @@ str_rc::uppercase()
 			try_decref(p);
 		}
 		else {
-			bind(p);
+			adopt(p);
 		}
 	}
 }

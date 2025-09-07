@@ -305,4 +305,4 @@ function init_globals() : void {}
 
 function str_intern(string $s) : string {}
 
-function test_wcc(mixed& $test) : mixed {} 
+function test_wcc() : mixed {} 

@@ -197,7 +197,7 @@ PHP_FUNCTION(Wcc_test_wcc)
 	/**
 	 * 
 	 */
-
+#ifdef DEBUG_EXTRA
 	str_temp start("START");
 	showstr("start", start);
 
@@ -209,6 +209,20 @@ PHP_FUNCTION(Wcc_test_wcc)
 		
 	copy = copy.to_lower();
 	showstr("lower2",copy);	
+
+	str_temp test_trim("  __ TRIM ME ___ ");
+	showstr("test_trim", test_trim);
+
+	str_rc tt_copy(test_trim);
+	showstr("tt_copy",tt_copy);
+
+	tt_copy = tt_copy.trim();
+	showstr("trim-1",tt_copy);
+
+	tt_copy = tt_copy.trim();
+	showstr("trim-2",tt_copy);
+
+#endif
 	/**
 
 	preg regex("/\\G([-A-Z_a-z0-9]+)/u");

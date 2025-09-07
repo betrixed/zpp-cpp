@@ -28,12 +28,6 @@ namespace zpp {
 
 		static const char* empty;
 
-		enum {
-			LTRIM = 1,
-			RTRIM = 2,
-			LRTRIM = 3
-		};
-
 		str_ptr() : s( (zend_string*) nullptr) {}
 
 	    str_ptr(zend_string* p)
