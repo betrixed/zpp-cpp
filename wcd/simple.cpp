@@ -439,19 +439,19 @@ ZEND_METHOD(Wcd_Simple, prepare)
 {
 	zarg_rd args(execute_data);
 
-	htab_ptr values;
+	str_rc sql;
 
-	args.zarray(values, args.need(1));
+	args.zstring(sql, args.need(1));
 
-	val_rc result;
+	bool result = false;
 
 	if(!args.throw_errors())
 	{
 		Simple* sobj = zval_toc<Simple>(ZEND_THIS);
 
-		result = sobj->insert(values);
+		result = sobj->prepare(sql);
 	}
-	result.move_zv(return_value);
+	RETURN_BOOL(result);
 }
 
 ZEND_METHOD(Wcd_Simple, quoteName)
