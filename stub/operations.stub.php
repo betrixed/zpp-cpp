@@ -29,7 +29,7 @@ class Operation {
 
 	public function getSqlParams() : ParamList {}
 
-	public function limit(mixed $ct, int $start = 0) : void {}
+	public function limit(mixed $ct, mixed $start = null) : void {}
 
 	public function orderBy(mixed $column, bool $descend = false) : void {}
 

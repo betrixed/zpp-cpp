@@ -85,8 +85,7 @@ ServiceAccess::construct(val_ptr services_obj)
 	arg = services_;
 	self.property(SAdata.services, arg);
 
-	obj_ptr caller (this);
-	caller.call(SAdata.init_access);
+	self.call(SAdata.init_access);
 }
 
 void ServiceAccess::destruct()

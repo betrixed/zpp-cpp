@@ -94,19 +94,19 @@ RouteAdd::addRoutes(htab_ptr list, str_ptr prefix, str_ptr module)
 			module_name_.init();
 		}
 	}
-	showstr("module_name_", module_name_);
+	//showstr("module_name_", module_name_);
 	htab_walk wk;
 	auto value = wk.value();
-	showobj("RouteSet", route_set_);
+	//showobj("RouteSet", route_set_);
 
 	RouteSet* rs = zobj_toc<RouteSet>(route_set_);
 
-	showdata("list", list);
+	//showdata("list", list);
 	for(wk.start(list); wk.ok(); wk.next())
 	{
 		obj_ptr route(value.zobject());
 
-		showobj("route", route);
+		//showobj("route", route);
 
 		Route* r = zobj_toc<Route>(route);
 
@@ -118,7 +118,7 @@ RouteAdd::addRoutes(htab_ptr list, str_ptr prefix, str_ptr module)
 		}
 		rs->addRoute(value);
 	}
-	zend_printf("Routes added\n" );
+	//zend_printf("Routes added\n" );
 }
 
 
