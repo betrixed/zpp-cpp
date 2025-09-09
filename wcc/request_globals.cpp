@@ -562,7 +562,7 @@ void RequestGlobals::construct()
 		request_ = Hmap::newFromArray(gval);
 	}
 	else {
-		request_ = Hmap::new_hmap();
+		request_ = get_
 	}
 
 	post_ = Hmap::newFromArray(htab_rc::get_global(RQit.G_POST));
@@ -573,6 +573,7 @@ void RequestGlobals::construct()
 	spoof_ = false;
 	methodOverride_ = false;
 	
+	/*
 	Hmap* rmap = zobj_toc<Hmap>(request_);
 
 	if (rmap->count()==0)
@@ -584,6 +585,7 @@ void RequestGlobals::construct()
 			rmap->addArray(gmap);
 		}
 	}
+	*/
 	
 }
 
