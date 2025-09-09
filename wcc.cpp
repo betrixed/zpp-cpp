@@ -49,7 +49,7 @@ extern "C" {
 };
 
 
-#define DEBUG_EXTRA
+//#define DEBUG_EXTRA
 
 #include "zpp/base.cpp"
 #include "zpp/show_zpp.cpp"

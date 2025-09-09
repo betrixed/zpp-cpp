@@ -52,7 +52,7 @@ str_rc::bind(zend_string* rc)
     }
     else if (s) 
     {
-    	showstr("Error bind same", s);
+    	//showstr("Error bind same", s);
     }
 }
 
@@ -252,7 +252,7 @@ str_rc::trim_self(const char* what, int mode)
 	{
 		size_t slen = what ? strlen(what) : 0;
 		zend_string* p = php_trim(s, what, slen, mode);
-		showstr("php_trim", p);
+		//showstr("php_trim", p);
 		if (p == s)
 		{
 			try_decref(p);
