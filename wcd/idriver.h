@@ -45,9 +45,11 @@ namespace wcd {
 		
 		void bind(val_ptr stmt, htab_ptr params);
 		void close();
-		void closeStmt(val_ptr stmt);
+		
 		bool commit();
 		void connect();
+
+		bool closeStmt(val_ptr stmt);
 
 		str_rc escape(str_ptr value);
 		val_rc execute(val_ptr stmt, bool close = true, bool fetch = false);
@@ -143,7 +145,7 @@ namespace wcd {
 
 		int         ifetch_;
 		bool        logging_;
-		str_rc      lastsql_;
+		str_rc    	lastsql_;
 
 		htab_rc    table_models_;
 		obj_rc     schema_def_;

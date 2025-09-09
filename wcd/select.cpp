@@ -17,6 +17,14 @@ using namespace zpp;
 base_obj_mgr<Select> Select::omg;
 
 
+void Select::debug_info(htab_rw di)
+{
+	Operation::debug_info(di);
+
+	di.set(SQSTR.icolumns, icols_);
+	di.set(SQSTR.auto_alias, autoAlias_);
+}
+
 obj_rc 
 Select::getSqlParams()
 {
@@ -30,11 +38,16 @@ Select::getSqlParams()
 	obj_rc plist_mgr = isq->select(bind);
 	bind.wipe();
 
-	//showobj("getSQLParams", vobj());
-	ParamList* plist = zobj_toc<ParamList>(plist_mgr);
+	//showobj("\nSelect::ParamList ", plist_mgr);
+	//ParamList* pl = zobj_toc<ParamList>(plist_mgr);
+	//str_rc sql = pl->getSql();
+	//showstr("\nSql", sql);
 
-	str_rc sql = plist->getSql();
-	//showstr("sql: ", sql);
+	//htab_ptr values = pl->getValues();
+	//showdata("\nValues", values);
+
+	
+
 	return plist_mgr;
 }
 

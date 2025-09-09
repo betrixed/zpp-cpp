@@ -152,6 +152,12 @@ namespace wcd {
 		return rmgr;
 	}
 
+	// Make sure a call to construct will succeed
+	void
+	Model::construct()
+	{
+	}
+
 	void
 	Model::debug_info(htab_rw di)
 	{
@@ -1180,6 +1186,15 @@ namespace wcd {
 }; // namespace wcd
 
 using namespace wcd;
+
+ZEND_METHOD(Wcd_Model, __construct)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	Model* model = zval_toc<Model>(ZEND_THIS);
+
+	model->construct();
+}
 
 ZEND_METHOD(Wcd_Model, __destruct)
 {

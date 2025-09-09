@@ -187,6 +187,15 @@ htab_rc::operator=(const val_ptr& zptr)
 	return *this;
 }
 
+const htab_rc& 
+htab_rc::operator=(const htab_ptr& c)
+{
+	lose();
+	ht_ = c.ht_;
+	if (ht_) own();
+	return *this;
+}
+
 htab_rc& 
 htab_rc::operator=(val_rc&& zw)
 {

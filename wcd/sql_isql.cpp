@@ -88,6 +88,17 @@ ParamList::addParam(val_ptr value)
 	return paramStr((int) params_.size());
 }
 
+void 
+ParamList::setSql(str_ptr s)
+{
+	sql_ = s;
+}
+
+str_ptr 
+ParamList::getSql()
+{
+	return sql_;
+}
 
 void 
 ParamList::useOwnValues()
@@ -1216,14 +1227,17 @@ ISql::limit(ParamList* plist, htab_ptr ltab)
 	val_ptr offset_val = ltab.get(SQSTR.offset);
 
 	str_buf buf;
+	str_rc temp;
 
 	if (!limit_val.isNull())
 	{
-		buf << " LIMIT " << plist->paramLiteral(limit_val);
+		temp = plist->paramLiteral(limit_val);
+		buf << " LIMIT " << temp;
 	}
 	if (!offset_val.isNull())
 	{
-		buf << " OFFSET " << plist->paramLiteral(offset_val);
+		temp = plist->paramLiteral(offset_val);
+		buf << " OFFSET " << temp;
 	}
 
 	str_rc result = buf.zstr();
@@ -1239,6 +1253,7 @@ ISql::select(Bindings& bind)
 	JoinTables* from = bind.getJoinTables();
 
 	str_buf buf;
+	str_rc temp;
 
 	str_rc what = this->select_jt(bind, from);
 
@@ -1260,26 +1275,29 @@ ISql::select(Bindings& bind)
 	val_ptr where = bind.get(SQL_WHERE);
 	if (where.isArray())
 	{
-		buf << " WHERE" << this->where(bind, where.zarray());
+		temp = this->where(bind, where.zarray());
+		buf << " WHERE" << temp;
 	}
 
 	val_ptr order = bind.get(SQL_ORDER);
 	if (order.isArray())
 	{
-		buf << " ORDER BY" << this->orderBy(order.zarray());
+		temp = this->orderBy(order.zarray());
+		buf << " ORDER BY" << temp;
 	}
 
 	val_ptr limit = bind.get(SQL_LIMIT);
 
 	if (limit.isArray())
 	{
-		buf << this->limit(plist, limit.zarray());
+		str_rc temp = this->limit(plist, limit.zarray());
+		buf << temp;
 	}
 
 	str_rc sql = buf.zstr();
 
-
 	plist->setSql(sql);
+	//showstr("sql", sql);
 	plist->useOwnValues();
 	return pobj;
 }
@@ -2222,15 +2240,17 @@ ZEND_METHOD(Wcd_Sql_ParamList, setReturns)
 
 ZEND_METHOD(Wcd_Sql_ParamList, setSql)
 {
-	zend_string* sql;
+	str_ptr sql;
 
-	ZEND_PARSE_PARAMETERS_START(1,1)
-	Z_PARAM_STR(sql)
-	ZEND_PARSE_PARAMETERS_END();
+	zarg_rd args(execute_data);
 
-	ParamList* cobj = zval_toc<ParamList>(ZEND_THIS);
+	args.zstring(sql, args.need(1));
 
-	cobj->setSql(sql);
+	if (!args.throw_errors())
+	{
+		ParamList* cobj = zval_toc<ParamList>(ZEND_THIS);
+		cobj->setSql(sql);
+	}	
 }
 
 ZEND_METHOD(Wcd_Sql_ParamList, setValues)

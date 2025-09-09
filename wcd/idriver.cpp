@@ -322,11 +322,12 @@ IDriver::quoteName(str_ptr name)
 	return isql_c()->quoteName(name);
 }	
 
-void 
+bool 
 IDriver::closeStmt(val_ptr stmt)
 {
-	obj_ptr obj(stmt);
-	obj.call(DBS.close_cursor);
+	obj_ptr sobj(stmt);
+	val_rc result = sobj.call(DBS.close_cursor);
+	return result.isTrue();
 }
 
 
@@ -441,7 +442,9 @@ IDriver::execute(val_ptr stmt, bool close, bool fetch)
 	//showmem("pdo_result", pdo_result);
 	//showstr("lastsql", lastsql_);
 
-	if (pdo_result.isTrue())
+	bool good_result = pdo_result.isTrue();
+
+	if (good_result)
 	{
 		if (fetch) {
 			val_rc farg(ifetch_);
@@ -452,24 +455,17 @@ IDriver::execute(val_ptr stmt, bool close, bool fetch)
 			//showmem("RowCount", result);
 		}
 	}
-	if (close || pdo_result.isFalse())
+	if (close || !good_result)
 	{
-		/*if (pdo_result.isFalse())
-		{
-			zend_printf("pdo_result FALSE\n");
-		}
-		else {
-			zend_printf("CLOSE stmt\n");
-		}*/
-		sobj.call(DBS.close_cursor);
 		closeStmt(stmt);
+
 		if (isAutoCommit() && inTransaction())
 		{
 			commit();
 		}
 	}
 
-	if (pdo_result.isTrue()) {
+	if (good_result) {
 		if (fetch)
 		{
 			check_results(result);
@@ -478,7 +474,7 @@ IDriver::execute(val_ptr stmt, bool close, bool fetch)
 	else {
 		result.set_bool(false);
 	}
-	//showobj("End Execute ", sobj);
+
 	return result;
 }
 
@@ -659,6 +655,7 @@ htab_rc
 IDriver::getTableColumns(str_ptr tableName)
 {
 	obj_rc model_mgr = getTableModel(tableName);
+
 	Model* m = zobj_toc<Model>(model_mgr);
 	return m->getColDefs();
 }
@@ -698,6 +695,7 @@ IDriver::getTableModel(str_ptr tableName)
 	}
 	if (result.ok())
 	{
+		result.call(STAB.construct_key);
 		obj_ptr self(vobj());
 		Model* m = zobj_toc<Model>(result);
 		m->setConnect(self);
@@ -804,11 +802,18 @@ IDriver::param(int pno)
 val_rc 
 IDriver::prepare(str_ptr query)
 {
+	//zend_printf("IDriver::prepare-- ");
+
 	obj_rc pdo(handle());
 
-	lastsql_ = query;
+	//showstr("Last SQL", lastsql_);
+	// Duplicate, to try and resolve 
+	// mystery interaction with PDO that can occur 
+	// with reference count error for sql string
+	lastsql_ = query.duplicate();
 	val_rc sql(query);
 	val_rc stmt = pdo.call(DBS.prepare_fn, sql);
+	//showmem("IDriver prepare", stmt);
 	/** if (!stmt.ok())
 	{
 		zend_throw_error(zend_ce_error, "Prepare: %s", lastsql_.data());

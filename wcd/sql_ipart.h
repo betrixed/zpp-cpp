@@ -124,6 +124,10 @@ namespace wcd {
 		str_intern  statement;
 		str_intern  db_name;
 
+		str_intern  queryString;
+		str_intern  icolumns;
+		str_intern  auto_alias;
+		
 		std::vector<str_intern> opstr;
 		std::vector<str_intern> boolstr;
 		std::vector<str_intern> joinstr;

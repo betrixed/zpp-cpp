@@ -50,8 +50,9 @@ str_rc::bind(zend_string* rc)
         s = rc;
         own();
     }
-    else {
-    	//showstr("bind same", s);
+    else if (s) 
+    {
+    	showstr("Error bind same", s);
     }
 }
 
@@ -99,7 +100,7 @@ str_rc::operator=(str_temp&& rc)
 {
 
     zend_string* p = rc.s;
-    showstr("operator= str_temp&&", p);
+    //showstr("operator= str_temp&&", p);
     if (p != s)
     {
     	lose();
@@ -115,7 +116,7 @@ str_rc::operator=(str_rc&& rc)
 {
 
     zend_string* p = rc.s;
-    showstr("operator= str_rc&&", p);
+    //showstr("operator= str_rc&&", p);
     if (p != s)
     {
     	lose();
@@ -133,7 +134,7 @@ str_rc::operator=(str_rc&& rc)
 const str_rc& 
 str_rc::operator=(const str_ptr& rc)
 {
-	showstr("operator= str_ptr&", rc.s);
+	//showstr("operator= str_ptr&", rc.s);
 	bind(rc.s);
 	return *this;
 }
@@ -147,7 +148,7 @@ str_rc::operator=(const str_ptr& rc)
 const str_rc& 
 str_rc::operator=(zend_string* rc)
 {
-	showstr("operator= zend_string*", rc);
+	//showstr("operator= zend_string*", rc);
 	bind(rc);
 	return *this;
 }
@@ -170,7 +171,7 @@ str_rc::operator=(val_rc&& rc)
 const str_rc& 
 str_rc::operator=(const str_rc& rc)
 {
-	showstr("operator= str_rc&", rc.s);
+	//showstr("operator= str_rc&", rc.s);
 	bind(rc.s);
 	//showstr("operator= &", s);
 	return *this;
@@ -308,7 +309,6 @@ str_rc::size() const
 		return 0;
 	return ZSTR_LEN(s);
 }
-
 
 str_rc::~str_rc()
 {

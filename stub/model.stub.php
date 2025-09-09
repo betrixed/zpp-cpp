@@ -46,7 +46,8 @@ class Model implements IfCrud {
 
     public ?string $name = null;
     
-
+    public function __construct() {}
+    
     public static function KeyValue(array $key, array $value): ?IRow {}
 
     public static function WithValues(array $values) : ?IRow {}

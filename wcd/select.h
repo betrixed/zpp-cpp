@@ -32,6 +32,8 @@ protected:
 
 public:
 
+	virtual void debug_info(htab_rw di);
+	
 	static htab_rc getAlive();
 
 	static base_obj_mgr<Select> omg;

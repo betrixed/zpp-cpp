@@ -28,24 +28,29 @@ Simple::construct(obj_ptr db, int fetch)
 {
 	db_ = db;
 	fetch_ =  (fetch >= 0) ? fetch : IDriver::FETCH_ASSOC;
+	//showobj("\nSimple construct", vobj());
+
 }
 
 void 
 Simple::destruct()
 {
-	if (stmt_.ok() && db_.ok())
+	//showobj("\nSimple destruct", vobj());
+
+	if (stmt_.ok())
 	{
-		IDriver* db = zobj_toc<IDriver>(db_);
-		db->closeStmt(stmt_);
+		//showmem("set_null stmt", stmt_);
 		stmt_.set_null();
 	}
+	//showstr("Simple destruct sql_", sql_);
+	//sql_.init();
 }
 
 void 
 Simple::debug_info(htab_rw di)
 {	
 	di.set(SQSTR.driver, db_);
-	di.set(SQSTR.sql, sql_);
+	//di.set(SQSTR.sql, sql_);
 	di.set(SQSTR.fetch_key, fetch_);
 	di.set(SQSTR.values_key, values_);
 	di.set(SQSTR.returns_str, retval_);
@@ -57,36 +62,45 @@ Simple::arrayMap(str_ptr keycol,
 					str_ptr valcol, str_ptr table)
 {	
 	IDriver* db = zobj_toc<IDriver>(db_);
-
 	
 	ISql* isql = db->isql_c();
 
-	str_buf buf;
+	str_rc msql;
+	{
+		str_buf buf;
 
-	buf << "select " << isql->quoteName(keycol)
-	    << ", " << isql->quoteName(valcol)
-	    << " from " << isql->quoteName(table);
+		str_rc key1 = isql->quoteName(keycol);
+		str_rc val2 = isql->quoteName(valcol);
+		str_rc table3 = isql->quoteName(table);
+		buf << "select " << key1
+		    << ", " << val2
+		    << " from " << table3;
 	    
-	sql_ = buf.zstr();
+		msql = buf.zstr();
+	}
+
 	fetch_ = IDriver::FETCH_NUM;
 
-	htab_rc rows = this->arraySet(sql_);
+	htab_rc rows = this->arraySet(msql);
+	htab_rc result_mgr;
 
-	
-
-	val_rc result_mgr;
-	htab_rw result(result_mgr);
-
-	htab_walk wk;
-	auto row = wk.value();
-
-	for(wk.start(rows); wk.ok(); wk.next())
+	if (rows.size())
 	{
-		htab_ptr r(row);
-		val_ptr row0(r.get(int(0)));
-		val_ptr row1(r.get(int(1)));
+		htab_rw result(result_mgr);
 
-		result.set(row0, row1);
+		htab_walk wk;
+		auto row = wk.value();
+
+		for(wk.start(rows); wk.ok(); wk.next())
+		{
+			htab_ptr rd(row.zarray());
+			val_ptr row0(rd.get(int(0)));
+			val_ptr row1(rd.get(int(1)));
+
+			result.set(row0, row1);
+		}
+
+		//showdata("\narrayMap results", result_mgr);
 	}
 	return result_mgr;
 
@@ -95,15 +109,25 @@ Simple::arrayMap(str_ptr keycol,
 htab_rc 
 Simple::arraySet(str_ptr sql, htab_ptr params)
 {
+	htab_rc result;
 	IDriver* db = zobj_toc<IDriver>(db_);
-	sql_ = sql;
-	stmt_ = db->prepare(sql_);
-	autoclose_ = true;
-	if (params.size())
+
+	stmt_ = db->prepare(sql);
+
+
+	if (stmt_.ok())
 	{
-		setValues(params);
+		autoclose_ = false;
+		if (params.size())
+		{
+			setValues(params);
+		}
+		result = this->send(true);
+		db->closeStmt(stmt_);
+		stmt_.set_null();
+
 	}
-	return this->send(true);
+	return result;
 }
 
 str_rc 
@@ -143,6 +167,7 @@ Simple::firstrow(str_ptr sql, htab_ptr params)
 val_rc 
 Simple::getRows()
 {
+	autoclose_ = true;
 	return this->send(true);
 }
 
@@ -167,12 +192,15 @@ Simple::prepare(str_ptr sql)
 	if (stmt_.ok())
 	{
 		db->closeStmt(stmt_);
+		stmt_.set_null();
 	}
-	sql_ = sql;
-	stmt_ = db->prepare(sql_);
+
+	stmt_ = db->prepare(sql);
+
+
 	if (!stmt_.ok())
 	{
-		zend_throw_error(zend_ce_error, "Prepare failed for: %s", sql_.data());
+		zend_throw_error(zend_ce_error, "Prepare failed for: %s", sql.data());
 		return false;
 	}
 	return true;
@@ -218,15 +246,29 @@ Simple::send(bool retval)
 	{
 		fsave = db->setFetch(fetch_);
 	}
-	result = db->execute(stmt_, autoclose_, retval);
+	bool ac = autoclose_;
+	//showobj("call execute", vobj());
+
+	result = db->execute(stmt_, ac, retval);
+
 	if (retval)
 	{
 		db->setFetch(fsave);
 	}
-	if (autoclose_)
-	{
-		stmt_.set_null();
+	if (ac)
+	{	
+		if (stmt_.ok())
+		{
+			obj_ptr sobj(stmt_);
+			val_rc qstr = sobj.property(SQSTR.queryString);
+			stmt_.set_null();
+			//showmem("queryString", qstr);
+			
+		}
+		//showmem("autoclosed stmt", stmt_);
 	}
+	//showmem("Simple send result", result);
+
 	values_.reset();
 	return result;
 }

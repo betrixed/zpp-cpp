@@ -95,11 +95,14 @@ namespace zpp {
 	    	return (s);
 	    }
 
+
 	    bool isNull() const {
 	    	return !(s);
 	    }
 	    
 	    void init();
+	    
+	    
 	    
 	    size_t size() const;
 	    const char* data() const;

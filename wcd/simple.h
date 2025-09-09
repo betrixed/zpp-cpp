@@ -20,13 +20,13 @@ namespace wcd {
 
 class Simple : public base_d {
 protected:
+	val_rc stmt_;
+	htab_rc values_;
+	//str_rc sql_;
+	obj_rc db_;
 	bool autoclose_;
 	bool retval_;
 	int  fetch_;
-	htab_rc values_;
-	val_rc stmt_;
-	str_rc sql_;
-	obj_rc db_;
 
 protected:
 

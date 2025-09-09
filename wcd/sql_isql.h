@@ -147,7 +147,7 @@ namespace wcd {
 		/** SQL param values */
 		htab_rc    params_;
 		/** generated SQL */
-		str_rc    sql_;
+		str_rc     sql_;
 		/** values of params */
 		htab_rc    val_params_;
 		/** return values */
@@ -183,22 +183,15 @@ namespace wcd {
 		}
 
 		void setValues(htab_ptr vals)
-		{
-			
+		{	
 			val_params_ = vals;
 		}
 
 		void useOwnValues();
 
-		void setSql(str_ptr s)
-		{
-			sql_ = s;
-		}
+		void setSql(str_ptr s);
 
-		str_ptr getSql() 
-		{
-			return sql_;
-		}
+		str_ptr getSql();
 
 		htab_ptr getReturns() 
 		{

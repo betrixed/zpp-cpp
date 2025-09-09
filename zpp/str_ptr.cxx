@@ -486,6 +486,19 @@ str_ptr::empty_str()
 	return str_ptr(zend_empty_string);
 }
 
+str_rc 
+str_ptr::duplicate() const
+{
+	str_rc result;
+
+	if (s)
+	{
+		zend_string* dup = zend_string_init(ZSTR_VAL(s), ZSTR_LEN(s), 0);
+		result.adopt(dup);
+	}
+	return result;
+}
+
 str_rc  operator+(str_ptr lhs, str_ptr rhs)
 {
     str_buf buf;

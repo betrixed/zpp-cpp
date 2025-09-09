@@ -152,7 +152,10 @@ void sql_strtab::init()
 	eager_load = "eager_load";
 	statement = "stmt";
 	db_name = "dbname";
-
+	queryString = "queryString";
+	icolumns = "icols";
+	auto_alias = "auto_alias";
+	
 	opstr = {
 		{"="}, {"<>"}, {">"}, {"<"}, {">="}, {"<="}, {op_like},
         {op_and}, {op_or}, {is_null}, {is_not_null}, {str_space}

@@ -91,6 +91,8 @@ namespace zpp {
 		bool starts_with(str_ptr match) const;
 
 		bool ends_with(str_ptr match) const;
+
+		str_rc duplicate() const;
 		
 		const str_ptr& operator=(zval* rc);
 

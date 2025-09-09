@@ -81,7 +81,8 @@ namespace zpp {
 
         htab_rc(const htab_rc& c);
         const htab_rc& operator=(const htab_rc& c);
-
+        const htab_rc& operator=(const htab_ptr& c);
+        
         htab_rc(const val_rc& zw);
         const htab_rc& operator=(const val_rc& zw);
         const htab_rc& operator=(const val_ptr& zw);
