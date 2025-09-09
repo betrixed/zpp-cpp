@@ -572,6 +572,19 @@ void RequestGlobals::construct()
 	strictHost_ = true;
 	spoof_ = false;
 	methodOverride_ = false;
+	
+	Hmap* rmap = zobj_toc<Hmap>(request_);
+
+	if (rmap->count()==0)
+	{
+		htab_ptr gmap = Hmap::map_htab(get_);
+
+		if (gmap.size() > 0)
+		{
+			rmap->addArray(gmap);
+		}
+	}
+	
 }
 
 htab_rc 
