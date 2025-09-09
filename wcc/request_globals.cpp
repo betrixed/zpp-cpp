@@ -562,7 +562,7 @@ void RequestGlobals::construct()
 		request_ = Hmap::newFromArray(gval);
 	}
 	else {
-		request_ = get_
+		request_ = get_;
 	}
 
 	post_ = Hmap::newFromArray(htab_rc::get_global(RQit.G_POST));
