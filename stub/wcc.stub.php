@@ -295,6 +295,8 @@ class ServiceAccess {
 class Str {
 	static public function camel(string $s, string $seperate = "_"): string {}
 	static public function uncamel(string $s, string $seperate = "_"): string {}
+	static public function test_wcc() : void {}
+	static public function intern(string $s) : string {}
 };
 
 function debug_zpp_dump(mixed $val) : void {}
@@ -302,7 +304,3 @@ function debug_zpp_dump(mixed $val) : void {}
 function init_globals() : void {}
 
 //function route_extract_params(string $s): array {}
-
-function str_intern(string $s) : string {}
-
-function test_wcc() : mixed {} 

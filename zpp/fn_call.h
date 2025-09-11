@@ -87,8 +87,6 @@ namespace zpp {
         //! 
         zval* argsptr() { wipe(); return fci_.params; }
 
-        
-
 
     };
 
@@ -241,6 +239,7 @@ namespace zpp {
         str_intern  strtr;
         str_intern  ucwords;
         str_intern  stripslashes;
+        str_intern  array_pop;
 
         
         virtual void init();
@@ -259,6 +258,8 @@ namespace zpp {
 
     bool file_exists(str_ptr fname);
     
+    val_rc array_pop(val_rc& arrayref);
+
     str_rc preg_quote(str_ptr expr, str_ptr delimiter);
 
     str_rc file_get_contents(str_ptr path, int offset=0, size_t len=0);

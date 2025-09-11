@@ -18,6 +18,9 @@ namespace zpp {
 
 
 	public:
+
+		friend class ref_rc;
+		
 		static void try_decref(zend_object* ob);
 		static void try_addref(zend_object* ob);
 		

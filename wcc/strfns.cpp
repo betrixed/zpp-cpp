@@ -1,7 +1,9 @@
 #ifndef STRFNS_CPP
 #define STRFNS_CPP
 
+#ifndef WCC_STR_FNS_H
 #include "strfns.h"
+#endif
 
 #ifndef WCC_ARGINFO_H
 #define WCC_ARGINFO_H
@@ -132,7 +134,7 @@ phiz_camel(const zend_string *src, const zend_string *sep)
 	return result;
 }
 
-PHP_FUNCTION(Wcc_debug_zpp_dump) 
+ZEND_FUNCTION(Wcc_debug_zpp_dump) 
 {
 	zval* value;
 	ZEND_PARSE_PARAMETERS_START(1, 1)
@@ -172,7 +174,7 @@ ZEND_METHOD(Wcc_Str, camel) {
 	result.move_zv(return_value);
 }
 
-PHP_FUNCTION(Wcc_str_intern)
+ZEND_METHOD(Wcc_Str, intern)
 {
 	zend_string* src = NULL;
 	ZEND_PARSE_PARAMETERS_START(1, 1)
@@ -192,7 +194,7 @@ static val_rc global_ref(const char* gname)
 */
 
 // may have occasional real test code
-PHP_FUNCTION(Wcc_test_wcc)
+ZEND_METHOD(Wcc_Str, test_wcc)
 {	
 	/**
 	 * 
@@ -222,6 +224,32 @@ PHP_FUNCTION(Wcc_test_wcc)
 	tt_copy = tt_copy.trim();
 	showstr("trim-2",tt_copy);
 
+
+	// test reference pass for array_pop
+	val_rc list_mgr;
+
+	htab_rw list(list_mgr);
+
+	for(int i = 0; i < 10; i++)
+	{
+		list.push_back(i);
+	}
+
+	list_mgr.make_ref();
+	
+	val_rc lastval =array_pop(list_mgr);
+
+	showmem("after pop", list_mgr);
+
+	showmem("last value", lastval);
+	
+	// now test the htab_rw pop(), without making a reference
+
+	val_rc last2 = list.pop();
+
+	showarray("popped again", list);
+
+	showmem("2nd pop", last2);
 #endif
 	/**
 

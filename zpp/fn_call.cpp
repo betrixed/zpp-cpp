@@ -186,6 +186,17 @@ PathInfo::call(str_ptr path, int flags)
 }
 
 
+val_rc
+array_pop(val_rc& array_ref)
+{
+    fn_call_args<1> fn;
+
+    fn.set_fname(STAB.array_pop);
+    htab_rw hw(array_ref); // must be writable
+    array_ref.make_ref(); // must be reference
+    ZVAL_COPY_VALUE(fn.argsptr(), array_ref);
+    return fn.call_fn();
+}
 
 str_rc 
 preg_quote(str_ptr expr, str_ptr delimiter)
@@ -391,6 +402,7 @@ strtable::init()
     strtr = "strtr";
     ucwords = "ucwords";
     stripslashes = "stripslashes"; 
+    array_pop = "array_pop";
 
 
 

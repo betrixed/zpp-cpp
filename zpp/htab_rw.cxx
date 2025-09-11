@@ -368,31 +368,78 @@ void htab_rw::set(zend_long idx, zval* value)
 	}
 }
 
-void
+int
 htab_rw::merge(HashTable* src)
 {
-	//showarray("src ,merge", src);
-	htab_walk w;
-	auto key = w.key();
-	auto value = w.value();
-
-	for(w.start(src); w.ok(); w.next())
-	{
-		//showmem("Key: ", key);
-		//showmem("Value: ", value);
-		if (key.isLong())
-		{
-			 this->push_back(value);
-		}
-		else {
-			 this->set(key, value);
-		}
-	}
-
-	//showarray("post ,merge", ht_);
-	return;
+	return php_array_merge(ht_, src);
 }
 
+val_rc 
+htab_rw::pop()
+{
+	zval*     val = nullptr;
+	val_rc    result;
+	uint32_t  idx;
+	zend_long nextFree;
+
+	if (ht_) 
+	{
+		if (HT_IS_PACKED(ht_))
+		{
+			idx = ht_->nNumUsed;
+			while(idx > 0)
+			{
+				if (idx == 0)
+				{
+					goto BAIL_OUT;
+				}
+				idx--;
+				val = ht_->arPacked + idx;
+				if (Z_TYPE_P(val) != IS_UNDEF) {
+					break;
+				}
+			}
+			ZVAL_COPY_VALUE(result, val);
+			ZVAL_UNDEF(val);
+			nextFree = ht_->nNextFreeElement - 1;
+			if (idx == nextFree)
+			{
+				ht_->nNextFreeElement = nextFree;
+			}
+			zend_hash_packed_del_val(ht_, val);
+		}
+		else {
+			Bucket *p;
+			idx = ht_->nNumUsed;
+			while (1) 
+			{
+				if (idx == 0) {
+					goto BAIL_OUT;
+				}
+				idx--;
+				p = ht_->arData + idx;
+				val = &p->val;
+				if (Z_TYPE_P(val) != IS_UNDEF) {
+					break;
+				}
+			}
+			ZVAL_COPY_VALUE(result, val);
+			ZVAL_UNDEF(val);
+			nextFree = ht_->nNextFreeElement - 1;
+			if (!p->key && ((zend_long)p->h == nextFree))
+			{
+				ht_->nNextFreeElement = nextFree;
+			}
+			zend_hash_del_bucket(ht_, p);
+		}
+		// in case it points to deleted value?
+		zend_hash_internal_pointer_reset(ht_);
+	}
+	// zend code unwraps any reference result here. Is this necessary?
+BAIL_OUT:
+	return result;
+
+}
 
 
 

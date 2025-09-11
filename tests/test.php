@@ -4,6 +4,6 @@ namespace Wcc;
 
 require "bootstrap.php";
 
-test_wcc();
+Str::test_wcc();
 
 echo "Done\n";

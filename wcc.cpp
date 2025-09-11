@@ -49,10 +49,11 @@ extern "C" {
 };
 
 
-//#define DEBUG_EXTRA
+#define DEBUG_EXTRA
 
 #include "zpp/base.cpp"
 #include "zpp/show_zpp.cpp"
+#include "wcc/strfns.cpp"
 
 #include "wcc/pair.cpp"
 #include "wcc/config.cpp"
@@ -102,6 +103,7 @@ extern "C" {
 #include "wcd/update.cpp"
 #include "wcd/insert.cpp"
 #include "wcd/delete.cpp"
+
  //SQL_IPART_CPP
 //#include "wcc/sql_ipart.cpp"
 //#include "wcc/sql_isql.cpp"
@@ -173,7 +175,7 @@ extern "C" {
 #include "wcc/route_add.cpp"
 
 */
-#include "wcc/strfns.cpp"
+
 
 PHP_FUNCTION(Wcc_init_globals)
 {

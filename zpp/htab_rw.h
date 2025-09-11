@@ -40,7 +40,7 @@ namespace zpp {
         const htab_rw& operator=(const zval* p);
         
         
-        void merge(HashTable* src);
+        int merge(HashTable* src);
 
         void clear();
 
@@ -71,6 +71,8 @@ namespace zpp {
             push_back((zend_string*) si);
         }
 
+        val_rc pop();
+        
         void push_back(str_rc sm)
         {
             push_back((zend_string*)sm);

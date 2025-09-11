@@ -12,6 +12,7 @@
 
 #include "val_rc.cpp"
 #include "val_ptr.cpp"
+#include "ref_rc.cpp"
 
 #include "htab.cpp"
 

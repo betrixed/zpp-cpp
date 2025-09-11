@@ -21,6 +21,7 @@ namespace zpp {
 
         friend class htab_ptr;
         friend class htab_rw;
+        friend class ref_rc;
 
     public:
         

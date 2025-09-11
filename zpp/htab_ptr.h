@@ -47,6 +47,10 @@ namespace zpp {
 
         uint32_t size() const;
 
+        bool isPacked() const {
+            return (ht_ && (HT_IS_PACKED(ht_)));
+        }
+
         bool isNull() 
         {
             return (ht_ == nullptr);
@@ -73,6 +77,7 @@ namespace zpp {
                 //zend_printf("[string_view&] %s\n", zkey.data());
                 return get(zkey);
         }
+
 
         zval* operator[]  (const val_rc& key) const;
 
