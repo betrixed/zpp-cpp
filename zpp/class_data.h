@@ -1,10 +1,17 @@
 #ifndef CLASS_DATA_H
 #define CLASS_DATA_H
 
+/**
+ * @file zpp/class_data.h
+ * @brief Handle operations for a zend_class_entry*.
+ * @author Michael Rynn
+ * copyright (c) 2025 Michael Rynn
+ * Distributed under the Artistic License 2.0
+ */ 
+
 #ifndef PHP_EXTERN_H
 #include "php_extern.h"
 #endif
-
 
 #ifndef OBJ_RC_H
 #include "obj_rc.h"
@@ -49,9 +56,6 @@ class class_data {
         void add_constant(const char* name, zend_string* zs);
         void add_constant(const char* name, zend_long value);
 
-        void typed_property(str_ptr name, val_ptr data, 
-                        zend_type datatype, int accessflag = ZEND_ACC_PUBLIC);
-        //void add_constant(const str_intern& name,  val_ptr value, int flags = ZEND_ACC_PUBLIC);
 
         // read
         val_rc static_property(zend_string* s);

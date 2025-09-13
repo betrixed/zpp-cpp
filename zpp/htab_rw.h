@@ -1,6 +1,12 @@
 #ifndef HTAB_RW_H
 #define HTAB_RW_H
 
+/**
+ * @file zpp/htab_rw.h
+ * @author Michael Rynn
+ * @brief htab_rw - read/write HashTable manager
+ * @copyright Copyright (c) 2025
+ */
 #ifndef HTAB_PTR_H
 #include "htab_ptr.h"
 #endif 
@@ -12,6 +18,8 @@
 namespace zpp {
 
     class str_intern;
+
+    
 
     class htab_rw : public htab_ptr 
     {

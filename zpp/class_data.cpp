@@ -1,6 +1,15 @@
 #ifndef CLASS_DATA_CPP
 #define CLASS_DATA_CPP
 
+/**
+ * @file zpp/class_data.cpp
+ * @brief Handle operations for a zend_class_entry*.
+ * @author Michael Rynn
+ * @date 2025
+ * copyright (c) 2025 Michael Rynn
+ * Distributed under the Artistic License 2.0
+ */ 
+
 #ifndef CLASS_DATA_H
 #include "class_data.h"
 #endif
@@ -20,19 +29,6 @@ extern "C" {
 
 
 namespace zpp {
-
-void 
-class_data::typed_property(
-    str_ptr name, val_ptr data, 
-    zend_type datatype, int accessflag)
-{
-    zend_declare_typed_property(class_entry_,
-            name, 
-            data,
-            accessflag, 
-            nullptr,  //doc_comment zend_string
-             datatype);
-}
 
 void 
 class_data::add_constant(const char* name, const char* value)

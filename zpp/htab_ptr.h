@@ -1,6 +1,13 @@
 #ifndef HTAB_PTR_H
 #define HTAB_PTR_H
 
+/**
+ * @file zpp/htab_ptr.h
+ * @author Michael Rynn
+ * @brief htab_ptr - non-owning pointer to HashTable
+ * @copyright Copyright (c) 2025
+ * @license Artistic License 2.0
+ */
 #ifndef VAL_PTR_H
 #include "val_ptr.h"
 #endif
@@ -17,6 +24,14 @@ namespace zpp {
 
     class  htab_rc;
 
+    /** 
+     * @class htab_ptr
+     * @brief Non-owning pointer to a HashTable 
+     * This class does not do any reference counting
+     * It is used to pass around HashTables without
+     * transferring ownership. No write methods are provided.
+     * Use htab_rw for that.
+     */
     class  htab_ptr {
     protected:
         HashTable* ht_;

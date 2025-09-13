@@ -1,6 +1,13 @@
 #ifndef FOR_KEY_VALUE_CPP
 #define FOR_KEY_VALUE_CPP
 
+/**
+  *  @file for_key_value.cpp
+  *  @brief Iterate a HashTable for each key and value.
+  *  @author Michael Rynn
+  *  @license Artistic License 2.0
+  */
+
 #ifndef FOR_KEY_VALUE_H
 #include "for_key_value.h"
 #endif

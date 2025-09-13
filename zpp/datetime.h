@@ -15,6 +15,9 @@
 
 namespace zpp {
 	
+	/**
+	@class Date_init
+	*/
 	class Date_init : public state_init {
 	public:
 		Date_init() : state_init() {}
@@ -45,6 +48,10 @@ namespace zpp {
 
 	extern Date_init DTData;
 
+	/** 
+	@class timezone_obj
+	@brief Wrapper for zend_object which is a DateTimeZone
+	*/
 	class timezone_obj : public obj_rc {
 	protected:
 		bool make_obj();
@@ -52,7 +59,11 @@ namespace zpp {
 		timezone_obj(str_ptr zone);
 	};
 
+/** 
+@class dt_interval
+@brief Wrapper for zend_object which is a DateInterval
 
+*/
 	class dt_interval : public obj_rc {
 	public:
 		long years();
@@ -65,6 +76,10 @@ namespace zpp {
 		val_rc daystotal();
 	};
 
+	/**
+	@class datetime_obj
+	@brief Wrapper for zend_object which is a DateTime
+	*/
 	class datetime_obj : public obj_rc {
 	protected:
 		bool make_obj();

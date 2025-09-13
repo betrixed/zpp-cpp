@@ -1,6 +1,13 @@
 #ifndef FOR_KEY_VALUE_H
 #define FOR_KEY_VALUE_H
-//for_key_value.h
+
+/**
+  *  @file for_key_value.h
+  *  @brief Iterate a HashTable for key and value.
+  *  @author Michael Rynn
+  *  @license Artistic License 2.0
+  *  copyright 2025 Michael Rynn
+  */
 
 #ifndef PHP_EXTERN_H
 #include "php_extern.h"
@@ -13,10 +20,15 @@
 namespace zpp {
 
 /**
+  * @class for_key_value
+  * @brief Iterate a HashTable for key and value.
+  * @details	
+ * Iterate the array passed to start()   for(.start(array); .ok(); .next()).
+ * Can also be used in while, or sequence of statements.
  * Unlike htab_walk, usage requires 
- * call of value() key() or index()
- * as values will changfor_key_valuefor_key_valuee
- * every iteration,
+ * call of value() key() or index() after start() or next() loop,
+ * as these values will change with each interation.
+ * 
  */
 class for_key_value : public htab_rc {
 protected:

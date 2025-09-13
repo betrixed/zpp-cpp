@@ -1,7 +1,9 @@
- /*  
-  *  PHP extension C++ classes - zpp 
+ /** 
+ *   @file fn_call.cpp
+  *  @brief Implementation of fn_call class for calling PHP functions from C++
   *  @author Michael Rynn <michael.rynn.500@gmail.com>
-  *  @copyright 2024-2025 Michael Rynn
+  *  @copyright 2025 Michael Rynn
+    *  @license Artistic License 2.0
   */
 
 #ifndef FN_CALL_CPP

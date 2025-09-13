@@ -1,6 +1,13 @@
 #ifndef ZPP_BASE_H
 #define ZPP_BASE_H
-//wc_base.h
+
+/**
+ * @file zpp/base.h
+ * @brief base_d is base class for PHP class objects. based_obj_mgr is template for class specific data.
+ * @author Michael Rynn
+ * @date 2025
+ * 
+ */ 
 
 
 #ifndef PHP_EXTERN_H
@@ -10,6 +17,11 @@
 // ZPP_BUILD_ALL tells base.cpp to be one compile unit
 #define ZPP_BUILD_ALL
 
+
+#ifdef DEBUG_EXTRA
+//base.h Enable templates have trace output statements
+//#define BASE_DEBUG
+#endif
 
 #include "str_ptr.h"
 #include "str_rc.h"
@@ -23,7 +35,10 @@
 
 #include "val_rc.h"
 #include "val_ptr.h"
+
+/* This does not seem necessary
 #include "ref_rc.h"
+*/
 
 #include "htab_walk.h"
 #include "state_init.h"
@@ -43,9 +58,6 @@
 
 
 
-#ifdef DEBUG_EXTRA
-//#define BASE_DEBUG
-#endif
 
 
 #define BASE_ZOBJPTR
@@ -65,27 +77,24 @@
 namespace zpp {
 
 	/**
-	 * All base_d objects have a memory overhead - 3 x pointers 
-	 * 	Of course a C++ virtual function table pointer (base virtual destructor)
-	 *  zend_object* as first member of T*.
-	 *  Pointer to *T as first negative offset from zend_object.
+	 * All base_d objects add a memory overhead - 3 x pointers 
+	 * There is
+	  1. C++ virtual function table pointer (base virtual destructor) put in by C++ compiler.
+	  2. zend_object* is declared and set as first member of class T.
+	  3. Pointer to self (T*) is stored at offset sizeof(T) from start of T, when part of zend_object memory block.
+	 *  Allocator ensures space for Pointer to *T as first negative offset from zend_object structure.
 	 * 
 	 * Base class for all C++ objects implemented here.
-	 * Each class should have its own base_obj_mgr<T>,
+	 * Each class has a static instance of its base_obj_mgr<T>.
 	 * which holds its own static storage for zend_class_entry*, and
-	 * zend_object_handlers. Relies on one static instance of each base_obj_mgr<T>
-	 * being created in the .cpp implementation, as declared in the .h file.
+	 * zend_object_handlers. Relies on exactly one static instance of each base_obj_mgr<T>
+	 * in the .cpp implementation, as declared in the .h file.
 	 * 
-	 * Its possible, but have not tried, to create non-zobject associated 
-	 * (with nullptr for zend_object*)
-	 * using a different C++ new allocator. This won't be able to use 
-	 * zend_object properties, or management functions.
+	 * Inheritance of base_d derived classes works according to PHP class inheritance.
+	 * Presume single C++ inheritance, with stacked memory layout, 
+	 *  and the child class pointer can be static cast to parent.
 	 * 
-	 * 
-	 * How to implement internal subclasses?
-	 * This naive plan is :-
-	 * 
-	 *     Presume that the internal arrangement, will be
+	 *   
 	 *  
 	 * 	   class [baseclass] : public base_d {}
 	 * 
@@ -139,7 +148,11 @@ namespace zpp {
         tails of inheritance to cater for, include calling virtual functions of parent class where properly useful,
 	 *     eg call parent virtual debug_info, or  the function handling constructor, internal function of parent.
 	 */
+/**
+@class base_d
+Link all instances of a class T, by optionally mixing in this template.
 
+*/
 	template<typename T>
 	struct base_dlink {
 		typedef base_dlink<T> olink;
@@ -154,17 +167,6 @@ namespace zpp {
 		{
 			this->prev_ = &base;
 
-			/*
-				this is linked as next after base.
-
-				old_next = base.next_;
-
-				this.prev_ = base
-				this.next_ = old_next;
-				base.next_ = this
-				old_next.prev_ = this
-
-			*/
 			olink* old_next = base.next_;
 			base.next_ = this;
 			if(old_next)
@@ -196,6 +198,10 @@ namespace zpp {
 		}
 	};
 
+	/**
+	@class base_d 
+	Base class for placement below a zend_object structure.
+	*/
 	class   base_d {
 	#ifdef BASE_ZOBJPTR
 	protected:
@@ -310,6 +316,9 @@ namespace zpp {
 
 
 
+	/**
+	Template function to get back to C++ object from zend_object* or zval*.
+	*/
 
 	template<typename T>
 	T* zobj_toc(zend_object* zobj)
@@ -321,13 +330,15 @@ namespace zpp {
 		//assert(zo;
 	}
 
+	/** Template function to get back to C++ object from zval*.
+	 */
 	template<typename T>
 	T* zval_toc(zval* z)
 	{
 		return zobj_toc<T>(z->value.obj);
 	}
 	/** Linked list, 
-	 *  links to every base_obj_mgr,
+	 *  links up every instance of base_obj_mgr<T>.
 	 *  order not important.
 	 */
 
@@ -378,10 +389,13 @@ namespace zpp {
 	};
 
 	/**
+	 * Template class to manage zend_class_entry* and zend_object_handlers
 	 * This will be instantiated before being 
-	 * called. Singleton and static access.
+	 * called. Each is a Singleton and static access.
+	 * Requires registration call from <objects>_arginfo.h zend_class_entry*.
 	 * Holds zend_object* class handlers and entry,
-	 * and static functions for object management.
+	 * static functions for object lifetime management.
+	 * Object handlers can be modified in virtual functions.
 	 */
 	template< typename T >
 	class base_obj_mgr : public mgr_link  {
@@ -655,6 +669,9 @@ namespace zpp {
 			return zobj;
 		}
 	};
+/**
+ * Static member initialization
+ */
 
 template<typename T> base_obj_mgr<T>*  base_obj_mgr<T>::self_ = nullptr;
 template<typename T> zend_class_entry*  base_obj_mgr<T>::class_entry_ = nullptr;

@@ -1,6 +1,14 @@
 #ifndef HTAB_RC_H
 #define HTAB_RC_H
 
+/** 
+ * @file zpp/htab_rc.h
+ * @author Michael Rynn
+ * @brief htab_rc - reference counted HashTable manager
+ * @copyright Copyright (c) 2025
+ * @license Artistic License 2.0
+ * 
+ */
 #ifndef HTAB_PTR_H
 #include "htab_ptr.h"
 #endif
@@ -12,7 +20,14 @@
 namespace zpp {
 
     class htab_rw;
-
+/**
+ * @class htab_rc
+ * @brief Reference counted HashTable manager
+ * This class manages a HashTable* with reference counting.
+ * It increments the reference count when copied
+ * and decrements when destroyed or assigned a new value.
+ * It provides methods to read from the HashTable, inherited from htab_ptr.
+ */
     class htab_rc : public htab_ptr {
     protected:
         void  own();

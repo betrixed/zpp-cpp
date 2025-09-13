@@ -1756,15 +1756,6 @@ PHP_MINIT_FUNCTION(Wcd_Model_reg)
 
 	Model::omg.classEntry(register_class_Wcd_Model(zintf_ce_IfCrud));
 
-	/*
-	class_data  cd(Model::omg.class_entry_);
-
-	val_rc null_val;
-
-	zend_type dtype =  {nullptr, 0};
-	cd.typed_property(MIS.name_str, null_val, IS_STRING, ZEND_ACC_PROTECTED_SET);
-	*/
-
 	return SUCCESS;
 }
 

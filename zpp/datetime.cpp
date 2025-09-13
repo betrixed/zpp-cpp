@@ -1,6 +1,14 @@
 #ifndef DATE_TIME_OBJ_CPP
 #define DATE_TIME_OBJ_CPP
 
+/**
+ *  @file datetime.cpp
+ *  @brief Wrapper for zend_object which is a DateTime
+ *  @author Michael Rynn
+ * 
+ *  copyright (c) 2025 Michael Rynn
+ *  Distributed under the Artistic License 2.0
+ */
 #ifndef OBJ_RC_H
 #include "obj_rc.h"
 #endif

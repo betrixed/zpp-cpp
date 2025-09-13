@@ -1,8 +1,22 @@
 #ifndef HTAB_RW_CPP
 #define HTAB_RW_CPP
 
+/**
+ * @file zpp/htab_rw.cxx
+ * @author Michael Rynn
+ * @brief htab_rw - read/write HashTable manager
+ * @copyright Copyright (c) 2025
+ * @license Artistic License 2.0
+ * 
+ * @details This class provides read and write access to a HashTable*.
+ * It ensures that the HashTable is unique (copy-on-write) before any write operation.
+ * It can be constructed from various sources, including htab_rc, val_rc, val_ptr, zval*, or HashTable*.
+ * It provides methods to modify the HashTable, such as push_back, set, unset, clear, merge, etc.
+ * It does not manage the reference count of the HashTable directly, but relies its source class to do that.
+ *  */
+
 #ifndef HTAB_RW_H
-#include "htab_rw.h"
+#include "zpp/htab_rw.h"
 #endif
 
 

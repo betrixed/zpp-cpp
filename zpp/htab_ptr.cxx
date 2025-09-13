@@ -1,6 +1,15 @@
 #ifndef htab_ptr_CPP
 #define htab_ptr_CPP
 
+/**
+ * @file zpp/htab_ptr.cxx
+ * @author Michael Rynn <michael.rynn.500@gmail.com>
+ * @brief htab_ptr - non-owning pointer to HashTable
+ * @copyright Copyright (c) 2025
+ * @license Artistic License 2.0
+ * 
+ */
+
 #ifndef STR_RC_H
 #include "str_rc.h"
 #endif

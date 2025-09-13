@@ -1,6 +1,13 @@
 #ifndef WC_BASE_CPP
 #define WC_BASE_CPP
 
+/**
+ * @file zpp/base.cpp
+ * @brief base_d is base class for PHP class objects. based_obj_mgr is template for class specific data.
+ * @author Michael Rynn
+ * @date 2025
+ * 
+ */ 
 
 
 #include "base.h"
