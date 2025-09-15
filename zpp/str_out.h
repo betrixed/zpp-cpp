@@ -1,6 +1,15 @@
 #ifndef STR_OUT_H
 #define STR_OUT_H
 
+/**
+ * @file zpp/str_out.h
+ * @author Michael Rynn <michael.rynn.500@gmail.com>
+ * @brief str_out class, string buffer with zend_string memory layout.	
+ * @copyright Copyright (c) 2025 Michael Rynn
+ * @license Artistic License 2.0
+ */
+
+
 #ifndef STR_RC_H
 #include "str_rc.h"
 #endif
@@ -16,6 +25,10 @@ namespace zpp {
 		HEX
 	};
 
+	/**
+	 * @class iform
+	 * @brief  format numeric base for numbers output
+	 */
 	class iform {
 	public:
 		Numf value_;
@@ -31,12 +44,25 @@ namespace zpp {
 		}
 	};
 
+	/**
+	 * @class fm_endl
+	 * @brief  class to signal output of end line character.
+	 */
 	class fm_endl {
 
 	};
 
+	/** 
+	 * @brief Instance to signal ouptut of end line character.
+	 */
 	extern fm_endl endl;
 	
+	/**
+	 * @class str_out
+	 * @brief Output text string to PHP write handler.
+	 * @details Use with output operator <<.d
+	 */
+
 	class str_out {
 	protected:
 		iform   	 nf_;

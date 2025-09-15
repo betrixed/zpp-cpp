@@ -3,7 +3,7 @@
 
 /**
  * @file zpp/htab_rw.cxx
- * @author Michael Rynn
+ * @author Michael Rynn <michael.rynn.500@gmail.com>
  * @brief htab_rw - read/write HashTable manager
  * @copyright Copyright (c) 2025
  * @license Artistic License 2.0
@@ -12,7 +12,7 @@
  * It ensures that the HashTable is unique (copy-on-write) before any write operation.
  * It can be constructed from various sources, including htab_rc, val_rc, val_ptr, zval*, or HashTable*.
  * It provides methods to modify the HashTable, such as push_back, set, unset, clear, merge, etc.
- * It does not manage the reference count of the HashTable directly, but relies its source class to do that.
+ * It does not manage the reference count of the HashTable, which is done by the donor class.
  *  */
 
 #ifndef HTAB_RW_H

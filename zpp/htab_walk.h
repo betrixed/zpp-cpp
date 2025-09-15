@@ -1,6 +1,14 @@
 #ifndef HTAB_WALK_H
 #define HTAB_WALK_H
 
+/**
+ * @file zpp/htab_rw.h
+ * @author Michael Rynn <michael.rynn.500@gmail.com>
+ * @brief htab_walk - A simple HashTable iterator.
+ * @copyright Copyright (c) 2025
+ * @license Artistic License 2.0
+ */
+
 #ifndef VAL_PTR_H
 #include "val_ptr.h"
 #endif
@@ -15,6 +23,15 @@
 
 namespace zpp {
 
+
+    /**
+     * @class htab_walk
+     * @brief A simple HashTable iterator.
+     * @details This class provides a simple interface to iterate over a HashTable*.
+     * It increments or decrements the current position and provides methods to access a copy of the key and value
+     * as a val_ptr.
+     * 
+     */
     class htab_walk {
     private:
         val_rc key_;

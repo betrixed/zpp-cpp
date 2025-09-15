@@ -2,6 +2,13 @@
 #define SHOW_ZPP_CPP
 
 // Debug dumpers
+/**
+ * @file zpp/show_zpp.cpp
+ * @author Michael Rynn <michael.rynn.500@gmail.com>
+ * @brief Debug dumpers for PHP types. Output details of PHP types to console for trace/debugging.
+ * @copyright Copyright (c) 2025 Michael Rynn
+ * @license Artistic License 2.0
+ */
 
 #ifndef FOR_KEY_VALUE_H
 #include "for_key_value.h"

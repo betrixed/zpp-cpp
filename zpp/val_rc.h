@@ -1,7 +1,9 @@
  /*  
-  *  PHP extension C++ classes - zpp 
+  *  @file val_rc.h
+  *  @brief val_rc class, reference counted zval value.  
   *  @author Michael Rynn <michael.rynn.500@gmail.com>
   *  @copyright 2024-2025 Michael Rynn
+  *  @license Artistic License 2.0
   */
 
 #ifndef VAL_RC_H
@@ -22,22 +24,15 @@ class str_rc;
 class obj_ptr;
 
 /**
+ * @class val_rc
+ * @brief val_rc class, reference counted zval value.  
+ * Holds an actual zval structure, not a pointer to one.
  * 
  */
 class val_rc {
 protected:
     zval zv_;
-
-    /** try to lose whatever is inside 
-     *  Return true if handle was reference counted
-     *  and likely was freed and nullified 
-     *  (unless interned string or handle)
-     **/
     
-
-    /**
-     *  Free and clear contents to null
-     */
     void lose();
 
     void init();
@@ -56,10 +51,9 @@ protected:
 
 public:
     
-    //! Return true if contents become invalid
+    
     static void try_decref(zval* p);
 
-    //! Increment reference if not interned or immutable
     static void try_addref(zval* p);
 
 	operator zval*() const  { return (zval*) &zv_; }
@@ -95,7 +89,6 @@ public:
 
     val_rc(const str_ptr& rc);
 
-    //val_rc(const obj_ptr& rc);
 
     //! mutate in place to suggested type if necessary
     void     toLong();
@@ -116,8 +109,6 @@ public:
     const val_rc& operator=(const val_ptr &rc);
 
     const val_rc& operator=(const obj_ptr &rc);
-
-    //const val_rc& operator=(const obj_rc &rc);
 
     const val_rc& operator=(const str_ptr &rc);
 

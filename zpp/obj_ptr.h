@@ -1,7 +1,13 @@
 #ifndef OBJ_PTR_H
 #define OBJ_PTR_H
 
-
+/**
+ * @file zpp/obj_ptr.h
+ * @author Michael Rynn <michael.rynn.500@gmail.com>
+ * @brief obj_ptr - A simple zend_object* wrapper
+ * @copyright
+ * @license Artistic License 2.0
+ */
 #ifndef VAL_RC_H
 #include "val_rc.h"
 #endif
@@ -15,6 +21,12 @@ namespace zpp {
 	class htab_rc;
 	class obj_rc;
 
+	/**
+	 * @class obj_ptr
+	 * @brief A simple zend_object* wrapper
+	 * @details
+	 * Construction, callable, call methods, property get/set.
+	 */
 	class obj_ptr {
 	protected:
 		zend_object* obj_;

@@ -1,7 +1,14 @@
 #ifndef HTAB_RC_CPP
 #define HTAB_RC_CPP
 
-// clean this zval of its reference counted value and reinitialize
+/**
+ * @file zpp/htab_rc.cxx
+ * @author Michael Rynn <michael.rynn.500@gmail.com>
+ * @brief htab_rc - Reference counted HashTable read-only manager
+ * @copyright Copyright (c) 2025
+ * @license Artistic License 2.0
+ * 
+ */
 #ifndef HTAB_RC_H
 #include "htab_rc.h"
 #endif
@@ -361,6 +368,12 @@ htab_rc::operator=(htab_rc&& m)
 	return *this;
 }
 
+void htab_rc::return_zv(zval* return_value)
+{
+	//showarray("move_zv", ht_);
+	val_ptr::array_bind(return_value, ht_);
+	ht_ = nullptr;
+}
 
 void htab_rc::move_zv(zval* return_value)
 {

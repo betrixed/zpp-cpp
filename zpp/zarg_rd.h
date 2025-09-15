@@ -1,6 +1,13 @@
 #ifndef ZARG_RD_H
 #define ZARG_RD_H
 
+/**
+ * @file zarg_rd.h
+ * @author Michael Rynn <michael.rynn.500@gmail.com>
+ * @brief zpp::zarg_rd - Argument reader for PHP functions/method
+ * @copyright Copyright (c) 2025 Michael Rynn
+ * @license Artistic License 2.0
+ */
 #ifndef OBJ_PTR_H
 #include "obj_ptr.h"
 #endif
@@ -11,7 +18,14 @@
 
 namespace zpp {
 
-
+/**
+ * @class zarg_rd
+ * @brief Argument reader for PHP functions/methods.	
+ * @details
+ *  Use in PHP functions/methods to read and validate arguments.
+ *  Throw zend exceptions on error.
+ *  
+ */
 class zarg_rd 
 {
 protected:

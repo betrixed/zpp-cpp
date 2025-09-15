@@ -12,8 +12,8 @@ namespace zpp {
     * A strategy for php module initialise.
     * C++ default initializes them in ANY ORDER 
     * (compiler undefined),
-    * Later call tp static init_all() for runtime 
-    * initialize, is in random order of being linked.
+    * Module initialisation will call static init_all() for runtime 
+    * initialize, in unknown link, prior to calling functions for class registration.
     */
     class  state_init {
     protected:

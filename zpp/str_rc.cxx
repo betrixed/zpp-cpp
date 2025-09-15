@@ -1,7 +1,9 @@
  /*  
-  *  PHP extension C++ classes - zpp 
+  *  @file str_rc.cxx
   *  @author Michael Rynn <michael.rynn.500@gmail.com>
-  *  @copyright 2024-2025 Michael Rynn
+  *  @copyright 2025 Michael Rynn
+  *  @brief str_rc class, reference counted zend_string pointer.	
+  *  @license Artistic License 2.0	
   */
 
 #ifndef STR_RC_CPP
@@ -316,6 +318,18 @@ str_rc::~str_rc()
     lose();
 }
 
+void 
+str_rc::return_zv(zval* ret)
+{
+	if (s)
+	{
+		ZVAL_STR(ret, s);
+		s = nullptr;
+	}
+	else {
+		ZVAL_NULL(ret);
+	}
+}
 
 void 
 str_rc::move_zv(zval* ret)

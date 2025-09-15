@@ -4,7 +4,7 @@
 /**
  *  @file datetime.cpp
  *  @brief Wrapper for zend_object which is a DateTime
- *  @author Michael Rynn
+ *  @author Michael Rynn <michael.rynn.500@gmail.com>
  * 
  *  copyright (c) 2025 Michael Rynn
  *  Distributed under the Artistic License 2.0

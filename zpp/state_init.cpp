@@ -2,6 +2,14 @@
   *  PHP extension C++ classes - zpp 
   *  @author Michael Rynn <michael.rynn.500@gmail.com>
   *  @copyright 2024-2025 Michael Rynn
+  *  @license Artistic License 2.0  
+  *  @file zpp/state_init.cpp
+  *  @brief Base class for module and request initialization and shutdown.
+  *  @details
+  *  Derive from this class to get module and request init and shutdown calls.
+  *  The constructor links the instance into a static list.
+  *  The static methods init_all(), end_all(), init_request(), end_request()
+  *  walk the list and call the virtual methods init(), end(), init_req(), end
   */
 
 #ifndef STATE_INIT_CPP

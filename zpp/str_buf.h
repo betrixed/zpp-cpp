@@ -1,6 +1,14 @@
 #ifndef STR_BUF_H
 #define STR_BUF_H
 
+/**
+ * @file zpp/str_buf.h 
+ * @author Michael Rynn <michael.rynn.500@gmail.com>
+ * @brief str_buf class, string buffer with zend_string memory layout.	
+ * @copyright Copyright (c) 2025 Michael Rynn
+ * @license Artistic License 2.0
+ */
+
 #ifndef STR_OUT_H
 #include "str_out.h"
 #endif
@@ -12,7 +20,15 @@ extern "C" {
 
 namespace zpp {
 
-
+	/**
+	 * @class str_buf
+	 * @brief String buffer using output operator <<
+	 * @details Implementation uses PHP smart_str structure and functions.
+	 * Overrides str_out append methods to add to buffer.
+	 * Finalize method creates a zend_string from the buffer.
+	 * The buffer is then reset to empty.
+	 * The buffer is always null terminated.
+	 */
 //! str_buf with memory layout as "smart_string"
 	class str_buf : public str_out {
 	protected:

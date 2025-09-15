@@ -12,9 +12,18 @@ class htab_ptr;
 class obj_ptr;
 
 /**
- * Make a reference stores value in the zval
+ * @class ref_rc
+ * @brief	 Reference counted reference to a zval reference
+ * @author  Michael Rynn <michael.rynn.500@gmail.com>
+ * @copyright copyright (c) 2025 Michael Rynn 
+ * @license Artistic License 2.0	
+ * @details  	
+ * Make a reference which stores value in the zval
  * inside a reference counted reference handle.
  * which protects value from reference counting!.
+ * Allows returning reference types from functions.
+ * Not used much yet, therefore not very well tested.
+ * There isn't even a ref_ptr class, using the pattern of the other reference counted PHP types. (yet).
  */
 class ref_rc {
 protected:

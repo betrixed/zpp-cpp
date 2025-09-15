@@ -1,21 +1,14 @@
  /*  
-  *  PHP extension C++ classes - zpp 
+  *  @file val_ptr.h    
+  *  @brief val_ptr class, holds a zval pointer.    
+  *  @license Artistic License 2.0  
   *  @author Michael Rynn <michael.rynn.500@gmail.com>
-  *  @copyright 2024-2025 Michael Rynn
+  *  @copyright 2025 Michael Rynn
   */
 
 #ifndef VAL_PTR_H
 #define VAL_PTR_H
 
-
-/** It turns out that PHP and its zend types
- *  rarely if ever allocate _struct_zval directly
- *  using heap memory. Allocating and freeing 
- *  _struct_zval is by inclusion and mixin.
- * 
- *  Binding various values requires 
- *  reference counting them all.
- */
 
 #ifndef PHP_EXTERN_H
 #include "php_extern.h"
@@ -31,6 +24,11 @@ namespace zpp {
 class str_rc;
 class val_rc;
 
+/**
+ * @class val_ptr
+ * @brief val_ptr class, holds a zval pointer. Not reference counted.   
+ * A non-null value refers to zval structure that must exists somewhere.
+ */
 class val_ptr {
 protected:
     zval *p_;
@@ -47,10 +45,7 @@ protected:
 
     void bind_long(zend_long value);
 
-
 public:
-   
-    
 
     static void set_global(str_ptr key, val_ptr value);
     static val_ptr get_global(str_ptr key);
@@ -133,7 +128,8 @@ public:
 
     bool isObject() const;
 
-    /** A not empty value. Not quite the same as !empty($xx)
+    /**
+     * @detail A not empty value. Not quite the same as !empty($xx)
      * Not UNDEFINED, NULL or FALSE.
      * NON-empty array or string. All LONG or DOUBLE are considered ok!
      */
@@ -198,7 +194,7 @@ public:
     //! return HashTable* pointer or nullptr
     HashTable* zarray() const;
 
-    void return_zv(zval* ret);
+    void return_zv(zval* ret) const
     
     int refcount() const;
     int ztype() const {

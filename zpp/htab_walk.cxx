@@ -1,6 +1,15 @@
 #ifndef HTAB_WALK_CPP
 #define HTAB_WALK_CPP
 
+/**
+ * @file zpp/htab_rw.h
+ * @author Michael Rynn <michael.rynn.500@gmail.com>
+ * @brief htab_rw - read/write, not-reference counting, HashTable manager
+ * @copyright Copyright (c) 2025
+ * @license Artistic License 2.0
+ */
+
+
 #ifndef HTAB_WALK_H
 #include "htab_walk.h"
 #endif

@@ -1,7 +1,9 @@
  /*  
-  *  PHP extension C++ classes - zpp 
+  *  @file val_ptr.cpp
   *  @author Michael Rynn <michael.rynn.500@gmail.com>
-  *  @copyright 2024-2025 Michael Rynn
+  *  @copyright 2025 Michael Rynn
+  *  @brief val_ptr class, holds a zval pointer.	
+  *  @license Artistic License 2.0
   */
 
 #ifndef VAL_PTR_CPP
@@ -407,7 +409,7 @@ val_ptr::zarray() const
 }
 
 void 
-val_ptr::return_zv(zval* ret)
+val_ptr::return_zv(zval* ret) const
 {
 	if (p_)
 	{

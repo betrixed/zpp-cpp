@@ -1,7 +1,9 @@
- /*  
-  *  PHP extension C++ classes - zpp 
+ /*  @file str_ptr.h
+  *  @brief str_ptr class, holds a zend_string pointer.	
+
   *  @author Michael Rynn <michael.rynn.500@gmail.com>
-  *  @copyright 2024-2025 Michael Rynn
+  *  @copyright 2025 Michael Rynn
+  *  @license Artistic License 2.0
   */
 
 #ifndef STR_PTR_H
@@ -18,6 +20,11 @@ namespace zpp {
 
 	class str_intern;
 
+	/**
+	 * @class str_ptr
+	 * @brief str_ptr class, holds a zend_string pointer. Not reference counted.
+	 * 
+	 */
 	class str_ptr {
 	protected:
 	    zend_string* s;

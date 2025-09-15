@@ -1,6 +1,14 @@
 #ifndef ZARG_RD_CPP
 #define ZARG_RD_CPP
 
+/**
+ * @file zarg_rd.cpp
+ * @author Michael Rynn <michael.rynn.500@gmail.com>
+ * @brief Read arguments from zend_execute_data
+ * @copyright Copyright (c) 2025 Michael Rynn
+ * @license MIT License
+ * 
+ */
 #ifndef ZARG_RD_H
 #include "zarg_rd.h"
 #endif

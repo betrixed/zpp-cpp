@@ -3,7 +3,7 @@
 
 /**
  * @file zpp/htab_ptr.h
- * @author Michael Rynn
+ * @author Michael Rynn <michael.rynn.500@gmail.com>
  * @brief htab_ptr - non-owning pointer to HashTable
  * @copyright Copyright (c) 2025
  * @license Artistic License 2.0

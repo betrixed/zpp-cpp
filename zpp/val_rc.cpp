@@ -1,7 +1,9 @@
  /*  
-  *  PHP extension C++ classes - zpp 
+  *  @file val_rc.cpp
+  *  @brief val_rc class, reference counted zval value.
   *  @author Michael Rynn <michael.rynn.500@gmail.com>
   *  @copyright 2024-2025 Michael Rynn
+  * @license Artistic License 2.0
   */
 
 #ifndef VAL_RC_CPP
@@ -383,13 +385,13 @@ val_rc::move_zv(zval* return_value)
 {
     ZVAL_COPY_VALUE(return_value, &zv_);
     zv_ = {0};
-    ZVAL_NULL(&zv_);
 }
 
 void 
 val_rc::return_zv(zval* return_value)
 {
-    ZVAL_COPY(return_value, &zv_);
+    ZVAL_COPY_VALUE(return_value, &zv_);
+    zv_ = {0};
 }
 
 

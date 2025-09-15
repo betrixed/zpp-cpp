@@ -4,7 +4,7 @@
 /**
   *  @file for_key_value.cpp
   *  @brief Iterate a HashTable for each key and value.
-  *  @author Michael Rynn
+  *  @author Michael Rynn <michael.rynn.500@gmail.com>
   *  @license Artistic License 2.0
   */
 

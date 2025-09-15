@@ -1,6 +1,12 @@
 #ifndef PHP_EXTERN_H
 #define PHP_EXTERN_H
 
+/**
+ * @file zpp/php_extern.h
+ * @author Michael Rynn
+ * @brief  Include C headers from PHP distribution.
+ */
+
 extern "C" {
 	#include <php.h>
 	#include <Zend/zend.h>  

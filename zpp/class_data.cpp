@@ -4,7 +4,7 @@
 /**
  * @file zpp/class_data.cpp
  * @brief Handle operations for a zend_class_entry*.
- * @author Michael Rynn
+ * @author Michael Rynn <michael.rynn.500@gmail.com>
  * @date 2025
  * copyright (c) 2025 Michael Rynn
  * Distributed under the Artistic License 2.0

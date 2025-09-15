@@ -1,6 +1,12 @@
 #ifndef REF_RC_CPP
 #define REF_RC_CPP
 
+/**
+ * @file zpp/ref_rc.cpp
+ * @author Michael Rynn <michael.rynn.500@gmail.com>
+ * @brief Implementation of ref_rc class.
+ * @copyright copyright (c) 2025 Michael Rynn
+ */
 #ifndef REF_RC_H
 #include "ref_rc.h"
 #endif

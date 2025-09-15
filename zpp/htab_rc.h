@@ -3,7 +3,7 @@
 
 /** 
  * @file zpp/htab_rc.h
- * @author Michael Rynn
+ * @author Michael Rynn <michael.rynn.500@gmail.com>
  * @brief htab_rc - reference counted HashTable manager
  * @copyright Copyright (c) 2025
  * @license Artistic License 2.0
@@ -119,6 +119,7 @@ namespace zpp {
         void  init();
         void  reset();
         
+        void  return_zv(zval* return_value);
         void  move_zv(zval* return_value);
 
         bool isNull() const { return !(ht_); }

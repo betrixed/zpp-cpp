@@ -3,12 +3,13 @@
 
 /**
  * @file zpp/htab_rw.h
- * @author Michael Rynn
- * @brief htab_rw - read/write HashTable manager
+ * @author Michael Rynn <michael.rynn.500@gmail.com>
+ * @brief htab_rw - read/write, not-reference counting, HashTable manager
  * @copyright Copyright (c) 2025
+ * @license Artistic License 2.0
  */
 #ifndef HTAB_PTR_H
-#include "htab_ptr.h"
+#include "zpp/htab_ptr.h"
 #endif 
 
 #ifndef STR_RC_H
@@ -19,7 +20,14 @@ namespace zpp {
 
     class str_intern;
 
-    
+    /**
+     * @class htab_rw
+     * @brief Read/write HashTable manager with copy-on-write semantics on construction.
+     * @details  This class provides read and write access to a HashTable*. On construction,
+    * it ensures that HashTable has a reference count of 1, for the reference counted class passed in.
+     * If the source HashTable has a reference count greater than 1, it duplicates the HashTable
+     * to ensure that modifications do not affect other references. 
+     */
 
     class htab_rw : public htab_ptr 
     {

@@ -1,6 +1,13 @@
 #ifndef ZPP_PREG_H
 #define ZPP_PREG_H
 
+/**
+ * @file zpp/preg.h 
+ * @author Michael Rynn <michael.rynn.500@gmail.com>
+ * @brief class and functions using PHP API of its PCRE extension.
+ * @copyright Copyright (c) 2025 Michael Rynn
+ * @license Artistic License 2.0
+ */
 
 #ifndef VAL_PTR_H
 #include "val_ptr.h"
@@ -29,7 +36,12 @@ extern "C" {
 namespace zpp {
 
 	
-
+    /**
+	 * @class preg
+	 * @brief Wrapper for PHP preg functions
+	 * Uses PHP internal pcre functions.
+	 * Can be used for preg_match, preg_match_all, preg_split, preg_replace
+	 */
 
 
 	class preg {
@@ -92,6 +104,16 @@ namespace zpp {
 
 	};
 
+	/**
+	 * @class preg_callback
+	 * @brief Base class for preg_replace_callback
+	 * Derive from this class and implement the callback() method.
+	 * The replace() method will call the callback for each match
+	 * and return the final replaced string.
+	 * The captures are available in the htab_ptr captures_ member.
+	 * The whole matched string is in wholes_ member.
+	 * The replace_ member is set by the callback to the replacement string.
+	 */
 	class preg_callback {
 	protected:
 		preg      regexp_;

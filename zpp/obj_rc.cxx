@@ -1,6 +1,14 @@
 #ifndef OBJ_RC_CPP
 #define OBJ_RC_CPP
 
+/**
+ * @file zpp/obj_rc.cxx
+ * @author Michael Rynn <michael.rynn.500@gmail.com>
+ * @brief obj_rc- A simple zend_object* wrapper with added reference counting
+ * @copyright 2025 Michael Rynn
+ * @license Artistic License 2.0
+ */
+
 #ifndef OBJ_RC_H
 #include "obj_rc.h"
 #endif
@@ -13,7 +21,9 @@
 #include "class_data.h"
 #endif
 
-
+#ifndef VAL_PTR_H
+#include "val_ptr.h"
+#endif	
 
 namespace zpp {
 

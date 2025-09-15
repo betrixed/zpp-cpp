@@ -4,7 +4,7 @@
 /**
  * @file zpp/base.h
  * @brief base_d is base class for PHP class objects. based_obj_mgr is template for class specific data.
- * @author Michael Rynn
+ * @author Michael Rynn <michael.rynn.500@gmail.com>
  * @date 2025
  * 
  */ 

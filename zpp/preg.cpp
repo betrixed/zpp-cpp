@@ -1,6 +1,13 @@
 #ifndef ZPP_PREG_CPP
 #define ZPP_PREG_CPP
 
+/**
+ * @file preg.cpp
+ * @author Michael Rynn <michael.rynn.500@gmail.com>
+ * @brief zpp::preg - Regular expression support
+ * @copyright Copyright (c) 2025 Michael Rynn
+ * @license Artistic License 2.0	
+ */
 #ifndef ZPP_PREG_H
 #include "preg.h"
 #endif

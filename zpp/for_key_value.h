@@ -4,7 +4,7 @@
 /**
   *  @file for_key_value.h
   *  @brief Iterate a HashTable for key and value.
-  *  @author Michael Rynn
+  *  @author Michael Rynn <michael.rynn.500@gmail.com>
   *  @license Artistic License 2.0
   *  copyright 2025 Michael Rynn
   */
@@ -28,6 +28,7 @@ namespace zpp {
  * Unlike htab_walk, usage requires 
  * call of value() key() or index() after start() or next() loop,
  * as these values will change with each interation.
+ * This depends on internal details of HashTable.
  * 
  */
 class for_key_value : public htab_rc {

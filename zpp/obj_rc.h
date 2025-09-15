@@ -1,6 +1,13 @@
 #ifndef OBJ_RC_H
 #define OBJ_RC_H
 
+/**
+ * @file zpp/obj_rc.h
+ * @author Michael Rynn <michael.rynn.500@gmail.com>
+ * @brief obj_rc- A simple zend_object* wrapper with added reference counting
+ * @copyright 2025 Michael Rynn
+ * @license Artistic License 2.0
+ */
 #ifndef OBJ_PTR_H
 #include "obj_ptr.h"
 #endif

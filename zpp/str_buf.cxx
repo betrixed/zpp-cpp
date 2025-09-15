@@ -1,6 +1,15 @@
 #ifndef STR_BUF_CPP
 #define STR_BUF_CPP
 
+/**
+ * @file zpp/str_buf.cpp
+ * @author Michael Rynn <michael.rynn.500@gmail.com>
+ * @brief str_buf class, string buffer with zend_string memory layout.	
+ * @copyright Copyright (c) 2025 Michael Rynn
+ * @license Artistic License 2.0
+ */
+
+
 #ifndef STR_BUF_H
 #include "str_buf.h"
 #endif

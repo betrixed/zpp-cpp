@@ -1,7 +1,10 @@
  /*  
-  *  PHP extension C++ classes - zpp 
+  * @file str_ptr.cxx
   *  @author Michael Rynn <michael.rynn.500@gmail.com>
-  *  @copyright 2024-2025 Michael Rynn
+  *  @copyright 2025 Michael Rynn
+  * @license Artistic License 2.0
+  * @brief str_ptr class, and methods, holds a zend_string pointer.
+  * 
   */
 
 #ifndef STR_PTR_CPP
