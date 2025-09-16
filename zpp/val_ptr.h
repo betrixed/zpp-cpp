@@ -194,7 +194,7 @@ public:
     //! return HashTable* pointer or nullptr
     HashTable* zarray() const;
 
-    void return_zv(zval* ret) const
+    void return_zv(zval* ret) const;
     
     int refcount() const;
     int ztype() const {

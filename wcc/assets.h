@@ -105,7 +105,7 @@ public:
 
 	void add(val_ptr list);
 
-	void addAssets(htab_ptr data);
+	htab_rc addAssets(htab_ptr data);
 
 	void addBlob(str_rc blob, bool header = false);
 
@@ -132,7 +132,7 @@ public:
 
  	str_rc link();
 
- 	void loadAssetFile(str_ptr file);
+ 	htab_rc loadAssetFile(str_ptr file);
 
  	void reset();
 

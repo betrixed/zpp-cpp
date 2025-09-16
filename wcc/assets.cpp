@@ -210,13 +210,11 @@ Assets::construct()
 	web_ = run.property(ASI.web_dir);
 
 	str_rc assets_file = run.property(ASI.assets_cfg);
+	assets_ = Config::omg.new_zobj();
 
 	if (assets_file.size())
 	{
 		this->loadAssetFile(assets_file);
-	}
-	else {
-		assets_ = Config::omg.new_zobj();
 	}
 }
 
@@ -409,6 +407,7 @@ Assets::add(val_ptr nlist)
 		zend_throw_error(zend_ce_error, "Assets locked during render");
 		return;
 	}
+
 	if (nlist.isArray())
 	{
 		for_key_value loop;
@@ -425,17 +424,23 @@ Assets::add(val_ptr nlist)
 	}
 }
 
-void 
+htab_rc 
 Assets::addAssets(htab_ptr data)
 {
 	htab_walk wk;
 	auto key = wk.key();
 	auto value = wk.value();
 
+	htab_rc keys_added;
+	htab_rw hw(keys_added);
+
 	for(wk.start(data); wk.ok(); wk.next())
 	{
+		hw.push_back(key);
 		assets_.property(key, value);
 	}
+	//showdata("keys_added", keys_added);
+	return keys_added;
 }
 
 void 
@@ -612,13 +617,16 @@ Assets::filterPaths(htab_ptr paths)
 	}
 	return result;
 }
-void 
+
+htab_rc 
 Assets::loadAssetFile(str_ptr file)
 {
+	htab_rc result = htab_ptr::empty_array();
+
 	if (! file_exists(file))
 	{
 		zend_throw_error(zend_ce_error,"Asset file '%s' not found", file.data());
-		return;
+		return result;
 	}
 
 	obj_rc cache_all = Services::service(ASI.cache_all);
@@ -644,17 +652,22 @@ Assets::loadAssetFile(str_ptr file)
 		slist->addPaths(paths);
 	}
 
-	val_ptr temp = data.get(ASI.assets_str);
+	val_rc temp = data.get(ASI.assets_str);
+	if (temp.isObject())
+	{
+		obj_rc cfg_obj = temp.zobject();
+		if (cfg_obj.ok())
+		{
+			Config* cfg = zobj_toc<Config>(cfg_obj);
+			temp = cfg->toArray();
+		}
+	}
 	if (temp.isArray())
 	{
-		assets_ = Config::omg.new_zobj();
-		Config* cfg = zobj_toc<Config>(assets_);
-		cfg->construct(temp);
+		result = this->addAssets(temp.zarray());
+		//showdata("result", result);
 	}
-	else if (temp.isObject())
-	{
-		assets_ = temp.zobject();
-	}
+	return result;
 }
 
 void 
@@ -830,7 +843,8 @@ ZEND_METHOD(Wcc_Assets, addAssets)
 	if (!args.throw_errors())
 	{
 		Assets* cobj = zval_toc<Assets>(ZEND_THIS);
-		cobj->addAssets(data);
+		htab_rc result = cobj->addAssets(data);
+		result.move_zv(return_value);
 	}
 }
 
@@ -977,8 +991,8 @@ ZEND_METHOD(Wcc_Assets, link)
 	Assets* cobj = zval_toc<Assets>(ZEND_THIS);
 	str_rc text = cobj->link();
 	text.move_zv(return_value);
-
 }
+
 ZEND_METHOD(Wcc_Assets, loadAssetFile)
 {
 	zarg_rd args(execute_data);
@@ -986,12 +1000,17 @@ ZEND_METHOD(Wcc_Assets, loadAssetFile)
 	str_ptr file;
 
 	args.zstring(file, args.need(1));
+	htab_rc result;
 
 	if (!args.throw_errors())
 	{
 		Assets* cobj = zval_toc<Assets>(ZEND_THIS);
-		cobj->loadAssetFile(file);
+		result = cobj->loadAssetFile(file);
 	}
+	else {
+		result = htab_ptr::empty_array();
+	}
+	result.move_zv(return_value);
 }
 
 ZEND_METHOD(Wcc_Assets, reset)

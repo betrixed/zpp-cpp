@@ -12,7 +12,7 @@ class Assets {
 	
 	public function add(array|string $list) : void {}
 
- 	public function addAssets(array $add) : void {}
+ 	public function addAssets(array $add) : array {}
 
  	public function addBlob(string $blob, bool $header = false) : void {}
 
@@ -39,7 +39,7 @@ class Assets {
 
  	public function link() : string {}
 
- 	public function loadAssetFile(string $file) : void {}
+ 	public function loadAssetFile(string $file) : array {}
 
  	public function reset() : void {}
 
