@@ -89,12 +89,12 @@ public:
 		addstyle_fn = "addstyle";
 		assets_key = "assets";
 
-
+		OBfn.init();
 	}
 
 	void init_req() override
 	{
-		OBfn.init();
+		
 	}
 };
 
