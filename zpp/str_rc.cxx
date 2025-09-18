@@ -227,7 +227,7 @@ str_rc::lowercase()
 		zend_string* p = zend_string_tolower(s);
 		if (p == s)
 		{
-			try_decref(p); // undo
+			try_decref(p); // undo unwanted rc++
 		}
 		else {
 			adopt(p); 
