@@ -211,7 +211,7 @@ Day24::format(int flags)
 }
 
 str_rc 
-Day24::toString()
+Day24::toString() const
 {
 	str_rc result;
 	result.adopt(day24_format(tval_, SEC_AUTO));

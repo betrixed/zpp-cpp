@@ -45,7 +45,7 @@ namespace wcc {
 
 		str_rc format(int flags);
 
-		str_rc toString();
+		str_rc toString() const override;
 
 		static bool 		day24_time(int hours, int mins, double secs, double& ret, bool except=false);
 		static bool		 	day24_str(const char* s, long slen, double& ret, bool except=false);
