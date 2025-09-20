@@ -383,7 +383,7 @@ PHP_RSHUTDOWN_FUNCTION(wcc)
 	zpp::state_init::end_request();
 
 #ifdef BASE_DEBUG
-	wcc::mgr_link::report();
+	zpp::mgr_link::report();
 #endif
 
 	return SUCCESS;
@@ -412,7 +412,7 @@ extern "C" {
 zend_module_entry wcc_module_entry = {
 	STANDARD_MODULE_HEADER,
 	"Wcc",					/* Extension name */
-	ext_functions,			/* defined in wcc_arginfo.h */
+	ext_functions,			
 	PHP_MINIT(wcc),		/* PHP_MINIT - Module initialization */
 	PHP_MSHUTDOWN(wcc),	/* PHP_MSHUTDOWN - Module shutdown */
 	PHP_RINIT(wcc),		/* PHP_RINIT - Request initialization */

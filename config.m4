@@ -1,4 +1,4 @@
-./dnl config.m4 for extension wcc
+dnl config.m4 for extension wcc
 
 dnl Comments in this file start with the string 'dnl'.
 dnl Remove where necessary.
@@ -15,7 +15,6 @@ if test "$PHP_WCC" != "no"; then
   
   FLAGS="-fPIC"
   CXXFLAGS="$CXXFLAGS -Wall -O2 --std=c++23 -I./include"
-  
   PHP_REQUIRE_CXX()
   AC_LANG([C++])
   
