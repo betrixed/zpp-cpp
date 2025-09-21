@@ -464,7 +464,7 @@ fntable::init()
     get_dirname.set_fname(s_dirname);
     call_user_func_array.set_fname(s_call_user_func_array);
 
-    //fgetcsv.set_fname(s_fgetcsv);
+    state_init::init();
 
 }
 
