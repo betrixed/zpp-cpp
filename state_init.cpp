@@ -41,18 +41,22 @@ state_init::state_init() : next_((state_init*)nullptr)
 }
 
 
-void //static
+int //static
 state_init::init_all()
 {
-    #ifdef DEBUG_XTRA
+    #ifdef DEBUG_EXTRA
         zend_printf("init_all\n");
     #endif
+    int result = 0;
     state_init* link = state_init::first_;
+
     while(link)
     {
         link->init();
+        result++;
         link = link->next_;
     }
+    return result;
 }
 
 void //static
@@ -73,6 +77,7 @@ state_init::end_all()
 void //virtual
 state_init::init()
 {
+   zend_printf("Init in module %lx type %s", (long unsigned) this, typeid(*this).name());
 }
 
 void //virtual

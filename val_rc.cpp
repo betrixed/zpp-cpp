@@ -207,6 +207,12 @@ val_rc::val_rc(base_d* cobj)
     val_ptr(&zv_).bind_object(cobj->vobj());
 }
 
+val_rc::val_rc(double value)
+{
+    zv_ = {0};
+    ZVAL_DOUBLE(&zv_, value);
+}
+
 val_rc::val_rc(bool bval)
 {
     zv_ = {0};

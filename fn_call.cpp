@@ -116,6 +116,14 @@ bool fnexists::call(str_ptr arg)
 }
 
 str_rc 
+fn_dirname::call(str_ptr name)
+{
+    ZVAL_STR(argsptr(), name);
+    str_rc result = call_fn();
+    return result;
+}
+
+str_rc 
 pregquote::call(str_ptr str, str_ptr delimiter)
 {
     zval* pz = argsptr();
@@ -265,6 +273,44 @@ fn_fgetcsv::fn_fgetcsv() : fn_call_args<1>()
     set_fname(FTAB.s_fgetcsv);
 }
 
+str_rc
+getcwd()
+{
+    fn_call fc;
+    fc.set_fname(FTAB.s_getcwd);
+    return fc.call_fn();
+}
+
+val_rc 
+fn_constant::call(str_ptr name)
+{
+    //showstr("fn_constant call", name);
+    //showmem("fn", &fci_.function_name);
+    ZVAL_STR(argsptr(), name);
+    val_rc result;
+    result = call_fn();
+    //showmem("constant value", result);
+    return result;
+}
+
+bool 
+fn_defined::call(str_ptr name)
+{
+    ZVAL_STR(argsptr(), name);
+    val_rc result = call_fn();
+    return result.isTrue();
+}
+
+void 
+fn_define::call(str_ptr name, val_ptr value)
+{
+    zval* args = argsptr();
+    ZVAL_STR(args, name);
+    ZVAL_COPY_VALUE(args+1, value);
+
+    call_fn();
+}
+
 val_rc 
 fn_fgetcsv::call(val_ptr file_res)
 {
@@ -279,10 +325,34 @@ bool extnloaded::call(str_ptr name)
     return val_ptr(result).isTrue();
 }
 
+val_rc 
+constant(str_ptr name)
+{
+    return FTAB.get_constant.call(name);
+}
+
 bool 
 function_exists(str_ptr name)
 {
     return FTAB.function_exists.call(name);
+}
+
+str_rc 
+dirname(str_ptr path)
+{
+    return FTAB.get_dirname.call(path);
+}
+
+bool 
+defined(str_ptr name)
+{
+    return FTAB.defined.call(name);
+}
+
+void 
+define(str_ptr name, val_ptr value)
+{
+    FTAB.define.call(name, value);
 }
 
 str_rc 
@@ -362,7 +432,7 @@ json_decode(str_ptr str, bool asArray,  int flags)
 void  // virtual
 fntable::init()
 {        
-    //zend_printf("fntable init\n");
+    zend_printf("fntable init\n");
 
     s_extension_loaded = "extension_loaded";
     s_function_exists = "function_exists";
@@ -373,6 +443,11 @@ fntable::init()
     s_fgetcsv = "fgetcsv";
     s_fopen = "fopen";
     s_fclose = "fclose";
+    s_constant = "constant";
+    s_dirname = "dirname";
+    s_getcwd = "getcwd";
+    s_defined = "defined";
+    s_define = "define";
 
     extension_loaded.set_fname(s_extension_loaded);
     function_exists.set_fname(s_function_exists);
@@ -381,7 +456,12 @@ fntable::init()
     pathinfo.set_fname(s_pathinfo);
     fopen.set_fname(s_fopen);
     fclose.set_fname(s_fclose);
+    defined.set_fname(s_defined);
+    define.set_fname(s_define);
 
+    get_constant.set_fname(s_constant);
+    zend_printf("Set constant fn\n");
+    get_dirname.set_fname(s_dirname);
     call_user_func_array.set_fname(s_call_user_func_array);
 
     //fgetcsv.set_fname(s_fgetcsv);

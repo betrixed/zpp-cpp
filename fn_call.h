@@ -29,8 +29,6 @@
 
 
 namespace zpp {
-
-
     /**
      *  callable_fn, for PHP "Callable"
      *  Is PHP wrap for call_user_function
@@ -75,7 +73,7 @@ namespace zpp {
 
     	fn_call();
         ~fn_call();
-
+        
         void set_fci(zend_object* obj , str_ptr method, HashTable* nargs = nullptr);
         
         void set_fname(str_ptr name);
@@ -183,6 +181,16 @@ namespace zpp {
         str_rc call(str_ptr name);
     };
 
+    class fn_define : public fn_call_args<2> {
+    public:
+        void call(str_ptr name, val_ptr value);
+    };
+
+    class fn_defined : public fn_call_args<1> {
+    public:
+        bool call(str_ptr name);
+    };
+
     /**
      * @class
         *  PathInfo
@@ -231,6 +239,16 @@ namespace zpp {
         val_rc call(zval* arg1, zval* arg2);
     };
 
+    class fn_constant : public fn_call_args<1>
+    {
+    public:
+        val_rc call(str_ptr name);
+    };
+    class fn_dirname : public fn_call_args<1>
+    {
+    public:
+        str_rc call(str_ptr name);
+    };
     /** 
      *  zend_string passed to set_fname
      *  MUST be defined prior to the fci_args
@@ -242,6 +260,10 @@ namespace zpp {
     class fntable : public state_init {
     public:
 
+        fntable() : state_init() 
+        {
+        }
+
         str_intern  s_function_exists;
         str_intern  s_file_get_contents;
         str_intern  s_extension_loaded;
@@ -251,6 +273,11 @@ namespace zpp {
         str_intern  s_fgetcsv;
         str_intern  s_fopen;
         str_intern  s_fclose;
+        str_intern  s_constant;
+        str_intern  s_dirname;
+        str_intern  s_defined;
+        str_intern  s_define;
+        str_intern  s_getcwd;
 
         extnloaded    extension_loaded;
         fnexists      function_exists;
@@ -258,12 +285,15 @@ namespace zpp {
         file_content  file_get_contents;
         fn_fopen      fopen;
         fn_fclose     fclose;
-
+        fn_constant   get_constant;
+        fn_dirname    get_dirname;
+        fn_define     define;
+        fn_defined    defined;
         PathInfo      pathinfo;
         FCall2        call_user_func_array;
         fn_call       get_called_class;
         
-        virtual void init();
+        void init() override;
 
     };
 
@@ -285,7 +315,7 @@ namespace zpp {
         str_intern  array_pop;
 
         
-        virtual void init();
+        void init() override;
     };
 
 
@@ -320,6 +350,18 @@ namespace zpp {
     str_rc preg_quote(str_ptr expr, str_ptr delimiter);
 
     str_rc file_get_contents(str_ptr path, int offset=0, size_t len=0);
+
+    val_rc constant(str_ptr name);
+
+    str_rc dirname(str_ptr path);
+
+    bool defined(str_ptr name);
+
+    void define(str_ptr name, val_ptr value);
+
+    str_rc getcwd();
+
+
 
 }; // end namespace zpp
 #endif

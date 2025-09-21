@@ -85,6 +85,8 @@ public:
 
     val_rc(int value);
 
+    val_rc(double value);
+
     val_rc(const val_ptr& rc);
 
     val_rc(const str_ptr& rc);

@@ -107,6 +107,7 @@ namespace zpp {
 
 		static val_rc  strtotime(zval* value);
 		static str_rc  date(str_ptr dfmt, zval* value);
+		static double  microtime();
 
 	};
 }; // namespace

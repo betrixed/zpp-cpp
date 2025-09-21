@@ -568,7 +568,7 @@ Link all instances of a class T, by optionally mixing in this template.
 		}
 
 
-		static zend_class_entry classEntry(zend_class_entry* zce)
+		static zend_class_entry* classEntry(zend_class_entry* zce)
 		{
 			if (zce == nullptr)
 			{

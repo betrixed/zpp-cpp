@@ -305,7 +305,13 @@ dt_interval::daystotal()
 	return obj_ptr(obj_).property(DTData.days_prop);
 }
 
-
+ double  //static - taken from ext/standard/microtime.c
+ datetime_obj::microtime()
+ {
+ 	struct timeval tp = {0};
+ 	gettimeofday(&tp, nullptr);
+	return (double)(tp.tv_sec + tp.tv_usec / 1.0e6);
+ }
 
 }; // namespace
 
