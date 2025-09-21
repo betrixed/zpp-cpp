@@ -77,7 +77,8 @@ state_init::end_all()
 void //virtual
 state_init::init()
 {
-   zend_printf("Init in module %lx type %s", (long unsigned) this, typeid(*this).name());
+    zend_printf("static first_ %lx ", (long unsigned) &first_);
+   zend_printf("Init in module %lx type %s\n", (long unsigned) this, typeid(*this).name());
 }
 
 void //virtual
