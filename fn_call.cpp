@@ -432,7 +432,7 @@ json_decode(str_ptr str, bool asArray,  int flags)
 void  // virtual
 fntable::init()
 {        
-    zend_printf("fntable init\n");
+    //zend_printf("fntable init\n");
 
     s_extension_loaded = "extension_loaded";
     s_function_exists = "function_exists";

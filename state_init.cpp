@@ -45,7 +45,7 @@ int //static
 state_init::init_all()
 {
     #ifdef DEBUG_EXTRA
-        zend_printf("init_all\n");
+    //    zend_printf("init_all\n");
     #endif
     int result = 0;
     state_init* link = state_init::first_;
@@ -63,7 +63,7 @@ void //static
 state_init::end_all()
 {
     #ifdef DEBUG_XTRA
-        zend_printf("end_all\n");
+    //    zend_printf("end_all\n");
     #endif
     state_init* link = state_init::first_;
     while(link)
@@ -92,7 +92,7 @@ void //static
 state_init::init_request()
 {
     #ifdef DEBUG_EXTRA
-        zend_printf("init_request\n");
+    //    zend_printf("init_request\n");
     #endif
 
     state_init* link = state_init::first_;
@@ -107,7 +107,7 @@ void //static
 state_init::end_request()
 {
     #ifdef DEBUG_EXTRA
-        zend_printf("end_request\n");
+    //    zend_printf("end_request\n");
     #endif
     state_init* link = state_init::first_;
     while(link)
