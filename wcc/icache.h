@@ -8,6 +8,7 @@
 
 
 
+
 namespace wcc {
 
 class  ICache : public base_d {
