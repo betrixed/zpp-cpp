@@ -18,15 +18,17 @@
 #include "route_match.h"
 #endif
 
-#ifdef __cplusplus
+
 extern "C" {
-#endif
+	#include "ext/pcre/php_pcre.h"
+}
 
-#include "ext/pcre/php_pcre.h"
 
-#ifdef __cplusplus
-};
-
+#ifndef WCC_ROUTESET_ARGINFO
+#define WCC_ROUTESET_ARGINFO
+extern "C" {
+	#include "stub/routeset_arginfo.h"	
+}
 #endif
 
 

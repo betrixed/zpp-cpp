@@ -7,10 +7,11 @@
 
 namespace wcc {
 
+using namespace zpp;
+
 class  Config : public base_d {
 public:
-	
-	class Config_Mgr :  public base_obj_mgr<Config>
+	class Config_Mgr : public base_obj_mgr<Config>
 	{
 		virtual void init_class_fn() {
 		// base class

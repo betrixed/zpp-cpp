@@ -13,6 +13,13 @@
 #include "reflect_cache.h"
 #endif
 
+#ifndef WCC_SERVICES_ARGINFO
+#define WCC_SERVICES_ARGINFO
+extern "C" {
+	#include "stub/services_arginfo.h"
+};
+#endif
+
 namespace wcc 
 {
 	using namespace zpp;

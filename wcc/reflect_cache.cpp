@@ -9,6 +9,13 @@
 #include "zpp/fn_call.h"
 #endif
 
+#ifndef REFLECT_CACHE_ARGINFO
+#define REFLECT_CACHE_ARGINFO
+extern "C" {
+	#include "stub/reflectcache_arginfo.h"	
+};
+#endif
+
 namespace wcc 
 {
 	using namespace zpp;

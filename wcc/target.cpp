@@ -5,6 +5,13 @@
 #include "target.h"
 #endif
 
+#ifndef WCC_TARGET_ARGINFO
+#define WCC_TARGET_ARGINFO
+extern "C" {
+	#include "stub/target_arginfo.h"	
+};
+#endif
+
 namespace wcc {
 
 class TargetData : public state_init {

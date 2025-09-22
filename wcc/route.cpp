@@ -13,6 +13,13 @@
 #include "state_init.h"
 #endif
 
+#ifndef WCC_ROUTE_ARGINFO
+#define WCC_ROUTE_ARGINFO
+extern "C" {
+	#include "stub/route_arginfo.h"	
+};
+#endif
+
 namespace wcc {
  	
 Route::RouteMgr Route::omg;

@@ -28,6 +28,13 @@ extern "C" {
 #include "reflect_cache.h"
 #endif
 
+#ifndef ROUTE_MATCH_ARGINFO
+#define ROUTE_MATCH_ARGINFO
+extern "C" {
+	#include "stub/routematch_arginfo.h"	
+};
+#endif
+
 #include <string.h>
 
 

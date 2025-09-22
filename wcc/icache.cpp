@@ -13,10 +13,10 @@
 #include "services.h"
 #endif
 
-#ifndef ICACHE_ARGINFO_H
-#define ICACHE_ARGINFO_H
+#ifndef ICACHE_ARGINFO
+#define ICACHE_ARGINFO
 extern "C" {
-	#include "icache_arginfo.h"
+	#include "stub/icache_arginfo.h"
 };
 #endif
 

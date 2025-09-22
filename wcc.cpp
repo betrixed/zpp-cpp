@@ -56,6 +56,7 @@ extern "C" {
 #include "wcc/strfns.cpp"
 
 #include "wcc/pair.cpp"
+#include "wcc/replace.cpp"
 #include "wcc/config.cpp"
 
 #include "wcc/assets.cpp"
@@ -177,13 +178,6 @@ extern "C" {
 */
 
 
-PHP_FUNCTION(Wcc_init_globals)
-{
-	ZEND_PARSE_PARAMETERS_START(0, 0)
-   ZEND_PARSE_PARAMETERS_END();
-}
-
-
 PHP_MSHUTDOWN_FUNCTION(wcc)
 {
 
@@ -235,6 +229,7 @@ PHP_MINIT_FUNCTION(wcc)
 #endif
 
 #ifdef WCC_CONFIG_CPP
+	PHP_MINIT(wcc_replace_reg)(INIT_FUNC_ARGS_PASSTHRU);
 	PHP_MINIT(Wcc_Config_reg)(INIT_FUNC_ARGS_PASSTHRU);
 #endif
 
@@ -306,6 +301,7 @@ PHP_MINIT(wcc_route_add)(INIT_FUNC_ARGS_PASSTHRU);
 
 #ifdef WCC_ASSETS_CPP
 PHP_MINIT(wcc_assets_reg)(INIT_FUNC_ARGS_PASSTHRU);
+
 #endif
 
 #ifdef ICACHE_CPP

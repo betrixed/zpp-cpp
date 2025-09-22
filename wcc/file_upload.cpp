@@ -5,10 +5,10 @@
 #include "file_upload.h"
 #endif
 
-#ifndef REQUEST_GLOBALS_ARGINFO
-#define REQUEST_GLOBALS_ARGINFO
+#ifndef  FILE_UPLOAD_ARGINFO
+#define  FILE_UPLOAD_ARGINFO
 extern "C" {
-	#include "stub/request_globals_arginfo.h"
+	#include "stub/fileupload_arginfo.h"
 };
 #endif
 

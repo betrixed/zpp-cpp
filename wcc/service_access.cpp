@@ -10,6 +10,13 @@
 #include "services.h"
 #endif
 
+#ifndef WCC_SERVICEACCESS_ARGINFO
+#define WCC_SERVICEACCESS_ARGINFO
+extern "C" {
+	#include "stub/serviceaccess_arginfo.h"
+};
+#endif
+
 using namespace zpp;
 
 namespace wcc {

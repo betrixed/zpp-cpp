@@ -5,8 +5,8 @@
 #include "config.h"
 #endif
 
-#ifndef WCC_ASSETS_H
-#include "assets.h"
+#ifndef WCC_REPLACE_H
+#include "replace.h"
 #endif
 
 extern "C" {
@@ -17,7 +17,11 @@ extern "C" {
 }
 
 
+
 namespace wcc {
+	using namespace zpp;
+
+
 	Config::Config_Mgr Config::omg;
 
 	using namespace zpp;
@@ -267,17 +271,21 @@ Config::clear()
 	}
 }
 
+
 str_rc 
 Config::unhive(str_ptr subj)
 {
 	obj_ptr self(vobj());
 
-	Replace propnames(self, ASI.prop_expr);
+	Replace propnames(self, REPi.prop_expr);
 
 	return propnames.eval(subj);
 }
 
 }; // namespace wcc //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@&&&&&&&&&&&&&&&&&&&&&&&&@@@@@@@@@@@@@@@
+
+using namespace wcc;
+using namespace zpp;
 
 ZEND_METHOD(Wcc_Config, __construct)
 {

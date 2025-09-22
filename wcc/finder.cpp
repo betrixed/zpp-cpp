@@ -6,7 +6,16 @@
 #include "finder.h"
 #endif
 
+#ifndef WCC_FINDER_ARGINFO
+#define WCC_FINDER_ARGINFO
+extern "C" {
+	#include "stub/finder_arginfo.h"
+}
+
+#endif
+
 #include <filesystem>
+
 
 namespace wcc {
 

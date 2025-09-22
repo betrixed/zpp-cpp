@@ -5,6 +5,13 @@
 #include "pair.h"
 #endif
 
+#ifndef WCC_PAIR_ARGINFO
+#define WCC_PAIR_ARGINFO
+extern "C" {
+	#include "stub/pair_arginfo.h"
+};
+#endif
+
 namespace wcc {
 
 base_obj_mgr<Pair> Pair::omg;

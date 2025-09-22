@@ -139,24 +139,6 @@ public:
  	str_rc styleHeader();
 };
 
-class Replace : public base_d {
-	protected:
-		preg   expr_;
-		obj_rc src_;
-	public:
-
-		static base_obj_mgr<Replace> omg;
-
-		static str_rc property(obj_ptr obj, str_ptr data);
-
-		Replace(obj_ptr obj, str_ptr expr = str_ptr());
-
-		Replace();
-
-		void   construct(obj_ptr obj, str_ptr rexpr);
-
-		str_rc eval(str_ptr src);
-	};
-}; // namespace wcc
+}; //namespace wcc
 
 #endif

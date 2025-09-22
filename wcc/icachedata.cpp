@@ -5,11 +5,10 @@
 #include "icachedata.h"
 #endif
 
-#ifndef ICACHE_ARGINFO_H
-#define ICACHE_ARGINFO_H
-
+#ifndef ICACHE_DATA_ARGINFO
+#define ICACHE_DATA_ARGINFO
 extern "C" {
-	#include "stub/icache_arginfo.h"
+	#include "stub/icachedata_arginfo.h"
 };
 #endif
 
