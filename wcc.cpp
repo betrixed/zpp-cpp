@@ -121,10 +121,6 @@ extern "C" {
 
 */
 
-//GLOBAL_RESPONSE_CPP
- //#include "wcc/global_response.cpp"
- //#include "wcc/headers_response.cpp"
-
 
 
 

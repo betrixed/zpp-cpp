@@ -1,6 +1,7 @@
 #ifndef HEADERS_RESPONSE_CPP
 #define HEADERS_RESPONSE_CPP
 
+// not used anymore, excised from global_response
 #ifndef HEADERS_RESPONSE_H
 #include "headers_response.h"
 #endif
@@ -13,7 +14,10 @@ extern "C" {
 #endif
 
 namespace wcc {
-	Hmap_mgr Headers::omg;
+
+using namespace zpp;
+
+Headers_mgr Headers::omg;
 
 bool Headers::send()
 {
@@ -71,6 +75,9 @@ void Headers::Headers::setRaw(str_ptr zs)
 
 
 }; //namespace wcc
+
+using namespace wcc;
+using namespace zpp;
 
 ZEND_METHOD(Wcc_Headers, get)
 {
