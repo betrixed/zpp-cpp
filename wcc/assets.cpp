@@ -701,10 +701,7 @@ Assets::styleHeader()
 	return buf.zstr();
 }
 
-//============================================================================================
 
-
-}; //end namespace wcc
 
 str_rc Assets::implode_blob(htab_ptr blobs)
 {
@@ -717,6 +714,11 @@ str_rc Assets::implode_blob(htab_ptr blobs)
 		return estr;
 	}
 }
+
+
+}; //end namespace wcc
+//============================================================================================
+
 using namespace wcc;
 using namespace zpp;
 
@@ -958,8 +960,6 @@ PHP_MINIT_FUNCTION(wcc_assets_reg)
 {
 
 	Assets::omg.classEntry(register_class_Wcc_Assets());
-
-	Replace::omg.classEntry(register_class_Wcc_Replace());
 
 	return SUCCESS;
 

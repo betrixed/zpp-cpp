@@ -8,6 +8,8 @@
 
 namespace wcc {
 
+	using namespace zpp;
+
 	enum {
 		// from ext/fileinfo/libmagic/magic.h
 		FILEINFO_MIME_TYPE = 0x0000010,

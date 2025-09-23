@@ -19,6 +19,8 @@ extern "C" {
 
 namespace wcc {
 
+using namespace zpp;
+
 base_obj_mgr<Finder> Finder::omg;
 
 class Finder_init : public state_init 
@@ -240,6 +242,7 @@ Finder::find(str_ptr cname)
 }; //namespace wcc
 
 using namespace wcc;
+using namespace zpp;
 
 ZEND_METHOD(Wcc_Finder, addFolder)
 {

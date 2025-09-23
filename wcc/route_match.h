@@ -12,6 +12,7 @@
 namespace wcc {
 
 class Route;
+class RouteSet;
 
 class RouteMatch : public base_d {
 

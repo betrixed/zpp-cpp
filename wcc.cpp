@@ -295,10 +295,6 @@ PHP_MINIT(wcc_pair_d)(INIT_FUNC_ARGS_PASSTHRU);
 	PHP_MINIT(route_match_d)(INIT_FUNC_ARGS_PASSTHRU);
 #endif
 
-#ifdef WCC_ROUTE_ADD_CPP
-PHP_MINIT(wcc_route_add)(INIT_FUNC_ARGS_PASSTHRU);
-#endif
-
 #ifdef WCC_ASSETS_CPP
 PHP_MINIT(wcc_assets_reg)(INIT_FUNC_ARGS_PASSTHRU);
 

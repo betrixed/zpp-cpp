@@ -24,6 +24,10 @@ extern "C" {
 #include "route_set.h"
 #endif
 
+#ifndef WCC_TARGET_H
+#include "target.h"
+#endif
+
 #ifndef REFLECT_CACHE_H
 #include "reflect_cache.h"
 #endif

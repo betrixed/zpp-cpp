@@ -17,9 +17,12 @@ extern "C" {
 #endif
 
 namespace wcc {
-	base_obj_mgr<FileUpload> FileUpload::omg;
 
 using namespace zpp;
+	
+base_obj_mgr<FileUpload> FileUpload::omg;
+
+
 
 void FileUpload::debug_info(htab_rw di)
 {
@@ -92,6 +95,8 @@ FileUpload::moveTo(str_ptr destination)
 
 }; // end namespace
 
+using namespace wcc;
+using namespace zpp;
 
 ZEND_METHOD(Wcc_FileUpload, __construct)
 {

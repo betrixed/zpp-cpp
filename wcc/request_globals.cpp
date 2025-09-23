@@ -15,7 +15,6 @@
 
 #ifndef REQUEST_GLOBALS_ARGINFO
 #define REQUEST_GLOBALS_ARGINFO
-
 extern "C" {
 	#include "stub/request_globals_arginfo.h"
 };

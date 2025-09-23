@@ -1,7 +1,14 @@
 #ifndef HTMLGEM_CPP
 #define HTMLGEM_CPP
 
+#ifndef HTMLGEM_H
 #include "htmlgem.h"
+#endif
+
+#ifndef MONEY_FMT_H
+#include "money_fmt.h"
+#endif
+
 
 #ifndef HTMLGET_ARGINFO_H
 #define HTMLGET_ARGINFO_H
@@ -10,14 +17,12 @@ extern "C" {
 }
 #endif
 
+
 namespace wcc {
 
-	base_obj_mgr<HtmlGem>  HtmlGem::omg;
-
-#ifndef MONEY_FMT_H
-#include "money_fmt.h"
-#endif
-
+using namespace zpp;
+	
+base_obj_mgr<HtmlGem>  HtmlGem::omg;
 
 using  Value = val_ptr;
 

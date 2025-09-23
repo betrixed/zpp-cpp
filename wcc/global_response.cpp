@@ -843,6 +843,9 @@ Response::setRawHeader(str_ptr header)
 
 }; // namespace wcc
  
+using namespace wcc;
+using namespace zpp;
+
 //@@@@@@@@@@@@@@@@		 @@@@@@@@@@@@@@@@@@     @@@@@@@@@@@@@@@@@    @@@@@@@@@@@@@@@    @@@@@@@@@@@@@@@
 ZEND_METHOD(Wcc_Response, __construct)
 {
