@@ -456,11 +456,12 @@ fntable::init()
     pathinfo.set_fname(s_pathinfo);
     fopen.set_fname(s_fopen);
     fclose.set_fname(s_fclose);
+
     defined.set_fname(s_defined);
     define.set_fname(s_define);
-
     get_constant.set_fname(s_constant);
     get_dirname.set_fname(s_dirname);
+    
     call_user_func_array.set_fname(s_call_user_func_array);
 
     state_init::init();
