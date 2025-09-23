@@ -41,6 +41,7 @@
 */
 
 #include "htab_walk.h"
+#include "for_key_value.h"
 #include "state_init.h"
 #include "class_data.h"
 

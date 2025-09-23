@@ -20,7 +20,6 @@ for_key_value::start(HashTable* ht)
 	lose();
 	ht_ = ht;
 	own();
-
 	count_ = ht_->nNumOfElements;
 	isPacked_ = (HT_FLAGS(ht_) & HASH_FLAG_PACKED);
 	int elemSize = ZEND_HASH_ELEMENT_SIZE(ht_); //16 + {0|1}*(4) 16:Packed, 20:Not packed

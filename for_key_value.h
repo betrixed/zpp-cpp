@@ -14,7 +14,7 @@
 #endif
 
 #ifndef HTAB_RC_H
-#include "htab_rc.h"
+#include "htab_ptr.h"
 #endif
 
 namespace zpp {

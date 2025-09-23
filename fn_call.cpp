@@ -460,7 +460,6 @@ fntable::init()
     define.set_fname(s_define);
 
     get_constant.set_fname(s_constant);
-    zend_printf("Set constant fn\n");
     get_dirname.set_fname(s_dirname);
     call_user_func_array.set_fname(s_call_user_func_array);
 
