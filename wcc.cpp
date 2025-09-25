@@ -51,127 +51,77 @@ extern "C" {
 
 //#define DEBUG_EXTRA
 
+//core wcc
 #include "zpp/base.cpp"
 #include "zpp/show_zpp.cpp"
 #include "wcc/strfns.cpp"
-
-#include "wcc/pair.cpp"
+#include "wcc/service_access.cpp"
+#include "wcc/finder.cpp"
+#include "wcc/reflect_cache.cpp"
+#include "wcc/services.cpp"
 #include "wcc/replace.cpp"
 #include "wcc/config.cpp"
+#include "wcc/hmap.cpp"
+#include "wcc/icachedata.cpp"
+#include "wcc/icache.cpp"
 
-#include "wcc/assets.cpp"
+// route, wccr
 
+#include "wcc/pair.cpp"
 #include "wcc/target.cpp"
 #include "wcc/route.cpp"
 #include "wcc/route_set.cpp"
 #include "wcc/route_match.cpp"
+#include "wcc/request_globals.cpp"
+#include "wcc/file_upload.cpp"
+#include "wcc/global_response.cpp"
 
-#include "wcc/service_access.cpp"
-
+// html generation, wcch
+#include "wcc/assets.cpp"
 #include "wcc/money_fmt.cpp"
-#include "toml/toml_php.cpp"
+
 #include "wcc/htmlgem.cpp"
 #include "wcc/search_list.cpp"
 #include "wcc/plate.cpp"
 #include "wcc/plate_engine.cpp"
 #include "wcc/htmlplates.cpp"
 
-#include "wcc/finder.cpp"
-#include "wcc/request_globals.cpp"
-#include "wcc/file_upload.cpp"
 
 
+//WCC_SERVICES_CPP
+// miscellaneous, wccm
+#include "toml/toml_php.cpp"
+#include "wcc/xmlread.cpp"
 
-#include "wcc/global_response.cpp"
+
+ //ICACHE_DATA_CPP
+
+//Wcd classes, wccd
 #include "wcd/iconfig.cpp"
 #include "wcd/iserver.cpp"
 #include "wcd/idriver.cpp" 
 #include "wcd/ibuild.cpp"
 
 #include "wcd/raw.cpp"
-
 #include "wcd/model.cpp"
+#include "wcd/irow.cpp"
 
 #include "wcd/sql_ipart.cpp"
 #include "wcd/sql_isql.cpp"
 #include "wcd/bindings.cpp"
 #include "wcd/runsql.cpp"
 #include "wcd/simple.cpp"
-#include "wcc/hmap.cpp"
-#include "wcd/irow.cpp"
+
+
 #include "wcd/operation.cpp"
 #include "wcd/select.cpp"
 #include "wcd/update.cpp"
 #include "wcd/insert.cpp"
 #include "wcd/delete.cpp"
 
- //SQL_IPART_CPP
-//#include "wcc/sql_ipart.cpp"
-//#include "wcc/sql_isql.cpp"
-
-
-//TOML_PHP_CPP
-//#include "wcc/toml_php.cpp"
-//#include "wcc/daytime.cpp"
-
-/* // TOML_STREAM_CPP
-#include "wcc/ucode8.cpp"
-#include "wcc/str8_obj.cpp"
-#include "wcc/toml_stream.cpp"
-
-*/
 
 
 
-
-//FILTER_WCF_CPP // not actually used much, so not included
-//#include "wcc/filter_wcf.cpp"
-
-
-//#include "wcc/wcc_config.cpp" // not adequatedly functional
-
-// REQUEST_GLOBALS_CPP
-
-/*
-#include "wcc/request_globals.cpp"
-#include "wcc/file_upload.cpp"
-
-
-// HTMLGEM_CPP
-
-
-
-
-
-#include "wcc/plate_wcp.cpp"
-#include "wcc/plate_engine.cpp"
-*/
-
-//WCC_SERVICES_CPP
-#include "wcc/reflect_cache.cpp"
-#include "wcc/services.cpp"
-
-#define XMLREAD_CODE
-
-#ifdef XMLREAD_CODE
-#include "wcc/xmlread.cpp"
-#endif
-
- //ICACHE_DATA_CPP
-#include "wcc/icachedata.cpp"
-#include "wcc/icache.cpp"
-
-/*
-#include "wcc/reflect_cache.cpp"
-
-#include "wcc/target.cpp"
-
-#include "wcc/route_set.cpp"
-
-#include "wcc/route_match.cpp"
-#include "wcc/route_add.cpp"
-
-*/
 
 
 PHP_MSHUTDOWN_FUNCTION(wcc)

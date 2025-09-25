@@ -5,6 +5,14 @@
 #include "iconfig.h"
 #endif
 
+#ifndef REFLECT_CACHE_H
+#include "wcc/reflect_cache.h"
+#endif
+
+#ifndef WCC_SERVICES_H
+#include "wcc/services.h"
+#endif
+
 #ifndef ICONFIG_ARGINFO_H
 #define ICONFIG_ARGINFO_H
 extern "C" {
@@ -23,6 +31,7 @@ extern "C" {
 namespace wcd {
 
 using namespace zpp;
+using namespace wcc;
 
 CfgInit ICS;
 

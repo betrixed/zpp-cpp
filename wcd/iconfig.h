@@ -10,7 +10,7 @@
 namespace wcd {
 
 	using namespace zpp;
-	using namespace wcc;
+
 
 /** To properly inherit Hmap property access and array access, 
  *   also have to override own special object handlers

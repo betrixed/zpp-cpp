@@ -82,21 +82,6 @@ using namespace zpp;
 			b = val_ptr(two_).zlong();
 			return (a + b) / double(a);
 		}
-		/*
-		val_rc key()
-		{
-			val_rc result;
-			get_first(p_zobj_, result);
-			return result;
-		}
-
-		val_rc value()
-		{
-			val_rc result;
-			get_second(p_zobj_, result);
-			return result;
-		}
-		*/
 
 	public:
 		static base_obj_mgr<Pair> omg;

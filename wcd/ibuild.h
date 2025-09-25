@@ -11,7 +11,6 @@
 namespace wcd {
 
 	using namespace zpp;
-	using namespace wcc;
 
 	class Bindings;
 	class ISql;

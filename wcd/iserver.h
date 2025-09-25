@@ -12,7 +12,6 @@
 namespace wcd {
 
 	using namespace zpp;
-	using namespace wcc;
 
 	class IDriver;
 	class IConfig;

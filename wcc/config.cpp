@@ -80,7 +80,6 @@ Config::construct(htab_ptr values)
 {
 	if (values.size() > 0)
 	{
-		obj_ptr self(this->vobj());
 		for_key_value wk;
 
 		for(wk.start(values); wk.ok(); wk.next())
@@ -96,7 +95,7 @@ Config::getOrNot(str_ptr name, val_ptr ifnot)
 {
 	val_rc result;
 
-	obj_ptr self(this->vobj());
+	obj_ptr self = this->self();
 
 	//result = self.property(name);
 

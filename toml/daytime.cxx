@@ -31,21 +31,11 @@ public:
 
 D24Init D24;
 
-Day24* //static 
-day24_obj::make_obj(str_ptr zs)
-{
-
-	zend_object* obj = Day24::omg.make_new();
-
-	Day24* cobj = zobj_toc<Day24>(obj);
-	cobj->construct(zs);
-	return cobj;
-}
-
 day24_obj::day24_obj(str_ptr zs) : obj_rc()
 {
-	Day24* cobj = make_obj(zs);
-	obj_ = cobj->vobj(); // internal adopt
+	*((obj_rc*)(this)) = Day24::omg.new_zobj();
+	Day24* cobj = zobj_toc<Day24>(obj_);
+	cobj->construct(zs);
 }
 
 str_rc 

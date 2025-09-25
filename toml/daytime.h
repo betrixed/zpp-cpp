@@ -56,9 +56,6 @@ namespace wcc {
 
 	
 	class day24_obj : public obj_rc {
-	protected:
-		// return un-managed object
-		static Day24* make_obj(str_ptr zs);
 	public:
 		
 		
