@@ -204,6 +204,7 @@ val_rc::val_rc(HashTable* ht)
 val_rc::val_rc(base_d* cobj)
 {
     zv_ = {0};
+    
     val_ptr(&zv_).bind_object(cobj->vobj());
 }
 
