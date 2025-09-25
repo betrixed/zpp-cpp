@@ -427,7 +427,7 @@ val_ptr::operator=(const val_rc& rc)
 	return *this;
 }
 
-void // protected
+void // protected, can bump reference count
 val_ptr::bind_string(zend_string* s)
 {
     if (s) 
@@ -457,7 +457,14 @@ val_ptr::bind_object(zend_object* obj)
 {
     if (obj)
     {
-        ZVAL_OBJ_COPY(p_, obj);
+        ZVAL_OBJ(p_, obj);
+        if (! (GC_FLAGS(obj) & GC_IMMUTABLE))
+        {
+        	GC_ADDREF(obj);
+        }
+        else {
+        	Z_TYPE_FLAGS_P(p_) = 0; 
+        }
     }
     else {
         ZVAL_NULL(p_);
@@ -465,13 +472,13 @@ val_ptr::bind_object(zend_object* obj)
 }
 
 
-void 
+void // protected
 val_ptr::bind_array(HashTable* ht)
 {
     if (ht) {
         ZVAL_ARR(p_, ht);
-        if ( !(ht->gc.u.type_info & GC_IMMUTABLE)){
-            ht->gc.refcount++;
+        if ( ! ( GC_FLAGS(ht) & GC_IMMUTABLE)) {
+            GC_ADDREF(ht);
         }
         else { // clear 
         	Z_TYPE_FLAGS_P(p_) = 0; 

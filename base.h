@@ -62,17 +62,7 @@
 
 
 #define BASE_ZOBJPTR
-
-#ifndef BASE_ZOBJPTR
-/* 
-	This is virtual because problem of base class needs
-	to use the sizeof(*this) of enclosing class.
-*/
-#define VIRTUAL_ZOBJPTR virtual zend_object* vobj() const \
-	{ return (zend_object*) ((char*)(this) + sizeof(*this) + sizeof(char*)); }
-#else
 #define VIRTUAL_ZOBJPTR
-#endif
 
 
 namespace zpp {
@@ -206,11 +196,11 @@ Link all instances of a class T, by optionally mixing in this template.
 	class   base_d {
 	#ifdef BASE_ZOBJPTR
 	protected:
-		zend_object* p_zobj_;
+		zend_object* self_;
 	#endif
 	public:
 		#ifdef BASE_ZOBJPTR
-		base_d() : p_zobj_(nullptr) {}
+		base_d() : self_(nullptr) {}
 		#else
 		base_d() {}
 		#endif
@@ -223,31 +213,27 @@ Link all instances of a class T, by optionally mixing in this template.
 			// unattached have no zend_object*
 			// Does this allow C++ objects to co-delete their zend_object?
 			#ifdef BASE_ZOBJPTR
-			if (p_zobj_) {
+			if (self_) {
 				#ifdef BASE_DEBUG
-				zend_printf("dtor zend object %lx\n", (uintptr_t)p_zobj_);
+				zend_printf("dtor zend object %lx\n", (uintptr_t)self_);
 				#endif
-				zend_object_std_dtor(p_zobj_);
+				zend_object_std_dtor(self_);
 			}
-			p_zobj_ = nullptr;
+			self_ = nullptr;
 			#endif
 		}
 
 		#ifdef BASE_ZOBJPTR
 		//! Memory vs Time-Indirection trade off. Stored pointer or call function to calculate it.
-		zend_object* vobj() const { return p_zobj_; }
-		void set_vobj(zend_object* zo) { p_zobj_ = zo; }
-		#else 
-		// This needs to be redeclared in every class
-		/* virtual zend_object* zobj() const {
-			return (zend_object*) ((char*)(this) + sizeof(*this) + sizeof(char*));
-		}*/
-		VIRTUAL_ZOBJPTR
+		zend_object* vobj() const { return self_; }
+		obj_ptr      self() const { return obj_ptr(self_); }
+
+		void set_vobj(zend_object* zo) { self_ = zo; }
 		#endif
 
 		/**
 		 * Assumptions of memory layout. 
-		 * Expect zend_object pointer p_zobj_
+		 * Expect zend_object pointer self_
 		 * at zero offset of base_d pointer.
 		 * at (base_d* + 1) is address of base_d, ie pointer to self.
 		 * at (self* + 1) is storage of the zend_object.
@@ -324,11 +310,14 @@ Link all instances of a class T, by optionally mixing in this template.
 	template<typename T>
 	T* zobj_toc(zend_object* zobj)
 	{
+		return *(((T**)(zobj))-1);
+		/*
 		T** pp = (T**)(zobj);
 		//--pp;
 		// pointer below start of zend_object
 		return *(--pp); 
 		//assert(zo;
+		*/
 	}
 
 	/** Template function to get back to C++ object from zval*.
@@ -467,28 +456,30 @@ Link all instances of a class T, by optionally mixing in this template.
 #endif
 		};
 
+		/**
 		static zend_object* zobj(T* cobj)
 		{
 			return (zend_object*)((char*)cobj + sizeof(char*) + sizeof(T));
 		}
+		*/
 
 		static zend_string* name()
 		{
 			return (mydef::class_entry_->name);
 		}
 
+		/*
 		static zend_object* make_new()
 		{
 			zend_object* nobj = mydef::znew_ex(class_entry_);
 			return nobj;
 		}
+		*/
 
 		static  obj_rc new_zobj()
 		{
-			// setup object with handlers
 			obj_rc result;
-			result.adopt(mydef::make_new());
-			//showobj("new_zobj()", result);
+			result.adopt(mydef::znew_ex(class_entry_));
 			return result;
 		}
 

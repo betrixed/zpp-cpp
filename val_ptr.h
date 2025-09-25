@@ -50,7 +50,7 @@ public:
     static void set_global(str_ptr key, val_ptr value);
     static val_ptr get_global(str_ptr key);
 
-     // potential inlines
+    // Potential inlines. Set value+flags without rc++
     static void string_bind(zval* zt, zend_string* s)
     {
         if (s) 
