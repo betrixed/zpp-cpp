@@ -127,7 +127,7 @@ Config::getOrNot(str_ptr name, val_ptr ifnot)
 bool      
 Config::has(str_ptr name)
 {
-	obj_ptr self = this->self():
+	obj_ptr self = this->self();
 
 	return self.has_property(name);
 }
