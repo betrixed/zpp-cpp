@@ -127,7 +127,7 @@ Config::getOrNot(str_ptr name, val_ptr ifnot)
 bool      
 Config::has(str_ptr name)
 {
-	obj_ptr self(this->vobj());
+	obj_ptr self = this->self():
 
 	return self.has_property(name);
 }
@@ -135,7 +135,7 @@ Config::has(str_ptr name)
 val_rc
 Config::get(str_ptr name)
 {
-	obj_ptr self(this->vobj());
+	obj_ptr self = this->self();
 
 	return self.property(name);
 }
@@ -262,7 +262,7 @@ Config::clear()
 
 	for_key_value wk;
 
-	obj_ptr self(vobj());
+	obj_ptr self = this->self();
 
 	for(wk.start(look); wk.ok(); wk.next())
 	{

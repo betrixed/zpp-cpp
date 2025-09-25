@@ -74,8 +74,6 @@ val_rc
 Services::call_value(obj_ptr callme)
 {
 	val_rc self(this);
-	// 1 argument
-	//showmem("self svc", self);
 	return callme.callable(self);
 }
 
