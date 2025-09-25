@@ -6,11 +6,15 @@
 #include "zpp/base.h"
 #endif
 
-
+#ifndef WCC_SERVICES_H
+#include "services.h"
+#endif
 
 
 namespace wcc {
 
+	using namespace zpp;
+	
 class  ICache : public base_d {
 protected:
 	htab_rc  cached_;

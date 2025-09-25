@@ -9,6 +9,8 @@
 
 namespace wcc {
 
+	using namespace zpp;
+
 class  Services : public base_d {
 protected:
 	htab_rc  active_;

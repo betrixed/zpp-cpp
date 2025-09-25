@@ -16,7 +16,7 @@ namespace wcc {
 
 using namespace zpp;
 
-	base_obj_mgr<ICacheData>  ICacheData::omg;
+base_obj_mgr<ICacheData>  ICacheData::omg;
 
 /**
  * Serialize keys

@@ -9,9 +9,6 @@
 #include "icache.h"
 #endif
 
-#ifndef WCC_SERVICES_H
-#include "services.h"
-#endif
 
 #ifndef ICACHE_ARGINFO
 #define ICACHE_ARGINFO
@@ -21,9 +18,12 @@ extern "C" {
 #endif
 
 namespace wcc {
-	base_obj_mgr<ICache> ICache::omg;
 
 using namespace zpp;
+
+	base_obj_mgr<ICache> ICache::omg;
+
+
 
 obj_rc 
 ICache::make_cache( val_ptr options, val_ptr services)
@@ -403,7 +403,9 @@ void ICache::setServices(val_ptr svc)
 
 }; //namespace wcc
 
-//@@@@@@@@@@@ @@@@@@@@@@@@@@@@@@@@@ @@@@@@@@@@@@@@ @@@@@@@@@@@@@@@
+
+using namespace wcc;
+using namespace zpp;
 
 ZEND_METHOD(Wcc_ICache, __construct)
 {

@@ -5,8 +5,12 @@
 #include "zpp/base.h"
 #endif
 
+#ifndef WCC_SERVICES_H
+#include "services.h"
+#endif
 
 namespace wcc {
+	using namespace zpp;
 
 	class  ICacheData : public base_d {
 	protected:
