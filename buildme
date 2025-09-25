@@ -3,11 +3,6 @@ set -e
 sudo make clean
 clear
 
-make ./stub/htmlgem_arginfo.h
-make ./stub/assets_arginfo.h
-
-
-
 #make ./stub/toml_arginfo.h
 
 #make ./stub/irow_arginfo.h
