@@ -269,9 +269,9 @@ obj_ptr::property_ptr(str_ptr name)
 void obj_ptr::property(str_ptr key, str_ptr value)
 {
     zval temp = {0};
+    // No rc++, because zval is thrown away on exit.
     val_ptr::string_bind(&temp, value);
     property(key, val_ptr(&temp));
-
 }
 void
 obj_ptr::property(str_ptr key, val_ptr value)

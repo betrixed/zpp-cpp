@@ -50,42 +50,74 @@ public:
     static void set_global(str_ptr key, val_ptr value);
     static val_ptr get_global(str_ptr key);
 
-    // Potential inlines. Set value+flags without rc++
-    static void string_bind(zval* zt, zend_string* s)
+    // Potential inlines. 
+    // Return true if reference counted value
+    static bool string_bind(zval* zt, zend_string* s)
     {
+        bool result = false;
         if (s) 
         {
             Z_STR_P(zt) = s;
-            Z_TYPE_INFO_P(zt) = (GC_FLAGS(s) & IS_STR_INTERNED) ? IS_STRING : IS_STRING_EX;
+            result = (GC_FLAGS(s) & IS_STR_INTERNED) ? false : true;
+            Z_TYPE_INFO_P(zt) = result ? IS_STRING_EX : IS_STRING;
+        }
+        else {
+            ZVAL_NULL(zt);
+        }
+        return result;
+    }
+/*
+    static void string_rcbind(zval* zt, zend_string* s)
+    {
+        if (s) 
+        {        
+            uint32_t flags;
+            if (GC_FLAGS(s) & IS_STR_INTERNED)
+            {
+                flags = IS_STRING;
+            }
+            else {
+                flags = IS_STRING_EX;
+                GC_ADDREF(s);
+            }
+            Z_TYPE_INFO_P(zt) = flags;
         }
         else {
             ZVAL_NULL(zt);
         }
     }
-    static void array_bind(zval* zt, HashTable* ht)
+*/
+    // return true if reference counted value
+    static bool array_bind(zval* zt, HashTable* ht)
     {
+        bool result = false;
         if (ht)
         {
             Z_ARR_P(zt)=ht;
-            Z_TYPE_INFO_P(zt) = (GC_FLAGS(ht) & GC_IMMUTABLE) ? IS_ARRAY : IS_ARRAY_EX;       
+            result = (GC_FLAGS(ht) & GC_IMMUTABLE) ? false : true;
+            Z_TYPE_INFO_P(zt) = result ? IS_ARRAY_EX : IS_ARRAY;       
         }
         else
         {   
             ZVAL_NULL(zt);
         }
+        return result;
     }
-        
-    static void object_bind(zval* zt, zend_object* obj)
+    
+    // return true if reference counted value
+    static bool object_bind(zval* zt, zend_object* obj)
     {
         if (obj)
         {
             Z_OBJ_P(zt) = obj;
-            Z_TYPE_INFO_P(zt) = (GC_FLAGS(obj) & GC_IMMUTABLE) ? IS_OBJECT : IS_OBJECT_EX;
+            result = (GC_FLAGS(obj) & GC_IMMUTABLE) ? false : true;
+            Z_TYPE_INFO_P(zt) = result ? IS_OBJECT_EX : IS_OBJECT;
         }
         else
         {   
             ZVAL_NULL(zt);
         }
+        return result;
     }
 
     static zval* real_zval(const zval* zv);

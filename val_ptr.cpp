@@ -511,50 +511,6 @@ val_ptr::php_constant(str_ptr name)
 }
 
 
-/*
-void // static 
-val_ptr::array_bind(zval* tmp, HashTable* t)
-{
-	if (!t)
-	{
-		ZVAL_NULL(tmp);
-	}
-	else
-	{	
-		Z_ARR_P(tmp)=t;
-		Z_TYPE_INFO_P(tmp) = (GC_FLAGS(t) & GC_IMMUTABLE) ? IS_ARRAY : IS_ARRAY_EX;
-	}
-}
-*/
-/*
-void
-val_ptr::object_bind(zval* temp, zend_object* obj)
-{
-	if (!obj)
-	{
-		ZVAL_NULL(temp);
-	}
-	else
-	{	
-		Z_OBJ_P(temp) = obj;
-		Z_TYPE_INFO_P(temp) = (GC_FLAGS(obj) & GC_IMMUTABLE) ? IS_OBJECT : IS_OBJECT_EX;
-	}
-}*/
-
-/*
-void // static 
-val_ptr::string_bind(zval* tmp, zend_string* s)
-{
-	if (s) 
-    {
-    	Z_STR_P(tmp) = s;
-    	Z_TYPE_INFO_P(tmp) = (GC_FLAGS(s) & IS_STR_INTERNED) ? IS_STRING : IS_STRING_EX;
-    }
-    else {
-        ZVAL_NULL(tmp);
-    }
-}
-*/
 
 }; //namespace
 //val_ptr.cpp
