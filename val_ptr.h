@@ -66,27 +66,7 @@ public:
         }
         return result;
     }
-/*
-    static void string_rcbind(zval* zt, zend_string* s)
-    {
-        if (s) 
-        {        
-            uint32_t flags;
-            if (GC_FLAGS(s) & IS_STR_INTERNED)
-            {
-                flags = IS_STRING;
-            }
-            else {
-                flags = IS_STRING_EX;
-                GC_ADDREF(s);
-            }
-            Z_TYPE_INFO_P(zt) = flags;
-        }
-        else {
-            ZVAL_NULL(zt);
-        }
-    }
-*/
+
     // return true if reference counted value
     static bool array_bind(zval* zt, HashTable* ht)
     {
@@ -107,6 +87,7 @@ public:
     // return true if reference counted value
     static bool object_bind(zval* zt, zend_object* obj)
     {
+        bool result = false;
         if (obj)
         {
             Z_OBJ_P(zt) = obj;
