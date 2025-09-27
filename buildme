@@ -2,36 +2,5 @@
 set -e
 sudo make clean
 clear
-
-make ./stub/config_arginfo.h
-make ./stub/finder_arginfo.h
-make ./stub/hmap_arginfo.h
-make ./stub/icache_arginfo.h
-make ./stub/icachedata_arginfo.h
-make ./stub/pair_arginfo.h
-make ./stub/reflectcache_arginfo.h
-make ./stub/replace_arginfo.h
-
-make ./stub/services_arginfo.h
-make ./stub/serviceaccess_arginfo.h
-make ./stub/wcc_arginfo.h
-
-
-#make ./stub/toml_arginfo.h
-
-#make ./stub/irow_arginfo.h
-#make ./stub/iconfig_arginfo.h
-#make ./stub/ds_arginfo.h
-#make ./stub/db_arginfo.h
-#make ./stub/model_arginfo.h
-#make ./stub/operations_arginfo.h
-#make sqlipart_arginfo.h
-#make toml_arginfo.h
-#make htmlgem_arginfo.h
-#make wcc_config_arginfo.h
-#make request_globals_arginfo.h
-#make global_response_arginfo.h
-#make filter_wcf_arginfo.h
-#make ustr8_arginfo.h
-
+make
 sudo make install
