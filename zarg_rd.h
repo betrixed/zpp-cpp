@@ -74,19 +74,6 @@ public:
 		return nargs_;
 	}
 
-/*
-	#if ZEND_DEBUG 
-		void setArgCt(int ct)
-		{
-			(ze_)->This.u2.num_args = ct;
-		}
-
-		zval* argPtr()
-		{
-			return argptr_;
-		}
-	#endif
-*/
 };
 
 }; //namespace zpp

@@ -20,7 +20,7 @@ namespace zpp {
 
 	class htab_rc;
 	class obj_rc;
-
+	class val_rc;
 	/**
 	 * @class obj_ptr
 	 * @brief A simple zend_object* wrapper
@@ -78,6 +78,8 @@ namespace zpp {
 		//! set a property value
 		void      property(str_ptr key, val_ptr value);
 		void      property(str_ptr key, str_ptr value);
+		void      property(str_ptr key, obj_ptr value);
+		void      property(str_ptr key, val_rc& value);
 		
 		bool      has_property(str_ptr name);
 		void      unset_property(str_ptr name);

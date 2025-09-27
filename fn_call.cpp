@@ -448,6 +448,9 @@ fntable::init()
     s_getcwd = "getcwd";
     s_defined = "defined";
     s_define = "define";
+    s_php_sapi_name = "php_sapi_name";
+
+
 
     extension_loaded.set_fname(s_extension_loaded);
     function_exists.set_fname(s_function_exists);
@@ -463,8 +466,9 @@ fntable::init()
     get_dirname.set_fname(s_dirname);
     
     call_user_func_array.set_fname(s_call_user_func_array);
+    php_sapi_name.set_fname(s_php_sapi_name);
 
-    state_init::init();
+    //state_init::init();
 
 }
 

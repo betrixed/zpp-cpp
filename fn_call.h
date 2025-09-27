@@ -278,6 +278,7 @@ namespace zpp {
         str_intern  s_defined;
         str_intern  s_define;
         str_intern  s_getcwd;
+        str_intern  s_php_sapi_name;
 
         extnloaded    extension_loaded;
         fnexists      function_exists;
@@ -291,7 +292,7 @@ namespace zpp {
         fn_defined    defined;
         PathInfo      pathinfo;
         FCall2        call_user_func_array;
-        fn_call       get_called_class;
+        fn_call       php_sapi_name;
         
         void init() override;
 

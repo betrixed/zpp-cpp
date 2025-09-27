@@ -266,13 +266,32 @@ obj_ptr::property_ptr(str_ptr name)
     return zend_std_get_property_ptr_ptr(obj_, name, BP_VAR_IS, nullptr);
 }
 
+void 
+obj_ptr::property(str_ptr key, obj_ptr value)
+{
+    zval temp = {0};
+    val_ptr::object_bind(&temp, value);
+    property(key, val_ptr(&temp));
+}
+
+void 
+obj_ptr::property(str_ptr key, val_rc& value)
+{
+    zend_class_entry* scope = EG(fake_scope);
+
+    if (!scope) {
+        scope = zend_get_executed_scope();
+    }
+    zend_update_property_ex(scope, obj_, key, value);   
+}
+
 void obj_ptr::property(str_ptr key, str_ptr value)
 {
     zval temp = {0};
     val_ptr::string_bind(&temp, value);
     property(key, val_ptr(&temp));
-
 }
+
 void
 obj_ptr::property(str_ptr key, val_ptr value)
 {
@@ -281,11 +300,7 @@ obj_ptr::property(str_ptr key, val_ptr value)
 
     if (!scope) {
         scope = zend_get_executed_scope();
-        //zend_printf("ex scope %lx\n", scope);
     }
-    //zend_printf("zobj property ");
-    //showstr("key", key);
-    
     zend_update_property_ex(scope, obj_, key, value);    
 }
 
