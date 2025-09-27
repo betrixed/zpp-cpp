@@ -43,11 +43,13 @@ namespace zpp {
 
 		static void try_addref(zend_string* zs)
 		{
-			if (zs->gc.u.type_info & IS_STR_INTERNED)
+			// also IS_STR_INTERNED == GC_IMMUTABLE
+			//if (zs->gc.u.type_info & IS_STR_INTERNED)
+			if (GC_TYPE_INFO(zs) & IS_STR_INTERNED)
 			{
 				return;
 			}
-			++zs->gc.refcount;
+			GC_ADDREF(zs);
 		}
 
 		static void try_decref(zend_string* zs)

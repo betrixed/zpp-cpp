@@ -105,35 +105,35 @@ htab_rw::htab_rw(zval* p, size_t init)
 }
 
 
-void htab_rw::push_back(HashTable* t)
+void htab_rw::push_back(HashTable* ht)
 {
 	zval tmp = {0};
-	htab_rc::array_bind(&tmp, t);
-	if (zend_hash_next_index_insert(ht_, &tmp))
+	bool refct = val_ptr::array_bind(&tmp, ht);
+	if (zend_hash_next_index_insert(ht, &tmp))
 	{
-		htab_rc::try_addref(t);
+		if (refct) GC_ADDREF(ht);
 	}
 }
 
 void htab_rw::push_back(zend_string* zs)
 {
 	zval tmp = {0};
-	val_ptr::string_bind(&tmp,zs);
+	bool refct = val_ptr::string_bind(&tmp,zs);
 
 	if (zend_hash_next_index_insert(ht_, &tmp))
 	{
-		str_rc::try_addref(zs);	
+		if (refct) GC_ADDREF(zs);	
 	}
 }
 
 void htab_rw::push_back(zend_object* zo)
 {
 	zval tmp = {0};
-	val_ptr::object_bind(&tmp, zo);
+	bool refct = val_ptr::object_bind(&tmp, zo);
 
 	if (zend_hash_next_index_insert(ht_, &tmp))
 	{
-		obj_rc::try_addref(zo);
+		if (refct) GC_ADDREF(zo);
 	}
 }
 
@@ -200,15 +200,15 @@ htab_rw::set(zend_string* key, zend_string* value)
 */
 
 
-void htab_rw::set(zend_string* key, HashTable* htab)
+void htab_rw::set(zend_string* key, HashTable* ht)
 {
 	//showstr("htab_rw::set  key", key);
 
 	zval tmp = {0};
-	htab_rc::array_bind(&tmp, htab);
+	bool refct = val_ptr::array_bind(&tmp, ht);
 	if (zend_hash_update(ht_, key, &tmp))
 	{	 
-		htab_rc::try_addref(htab);
+		if (refct) GC_ADDREF(ht);
 	}
 	//showarray("htab_rw::set  HashTable* ", value);
 }
@@ -216,12 +216,12 @@ void htab_rw::set(zend_string* key, HashTable* htab)
 void htab_rw::set(zend_string* key, zend_object* obj)
 {
 	zval temp = {0};
-	val_ptr::object_bind(&temp, obj);
+	bool refct = val_ptr::object_bind(&temp, obj);
 
 	if (zend_hash_update(ht_, key, &temp))
 	{
-		if (obj)
-			obj_rc::try_addref(obj);
+		if (obj && refct)
+			GC_ADDREF(obj);
 	}
 }
 
@@ -280,13 +280,11 @@ htab_rw::set(zend_string* key, zend_string* value)
 	//showstr("htab_rw::set key", key);
 	//showstr("htab_rw::set value", value);
 	zval temp = {0};
-	val_ptr::string_bind(&temp, value);
+	bool refct = val_ptr::string_bind(&temp, value);
 	if (zend_hash_update(ht_, key, &temp))
 	{
-		if (Z_TYPE_FLAGS(temp) != 0)
-		{
-			str_rc::try_addref(value);
-		}
+		if (refct) GC_ADDREF(value);
+
 	}
 }
 
@@ -336,28 +334,25 @@ void htab_rw::set(zend_long idx, val_ptr value)
 }
 */
 
-void htab_rw::set(zend_long idx, HashTable* value)
+void htab_rw::set(zend_long idx, HashTable* ht)
 {
 	zval temp = {0};
-	htab_rc::array_bind(&temp,value);
+	bool refct = val_ptr::array_bind(&temp,ht);
 	
 	if (zend_hash_index_update(ht_, idx, &temp))
 	{
-		htab_rc::try_addref(value);
+		if (refct) GC_ADDREF(ht);
 	}
 }
 
 void htab_rw::set(zend_long idx, zend_object* value)
 {
 	zval temp = {0};
-	val_ptr::object_bind(&temp,value);
+	bool refct = val_ptr::object_bind(&temp,value);
 	
 	if (zend_hash_index_update(ht_, idx, &temp))
 	{
-		if (Z_TYPE_FLAGS(temp) != 0)
-		{
-			val_rc::try_addref(&temp);
-		}
+		if (refct) GC_ADDREF(value);
 	}
 }
 
