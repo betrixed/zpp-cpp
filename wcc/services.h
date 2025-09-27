@@ -41,7 +41,7 @@ public:
 
 	obj_ptr  newInstance(str_ptr key);
 	
-	obj_ptr  setObject(obj_ptr obj, str_ptr key);
+	obj_ptr  setObject(obj_ptr obj, str_ptr key = str_ptr());
 
 	/* return cached object */
 	obj_ptr  getObject(str_ptr key);
@@ -53,7 +53,9 @@ public:
 
 	void       setDefer(str_ptr name, val_ptr value);
 	void       set(str_ptr name, val_ptr value);
-	val_rc   get(str_ptr name);
+	void       set(str_ptr name, obj_ptr obj);
+	
+	val_rc   	get(str_ptr name);
 
 	void       unset(str_ptr name);
 

@@ -309,6 +309,14 @@ void  Services::set(str_ptr name, val_ptr value)
 	temp.set(key, data);
 }
 
+void  
+Services::set(str_ptr name, obj_ptr obj)
+{
+	htab_rw temp(active_);
+
+	temp.set(name, obj);
+}
+
 val_rc  
 Services::get(str_ptr name)
 {
@@ -504,16 +512,20 @@ ZEND_METHOD(Wcc_Services, newInstance)
 
 ZEND_METHOD(Wcc_Services, set)
 {
-	zend_string* skey;
-	zval*        svalue;
+	zarg_rd args(execute_data);
 
-	ZEND_PARSE_PARAMETERS_START(2, 2)
-		Z_PARAM_STR(skey)
-		Z_PARAM_ZVAL(svalue)
-	ZEND_PARSE_PARAMETERS_END();
+	str_ptr skey;
+	val_ptr pvalue;
 
-	Services* svc = zval_toc<Services>(ZEND_THIS);
-	svc->set(skey, svalue);
+	args.zstring(skey, args.need(1));
+	
+	pvalue = args.need(2);
+
+	if (!args.throw_errors())
+	{
+		Services* svc = zval_toc<Services>(ZEND_THIS);
+		svc->set(skey, pvalue);
+	}
 
 }
 

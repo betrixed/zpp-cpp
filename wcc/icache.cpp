@@ -53,8 +53,8 @@ ICache::make_cache( val_ptr options, val_ptr services)
            
             if (key.size()) {
                   Services* svc = zval_toc<Services>(services);
-                  val_rc temp(result);
-                  svc->set(key, temp);
+                 // val_rc temp(result);
+                  svc->set(key, result);
             }
         }
     }
