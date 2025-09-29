@@ -12,6 +12,8 @@
 #include "zpp/show_zpp.h"
 
 // compile 
+#include "wcc/icache.cpp"
+#include "wcc/icachedata.cpp"
 #include "wcc/file_upload.cpp"
 #include "wcc/global_response.cpp"
 #include "wcc/pair.cpp"
@@ -50,6 +52,11 @@ PHP_MINIT(wcc_pair_d)(INIT_FUNC_ARGS_PASSTHRU);
 
 #ifdef WCC_TARGET_CPP
 		PHP_MINIT(wcc_target)(INIT_FUNC_ARGS_PASSTHRU);
+#endif
+
+#ifdef ICACHE_CPP
+	PHP_MINIT(Wcc_ICacheData_reg)(INIT_FUNC_ARGS_PASSTHRU);
+	PHP_MINIT(Wcc_ICache_reg)(INIT_FUNC_ARGS_PASSTHRU);
 #endif
 	return SUCCESS;
 }
