@@ -64,6 +64,7 @@ extern "C" {
 #include "wcc/hmap.cpp"
 #include "wcc/icachedata.cpp"
 #include "wcc/icache.cpp"
+#include "wcc/cachemgr.cpp"
 
 // route, wccr
 
@@ -118,11 +119,6 @@ extern "C" {
 #include "wcd/update.cpp"
 #include "wcd/insert.cpp"
 #include "wcd/delete.cpp"
-
-
-
-
-
 
 PHP_MSHUTDOWN_FUNCTION(wcc)
 {
