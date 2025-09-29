@@ -77,6 +77,8 @@ namespace zpp {
         void set_fci(zend_object* obj , str_ptr method, HashTable* nargs = nullptr);
         
         void set_fname(str_ptr name);
+        void set_obj(zend_object* obj);
+        
         void set_named_args(HashTable* nargs);
 
         void wipe();
@@ -169,6 +171,11 @@ namespace zpp {
         bool call(val_ptr fres);
     };
 
+    class fn_filemtime : public fn_call_args<1> {
+    public:
+        long call(str_ptr path);
+    };
+
     class fn_fgetcsv : public fn_call_args<1> {
     public:
         fn_fgetcsv();
@@ -184,6 +191,7 @@ namespace zpp {
     class fn_define : public fn_call_args<2> {
     public:
         void call(str_ptr name, val_ptr value);
+        void call(str_ptr name, str_ptr value);
     };
 
     class fn_defined : public fn_call_args<1> {
@@ -279,6 +287,7 @@ namespace zpp {
         str_intern  s_define;
         str_intern  s_getcwd;
         str_intern  s_php_sapi_name;
+        str_intern  s_filemtime;
 
         extnloaded    extension_loaded;
         fnexists      function_exists;
@@ -293,6 +302,7 @@ namespace zpp {
         PathInfo      pathinfo;
         FCall2        call_user_func_array;
         fn_call       php_sapi_name;
+        fn_filemtime  filemtime;
         
         void init() override;
 
@@ -359,7 +369,7 @@ namespace zpp {
     bool defined(str_ptr name);
 
     void define(str_ptr name, val_ptr value);
-
+    void define(str_ptr name, str_ptr value);
     str_rc getcwd();
 
 

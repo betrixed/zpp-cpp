@@ -401,7 +401,7 @@ htab_empty::htab_empty()
 }
 
 
-htab_rc
+htab_rc //static
 htab_rc::getValues(htab_ptr hr)
 {
 	 htab_rc result;
@@ -419,7 +419,7 @@ htab_rc::getValues(htab_ptr hr)
 }
 
 //* return indexed array of keys
-htab_rc 
+htab_rc //static
 htab_rc::getKeys(htab_ptr hr)
 {
 	 htab_rc result;

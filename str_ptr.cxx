@@ -31,7 +31,7 @@ const char* str_ptr::empty = "\0";
 int 
 zs_cmp(zend_string* a, zend_string* b)
 {
-	if (!a && !b)
+	if (a == b)
 	{
 		return 0;
 	}
@@ -41,6 +41,8 @@ zs_cmp(zend_string* a, zend_string* b)
 	if (!b) {
 		return 1;
 	}
+
+
 	const char* ap = ZSTR_VAL(a);
 	const char* bp = ZSTR_VAL(b);
 
@@ -54,7 +56,7 @@ zs_cmp(zend_string* a, zend_string* b)
 
 int zs_cmp_ci(zend_string* a, zend_string* b)
 {
-	if (!a && !b)
+	if (a == b)
 	{
 		return 0;
 	}

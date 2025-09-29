@@ -73,6 +73,12 @@ fn_call::set_fci(zend_object* obj, str_ptr method, HashTable* nargs)
     fci_.named_params = nargs; 
 }
 
+void 
+fn_call::set_obj(zend_object* obj)
+{
+    fci_.object = obj;
+}
+
 /**
  * set_fname must convert the C string
  *  to a zend_string* with persistent flag set.
@@ -293,12 +299,28 @@ fn_constant::call(str_ptr name)
     return result;
 }
 
+long 
+fn_filemtime::call(str_ptr path)
+{
+    ZVAL_STR(argsptr(), path);
+    val_rc result = call_fn();
+    return result.zlong();
+}
+
 bool 
 fn_defined::call(str_ptr name)
 {
     ZVAL_STR(argsptr(), name);
     val_rc result = call_fn();
     return result.isTrue();
+}
+void 
+fn_define::call(str_ptr name, str_ptr value)
+{
+    zval* args = argsptr();
+    ZVAL_STR(args, name);
+    ZVAL_STR(args+1, value);
+    call_fn();
 }
 
 void 
@@ -351,6 +373,12 @@ defined(str_ptr name)
 
 void 
 define(str_ptr name, val_ptr value)
+{
+    FTAB.define.call(name, value);
+}
+
+void 
+define(str_ptr name, str_ptr value)
 {
     FTAB.define.call(name, value);
 }
@@ -449,6 +477,7 @@ fntable::init()
     s_defined = "defined";
     s_define = "define";
     s_php_sapi_name = "php_sapi_name";
+    s_filemtime = "filemtime";
 
 
 
@@ -467,6 +496,7 @@ fntable::init()
     
     call_user_func_array.set_fname(s_call_user_func_array);
     php_sapi_name.set_fname(s_php_sapi_name);
+    filemtime.set_fname(s_filemtime);
 
     //state_init::init();
 
