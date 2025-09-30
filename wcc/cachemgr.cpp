@@ -5,6 +5,10 @@
 #include "cachemgr.h"
 #endif
 
+#ifndef REFLECT_CACHE_H
+#include "reflect_cache.h"
+#endif
+
 #ifndef TOML_PHP_H
 #include "toml/toml_php.h"
 #endif
