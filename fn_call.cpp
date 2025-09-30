@@ -478,7 +478,7 @@ fntable::init()
     s_define = "define";
     s_php_sapi_name = "php_sapi_name";
     s_filemtime = "filemtime";
-
+    s_simple_loader = "simple_loader";
 
 
     extension_loaded.set_fname(s_extension_loaded);
@@ -497,6 +497,7 @@ fntable::init()
     call_user_func_array.set_fname(s_call_user_func_array);
     php_sapi_name.set_fname(s_php_sapi_name);
     filemtime.set_fname(s_filemtime);
+    simple_loader.set_fname(s_simple_loader);
 
     //state_init::init();
 

@@ -199,6 +199,15 @@ namespace zpp {
         bool call(str_ptr name);
     };
 
+    class fn_simple_loader : public fn_call_args<1> {
+    public:
+        val_rc call(str_ptr path)
+        {
+            ZVAL_STR(argsptr(), path);
+            return call_fn();
+        }
+    };
+
     /**
      * @class
         *  PathInfo
@@ -288,6 +297,7 @@ namespace zpp {
         str_intern  s_getcwd;
         str_intern  s_php_sapi_name;
         str_intern  s_filemtime;
+        str_intern  s_simple_loader;
 
         extnloaded    extension_loaded;
         fnexists      function_exists;
@@ -303,6 +313,7 @@ namespace zpp {
         FCall2        call_user_func_array;
         fn_call       php_sapi_name;
         fn_filemtime  filemtime;
+        fn_simple_loader simple_loader;
         
         void init() override;
 
