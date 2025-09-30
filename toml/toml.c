@@ -51,7 +51,7 @@ void toml_set_memutil(void *(*xxmalloc)(size_t), void (*xxfree)(void *)) {
 #define FREE(a) ppfree(a)
 
 #define malloc(x) error - forbidden - use MALLOC instead
-#define free(x) error - forbidden - use FREE instead
+//#define free(x) error - forbidden - use FREE instead
 #define calloc(x, y) error - forbidden - use CALLOC instead
 
 static void *CALLOC(size_t nmemb, size_t sz) {

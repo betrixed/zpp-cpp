@@ -5,7 +5,23 @@
 #include "cachemgr.h"
 #endif
 
- 
+#ifndef TOML_PHP_H
+#include "toml/toml_php.h"
+#endif
+
+#ifndef XML_READ_H
+#include "wcc/xmlread.h"
+#endif
+
+#ifndef CACHEMGR_ARGINFO_H
+#define CACHEMGR_ARGINFO_H
+
+extern "C" {
+	#include "stub/cachemgr_arginfo.h"
+};
+
+#endif
+
 namespace wcc {
 
 
@@ -23,7 +39,6 @@ void CacheMgr_init::init()
 	expiry_key = "expiry_key";
 	expired_check = "expired_check";
 
-
 	default_cache = "default_cache";
 	file_cache = "file_cache";
 	
@@ -34,9 +49,12 @@ void CacheMgr_init::init()
 	s_setoption = "setoption";
 	s_writecached = "writecached";
 	s_delete_expired = "deleteexpired";
-
+	s_clear_str = "clear";
 	defer_write = "defer_write";
-	
+
+	php_ext = "php";
+	toml_ext = "toml";
+	xml_ext = "xml";
 }
 
 void CacheMgr::construct(htab_ptr cfg)
@@ -86,7 +104,18 @@ void CacheMgr::destruct()
 
 void CacheMgr::clearAll()
 {
+	for_key_value wk;
 
+	fn_call fnclear;
+
+	fnclear.set_fname(Cache_i.s_clear_str);
+
+	for(wk.start(cache_obj_); wk.ok(); wk.next())
+	{
+		obj_rc obj = wk.value();
+		fnclear.set_obj(obj);
+		fnclear.call_fn();
+	}
 }
 
 
@@ -253,7 +282,266 @@ CacheMgr::write_caches()
 }
 
 
-};
+val_rc //static
+CacheMgr::readFile(str_ptr filename, str_ptr ext)
+{
+	str_rc filetype;
 
+	if (!ext.ok())
+	{
+		filetype = FTAB.pathinfo.call(filename, PathInfo::EXTENSION);
+	}
+	else {
+		filetype = ext;
+	}
+	if (zs_cmp_ci(filetype,Cache_i.xml_ext)==0)
+	{
+		return readXml(filename);
+	}
+	if (zs_cmp_ci(filetype,Cache_i.php_ext)==0)
+	{
+		return readPhp(filename);
+	}
+	if (zs_cmp_ci(filetype, Cache_i.toml_ext)==0)
+	{
+		return readToml(filename);
+	}
+	zend_throw_error(zend_ce_error,"Unmatched file extension %s", filetype.data());
+	return val_rc();
+}
+
+val_rc  //static
+CacheMgr::readPhp(str_ptr filename)
+{
+	return FTAB.simple_loader.call(filename);
+}
+
+val_rc  //static
+CacheMgr::readToml(str_ptr filename)
+{
+	val_rc result(Toml::decodeFile(filename));
+	return result;
+}
+val_rc  //static
+CacheMgr::readXml(str_ptr filename)
+{
+	val_rc result(Wcc_XmlRead::fromFile(filename));
+	return result;
+}
+
+};
+// end namespace wcc;
+
+
+using namespace wcc;
+using namespace zpp;
+
+ZEND_METHOD(Wcc_CacheMgr, __construct)
+{
+	zarg_rd args(execute_data);
+
+	htab_ptr cfg;
+
+	args.zarray(cfg, args.need(1));
+
+	if (!args.throw_errors())
+	{
+		CacheMgr*  cobj = zval_toc<CacheMgr>(ZEND_THIS);
+		cobj->construct(cfg);
+	}
+}
+
+ZEND_METHOD(Wcc_CacheMgr, __destruct)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	CacheMgr*  cobj = zval_toc<CacheMgr>(ZEND_THIS);
+	cobj->destruct();
+}
+
+ZEND_METHOD(Wcc_CacheMgr, __callStatic)
+{
+	zarg_rd args(execute_data);
+
+	str_ptr 	fname;
+	htab_ptr 	params;
+	val_rc      result;
+
+	args.zstring(fname, args.need(1));
+	args.zarray(params, args.need(2));
+
+	if (!args.throw_errors())
+	{
+		result = CacheMgr::callStatic(fname, params);
+	}
+	result.move_zv(return_value);
+}
+
+ZEND_METHOD(Wcc_CacheMgr, clearAll)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	CacheMgr*  cobj = zval_toc<CacheMgr>(ZEND_THIS);
+	cobj->clearAll();
+}
+
+ZEND_METHOD(Wcc_CacheMgr, createCache)
+{
+	zarg_rd args(execute_data);
+
+	str_ptr 	svckey;
+	str_ptr     classname;
+	htab_ptr 	options;
+
+	args.zstring(svckey, args.need(1));
+	args.zstring(classname, args.need(2));
+	args.zarray(options, args.need(3));
+
+	if (!args.throw_errors())
+	{
+		CacheMgr*  cobj = zval_toc<CacheMgr>(ZEND_THIS);
+		cobj->createCache(svckey, classname, options);
+	}
+}
+
+ZEND_METHOD(Wcc_CacheMgr, deleteExpired)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	CacheMgr*  cobj = zval_toc<CacheMgr>(ZEND_THIS);
+	cobj->deleteExpired();
+}
+
+ZEND_METHOD(Wcc_CacheMgr, getCache)
+{
+	obj_ptr result;
+	zarg_rd args(execute_data);
+
+	str_ptr 	svckey;
+	args.zstring(svckey, args.need(1));
+
+	if (!args.throw_errors())
+	{
+		CacheMgr*  cobj = zval_toc<CacheMgr>(ZEND_THIS);
+		result = cobj->getCache(svckey);
+	}
+	result.return_zv(return_value);
+}
+
+ZEND_METHOD(Wcc_CacheMgr, getCacheClass)
+{
+	str_rc 		result;
+	str_ptr 	svckey;
+
+	zarg_rd args(execute_data);
+
+	args.zstring(svckey, args.need(1));
+
+	if (!args.throw_errors())
+	{
+		CacheMgr*  cobj = zval_toc<CacheMgr>(ZEND_THIS);
+		result = cobj->getCacheClass(svckey);
+	}
+	result.move_zv(return_value);
+}
+
+ZEND_METHOD(Wcc_CacheMgr, readCache)
+{
+	zarg_rd args(execute_data);
+
+	str_ptr 	filename;
+	str_ptr     svckey;
+	val_rc      result;
+
+	args.zstring(filename, args.need(1));
+	args.zstring(svckey, args.need(2));
+
+	if (!args.throw_errors())
+	{
+		CacheMgr*  cobj = zval_toc<CacheMgr>(ZEND_THIS);
+		result = cobj->readCache(filename, svckey);
+	}
+	result.move_zv(return_value);
+}
+
+ZEND_METHOD(Wcc_CacheMgr, write_caches)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	CacheMgr*  cobj = zval_toc<CacheMgr>(ZEND_THIS);
+	cobj->write_caches();
+}
+
+ZEND_METHOD(Wcc_CacheMgr, readFile)
+{
+	zarg_rd args(execute_data);
+
+	str_ptr filename;
+	str_ptr ext;
+	val_rc result;
+
+	args.zstring(filename, args.need(1));
+	args.zstring_null(ext, args.option(2));
+	if (!args.throw_errors())
+	{
+		result = CacheMgr::readFile(filename, ext);
+		result.move_zv(return_value);
+	}
+}
+
+ZEND_METHOD(Wcc_CacheMgr, readPhp)
+{
+	zarg_rd args(execute_data);
+
+	str_ptr filename;
+	val_rc result;
+
+	args.zstring(filename, args.need(1));
+
+	if (!args.throw_errors())
+	{
+		result = CacheMgr::readPhp(filename);
+		result.move_zv(return_value);
+	}
+}
+
+ZEND_METHOD(Wcc_CacheMgr, readToml)
+{
+	zarg_rd args(execute_data);
+
+	str_ptr filename;
+	val_rc result;
+
+	args.zstring(filename, args.need(1));
+
+	if (!args.throw_errors())
+	{
+		result = CacheMgr::readToml(filename);
+		result.move_zv(return_value);
+	}
+}
+
+ZEND_METHOD(Wcc_CacheMgr, readXml)
+{
+	zarg_rd args(execute_data);
+
+	str_ptr filename;
+	val_rc result;
+
+	args.zstring(filename, args.need(1));
+
+	if (!args.throw_errors())
+	{
+		result = CacheMgr::readXml(filename);
+		result.move_zv(return_value);
+	}
+}
+
+PHP_MINIT_FUNCTION(Wcc_CacheMgr_reg)
+{
+	CacheMgr::omg.classEntry(register_class_Wcc_CacheMgr());
+
+	return SUCCESS;
+}
 
 #endif

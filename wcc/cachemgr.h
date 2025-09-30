@@ -5,6 +5,9 @@
 #include "zpp/base.h"
 #endif
 
+#ifndef XML_READ_H
+#include "wcc/xmlread.h"
+#endif
 
 namespace wcc {
 
@@ -24,6 +27,7 @@ public:
 
 	str_intern s_set;
 	str_intern s_get;
+	str_intern s_clear_str;
 	
 	str_intern s_delete;
 	str_intern s_getcached;
@@ -31,7 +35,11 @@ public:
 	str_intern s_writecached;
 	str_intern s_delete_expired;
 	
+	str_intern s_simple_loader;
 	
+	str_intern php_ext;
+	str_intern toml_ext;
+	str_intern xml_ext;
 
 	void init() override;
 
@@ -74,6 +82,11 @@ public:
 	htab_rc getCacheKeys();
 
 	val_rc readCache(str_ptr filename, str_ptr cachename);
+
+	static val_rc readFile(str_ptr filename, str_ptr ext);
+	static val_rc readPhp(str_ptr filename);
+	static val_rc readToml(str_ptr filename);
+	static val_rc readXml(str_ptr filename);
 
 	void write_caches();
 

@@ -13,6 +13,12 @@ class CacheMgr {
 
 	public static function __callStatic(string $name, array $args) : mixed {}
 
+	public static function readFile(string $filename, ?string $ext) : mixed {}
+
+	public static function readPhp(string $filename): mixed {}
+	public static function readToml(string $filename): mixed {}
+	public static function readXml(string $filename): mixed {}
+
 	public function clearAll() : void {}
 
 	public function createCache(string $svc_key, string $classname, array $options) : void {}
