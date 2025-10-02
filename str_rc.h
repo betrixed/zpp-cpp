@@ -18,8 +18,6 @@ namespace zpp {
 	class str_ptr;
 	class val_rc;
 	class val_ptr;
-	
-	class str_buf;
 	class str_temp;
 	
 	class str_rc  : public str_ptr
@@ -90,10 +88,9 @@ namespace zpp {
 	    str_rc(val_rc&& rc);
 
 	    str_rc(zend_long ival);
-	    
-	    str_rc(str_buf&& m);
 
 	   
+	    str_rc(const std::string_view& sv);
 
 	    bool ok() const {
 	    	return (s);
@@ -114,8 +111,6 @@ namespace zpp {
 	    const str_rc& operator=(const str_rc& rc);
 	    const str_rc& operator=(zend_string* rc);
 	    const str_rc& operator=(zval* rc);
-		 
-		const str_rc& operator=(str_buf&& m);
 
 	    str_rc& operator=(val_rc&& rc);
 	    str_rc& operator=(str_rc&& rc);

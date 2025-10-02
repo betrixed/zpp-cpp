@@ -116,15 +116,26 @@ void fn_call::throw_failed()
 
 bool fnexists::call(str_ptr arg)
 {
-    ZVAL_STR(argsptr(), (zend_string*)arg);
+    ZVAL_STR(argsptr(), arg);
+    val_rc result = call_fn();
+    return val_ptr(result).zbool();
+}
+
+bool fn_class_exists::call(str_ptr arg)
+{
+    ZVAL_STR(argsptr(), arg);
     val_rc result = call_fn();
     return val_ptr(result).zbool();
 }
 
 str_rc 
-fn_dirname::call(str_ptr name)
+fn_dirname::call(str_ptr name, int level)
 {
-    ZVAL_STR(argsptr(), name);
+    zval* pz = argsptr();
+
+    ZVAL_STR(pz, name);
+    ZVAL_LONG(pz+1, level);
+
     str_rc result = call_fn();
     return result;
 }
@@ -201,6 +212,16 @@ PathInfo::call(str_ptr path, int flags)
     return call_fn();
 }
 
+val_rc 
+fn_simple_loader::call(str_ptr path)
+{
+    val_rc result;
+    ZVAL_STR(argsptr(), path);
+    //showstr("\nload path", path);
+    result = call_fn();
+    //showmem("loader call", result);
+    return result;
+}
 
 val_rc
 array_pop(val_rc& array_ref)
@@ -314,23 +335,25 @@ fn_defined::call(str_ptr name)
     val_rc result = call_fn();
     return result.isTrue();
 }
-void 
-fn_define::call(str_ptr name, str_ptr value)
+
+bool 
+fn_define::call(str_ptr constant_name, str_ptr value)
 {
     zval* args = argsptr();
-    ZVAL_STR(args, name);
+    ZVAL_STR(args, constant_name);
     ZVAL_STR(args+1, value);
-    call_fn();
+    val_rc result = call_fn();
+    return result.isTrue();
 }
 
-void 
-fn_define::call(str_ptr name, val_ptr value)
+bool 
+fn_define::call(str_ptr constant_name, val_ptr value)
 {
     zval* args = argsptr();
-    ZVAL_STR(args, name);
+    ZVAL_STR(args, constant_name);
     ZVAL_COPY_VALUE(args+1, value);
-
-    call_fn();
+    val_rc result = call_fn();
+    return result.isTrue();
 }
 
 val_rc 
@@ -339,6 +362,36 @@ fn_fgetcsv::call(val_ptr file_res)
     ZVAL_COPY_VALUE(argsptr(), file_res);
     return call_fn();
 }
+
+bool 
+fn_isdir::call(str_ptr path)
+{
+    ZVAL_STR(argsptr(), path);
+    val_rc result = call_fn();
+    return result.isTrue();
+}
+
+val_rc 
+fn_opendir::call(str_ptr path)
+{
+    ZVAL_STR(argsptr(), path);
+    return call_fn();
+}
+
+val_rc 
+fn_readdir::call(val_ptr dh)
+{
+    ZVAL_COPY_VALUE(argsptr(), dh);
+    return call_fn();
+}
+
+void 
+fn_closedir::call(val_ptr dh)
+{
+    ZVAL_COPY_VALUE(argsptr(), dh);
+    call_fn();
+}
+
 
 bool extnloaded::call(str_ptr name)
 {
@@ -360,9 +413,9 @@ function_exists(str_ptr name)
 }
 
 str_rc 
-dirname(str_ptr path)
+dirname(str_ptr path, int level)
 {
-    return FTAB.get_dirname.call(path);
+    return FTAB.get_dirname.call(path, level);
 }
 
 bool 
@@ -371,16 +424,18 @@ defined(str_ptr name)
     return FTAB.defined.call(name);
 }
 
-void 
+bool 
 define(str_ptr name, val_ptr value)
 {
-    FTAB.define.call(name, value);
+    return FTAB.define.call(name, value);
 }
 
-void 
+bool 
 define(str_ptr name, str_ptr value)
 {
-    FTAB.define.call(name, value);
+    //showstr("define ", name);
+    //showstr(" = ", value);
+    return FTAB.define.call(name, value);
 }
 
 str_rc 
@@ -464,6 +519,8 @@ fntable::init()
 
     s_extension_loaded = "extension_loaded";
     s_function_exists = "function_exists";
+    s_class_exists = "class_exists";
+
     s_preg_quote = "preg_quote";
     s_file_get_contents = "file_get_contents";
     s_pathinfo = "pathinfo";
@@ -473,6 +530,12 @@ fntable::init()
     s_fclose = "fclose";
     s_constant = "constant";
     s_dirname = "dirname";
+
+    s_isdir = "is_dir";
+    s_opendir = "opendir";
+    s_closedir = "closedir";
+    s_readdir = "readdir";
+
     s_getcwd = "getcwd";
     s_defined = "defined";
     s_define = "define";
@@ -483,12 +546,19 @@ fntable::init()
 
     extension_loaded.set_fname(s_extension_loaded);
     function_exists.set_fname(s_function_exists);
+    class_exists.set_fname(s_class_exists);
+
     preg_quote.set_fname(s_preg_quote);
     file_get_contents.set_fname(s_file_get_contents);
     pathinfo.set_fname(s_pathinfo);
     fopen.set_fname(s_fopen);
     fclose.set_fname(s_fclose);
 
+    is_dir.set_fname(s_isdir);
+    opendir.set_fname(s_opendir);
+    readdir.set_fname(s_readdir);
+    closedir.set_fname(s_closedir);
+    
     defined.set_fname(s_defined);
     define.set_fname(s_define);
     get_constant.set_fname(s_constant);
@@ -498,6 +568,7 @@ fntable::init()
     php_sapi_name.set_fname(s_php_sapi_name);
     filemtime.set_fname(s_filemtime);
     simple_loader.set_fname(s_simple_loader);
+
 
     //state_init::init();
 

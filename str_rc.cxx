@@ -13,10 +13,6 @@
 #include "str_rc.h"
 #endif
 
-#ifndef STR_BUF_H
-#include "str_buf.h"
-#endif
-
 extern "C" {
 	#include <ext/standard/php_math.h>
 	#include <ext/standard/base64.h>
@@ -281,6 +277,14 @@ str_rc::uppercase()
 	}
 }
 
+str_rc::str_rc(const std::string_view& sv)
+{
+	auto slen = sv.size();
+	if (slen)
+	{
+		s = zend_string_init(sv.data(), slen, 0);
+	}
+}
 
 str_rc::str_rc(zval* copy) : str_ptr()
 {
@@ -393,20 +397,6 @@ str_intern::operator=(const char* cp)
 
 str_empty::str_empty() {
 	s = zend_empty_string;
-}
-
-const str_rc& 
-str_rc::operator=(str_buf&& m)
-{
-	lose();
-	// str_buf cleared by this, refcount==1
-	s = m.finalize(); 
-	return *this;
-}
-
-str_rc::str_rc(str_buf&& m)
-{
-	s = m.finalize();// str_buf cleared by this, refcount==1
 }
 
 

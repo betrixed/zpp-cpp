@@ -144,7 +144,7 @@ htab_ptr::unhive(str_ptr subj)
 
 		std::string_view original = subj.vstr();
 
-		str_buf result;
+		str_buf buf;
 		size_t ipos = 0;
 
 		for(int i = 0; i < ct; i++)
@@ -165,18 +165,20 @@ htab_ptr::unhive(str_ptr subj)
 
 			if (!replace_str)
 			{
-				result << original.substr(ipos, soffset-ipos);
+				buf << original.substr(ipos, soffset-ipos);
 			} 
 			else {
-				result << original.substr(ipos, soffset-ipos);
-				result << replace_str;
+				buf << original.substr(ipos, soffset-ipos);
+				buf << replace_str;
 			}
 			ipos = soffset + slen;
 		}
-		if (ipos < original.size()) {
-			result << original.substr(ipos);
+		if (ipos < original.size()) 
+		{
+			buf << original.substr(ipos);
 		}
-		return std::move(result);
+		result = buf.zstr();
+		return result;
 	}
 	else {
 		result = subj;

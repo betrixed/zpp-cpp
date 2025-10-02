@@ -171,6 +171,26 @@ namespace zpp {
         bool call(val_ptr fres);
     };
 
+    class fn_isdir : public fn_call_args<1> {
+    public:
+        bool call(str_ptr path);
+    };
+
+    class fn_opendir : public fn_call_args<1> {
+    public:
+        val_rc call(str_ptr path);
+    };
+
+    class fn_readdir : public fn_call_args<1> {
+    public:
+        val_rc call(val_ptr dh);
+    };
+
+    class fn_closedir : public fn_call_args<1> {
+    public:
+        void call(val_ptr dh);
+    };
+
     class fn_filemtime : public fn_call_args<1> {
     public:
         long call(str_ptr path);
@@ -188,10 +208,10 @@ namespace zpp {
         str_rc call(str_ptr name);
     };
 
-    class fn_define : public fn_call_args<2> {
+    class fn_define : public fn_call_args<3> {
     public:
-        void call(str_ptr name, val_ptr value);
-        void call(str_ptr name, str_ptr value);
+        bool call(str_ptr constant_name, val_ptr value);
+        bool call(str_ptr constant_name, str_ptr value);
     };
 
     class fn_defined : public fn_call_args<1> {
@@ -201,11 +221,7 @@ namespace zpp {
 
     class fn_simple_loader : public fn_call_args<1> {
     public:
-        val_rc call(str_ptr path)
-        {
-            ZVAL_STR(argsptr(), path);
-            return call_fn();
-        }
+        val_rc call(str_ptr path);
     };
 
     /**
@@ -229,6 +245,11 @@ namespace zpp {
 
         val_rc call(str_ptr path, int flags = ALL);
     };
+
+    class fn_class_exists : public fn_call_args<1> {
+    public:
+        bool call(str_ptr name);
+    }; 
 
     class fnexists : public fn_call_args<1> {
     public:
@@ -264,7 +285,7 @@ namespace zpp {
     class fn_dirname : public fn_call_args<1>
     {
     public:
-        str_rc call(str_ptr name);
+        str_rc call(str_ptr name, int level=1);
     };
     /** 
      *  zend_string passed to set_fname
@@ -282,6 +303,7 @@ namespace zpp {
         }
 
         str_intern  s_function_exists;
+        str_intern  s_class_exists;
         str_intern  s_file_get_contents;
         str_intern  s_extension_loaded;
         str_intern  s_preg_quote;
@@ -295,12 +317,20 @@ namespace zpp {
         str_intern  s_defined;
         str_intern  s_define;
         str_intern  s_getcwd;
+
+        str_intern  s_isdir;
+        str_intern  s_readdir;
+        str_intern  s_opendir;
+        str_intern  s_closedir;
+
         str_intern  s_php_sapi_name;
         str_intern  s_filemtime;
         str_intern  s_simple_loader;
 
         extnloaded    extension_loaded;
         fnexists      function_exists;
+        fn_class_exists  class_exists;
+
         pregquote     preg_quote;
         file_content  file_get_contents;
         fn_fopen      fopen;
@@ -314,6 +344,11 @@ namespace zpp {
         fn_call       php_sapi_name;
         fn_filemtime  filemtime;
         fn_simple_loader simple_loader;
+
+        fn_isdir      is_dir;
+        fn_opendir    opendir;
+        fn_readdir    readdir;
+        fn_closedir   closedir;
         
         void init() override;
 
@@ -373,14 +408,16 @@ namespace zpp {
 
     str_rc file_get_contents(str_ptr path, int offset=0, size_t len=0);
 
+    bool is_dir(str_ptr path);
+
     val_rc constant(str_ptr name);
 
-    str_rc dirname(str_ptr path);
+    str_rc dirname(str_ptr path, int level=1);
 
     bool defined(str_ptr name);
 
-    void define(str_ptr name, val_ptr value);
-    void define(str_ptr name, str_ptr value);
+    bool define(str_ptr name, val_ptr value);
+    bool define(str_ptr name, str_ptr value);
     str_rc getcwd();
 
 

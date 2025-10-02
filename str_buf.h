@@ -32,6 +32,8 @@ namespace zpp {
 //! str_buf with memory layout as "smart_string"
 	class str_buf : public str_out {
 	protected:
+		// temporarystore final, for suspected reference drops
+		str_rc 		 final_; 
 		smart_str    buf;
 
 		static zend_string* init_zs(const char* c, size_t slen);
@@ -42,8 +44,6 @@ namespace zpp {
 
 		void lose();
 
-		// for use by friends
-		zend_string* finalize();
 	public:
 
 		str_buf();
@@ -75,7 +75,7 @@ namespace zpp {
 		std::string str();
 
 		// Finalize, 0-terminate give away
-		str_rc zstr();
+		str_ptr zstr();
 
 		// view of content so far, does not finalize
 		std::string_view vstr() const;

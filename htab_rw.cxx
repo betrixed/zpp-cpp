@@ -105,13 +105,14 @@ htab_rw::htab_rw(zval* p, size_t init)
 }
 
 
-void htab_rw::push_back(HashTable* ht)
+void htab_rw::push_back(HashTable* val)
 {
 	zval tmp = {0};
-	bool refct = val_ptr::array_bind(&tmp, ht);
-	if (zend_hash_next_index_insert(ht, &tmp))
+	bool refct = val_ptr::array_bind(&tmp, val);
+	//showdata("push_back", val);
+	if (zend_hash_next_index_insert(ht_, &tmp))
 	{
-		if (refct) GC_ADDREF(ht);
+		if (refct) GC_ADDREF(val);
 	}
 }
 
@@ -380,7 +381,21 @@ void htab_rw::set(zend_long idx, zval* value)
 int
 htab_rw::merge(HashTable* src)
 {
-	return php_array_merge(ht_, src);
+	//static int test = 1;
+
+	/* if (test)
+	{
+		zend_printf("<pre>\n");
+		test = 0;
+	}
+	*/
+	
+	int oldsize = size();
+	//showdata("\nbefore merge", ht_);
+	php_array_merge(ht_, src);
+	//showdata("\nafter merge", ht_);
+	int newsize = size();
+	return (newsize - oldsize);
 }
 
 val_rc 

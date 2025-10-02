@@ -28,6 +28,7 @@ void str_buf::initbuf()
 {
 	buf.s = nullptr;
 	buf.a = 0;
+	final_ = str_ptr::empty_str();
 }
 
 str_buf::str_buf()
@@ -182,26 +183,22 @@ str_buf::str()
 // zend_string s.
 // result will need to be "adopted"
 
-str_rc
+str_ptr
 str_buf::zstr()
 {
-	str_rc result;
-
 	if (buf.s)
 	{
 		zend_string* value = smart_str_extract_ex(&buf, 0);
-		result.adopt(value);
+		final_.adopt(value); // erases old value
 		//showstr("zstr adopt", value);
 	}
 	else {
 		//TODO: EMPTY or null?
-
-		result = str_ptr::empty_str();
-		//showstr("zstr empty", result);
+		// old value remains
 	}
-	return result;
+	return final_;
 }
-
+/*
 zend_string*
 str_buf::finalize()
 {
@@ -209,9 +206,9 @@ str_buf::finalize()
 	{
 		return smart_str_extract_ex(&buf, 0);
 	}
-	return (zend_string*) nullptr;
+	return final_;
 }
-
+*/
 // this doesn't seem to be useful.
 /*
 str_buf& 
@@ -229,7 +226,7 @@ str_buf::vstr() const
 		return std::string_view(ZSTR_VAL(buf.s), ZSTR_LEN(buf.s));
 	}
 	else {
-		return std::string_view(str_ptr::empty, 0);
+		return final_.vstr();
 	}
 }
 
