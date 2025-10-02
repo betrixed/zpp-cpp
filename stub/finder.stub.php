@@ -26,6 +26,9 @@ class Finder {
 
 	public function find(string $cname) : null|string {}
 
+	public static function dirList_dir(string $s) : array {}
+	
+
 };
 
 

@@ -1,3 +1,6 @@
+#ifndef TOML_C
+#define TOML_C
+
 /*
 
   MIT License
@@ -2379,3 +2382,6 @@ static int parse_microsec(const char *p, const char **endp) {
   *endp = p;
   return ret;
 }
+
+
+#endif

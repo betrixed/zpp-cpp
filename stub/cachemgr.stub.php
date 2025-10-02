@@ -13,7 +13,7 @@ class CacheMgr {
 
 	public static function __callStatic(string $name, array $args) : mixed {}
 
-	public static function readFile(string $filename, ?string $ext) : mixed {}
+	public static function readFile(string $filename, ?string $ext = null) : mixed {}
 
 	public static function readPhp(string $filename): mixed {}
 	public static function readToml(string $filename): mixed {}
@@ -21,17 +21,13 @@ class CacheMgr {
 
 	public function clearAll() : void {}
 
-	public function createCache(string $svc_key, string $classname, array $options) : void {}
+	public function createCache(string $service_key, string $class_name, array $options) : void {}
 
 	public function deleteExpired() : void {}
 
-	public function getCache(string $svc_key) : ?ICache {}
+	public function getCache(string $service_key) : ?ICache {}
 
-	public function getCacheClass(string $svc_key) : string {}
-
-	public function getHits(string $svc_key) : int {}
-
-	public function getMisses(string $svc_key) : int {}
+	public function getCacheClass(string $service_key) : string {}
 
 	public function readCache(string $filename, string $cache_name) : mixed {}
 

@@ -5,6 +5,11 @@
 #include "toml_php.h"
 #endif
 
+#ifndef TOML_C
+#include "toml.c"
+#include "tomlcpp.cxx"
+#endif
+
 #ifndef TOML_ARGINFO_H
 #define TOML_ARGINFO_H
 extern "C" {

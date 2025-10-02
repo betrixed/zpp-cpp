@@ -407,8 +407,8 @@ void Plate::stop()
 		isPushed_ = false;
 	}
 	buf << newContent;
-	str_rc gather(std::move(buf));
-	slabs.set(sectionName_,gather);
+
+	slabs.set(sectionName_, buf.zstr());
 }
 
 void Plate::push(str_ptr name)

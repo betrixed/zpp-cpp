@@ -17,6 +17,8 @@ public:
 	
 	static base_obj_mgr<Finder> omg;
 
+	static htab_rc dirList_dir(str_ptr path);
+	
 	virtual void debug_info(htab_rw hw);
 
 	virtual ~Finder();

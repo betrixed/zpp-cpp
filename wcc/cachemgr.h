@@ -37,9 +37,16 @@ public:
 	
 	str_intern s_simple_loader;
 	
+	str_intern cache_mgr;
+	
 	str_intern php_ext;
 	str_intern toml_ext;
 	str_intern xml_ext;
+
+	str_intern s_cache_obj;
+	str_intern s_cache_defaults;
+	str_intern s_default_cache;
+
 
 	void init() override;
 
@@ -62,6 +69,8 @@ protected:
 public:
 	static base_obj_mgr<CacheMgr> omg;
 
+	void debug_info(htab_rw di) override;
+
 	void construct(htab_ptr cfg);
 
 	void init(htab_ptr cfg);
@@ -83,14 +92,12 @@ public:
 
 	val_rc readCache(str_ptr filename, str_ptr cachename);
 
-	static val_rc readFile(str_ptr filename, str_ptr ext);
+	static val_rc readFile(str_ptr filename, str_ptr ext = str_ptr());
 	static val_rc readPhp(str_ptr filename);
 	static val_rc readToml(str_ptr filename);
 	static val_rc readXml(str_ptr filename);
 
 	void write_caches();
-
-	val_rc readFile(str_ptr path);
 
 }; // CacheMgr
 

@@ -13,6 +13,10 @@
 #include "toml/toml_php.h"
 #endif
 
+#ifndef WCC_SERVICES_H
+#include "services.h"
+#endif
+
 #ifndef XML_READ_H
 #include "wcc/xmlread.h"
 #endif
@@ -45,7 +49,12 @@ void CacheMgr_init::init()
 
 	default_cache = "default_cache";
 	file_cache = "file_cache";
-	
+	cache_mgr = "cache_mgr";
+
+	s_cache_obj = "cache_obj";
+	s_cache_defaults = "cache_defaults";
+	s_default_cache = "default_cache";
+
 	s_set = "set";
 	s_get = "get";
 	s_delete = "delete";
@@ -70,9 +79,30 @@ void CacheMgr::construct(htab_ptr cfg)
 val_rc //static
 CacheMgr::callStatic(str_ptr name, htab_ptr args)
 {
-	return val_rc();
+	str_rc cache_name = name.uncamel();
+
+	obj_rc cache_mgr = Services::service(Cache_i.cache_mgr);
+
+	CacheMgr* cm = zobj_toc<CacheMgr>(cache_mgr);
+	
+	return cm->readCache(args.get(int(0)), cache_name);
 }
 
+void CacheMgr::debug_info(htab_rw di)
+{
+	di.set(Cache_i.s_cache_obj, cache_obj_);
+
+	di.set(Cache_i.s_cache_defaults, cache_defaults_);
+
+	di.set(Cache_i.fast_cache, fast_cache_);
+
+	di.set(Cache_i.s_default_cache, default_cache_);
+
+	di.set(Cache_i.expiry_key, expiry_key_);
+
+	di.set(Cache_i.del_expired, delete_expired_);
+
+}
 void CacheMgr::init(htab_ptr cfg)
 {
 	cache_defaults_ = cfg.get(Cache_i.defaults_str);
@@ -131,20 +161,31 @@ void CacheMgr::createCache(str_ptr svckey, str_ptr classname, htab_ptr options)
 		zend_throw_error(zend_ce_error, "createCache: service key %s exists", svckey.data());
 		return;
 	}
+
+	
+	//showdata("config_args a", cache_defaults_);
 	htab_rc config_args = cache_defaults_;
+	//showdata("config_args b", config_args);
+
 	htab_rw config(config_args);
+
+	//showdata("config_write c", config_args);
 	config.merge(options);
 
+	//showdata("config_args", config_args);
+	
 	htab_rc args_cache;
-	htab_rw args(args_cache);
+	htab_rw acwrite(args_cache);
 
-	args.push_back(config_args);
-	args.push_back(svc->self());
+	acwrite.push_back(config_args);
+	acwrite.push_back(svc->self());
+
+	//showdata("args_cache", args_cache);
 
 	obj_rc obj = ReflectCache::staticInstanceArgs(classname, args_cache);
 
-	htab_rw cache_obj(cache_obj_);
-	cache_obj.set(svckey, obj);
+	htab_rw hw(cache_obj_);
+	hw.set(svckey, obj);
 	svc->set(svckey, obj);
 }
 
@@ -255,7 +296,7 @@ CacheMgr::readCache(str_ptr filename, str_ptr cachename)
 
 	if (data.ok())
 	{
-		if (!cache.call(Cache_i.s_set, data))
+		if (!cache.call(Cache_i.s_set, key, data))
 		{
 			zend_throw_error(zend_ce_error, "Failed to set data from %s", filename.data());
 			return result;
@@ -486,11 +527,12 @@ ZEND_METHOD(Wcc_CacheMgr, readFile)
 
 	args.zstring(filename, args.need(1));
 	args.zstring_null(ext, args.option(2));
+
 	if (!args.throw_errors())
 	{
 		result = CacheMgr::readFile(filename, ext);
-		result.move_zv(return_value);
 	}
+	result.move_zv(return_value);
 }
 
 ZEND_METHOD(Wcc_CacheMgr, readPhp)

@@ -109,11 +109,12 @@ MoneyFmt::fmtValue(val_ptr value)
 str_rc 
 MoneyFmt::format(val_ptr value)
 {
-	str_buf result;
 
-	result << money_sym_ << ' ' << formatNoSym(value);
+	str_buf buf;
 
-	return result;
+	buf << money_sym_ << ' ' << formatNoSym(value);
+
+	return buf.zstr();
 }
 
 //money_fmt.cpp

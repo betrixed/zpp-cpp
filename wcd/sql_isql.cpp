@@ -581,7 +581,7 @@ ISql::columnsTC(IColumns* tc, htab_rw col_list)
 				}
 			}
 
-			cfrag = std::move(fbuf);
+			cfrag = fbuf.zstr();
 			//showstr("cfrag:", cfrag);
 			col_list.push_back(cfrag);
 		}
@@ -1480,7 +1480,7 @@ ISql::where(Bindings &bind, htab_ptr wtab)
 				TableAttr* ta = static_cast<TableAttr*>(sqlpart);
 				str_buf temp;
 				temp << ta->getTable() << '.' << this->quoteName(ta->getAttr());
-				col_name = std::move(temp);
+				col_name = temp.zstr();
 			}
 			else if (partid == SqlPartId::JE_PID)
 			{

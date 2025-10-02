@@ -7,10 +7,7 @@
 
 #ifndef TOML_H
 #include "toml.h"
-#include "toml.c"
-
 #include "tomlcpp.hpp"
-#include "tomlcpp.cxx"
 #endif
 
 namespace wcc {

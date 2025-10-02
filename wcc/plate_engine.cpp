@@ -227,7 +227,7 @@ str_rc PlateEngine::fileLabel(str_ptr file)
 
 	buf << "<!--" << file << " -->\n";
 
-	return buf;
+	return buf.zstr();
 }
 
 str_rc 

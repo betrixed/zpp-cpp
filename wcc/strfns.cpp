@@ -196,6 +196,7 @@ static val_rc global_ref(const char* gname)
 // may have occasional real test code
 ZEND_METHOD(Wcc_Str, test_wcc)
 {	
+
 	/**
 	 * 
 	 */

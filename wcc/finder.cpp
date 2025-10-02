@@ -33,6 +33,9 @@ public:
 	str_intern folders_key;
 	str_intern php_ext;
 	str_intern dir_sep;
+	str_intern dir_dot;
+	str_intern dir_two;
+
 
 
 	void init() override 
@@ -42,6 +45,8 @@ public:
 		folders_key = "folders";
 		dir_sep = "/";
 		php_ext = ".php";
+		dir_dot = ".";
+		dir_two = "..";
 	}
 
 };
@@ -239,6 +244,51 @@ Finder::find(str_ptr cname)
 	return result;
 }
 
+htab_rc
+Finder::dirList_dir(str_ptr path)
+{
+	htab_rc result = htab_ptr::empty_array();
+
+	if (!FTAB.is_dir.call(path))
+	{
+		return result;
+	}
+
+	val_rc dh = FTAB.opendir.call(path);
+
+	if (dh.isFalse()) 
+	{
+		return result;
+	}
+
+	htab_rw list(result);
+	while(true)
+	{
+		val_rc entry = FTAB.readdir.call(dh);
+		if (entry.isFalse())
+		{
+			break;
+		}
+		str_rc value = entry.zstr();
+		if (!zs_cmp(value, FDit.dir_dot) || !zs_cmp(value, FDit.dir_two))
+		{
+			continue;
+		}
+		str_buf jpath;
+
+		jpath << path << FDit.dir_sep << value;
+
+		str_rc tdir = jpath.zstr();
+		if (FTAB.is_dir.call(tdir))
+		{
+			list.set(value, tdir);
+		}
+	}
+	FTAB.closedir.call(dh);
+
+	return result;
+}
+
 }; //namespace wcc
 
 using namespace wcc;
@@ -358,6 +408,22 @@ ZEND_METHOD(Wcc_Finder, find)
 	auto cobj = zval_toc<Finder>(ZEND_THIS);
 
 	str_rc result = cobj->find(cname);
+	result.move_zv(return_value);
+}
+
+ZEND_METHOD(Wcc_Finder, dirList_dir)
+{
+	zarg_rd args(execute_data);
+
+	str_ptr path;
+	htab_rc result;
+
+	args.zstring(path, args.need(1));
+
+	if (!args.throw_errors())
+	{
+		result = Finder::dirList_dir(path);
+	}
 	result.move_zv(return_value);
 }
 

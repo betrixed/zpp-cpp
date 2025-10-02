@@ -504,7 +504,7 @@ RouteSet::compile(Route* route)
 				buf << prefix;
 			}
 		}
-		init_pattern = std::move(buf);
+		init_pattern = buf.zstr();
 		//showstr("init_pattern", init_pattern);
 	}
 	//str_out sink;
