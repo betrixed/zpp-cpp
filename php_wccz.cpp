@@ -1,11 +1,8 @@
 /* wccz extension for PHP */
 
 #define ZPP_BUILD_ALL
-//#define DEBUG_EXTRA
 
 #include "php_wccz.h"
-
-
 
 #include "zpp/base.cpp"
 #include "zpp/show_zpp.cpp"
