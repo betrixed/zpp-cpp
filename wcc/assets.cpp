@@ -43,7 +43,7 @@ void ASinit::init()
 		assets_str = "assets";
 		body_blob = "bodyBlobs";
 
-		cache_all =  "cache_all";
+		cache_mgr =  "cache_mgr";
 		css_str =    "css";
 		file_cache = "file_cache";
 		fwd_slash = "/";
@@ -633,11 +633,11 @@ Assets::loadAssetFile(str_ptr file)
 		return result;
 	}
 
-	obj_rc cache_all = Services::service(ASI.cache_all);
+	obj_rc cache_mgr = Services::service(ASI.cache_mgr);
 
 	val_rc filename(file);
 	val_rc cachename(ASI.file_cache);
-	htab_rc data = cache_all.call(ASI.read_cache, filename, cachename);
+	htab_rc data = cache_mgr.call(ASI.read_cache, filename, cachename);
 	htab_rc paths;
 
 	val_ptr paths_v = data.get(ASI.src_paths);

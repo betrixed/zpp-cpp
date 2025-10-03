@@ -41,15 +41,21 @@ using std::pair;
 using std::string_view;
 using std::vector;
 
-static void *toml_mymalloc(size_t sz) { return new char[sz]; }
+//static void *toml_mymalloc(size_t sz) { return new char[sz]; }
 
-static void toml_myfree(void *p) {
+/*static void toml_myfree(void *p) {
   if (p) {
     char *pp = (char *)p;
     delete[] pp;
   }
-}
+}*/
 
+static void *toml_mymalloc(size_t sz) { return emalloc(sizeof(char*) + sizeof(char)*(sz+1)); }
+static void toml_myfree(void *p) {
+  if (p) {
+      efree(p);
+  }
+}
 
 /**
  *  Keep track of memory to be freed when all references

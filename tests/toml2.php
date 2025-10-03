@@ -23,7 +23,7 @@ function runit()
     $parseFiles = [
     'example.toml',
     'fruit.toml', 
-    'config.toml',
+    'assets_full.toml',
     'hard_example.toml', 
     'hard_example_unicode.toml'
     ];

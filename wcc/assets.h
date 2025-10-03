@@ -19,7 +19,7 @@ public:
 	str_intern assets_str;
 	str_intern body_blob;
 
-	str_intern cache_all;
+	str_intern cache_mgr;
 	str_intern css_str;
 	str_intern file_cache;
 	str_intern fwd_slash;
