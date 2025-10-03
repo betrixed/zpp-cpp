@@ -191,6 +191,11 @@ namespace zpp {
         void call(val_ptr dh);
     };
 
+    class fn_mkdir : public fn_call_args<3> {
+    public:
+        bool call(str_ptr path, int permissions = 0755, bool recurse = false);
+    };
+
     class fn_filemtime : public fn_call_args<1> {
     public:
         long call(str_ptr path);
@@ -208,7 +213,7 @@ namespace zpp {
         str_rc call(str_ptr name);
     };
 
-    class fn_define : public fn_call_args<3> {
+    class fn_define : public fn_call_args<2> {
     public:
         bool call(str_ptr constant_name, val_ptr value);
         bool call(str_ptr constant_name, str_ptr value);
@@ -322,7 +327,7 @@ namespace zpp {
         str_intern  s_readdir;
         str_intern  s_opendir;
         str_intern  s_closedir;
-
+        str_intern  s_mkdir;
         str_intern  s_php_sapi_name;
         str_intern  s_filemtime;
         str_intern  s_simple_loader;
@@ -349,6 +354,7 @@ namespace zpp {
         fn_opendir    opendir;
         fn_readdir    readdir;
         fn_closedir   closedir;
+        fn_mkdir      mkdir;
         
         void init() override;
 

@@ -392,6 +392,17 @@ fn_closedir::call(val_ptr dh)
     call_fn();
 }
 
+bool
+fn_mkdir::call(str_ptr path, int permissions, bool recurse)
+{
+    zval* args = argsptr();
+    ZVAL_STR(args, path);
+    ZVAL_LONG(args+1, permissions);
+    ZVAL_BOOL(args+2, recurse);
+
+    val_rc result = call_fn();
+    return result.isTrue();
+}
 
 bool extnloaded::call(str_ptr name)
 {
@@ -535,6 +546,7 @@ fntable::init()
     s_opendir = "opendir";
     s_closedir = "closedir";
     s_readdir = "readdir";
+    s_mkdir = "mkdir";
 
     s_getcwd = "getcwd";
     s_defined = "defined";
@@ -558,6 +570,7 @@ fntable::init()
     opendir.set_fname(s_opendir);
     readdir.set_fname(s_readdir);
     closedir.set_fname(s_closedir);
+    mkdir.set_fname(s_mkdir);
     
     defined.set_fname(s_defined);
     define.set_fname(s_define);
