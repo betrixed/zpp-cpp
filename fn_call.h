@@ -66,7 +66,7 @@ namespace zpp {
         // PHP call cache info for multiple calls
         zend_fcall_info       fci_;
         zend_fcall_info_cache cache_;
-        val_rc     result_;
+        zval     result_;
     public:
 
         void throw_failed();
@@ -84,7 +84,8 @@ namespace zpp {
         void wipe();
 
         // fetching result as move operator result also clears it.
-        val_rc&& call_fn();
+        // The result must be moved, from permanent, into request memory.
+        val_rc call_fn();
 
         //! Since this calls wipe,
         //! must call only once for each call setup.
@@ -223,11 +224,12 @@ namespace zpp {
     public:
         bool call(str_ptr name);
     };
-
+    /*
     class fn_simple_loader : public fn_call_args<1> {
     public:
         val_rc call(str_ptr path);
     };
+    */
 
     /**
      * @class
@@ -248,6 +250,7 @@ namespace zpp {
             ALL = DIRNAME + BASENAME + EXTENSION + FILENAME
         };
 
+        // The result must be moved, into request memory.
         val_rc call(str_ptr path, int flags = ALL);
     };
 
@@ -348,7 +351,7 @@ namespace zpp {
         FCall2        call_user_func_array;
         fn_call       php_sapi_name;
         fn_filemtime  filemtime;
-        fn_simple_loader simple_loader;
+        //fn_simple_loader simple_loader;
 
         fn_isdir      is_dir;
         fn_opendir    opendir;
@@ -424,6 +427,9 @@ namespace zpp {
 
     bool define(str_ptr name, val_ptr value);
     bool define(str_ptr name, str_ptr value);
+
+    val_rc simple_loader(str_ptr path);
+    
     str_rc getcwd();
 
 

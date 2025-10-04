@@ -93,6 +93,11 @@ bool str_rc::try_decref(zend_string* zs)
 }
 */
 
+str_rc::str_rc(const char* cp) : str_ptr()
+{
+	s = zend_string_init(cp, strlen(cp), 0);
+}
+
 str_rc& 
 str_rc::operator=(str_temp&& rc)
 {
@@ -172,6 +177,17 @@ str_rc::operator=(const str_rc& rc)
 	//showstr("operator= str_rc&", rc.s);
 	bind(rc.s);
 	//showstr("operator= &", s);
+	return *this;
+}
+
+const str_rc& 
+str_rc::operator=(const char* cp)
+{
+	auto slen = strlen(cp);
+	if (slen)
+	{
+		s = zend_string_init(cp, slen, 0);
+	}
 	return *this;
 }
 

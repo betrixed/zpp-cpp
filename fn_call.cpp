@@ -30,7 +30,9 @@ fn_call::fn_call()
 {
     fci_ = {0};
     cache_ = {0};  
-    fci_.retval = (zval*) result_;
+    result_ = {0};
+
+    fci_.retval = &result_;
 }
 
 fn_call::~fn_call()
@@ -45,7 +47,7 @@ void fn_call::wipe()
         memset(ptr, 0, ct*sizeof(zval));
     }
     // in case previous result was not cleared
-    result_.set_null(); 
+    result_ = {0};
 }
 
 
@@ -111,7 +113,6 @@ void fn_call::throw_failed()
         zend_throw_error(zend_ce_error, "fn_call_failed for %s", name.data());
     else 
         zend_throw_error(zend_ce_error, "fn_call_failed, no name");
-    result_.set_null();
 }
 
 bool fnexists::call(str_ptr arg)
@@ -212,16 +213,33 @@ PathInfo::call(str_ptr path, int flags)
     return call_fn();
 }
 
+//bool callable_fn(val_rc& result, val_rc& callme, int argct = 0, zval* argv = nullptr);
+val_rc 
+simple_loader(str_ptr path)
+{
+    val_rc result;
+    val_rc callme(FTAB.s_simple_loader);
+
+    zval arg = {0};
+    ZVAL_STR(&arg, path);
+
+    callable_fn(result, callme, 1, &arg);
+
+    return result;
+}
+/*
 val_rc 
 fn_simple_loader::call(str_ptr path)
 {
     val_rc result;
+    showmem("fn name", &fci_.function_name);
     ZVAL_STR(argsptr(), path);
-    //showstr("\nload path", path);
+    showstr("\nload path", path);
     result = call_fn();
-    //showmem("loader call", result);
+    showmem("loader call", result);
     return result;
 }
+*/
 
 val_rc
 array_pop(val_rc& array_ref)
@@ -229,8 +247,14 @@ array_pop(val_rc& array_ref)
     fn_call_args<1> fn;
 
     fn.set_fname(STAB.array_pop);
+    
+    zend_printf("\nprepare array_pop\n");
     htab_rw hw(array_ref); // must be writable
+    
     array_ref.make_ref(); // must be reference
+
+
+    zend_printf("\nprepare 2 array_pop\n");
     ZVAL_COPY_VALUE(fn.argsptr(), array_ref);
     return fn.call_fn();
 }
@@ -241,7 +265,7 @@ preg_quote(str_ptr expr, str_ptr delimiter)
     return FTAB.preg_quote.call(expr, delimiter);
 }
 
-val_rc&&
+val_rc
 fn_call::call_fn()
 {
     if (fci_.size==0)
@@ -258,7 +282,10 @@ fn_call::call_fn()
         }
     }
     //showmem("call_fn result", result_);
-    return std::move(result_);
+
+    val_rc temp(std::move(result_));
+    return temp;
+    //return result_;
 }
 
 str_rc 
@@ -580,7 +607,7 @@ fntable::init()
     call_user_func_array.set_fname(s_call_user_func_array);
     php_sapi_name.set_fname(s_php_sapi_name);
     filemtime.set_fname(s_filemtime);
-    simple_loader.set_fname(s_simple_loader);
+    //simple_loader.set_fname(s_simple_loader);
 
 
     //state_init::init();
@@ -651,7 +678,6 @@ bool callable_fn(
     int argct, 
     zval* argv)
 {
-    result.set_null();
 
     //showmem("argv", argv);
     //showmem("result", result);
@@ -668,7 +694,6 @@ bool callable_fn(
         zend_throw_error(zend_ce_error, "Invalid callable");
         return false;
     }
-     //showmem("result", result);
     return true;
 }
 

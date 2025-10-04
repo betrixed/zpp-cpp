@@ -48,13 +48,20 @@ zs_cmp(zend_string* a, zend_string* b)
 
 	for (;; ap++, bp++) {
         int d = *ap - *bp;
-        if (d != 0 || !*ap)
+        if (d != 0)
+        {
             return d;
+        }
+        if (!*ap)
+        {
+        	break;
+        }
     }
     return 0;
 }
 
-int zs_cmp_ci(zend_string* a, zend_string* b)
+int 
+zs_cmp_ci(zend_string* a, zend_string* b)
 {
 	if (a == b)
 	{
@@ -71,8 +78,13 @@ int zs_cmp_ci(zend_string* a, zend_string* b)
 
 	for (;; ap++, bp++) {
         int d = tolower((unsigned char)*ap) - tolower((unsigned char)*bp);
-        if (d != 0 || !*ap)
+        if (d != 0)
+        {
             return d;
+        }
+        if (!*ap) {
+        	break;
+        }
     }
     return 0;
 }

@@ -50,7 +50,8 @@ void
 val_rc::make_ref()
 {
     zval *zp = &zv_;
-    if (!Z_ISREF_P(zp)) { 
+    if (Z_TYPE_P(zp) != IS_REFERENCE) 
+    { 
         /*
         zend_reference *ref = (zend_reference *) emalloc(sizeof(zend_reference));
         ref->gc.refcount = 1;                               
@@ -61,7 +62,15 @@ val_rc::make_ref()
         Z_TYPE_INFO_P(zp) = IS_REFERENCE_EX; 
         */
         ZVAL_NEW_REF(&zv_, zp);  
-    }                       
+        showmem("make_ref", &zv_);
+        if (Z_TYPE_P(zp) != IS_REFERENCE) 
+        {
+            showmem("!!not a reference", &zv_);
+        }
+    }   
+    else {
+        showmem("already ref", &zv_);
+    }                    
 }
 
 val_rc::~val_rc()
@@ -80,6 +89,7 @@ val_rc::zstr() const
     }
     return Z_STR_P(p);
 }
+
 
 zend_long 
 val_rc::zlong() const
@@ -300,6 +310,7 @@ val_rc::val_rc(val_rc&& m)
     ZVAL_COPY_VALUE(&zv_, &m.zv_);
     m.init();
 }
+
 
 
 /** copy with careful addref */
@@ -572,10 +583,15 @@ val_rc::try_decref(zval* p)
         case IS_REFERENCE:
             {
                 auto zref = Z_REF_P(p);
+                showmem("reference", p);
                 if (rct == 1) 
                 {
-                    zval_ptr_dtor(&zref->val);
+
+                    try_decref(&zref->val);
                     efree_size(zref, sizeof(zend_reference));
+                    ZVAL_NULL(p);
+                    showmem("reference", p);
+
                     return;
                 }
                 zref->gc.refcount--;

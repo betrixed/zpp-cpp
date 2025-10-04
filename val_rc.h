@@ -79,6 +79,13 @@ public:
 
     val_rc(val_rc&& rc);
 
+
+    val_rc(zval&& rc)
+    {
+        ZVAL_COPY_VALUE(&zv_, &rc);
+        rc = {0};
+    }
+
     val_rc(HashTable* ht);
 
     val_rc(str_rc&& rc);

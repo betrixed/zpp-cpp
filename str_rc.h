@@ -61,6 +61,8 @@ namespace zpp {
 	    {   
 	    }
 		
+		str_rc(const char* cp);
+
 	    str_rc(zend_string* p) : str_ptr(p)
 	    {
 	        own();
@@ -111,10 +113,12 @@ namespace zpp {
 	    const str_rc& operator=(const str_rc& rc);
 	    const str_rc& operator=(zend_string* rc);
 	    const str_rc& operator=(zval* rc);
+	    const str_rc& operator=(const char* cp);
 
 	    str_rc& operator=(val_rc&& rc);
 	    str_rc& operator=(str_rc&& rc);
 	    str_rc& operator=(str_temp&& rc);
+	    
 
 	    void move_zv(zval* ret);
 
