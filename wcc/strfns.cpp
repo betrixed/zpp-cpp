@@ -201,6 +201,15 @@ ZEND_METHOD(Wcc_Str, test_wcc)
 	 * 
 	 */
 #ifdef DEBUG_EXTRA
+
+
+	str_rc path = "sites/pcan/config/config.php";
+	showstr("path", path);
+
+	str_rc ext = FTAB.pathinfo.call(path, PathInfo::EXTENSION);
+
+	showstr("extension = ", ext);
+
 	str_temp start("START");
 	showstr("start", start);
 
@@ -236,9 +245,9 @@ ZEND_METHOD(Wcc_Str, test_wcc)
 		list.push_back(i);
 	}
 
-	list_mgr.make_ref();
+	//list_mgr.make_ref();
 	
-	val_rc lastval =array_pop(list_mgr);
+	val_rc lastval = array_pop(list_mgr);
 
 	showmem("after pop", list_mgr);
 

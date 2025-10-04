@@ -18,6 +18,10 @@ public:
 	static base_obj_mgr<Finder> omg;
 
 	static htab_rc dirList_dir(str_ptr path);
+
+	static str_rc  path_ext(str_ptr path); 
+
+	static str_rc  path_base(str_ptr path); 
 	
 	virtual void debug_info(htab_rw hw);
 

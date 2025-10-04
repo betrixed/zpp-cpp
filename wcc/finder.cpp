@@ -244,6 +244,43 @@ Finder::find(str_ptr cname)
 	return result;
 }
 
+
+
+str_rc  
+Finder::path_base(str_ptr path)
+{
+	str_rc result;
+
+	auto psize = path.size();
+
+	if (psize)
+	{
+		zend_string* fname = php_basename(path.data(), psize, nullptr, 0);
+		result.adopt(fname);
+	}
+
+	return result;
+}
+
+str_rc  
+Finder::path_ext(str_ptr path)
+{
+	str_rc result;
+
+	if (path.size())
+	{
+		str_rc base = path_base(path);
+
+		int pos = base.rfind('.');
+
+		if (pos >= 0)
+		{
+			result = base.substr(pos+1);
+		}
+	}
+	return result;
+}
+
 htab_rc
 Finder::dirList_dir(str_ptr path)
 {

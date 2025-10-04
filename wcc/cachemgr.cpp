@@ -5,6 +5,10 @@
 #include "cachemgr.h"
 #endif
 
+#ifndef WCC_FINDER_H
+#include "finder.h"
+#endif
+
 #ifndef REFLECT_CACHE_H
 #include "reflect_cache.h"
 #endif
@@ -138,15 +142,16 @@ void CacheMgr::destruct()
 
 void CacheMgr::clearAll()
 {
-	for_key_value wk;
+	htab_walk wk;
 
 	fn_call fnclear;
 
 	fnclear.set_fname(Cache_i.s_clear_str);
 
+	auto cache = wk.value();
 	for(wk.start(cache_obj_); wk.ok(); wk.next())
 	{
-		obj_rc obj = wk.value();
+		obj_ptr obj = cache.zobject();
 		fnclear.set_obj(obj);
 		fnclear.call_fn();
 	}
@@ -202,15 +207,17 @@ void CacheMgr::deleteExpired()
 			val_rc check = fc.call(Cache_i.s_get, key);
 			if (!check.ok())
 			{
-				for_key_value wk;
+				htab_walk wk;
 
 				fn_call delete_expired;
 
 				delete_expired.set_fname(Cache_i.s_delete_expired);
 
+				auto cache = wk.value();
+
 				for(wk.start(cache_obj_); wk.ok(); wk.next())
 				{
-					obj_ptr obj = wk.value();
+					obj_ptr obj = cache.zobject();
 					delete_expired.set_obj(obj);
 					delete_expired.call_fn();
 				}
@@ -293,6 +300,7 @@ CacheMgr::readCache(str_ptr filename, str_ptr cachename)
 	}
 	// data missing or not current
 	val_rc data = readFile( filename );
+	showmem("read data", data);
 
 	if (data.ok())
 	{
@@ -313,11 +321,12 @@ CacheMgr::readCache(str_ptr filename, str_ptr cachename)
 void 
 CacheMgr::write_caches()
 {
-	for_key_value wk;
-
+	htab_walk wk;
+	auto cache = wk.value();
 	for(wk.start(cache_obj_); wk.ok(); wk.next())
 	{
-		obj_ptr obj(wk.value());
+		obj_ptr obj = cache.zobject();
+
 		obj.call(Cache_i.s_writecached);
 
 		val_rc arg1(Cache_i.defer_write);
@@ -334,16 +343,22 @@ CacheMgr::readFile(str_ptr filename, str_ptr ext)
 
 	if (!ext.ok())
 	{
-		filetype = FTAB.pathinfo.call(filename, PathInfo::EXTENSION);
+		showstr("type for ", filename);
+		filetype = Finder::path_ext(filename);
+		//filetype = FTAB.pathinfo.call(filename, PathInfo::EXTENSION);
+		showstr("pathinfo", filetype);
 	}
 	else {
 		filetype = ext;
 	}
+	showstr("filetype", filetype);
+
 	if (zs_cmp_ci(filetype,Cache_i.xml_ext)==0)
 	{
 		return readXml(filename);
 	}
-	if (zs_cmp_ci(filetype,Cache_i.php_ext)==0)
+	
+	if (zs_cmp_ci(filetype, Cache_i.php_ext)==0)
 	{
 		return readPhp(filename);
 	}
@@ -358,7 +373,8 @@ CacheMgr::readFile(str_ptr filename, str_ptr ext)
 val_rc  //static
 CacheMgr::readPhp(str_ptr filename)
 {
-	return FTAB.simple_loader.call(filename);
+	showstr("read PHP", filename);
+	return simple_loader(filename);
 }
 
 val_rc  //static
