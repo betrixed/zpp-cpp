@@ -54,6 +54,8 @@ public:
 	void       setDefer(str_ptr name, val_ptr value);
 	void       set(str_ptr name, val_ptr value);
 	void       set(str_ptr name, obj_ptr obj);
+	void       set(str_ptr name, val_rc& val);
+	
 	
 	val_rc   	get(str_ptr name);
 

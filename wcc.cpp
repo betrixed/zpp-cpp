@@ -94,6 +94,8 @@ extern "C" {
 #include "toml/toml_php.cpp"
 #include "wcc/xmlread.cpp"
 
+#include "wcc/run.cpp"
+#include "wcc/loader.cpp"
 
  //ICACHE_DATA_CPP
 
@@ -298,7 +300,10 @@ PHP_MINIT(wcc_assets_reg)(INIT_FUNC_ARGS_PASSTHRU);
 #ifdef WCD_IBUILD_CPP
 	PHP_MINIT(Wcd_IBuild_reg)(INIT_FUNC_ARGS_PASSTHRU);
 #endif
-
+#ifdef WCC_RUN_CPP
+	PHP_MINIT(wcc_run_reg)(INIT_FUNC_ARGS_PASSTHRU);
+	PHP_MINIT(wcc_loader_reg)(INIT_FUNC_ARGS_PASSTHRU);
+#endif
 
 
 	return SUCCESS;

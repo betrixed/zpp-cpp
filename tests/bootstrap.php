@@ -33,24 +33,17 @@ function boolstr(bool $value) : string
     return $value ? "true" : "false";
 }
 
-if (!class_exists(Finder::class)) {
-	require $wcc_root . DIRECTORY_SEPARATOR . "Finder.php";
+
+if (!class_exists(Loader::class))
+{
+    require $wcc_root . DIRECTORY_SEPARATOR . "Loader.php";
 }
-	
-require $wcc_root . DIRECTORY_SEPARATOR . "Loader.php";
 
-$finder = new Finder();
-$finder->addPathArray([
-    "Wcc" => "php/Wcc",
-    "Wcd" => "php/Wcd",
-    "Wcf" => "php/Wcf",
-    "Wc" => "php/Wc",
-    "voku\helper" => "php/voku/helper"
-]);
+$loader = Loader::instance();
 
-$loader = new Loader("", $finder);
-$loader->register();
+$loader->setBaseDir($wcc_root);
 
+$loader->regLoader();
 
 
 class EmptyTest {

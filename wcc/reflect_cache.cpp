@@ -22,7 +22,8 @@ namespace wcc
 
 	base_obj_mgr<ReflectCache> ReflectCache::omg;
 
-
+	thread_local obj_rc    g_reflect_cache;
+	
 class ReflectCache_data : public state_init {
 public:
 	str_intern cache_key;
@@ -32,7 +33,7 @@ public:
 	str_intern new_instance_args;
 	class_data  rfc_cdata;
 
-	obj_rc    g_reflect_cache;
+	
 	ReflectCache_data() 
 	{
 
@@ -199,7 +200,7 @@ ReflectCache::newInstanceArgs(str_ptr class_name, htab_ptr args)
 obj_ptr
 ReflectCache::instance()
 {
-	return RFC_data.g_reflect_cache;
+	return g_reflect_cache;
 	/*
 	Global gme = GLOBALS[ReflectCache::omg.class_name()];
 
@@ -218,7 +219,7 @@ ReflectCache::instance()
 	
 ReflectCache* ReflectCache::cpp()
 {
-	return zobj_toc<ReflectCache>(RFC_data.g_reflect_cache);
+	return zobj_toc<ReflectCache>(g_reflect_cache);
 }
 
 void

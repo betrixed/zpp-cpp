@@ -22,7 +22,11 @@
 #endif
 
 #ifndef XML_READ_H
-#include "wcc/xmlread.h"
+#include "xmlread.h"
+#endif
+
+#ifndef WCC_LOADER_H
+#include "loader.h"
 #endif
 
 #ifndef CACHEMGR_ARGINFO_H
@@ -58,12 +62,14 @@ void CacheMgr_init::init()
 	s_cache_obj = "cache_obj";
 	s_cache_defaults = "cache_defaults";
 	s_default_cache = "default_cache";
+	s_loader = "loader",
 
 	s_set = "set";
 	s_get = "get";
 	s_delete = "delete";
 	s_getcached = "getcached";
 	s_setoption = "setoption";
+
 	s_writecached = "writecached";
 	s_delete_expired = "deleteexpired";
 	s_clear_str = "clear";
@@ -107,6 +113,18 @@ void CacheMgr::debug_info(htab_rw di)
 	di.set(Cache_i.del_expired, delete_expired_);
 
 }
+
+Loader* CacheMgr::getLoader()
+{
+	if (!loader_.ok())
+	{
+		Services* svc = Services::cpp_global();
+
+		loader_ = svc->get(Cache_i.s_loader);
+	}
+	return zobj_toc<Loader>(loader_);
+}
+
 void CacheMgr::init(htab_ptr cfg)
 {
 	cache_defaults_ = cfg.get(Cache_i.defaults_str);
@@ -340,6 +358,7 @@ val_rc //static
 CacheMgr::readFile(str_ptr filename, str_ptr ext)
 {
 	str_rc filetype;
+	val_rc result;
 
 	if (!ext.ok())
 	{
@@ -355,39 +374,24 @@ CacheMgr::readFile(str_ptr filename, str_ptr ext)
 
 	if (zs_cmp_ci(filetype,Cache_i.xml_ext)==0)
 	{
-		return readXml(filename);
+		result = Wcc_XmlRead::fromFile(filename);
 	}
-	
+	else
 	if (zs_cmp_ci(filetype, Cache_i.php_ext)==0)
 	{
-		return readPhp(filename);
+		showstr("match php ", filename);
+		result = Loader::readPHP(filename);
 	}
+	else
 	if (zs_cmp_ci(filetype, Cache_i.toml_ext)==0)
 	{
-		return readToml(filename);
+		result = val_rc(Toml::decodeFile(filename));
 	}
-	zend_throw_error(zend_ce_error,"Unmatched file extension %s", filetype.data());
+	else {
+		zend_throw_error(zend_ce_error,"Unmatched file extension %s", filetype.data());
+	}
+	
 	return val_rc();
-}
-
-val_rc  //static
-CacheMgr::readPhp(str_ptr filename)
-{
-	showstr("read PHP", filename);
-	return simple_loader(filename);
-}
-
-val_rc  //static
-CacheMgr::readToml(str_ptr filename)
-{
-	val_rc result(Toml::decodeFile(filename));
-	return result;
-}
-val_rc  //static
-CacheMgr::readXml(str_ptr filename)
-{
-	val_rc result(Wcc_XmlRead::fromFile(filename));
-	return result;
 }
 
 };
@@ -551,53 +555,7 @@ ZEND_METHOD(Wcc_CacheMgr, readFile)
 	result.move_zv(return_value);
 }
 
-ZEND_METHOD(Wcc_CacheMgr, readPhp)
-{
-	zarg_rd args(execute_data);
 
-	str_ptr filename;
-	val_rc result;
-
-	args.zstring(filename, args.need(1));
-
-	if (!args.throw_errors())
-	{
-		result = CacheMgr::readPhp(filename);
-		result.move_zv(return_value);
-	}
-}
-
-ZEND_METHOD(Wcc_CacheMgr, readToml)
-{
-	zarg_rd args(execute_data);
-
-	str_ptr filename;
-	val_rc result;
-
-	args.zstring(filename, args.need(1));
-
-	if (!args.throw_errors())
-	{
-		result = CacheMgr::readToml(filename);
-		result.move_zv(return_value);
-	}
-}
-
-ZEND_METHOD(Wcc_CacheMgr, readXml)
-{
-	zarg_rd args(execute_data);
-
-	str_ptr filename;
-	val_rc result;
-
-	args.zstring(filename, args.need(1));
-
-	if (!args.throw_errors())
-	{
-		result = CacheMgr::readXml(filename);
-		result.move_zv(return_value);
-	}
-}
 
 PHP_MINIT_FUNCTION(Wcc_CacheMgr_reg)
 {

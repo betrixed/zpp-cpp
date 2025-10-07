@@ -27,6 +27,7 @@ namespace wcc
 
 	base_obj_mgr<Services> Services::omg;
 
+	thread_local obj_rc	g_services;
 
 	class Services_data : public state_init {
 	public:
@@ -35,8 +36,6 @@ namespace wcc
 		str_intern instances;
 		str_intern throw_fail;
 		str_intern defer_ct;
-
-		obj_rc	g_services;
 
 		Services_data() : state_init() {}
 
@@ -151,7 +150,7 @@ Services::Services()
 Services* 
 Services::cpp_global()
 {
-	obj_ptr sv = SVC_data.g_services;
+	obj_ptr sv = g_services;
 
 	//showmem("instance", sv);
 	return zobj_toc<Services>(sv);
@@ -160,7 +159,7 @@ Services::cpp_global()
 obj_ptr
 Services::instance()
 {
-	return SVC_data.g_services;
+	return g_services;
 	/*
 	obj_ptr result;
 
@@ -315,6 +314,12 @@ Services::set(str_ptr name, obj_ptr obj)
 	htab_rw temp(active_);
 
 	temp.set(name, obj);
+}
+
+void
+Services::set(str_ptr name, val_rc& val)
+{
+	set(name, val_ptr(val));
 }
 
 val_rc  

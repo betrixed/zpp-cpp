@@ -62,11 +62,11 @@ public:
 	Toml();
 	virtual ~Toml();
 
-	htab_ptr parseFile(str_ptr path);
-	htab_ptr parse(str_ptr toml);
+	htab_rc parseFile(str_ptr path);
+	htab_rc parse(str_ptr toml);
 
-	static htab_ptr decode(str_ptr toml);
-	static htab_ptr decodeFile(str_ptr toml);
+	static htab_rc decode(str_ptr toml);
+	static htab_rc decodeFile(str_ptr toml);
 	static base_obj_mgr<Toml> omg;
 
 };

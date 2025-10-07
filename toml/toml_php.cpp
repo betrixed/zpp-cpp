@@ -314,7 +314,7 @@ void Toml::w_values(const toml::ppref<toml_keyval_t>& values)
 }
 
 
-htab_ptr
+htab_rc
 Toml::parseFile(str_ptr path)
 {
 	if (!fs::is_regular_file(path.data()))
@@ -327,7 +327,7 @@ Toml::parseFile(str_ptr path)
 	return parse(toml);
 }
 
-htab_ptr
+htab_rc
 Toml::parse(str_ptr toml)
 {
 	hold_ = toml;
@@ -356,22 +356,22 @@ Toml::parse(str_ptr toml)
 }
 
 
-htab_ptr //static
+htab_rc //static
 Toml::decode(str_ptr toml)
 {
 	obj_rc obj = Toml::omg.new_zobj();
 	Toml*  cobj = zobj_toc<Toml>(obj);
-	htab_ptr result = cobj->parse(toml);
+	htab_rc result = cobj->parse(toml);
 	return result;
 }
 
-htab_ptr //static
+htab_rc //static
 Toml::decodeFile(str_ptr path)
 {
 	obj_rc obj = Toml::omg.new_zobj();
 	Toml*  cobj = zobj_toc<Toml>(obj);
 
-	htab_ptr result = cobj->parseFile(path);
+	htab_rc result = cobj->parseFile(path);
 	return result;
 }
 
@@ -387,8 +387,8 @@ ZEND_METHOD(Toml, decode)
 	Z_PARAM_STR(s)
 	ZEND_PARSE_PARAMETERS_END();
 
-	htab_ptr result = Toml::decode(s);
-	result.return_zv(return_value);
+	htab_rc result = Toml::decode(s);
+	result.move_zv(return_value);
 
 }
 
@@ -399,8 +399,8 @@ ZEND_METHOD(Toml, decodeFile)
 	Z_PARAM_STR(path)
 	ZEND_PARSE_PARAMETERS_END();
 
-	htab_ptr result = Toml::decodeFile(path);
-	result.return_zv(return_value);
+	htab_rc result = Toml::decodeFile(path);
+	result.move_zv(return_value);
 
 }
 
@@ -414,8 +414,8 @@ ZEND_METHOD(Toml, parse)
 
 	auto cobj = zval_toc<Toml>(ZEND_THIS);
 
-	htab_ptr result = cobj->parse(s);
-	result.return_zv(return_value);
+	htab_rc result = cobj->parse(s);
+	result.move_zv(return_value);
 }
 
 ZEND_METHOD(Toml, parseFile)
@@ -427,8 +427,8 @@ ZEND_METHOD(Toml, parseFile)
 
 	auto cobj = zval_toc<Toml>(ZEND_THIS);
 
-	htab_ptr result = cobj->parseFile(path);
-	result.return_zv(return_value);
+	htab_rc result = cobj->parseFile(path);
+	result.move_zv(return_value);
 }
 
 PHP_MINIT_FUNCTION(Toml_reg)

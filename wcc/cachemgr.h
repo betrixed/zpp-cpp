@@ -28,6 +28,7 @@ public:
 	str_intern s_set;
 	str_intern s_get;
 	str_intern s_clear_str;
+
 	
 	str_intern s_delete;
 	str_intern s_getcached;
@@ -35,7 +36,7 @@ public:
 	str_intern s_writecached;
 	str_intern s_delete_expired;
 	
-	str_intern s_simple_loader;
+	
 	
 	str_intern cache_mgr;
 	
@@ -46,6 +47,7 @@ public:
 	str_intern s_cache_obj;
 	str_intern s_cache_defaults;
 	str_intern s_default_cache;
+	str_intern s_loader;
 
 
 	void init() override;
@@ -54,6 +56,7 @@ public:
 
 extern CacheMgr_init Cache_i;
 
+class  Loader;
 
 class  CacheMgr : public base_d {
 protected:
@@ -65,6 +68,10 @@ protected:
 
 	str_rc  expiry_key_;
 	int     delete_expired_;
+
+	obj_rc  loader_;
+
+	Loader* getLoader();
 
 public:
 	static base_obj_mgr<CacheMgr> omg;
@@ -93,9 +100,6 @@ public:
 	val_rc readCache(str_ptr filename, str_ptr cachename);
 
 	static val_rc readFile(str_ptr filename, str_ptr ext = str_ptr());
-	static val_rc readPhp(str_ptr filename);
-	static val_rc readToml(str_ptr filename);
-	static val_rc readXml(str_ptr filename);
 
 	void write_caches();
 

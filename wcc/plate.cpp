@@ -92,10 +92,6 @@ public:
 		OBfn.init();
 	}
 
-	void init_req() override
-	{
-		
-	}
 };
 
 PlateInit PLD;

@@ -15,10 +15,6 @@ class CacheMgr {
 
 	public static function readFile(string $filename, ?string $ext = null) : mixed {}
 
-	public static function readPhp(string $filename): mixed {}
-	public static function readToml(string $filename): mixed {}
-	public static function readXml(string $filename): mixed {}
-
 	public function clearAll() : void {}
 
 	public function createCache(string $service_key, string $class_name, array $options) : void {}
