@@ -43,7 +43,7 @@ namespace wcc {
 
     	obj_ptr getFinder() { return finder_; }
 
-    	void setBaseDir(str_ptr dir) { basedir_ = dir; }
+    	void setBaseDir(str_ptr dir);
    
     	str_ptr getBaseDir() { return basedir_; }
 

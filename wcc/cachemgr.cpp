@@ -376,14 +376,12 @@ CacheMgr::readFile(str_ptr filename, str_ptr ext)
 	{
 		result = Wcc_XmlRead::fromFile(filename);
 	}
-	else
-	if (zs_cmp_ci(filetype, Cache_i.php_ext)==0)
+	else if (zs_cmp_ci(filetype, Cache_i.php_ext)==0)
 	{
 		showstr("match php ", filename);
 		result = Loader::readPHP(filename);
 	}
-	else
-	if (zs_cmp_ci(filetype, Cache_i.toml_ext)==0)
+	else if (zs_cmp_ci(filetype, Cache_i.toml_ext)==0)
 	{
 		result = val_rc(Toml::decodeFile(filename));
 	}
@@ -391,7 +389,7 @@ CacheMgr::readFile(str_ptr filename, str_ptr ext)
 		zend_throw_error(zend_ce_error,"Unmatched file extension %s", filetype.data());
 	}
 	
-	return val_rc();
+	return result;
 }
 
 };

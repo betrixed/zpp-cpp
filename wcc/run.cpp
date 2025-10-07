@@ -186,15 +186,7 @@ public:
 
 Run_init Run_i;
 
-static void php_path(str_ptr php_root, const char* s, htab_rw data)
-{
-	str_temp ns(s);
-	str_buf buf;
 
-	buf << php_root << "/" << ns;
-	str_rc value = buf.zstr();
-	data.set(ns, value);
-}
 
 bool // static
 Run::class_load(str_ptr class_name, str_ptr php_root)
@@ -214,32 +206,6 @@ Run::class_load(str_ptr class_name, str_ptr php_root)
 	return true;
 }
 
-void
-Run::load_boot(str_ptr php_root)
-{
-	Loader* lob = Loader::cpp_global();
-
-	obj_rc finder = Finder::omg.new_zobj();
-
-	Finder* fob = zobj_toc<Finder>(finder);
-
-	htab_rc paths_data;
-	htab_rw paths(paths_data);
-
-	php_path(php_root, "Wcc", paths);
-	php_path(php_root, "Wc", paths);
-	php_path(php_root, "Wcd", paths);
-
-	fob->addPathArray(paths_data);
-
-	lob->setFinder(finder);
-
-	Services* sobj = Services::cpp_global();
-
-	sobj->setObject(finder);
-
-	sobj->set(Run_i.finder, finder);
-}
 
 void Run::construct()
 {
@@ -328,8 +294,6 @@ void Run::construct()
 
 	obj_rc dos = ReflectCache::staticInstance(Run_i.dos_class);
 	sobj->set(Run_i.dos_str, dos);
-
-	load_boot(php_root);
 }
 
 

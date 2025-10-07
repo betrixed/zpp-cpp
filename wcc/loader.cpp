@@ -31,6 +31,7 @@ public:
 	str_intern ns_sep;
 	str_intern dir_sep;
 	str_intern php_ext;
+	str_intern finder_str;
 
 
 
@@ -52,6 +53,7 @@ void Loader_init::init()
 	ns_sep = "\\";
 	dir_sep = "/";
 	php_ext = "php";
+	finder_str = "finder";
 }
 
 
@@ -88,8 +90,6 @@ Loader::call_spl(str_ptr fname)
 
 	ZVAL_ARR(fn.argsptr(), cfn);
 	fn.call_fn();
-
-
 }
 
 Loader::Loader() : base_d()
@@ -115,8 +115,46 @@ val_rc //static
 Loader::readPHP(str_ptr path)
 {
 	Loader* lob = Loader::cpp_global();
-	return lob->require(path);
+	val_rc result = lob->require(path);
+	showmem("readPHP result", result);
+	return result;
 }
+
+static void php_path(str_ptr php_root, const char* s, htab_rw data)
+{
+	str_temp ns(s);
+	str_buf buf;
+
+	buf << php_root << "/" << ns;
+	str_rc value = buf.zstr();
+	data.set(ns, value);
+}
+
+void 
+Loader::setBaseDir(str_ptr dir) 
+{ 
+	basedir_ = dir; 
+
+	obj_rc finder = Finder::omg.new_zobj();
+	Finder* fob = zobj_toc<Finder>(finder);
+
+	htab_rc paths_data;
+	htab_rw paths(paths_data);
+
+	php_path(basedir_, "Wcc", paths);
+	php_path(basedir_, "Wc", paths);
+	php_path(basedir_, "Wcd", paths);
+
+	fob->addPathArray(paths_data);
+
+	this->setFinder(finder);
+
+	Services* sobj = Services::cpp_global();
+
+	sobj->setObject(finder);
+	sobj->set(LDRi.finder_str, finder);
+}
+
 
 void 
 Loader::destruct()
@@ -236,6 +274,7 @@ ZEND_METHOD(Wcc_Loader, readPHP)
 	{
 		result = Loader::readPHP(path);
 	}
+	showmem("zend readPHP", result);
 	result.move_zv(return_value);
 }
 

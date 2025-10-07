@@ -13,7 +13,6 @@ namespace wcc {
 		void config_init(str_ptr bootstrap);
 		void temp_folders();
 		obj_ptr setup_world();
-		void load_boot(str_ptr php_root);
 		void setup_cryptic();
 		
 	public:
