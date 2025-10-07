@@ -333,7 +333,7 @@ namespace zpp {
         str_intern  s_mkdir;
         str_intern  s_php_sapi_name;
         str_intern  s_filemtime;
-        str_intern  s_simple_loader;
+
 
         extnloaded    extension_loaded;
         fnexists      function_exists;
@@ -427,8 +427,6 @@ namespace zpp {
 
     bool define(str_ptr name, val_ptr value);
     bool define(str_ptr name, str_ptr value);
-
-    val_rc simple_loader(str_ptr path);
     
     str_rc getcwd();
 

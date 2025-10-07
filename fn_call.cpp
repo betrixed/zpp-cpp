@@ -214,19 +214,7 @@ PathInfo::call(str_ptr path, int flags)
 }
 
 //bool callable_fn(val_rc& result, val_rc& callme, int argct = 0, zval* argv = nullptr);
-val_rc 
-simple_loader(str_ptr path)
-{
-    val_rc result;
-    val_rc callme(FTAB.s_simple_loader);
 
-    zval arg = {0};
-    ZVAL_STR(&arg, path);
-
-    callable_fn(result, callme, 1, &arg);
-
-    return result;
-}
 /*
 val_rc 
 fn_simple_loader::call(str_ptr path)
@@ -580,8 +568,6 @@ fntable::init()
     s_define = "define";
     s_php_sapi_name = "php_sapi_name";
     s_filemtime = "filemtime";
-    s_simple_loader = "simple_loader";
-
 
     extension_loaded.set_fname(s_extension_loaded);
     function_exists.set_fname(s_function_exists);
@@ -607,7 +593,6 @@ fntable::init()
     call_user_func_array.set_fname(s_call_user_func_array);
     php_sapi_name.set_fname(s_php_sapi_name);
     filemtime.set_fname(s_filemtime);
-    //simple_loader.set_fname(s_simple_loader);
 
 
     //state_init::init();
@@ -631,10 +616,6 @@ strtable::init()
     ucwords = "ucwords";
     stripslashes = "stripslashes"; 
     array_pop = "array_pop";
-
-
-
-
 }
 
 /**
