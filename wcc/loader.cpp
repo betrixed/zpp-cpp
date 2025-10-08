@@ -31,9 +31,14 @@ public:
 	str_intern ns_sep;
 	str_intern dir_sep;
 	str_intern php_ext;
+
 	str_intern finder_str;
+	str_intern loader_str;
 
-
+	str_intern extloader_str;
+	str_intern basedir_str;
+	str_intern isreg_str;
+	str_intern throwon_err;
 
 	void init() override;
 
@@ -54,6 +59,13 @@ void Loader_init::init()
 	dir_sep = "/";
 	php_ext = "php";
 	finder_str = "finder";
+	loader_str = "loader";
+
+	extloader_str = "extloader";
+	basedir_str = "basedir";
+	isreg_str = "registered";
+	throwon_err = "throwerr";
+
 }
 
 
@@ -98,6 +110,14 @@ Loader::Loader() : base_d()
 	throwNotFound_ = false;
 }
 
+void Loader::debug_info(htab_rw di)
+{
+	di.set(LDRi.finder_str, finder_);
+	di.set(LDRi.extloader_str, extloader_);
+	di.set(LDRi.basedir_str, basedir_);
+	di.set(LDRi.throwon_err, throwNotFound_);
+	di.set(LDRi.isreg_str, isRegistered_);
+}
 
 obj_ptr // static
 Loader::instance()
@@ -116,7 +136,7 @@ Loader::readPHP(str_ptr path)
 {
 	Loader* lob = Loader::cpp_global();
 	val_rc result = lob->require(path);
-	showmem("readPHP result", result);
+	//showmem("readPHP result", result);
 	return result;
 }
 
@@ -151,8 +171,13 @@ Loader::setBaseDir(str_ptr dir)
 
 	Services* sobj = Services::cpp_global();
 
-	sobj->setObject(finder);
+	obj_ptr self(this->self());
+
 	sobj->set(LDRi.finder_str, finder);
+	sobj->set(LDRi.loader_str, self);
+
+	sobj->setObject(finder);
+	sobj->setObject(self);
 }
 
 
@@ -274,7 +299,7 @@ ZEND_METHOD(Wcc_Loader, readPHP)
 	{
 		result = Loader::readPHP(path);
 	}
-	showmem("zend readPHP", result);
+	//showmem("zend readPHP", result);
 	result.move_zv(return_value);
 }
 

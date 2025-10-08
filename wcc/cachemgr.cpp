@@ -318,7 +318,7 @@ CacheMgr::readCache(str_ptr filename, str_ptr cachename)
 	}
 	// data missing or not current
 	val_rc data = readFile( filename );
-	showmem("read data", data);
+	//showmem("read data", data);
 
 	if (data.ok())
 	{
@@ -360,25 +360,34 @@ CacheMgr::readFile(str_ptr filename, str_ptr ext)
 	str_rc filetype;
 	val_rc result;
 
+	//showstr("readFile ", filename);
+
 	if (!ext.ok())
 	{
-		showstr("type for ", filename);
+		
 		filetype = Finder::path_ext(filename);
 		//filetype = FTAB.pathinfo.call(filename, PathInfo::EXTENSION);
-		showstr("pathinfo", filetype);
+		//showstr("pathinfo", filetype);
 	}
 	else {
 		filetype = ext;
 	}
-	showstr("filetype", filetype);
+
+	if (!filename.ok() || !filetype.ok())
+	{
+		zend_throw_error(zend_ce_error,"CacheMgr::readFile bad filename");
+		return result;
+	}
+	
 
 	if (zs_cmp_ci(filetype,Cache_i.xml_ext)==0)
 	{
+		//showstr("filename", filename);
 		result = Wcc_XmlRead::fromFile(filename);
 	}
 	else if (zs_cmp_ci(filetype, Cache_i.php_ext)==0)
 	{
-		showstr("match php ", filename);
+		//showstr("match php ", filename);
 		result = Loader::readPHP(filename);
 	}
 	else if (zs_cmp_ci(filetype, Cache_i.toml_ext)==0)

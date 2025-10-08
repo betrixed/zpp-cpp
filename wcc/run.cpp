@@ -29,12 +29,21 @@
 #include "wcc/loader.h"
 #endif
 
+#ifndef REQUEST_GLOBALS_H
+#include "wcc/request_globals.h"
+#endif
 
 #ifndef RUN_ARGINFO_H
 #define RUN_ARGINFO_H
 extern "C" {
 #include "stub/run_arginfo.h"
 };
+#endif
+
+#ifndef PHP_SESSION_H
+extern "C" {
+	#include <ext/session/php_session.h>
+}
 #endif
 
 namespace wcc {
@@ -110,6 +119,9 @@ public:
 	str_intern site_str;
 	str_intern cryptic_str;
 
+	str_intern user_session;
+	str_intern is_ended;
+
 	void init() override {
 		start_time = "start_time";
 		target = "target";
@@ -179,6 +191,9 @@ public:
 		s_prepare = "prepare";
 		site_str = "site";
 		cryptic_str = "cryptic";
+
+		user_session = "user_session";
+		is_ended = "isended";
 
 		state_init::init();
 	}
@@ -351,20 +366,24 @@ Run::setup_cryptic()
 {
 	obj_ptr self (this->self());
 
-	str_rc target = self.property(Run_i.target);
-	target.lowercase();
+	obj_ptr config = self.property(Run_i.config_str);
+	str_rc  config_dir = self.property(Run_i.config_dir);
 
-	str_rc config_dir = self.property(Run_i.config_dir);
+	str_rc cryptic_data = config.property(Run_i.cryptic_str);
 
+	if (!cryptic_data.ok())
+	{
+		return;
+	}
 	str_buf buf;
 
-
-	buf << config_dir << '/' << "_secrets.xml";
+	buf << config_dir << '/' << cryptic_data;
 	str_rc path = buf.zstr();
-	val_rc data;
+	
 
 	Services* sobj = Services::cpp_global();
 
+	val_rc data;
 	if (file_exists(path))
 	{	
 		obj_rc cache_mgr = sobj->get(Run_i.cache_mgr);
@@ -372,8 +391,11 @@ Run::setup_cryptic()
 		data = cmgr->readCache(path, Run_i.file_cache);
 		
 	}
+	else {
+		zend_throw_error(zend_ce_error,"File %s not found", path.data());
+	}
 	sobj->set(Run_i.cryptic_str, data);
-	showmem("cryptic data", data);
+
 }
 
 void Run::temp_folders()
@@ -455,7 +477,25 @@ void Run::temp_folders()
 
 void Run::shutdown()
 {
+
 	Services* sobj = Services::cpp_global();
+
+	if (php_get_session_status() == php_session_active)
+	{
+		obj_rc user_session = sobj->get(Run_i.user_session);
+		if (user_session.ok())
+		{
+			val_rc ended = user_session.call(Run_i.is_ended);
+			if (ended.isFalse())
+			{
+				htab_ptr session = htab_rc::get_global(RQit.G_SESSION);
+				if (session.size())
+				{
+					php_session_flush(1);
+				}
+			}
+		}
+	}
 
 	obj_rc cfg = sobj->get(Run_i.config_str);
 	Config* cobj = zobj_toc<Config>(cfg);
@@ -598,7 +638,7 @@ void Run::config_init(str_ptr bootstrap)
 
 			str_ptr modules_dir = mpath.zstr();
 
-			showstr("modules_dir", modules_dir);
+			//showstr("modules_dir", modules_dir);
 
 			if (FTAB.is_dir.call(modules_dir))
 			{

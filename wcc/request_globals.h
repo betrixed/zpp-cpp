@@ -224,6 +224,7 @@ namespace wcc {
 		str_intern    G_REQUEST;
 		str_intern    G_POST;
 		str_intern    G_FILES;
+		str_intern    G_SESSION;
 
 		str_intern    HTTP_ACCEPT;
 		str_intern    HTTP_X_FORWARDED_FOR;
