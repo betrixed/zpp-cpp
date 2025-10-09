@@ -36,10 +36,6 @@
 #include "val_rc.h"
 #include "val_ptr.h"
 
-/* This does not seem necessary
-#include "ref_rc.h"
-*/
-
 #include "htab_walk.h"
 #include "for_key_value.h"
 #include "state_init.h"
@@ -55,10 +51,6 @@
 #include "datetime.h"
 
 #include "preg.h"
-
-
-
-
 
 
 #define BASE_ZOBJPTR
