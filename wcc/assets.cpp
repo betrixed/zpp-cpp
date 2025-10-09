@@ -270,7 +270,7 @@ Assets::script_wrap(str_ptr path)
 {
 	str_buf buf;
 
-	buf << R"(<script src=")" << path << R"("></script>")" << endl;
+	buf << R"(<script src=")" << path << R"("></script>)" << endl;
 
 	return buf.zstr();
 }
