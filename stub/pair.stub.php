@@ -21,5 +21,5 @@ final class Pair {
 
 	public function value() : mixed {}
 
-	public function sum() : mixed {}
+	public function test_calc() : mixed {}
 };

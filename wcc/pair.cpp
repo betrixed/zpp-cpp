@@ -96,12 +96,12 @@ ZEND_METHOD(Wcc_Pair, value)
 	cobj->two_.return_zv(return_value);
 }
 
-ZEND_METHOD(Wcc_Pair, sum)
+ZEND_METHOD(Wcc_Pair, test_calc)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	Pair* cobj = zval_toc<Pair>(ZEND_THIS);
-	ZVAL_DOUBLE(return_value, cobj->sum());
+	ZVAL_DOUBLE(return_value, cobj->test_calc());
 	//cobj->value_.return_zv(return_value);
 }
 

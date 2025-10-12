@@ -9,7 +9,7 @@ chdir($workdir);
 
 echo "Current directory is $workdir" .  PHP_EOL;
 
-$wcc_root = "php/Wcc";
+$wcc_root = "php";
 
 function get_version(string $extname)
 {
@@ -43,6 +43,12 @@ $loader = Loader::instance();
 
 $loader->setBaseDir($wcc_root);
 
+$loader->setExtLoader(function(string $file) {
+    echo "load $file\n";
+    return require_once($file);
+});
+
+echo "BaseDir is " . $loader->getBaseDir() . PHP_EOL;
 $loader->regLoader();
 
 

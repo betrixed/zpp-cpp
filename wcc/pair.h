@@ -75,11 +75,11 @@ using namespace zpp;
 			return two_;
 		}
 		
-		double sum() const 
+		double test_calc() const 
 		{
 			long a, b;
-			a = val_ptr(one_).zlong();
-			b = val_ptr(two_).zlong();
+			a = one_.zlong();
+			b = two_.zlong();
 			return (a + b) / double(a);
 		}
 

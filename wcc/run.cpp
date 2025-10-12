@@ -344,7 +344,6 @@ void Run::execute(str_ptr bootstrap)
 
 	obj_ptr site = this->setup_world();
 	site.call(Run_i.run_str);
-	this->shutdown();
 
 	
 }
@@ -403,8 +402,6 @@ void Run::temp_folders()
 
 	obj_ptr self = this->self();
 
-
-		
 	obj_rc config = self.property(Run_i.config_str);
 
 	str_rc temp_dir = self.property(Run_i.temp_dir);
@@ -491,11 +488,18 @@ void Run::shutdown()
 				htab_ptr session = htab_rc::get_global(RQit.G_SESSION);
 				if (session.size())
 				{
+					//showdata("session end", session);
 					php_session_flush(1);
 				}
 			}
 		}
 	}
+	
+
+	obj_rc cache_mgr = sobj->get(Run_i.cache_mgr);
+	CacheMgr *cmgr = zobj_toc<CacheMgr>(cache_mgr);
+	cmgr->write_caches();
+	//zend_printf("Caches written\n");
 
 	obj_rc cfg = sobj->get(Run_i.config_str);
 	Config* cobj = zobj_toc<Config>(cfg);
