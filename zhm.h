@@ -23,6 +23,7 @@
 #include "str_buf.h"
 #include "state_init.h"
 #include "fn_call.h"
+#include "show_zpp.h"
 
 
 #endif
