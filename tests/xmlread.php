@@ -9,6 +9,9 @@ require __DIR__ . "/bootstrap.php";
 
 $rd = new XmlRead();
 
+$testfile1 = "tests/assets.xml";
+$testfile2 = "tests/assets_full.xml";
+
 
 /*
 $config = ReflectCache::staticInstance("Wcc\\Config");
@@ -25,7 +28,8 @@ echo "DIES NOW\n"; return;
 */
 function testone()
 {
-	$data = XmlRead::fromFile("tests/assets.xml");
+	global $testfile1;
+	$data = XmlRead::fromFile($testfile1);
 	if (empty($data))
 	{
 	    throw new Exception("File read error");
@@ -69,10 +73,10 @@ $rd = new XmlRead();
 
 function test() : mixed {
 
-	global $rd;
+	global $rd, $testfile2;
 	echo "CWD is " . \getcwd() . PHP_EOL;
 
-	$s = file_get_contents("tests/assets_full.xml");
+	$s = file_get_contents($testfile2);
 	$result = $rd->parse($s);
 
 	if (is_bool($result)) {
@@ -127,7 +131,7 @@ function testavg(int $ct, string $msg) {
 }
 
 
-
+echo "Test file is " . $testfile2 . PHP_EOL;
 testavg(10, "Warm up");
 testavg(200, "Final");
 show_versions();

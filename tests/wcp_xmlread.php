@@ -8,7 +8,8 @@ use Exception;
 
 require __DIR__ . "/bootstrap.php";
 
-
+$testfile1 = "tests/assets.xml";
+$testfile2 = "tests/assets_full.xml";
 $rd = new XmlRead();
 
 
@@ -27,8 +28,8 @@ echo "DIES NOW\n"; return;
 */
 function testone()
 {
-	global $rd;
-	$data = $rd->parseFile("tests/assets.xml");
+	global $rd, $testfile1;
+	$data = $rd->parseFile($testfile1);
 	if (empty($data))
 	{
 	    throw new Exception("File read error");
@@ -111,11 +112,13 @@ $start = microtime(true);
 
 
 function testavg(int $ct, string $msg) {
+	global $testfile2;
+
 	$start = microtime(true);
 	for($i = 0; $i < $ct; $i++)
 	{
 		$rd = new XmlRead();
-		$rd->parseFile("tests/assets_full.xml");
+		$rd->parseFile($testfile2);
 	}//$emty = new EmptyTest();
 	$end = microtime(true);
 
@@ -127,7 +130,7 @@ function testavg(int $ct, string $msg) {
 }
 
 
-
+echo "Test file is " . $testfile2 . PHP_EOL;
 testavg(10, "Warm up");
 testavg(200, "Final");
 show_versions();
