@@ -89,6 +89,7 @@ obj_rc::adopt(zend_object *zo)
 	//showobj("Adopted", obj_);
 }
 
+#ifndef OMIT_BASE_D
 obj_rc::obj_rc(base_d* cobj) : obj_ptr(cobj)
 {
 	if (obj_)
@@ -96,6 +97,7 @@ obj_rc::obj_rc(base_d* cobj) : obj_ptr(cobj)
 		try_addref(obj_);
 	}
 }
+#endif
 
 obj_rc::obj_rc(zend_object* rc) : obj_ptr(rc)
 {

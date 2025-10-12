@@ -27,6 +27,17 @@ namespace zpp {
 
 const char* str_ptr::empty = "\0";
 
+int  
+str_ptr::strcmp(const char* bstr) const
+{
+	if (!bstr) {
+		return size();
+	}
+	std::string_view bv(bstr, strlen(bstr));
+	std::string_view av = vstr();
+
+	return av.compare(bv);
+}
 
 int 
 zs_cmp(zend_string* a, zend_string* b)
@@ -222,6 +233,8 @@ str_ptr::substr(int offset, int len) const
 	 //showstr("substr", result);
 	 return std::move(result);
 }
+
+
 
 bool 
 str_ptr::starts_with(str_ptr match) const

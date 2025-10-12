@@ -47,8 +47,9 @@ namespace zpp {
 		obj_ptr(const val_ptr& rc);
 		
 		obj_ptr(zval* zp);
-
+#ifndef OMIT_BASE_D
 		obj_ptr(base_d* cobj); 
+#endif
 		
 		obj_rc clone() const;
 
@@ -89,7 +90,8 @@ namespace zpp {
 		bool isNull() const { return !(obj_); }
 		bool ok() const { return (obj_); }
 
-		zend_string* className();
+		zend_string* className() const;
+		zend_class_entry* class_entry() const;
 
 		/** Calling methods of obj_ptr.
   			If obj_ptr contains a nullptr, its a global function call.

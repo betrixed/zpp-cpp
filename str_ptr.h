@@ -100,6 +100,8 @@ namespace zpp {
 		bool ends_with(str_ptr match) const;
 
 		str_rc duplicate() const;
+
+		int  strcmp(const char* bstr) const;
 		
 		const str_ptr& operator=(zval* rc);
 

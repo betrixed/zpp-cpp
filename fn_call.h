@@ -66,7 +66,7 @@ namespace zpp {
         // PHP call cache info for multiple calls
         zend_fcall_info       fci_;
         zend_fcall_info_cache cache_;
-        zval     result_;
+        zval    result_;
     public:
 
         void throw_failed();

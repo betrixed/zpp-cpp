@@ -236,7 +236,7 @@ public:
 
 };
 
-bool operator!=(const val_ptr& a, const val_ptr& b) 
+inline bool operator!=(const val_ptr& a, const val_ptr& b) 
 {
     return !a.same(b);
 }

@@ -37,9 +37,9 @@ namespace zpp {
 		obj_rc() : obj_ptr() {}
 
 		obj_rc(zend_object* rc);
-
+#ifndef OMIT_BASE_D
     	obj_rc(base_d* cobj); 
-    	
+#endif
     	obj_rc(const obj_rc& rc);
 
 	    obj_rc(obj_rc&& rc);

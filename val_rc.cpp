@@ -46,6 +46,12 @@ val_rc::ref_type() const
     return Z_TYPE_P((const zval*) val_ptr::real_zval(&zv_));
 }
 
+zval* 
+val_rc::dereference() const
+{
+    return val_ptr::real_zval(&zv_);
+}
+
 void 
 val_rc::make_ref()
 {
@@ -62,15 +68,9 @@ val_rc::make_ref()
         Z_TYPE_INFO_P(zp) = IS_REFERENCE_EX; 
         */
         ZVAL_NEW_REF(&zv_, zp);  
-        showmem("make_ref", &zv_);
-        if (Z_TYPE_P(zp) != IS_REFERENCE) 
-        {
-            showmem("!!not a reference", &zv_);
-        }
-    }   
-    else {
-        showmem("already ref", &zv_);
-    }                    
+        //showmem("make_ref", &zv_);
+        
+    }                      
 }
 
 val_rc::~val_rc()
@@ -211,12 +211,14 @@ val_rc::val_rc(HashTable* ht)
      val_ptr(&zv_).bind_array(ht);
 }
 
+#ifndef OMIT_BASE_D
 val_rc::val_rc(base_d* cobj)
 {
     zv_ = {0};
     
     val_ptr(&zv_).bind_object(cobj->vobj());
 }
+#endif
 
 val_rc::val_rc(double value)
 {
@@ -583,14 +585,14 @@ val_rc::try_decref(zval* p)
         case IS_REFERENCE:
             {
                 auto zref = Z_REF_P(p);
-                showmem("reference", p);
+                //showmem("reference", p);
                 if (rct == 1) 
                 {
 
                     try_decref(&zref->val);
                     efree_size(zref, sizeof(zend_reference));
                     ZVAL_NULL(p);
-                    showmem("reference", p);
+                    //showmem("reference", p);
 
                     return;
                 }

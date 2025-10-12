@@ -22,6 +22,7 @@ class obj_rc;
 class base_d;
 class str_rc;
 class obj_ptr;
+class htab_rc;
 
 /**
  * @class val_rc
@@ -71,7 +72,9 @@ public:
 
     val_rc(zend_long value);
 
+#ifndef OMIT_BASE_D
     val_rc(base_d* cobj);
+#endif
 
     val_rc(bool value);
     
@@ -149,6 +152,7 @@ public:
     zend_object* zobject() const;
     
     int   ref_type() const;
+    zval* dereference() const;
     
     // inlines
 

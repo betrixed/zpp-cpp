@@ -195,8 +195,17 @@ obj_ptr::return_zv(zval* ret) const
         ZVAL_NULL(ret);
 }
 
+zend_class_entry* 
+obj_ptr::class_entry() const
+{
+    if (obj_) {
+        return obj_->ce;
+    }
+    return nullptr;
+}
+
 zend_string* 
-obj_ptr::className()
+obj_ptr::className() const
 {
     if (obj_) {
         return obj_->ce->name;
@@ -493,11 +502,12 @@ obj_ptr::obj_ptr(const val_ptr& rc)
 {
     obj_ = rc.zobject();
 }
-
+#ifndef OMIT_BASE_D
 obj_ptr::obj_ptr(base_d* cobj) 
 {
     obj_ = cobj ? cobj->vobj() : nullptr;
 }
+#endif
 
 bool 
 obj_ptr::instanceof(zend_class_entry *ce) const
