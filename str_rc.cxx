@@ -126,7 +126,9 @@ str_rc::operator=(str_rc&& rc)
     	s = p;
     }
     else {
-    	try_decref(s); // 1 instance disappears
+    	if (s) {
+    		try_decref(s); // 1 instance disappears
+    	}
     }
     //showstr("operator= &&", s);
     rc.s = nullptr;

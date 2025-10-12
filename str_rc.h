@@ -49,7 +49,7 @@ namespace zpp {
 			}
 			GC_ADDREF(zs);
 		}
-
+		
 		static void try_decref(zend_string* zs)
      	{
 			zend_string_release(zs);
@@ -88,6 +88,7 @@ namespace zpp {
 	    str_rc(const val_ptr& rc);
 
 	    str_rc(val_rc&& rc);
+	    //str_rc(val_rc& rc);
 
 	    str_rc(zend_long ival);
 
