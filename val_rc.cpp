@@ -573,6 +573,11 @@ val_rc::try_decref(zval* p)
     if (Z_REFCOUNTED_P(p))
     {
         auto rct = zval_refcount_p(p);
+        if (rct <= 0)
+        {
+            //showmem("!!! RC emergency", p );
+            return;
+        }
         auto ztype = Z_TYPE_P(p);
         switch(ztype) 
         {
