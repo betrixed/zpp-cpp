@@ -154,9 +154,10 @@ public:
     int   ref_type() const;
     zval* dereference() const;
     
+     bool ok() const;
     // inlines
 
-    bool ok() const;
+   
     
     int   ztype() const {
         return Z_TYPE_P(&zv_);

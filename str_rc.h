@@ -61,7 +61,7 @@ namespace zpp {
 	    {   
 	    }
 		
-		str_rc(const char* cp);
+		str_rc(const char* cp, int len=-1);
 
 	    str_rc(zend_string* p) : str_ptr(p)
 	    {

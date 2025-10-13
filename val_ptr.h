@@ -139,6 +139,11 @@ public:
     
     bool isNull() const;
 
+    bool is_nullptr() const
+    {
+        return (!p_);
+    }
+
     bool isObject() const;
 
     /**

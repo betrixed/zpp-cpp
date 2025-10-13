@@ -92,10 +92,19 @@ bool str_rc::try_decref(zend_string* zs)
 	return !(rc);
 }
 */
-
-str_rc::str_rc(const char* cp) : str_ptr()
+// make a temporary string
+str_rc::str_rc(const char* cp, int slen) : str_ptr()
 {
-	s = zend_string_init(cp, strlen(cp), 0);
+	if (!cp)
+	{
+		return;
+	}
+	if (slen < 1)
+	{
+		//check!!
+		slen = strlen(cp);
+	}
+	s = zend_string_init(cp, slen, 0);
 }
 
 str_rc& 
