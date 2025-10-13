@@ -25,5 +25,6 @@
 #include "fn_call.h"
 #include "show_zpp.h"
 
+#include "alloc_phpreq.h"
 
 #endif
