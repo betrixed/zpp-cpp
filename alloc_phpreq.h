@@ -8,49 +8,59 @@ extern "C" {
     #include <Zend/zend.h>  
 	#include <Zend/zend_alloc.h>
 }
+/**
+ *  Allocator for C++ STL that uses PHP request memory allocations, emalloc and efree.
+ *  C++ compilers don't report on what is missing from allocator templates.
+ *  Thanks to 
+ *  https://www.codeproject.com/articles/A-Custom-STL-std-allocator-Replacement-Improves-Performance
+ */
 
 template <typename T>
 class alloc_phpreq {
 public:
-	using value_type = T;
+	typedef size_t size_type;
+    typedef ptrdiff_t difference_type;
+    typedef T* pointer;
+    typedef const T* const_pointer;
+    typedef T& reference;
+    typedef const T& const_reference;
+    typedef T value_type;
 
-	alloc_phpreq() = default;
+	alloc_phpreq(){}
+    ~alloc_phpreq(){}
 
-	template <typename U>
-    alloc_phpreq(const alloc_phpreq<U>&) {}
+    template <class U> struct rebind { typedef alloc_phpreq<U> other; };
 
-	T* allocate(std::size_t n) {
-		size_t sz = n * sizeof(T);
-		T* data = static_cast<T*>(emalloc(sz));
-		//zend_printf("Allocated %ld, %lx\n", sz, data);
-    	return data;
-	}
+	template <class U>alloc_phpreq(const alloc_phpreq<U>&) {}
 
-	T* deallocate(T* p, std::size_t n) noexcept {
-		//zend_printf("Free %lx fsize %ld\n", p, n);
-    	efree(p);
-	}
+    pointer address(reference x) const {return &x;}
+    const_pointer address(const_reference x) const {return &x;}
+    size_type max_size() const throw() {return size_t(-1) / sizeof(value_type);}
 
-	template <typename U, typename... Args>
-    void construct(U* p, Args&&... args)
+	pointer allocate(size_type n, alloc_phpreq<T>::const_pointer hint = 0)
     {
-        ::new ((void*)p) U(std::forward<Args>(args)...);
+        return static_cast<pointer>(emalloc(n*sizeof(T)));
     }
 
-    template <typename U>
-    void destroy(U* p) noexcept
+	void deallocate(pointer p, size_type n)
     {
-        if (p) 
-        {
-            p->~U();
-        }
+        efree(p);
     }
 
+	void construct(pointer p, const T& val)
+    {
+        new(static_cast<void*>(p)) T(val);
+    }
 
-	template <typename U>
-    struct rebind {
-        using other = alloc_phpreq<U>;
-    };
+    void construct(pointer p)
+    {
+        new(static_cast<void*>(p)) T();
+    }
+
+    void destroy(pointer p)
+    {
+        p->~T();
+    }
 };
 
 template <typename T, typename U>
