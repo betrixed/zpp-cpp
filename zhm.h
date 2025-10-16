@@ -24,7 +24,7 @@
 #include "state_init.h"
 #include "fn_call.h"
 #include "show_zpp.h"
-
+#include "zarg_rd.h"
 #include "alloc_phpreq.h"
 
 #endif
