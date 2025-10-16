@@ -6,7 +6,7 @@
  * @author Michael Rynn <michael.rynn.500@gmail.com>
  * @brief str_buf class, string buffer with zend_string memory layout.	
  * @copyright Copyright (c) 2025 Michael Rynn
- * @license Artistic License 2.0
+ * @license BSD 3-Clause License
  */
 
 

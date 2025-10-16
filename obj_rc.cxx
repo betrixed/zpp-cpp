@@ -6,7 +6,7 @@
  * @author Michael Rynn <michael.rynn.500@gmail.com>
  * @brief obj_rc- A simple zend_object* wrapper with added reference counting
  * @copyright 2025 Michael Rynn
- * @license Artistic License 2.0
+ * @license BSD 3-Clause License
  */
 
 #ifndef OBJ_RC_H

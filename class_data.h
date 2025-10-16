@@ -6,7 +6,7 @@
  * @brief Handle operations for a zend_class_entry*.
  * @author Michael Rynn <michael.rynn.500@gmail.com>
  * copyright (c) 2025 Michael Rynn
- * Distributed under the Artistic License 2.0
+ * Distributed under the BSD 3-Clause License
  */ 
 
 #ifndef PHP_EXTERN_H

@@ -6,7 +6,7 @@
  * @author Michael Rynn <michael.rynn.500@gmail.com>
  * @brief zpp::zarg_rd - Argument reader for PHP functions/method
  * @copyright Copyright (c) 2025 Michael Rynn
- * @license Artistic License 2.0
+ * @license BSD 3-Clause License
  */
 #ifndef OBJ_PTR_H
 #include "obj_ptr.h"

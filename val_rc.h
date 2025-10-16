@@ -3,7 +3,7 @@
   *  @brief val_rc class, reference counted zval value.  
   *  @author Michael Rynn <michael.rynn.500@gmail.com>
   *  @copyright 2024-2025 Michael Rynn
-  *  @license Artistic License 2.0
+  *  @license BSD 3-Clause License
   */
 
 #ifndef VAL_RC_H

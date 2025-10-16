@@ -2,7 +2,7 @@
   * @file str_ptr.cxx
   *  @author Michael Rynn <michael.rynn.500@gmail.com>
   *  @copyright 2025 Michael Rynn
-  * @license Artistic License 2.0
+  * @license BSD 3-Clause License
   * @brief str_ptr class, and methods, holds a zend_string pointer.
   * 
   */

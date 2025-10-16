@@ -5,7 +5,7 @@
   *  @file for_key_value.h
   *  @brief Iterate a HashTable for key and value.
   *  @author Michael Rynn <michael.rynn.500@gmail.com>
-  *  @license Artistic License 2.0
+  *  @license BSD 3-Clause License
   *  copyright 2025 Michael Rynn
   */
 

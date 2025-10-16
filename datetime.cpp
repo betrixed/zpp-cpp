@@ -7,7 +7,7 @@
  *  @author Michael Rynn <michael.rynn.500@gmail.com>
  * 
  *  copyright (c) 2025 Michael Rynn
- *  Distributed under the Artistic License 2.0
+ *  Distributed under the BSD 3-Clause License
  */
 #ifndef OBJ_RC_H
 #include "obj_rc.h"

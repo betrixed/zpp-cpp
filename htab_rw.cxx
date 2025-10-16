@@ -6,7 +6,7 @@
  * @author Michael Rynn <michael.rynn.500@gmail.com>
  * @brief htab_rw - read/write HashTable manager
  * @copyright Copyright (c) 2025
- * @license Artistic License 2.0
+ * @license BSD 3-Clause License
  * 
  * @details This class provides read and write access to a HashTable*.
  * It ensures that the HashTable is unique (copy-on-write) before any write operation.

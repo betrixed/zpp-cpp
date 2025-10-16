@@ -6,7 +6,7 @@
  * @author Michael Rynn <michael.rynn.500@gmail.com>
  * @brief obj_ptr - A simple zend_object* wrapper
  * @copyright Copyright (c) 2025
- * @license Artistic License 2.0
+ * @license BSD 3-Clause License
  */
 #ifndef FN_CALL_H
 #include "fn_call.h"

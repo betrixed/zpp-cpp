@@ -6,7 +6,7 @@
  * @author Michael Rynn <michael.rynn.500@gmail.com>
  * @brief htab_rw - read/write, not-reference counting, HashTable manager
  * @copyright Copyright (c) 2025
- * @license Artistic License 2.0
+ * @license BSD 3-Clause License
  */
 #ifndef HTAB_PTR_H
 #include "zpp/htab_ptr.h"

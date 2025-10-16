@@ -6,7 +6,7 @@
  * @author Michael Rynn <michael.rynn.500@gmail.com>
  * @brief Include all zpp HashTable related classes
  * @copyright Copyright (c) 2025
- * @license Artistic License 2.0
+ * @license BSD 3-Clause License
  * 
  */
 #include "htab_ptr.cxx"

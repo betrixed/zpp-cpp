@@ -3,7 +3,7 @@
   *  @author Michael Rynn <michael.rynn.500@gmail.com>
   *  @copyright 2025 Michael Rynn
   *  @brief str_rc class, reference counted zend_string pointer.	
-  *  @license Artistic License 2.0	
+  *  @license BSD 3-Clause License	
   */
 
 #ifndef STR_RC_CPP

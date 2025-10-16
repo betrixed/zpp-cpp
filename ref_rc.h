@@ -16,7 +16,7 @@ class obj_ptr;
  * @brief	 Reference counted reference to a zval reference
  * @author  Michael Rynn <michael.rynn.500@gmail.com>
  * @copyright copyright (c) 2025 Michael Rynn 
- * @license Artistic License 2.0	
+ * @license BSD 3-Clause License	
  * @details  	
  * Make a reference which stores value in the zval
  * inside a reference counted reference handle.

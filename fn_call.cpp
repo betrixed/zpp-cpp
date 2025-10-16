@@ -3,7 +3,7 @@
   *  @brief Implementation of fn_call class for calling PHP functions from C++
   *  @author Michael Rynn <michael.rynn.500@gmail.com>
   *  @copyright 2025 Michael Rynn
-    *  @license Artistic License 2.0
+    *  @license BSD 3-Clause License
   */
 
 #ifndef FN_CALL_CPP

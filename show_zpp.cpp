@@ -7,7 +7,7 @@
  * @author Michael Rynn <michael.rynn.500@gmail.com>
  * @brief Debug dumpers for PHP types. Output details of PHP types to console for trace/debugging.
  * @copyright Copyright (c) 2025 Michael Rynn
- * @license Artistic License 2.0
+ * @license BSD 3-Clause License
  */
 
 #ifndef FOR_KEY_VALUE_H

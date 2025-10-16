@@ -6,7 +6,7 @@
  * @author Michael Rynn <michael.rynn.500@gmail.com>
  * @brief obj_ptr - A simple zend_object* wrapper
  * @copyright
- * @license Artistic License 2.0
+ * @license BSD 3-Clause License
  */
 #ifndef VAL_RC_H
 #include "val_rc.h"

@@ -6,7 +6,7 @@
  * @author Michael Rynn <michael.rynn.500@gmail.com>
  * @brief htab_walk - A simple HashTable iterator.
  * @copyright Copyright (c) 2025
- * @license Artistic License 2.0
+ * @license BSD 3-Clause License
  */
 
 #ifndef VAL_PTR_H
