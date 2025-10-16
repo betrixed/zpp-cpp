@@ -26,6 +26,78 @@ fntable FTAB;
 strtable STAB;
 
 
+
+class TLfnTable {
+
+    TLfnTable() : configured_(false) {}
+
+    bool  configured_;
+    extnloaded       extension_loaded;
+    fnexists         function_exists;
+    fn_class_exists  class_exists;
+    pregquote        preg_quote;
+    file_content  file_get_contents;
+    fn_fopen      fopen;
+    fn_fclose     fclose;
+
+    fn_constant   get_constant;
+    fn_dirname    get_dirname;
+    fn_define     define;
+    fn_defined    defined;
+    PathInfo      pathinfo;
+    FCall2        call_user_func_array;
+    fn_call       php_sapi_name;
+    fn_filemtime  filemtime;
+    //fn_simple_loader simple_loader;
+
+    fn_isdir      is_dir;
+    fn_opendir    opendir;
+    fn_readdir    readdir;
+    fn_closedir   closedir;
+    fn_mkdir      mkdir;
+
+    void init(const fntable& ftab)
+    {
+        if (configured_)
+        {
+            return;
+        }
+
+        configured_ = true;
+        
+        extension_loaded.set_fname(ftab.s_extension_loaded);
+        function_exists.set_fname(ftab.s_function_exists);
+        class_exists.set_fname(ftab.s_class_exists);
+
+        preg_quote.set_fname(ftab.s_preg_quote);
+        file_get_contents.set_fname(ftab.s_file_get_contents);
+        pathinfo.set_fname(ftab.s_pathinfo);
+        fopen.set_fname(ftab.s_fopen);
+        fclose.set_fname(ftab.s_fclose);
+
+        is_dir.set_fname(ftab.s_isdir);
+        opendir.set_fname(ftab.s_opendir);
+        readdir.set_fname(ftab.s_readdir);
+        closedir.set_fname(ftab.s_closedir);
+        mkdir.set_fname(ftab.s_mkdir);
+        
+        defined.set_fname(ftab.s_defined);
+        define.set_fname(ftab.s_define);
+        get_constant.set_fname(ftab.s_constant);
+        get_dirname.set_fname(ftab.s_dirname);
+        
+        call_user_func_array.set_fname(ftab.s_call_user_func_array);
+        php_sapi_name.set_fname(ftab.s_php_sapi_name);
+        filemtime.set_fname(ftab.s_filemtime);
+    }
+
+
+};
+// as thread_local , won't be exporting the instance of this
+
+thread_local TLfnTable TLFNs;
+
+
 fn_call::fn_call() 
 {
     fci_ = {0};
@@ -161,6 +233,19 @@ fn_fclose::call(val_ptr fres)
     return val_ptr(result).isTrue();
 }
 
+val_rc 
+fopen(str_ptr path, str_ptr mode)
+{
+    return TLFNs.fn_fopen(path,mode);
+}
+
+bool 
+fclose(val_ptr fres)
+{
+    return TLFNs.fn_fclose(fres);
+}
+
+
 
 val_rc 
 fn_fopen::call(str_ptr path, str_ptr mode)
@@ -213,6 +298,11 @@ PathInfo::call(str_ptr path, int flags)
     return call_fn();
 }
 
+val_rc pathinfo(str_ptr path, int flags = PathInfo::ALL)
+{
+    TLFNs.pathinfo.call(path,flags);
+}
+
 //bool callable_fn(val_rc& result, val_rc& callme, int argct = 0, zval* argv = nullptr);
 
 /*
@@ -250,7 +340,7 @@ array_pop(val_rc& array_ref)
 str_rc 
 preg_quote(str_ptr expr, str_ptr delimiter)
 {
-    return FTAB.preg_quote.call(expr, delimiter);
+    return TLFNs.preg_quote.call(expr, delimiter);
 }
 
 val_rc
@@ -293,7 +383,7 @@ addcslashes(str_ptr s, str_ptr escapes)
  {
     //zend_printf("file get contents for %s\n", path.data());
 
-    str_rc result = FTAB.file_get_contents.call(path, offset, len);
+    str_rc result = TLFNs.file_get_contents.call(path, offset, len);
 
     //showmem("contents", result);
     return result;
@@ -304,10 +394,11 @@ file_exists(str_ptr path)
 {
     return std::filesystem::exists(path.vstr());
 }
+
 bool 
 extension_loaded(str_ptr name)
 {
-    return FTAB.extension_loaded.call(name);
+    return TLFNs.extension_loaded.call(name);
 }
 
 fn_fgetcsv::fn_fgetcsv() : fn_call_args<1>()
@@ -427,33 +518,39 @@ bool extnloaded::call(str_ptr name)
 }
 
 val_rc 
-constant(str_ptr name)
+get_constant(str_ptr name)
 {
-    return FTAB.get_constant.call(name);
+    return TLFNs.get_constant.call(name);
 }
 
 bool 
 function_exists(str_ptr name)
 {
-    return FTAB.function_exists.call(name);
+    return TLFNs.function_exists.call(name);
+}
+
+bool 
+class_exists(str_ptr name)
+{
+    return TLFNs.class_exists.call(name);
 }
 
 str_rc 
 dirname(str_ptr path, int level)
 {
-    return FTAB.get_dirname.call(path, level);
+    return TLFNs.get_dirname.call(path, level);
 }
 
 bool 
 defined(str_ptr name)
 {
-    return FTAB.defined.call(name);
+    return TLFNs.defined.call(name);
 }
 
 bool 
 define(str_ptr name, val_ptr value)
 {
-    return FTAB.define.call(name, value);
+    return TLFNs.define.call(name, value);
 }
 
 bool 
@@ -461,7 +558,7 @@ define(str_ptr name, str_ptr value)
 {
     //showstr("define ", name);
     //showstr(" = ", value);
-    return FTAB.define.call(name, value);
+    return TLFNs.define.call(name, value);
 }
 
 str_rc 
@@ -538,6 +635,12 @@ json_decode(str_ptr str, bool asArray,  int flags)
     return result;
 }
 
+
+void fntable::init_req()
+{
+    TLFNs.init(*this);
+}
+
 void  // virtual
 fntable::init()
 {        
@@ -569,30 +672,7 @@ fntable::init()
     s_php_sapi_name = "php_sapi_name";
     s_filemtime = "filemtime";
 
-    extension_loaded.set_fname(s_extension_loaded);
-    function_exists.set_fname(s_function_exists);
-    class_exists.set_fname(s_class_exists);
-
-    preg_quote.set_fname(s_preg_quote);
-    file_get_contents.set_fname(s_file_get_contents);
-    pathinfo.set_fname(s_pathinfo);
-    fopen.set_fname(s_fopen);
-    fclose.set_fname(s_fclose);
-
-    is_dir.set_fname(s_isdir);
-    opendir.set_fname(s_opendir);
-    readdir.set_fname(s_readdir);
-    closedir.set_fname(s_closedir);
-    mkdir.set_fname(s_mkdir);
-    
-    defined.set_fname(s_defined);
-    define.set_fname(s_define);
-    get_constant.set_fname(s_constant);
-    get_dirname.set_fname(s_dirname);
-    
-    call_user_func_array.set_fname(s_call_user_func_array);
-    php_sapi_name.set_fname(s_php_sapi_name);
-    filemtime.set_fname(s_filemtime);
+    TLFNs.init(this);
 
 
     //state_init::init();
@@ -708,8 +788,53 @@ FCall2::call(zval* arg1, zval* arg2)
 }
 
 
+val_rc 
+call_user_func_array(zval* arg1, zval* arg2)
+{
+    return TLFNs.call_user_func_array(arg1,arg2);
+}
+
+str_rc php_sapi_name()
+{
+    return TLFNs.php_sapi_name();
+}
+
+long 
+filemtime(str_ptr path)
+{
+    return TLFNs.filemtime(path);
+}
+
+bool 
+is_dir(str_ptr path)
+{
+    return TLFNs.is_dir(path);
+}
+
+val_rc 
+opendir(str_ptr path)
+{
+    return TLFNs.opendir(path);
+}
+
+val_rc readdir(val_ptr dh)
+{
+    return TLFNs.readdir(dh);
+}
+
+void closedir(val_ptr dh)
+{
+    TLFNs.closedir(dh);
+}
+
+void mkdir(str_ptr path, )
+
 }; // end namespace zpp
 
+bool mkdir(str_ptr path, int permissions, bool recurse)
+{
+    return TLFNs.mkdir(path, permissions, recurse);
+}
 
 //fn_call.cpp
 #endif

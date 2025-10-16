@@ -333,34 +333,9 @@ namespace zpp {
         str_intern  s_mkdir;
         str_intern  s_php_sapi_name;
         str_intern  s_filemtime;
-
-
-        extnloaded    extension_loaded;
-        fnexists      function_exists;
-        fn_class_exists  class_exists;
-
-        pregquote     preg_quote;
-        file_content  file_get_contents;
-        fn_fopen      fopen;
-        fn_fclose     fclose;
-        fn_constant   get_constant;
-        fn_dirname    get_dirname;
-        fn_define     define;
-        fn_defined    defined;
-        PathInfo      pathinfo;
-        FCall2        call_user_func_array;
-        fn_call       php_sapi_name;
-        fn_filemtime  filemtime;
-        //fn_simple_loader simple_loader;
-
-        fn_isdir      is_dir;
-        fn_opendir    opendir;
-        fn_readdir    readdir;
-        fn_closedir   closedir;
-        fn_mkdir      mkdir;
         
         void init() override;
-
+        void init_req() override;
     };
 
     class strtable : public state_init {
@@ -405,32 +380,59 @@ namespace zpp {
 
     int64_t strtotime(str_ptr datetime, int64_t base_timestamp = -1);
 
+    // calls to direct function implementations
+    bool file_exists(str_ptr fname);
+
+    val_rc array_pop(val_rc& arrayref);
+
+
+    // wrappers for TLfnTable calls
     bool extension_loaded(str_ptr name);
 
     bool function_exists(str_ptr name);
 
-    bool file_exists(str_ptr fname);
-    
-    val_rc array_pop(val_rc& arrayref);
+    bool class_exists(str_ptr name);
+
+    val_rc fopen(str_ptr name);
+
+    bool fclose(val_ptr fres);
 
     str_rc preg_quote(str_ptr expr, str_ptr delimiter);
 
     str_rc file_get_contents(str_ptr path, int offset=0, size_t len=0);
 
-    bool is_dir(str_ptr path);
+    // the "constant" is renamed as get_constant
+    val_rc get_constant(str_ptr name);
 
-    val_rc constant(str_ptr name);
+    bool is_dir(str_ptr path);
 
     str_rc dirname(str_ptr path, int level=1);
 
     bool defined(str_ptr name);
 
     bool define(str_ptr name, val_ptr value);
+
     bool define(str_ptr name, str_ptr value);
-    
+
+    val_rc pathinfo(str_ptr path, int flags = PathInfo::ALL);
+
+    val_rc call_user_func_array(zval* arg1, zval* arg2);
+
+    str_rc php_sapi_name();
+
+    long filemtime(str_ptr path);
+
+    bool is_dir(str_ptr path);
+
     str_rc getcwd();
 
+    val_rc opendir(str_ptr path);
 
+    val_rc readdir(val_ptr dh);
+
+    void closedir(val_ptr dh);
+
+    bool mkdir(str_ptr path, int permissions = 0755, bool recurse = false);
 
 }; // end namespace zpp
 #endif
