@@ -1,4 +1,4 @@
-#ifndef XMLREAD_CPP
+	#ifndef XMLREAD_CPP
 #define XMLREAD_CPP
 
 #ifndef XMLREAD_H
@@ -25,7 +25,6 @@ namespace zpp {
 
 	void xml_fns::init()
 	{
-
 		xmlreader = "xmlreader";
 		fromString = "xmlreader::fromstring";
 		open = "xmlreader::open";

@@ -127,7 +127,7 @@ Loader* CacheMgr::getLoader()
 
 void CacheMgr::init(htab_ptr cfg)
 {
-	showdata("CacheMgr init", cfg);
+	//showdata("CacheMgr init", cfg);
 
 	cache_defaults_ = cfg.get(Cache_i.defaults_str);
 	fast_cache_ = cfg.get(Cache_i.fast_cache);
