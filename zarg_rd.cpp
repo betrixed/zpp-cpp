@@ -48,16 +48,14 @@ zval*
 zarg_rd::option(size_t ix)
 {
 	option_ = 1;
-	zval* zptr = zptr0_ + (ix-1);
-	/*
-	#if ZEND_DEBUG
-		argptr_ = zptr;
-	#endif
-	*/
+	zval* zptr;
 
-	if ((ix < 1) || (ix > nargs_))
+	if (ix >= nargs_)
 	{
 		zptr = (zval*) nullptr;
+	}
+	else {
+		zptr = zptr0_ + ix;
 	}
 	return zptr;
 }
@@ -66,16 +64,15 @@ zval*
 zarg_rd::need(size_t ix)
 {
 	option_ = 0;
-	zval* zptr = zptr0_ + (ix-1);
-	/*
-	#if ZEND_DEBUG
-		argptr_ = zptr;
-	#endif
-	*/
-	if ((ix < 1) || (ix > nargs_))
+	zval* zptr;
+
+	if (ix >= nargs_)
 	{
 		error() << "; Bad argument index " << ix;
 		zptr = (zval*) nullptr;
+	}
+	else {
+		zptr = zptr0_ + ix;
 	}
 	return zptr;
 }
@@ -275,13 +272,13 @@ zarg_rd::get_errors()
 }
 
 bool 
-zarg_rd::throw_errors()
+zarg_rd::throw_errors(const char* fncstr)
 {
 	if (errors_)
 	{
+		*errors_ << " *** ZARG_RD: ERROR in " << fncstr;
 		str_rc s = errors_->zstr();
-		showstr("***** ZARG_RD ERRORS *****", s);
-		zend_throw_error(zend_ce_error,"Errors %s: ", s.data());
+		zend_throw_error(zend_ce_error,"%s", s.data());
 		delete errors_;
 		errors_ = nullptr;
 		return true;

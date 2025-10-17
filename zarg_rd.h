@@ -68,7 +68,7 @@ public:
 	
 	bool     has_errors() const { return (errors_); }
 	str_rc   get_errors();
-	bool     throw_errors();
+	bool     throw_errors(const char* fncstr = nullptr);
 
 	size_t size() const {
 		return nargs_;

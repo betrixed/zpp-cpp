@@ -28,7 +28,7 @@ strtable STAB;
 
 
 class TLfnTable {
-
+public:
     TLfnTable() : configured_(false) {}
 
     bool  configured_;
@@ -236,13 +236,13 @@ fn_fclose::call(val_ptr fres)
 val_rc 
 fopen(str_ptr path, str_ptr mode)
 {
-    return TLFNs.fn_fopen(path,mode);
+    return TLFNs.fopen.call(path,mode);
 }
 
 bool 
 fclose(val_ptr fres)
 {
-    return TLFNs.fn_fclose(fres);
+    return TLFNs.fclose.call(fres);
 }
 
 
@@ -298,9 +298,9 @@ PathInfo::call(str_ptr path, int flags)
     return call_fn();
 }
 
-val_rc pathinfo(str_ptr path, int flags = PathInfo::ALL)
+val_rc pathinfo(str_ptr path, int flags)
 {
-    TLFNs.pathinfo.call(path,flags);
+    return TLFNs.pathinfo.call(path,flags);
 }
 
 //bool callable_fn(val_rc& result, val_rc& callme, int argct = 0, zval* argv = nullptr);
@@ -672,11 +672,6 @@ fntable::init()
     s_php_sapi_name = "php_sapi_name";
     s_filemtime = "filemtime";
 
-    TLFNs.init(this);
-
-
-    //state_init::init();
-
 }
 
 void  // virtual
@@ -791,51 +786,49 @@ FCall2::call(zval* arg1, zval* arg2)
 val_rc 
 call_user_func_array(zval* arg1, zval* arg2)
 {
-    return TLFNs.call_user_func_array(arg1,arg2);
+    return TLFNs.call_user_func_array.call(arg1,arg2);
 }
 
 str_rc php_sapi_name()
 {
-    return TLFNs.php_sapi_name();
+    return TLFNs.php_sapi_name.call_fn();
 }
 
 long 
 filemtime(str_ptr path)
 {
-    return TLFNs.filemtime(path);
+    return TLFNs.filemtime.call(path);
 }
 
 bool 
 is_dir(str_ptr path)
 {
-    return TLFNs.is_dir(path);
+    return TLFNs.is_dir.call(path);
 }
 
 val_rc 
 opendir(str_ptr path)
 {
-    return TLFNs.opendir(path);
+    return TLFNs.opendir.call(path);
 }
 
 val_rc readdir(val_ptr dh)
 {
-    return TLFNs.readdir(dh);
+    return TLFNs.readdir.call(dh);
 }
 
 void closedir(val_ptr dh)
 {
-    TLFNs.closedir(dh);
+    TLFNs.closedir.call(dh);
 }
 
-void mkdir(str_ptr path, )
-
-}; // end namespace zpp
 
 bool mkdir(str_ptr path, int permissions, bool recurse)
 {
-    return TLFNs.mkdir(path, permissions, recurse);
+    return TLFNs.mkdir.call(path, permissions, recurse);
 }
 
+} // end namespace zpp
 //fn_call.cpp
 #endif
 
