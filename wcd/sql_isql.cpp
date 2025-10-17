@@ -2244,7 +2244,7 @@ ZEND_METHOD(Wcd_Sql_ParamList, setSql)
 
 	zarg_rd args(execute_data);
 
-	args.zstring(sql, args.need(1));
+	args.zstring(sql, args.need(0));
 
 	if (!args.throw_errors())
 	{

@@ -522,9 +522,9 @@ ZEND_METHOD(Wcc_Services, set)
 	str_ptr skey;
 	val_ptr pvalue;
 
-	args.zstring(skey, args.need(1));
+	args.zstring(skey, args.need(0));
 	
-	pvalue = args.need(2);
+	pvalue = args.need(1);
 
 	if (!args.throw_errors())
 	{

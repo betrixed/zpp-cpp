@@ -744,7 +744,7 @@ ZEND_METHOD(Wcc_Assets, add)
 {
 	zarg_rd args(execute_data);
 
-	val_ptr list(args.need(1));
+	val_ptr list(args.need(0));
 
 	if (!(list.isString() || list.isArray()))
 	{
@@ -761,7 +761,7 @@ ZEND_METHOD(Wcc_Assets, addAssets)
 {
 	zarg_rd args(execute_data);
 	htab_ptr data;
-	args.zarray(data, args.need(1));
+	args.zarray(data, args.need(0));
 
 	if (!args.throw_errors())
 	{
@@ -776,8 +776,8 @@ ZEND_METHOD(Wcc_Assets, addBlob)
 	zarg_rd args(execute_data);
 	str_ptr blob;
 	bool    headblob = false;
-	args.zstring(blob, args.need(1));
-	args.zbool(headblob, args.option(2));
+	args.zstring(blob, args.need(0));
+	args.zbool(headblob, args.option(1));
 	if (!args.throw_errors())
 	{
 		Assets* cobj = zval_toc<Assets>(ZEND_THIS);
@@ -789,7 +789,7 @@ ZEND_METHOD(Wcc_Assets, addSourcePath)
 {
 	zarg_rd args(execute_data);
 	str_ptr path;
-	args.zstring(path, args.need(1));
+	args.zstring(path, args.need(0));
 	if (!args.throw_errors())
 	{
 		Assets* cobj = zval_toc<Assets>(ZEND_THIS);
@@ -801,7 +801,7 @@ ZEND_METHOD(Wcc_Assets, addStyle)
 {
 	zarg_rd args(execute_data);
 	str_ptr style;
-	args.zstring(style, args.need(1));
+	args.zstring(style, args.need(0));
 	if (!args.throw_errors())
 	{
 		Assets* cobj = zval_toc<Assets>(ZEND_THIS);
@@ -852,12 +852,12 @@ ZEND_METHOD(Wcc_Assets, getWebList)
 	bool    aslist = true;
 	htab_rc result;
 
-	args.zstring(typekey, args.need(1));
+	args.zstring(typekey, args.need(0));
 
-    names = args.option(2);
+    names = args.option(1);
 
 	if (names.ok() && (names.isString() || names.isArray())) {
-		args.zbool(aslist, args.option(3));
+		args.zbool(aslist, args.option(2));
 	}
 	if (!args.throw_errors())
 	{
@@ -872,7 +872,7 @@ ZEND_METHOD(Wcc_Assets, has)
 	zarg_rd args(execute_data);
 	str_rc  namekey;
 
-	args.zstring(namekey, args.need(1));
+	args.zstring(namekey, args.need(0));
 	if (!args.throw_errors())
 	{
 		Assets* cobj = zval_toc<Assets>(ZEND_THIS);
@@ -898,7 +898,7 @@ ZEND_METHOD(Wcc_Assets, inline_css)
 
 	str_ptr name;
 
-	args.zstring(name, args.need(1));
+	args.zstring(name, args.need(0));
 	if (!args.throw_errors())
 	{
 		Assets* cobj = zval_toc<Assets>(ZEND_THIS);
@@ -922,7 +922,7 @@ ZEND_METHOD(Wcc_Assets, loadAssetFile)
 
 	str_ptr file;
 
-	args.zstring(file, args.need(1));
+	args.zstring(file, args.need(0));
 	htab_rc result;
 
 	if (!args.throw_errors())

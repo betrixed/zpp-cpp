@@ -206,9 +206,9 @@ ZEND_METHOD(Wcd_Sql_Select, __construct)
 	obj_ptr   db;
 	bool      auto_alias = false;
 
-	args.obj_ofclass(db, args.need(1), IDriver::omg.class_entry_);
+	args.obj_ofclass(db, args.need(0), IDriver::omg.class_entry_);
 
-	if (!args.zbool(auto_alias, args.option(2)))
+	if (!args.zbool(auto_alias, args.option(1)))
 	{
 		/*#if ZEND_DEBUG
 		zend_printf("Arg 2 using default\n");
@@ -263,7 +263,7 @@ ZEND_METHOD(Wcd_Sql_Select, add)
 
 	htab_ptr cols;
 
-	args.zarray(cols, args.need(1));
+	args.zarray(cols, args.need(0));
 
 	if (!args.throw_errors())
 	{
@@ -284,10 +284,10 @@ ZEND_METHOD(Wcd_Sql_Select, aggregate)
 
 	htab_ptr aggcols;
 
-	args.zstring(aggfn, args.need(1));
-	args.zstring(alias, args.need(2));
+	args.zstring(aggfn, args.need(0));
+	args.zstring(alias, args.need(1));
 
-	args.zarray_null(aggcols, args.option(3));
+	args.zarray_null(aggcols, args.option(2));
 
 	if (!args.throw_errors())
 	{
@@ -306,9 +306,9 @@ ZEND_METHOD(Wcd_Sql_Select, addJoin)
 	zend_long jtype = JoinInfo::J_INNER;
 	obj_rc result;
 
-	args.obj_ofclass(ltable, args.need(1), zclass_sql_icolumns);
-	args.obj_ofclass_null(rtable, args.option(2), zclass_sql_icolumns);
-	args.zlong(jtype, args.option(3));
+	args.obj_ofclass(ltable, args.need(0), zclass_sql_icolumns);
+	args.obj_ofclass_null(rtable, args.option(1), zclass_sql_icolumns);
+	args.zlong(jtype, args.option(2));
 	
 
 	if (!args.throw_errors())
@@ -331,9 +331,9 @@ ZEND_METHOD(Wcd_Sql_Select, addTable)
 
 	obj_rc result;
 
-	args.zstring(tname, args.need(1));
-	args.zstring_null(talias, args.option(2));
-	args.zarray_null(cols, args.option(3));
+	args.zstring(tname, args.need(0));
+	args.zstring_null(talias, args.option(1));
+	args.zarray_null(cols, args.option(2));
 	
 
 	if (!args.throw_errors())
@@ -395,7 +395,7 @@ ZEND_METHOD(Wcd_Sql_Select, setAlias)
 
 	str_ptr alias;
 
-	args.zstring(alias, args.need(1));
+	args.zstring(alias, args.need(0));
 
 	if (!args.throw_errors())
 	{

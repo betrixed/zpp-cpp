@@ -904,7 +904,7 @@ ZEND_METHOD(Wcd_Sql_IColumns, __construct)
 
 	obj_rc owner;
 
-	args.obj_null(owner, args.need(1));
+	args.obj_null(owner, args.need(0));
 
 	if (!args.throw_errors())
 	{
@@ -998,7 +998,7 @@ ZEND_METHOD(Wcd_Sql_IColumns, setOwner)
 
 	obj_ptr owner;
 
-	args.obj_null(owner, args.need(1));
+	args.obj_null(owner, args.need(0));
 
 	if (!args.throw_errors())
 	{
@@ -1014,7 +1014,7 @@ ZEND_METHOD(Wcd_Sql_IColumns, add)
 
 	htab_ptr cols;
 
-	args.zarray(cols, args.need(1));
+	args.zarray(cols, args.need(0));
 
 	if (!args.throw_errors())
 	{

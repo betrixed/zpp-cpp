@@ -993,9 +993,9 @@ ZEND_METHOD(Wcd_IBuild, orderBy)
 	zarg_rd args(execute_data);
 
 	bool         descend = false;
-	val_ptr    colspec(args.need(1));
+	val_ptr    colspec(args.need(0));
 
-	args.zbool(descend, args.option(2));
+	args.zbool(descend, args.option(1));
 
 	if (!args.throw_errors())
 	{

@@ -292,7 +292,7 @@ ZEND_METHOD(Wcd_Sql_Operation, __construct)
 
 	obj_ptr driver;
 
-	args.obj_ofclass(driver, args.need(1), IDriver::omg.class_entry_);
+	args.obj_ofclass(driver, args.need(0), IDriver::omg.class_entry_);
 
 	if (!args.throw_errors())
 	{
@@ -318,9 +318,9 @@ ZEND_METHOD(Wcd_Sql_Operation, addPrime)
 	str_ptr alias;
 	htab_ptr cols;
 
-	args.zstring(table, args.need(1));
-	args.zstring_null(alias, args.option(2));
-	args.zarray_null(cols, args.option(3));
+	args.zstring(table, args.need(0));
+	args.zstring_null(alias, args.option(1));
+	args.zarray_null(cols, args.option(2));
 
 
 	if (!args.throw_errors())
@@ -341,9 +341,9 @@ ZEND_METHOD(Wcd_Sql_Operation, firstRow)
 	str_ptr alias;
 	htab_ptr cols;
 
-	args.zstring(table, args.need(1));
-	args.zstring_null(alias, args.option(2));
-	args.zarray_null(cols, args.option(3));
+	args.zstring(table, args.need(0));
+	args.zstring_null(alias, args.option(1));
+	args.zarray_null(cols, args.option(2));
 
 
 	if (!args.throw_errors())
@@ -397,7 +397,7 @@ ZEND_METHOD(Wcd_Sql_Operation, getRows)
 
 	zend_long fetch = -1;
 
-	args.zlong(fetch, args.option(1));
+	args.zlong(fetch, args.option(0));
 
 	if (fetch < 0)
 	{
@@ -439,8 +439,8 @@ ZEND_METHOD(Wcd_Sql_Operation, limit)
 {
 	zarg_rd args(execute_data);
 
-	val_ptr maxct(args.need(1));
-	val_ptr start(args.option(2));
+	val_ptr maxct(args.need(0));
+	val_ptr start(args.option(1));
 
 	Operation* cobj = zval_toc<Operation>(ZEND_THIS);
 
@@ -452,10 +452,10 @@ ZEND_METHOD(Wcd_Sql_Operation, orderBy)
 {
 	zarg_rd args(execute_data);
 
-	val_ptr column(args.need(1));
+	val_ptr column(args.need(0));
 	bool      descend;
 
-	if (!args.zbool(descend,args.option(2)))
+	if (!args.zbool(descend,args.option(1)))
 	{
 		descend = false;
 	}
@@ -474,7 +474,7 @@ ZEND_METHOD(Wcd_Sql_Operation, prepare)
 
 	zend_long fetch = -1;
 
-	args.zlong(fetch, args.option(1));
+	args.zlong(fetch, args.option(0));
 
 	if (fetch < 0)
 	{
@@ -496,7 +496,7 @@ ZEND_METHOD(Wcd_Sql_Operation, returns)
 
 	htab_ptr rvalues;
 
-	args.zarray(rvalues, args.need(1));
+	args.zarray(rvalues, args.need(0));
 
 	if (!args.throw_errors())
 	{
@@ -520,14 +520,14 @@ ZEND_METHOD(Wcd_Sql_Operation, where)
 {
 	zarg_rd args(execute_data);
 
-	val_ptr lattr(args.need(1));
-	val_ptr rattr(args.option(2));
+	val_ptr lattr(args.need(0));
+	val_ptr rattr(args.option(1));
 
 	zend_long op = -1;
 	zend_long blogic = -1;
 
-	args.zlong(op, args.option(3));
-	args.zlong(blogic, args.option(4));
+	args.zlong(op, args.option(2));
+	args.zlong(blogic, args.option(3));
 
 	if (!args.throw_errors())
 	{

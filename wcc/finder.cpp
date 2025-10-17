@@ -286,12 +286,12 @@ Finder::dirList_dir(str_ptr path)
 {
 	htab_rc result = htab_ptr::empty_array();
 
-	if (!FTAB.is_dir.call(path))
+	if (!is_dir(path))
 	{
 		return result;
 	}
 
-	val_rc dh = FTAB.opendir.call(path);
+	val_rc dh = opendir(path);
 
 	if (dh.isFalse()) 
 	{
@@ -301,7 +301,7 @@ Finder::dirList_dir(str_ptr path)
 	htab_rw list(result);
 	while(true)
 	{
-		val_rc entry = FTAB.readdir.call(dh);
+		val_rc entry = readdir(dh);
 		if (entry.isFalse())
 		{
 			break;
@@ -316,12 +316,12 @@ Finder::dirList_dir(str_ptr path)
 		jpath << path << FDit.dir_sep << value;
 
 		str_rc tdir = jpath.zstr();
-		if (FTAB.is_dir.call(tdir))
+		if (is_dir(tdir))
 		{
 			list.set(value, tdir);
 		}
 	}
-	FTAB.closedir.call(dh);
+	closedir(dh);
 
 	return result;
 }
@@ -455,7 +455,7 @@ ZEND_METHOD(Wcc_Finder, dirList_dir)
 	str_ptr path;
 	htab_rc result;
 
-	args.zstring(path, args.need(1));
+	args.zstring(path, args.need(0));
 
 	if (!args.throw_errors())
 	{

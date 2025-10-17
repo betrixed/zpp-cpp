@@ -206,7 +206,7 @@ Run_init Run_i;
 bool // static
 Run::class_load(str_ptr class_name, str_ptr php_root)
 {
-	if (!FTAB.class_exists.call(class_name))
+	if (!class_exists(class_name))
 	{
 		str_rc rname = str_replace(Run_i.ns_sep, Run_i.dir_sep, class_name);
 
@@ -231,7 +231,7 @@ void Run::construct()
 
 	self.property(Run_i.start_time, temp);
 
-	str_rc sapi = FTAB.php_sapi_name.call_fn();
+	str_rc sapi = php_sapi_name();
 	self.property(Run_i.sapi_str, sapi);
 
 	bool is_web = (zs_cmp(sapi, Run_i.cli_str) != 0);
@@ -260,14 +260,14 @@ void Run::construct()
 	str_rc root_dir = dirname(php_root);
 	self.property(Run_i.wc_leaf, root_dir);
 
-	temp = constant(Run_i.target_const);
+	temp = get_constant(Run_i.target_const);
 	//showmem("target", temp);
 
 	self.property(Run_i.target, temp);
 
 	self.property(Run_i.vendor_leaf, Run_i.vendor_str);
 
-	str_rc site_leaf = constant(Run_i.site_leaf_const);
+	str_rc site_leaf = get_constant(Run_i.site_leaf_const);
 	self.property(Run_i.site_leaf, site_leaf);
 
 	str_buf buf;
@@ -438,9 +438,9 @@ void Run::temp_folders()
 		//showstr("temp folder", path);
 
 		temp_path.set(key, path);
-		if (!FTAB.is_dir.call(path)) 
+		if (!is_dir(path)) 
 		{
-			if (!FTAB.mkdir.call(path, 0755, true))
+			if (! mkdir(path, 0755, true))
 			{
 				missing.set(key, path);
 			}
@@ -644,7 +644,7 @@ void Run::config_init(str_ptr bootstrap)
 
 			//showstr("modules_dir", modules_dir);
 
-			if (FTAB.is_dir.call(modules_dir))
+			if (is_dir(modules_dir))
 			{
 				value = Finder::dirList_dir(modules_dir);
 				self.property(Run_i.modules_str, value);
@@ -679,7 +679,7 @@ ZEND_METHOD(Wcc_Run, execute)
 	zarg_rd args(execute_data);
 	str_ptr bootstrap;
 
-	args.zstring(bootstrap, args.need(1));
+	args.zstring(bootstrap, args.need(0));
 
 	if (!args.throw_errors())
 	{

@@ -206,7 +206,7 @@ ZEND_METHOD(Wcc_Str, test_wcc)
 	str_rc path = "sites/pcan/config/config.php";
 	showstr("path", path);
 
-	str_rc ext = FTAB.pathinfo.call(path, PathInfo::EXTENSION);
+	str_rc ext = pathinfo(path, PathInfo::EXTENSION);
 
 	showstr("extension = ", ext);
 

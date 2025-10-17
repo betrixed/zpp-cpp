@@ -127,6 +127,8 @@ Loader* CacheMgr::getLoader()
 
 void CacheMgr::init(htab_ptr cfg)
 {
+	showdata("CacheMgr init", cfg);
+
 	cache_defaults_ = cfg.get(Cache_i.defaults_str);
 	fast_cache_ = cfg.get(Cache_i.fast_cache);
 	if (!fast_cache_.ok())
@@ -306,7 +308,7 @@ CacheMgr::readCache(str_ptr filename, str_ptr cachename)
 	obj_rc pkg = cache.call(Cache_i.s_getcached, key);
 	if (pkg.ok())
 	{
-		long mtime = FTAB.filemtime.call(filename);
+		long mtime = filemtime(filename);
 		ICacheData* icd = zobj_toc<ICacheData>(pkg);
 		if (mtime > icd->getStored() + 3) 
 		{
@@ -414,7 +416,7 @@ ZEND_METHOD(Wcc_CacheMgr, __construct)
 
 	htab_ptr cfg;
 
-	args.zarray(cfg, args.need(1));
+	args.zarray(cfg, args.need(0));
 
 	if (!args.throw_errors())
 	{
@@ -439,10 +441,10 @@ ZEND_METHOD(Wcc_CacheMgr, __callStatic)
 	htab_ptr 	params;
 	val_rc      result;
 
-	args.zstring(fname, args.need(1));
-	args.zarray(params, args.need(2));
+	args.zstring(fname, args.need(0));
+	args.zarray(params, args.need(1));
 
-	if (!args.throw_errors())
+	if (!args.throw_errors(__FUNCTION__))
 	{
 		result = CacheMgr::callStatic(fname, params);
 	}
@@ -465,11 +467,11 @@ ZEND_METHOD(Wcc_CacheMgr, createCache)
 	str_ptr     classname;
 	htab_ptr 	options;
 
-	args.zstring(svckey, args.need(1));
-	args.zstring(classname, args.need(2));
-	args.zarray(options, args.need(3));
+	args.zstring(svckey, args.need(0));
+	args.zstring(classname, args.need(1));
+	args.zarray(options, args.need(2));
 
-	if (!args.throw_errors())
+	if (!args.throw_errors(__FUNCTION__))
 	{
 		CacheMgr*  cobj = zval_toc<CacheMgr>(ZEND_THIS);
 		cobj->createCache(svckey, classname, options);
@@ -490,7 +492,7 @@ ZEND_METHOD(Wcc_CacheMgr, getCache)
 	zarg_rd args(execute_data);
 
 	str_ptr 	svckey;
-	args.zstring(svckey, args.need(1));
+	args.zstring(svckey, args.need(0));
 
 	if (!args.throw_errors())
 	{
@@ -507,7 +509,7 @@ ZEND_METHOD(Wcc_CacheMgr, getCacheClass)
 
 	zarg_rd args(execute_data);
 
-	args.zstring(svckey, args.need(1));
+	args.zstring(svckey, args.need(0));
 
 	if (!args.throw_errors())
 	{
@@ -525,10 +527,10 @@ ZEND_METHOD(Wcc_CacheMgr, readCache)
 	str_ptr     svckey;
 	val_rc      result;
 
-	args.zstring(filename, args.need(1));
-	args.zstring(svckey, args.need(2));
+	args.zstring(filename, args.need(0));
+	args.zstring(svckey, args.need(1));
 
-	if (!args.throw_errors())
+	if (!args.throw_errors(__FUNCTION__))
 	{
 		CacheMgr*  cobj = zval_toc<CacheMgr>(ZEND_THIS);
 		result = cobj->readCache(filename, svckey);
@@ -552,8 +554,8 @@ ZEND_METHOD(Wcc_CacheMgr, readFile)
 	str_ptr ext;
 	val_rc result;
 
-	args.zstring(filename, args.need(1));
-	args.zstring_null(ext, args.option(2));
+	args.zstring(filename, args.need(0));
+	args.zstring_null(ext, args.option(1));
 
 	if (!args.throw_errors())
 	{

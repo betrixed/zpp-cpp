@@ -388,7 +388,7 @@ namespace wcd {
 		arg1.push_back(build);
 		arg1.push_back(mlower);
 		
-		return FTAB.call_user_func_array.call(obj_method, params);
+		return call_user_func_array(obj_method, params);
 	}
 
 	str_rc //static
@@ -637,7 +637,7 @@ namespace wcd {
 
 		obj_rc builder = m->getBuilderForMe();
 
-		val_rc import_mgr = FTAB.fopen.call(filename, MIS.r_arg);
+		val_rc import_mgr = fopen(filename, MIS.r_arg);
 
 		val_ptr import(import_mgr);
 
@@ -750,7 +750,7 @@ namespace wcd {
 
 			driver->closeStmt(stmt);
 
-			FTAB.fclose.call(import);
+			fclose(import);
 
 			htab_rc seq_defs = m->getSeqDefs();
 

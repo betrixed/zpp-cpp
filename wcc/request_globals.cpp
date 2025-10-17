@@ -990,7 +990,7 @@ RequestGlobals::getRawBody()
 {
 	if (!body_.size())
 	{
-		body_ = FTAB.file_get_contents.call(RQit.php_input);
+		body_ = file_get_contents(RQit.php_input);
 	}
 	return body_;
 }

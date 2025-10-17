@@ -58,8 +58,8 @@ ZEND_METHOD(Wcd_Sql_Update, set)
 	str_ptr  column;
 	val_ptr  value;
 
-	args.zstring(column, args.need(1));
-	value = args.need(2);
+	args.zstring(column, args.need(0));
+	value = args.need(1);
 
 	if (!args.throw_errors())
 	{

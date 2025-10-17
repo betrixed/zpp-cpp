@@ -911,11 +911,11 @@ ZEND_METHOD(Wcd_Sql_Bindings, orderBy)
 {
 	zarg_rd args(execute_data);
 
-	val_ptr colspec( args.need(1));
+	val_ptr colspec( args.need(0));
 	bool descend = false;
 	
 
-	args.zbool(descend, args.option(2));
+	args.zbool(descend, args.option(1));
 
 	if (!args.throw_errors())
 	{

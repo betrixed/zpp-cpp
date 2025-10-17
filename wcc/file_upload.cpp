@@ -43,7 +43,7 @@ FileUpload::construct(htab_ptr file_data, str_ptr name)
 
 	if (name_.size())
 	{
-		val_rc info = FTAB.pathinfo.call(name_,(PathInfo::EXTENSION));
+		val_rc info = pathinfo(name_,(PathInfo::EXTENSION));
 		ext_ = val_ptr(info).zstr();
 	}
 	else {

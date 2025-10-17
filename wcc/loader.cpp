@@ -291,7 +291,7 @@ ZEND_METHOD(Wcc_Loader, readPHP)
 
 	str_ptr path;
 
-	args.zstring(path, args.need(1));
+	args.zstring(path, args.need(0));
 
 	val_rc result;
 
@@ -327,7 +327,7 @@ ZEND_METHOD(Wcc_Loader, setThrowNotFound)
 
 	bool bval = true;
 
-	args.zbool(bval, args.need(1));
+	args.zbool(bval, args.need(0));
 
 	if (!args.throw_errors())
 	{
@@ -340,7 +340,7 @@ ZEND_METHOD(Wcc_Loader, setExtLoader)
 {
 	zarg_rd args(execute_data);
 
-	val_ptr extfn = args.need(1);
+	val_ptr extfn = args.need(0);
 
 	if (!args.throw_errors())
 	{
@@ -356,7 +356,7 @@ ZEND_METHOD(Wcc_Loader, setFinder)
 
 	obj_ptr finder;
 
-	args.obj_ofclass(finder, args.need(1), Finder::omg.classEntry());
+	args.obj_ofclass(finder, args.need(0), Finder::omg.classEntry());
 	if (!args.throw_errors())
 	{
 		Loader* lob = zval_toc<Loader>(ZEND_THIS);
@@ -382,7 +382,7 @@ ZEND_METHOD(Wcc_Loader, require)
 
 	str_ptr path;
 
-	args.zstring(path, args.need(1));
+	args.zstring(path, args.need(0));
 
 	val_rc result;
 
@@ -401,7 +401,7 @@ ZEND_METHOD(Wcc_Loader, load)
 
 	str_ptr path;
 
-	args.zstring(path, args.need(1));
+	args.zstring(path, args.need(0));
 
 	bool result = false;
 
@@ -420,7 +420,7 @@ ZEND_METHOD(Wcc_Loader, mustload)
 
 	str_ptr path;
 
-	args.zstring(path, args.need(1));
+	args.zstring(path, args.need(0));
 
 	bool result = false;
 
@@ -439,7 +439,7 @@ ZEND_METHOD(Wcc_Loader, setBaseDir)
 
 	str_ptr path;
 
-	args.zstring(path, args.need(1));
+	args.zstring(path, args.need(0));
 
 	if (!args.throw_errors())
 	{

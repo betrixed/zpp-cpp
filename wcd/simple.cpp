@@ -304,8 +304,8 @@ ZEND_METHOD(Wcd_Simple, __construct)
 	obj_ptr db;
 	zend_long fetch = IDriver::FETCH_ASSOC;
 
-	args.obj_ofclass(db, args.need(1),IDriver::omg.class_entry_);
-	if (!args.zlong_null(fetch, args.option(2)))
+	args.obj_ofclass(db, args.need(0),IDriver::omg.class_entry_);
+	if (!args.zlong_null(fetch, args.option(1)))
 	{
 		fetch = IDriver::FETCH_ASSOC;
 	}
@@ -338,9 +338,9 @@ ZEND_METHOD(Wcd_Simple, arrayMap)
 	str_ptr valcol;
 	str_ptr table;
 
-	args.zstring(keycol, args.need(1));
-	args.zstring(valcol, args.need(2));
-	args.zstring(table, args.need(3));
+	args.zstring(keycol, args.need(0));
+	args.zstring(valcol, args.need(1));
+	args.zstring(table, args.need(2));
 
 	htab_rc result;
 
@@ -362,8 +362,8 @@ ZEND_METHOD(Wcd_Simple, arraySet)
 	str_ptr sql;
 	htab_ptr params;
 
-	args.zstring(sql, args.need(1));
-	args.zarray_null(params, args.option(2));
+	args.zstring(sql, args.need(0));
+	args.zarray_null(params, args.option(1));
 
 	htab_rc result;
 
@@ -382,7 +382,7 @@ ZEND_METHOD(Wcd_Simple, bind)
 {
 	zarg_rd args(execute_data);
 
-	zval* arg = args.need(1);
+	zval* arg = args.need(0);
 	str_rc result;
 	if (!args.throw_errors())
 	{
@@ -400,8 +400,8 @@ ZEND_METHOD(Wcd_Simple, exec)
 	str_ptr sql;
 	htab_ptr params;
 
-	args.zstring(sql, args.need(1));
-	args.zarray(params, args.option(2));
+	args.zstring(sql, args.need(0));
+	args.zarray(params, args.option(1));
 
 	val_rc result;
 
@@ -421,8 +421,8 @@ ZEND_METHOD(Wcd_Simple, firstRow)
 	str_ptr sql;
 	htab_ptr params;
 
-	args.zstring(sql, args.need(1));
-	args.zarray(params, args.option(2));
+	args.zstring(sql, args.need(0));
+	args.zarray(params, args.option(1));
 
 	val_rc result;
 
@@ -463,7 +463,7 @@ ZEND_METHOD(Wcd_Simple, insert)
 
 	htab_ptr values;
 
-	args.zarray(values, args.need(1));
+	args.zarray(values, args.need(0));
 
 	val_rc result;
 
@@ -483,7 +483,7 @@ ZEND_METHOD(Wcd_Simple, prepare)
 
 	str_rc sql;
 
-	args.zstring(sql, args.need(1));
+	args.zstring(sql, args.need(0));
 
 	bool result = false;
 
@@ -502,7 +502,7 @@ ZEND_METHOD(Wcd_Simple, quoteName)
 
 	str_ptr name;
 
-	args.zstring(name, args.need(1));
+	args.zstring(name, args.need(0));
 
 	str_rc result;
 
@@ -521,7 +521,7 @@ ZEND_METHOD(Wcd_Simple, returnsValues)
 
 	bool  bval;
 
-	args.zbool(bval, args.need(1));
+	args.zbool(bval, args.need(0));
 
 	if(!args.throw_errors())
 	{
@@ -544,7 +544,7 @@ ZEND_METHOD(Wcd_Simple, setValues)
 	zarg_rd args(execute_data);
 	htab_ptr values;
 
-	args.zarray(values, args.need(1));
+	args.zarray(values, args.need(0));
 
 	if(!args.throw_errors())
 	{
@@ -559,7 +559,7 @@ ZEND_METHOD(Wcd_Simple, update)
 	zarg_rd args(execute_data);
 	htab_ptr values;
 
-	args.zarray(values, args.need(1));
+	args.zarray(values, args.need(0));
 	
 	val_rc result;
 
