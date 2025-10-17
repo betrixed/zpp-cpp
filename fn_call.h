@@ -393,7 +393,7 @@ namespace zpp {
 
     bool class_exists(str_ptr name);
 
-    val_rc fopen(str_ptr name);
+    val_rc fopen(str_ptr name, str_ptr fmode);
 
     bool fclose(val_ptr fres);
 
