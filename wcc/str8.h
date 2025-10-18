@@ -7,9 +7,11 @@
 #endif
 
 
+
 namespace wcc {
 
 using namespace zpp;
+
 
 class Str8Iterator {
 public:
@@ -21,10 +23,8 @@ public:
 
     zend_object_iterator phpit;
     obj_rc      s8;
-    str_ptr     zstr;
     long  	  	current; // 0 - indexed offset
-	long  	  	next;	   // 0 - indexed offset
-	long  	    ucode; 
+	long  	  	next;	   // 0 - indexed offset // key
 
                 // function table managed by iterator
     static Str8Iterator* psi(zend_object_iterator* zoi) {
@@ -64,13 +64,33 @@ public:
     }
 };
 
+class Str8;
+
+class Str8_mgr : public base_obj_mgr<Str8>
+{
+protected:
+    virtual void init_class_fn() 
+    {
+        mydef::init_class_fn();
+        Str8Iterator::setup_class(mydef::class_entry_);
+    }
+};
+
 class Str8 : public base_d {
 public:
-	str_rc   sdata;
 
-	void construct(str_ptr s);
-	str_ptr  toString();
+    static Str8_mgr omg;
 
+public:
+	str_rc   zstr_;
+
+	void     construct(str_ptr s);
+
+	str_rc  toString() const override;
+
+    size_t   size();
+
+    static str_rc ucode8str(zend_long value);
 };
 
 };

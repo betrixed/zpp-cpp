@@ -54,6 +54,8 @@ extern "C" {
 //core wcc
 #include "zpp/base.cpp"
 #include "zpp/show_zpp.cpp"
+
+#include "wcc/str8.cpp"
 #include "wcc/strfns.cpp"
 #include "wcc/service_access.cpp"
 #include "wcc/finder.cpp"
@@ -154,6 +156,10 @@ PHP_MINIT_FUNCTION(wcc)
 
 #ifdef FILTER_WCF_CPP
 	PHP_MINIT(FilterObj_reg)(INIT_FUNC_ARGS_PASSTHRU);
+#endif
+
+#ifdef WCC_STR8_CPP
+	PHP_MINIT(Wcc_Str8_reg)(INIT_FUNC_ARGS_PASSTHRU);
 #endif
 
 #ifdef STRFNS_CPP
