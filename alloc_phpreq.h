@@ -73,4 +73,19 @@ bool operator!=(const alloc_phpreq<T>&, const alloc_phpreq<U>&) {
     return false;
 }
 
+class PHPAlloc {
+public:
+    void* operator new(size_t size)
+    {
+        //zend_printf("new DStack %ld\n",size);
+        return emalloc(size);
+    }
+
+    void operator delete(void* ptr)
+    {
+        //zend_printf("delete DStack %lx\n",ptr);
+        efree(ptr);
+    }
+};
+
 #endif
