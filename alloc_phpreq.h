@@ -1,8 +1,6 @@
 #ifndef ALLOC_PHPREQ_H
 #define ALLOC_PHPREQ_H
 
-#include <vector>
-
 extern "C" {
     #include <php.h>
     #include <Zend/zend.h>  
@@ -66,12 +64,12 @@ public:
 template <typename T, typename U>
 bool operator==(const alloc_phpreq<T>&, const alloc_phpreq<U>&) {
     return true;
-}
+};
 
 template <typename T, typename U>
 bool operator!=(const alloc_phpreq<T>&, const alloc_phpreq<U>&) {
     return false;
-}
+};
 
 class PHPAlloc {
 public:

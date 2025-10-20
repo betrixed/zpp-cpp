@@ -6,6 +6,7 @@
  * @author Michael Rynn
  * @brief  Include C headers from PHP distribution.
  */
+#include <string>
 
 extern "C" {
 	#include <php.h>
@@ -21,7 +22,5 @@ extern "C" {
 	#include <Zend/zend_smart_str.h>
 };
 
-#include <string> 
-#include <stdexcept>
 
 #endif

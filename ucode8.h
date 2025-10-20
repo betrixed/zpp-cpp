@@ -5,17 +5,24 @@
 #include "alloc_phpreq.h"
 #endif
 
-#include <uchar.h>
+//#include <uchar.h>
 
-
+// not intended for heap allocation
 class str8_char {
 public:
 	const  char* data_;
 	size_t 	     length_;
 	char32_t     ucode_;
 
-	str8_char() : data_(nullptr), length_(0), ucode_(0);
-	str8_char(const str8_char& c) : data_(c.data_), length_(c.length_), ucode_(c.ucode_);
+	str8_char() 
+		: data_(nullptr), length_(0), ucode_(0) 
+	{ 
+	}
+	str8_char(const str8_char& c) 
+		: data_(c.data_), length_(c.length_), ucode_(c.ucode_)
+	{
+
+	}
 
 	const str8_char& operator=(const str8_char& c)
 	{
@@ -28,6 +35,7 @@ public:
 	std::string_view vstr() const { return std::string_view(data_, length_); }
 };
 
+// not intended for heap allocation
 class str8_fit {
 protected:
 	size_t foreward(char32_t& uc);
@@ -72,7 +80,7 @@ public:
 		if (length_ > 0)
 		{
 			front_.data_ = data_;
-			front_.length_ = forward(front_.ucode_);
+			front_.length_ = foreward(front_.ucode_);
 		}
 		else {
 			front_.data_ = nullptr;

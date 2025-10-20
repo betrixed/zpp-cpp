@@ -12,7 +12,7 @@
 #include "ucode8.h"
 #endif
 
-#include <stdlib.h>
+
 const char32_t INVALID_CHAR = (char32_t) -1;
 /**
  * char const*  cpt      pointer to first character to consume
