@@ -21,22 +21,10 @@ const char32_t INVALID_CHAR = (char32_t) -1;
  * @return unsigned int  number of bytes consumed
  */
 
-/** returns number of characters processed, adjusts slice pointer */
-size_t
-str8_fit::foreward(char32_t& uc)
-{
-    unsigned int k = ucode8Fore(data_, length_, uc);
-    if (k > 0)
-    {
-        data_ += k;
-        length_ -= k;
-    }
-    return k;
-}
 
 /** returns number of characters processed */
 unsigned int
-    ucode8Fore(
+    ucode8Fwd(
 	char const* cpt, 
 	unsigned int slen, 
 	char32_t& uc)
@@ -48,6 +36,7 @@ unsigned int
     const unsigned char* pa = (unsigned char const*)(cpt);
     unsigned int k = 1;
     
+
     char32_t test = *pa++; // ==1
     
     if (test < 0x80)
@@ -56,7 +45,7 @@ unsigned int
     else if (test < 0xC2)
     {
         test = INVALID_CHAR;
-        k = 0;
+        k = 0; // got nowhere
     }
     else if ((test < 0xE0) && (k < slen))
     {   
@@ -84,6 +73,26 @@ unsigned int
     return k;
 }
 
+unsigned int u8bytes(char32_t d)
+{
+    if (d < 0x80)
+    {
+        return 1;
+    }
+    if (d < 0x800)
+    {
+        return 2;
+    }
+    else if (d < 0x10000)
+    {
+        return 3;
+    }
+    else if (d < 0x110000)
+    {
+        return 4;
+    }
+    return 0;
+}
 
 // return number of char put in result
 unsigned int
