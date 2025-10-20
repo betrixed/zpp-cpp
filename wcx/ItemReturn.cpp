@@ -5,6 +5,9 @@
 #include "xmlparse.h"
 #endif
 
+namespace wcx {
+
+
 ItemReturn::ItemReturn() : itype_(RET_NULL) 
 {}
 
@@ -67,3 +70,8 @@ ItemReturn::operator=(ItemReturn&& m)
 	}
 	return *this;
 }
+
+} // namespace wcx
+
+
+#endif

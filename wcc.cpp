@@ -35,6 +35,8 @@ extern "C" {
 }
 #endif
 
+#include <vector>
+
 extern "C" {
 
 #include "php_wcc.h"

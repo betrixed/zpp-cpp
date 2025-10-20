@@ -5,6 +5,8 @@
 #include "xmlparse.h"
 #endif
 
+namespace wcx {
+
 static void stdEntityInit(htab_rc& map)
 {
 	htab_rw hw(map);
@@ -20,7 +22,7 @@ CoreParser::CoreParser(str_ptr data)
 {
 	init();
 	data_ = data;
-	ctx_ = new ParseContext(data, nullptr, data.vstr());
+	ctx_ = new ParseContext(this, (ParseContext*)nullptr, data.vstr());
 }
 
 void CoreParser::init()
@@ -37,7 +39,8 @@ void CoreParser::init()
 ParseError* 
 CoreParser::getNotWellFormed(const char* s)
 {
-	return new ParseError(s);
+	str_rc msg(s);
+	return new ParseError(msg, ParseError::fatal);
 }
 
 CoreParser::~CoreParser()
@@ -63,10 +66,11 @@ CoreParser::initParse(ItemReturn& item)
 
 		if (ctx_->empty())
 			break;
+
 		if (ctx_->peek('<'))
 		{
 			ctx_->adjustMarkupDepth(1);
-			ctx_->fit_.popFront();
+			ctx_->popFront();
 			ctx_->throwIfEmpty();
 
 			testchar = ctx_->front();
@@ -76,7 +80,7 @@ CoreParser::initParse(ItemReturn& item)
 				ctx_->popFront();
 				return parseProcessInst(item, spaceCt);	
 			case '!':
-				ctx_->popFront();
+				ctx_->fit_.popFront();
 				ctx_->throwIfEmpty();
 				if (ctx_->match(DOCTYPE_d))
 				{
@@ -98,12 +102,36 @@ CoreParser::initParse(ItemReturn& item)
 					throw getBadCharError(testchar);
 				break;
 			} // end switch
-
-
 		} // end if
 		// else?
 	} // end while
 	throw getNotWellFormed("bad xml");
 }
 
+bool 
+CoreParser::parseProcessInst(ItemReturn& ret, int spaceCt)
+{
+	str_rc xpiName;
+	if (!ctx_->getXmlName(xpiName))
+		throw getNotWellFormed("Bad process instruction name");
+	if (xpiName == "xml")
+	{
+		if (docStarted || spaceCt > 0)
+			throw getNotWellFormed("xml declaration should be first");
+		if (!hasDeclaration)
+		{
+			hasDeclaration = true;
+			return parseDeclaration(ret);
+		}
+		else
+			throw getNotWellFormed("Duplicate xml declaration");
+	}
+	DOMString content;
+	ctx_->parsePI(content);
+	DOMString_HM  extra;
+	extra.putR(DOMString(), content);
+	ret.set(ItemReturn::STR_PI,xpiName,extra);
+	return true;
+}
+}; // namespace wcx
 #endif

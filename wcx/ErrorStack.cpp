@@ -49,3 +49,42 @@ ErrorStack::toString()
 	}
 	return buf.zstr();
 }
+
+
+str_rc //static
+ParseError::getErrorCodeMsg(int code)
+{
+    switch(code)
+    {
+    case UNEXPECTED_END:
+        return "Unexpected end to parse source";
+    case TAG_FORMAT:
+        return "Tag format error";
+    case MISSING_QUOTE:
+        return "Missing quote";
+    case EXPECTED_ATTRIBUTE:
+        return "Attribute value expected";
+    case BAD_CHARACTER:
+        return "Bad character value";
+    case MISSING_SPACE:
+        return "Missing space character";
+    case DUPLICATE_ATTRIBUTE:
+        return "Duplicate attribute";
+    case ELEMENT_NESTING:
+        return "Element nesting error";
+    case CDATA_COMMENT:
+        return "Expected CDATA or Comment";
+    case BAD_ENTITY_REFERENCE:
+        return "Expected entity reference";
+    case MISSING_END_BRACKET:
+        return "Missing end >";
+    case EXPECTED_NAME:
+        return "Expected name";
+    case CONTEXT_STACK:
+        return "Pop on empty context stack";
+    default:
+        break;
+    }
+    return "Unknown error code";
+}
+#endif

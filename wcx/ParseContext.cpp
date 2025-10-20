@@ -5,6 +5,8 @@
 #include "xmlparse.h"
 #endif
 
+namespace wcx {
+
 void 
 ParseContext::init()
 {
@@ -14,7 +16,7 @@ ParseContext::init()
 	parenDepth = 0;
 }
 
-ParseContext::ParseContext(CoreParser* cp, ParseContent* prev, const std::string_view& data )
+ParseContext::ParseContext(CoreParser* cp, ParseContext* prev, const std::string_view& data )
 {
 	init();
 	parser_ = cp;
@@ -23,21 +25,38 @@ ParseContext::ParseContext(CoreParser* cp, ParseContent* prev, const std::string
 	fit_.set(data_.data(), data_.size());
 }
 
-bool 
-ParseContext::empty() {
-	 return (fit_.empty());
+bool ParseContext::getXmlName(str_rc& tag)
+{
+	if (empty())
+		return false;
+	if ( !(isNameStartFn(front()) || isNameStartFifthEdition(front())) )
+		return false;
+	
+	frontFilterOff();
+	scratch_.length(0);
+	scratch_.put(front());
+
+	popFront();
+	while (!empty())
+	{
+		if (isNameCharFn(front()) || isNameCharFifthEdition(front()))
+		{
+			scratch_.put(front());
+			popFront();
+		}
+		else
+			break;
+	}
+	tag = scratch_;
+	frontFilterOn();
+    return true;
 }
 
-bool 
-ParseContext::peek(char32_t match)
-{
-	return (match == fit_.front());
-}
 int 
 ParseContext::munchSpace()
 {
 	int   count = 0;
-	const char32_t test;
+	char32_t test = 0;
 
 	while(!fit_.empty())
 	{
@@ -58,3 +77,59 @@ ParseContext::adjustMarkupDepth(int adjust)
 {
 	markupDepth += adjust;
 }
+
+void ParseContext::throwIfEmpty()
+{
+	if (fit_.empty())
+		throw parser_->getNotWellFormed("Incomplete xml");
+}
+
+bool ParseContext::empty() {
+		return (fit_.empty());
+	}
+
+bool ParseContext::peek(char32_t match){
+	return (match == fit_.front());
+}
+
+char32_t ParseContext::front() {
+	return fit_.front();
+}
+
+void ParseContext::popFront(){
+	fit_.popFront();
+}
+	
+
+bool ParseContext::getXmlName(DOMString& wr)
+{
+	char32_t test;
+	if (!fit_.peek(test))
+		return false;
+	const CharTestFn isNameFn = rdr_->isNameCharFunc;
+	if (!isNameFn(test))
+		return false;
+
+	DOMString name;
+	name.put(test);
+	rd_.popFront();
+	while (rd_.peek(test))
+	{
+		if (isNameFn(test))
+		{
+			name.put(test);
+			rd_.popFront();
+		}
+		else {
+			wr = name;
+			return true;
+			break;
+		}
+	}
+	throwIfEmpty();
+	return false;
+}
+    
+} //namespace
+
+#endif

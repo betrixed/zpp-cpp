@@ -68,42 +68,12 @@ XMLP_init::init()
 
 XMLP_init XMLPi;
 
-class ItemReturn {
-public:
-	enum {
-		RET_NULL,
-		TAG_START, // tag start with inner content
-		TAG_END,   // tag end of inner content
-		TAG_EMPTY, // tag without inner content
-		XML_DEC,   // attributes of xml declaration
-		STR_TEXT,
-		STR_CDATA,
-		STR_PI,
-		STR_XI,
-		STR_COMMENT
-	};
-
-	int 	   itype_;
-	str_rc     item_;
-	htab_rc    attributes_; 
-
-	ItemReturn();
-	ItemReturn(int itype, str_ptr text, htab_ptr attr);
-	ItemReturn(int itype, str_ptr text);
-
-	ItemReturn(const ItemReturn& c );
-
-	ItemReturn(ItemReturn &&m);
-
-	void  set(int itype, str_ptr text);
-	
-	void  set(int itype, str_ptr text, htab_ptr attr);
-
-	const ItemReturn& operator=(const ItemReturn&c);
-
-	ItemReturn& operator=(ItemReturn&& m);
-};
-
 }; // namespace wcx
+
+#include "xmlchar.cpp"
+#include "ItemReturn.cpp"
+#include "ErrorStack.cpp"
+#include "ParseContext.cpp"
+#include "CoreParser.cpp"
 
 #endif
