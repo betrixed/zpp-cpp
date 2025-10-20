@@ -3,7 +3,7 @@
  * @generate-class-entries
  * @undocumentable
  */
-namespace Wcc;
+namespace Wcx;
 
 class XmlRead {
 	static public function fromFile(string $path) : mixed {}
@@ -12,4 +12,3 @@ class XmlRead {
 	static public function fromString(string $src) : mixed {}
 	public function parse(string $src) : mixed {}
 };
-

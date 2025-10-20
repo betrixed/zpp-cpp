@@ -5,6 +5,8 @@
 #include "xmlchar.h"
 #endif
 
+
+
 namespace wcx {
 
 bool 
@@ -27,7 +29,7 @@ bool isAsciiName(char const* s, uint slen)
 {
     for(uint i = 0; i < slen; i++)
     {
-	   const T d = s[i];
+	   const char d = s[i];
        if ((d >= 'a' && d <= 'z') || (d >= 'A' && d <= 'Z') || (d >= '0' && d <= '9')
 		   || (d=='_') || (d=='.') || (d=='-'))
 			continue;
@@ -36,44 +38,6 @@ bool isAsciiName(char const* s, uint slen)
 	 return true;
 }
 
-bool 
-isSpace(char32_t c)
-{
-    switch(c)
-    {
-    case 0x20:
-    case 0x09:
-    case 0x0A:
-    case 0x0D:
-        return true;
-    default:
-        return false;
-    }
-}
-
-
-bool 
-isControl11(char32_t c)
-{
-	if (c <= 0x1F)
-	{
-		switch(c)
-		{
-		case 0x09:
-		case 0x0A:
-		case 0x0:
-		case 0x0D:
-			return false;
-		default:
-			return true;
-		}
-	}
-	if (c <= 0x9F)
-	{
-		return (c >= 0x7F) && (c != 0x85);
-	}
-	return false;
-}
 
 bool 
 in_pairs_table(char32_t const* table, uint tlen, char32_t c)
@@ -83,7 +47,7 @@ in_pairs_table(char32_t const* table, uint tlen, char32_t c)
 	uint m2;
 	while (low < hi)
 	{
-		m2 = low + ((hi - low)/ 2) & ~1;  // round down to even number
+		m2 = low + (((hi - low)/ 2) & ~1);  // round down to even number
 		if (c < table[m2])
 		{
 			hi = m2;
@@ -182,7 +146,7 @@ bool isBase(char32_t c)
 		return false;
     }
     else {
-		return in_table(BaseCharTable, _countof(BaseCharTable), c);
+		return in_pairs_table(BaseTable, std::size(BaseTable), c);
     }
 }
 
@@ -195,7 +159,7 @@ bool isNameStart10(char32_t c)
 	)
 		return true;
 	else
-		return isIdeographic(c) || isBaseChar(c);
+		return isIdeographic(c) || isBase(c);
 
 }
 
@@ -204,9 +168,10 @@ bool isNameStart10(char32_t c)
  * Up to and including fourth edition there was no name start character restriction,
  * and  Letter | Digit | '.' | '-' | '_' | ':' | CombiningChar | Extender was OK for all name characters
  * Errata E09 changed this.
+
  **/
 
-bool xmlp::isName10(char32_t c)
+bool isName10(char32_t c)
 {
 	if ( 
 		((c >= 'a') && (c <= 'z')) ||
@@ -216,7 +181,7 @@ bool xmlp::isName10(char32_t c)
 		)
 		return true;
 	else
-		return isIdeographic(c) || isBaseChar(c) || isDigit(c) || isCombiningChar(c) || isExtender(c);
+		return isIdeographic(c) || isBase(c) || isDigit(c) || isCombining(c) || isExtender(c);
 
 }
 
@@ -245,7 +210,7 @@ isNameStart11(char32_t c)
 		)
 		return true;
 	else {
-		return in_pairs_table(ExtraNameStartTable, _countof(ExtraNameStartTable),c);
+		return in_pairs_table(ExtraNameStartTable, std::size(ExtraNameStartTable),c);
 	}
 }
 /**
@@ -280,7 +245,7 @@ isName11(char32_t c)
 		)
 		return true;
 	else 
-		return lookup(ExtraNameTable,_countof(ExtraNameTable),c);
+		return in_pairs_table(ExtraNameTable, std::size(ExtraNameTable),c);
 }
 
 
@@ -320,7 +285,7 @@ isDigit(char32_t c)
     if (c <= 0x0039 && c >= 0x0030)
 	    return true;
 
-    return lookup(ExtraDigitTable,_countof(ExtraDigitTable),c);
+    return in_pairs_table(ExtraDigitTable, std::size(ExtraDigitTable),c);
 }
 
 
@@ -359,7 +324,7 @@ const char32_t CombiningTable[] = {
 bool
 isCombining(char32_t c)
 {
-    return lookup(CombiningTable,_countof(CombiningTable), c);
+    return in_pairs_table(CombiningTable, std::size(CombiningTable), c);
 }
 
 /**
@@ -379,7 +344,7 @@ const char32_t ExtenderTable[] = {
 bool
 isExtender(char32_t c)
 {
-    return lookup(ExtenderTable,_countof(ExtenderTable), c);
+    return in_pairs_table(ExtenderTable, std::size(ExtenderTable), c);
 }
 
 
@@ -473,3 +438,5 @@ isControl11(char32_t c)
 	}
 	return false;
 }
+
+#endif //

@@ -1,6 +1,10 @@
 #ifndef WCX_XML_CHAR_H
 #define WCX_XML_CHAR_H
 
+#include <array>
+#include <string>
+#include <stdexcept>
+
 namespace wcx {
 
 typedef bool (*CharTestFn)(char32_t c);
