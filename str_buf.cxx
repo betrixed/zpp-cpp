@@ -22,6 +22,8 @@
 #include "val_ptr.h"
 #endif
 
+#include <stdarg.h>
+
 namespace zpp {
 
 void str_buf::initbuf()
@@ -230,6 +232,15 @@ str_buf::vstr() const
 	}
 }
 
+void 
+str_buf::printf(const char *format, ...)
+{
+	va_start(args, format);
+	php_printf_to_smart_str(&buf, format, args);
+	va_end(args);
+}
+		
+		
 };//namespace
 //str_buf.cpp
 #endif

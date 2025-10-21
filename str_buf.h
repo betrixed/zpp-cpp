@@ -13,6 +13,10 @@
 #include "str_out.h"
 #endif
 
+#include <cstdarg>
+#include <string>
+
+
 extern "C" {
 	#include <Zend/zend_smart_str.h>
 };
@@ -70,7 +74,8 @@ namespace zpp {
 
 		str_buf& operator=(const char* c);
 
-		
+		void printf(const char *format, ...);
+
 		// Finalize, 0-terminate, return as std::string, 
 		std::string str();
 
