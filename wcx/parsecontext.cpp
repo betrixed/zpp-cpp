@@ -14,6 +14,10 @@ ParseContext::init()
 	elementDepth = 0;
 	squareDepth = 0;
 	parenDepth = 0;
+	isNameFn_ = isName10;
+	isNameStartFn_ = isNameStart10;
+	validate_ = false;
+	xmlVersion_ = 10;
 }
 
 ParseContext::ParseContext(CoreParser* cp, ParseContext* prev, const std::string_view& data )
@@ -25,11 +29,31 @@ ParseContext::ParseContext(CoreParser* cp, ParseContext* prev, const std::string
 	fit_.set(data_.data(), data_.size());
 }
 
+bool ParseContext::isNameStart5thEd(char32_t test)
+{
+	if (xmlVersion_ == 10 && maxEdition_ >= 5)
+	{
+		if (!isNameStart11(test))
+			return false;
+
+		if (validate_)
+		{
+			estack_->pushMsg(
+				"Name start character only specified by XML 1.0 fifth edition", 
+				ParseError::invalid);
+			reportInvalid();
+		}
+		return true;
+	}
+	return false;
+}
+
 bool ParseContext::getXmlName(str_rc& tag)
 {
 	if (empty())
 		return false;
-	if ( !(isNameStartFn(front()) || isNameStartFifthEdition(front())) )
+	char32_t test = fit_.front();
+	if ( !(isNameStartFn_(test) || isNameStartFifthEdition(test)) )
 		return false;
 	
 	frontFilterOff();

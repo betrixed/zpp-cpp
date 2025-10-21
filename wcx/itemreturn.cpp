@@ -1,5 +1,5 @@
-#ifndef ErrorStack_CPP
-#define ErrorStack_CPP
+#ifndef ItemReturn_CPP
+#define ItemReturn_CPP
 
 #ifndef WCC_XML_PARSE_H
 #include "xmlparse.h"

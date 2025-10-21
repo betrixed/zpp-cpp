@@ -71,9 +71,10 @@ XMLP_init XMLPi;
 }; // namespace wcx
 
 #include "xmlchar.cpp"
-#include "ItemReturn.cpp"
-#include "ErrorStack.cpp"
-#include "ParseContext.cpp"
-#include "CoreParser.cpp"
+#include "itemreturn.cpp"
+#include "errorstack.cpp"
+#include "parsecontext.cpp"
+#include "xmlparse.cpp"
+#include "coreparse.cpp"
 
 #endif

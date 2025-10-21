@@ -5,8 +5,6 @@
 #include "xmlchar.h"
 #endif
 
-
-
 namespace wcx {
 
 bool 
@@ -438,5 +436,7 @@ isControl11(char32_t c)
 	}
 	return false;
 }
+
+}; // namespace wcx
 
 #endif //
