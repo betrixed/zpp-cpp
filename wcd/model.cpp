@@ -369,9 +369,8 @@ namespace wcd {
 			if (parray.size())
 			{
 				ib->where(params, nullstr, nullval, SQSTR.and_str);
-				result = ib->allRows();
 			}
-			
+			result = ib->allRows();
 
 			if (result.isObject())
 			{

@@ -299,8 +299,12 @@ IConfig::newConnect(str_ptr name)
 	args.push_back(name);
 	//showdata("dclass args", args_mgr);
 
-	obj_rc result(ReflectCache::staticInstanceArgs(dclass, args_mgr));
-	//showobj("Result ", result);
+	obj_rc result = ReflectCache::staticInstanceArgs(dclass, args_mgr);
+	
+	if (!result.ok())
+	{
+		zend_throw_error(zend_ce_error, "Unable to create class %s", dclass.data());
+	}
 	return result;
 }
 

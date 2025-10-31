@@ -44,7 +44,7 @@ public:
 	str_intern  sqls_key;
 	str_intern  drivers_key;
 	str_intern  db_config;
-	str_intern  cache_all;
+	str_intern  cache_mgr;
 	str_intern  sql_cache;
 	str_intern  get_cache;
 
@@ -82,7 +82,7 @@ public:
 		sqls_key = "sqls";
 		drivers_key = "drivers";
 		db_config = "db-config";
-		cache_all = "cache_all";
+		cache_mgr = "cache_mgr";
 		sql_cache = "sql_cache";
 		get_cache = "getcache";
 
@@ -167,9 +167,9 @@ IServer::getDataCache()
 	{
 		return dbCache_;
 	}
-	obj_rc cache_all = Services::service(ISV.cache_all);
+	obj_rc cache_mgr = Services::service(ISV.cache_mgr);
 	val_rc arg1(ISV.sql_cache);
-	dbCache_ = cache_all.call(ISV.get_cache, arg1);
+	dbCache_ = cache_mgr.call(ISV.get_cache, arg1);
 	return dbCache_;
 }
 
@@ -180,7 +180,8 @@ IServer::activate(str_ptr name)
 	obj_rc result;
 
 	if (!cfg)
-	{
+	{	
+		zend_throw_error(zend_ce_error,"No connection named %s", name.data());
 		return result;
 	}
 
@@ -189,10 +190,6 @@ IServer::activate(str_ptr name)
 	{
 		htab_rw hw(active_);
 		hw.set(name, result);
-	}
-	else {
-	// TODO:: else throw exeception
-		zend_throw_error(zend_ce_error,"No connection named %s", name.data());
 	}
 	return result;
 }
@@ -242,6 +239,8 @@ IServer::getConnect(str_ptr name)
 		// call keyed activation function
 		Services::service(key);
 	}
+
+
 	class_data cd(IServer::omg.class_entry_);
 
 	if (!name.ok())
@@ -257,7 +256,7 @@ IServer::getConnect(str_ptr name)
 		return conn;
 	}
 
-	str_ptr alias = alias_.get(name);
+	str_rc alias = alias_.get(name);
 	if (alias.ok())
 	{
 		conn = active_.get(alias);
@@ -279,21 +278,21 @@ IServer::connect(str_ptr name)
 	IServer* s = zobj_toc<IServer>(me);
 
 	class_data cd(IServer::omg.class_entry_);
+	
+	str_rc conkey;
 
 	if (!name.ok())
-	{
-		
-		str_rc name_mgr = cd.static_property(ISV.active_cfg);
-		name = name_mgr;
+	{	
+		conkey = cd.static_property(ISV.active_cfg);
 	}
 	else {
+		
 		val_rc value(name);
 		cd.static_property(ISV.active_cfg, value);
+		conkey = name;
 	}
 
-	
-
-	return s->getConnect(name);
+	return s->getConnect(conkey);
 }
 
 str_rc 

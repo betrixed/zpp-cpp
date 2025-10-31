@@ -556,6 +556,8 @@ IDriver::getSchema()
 	}
 	obj_ptr server_mgr = Services::getOne(IServer::omg.class_name());
 	IServer* isv = zobj_toc<IServer>(server_mgr);
+
+	
 	obj_rc cache_mgr = isv->getDataCache();
 	if (cache_mgr.ok())
 	{
