@@ -20,6 +20,6 @@ unsigned int utf32_str8(char32_t d, char (*result) [8]);
 
 unsigned int u8bytes(char32_t d);
 
-int  		 hex_str8(const char *data, int slen, char (*result) [8]);
+int hex_str8(const char *data, int slen, char (*result) [8]);
 
 #endif
