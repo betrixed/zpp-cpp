@@ -47,7 +47,7 @@ class CoreParse : public XmlRead
 {
 public:
 
-	typedef bool (CoreParser::*ItemFn)(ItemReturn& iret);
+	typedef bool (CoreParse::*ItemFn)(ItemReturn& iret);
 
 	bool docStarted_;
 	bool hasDeclared_;
@@ -63,8 +63,8 @@ public:
 
 	ParseError* getNotWellFormed(const char* s);
 
-	CoreParser(str_ptr data);
-	~CoreParser();
+	CoreParse(str_ptr data);
+	~CoreParse();
 
 	bool initParse(ItemReturn& item);
 	bool parseProcessInst(ItemReturn& ret, int spaceCt = 0);

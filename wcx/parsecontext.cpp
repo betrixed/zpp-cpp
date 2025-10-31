@@ -1,8 +1,12 @@
 #ifndef ParseContext_CPP
 #define ParseContext_CPP
 
-#ifndef WCC_XML_PARSE_H
+#ifndef WCX_XML_PARSE_H
 #include "xmlparse.h"
+#endif
+
+#ifndef WCX_PARSECONTEXT_H
+#include "parsecontext.h"
 #endif
 
 namespace wcx {
@@ -14,19 +18,19 @@ ParseContext::init()
 	elementDepth = 0;
 	squareDepth = 0;
 	parenDepth = 0;
-	isNameFn_ = isName10;
-	isNameStartFn_ = isNameStart10;
-	validate_ = false;
-	xmlVersion_ = 10;
 }
 
-ParseContext::ParseContext(CoreParser* cp, ParseContext* prev, const std::string_view& data )
+
+ParseContext::ParseContext(str8_fwd& fit, CoreParse* cp, 
+		ParseContext* prev, bool scoped) 
+	: fit_(fit), scoped_(scoped), parser_(cp), prior_(prev)
 {
 	init();
-	parser_ = cp;
-	prior_ = prev;
-	data_ = data;
-	fit_.set(data_.data(), data_.size());
+}
+
+ParseContext::~ParseContext()
+{
+
 }
 
 bool ParseContext::isNameStart5thEd(char32_t test)

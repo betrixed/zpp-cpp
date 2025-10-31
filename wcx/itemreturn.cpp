@@ -1,7 +1,7 @@
 #ifndef ItemReturn_CPP
 #define ItemReturn_CPP
 
-#ifndef WCC_XML_PARSE_H
+#ifndef WCX_XML_PARSE_H
 #include "xmlparse.h"
 #endif
 

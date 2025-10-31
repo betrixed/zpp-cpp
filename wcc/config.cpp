@@ -28,21 +28,20 @@ namespace wcc {
 
 /** type must be good for something? */
 
-#ifdef CONFIG_DIMENSIONS
+#ifdef CONFIG_HANDLERS
 zval* 
 Config::read_dimension(zend_object* obj, zval* offset, int type,  zval* return_value)
 {
-	return obj_ptr(obj).property_get(offset, return_value);
+	//zend_std_read_property(zend_object *zobj, zend_string *name, int type, void **cache_slot, zval *rv)
+	void* slot = nullptr;
+	return zend_std_read_property(obj, val_ptr(offset).zstr(), type, &slot, return_value);
 }
 
 void 
 Config::write_dimension(zend_object* obj, zval* offset,  zval* set_value)
 {
-	//showmem("write dimension offset", offset);
-	Config* cobj = zobj_toc<Config>(obj);
-	cobj->set(val_ptr(offset), val_ptr(set_value));
-
-	//obj_ptr(obj).property(offset, set_value);
+	void* slot = nullptr;
+	zend_std_write_property(obj, val_ptr(offset).zstr(), set_value, &slot);
 }
 
 int   
@@ -56,6 +55,8 @@ Config::unset_dimension(zend_object *object, zval *unset)
 {
 	return obj_ptr(object).unset_property(unset);
 }
+
+
 #endif
 
 

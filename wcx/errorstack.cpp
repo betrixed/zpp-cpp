@@ -1,9 +1,11 @@
 #ifndef ErrorStack_CPP
 #define ErrorStack_CPP
 
-#ifndef WCC_XML_PARSE_H
+#ifndef WCX_XML_PARSE_H
 #include "xmlparse.h"
 #endif
+
+namespace wcx {
 
 ErrorStack::ErrorStack() : errorLevel_(0)
 {
@@ -24,7 +26,7 @@ ErrorStack::clear()
 }
 
 int 
-ErrorStack::pushMsg(str_ptr msg, int level = 0)
+ErrorStack::pushMsg(str_ptr msg, int level)
 {
 	htab_rw hw(messages_);
 	hw.push_back(msg);
@@ -87,4 +89,7 @@ ParseError::getErrorCodeMsg(int code)
     }
     return "Unknown error code";
 }
+
+}//namespace wcx
+
 #endif

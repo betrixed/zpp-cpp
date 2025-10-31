@@ -1,5 +1,5 @@
-#ifndef WCC_XMLPARSE_CPP
-#define WCC_XMLPARSE_CPP
+#ifndef WCX_XMLPARSE_CPP
+#define WCX_XMLPARSE_CPP
 
 #ifndef ZPP_BASE_H
 #include "zpp/base.h"
@@ -34,16 +34,6 @@ namespace wcx {
 	using namespace zpp;
 
 
-enum ParserState {
-	XML_DECLARATION,
-	PROCESS_INSTRUCTION,
-	DOC_TYPE,
-	DTD_INTERNAL_SUBSET,
-	COMMENT,
-	TAG_START,
-	TAG_END,
-	EPILOG
-};
 
 class XMLP_init : public state_init {
 public:

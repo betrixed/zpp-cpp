@@ -54,7 +54,7 @@ namespace wcx {
 		return new ExceptionMsg(msg);
 	}
 
-	void reportInvalid() {} // override
+	virtual void reportInvalid() {} // override
 
 	void setXmlVersion(str_ptr vstr)
 	{

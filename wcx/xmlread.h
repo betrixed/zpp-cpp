@@ -41,7 +41,6 @@ protected:
 	
 	virtual void reportInvalid();
 	virtual void setXmlVersion(str_ptr vstr);
-	virtual void reportInvalid();
 
 	void setState(XMLR_STATE st)
 	{

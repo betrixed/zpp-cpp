@@ -128,7 +128,7 @@ Str8Iterator::it_forward(zend_object_iterator *iter)
 
 	if (slen > 0) {
 		char32_t value = INVALID_CHAR;
-		long units = ucode8Fore(zstr.data() + next, slen, value);
+		long units = ucode8Fwd(zstr.data() + next, slen, value);
 		
 		if (units > 0) {
 			iterator->current = next;

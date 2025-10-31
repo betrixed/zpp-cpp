@@ -1,6 +1,8 @@
 #ifndef WCX_ERRORSTACK_H
 #define WCX_ERRORSTACK_H
 
+#include <stdexcept>
+
 #ifndef ZPP_BASE_H
 #include "zpp/base.h"
 #endif

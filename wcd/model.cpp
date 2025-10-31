@@ -365,14 +365,15 @@ namespace wcd {
 		}
 		else if (zs_cmp(mlower, MIS.find_all)==0)
 		{
+			val_rc result;
 			if (parray.size())
 			{
 				ib->where(params, nullstr, nullval, SQSTR.and_str);
-				return ib->allRows();
+				result = ib->allRows();
 			}
-			val_rc   result = ib->allRows();
+			
 
-			if (val_ptr(result).isObject())
+			if (result.isObject())
 			{
 				htab_rc rows_mgr;
 				htab_rw rows(rows_mgr);

@@ -8,16 +8,13 @@ using namespace zpp;
 
 class ParseContext : public PHPAlloc { 
 public:
+	str8_fwd&      	fit_;
+
 	ParseContext* 	prior_;
-	CoreParser*   	parser_;
-	str8_fwd      	fit_;
-	std::string_view  data_;
-	ErrorStack    	estack_;
-	CharTestFn      isNameFn_;
-	CharTestFn		isNameStartFn_;
-	int             xmlVersion_;
-	int             maxEdition_;
-	bool            validate_;
+	CoreParse*   	parser_;
+	ErrorStack*    	estack_;
+
+
 
 	bool						scoped_;
     int							markupDepth;  //  count < and >
@@ -25,9 +22,12 @@ public:
 	int							squareDepth;  // count [ [ and ] ]
 	int							parenDepth;		// ( and )
 
-	ParseContext(CoreParser* cp, 
-		ParseContext* prev, 
-		const std::string_view& data );
+	ParseContext(str8_fwd& fit, CoreParse* cp, 
+		ParseContext* prev, bool scoped = false);
+
+	ParseContext(str8_fwd& fit);
+
+	~ParseContext();
 
 	void adjustMarkupDepth(int adjust);
 	void init();
