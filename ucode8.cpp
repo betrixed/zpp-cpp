@@ -30,7 +30,7 @@ unsigned int
 	char32_t& uc)
 {            
     uc = INVALID_CHAR;
-    if (!data_ || !slen) {
+    if (!cpt || !slen) {
         return 0;
     }
     const unsigned char* pa = (unsigned char const*)(cpt);
@@ -153,7 +153,7 @@ hex_str8(const char *data, int slen, char (*result) [8])
     char buf[24];
 
     // copy to terminate
-    for(size_t i = 0; i < slen; i++) {
+    for(int i = 0; i < slen; i++) {
         buf[i] = *data++;
     }
     buf[slen] = '\0';
@@ -163,3 +163,5 @@ hex_str8(const char *data, int slen, char (*result) [8])
     //Php::out << val << " is " << ec8.result << std::endl;
     return utf32_str8(val, result);
 }
+
+#endif

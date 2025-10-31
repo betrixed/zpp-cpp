@@ -7,6 +7,7 @@
  * @brief  Include C headers from PHP distribution.
  */
 #include <string>
+#include <stdexcept>
 
 extern "C" {
 	#include <php.h>

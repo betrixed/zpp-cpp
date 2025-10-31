@@ -235,6 +235,7 @@ str_buf::vstr() const
 void 
 str_buf::printf(const char *format, ...)
 {
+	std::va_list args;
 	va_start(args, format);
 	php_printf_to_smart_str(&buf, format, args);
 	va_end(args);
