@@ -293,7 +293,7 @@ using namespace zpp;
 	val_rc
 	IBuild::aggregate(str_ptr agfn, htab_ptr columns)
 	{
-		model_.init();
+		//model_.init();
 
 		htab_rc args_mgr;
 		htab_rw args(args_mgr);
@@ -305,8 +305,8 @@ using namespace zpp;
 		val_rc temp(args_mgr);
 		bind.set(ISql::SQL_AGGREGATE, temp);
 		bind.set(ISql::FETCH_AS, IDriver::FETCH_OBJECT);
-
-
+		bind.unset(ISql::MODEL_OBJ);
+		
 		val_rc result = bind.select();
 
 		if (result.isArray())
