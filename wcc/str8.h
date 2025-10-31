@@ -93,6 +93,6 @@ public:
     static str_rc ucode8str(zend_long value);
 };
 
-};
+}; //namespace wcc
 
 #endif

@@ -183,12 +183,19 @@ Str8::ucode8str(zend_long ucode)
 	return str_rc(&ustr[0], slen);
 }
 
+size_t
+Str8::size()
+{
+	return zstr_.size();
+}
+
+
 } // namespace wcc
 
 using namespace wcc;
 using namespace zpp;
 
-PHP_METHOD(Str8, __construct)
+ZEND_METHOD(Wcc_Str8, __construct)
 {
 	zarg_rd args(execute_data);
 
@@ -204,7 +211,7 @@ PHP_METHOD(Str8, __construct)
 }
 
 /* Create a new iterator from instance. */
-PHP_METHOD(Str8, getIterator)
+ZEND_METHOD(Wcc_Str8, getIterator)
 {
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
@@ -213,7 +220,7 @@ PHP_METHOD(Str8, getIterator)
 }
 
 /* {{{ Return the iterated string */
-PHP_METHOD(Str8, __toString)
+ZEND_METHOD(Wcc_Str8, __toString)
 {
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
@@ -224,7 +231,7 @@ PHP_METHOD(Str8, __toString)
 }
 
 /* {{{ Return the iterated string */
-PHP_METHOD(Str8, ucode8str)
+ZEND_METHOD(Wcc_Str8, ucode8str)
 {
 	zarg_rd args(execute_data);
 
@@ -237,6 +244,14 @@ PHP_METHOD(Str8, ucode8str)
 		str_rc zstr = Str8::ucode8str(value);
 		zstr.move_zv(return_value);
 	}
+}
+
+ZEND_METHOD(Wcc_Str8, size)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+	Str8* cobj = zval_toc<Str8>(ZEND_THIS);
+	RETURN_LONG(cobj->size());
+
 }
 
 PHP_MINIT_FUNCTION(Wcc_Str8_reg)
