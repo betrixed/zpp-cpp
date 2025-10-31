@@ -431,6 +431,25 @@ void htab_ptr::return_zv(zval* return_value) const
 	 val_ptr(return_value).bind_array(ht_);
 }
 
+int
+htab_ptr::value_index(str_ptr fvalue) const
+{
+	for_key_value ikv;
+
+	for (ikv.start(ht_); ikv.ok(); ikv.next())
+	{
+	    val_ptr test(ikv.value());
+	    if (!test.isString())
+	    {
+	    	continue;
+	    }
+	    if (zs_cmp(test.zstr(), fvalue) == 0)
+	    {
+	    	return ikv.index();
+	    }
+	}
+	return -1;
+}
 
 zval* 
 htab_ptr::operator[]  (const val_rc& key) const
