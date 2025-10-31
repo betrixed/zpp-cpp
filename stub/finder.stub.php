@@ -28,7 +28,7 @@ class Finder {
 
 	public static function dirList_dir(string $s) : array {}
 
-	public static function dirList_fileExt(string $dir, ?array $extlist = null) {}
+	public static function dirList_fileExt(string $dir, ?array $extlist = null) : array {}
 	
 
 };

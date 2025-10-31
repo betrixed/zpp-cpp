@@ -326,8 +326,9 @@ Finder::dirList_dir(str_ptr path)
 	return result;
 }
 
+// return list of files with extensions in found order
 htab_rc //static 
-Finder::dirList_ext(str_ptr path, htab_ptr extlist)
+Finder::dirList_fileExt(str_ptr path, htab_ptr extlist)
 {
 	htab_rc result = htab_ptr::empty_array();
 
@@ -353,26 +354,22 @@ Finder::dirList_ext(str_ptr path, htab_ptr extlist)
 			break;
 		}
 
+		str_ptr fname = entry.zstr();
+
 		if (extlist.size())
 		{
-			str_rc extname = 
-		}
-		str_rc value = entry.zstr();
-		if (!zs_cmp(value, FDit.dir_dot) || !zs_cmp(value, FDit.dir_two))
-		{
-			continue;
-		}
-		str_buf jpath;
+			str_rc extname = path_ext(fname);
+			extname.lowercase();
 
-		jpath << path << FDit.dir_sep << value;
-
-		str_rc tdir = jpath.zstr();
-		if (is_dir(tdir))
-		{
-			list.set(value, tdir);
+			if (extlist.value_index(extname) < 0)
+			{
+				continue;
+			}
+			list.push_back(entry);
 		}
 	}
 	closedir(dh);
+	return result;
 }
 }; //namespace wcc
 
@@ -508,6 +505,25 @@ ZEND_METHOD(Wcc_Finder, dirList_dir)
 	if (!args.throw_errors())
 	{
 		result = Finder::dirList_dir(path);
+	}
+	result.move_zv(return_value);
+}
+
+ZEND_METHOD(Wcc_Finder, dirList_fileExt)
+{
+	zarg_rd args(execute_data);
+
+	str_ptr path;
+	htab_ptr extlist;
+
+	htab_rc result;
+
+	args.zstring(path, args.need(0));
+	args.zarray_null(extlist, args.option(1));
+
+	if (!args.throw_errors())
+	{
+		result = Finder::dirList_fileExt(path,extlist);
 	}
 	result.move_zv(return_value);
 }

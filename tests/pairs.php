@@ -540,7 +540,7 @@ row("Wcc\\Pair (C++) declared properties (a)", $a/$e, $a/$a, $run);
 row("EmptyTest (PHP) declared properties (i)", $i/$e, $i/$a, $run);
 row("Wcc\Pair call test_calc() (c)", $c/$e, $c/$a, $run);
 row("Wcc\\Pair (C++) methods get (b)", $b/$e, $b/$a, $run);
-row("Wcc\\Config dynamic properties", $d/$e, $d/$a, $run);
+row("Wcc\\Config dynamic properties (d)", $d/$e, $d/$a, $run);
 
 row("Use local array (g)", $g/$e, $g/$a, $run);
 
@@ -568,7 +568,7 @@ foreach($gResults as $s => $column)
 	$mx = array_sum($x) / count($x);
 	$sx = stats_standard_deviation($x);
 	$my = array_sum($y) / count($y);
-	$sy = stats_standard_deviation($x);
+	$sy = stats_standard_deviation($y);
 
 	echo "| $s |" . " " . round($mx,$decp) . " \u{00B1} " . round($sx,$decp) . " |" ;
 	echo " " . round($my,$decp) . " \u{00B1} " . round($sy,$decp) . " |" . PHP_EOL;	
@@ -606,7 +606,7 @@ r2("Wcc\\Pair (C++) declared properties (a)", $a/$e, $a/$a);
 r2("EmptyTest (PHP) declared properties (i)", $i/$e, $i/$a);
 r2("Wcc\Pair call test_calc() (c)", $c/$e, $c/$a);
 r2("Wcc\\Pair (C++) methods get (b)", $b/$e, $b/$a);
-r2("Wcc\\Config dynamic properties", $d/$e, $d/$a);
+r2("Wcc\\Config dynamic properties (d)", $d/$e, $d/$a);
 
 r2("Use local array (g)", $g/$e, $g/$a);
 
