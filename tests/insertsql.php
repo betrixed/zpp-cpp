@@ -1,6 +1,6 @@
 <?php
 use Wcc\{
-    CacheAll,
+    CacheMgr,
     Config,
     Dos,
     Services
@@ -72,7 +72,7 @@ function bootstrap()
         }
     );
 
-    $cache = new CacheAll
+    $cache = new CacheMgr
     ([
         'delete_expired' => 60*10,
         'expired_key' => 'pcan_delete_expired',
@@ -109,9 +109,9 @@ function bootstrap()
         ]
     );
 
-    $services->set('cache_all', $cache);
+    $services->set('cache_mgr', $cache);
 
-    $cfg->cache_all = $cache;
+    $cfg->cache_mgr = $cache;
     
     $clean = function (Services $svc)
     {

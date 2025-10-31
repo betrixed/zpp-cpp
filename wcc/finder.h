@@ -19,6 +19,8 @@ public:
 
 	static htab_rc dirList_dir(str_ptr path);
 
+	static htab_rc dirList_ext(str_ptr path, htab_ptr extlist);
+
 	static str_rc  path_ext(str_ptr path); 
 
 	static str_rc  path_base(str_ptr path); 

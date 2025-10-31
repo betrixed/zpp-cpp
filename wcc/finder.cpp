@@ -326,6 +326,54 @@ Finder::dirList_dir(str_ptr path)
 	return result;
 }
 
+htab_rc //static 
+Finder::dirList_ext(str_ptr path, htab_ptr extlist)
+{
+	htab_rc result = htab_ptr::empty_array();
+
+	if (!is_dir(path))
+	{
+		return result;
+	}
+
+	val_rc dh = opendir(path);
+
+
+	if (dh.isFalse()) 
+	{
+		return result;
+	}
+
+	htab_rw list(result);
+	while(true)
+	{
+		val_rc entry = readdir(dh);
+		if (entry.isFalse())
+		{
+			break;
+		}
+
+		if (extlist.size())
+		{
+			str_rc extname = 
+		}
+		str_rc value = entry.zstr();
+		if (!zs_cmp(value, FDit.dir_dot) || !zs_cmp(value, FDit.dir_two))
+		{
+			continue;
+		}
+		str_buf jpath;
+
+		jpath << path << FDit.dir_sep << value;
+
+		str_rc tdir = jpath.zstr();
+		if (is_dir(tdir))
+		{
+			list.set(value, tdir);
+		}
+	}
+	closedir(dh);
+}
 }; //namespace wcc
 
 using namespace wcc;
