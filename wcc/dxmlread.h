@@ -1,16 +1,21 @@
-#ifndef XML_READ_H
-#define XML_READ_H
+#ifndef DXML_READ_H
+#define DXML_READ_H
 
 
 #ifndef ZPP_BASE_H
 #include "zpp/base.h"
 #endif
 
+
 #ifndef FN_CALL_H
 #include "zpp/fn_call.h"
 #endif
 
-
+#ifndef __XML_XMLREADER_H__
+extern "C" {
+#include <libxml/xmlreader.h>
+};
+#endif
 
 namespace zpp {
 		/**
@@ -19,39 +24,29 @@ namespace zpp {
 		fn_call read_;
 		*/
 
-	class xmlreader_open : public fn_call_args<3> {
-    public:
-        obj_rc call(str_ptr path);
-    };
 
-    class xmlreader_xml : public fn_call_args<3> {
-    public:
-        obj_rc call(str_ptr src);
-    };
     
 
     class xml_fns : public state_init {
     public:
-    	xmlreader_open    xml_file;
-    	xmlreader_xml	  xml_parse;
 
-    	str_intern   	  xmlreader;
-    	str_intern   	  fromString;
-    	str_intern   	  open;
-        str_intern    	  get_attribute;
-        str_intern    	  read_string;
-        str_intern    	  read;
+    	//str_intern   	  xmlreader;
+    	//str_intern   	  fromString;
+    	//str_intern   	  open;
+        //str_intern    	  get_attribute;
+        //str_intern    	  read_string;
+        //str_intern    	  read;
 
-		str_intern 	  k_nodeType;
-		str_intern	      k_attribute;
-		str_intern	      k_name;
+		//str_intern 	  	  k_nodeType;
+		//str_intern	      k_attribute;
+		//str_intern	      k_name;
 		
-		str_intern 	  k_c;
+		str_intern 	  	  k_c;
 		str_intern	      k_k;
 
-		str_intern	      k_close;
+		//str_intern	      k_close;
 
-		str_intern       reader;
+		//str_intern       reader;
 
 		str_intern       root;
 
@@ -79,21 +74,16 @@ namespace wcc {
 	class  XmlWrap
 	{
 	protected:
-		fn_call_args<1> getattribute_;
-		fn_call   readstring_;
-		fn_call   read_;
-		bool      fileOpen_;
-		str_rc  hold_; // filename or xml data
-		obj_rc  self_; // XmlReader::Object
+		xmlTextReaderPtr	xrptr_;
+		bool      			fileOpen_;
+		str_rc  			hold_; // filename or xml data
 
-		bool adopt_xmlobj(obj_rc& test);
 	public:
 		XmlWrap();
 		~XmlWrap();
 
 		bool fromFile(str_ptr path);
 		bool fromString(str_ptr xml);
-		void fn_setup();
 
 		str_rc  xml_name();
 
@@ -104,17 +94,13 @@ namespace wcc {
 		val_rc  xml_str_zval();
 
 		bool      read();
-		int		  nodeType();
+		long	  nodeType();
 		void      closeFile();
 
 		bool      ok() {
-			return self_.ok();
+			return fileOpen_;
 		}
 
-		obj_ptr xml() 
-		{
-			return self_;
-		}
 		operator obj_ptr* () {
 			return (obj_ptr*)(this);
 		}

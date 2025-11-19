@@ -119,7 +119,9 @@ function testavg(int $ct, string $msg) {
 	for($i = 0; $i < $ct; $i++)
 	{
 		$rd = new XmlRead();
-		$rd->parseFile("tests/assets_full.xml");
+		$s = file_get_contents("tests/assets_full.xml");
+		$result = $rd->parse($s);
+		//$rd->parseFile("tests/assets_full.xml");
 	}//$emty = new EmptyTest();
 	$end = microtime(true);
 

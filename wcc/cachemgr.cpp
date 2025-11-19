@@ -21,10 +21,6 @@
 #include "services.h"
 #endif
 
-#ifndef XML_READ_H
-#include "xmlread.h"
-#endif
-
 #ifndef WCC_LOADER_H
 #include "loader.h"
 #endif

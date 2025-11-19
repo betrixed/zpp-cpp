@@ -50,6 +50,8 @@ extern "C" {
 	
 };
 
+//#define DIRECT_LIBXML
+
 
 //#define DEBUG_EXTRA
 
@@ -96,7 +98,12 @@ extern "C" {
 //WCC_SERVICES_CPP
 // miscellaneous, wccm
 #include "toml/toml_php.cpp"
+
+#ifndef DIRECT_LIBXML
 #include "wcc/xmlread.cpp"
+#else
+#include "wcc/dxmlread.cpp"
+#endif
 
 #include "wcc/run.cpp"
 #include "wcc/loader.cpp"
@@ -211,8 +218,14 @@ PHP_MINIT_FUNCTION(wcc)
 	PHP_MINIT(Wcc_EmptyTest_reg)(INIT_FUNC_ARGS_PASSTHRU);
 #endif
 
-#ifdef XMLREAD_CPP
+#ifdef DIRECT_LIBXML
+#	ifdef DXMLREAD_CPP
 	PHP_MINIT(Wcc_XmlRead_reg)(INIT_FUNC_ARGS_PASSTHRU);
+#	endif
+#else
+#	ifdef XMLREAD_CPP
+	PHP_MINIT(Wcc_XmlRead_reg)(INIT_FUNC_ARGS_PASSTHRU);
+#	endif
 #endif
 
 #ifdef WCC_SERVICES_CPP
