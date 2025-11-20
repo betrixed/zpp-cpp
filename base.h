@@ -15,7 +15,7 @@
 
 // ZPP_BUILD_ALL tells base.cpp to be one compile unit
 #define ZPP_BUILD_ALL
-//#define DEBUG_EXTRA
+#define DEBUG_EXTRA
 
 #ifdef DEBUG_EXTRA
 //base.h Enable templates have trace output statements
