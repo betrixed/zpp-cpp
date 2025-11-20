@@ -14,6 +14,7 @@
 #ifndef __XML_XMLREADER_H__
 extern "C" {
 #include <libxml/xmlreader.h>
+#include <libxml/uri.h>
 };
 #endif
 
@@ -74,9 +75,12 @@ namespace wcc {
 	class  XmlWrap
 	{
 	protected:
-		xmlTextReaderPtr	xrptr_;
-		bool      			fileOpen_;
-		str_rc  			hold_; // filename or xml data
+		xmlTextReaderPtr		xrptr_;
+		xmlParserInputBufferPtr xrbuf_;
+		xmlChar*				xrpath_;
+
+		bool      				fileOpen_;
+		str_rc  				hold_; // filename or xml data
 
 	public:
 		XmlWrap();

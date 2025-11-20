@@ -50,7 +50,7 @@ extern "C" {
 	
 };
 
-//#define DIRECT_LIBXML
+#define DIRECT_LIBXML
 
 
 //#define DEBUG_EXTRA

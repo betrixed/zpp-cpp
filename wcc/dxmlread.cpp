@@ -54,7 +54,9 @@ namespace wcc {
 
 	base_obj_mgr<Wcc_XmlRead> Wcc_XmlRead::omg;
 
-	XmlWrap::XmlWrap() : xrptr_(nullptr), fileOpen_(false)
+	XmlWrap::XmlWrap() : 
+		xrptr_(nullptr), xrbuf_(nullptr), xrpath_(nullptr)
+		, fileOpen_(false)
 	{
 	}
 
@@ -72,8 +74,22 @@ namespace wcc {
 		{
 			fileOpen_ = false;
 			
-			xmlFreeTextReader(xrptr_);
-			xrptr_ = nullptr;
+			if (xrpath_)
+			{
+				xmlFree(xrpath_);
+				xrpath_ = nullptr;
+			}
+
+			if (xrbuf_)
+			{
+				xmlFreeParserInputBuffer(xrbuf_);
+				xrbuf_ = nullptr;
+			}
+			if (xrptr_)
+			{
+				xmlFreeTextReader(xrptr_);
+				xrptr_ = nullptr;
+			}
 		}
 	}
 
@@ -92,7 +108,19 @@ namespace wcc {
 	{
 		hold_ = xml;
 		//showstr("string hold_", hold_);	
-		xrptr_ = xmlReaderForMemory(hold_.data(), hold_.size(), nullptr, nullptr,0);
+
+		xrbuf_ = xmlParserInputBufferCreateMem(hold_.data(), hold_.size(), XML_CHAR_ENCODING_NONE);
+
+		str_buf buf;
+		str_rc wkdir = getcwd();
+
+		buf << wkdir << '/';
+
+		wkdir = buf.zstr();
+		xrpath_ = xmlCanonicPath( (const xmlChar*) wkdir.data());
+
+		xrptr_ = xmlNewTextReader(xrbuf_, (const char*) xrpath_);
+
 		fileOpen_ = (xrptr_ != nullptr);
 		return fileOpen_;
 	}
@@ -112,11 +140,11 @@ namespace wcc {
 	{
 		val_rc result;
 		
-		const xmlChar* name = xmlTextReaderConstName 	(xrptr_) ;
+		const xmlChar* name = xmlTextReaderConstName(xrptr_) ;
 
 		if (name) 
 		{
-			result = str_rc((const char*)name);
+			result =(const char*)name;
 		}
 
 		return result;
@@ -124,23 +152,13 @@ namespace wcc {
 
 	str_rc XmlWrap::xml_name()
 	{
-		const xmlChar* name = xmlTextReaderConstName 	(xrptr_) ;
+		const xmlChar* name = xmlTextReaderConstName(xrptr_) ;
 		str_rc result;
 
 		if (name)
 		{
-			result = str_rc((const char*) name, strlen((const char*)name));
+			result = (const char*) name;
 		}
-		
-
-		//showstr("Name", result);
-		/* This pathway was found to leak
-		  and value appears to be disposable.
-		*/
-		//str_rc::try_decref(result);
-
-		//showmem("zval_name", &test);
-		//showstr("xml_name", result);
 		return result;
 	}
 
@@ -151,7 +169,7 @@ namespace wcc {
 		const xmlChar* val = xmlTextReaderGetAttribute( xrptr_ , (const xmlChar*) name.data());
 		if (val)
 		{
-			result = str_rc((const char*) val);
+			result = (const char*) val;
 		}
 		return result;
 	}
@@ -164,19 +182,11 @@ namespace wcc {
 
 		if (inner)
 		{
-			result = str_rc( (const char*) inner);
+			result = (const char*) inner;
 		//showmem("readstring", result);
 		}
 		return result;
 	}
-
-	/**
-	str_rc
-	XmlWrap::xml_string()
-	{
-		return readstring_.call_fn();
-	}
-	*/
 
 	bool XmlWrap::read()
 	{
@@ -422,7 +432,7 @@ Wcc_XmlRead::parseFile(str_ptr filename)
 void 
 Wcc_XmlRead::tagsTable()
 {
-	val_rc tag;
+	str_rc tag;
 	val_rc value;
 	//zend_printf("tagsTable\n");
 	
@@ -431,7 +441,7 @@ Wcc_XmlRead::tagsTable()
 		switch(ntype) {
 			case Xntype::ELEMENT:
 				{
-					tag = xml_.xml_name_zval();
+					tag = xml_.xml_name();
 					value = xml_.xml_str_zval();
 
 					//showarray("tag_objs", tag_objs_);*/
@@ -440,7 +450,7 @@ Wcc_XmlRead::tagsTable()
 				break;
 			case Xntype::END_ELEMENT:
 				{
-					tag = xml_.xml_name_zval();
+					tag = xml_.xml_name();
 					std::string_view test = val_ptr(tag).vstr();
 					//zend_printf("test vstr (%ld) %s\n", test.size(), test.data());
 					//showmem("tagkey end", tag);
