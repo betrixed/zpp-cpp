@@ -58,6 +58,12 @@ namespace wcc {
 		xrptr_(nullptr), xrbuf_(nullptr), xrpath_(nullptr)
 		, fileOpen_(false)
 	{
+		/* getNameValue_ = (xr_strfn) xmlTextReaderConstName;
+		getAttrValue_ = (xr_attrfn) xmlTextReaderGetAttribute;
+		getStrValue_ = (xr_strfn) xmlTextReaderReadString;
+		nextNode_ = (xr_intfn) xmlTextReaderRead;
+		nodeType_ = (xr_intfn) xmlTextReaderNodeType;
+		*/
 	}
 
 	XmlWrap::~XmlWrap()
@@ -118,10 +124,25 @@ namespace wcc {
 
 		wkdir = buf.zstr();
 		xrpath_ = xmlCanonicPath( (const xmlChar*) wkdir.data());
-
+		//PHP_LIBXML_SANITIZE_GLOBALS(string_xml_wrap);
 		xrptr_ = xmlNewTextReader(xrbuf_, (const char*) xrpath_);
 
 		fileOpen_ = (xrptr_ != nullptr);
+
+		if (fileOpen_)
+		{
+			int ok = xmlTextReaderSetup(xrptr_, nullptr, (const char*) xrpath_, nullptr, 0);
+			if (ok != 0) {
+				fileOpen_ = false;
+			}
+		}
+
+		if (xrpath_)
+		{
+			xmlFree(xrpath_);
+			xrpath_ = nullptr;
+		}
+
 		return fileOpen_;
 	}
 	

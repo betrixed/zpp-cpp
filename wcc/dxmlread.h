@@ -67,10 +67,17 @@ namespace wcc {
 	//using xmlstr = zstr_own;
 	using namespace zpp;
 
+
 	/**
 	 * intended for single parse.
 	 * mixed in with Wcc_XmlRead
 	 */
+
+
+	/* typedef const xmlChar* (*xr_strfn)(xmlTextReaderPtr);
+	typedef long     (*xr_intfn)(xmlTextReaderPtr);
+	typedef const xmlChar* (*xr_attrfn)(xmlTextReaderPtr, const xmlChar*);
+	*/
 
 	class  XmlWrap
 	{
@@ -79,9 +86,17 @@ namespace wcc {
 		xmlParserInputBufferPtr xrbuf_;
 		xmlChar*				xrpath_;
 
+
 		bool      				fileOpen_;
 		str_rc  				hold_; // filename or xml data
 
+		/*
+		xr_strfn				getStrValue_;
+		xr_strfn				getNameValue_;
+		xr_attrfn				getAttrValue_;
+		xr_intfn                nextNode_;
+		xr_intfn                nodeType_;
+		*/
 	public:
 		XmlWrap();
 		~XmlWrap();

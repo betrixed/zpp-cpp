@@ -6,6 +6,10 @@ use Exception;
 
 require __DIR__ . "/bootstrap.php";
 
+function rutime($ru, $rus, $index){
+ return ($ru["ru_$index.tv_sec"]*1000 + intval($ru["ru_$index.tv_usec"]/1000)) - ($rus["ru_$index.tv_sec"]*1000 + intval($rus["ru_$index.tv_usec"]/1000));
+}
+
 
 $rd = new XmlRead();
 
@@ -102,7 +106,7 @@ function test() : mixed {
 }
 
 $data = test();
-//debug_zpp_dump($data);
+debug_zpp_dump($data);
 //echo "DIES NOW\n"; return;
 
 
@@ -115,7 +119,7 @@ $start = microtime(true);
 
 
 function testavg(int $ct, string $msg) {
-	$start = microtime(true);
+	$cpu_before = getrusage();
 	for($i = 0; $i < $ct; $i++)
 	{
 		$rd = new XmlRead();
@@ -123,21 +127,18 @@ function testavg(int $ct, string $msg) {
 		$result = $rd->parse($s);
 		//$rd->parseFile("tests/assets_full.xml");
 	}//$emty = new EmptyTest();
-	$end = microtime(true);
-
-	$total = (($end - $start)*1000_1000) / $ct;
-
-	//debug_zval_dump($data);
-
-	echo $msg . ": " . number_format($total,0) . " microsecs per iteration ($ct)" . PHP_EOL;
+	$cpu_after = getrusage();
+	echo "$msg Took ".rutime($cpu_after, $cpu_before, "utime")." ms CPU usage\n";
+	
 }
 
 
 echo "Test file is " . $testfile2 . PHP_EOL;
+
+
 testavg(10, "Warm up");
-testavg(200, "Final");
+testavg(2000, "Final");
+
 show_versions();
-
-
 
 
