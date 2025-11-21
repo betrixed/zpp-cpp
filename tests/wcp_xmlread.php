@@ -3,6 +3,10 @@
 namespace Wcc;
 use Wcp\XmlRead;
 
+function rutime($ru, $rus, $index){
+ return ($ru["ru_$index.tv_sec"]*1000 + intval($ru["ru_$index.tv_usec"]/1000)) - ($rus["ru_$index.tv_sec"]*1000 + intval($rus["ru_$index.tv_usec"]/1000));
+}
+
 use Exception;
 //use Wcc\Db\IServer;
 
@@ -114,19 +118,24 @@ $start = microtime(true);
 function testavg(int $ct, string $msg) {
 	global $testfile2;
 
-	$start = microtime(true);
+	$cpu_before = getrusage();
 	for($i = 0; $i < $ct; $i++)
 	{
 		$rd = new XmlRead();
+		//$s = file_get_contents("tests/assets_full.xml");
+		//$result = $rd->parse($s);
 		$rd->parseFile($testfile2);
 	}//$emty = new EmptyTest();
-	$end = microtime(true);
+	$cpu_after = getrusage();
+	echo "$msg CPU usage Per iteration of $ct in \u{00B5}s" . PHP_EOL;
 
-	$total = (($end - $start)*1000_1000) / $ct;
+	$user = rutime($cpu_after, $cpu_before, "utime") * 1000.0 / $ct;
+	$system = rutime($cpu_after, $cpu_before, "stime")* 1000.0 / $ct;
+	$total = $user + $system;
 
-	//debug_zval_dump($data);
-
-	echo $msg . ": " . number_format($total,0) . " microsecs per iteration ($ct)" . PHP_EOL;
+	echo "   User   " . $user . PHP_EOL;
+	echo "   System " . $system . PHP_EOL;
+	echo "   Total  " . $total . PHP_EOL;
 }
 
 
