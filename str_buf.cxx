@@ -173,7 +173,7 @@ str_buf::str()
 {
 	if (buf.s)
 	{
-		return std::string result(data(), size());
+		return std::string(data(), size());
 	}
 	else {
 		return std::string();
