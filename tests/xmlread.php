@@ -123,13 +123,20 @@ function testavg(int $ct, string $msg) {
 	for($i = 0; $i < $ct; $i++)
 	{
 		$rd = new XmlRead();
-		$s = file_get_contents("tests/assets_full.xml");
-		$result = $rd->parse($s);
-		//$rd->parseFile("tests/assets_full.xml");
+		//$s = file_get_contents("tests/assets_full.xml");
+		//$result = $rd->parse($s);
+		$rd->parseFile("tests/assets_full.xml");
 	}//$emty = new EmptyTest();
 	$cpu_after = getrusage();
-	echo "$msg Took ".rutime($cpu_after, $cpu_before, "utime")." ms CPU usage\n";
-	
+	echo "$msg CPU usage Per iteration of $ct in \u{00B5}s" . PHP_EOL;
+
+	$user = rutime($cpu_after, $cpu_before, "utime") * 1000.0 / $ct;
+	$system = rutime($cpu_after, $cpu_before, "stime")* 1000.0 / $ct;
+	$total = $user + $system;
+
+	echo "   User   " . $user . PHP_EOL;
+	echo "   System " . $system . PHP_EOL;
+	echo "   Total  " . $total . PHP_EOL;
 }
 
 

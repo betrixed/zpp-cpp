@@ -5,6 +5,12 @@
 #include "dxmlread.h"
 #endif
 
+#ifndef PHP_LIBXML_H
+extern "C" {
+	#include <ext/libxml/php_libxml.h>
+}
+#endif
+
 #ifndef REFLECT_CACHE_H
 #include "reflect_cache.h"
 #endif
@@ -150,7 +156,11 @@ namespace wcc {
 	{
 		hold_ = path;
 		//showstr("Path", path);
-		xrptr_ = xmlNewTextReaderFilename(path.data());
+		
+		PHP_LIBXML_SANITIZE_GLOBALS(reader_for_file);
+		xrptr_ = xmlReaderForFile(path.data(), nullptr, 0);
+		PHP_LIBXML_RESTORE_GLOBALS(reader_for_file);
+
 		fileOpen_ = (xrptr_ != nullptr);
 		//printf("xrptr_ %lx\n", (size_t) xrptr_);
 
