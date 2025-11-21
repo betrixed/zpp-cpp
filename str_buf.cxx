@@ -164,17 +164,20 @@ str_buf::size() const
 }
 
 
-// inalizes zend_string buffer, 
-// return buffer copy as C-string
-// and releases/destroys the zend_string
+// return buffer copy so far, as C-string
+
 std::string 
 str_buf::str()
 {
-	zend_string* xs = zstr(); // reassign buffer back here.
-	std::string result(ZSTR_VAL(xs), ZSTR_LEN(xs));
-	zend_string_release(xs);
-	return result;
+	if (buf.s)
+	{
+		return std::string result(data(), size());
+	}
+	else {
+		return std::string();
+	}
 }
+
 
 
 
