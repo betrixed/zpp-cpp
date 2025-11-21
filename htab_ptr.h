@@ -103,7 +103,9 @@ namespace zpp {
         bool  has_key(zend_string* skey) const;
 
         bool  has_key(val_ptr skey) const;
-        
+        int   value_index(str_ptr fvalue) const;
+
+
         bool try_fetch(zend_string* key, val_ptr&  store) const;
         bool try_fetch(zend_long key, val_ptr& store) const;
 

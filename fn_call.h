@@ -412,8 +412,6 @@ namespace zpp {
 
     bool define(str_ptr name, val_ptr value);
 
-    bool define(str_ptr name, str_ptr value);
-
     val_rc pathinfo(str_ptr path, int flags = PathInfo::ALL);
 
     val_rc call_user_func_array(zval* arg1, zval* arg2);

@@ -177,6 +177,15 @@ val_rc::operator=(zend_long value)
 }
 
 const val_rc& 
+val_rc::operator=(const char* s)
+{
+    try_decref(&zv_);
+    zv_ = {0};
+    ZVAL_STRING(&zv_, s);
+    return *this;
+}
+
+const val_rc& 
 val_rc::operator=(double value)
 {
     try_decref(&zv_);
@@ -209,6 +218,12 @@ val_rc::val_rc(HashTable* ht)
 {
      zv_ = {0};
      val_ptr(&zv_).bind_array(ht);
+}
+
+val_rc::val_rc(const char* s)
+{
+    zv_ = {0};
+    ZVAL_STRING(&zv_, s);
 }
 
 #ifndef OMIT_BASE_D

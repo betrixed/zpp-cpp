@@ -58,7 +58,7 @@ base_init BI_str;
 	 void //virtual
 	 base_d::debug_info(htab_rw di)
 	 {
-	 	obj_ptr temp(this->vobj());
+	 	obj_ptr temp(self_);
 
 	 	htab_rc plist;
 

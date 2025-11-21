@@ -101,6 +101,7 @@ public:
 
     val_rc(const str_ptr& rc);
 
+    val_rc(const char* s);
 
     //! mutate in place to suggested type if necessary
     void     toLong();
@@ -139,6 +140,8 @@ public:
     const val_rc& operator=(HashTable* rc);
 
     const val_rc& operator=(zend_string* rc);
+
+    const val_rc& operator=(const char* rc);
 
     val_rc& operator=(val_rc&& rc);
 

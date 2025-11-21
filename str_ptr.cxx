@@ -529,7 +529,8 @@ str_ptr::duplicate() const
 	return result;
 }
 
-str_rc  operator+(str_ptr lhs, str_ptr rhs)
+str_rc  
+operator+(str_ptr lhs, str_ptr rhs)
 {
     str_buf buf;
 

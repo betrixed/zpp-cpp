@@ -13,6 +13,8 @@
 #include "php_extern.h"
 #endif
 
+#include <string>
+
 namespace zpp {
 
 	class str_rc;

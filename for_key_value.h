@@ -41,8 +41,8 @@ protected:
 	zval*			zptr_;
 	zval*			next_;
 public:
-	zval* 				value() const { return zptr_; }
-	zend_long       	index() const { return h_; }
+	zval* 				  value() const { return zptr_; }
+	zend_long       index() const { return h_; }
 	zend_string*		key() const { return key_; }
 
 	bool start(HashTable* ht);
