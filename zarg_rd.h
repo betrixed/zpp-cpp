@@ -26,13 +26,26 @@ namespace zpp {
  *  Throw zend exceptions on error.
  *  
  */
-class zarg_rd 
+
+
+class zval_slice {
+protected:
+	zval*	zptr0_;
+	size_t  nargs_;
+public:
+	size_t  size() const {
+		return nargs_;
+	}
+	zval*   ptr() const {
+		return zptr0_;
+	}
+};
+
+class zarg_rd : public zval_slice
 {
 protected:
 	str_buf*          	  errors_;
-	zval*				  zptr0_;
-	uint32_t              nargs_;
-	uint32_t              option_;
+	bool              	  maybe_;
 /*
 #if ZEND_DEBUG
 	zend_execute_data* 	  ze_;
