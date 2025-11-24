@@ -101,6 +101,8 @@ namespace wcc {
 		XmlWrap();
 		~XmlWrap();
 
+		static str_rc get_valid_file_path(str_ptr src);
+
 		bool fromFile(str_ptr path);
 		bool fromString(str_ptr xml);
 

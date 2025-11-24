@@ -8,6 +8,7 @@
 #ifndef PHP_LIBXML_H
 extern "C" {
 	#include <ext/libxml/php_libxml.h>
+	#include <zend_virtual_cwd.h>
 }
 #endif
 
@@ -72,6 +73,106 @@ namespace wcc {
 		*/
 	}
 
+	struct URIDefer {
+		xmlURI* uri_;
+
+		URIDefer()
+		{
+			uri_ = xmlCreateURI(); //API
+		}
+		~URIDefer()
+		{
+			xmlFreeURI(uri_);
+		}
+
+		xmlURI* operator->()
+		{
+			return uri_;
+		}
+
+		operator xmlURI* ()
+		{
+			return uri_;
+		}
+	};
+
+	
+	str_rc //static
+	XmlWrap::get_valid_file_path(str_ptr src) 
+	{
+		xmlChar *escsource; 
+
+		str_rc  resolved_path;
+		str_rc  result;
+
+
+		const char* source = src.data();
+
+		
+		bool isFileUri = false;
+
+		//uri = xmlCreateURI(); //API
+		URIDefer uri;
+
+		if (uri == NULL) {
+			return result; // libxml2 not present?
+		}
+		escsource = xmlURIEscapeStr((xmlChar *)source, (xmlChar *)":");
+
+		int test = xmlParseURIReference(uri, (const char *)escsource);
+	
+		if (test != 0) {
+			return result; // libxml2 not present?
+		}
+		xmlFree(escsource);
+
+
+
+		bool hasSchema = (uri->scheme != nullptr);
+
+		if (hasSchema) {
+			/* absolute file uris - libxml only supports localhost or empty host */
+			if (strncasecmp(source, "file:///",8) == 0) 
+			{
+				isFileUri = true;
+		#ifdef PHP_WIN32
+				source += 8;
+		#else
+				source += 7;
+		#endif
+			} 
+			else if (strncasecmp(source, "file://localhost/",17) == 0) 
+			{
+				isFileUri = true;
+		#ifdef PHP_WIN32
+				source += 17;
+		#else
+				source += 16;
+		#endif
+			}
+	}
+
+	result = source;
+
+	if ((!hasSchema || isFileUri)) {
+
+		val_rc rpath = realpath(result);
+
+		if (rpath.isString())
+		{
+			result = rpath;
+		}
+		/** else {
+			expand_filepath(result) {
+			result = resolved_path;
+		}
+		**/
+	}
+
+	return result;
+}
+
+/* }}} */
 	XmlWrap::~XmlWrap()
 	{
 		if (fileOpen_)
@@ -94,11 +195,13 @@ namespace wcc {
 
 			if (xrbuf_)
 			{
+				//zend_printf("Free input buffer, ");
 				xmlFreeParserInputBuffer(xrbuf_);
 				xrbuf_ = nullptr;
 			}
 			if (xrptr_)
 			{
+				//zend_printf("Free reader\n");
 				xmlFreeTextReader(xrptr_);
 				xrptr_ = nullptr;
 			}
@@ -154,11 +257,12 @@ namespace wcc {
 	
 	bool XmlWrap::fromFile(str_ptr path)
 	{
-		hold_ = path;
-		//showstr("Path", path);
+		hold_ = XmlWrap::get_valid_file_path(path);
+		//showstr("Path", hold_);
 		
+
 		PHP_LIBXML_SANITIZE_GLOBALS(reader_for_file);
-		xrptr_ = xmlReaderForFile(path.data(), nullptr, 0);
+		xrptr_ = xmlReaderForFile(hold_.data(), nullptr, 0);
 		PHP_LIBXML_RESTORE_GLOBALS(reader_for_file);
 
 		fileOpen_ = (xrptr_ != nullptr);

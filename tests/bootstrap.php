@@ -16,7 +16,7 @@ function get_version(string $extname)
     $result = phpversion($extname);
     if (empty($result))
     {
-        $result = "None";
+        $result = " -- ";
     }
     return $result;
 }
