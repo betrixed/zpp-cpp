@@ -295,6 +295,13 @@ namespace zpp {
     public:
         str_rc call(str_ptr name, int level=1);
     };
+
+    class fn_realpath : public fn_call_args<1>
+    {
+    public:
+        str_rc call(str_ptr path);
+    };
+    
     /** 
      *  zend_string passed to set_fname
      *  MUST be defined prior to the fci_args
@@ -333,6 +340,7 @@ namespace zpp {
         str_intern  s_mkdir;
         str_intern  s_php_sapi_name;
         str_intern  s_filemtime;
+        str_intern  s_realpath;
         
         void init() override;
         void init_req() override;
@@ -429,6 +437,8 @@ namespace zpp {
     val_rc readdir(val_ptr dh);
 
     void closedir(val_ptr dh);
+
+    str_rc realpath(str_ptr path);
 
     bool mkdir(str_ptr path, int permissions = 0755, bool recurse = false);
 

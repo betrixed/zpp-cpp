@@ -55,6 +55,8 @@ public:
     fn_readdir    readdir;
     fn_closedir   closedir;
     fn_mkdir      mkdir;
+    fn_realpath   realpath;
+
 
     void init(const fntable& ftab)
     {
@@ -80,6 +82,8 @@ public:
         readdir.set_fname(ftab.s_readdir);
         closedir.set_fname(ftab.s_closedir);
         mkdir.set_fname(ftab.s_mkdir);
+
+        realpath.set_fname(ftab.s_realpath);
         
         defined.set_fname(ftab.s_defined);
         define.set_fname(ftab.s_define);
@@ -89,6 +93,8 @@ public:
         call_user_func_array.set_fname(ftab.s_call_user_func_array);
         php_sapi_name.set_fname(ftab.s_php_sapi_name);
         filemtime.set_fname(ftab.s_filemtime);
+
+
     }
 
 
@@ -523,6 +529,13 @@ get_constant(str_ptr name)
     return TLFNs.get_constant.call(name);
 }
 
+str_rc 
+fn_realpath::call(str_ptr path)
+{
+    ZVAL_STR(argsptr(), path);
+    return call_fn();
+}
+
 bool 
 function_exists(str_ptr name)
 {
@@ -533,6 +546,12 @@ bool
 class_exists(str_ptr name)
 {
     return TLFNs.class_exists.call(name);
+}
+
+str_rc
+realpath(str_ptr path)
+{
+    return TLFNs.realpath.call(path);
 }
 
 str_rc 
@@ -671,6 +690,8 @@ fntable::init()
     s_define = "define";
     s_php_sapi_name = "php_sapi_name";
     s_filemtime = "filemtime";
+    s_realpath = "realpath";
+
 
 }
 

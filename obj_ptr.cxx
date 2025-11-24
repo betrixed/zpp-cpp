@@ -286,7 +286,7 @@ obj_ptr::property(str_ptr key, obj_ptr value)
 void 
 obj_ptr::property(str_ptr key, val_rc& value)
 {
-    zend_class_entry* scope = EG(fake_scope);
+    const zend_class_entry* scope = EG(fake_scope);
 
     if (!scope) {
         scope = zend_get_executed_scope();
@@ -306,7 +306,7 @@ void
 obj_ptr::property(str_ptr key, val_ptr value)
 {
     // zend_class_entry* scope = obj_->ce;
-    zend_class_entry* scope = EG(fake_scope);
+    const zend_class_entry* scope = EG(fake_scope);
 
     if (!scope) {
         scope = zend_get_executed_scope();
@@ -350,7 +350,7 @@ obj_ptr::property_get(str_ptr key, zval* ret)
     // I do not understand why or what scope is required, (?? private, public protected access?
     // or what would be most permissive.
  
-    zend_class_entry* scope = EG(fake_scope) ? EG(fake_scope) : zend_get_executed_scope();
+    const zend_class_entry* scope = EG(fake_scope) ? EG(fake_scope) : zend_get_executed_scope();
     
     /**
      *  phpinternals book php7, probably outdated.
@@ -367,7 +367,7 @@ obj_ptr::property_get(str_ptr key, zval* ret)
      *  Execution of direct & indirect indicates one may be same as the other!
      *  
      */ 
-    return zend_read_property_ex(scope, obj_, key, 1, ret);
+    return zend_read_property_ex( (zend_class_entry*) scope, obj_, key, 1, ret);
 }
 
 
@@ -383,7 +383,7 @@ obj_ptr::property(str_ptr key)
 
     //amazing stuff from PHP-CPP Value::get(const har*, size_t)
     
-    zend_class_entry* scope = EG(fake_scope) ? EG(fake_scope) : zend_get_executed_scope();
+    const zend_class_entry* scope = EG(fake_scope) ? EG(fake_scope) : zend_get_executed_scope();
     
     /**
      *  phpinternals book php7, probably outdated.
@@ -402,7 +402,7 @@ obj_ptr::property(str_ptr key)
      */ 
     //showstr("obj_ptr property get", key);
 
-    zval* direct = zend_read_property_ex(scope, obj_, key, 1, result);
+    zval* direct = zend_read_property_ex((zend_class_entry*) scope, obj_, key, 1, result);
 
     if (direct)
     {
