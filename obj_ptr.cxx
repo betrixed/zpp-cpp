@@ -291,7 +291,7 @@ obj_ptr::property(str_ptr key, val_rc& value)
     if (!scope) {
         scope = zend_get_executed_scope();
     }
-    zend_update_property_ex(scope, obj_, key, value);   
+    zend_update_property_ex((zend_class_entry*) scope, obj_, key, value);   
 }
 
 void obj_ptr::property(str_ptr key, str_ptr value)
@@ -311,7 +311,7 @@ obj_ptr::property(str_ptr key, val_ptr value)
     if (!scope) {
         scope = zend_get_executed_scope();
     }
-    zend_update_property_ex(scope, obj_, key, value);    
+    zend_update_property_ex((zend_class_entry*)scope, obj_, key, value);    
 }
 
 
