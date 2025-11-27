@@ -12,6 +12,11 @@ namespace wcd {
 
 	using namespace zpp;
 
+	typedef zpp::bireturn<str_rc> str_return;
+	typedef zpp::bireturn<int>    int_return;
+	typedef zpp::bireturn<bool>   bool_return;
+	
+
 	class sql_strtab : public state_init {
 	public:
 		str_intern  str_space;
@@ -137,8 +142,9 @@ namespace wcd {
 	};
 
 
-
+	/*
 	enum {
+		OP_ERROR = -1,
 	    OP_EQ = 0,
 	    OP_NEQ = 1,
 	    OP_GT = 2,
@@ -152,7 +158,7 @@ namespace wcd {
 	    OP_NOTNULL = 10,
 	    OP_NOP = 11
 	};
-
+	*/
 	
 	class SqlPartId : public base_d
 	{
@@ -207,6 +213,7 @@ namespace wcd {
 	{
 	public:
 		enum {
+			OP_ERROR = -1,
 		    OP_EQ = 0,
 		    OP_NEQ = 1,
 		    OP_GT = 2,
@@ -222,6 +229,7 @@ namespace wcd {
 		};
 		
 		enum {
+			B_ERROR = -1,
 		    B_NULL = 0,
 		    B_AND = 1,
 		    B_OR = 2
@@ -239,8 +247,8 @@ namespace wcd {
 		static  str_ptr  opStr(int op);
 		static  str_ptr  boolStr(int nextop);
 
-		static  int       toLogic(str_ptr s);
-		static  int       toOperator(str_ptr s);
+		static  int_return       toLogic(str_ptr s);
+		static  int_return       toOperator(str_ptr s);
 
 		JoinExpr() : SqlPartId(JE_PID) {}
 

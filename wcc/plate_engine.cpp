@@ -39,7 +39,6 @@ public:
 		extensions = "extensions";
 		stored_key = "stored";
 		load_html = "loadhtml";
-		label_str = "dolabel";
 		getpaths = "getpaths";
 		clear_key = "clear";
 		find_leaf = "findleaf";
@@ -58,7 +57,6 @@ PlateEngine::debug_info(htab_rw d)
 	d.set(PEI.extensions, extensions_);
 	d.set(PEI.stored_key, stored_);
 	d.set(PEI.load_html,  loadintf_);
-	d.set(PEI.label_str, doLabel_);
 
 }
 
@@ -72,17 +70,7 @@ obj_ptr PlateEngine::getLoadHtml()
 	 return loadintf_;
 }
 
-void PlateEngine::setLabel(bool showLabel)
-{
-	doLabel_ = showLabel;
-	//showobj("setLabel", this->zobj());
-}
 
-
-bool PlateEngine::getLabel()
-{
-	return doLabel_;
-}
 
 void PlateEngine::store(str_ptr name, obj_ptr plate)
 {
@@ -221,15 +209,6 @@ PlateEngine::getFunction(str_ptr name)
 	return result;
 }
 
-str_rc PlateEngine::fileLabel(str_ptr file)
-{
-	str_buf buf;
-
-	buf << "<!--" << file << " -->\n";
-
-	return buf.zstr();
-}
-
 str_rc 
 PlateEngine::render(str_ptr name, htab_ptr data)
 {
@@ -345,18 +324,6 @@ PlateEngine::shareData(htab_ptr data, val_ptr where)
 }
 
 }; //namespace @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
- 
-ZEND_METHOD(Wcc_PlateEngine, fileComment)
-{
-	zend_string* file;
-
-	ZEND_PARSE_PARAMETERS_START(1, 1)
-	Z_PARAM_STR(file)
-	ZEND_PARSE_PARAMETERS_END();
-
-	str_rc result = PlateEngine::fileLabel(file);
-	result.move_zv(return_value);
-}
 
 
 
@@ -429,16 +396,6 @@ ZEND_METHOD(Wcc_PlateEngine, getFinder)
 	ref.return_zv(return_value);
 }
 
-
-ZEND_METHOD(Wcc_PlateEngine, getLabel)
-{
-	ZEND_PARSE_PARAMETERS_START(0, 0)
-	ZEND_PARSE_PARAMETERS_END();
-
-	auto cobj = zval_toc<PlateEngine>(ZEND_THIS);
-	bool val = cobj->getLabel();
-	RETURN_BOOL(val);
-}
 
 
 ZEND_METHOD(Wcc_PlateEngine, getLoadHtml)
@@ -546,20 +503,6 @@ ZEND_METHOD(Wcc_PlateEngine, setExtensions)
 	auto cobj = zval_toc<PlateEngine>(ZEND_THIS);
 
 	cobj->setExtensions(ext);
-}
-
-
-ZEND_METHOD(Wcc_PlateEngine, setLabel)
-{
-	bool value = false;
-
-	ZEND_PARSE_PARAMETERS_START(1, 1)
-	Z_PARAM_BOOL(value)
-	ZEND_PARSE_PARAMETERS_END();
-	
-	auto cobj = zval_toc<PlateEngine>(ZEND_THIS);
-
-	cobj->setLabel(value);
 }
 
 

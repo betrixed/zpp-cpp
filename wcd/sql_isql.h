@@ -30,6 +30,7 @@ namespace wcd {
 
 	public:
 		enum {
+			J_ERROR = -1,
 			J_INNER = 0,
 			J_LEFT = 1,
 			J_RIGHT = 2,
@@ -175,7 +176,7 @@ namespace wcd {
 		void wipe();
 
 		/** add parameter or constant */
-		str_rc paramLiteral(val_ptr value);
+		str_return paramLiteral(val_ptr value);
 
 		void setReturns(htab_ptr rets)
 		{
@@ -219,7 +220,7 @@ namespace wcd {
 		str_rc where(Bindings &bind, htab_ptr wtab);
 		str_rc insert_col_params(Bindings& bind, htab_ptr rowbind);
 		str_rc orderBy(htab_ptr obind);
-		str_rc limit(ParamList* plist, htab_ptr ltab);
+		str_return limit(ParamList* plist, htab_ptr ltab);
 		str_rc fromJT(Bindings& bind, JoinTables* jt);
 		str_rc select_jt(Bindings& bind, JoinTables* jt);
 
@@ -306,7 +307,7 @@ namespace wcd {
 		void addarray(int key, htab_ptr value);
 		void addstr(int key, str_ptr value);
 
-		bool addJoinData(htab_ptr data);
+		bool_return addJoinData(htab_ptr data);
 
 		zval* get(int key);
 

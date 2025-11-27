@@ -28,8 +28,6 @@ class Plate; // forward
 
 		htab_rc              	functions_; //stored Callable
 
-		bool                    doLabel_;
-
 		obj_rc                loadintf_; // name of class
 
 	public:
@@ -47,8 +45,6 @@ class Plate; // forward
 		void setFinder(obj_ptr pathobj);
 		obj_ptr getFinder();
 		
-		void setLabel(bool value);
-		bool getLabel();
 		
 		// output buffering fn
 		void 	  setLoadHtml(obj_ptr obj);
@@ -78,8 +74,6 @@ class Plate; // forward
 		void clearPlates();
 		void clearPaths();
 		
-		static str_rc fileLabel(str_ptr file);
-
 		friend class Plate;
 
 		VIRTUAL_ZOBJPTR

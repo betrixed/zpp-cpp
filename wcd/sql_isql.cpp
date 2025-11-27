@@ -106,9 +106,11 @@ ParamList::useOwnValues()
 	val_params_ = params_;
 }
 
-str_rc 
+str_return
 ParamList::paramLiteral(val_ptr value)
 {
+	str_return result;
+
 	val_ptr temp;
 
 	if (value.isObject())
@@ -123,17 +125,21 @@ ParamList::paramLiteral(val_ptr value)
 			{
 			case SqlPartId::PARAM_PID:
 				temp = static_cast<Param*>(part)->getValue();
-				return this->addParam(temp);
+				result = this->addParam(temp);
 			case SqlPartId::LIT_PID:
 				temp = static_cast<Literal*>(part)->getValue();
-				return val_ptr(temp).to_zstr();
+				result = val_ptr(temp).to_zstr();
 			}
 		}
+
 	}
 	else {
-		return this->addParam(value);
+		result = this->addParam(value);
 	}
-	throw std::runtime_error("Unhandled paramLiteral argument");
+	if (!result.value_.size()) {
+		result.error() << "Unhandled paramLiteral argument";
+	}
+	return result;
 }
 
 str_rc 
@@ -283,7 +289,8 @@ JoinInfo::getJoinType(str_ptr s)
 	default:
 		break;
 	}
-	throw std::runtime_error("Join Type string not recognized");
+	return J_ERROR;
+	//throw std::runtime_error("Join Type string not recognized");
 
 }
 
@@ -713,7 +720,8 @@ SqlPartId* getPartObj(val_ptr ret)
 			return zobj_toc<SqlPartId>(test);
 		}
 	}
-	throw std::runtime_error("SqlPartId object expected");
+	return nullptr;
+	//throw std::runtime_error("SqlPartId object expected");
 }
 
 //* called from a JoinExpr
@@ -766,7 +774,7 @@ ISql::emit(val_ptr sp, Bindings* bind, str_ptr lalias, str_ptr ralias)
  		}
  		break;
  	default:
- 		throw std::runtime_error("Unmatched partid in emit");
+ 		return str_rc("Unmatched partid in emit");
  	}
  	
  	return buf.zstr();		
@@ -803,7 +811,7 @@ ISql::truncate(Bindings& bind)
 			return buf.zstr();
 		}
 	}
-	throw std::runtime_error("Truncate table not set");
+	return str_rc("Error: Truncate table not set");
 }
 
 str_rc
@@ -877,7 +885,7 @@ ISql::setSeqValue(int value, htab_ptr data)
 		buf << "select setval('" << seq_name << "'," << value << ")";
 		return buf.zstr();
 	}
-	throw std::runtime_error("Missing name for setSeqValue");
+	return str_rc("Missing name for setSeqValue");
 }
 
 str_rc
@@ -898,7 +906,8 @@ IColumns* getIColumns(val_ptr zv)
 		return icol;
 	}
 	else {
-		throw std::runtime_error("IColumns object expected");
+
+		//throw std::runtime_error("IColumns object expected");
 	}
 	return nullptr;
 }
@@ -1220,29 +1229,36 @@ ISql::select_jt(Bindings& bind, JoinTables* jt)
 
 
 
-str_rc 
+str_return 
 ISql::limit(ParamList* plist, htab_ptr ltab)
 {
 	val_ptr limit_val = ltab.get(SQSTR.limit);
 	val_ptr offset_val = ltab.get(SQSTR.offset);
 
 	str_buf buf;
-	str_rc temp;
+	str_return result;
+	bool       hasError = false;
 
 	if (!limit_val.isNull())
 	{
-		temp = plist->paramLiteral(limit_val);
-		buf << " LIMIT " << temp;
+		result = plist->paramLiteral(limit_val);
+		if (!result.has_errors()) {
+			buf << " LIMIT " << result;
+		}
+		else {
+			hasError = true;
+		}
 	}
-	if (!offset_val.isNull())
+	if (!hasError && !offset_val.isNull())
 	{
-		temp = plist->paramLiteral(offset_val);
-		buf << " OFFSET " << temp;
+		result = plist->paramLiteral(offset_val);
+		if (!result.has_errors()) {
+			buf << " OFFSET " << result;
+		}
 	}
-
-	str_rc result = buf.zstr();
-
-	//showstr("limit", result);
+	if (!result.has_errors()) {
+		result = buf.zstr();
+	}
 	return result;
 
 }
@@ -1309,12 +1325,13 @@ ISql::update(Bindings& bind)
 
 	JoinTables* joins = bind.getJoinTables();
 	htab_ptr   tables = joins->getTables();
+	obj_rc result = bind.getParamList();
 
 	htab_walk wk;
 
 	if (!wk.start(tables))
 	{
-		throw std::runtime_error("Update table not set");
+		return result;
 	}
 
 	auto current = wk.value();
@@ -1323,7 +1340,7 @@ ISql::update(Bindings& bind)
 	buf << "UPDATE " << this->quoteName(tcol->getName()) << " SET";
 
 	val_ptr upset = bind.get(SQL_UPDATE);
-	obj_rc result = bind.getParamList();
+	
 
 	ParamList* plist = zobj_toc<ParamList>(result);
 
@@ -1568,7 +1585,8 @@ ISql::where(Bindings &bind, htab_ptr wtab)
 			harray = where_tab[SQSTR.value];
 			if (!harray.isArray() || (harray.size() < 2))
 			{
-				throw std::runtime_error("Between data needs 2 values");
+				//throw std::runtime_error("Between data needs 2 values");
+				return str_rc("Error: Between data needs 2 values");
 			}
 			htab_ptr duo(harray.zarray());
 			buf << " BETWEEN " << params->addParam(duo[int(0)]) << " AND " << params->addParam(duo[int(1)]);

@@ -221,15 +221,18 @@ Bindings::addToArray(int key, val_ptr value)
 	
 }
 
-bool 
+bool_return
 Bindings::addJoinData(htab_ptr data)
 {
+	bool_return result;
+
+	result = false;
 	str_rc atype = data.get(SQSTR.typekey);
 	if (atype.isNull())
 	{
 		atype = SQSTR.basic;
 	}
-	// translated from  some older PHP script of a join.
+	// translated from older PHP scripts 
 	// TODO: is this still needed?
 	if (atype.vstr() == SQSTR.nested.vstr())
 	{
@@ -280,8 +283,9 @@ Bindings::addJoinData(htab_ptr data)
 				htab_ptr jah = jc.zarray();
 
 				if (!jah.size())
-				{
-					throw std::runtime_error("Nested join has no data");
+				{	
+					result.error() << "Nested join has no data";
+					break;
 				}
 
 				str_rc c1str = jah.get(SQSTR.condition1);
@@ -291,17 +295,28 @@ Bindings::addJoinData(htab_ptr data)
 				val_rc rhs = TableAttr::splitDot(c2str);
 
 				str_rc opstr = jah.get(SQSTR.operator_key);
-				int op = JoinExpr::toOperator(opstr);
+				int_return op = JoinExpr::toOperator(opstr);
+				if (op.has_errors())
+				{
+					result = op;
+					break;
+				}
 
 				str_rc bstr = jah.get(SQSTR.boolean);
-				int logic = JoinExpr::toLogic(bstr);	
-
+				int_return logic = JoinExpr::toLogic(bstr);	
+				if (logic.has_errors()) {
+					result = logic;
+					break;
+				}
 				ji->add(lhs, rhs, op, logic);			
 			}
-			return true;
+			if (!result.has_errors()) {
+				result = true;
+			}
+			
 		}
 	}
-	return false;
+	return result;
 }
 
 zval*  
@@ -815,14 +830,17 @@ ZEND_METHOD(Wcd_Sql_Bindings, add)
 /* public function addJoinData(array $data) : void {} */
 ZEND_METHOD(Wcd_Sql_Bindings, addJoinData)
 {
-	zval*     data;
+	zarg_rd args(execute_data);
+	zval*     data = args.need(1);
 
-	ZEND_PARSE_PARAMETERS_START(1,1)
-	Z_PARAM_ARRAY(data)
-	ZEND_PARSE_PARAMETERS_END();
+	if (!args.throw_errors())
+	{
+		Bindings* cobj = zval_toc<Bindings>(ZEND_THIS);
+		bool_return result = cobj->addJoinData(data);
 
-	Bindings* cobj = zval_toc<Bindings>(ZEND_THIS);
-	RETURN_BOOL(cobj->addJoinData(data));
+		RETURN_BOOL(result);
+		result.throw_errors();
+	}
 }
 
 /* public function aliasSelect(): bool {} */

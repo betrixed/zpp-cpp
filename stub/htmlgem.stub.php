@@ -116,8 +116,6 @@ class SearchList implements IfFindLeaf {
 };
 
 class PlateEngine {
-    public static function fileComment(string $file) : string;
-    
     public function shareData(array $data, string|array|null $where) : void {}
 
     public function clearPaths() : void {}
@@ -130,7 +128,6 @@ class PlateEngine {
     public function getFinder() : ?IfFindLeaf {}
     public function setFinder(IfFindLeaf $lfind) : void {}
 
-    public function getLabel() : bool {}
 
     public function setLoadHtml(IfLoadHtml $loader) : void {}
     public function getLoadHtml() : IfLoadHtml {}
@@ -150,7 +147,6 @@ class PlateEngine {
     public function render(string $name, array $data=[]) : string {}
 
     public function setExtensions(array $ext) : void {}
-    public function setLabel(bool $doLabel) : void {}
 
 
     public function shareWithAll(array $data) : void {}

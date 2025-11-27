@@ -327,118 +327,149 @@ JoinExpr::emit(int ix, Bindings* bind,
 	return sqlbuf.zstr();
 }
 
-int
+int_return
 JoinExpr::toLogic(str_ptr s)
 {
 	size_t opsize = s.size();
+	int_return result;
 
-	if (!opsize)
+	result = B_ERROR;
+
+	if (opsize)
 	{
-		return B_NULL;
+		const char* c = s.data();
+		int c1 = toupper(c[0]);
+		switch(c1)
+		{
+		case ' ':
+			result = B_NULL;
+			break;
+		case 'A':
+			result = B_AND;
+			break;
+		case 'O':
+			result = B_OR;
+			break;
+		default:
+			result = B_ERROR;
+			
+			break;
+		}
 	}
-	const char* c = s.data();
-	int c1 = toupper(c[0]);
-	switch(c1)
+	else {
+		result.error() << " empty string " << s;
+	}
+	if (result == B_ERROR)
 	{
-	case ' ':
-		return B_NULL;
-	case 'A':
-		return B_AND;
-	case 'O':
-		return B_OR;
-	default:
-		break;
+		result.error() << " - invalid toLogic arg: " << s;
 	}
-	throw std::runtime_error("Invalid SQL logic operator");
+	return result;
 }
 
-int
+int_return
 JoinExpr::toOperator(str_ptr s)
 {
 	size_t opsize = s.size();
 
+	int_return result;
+
 	if (!opsize)
 	{
-		return OP_EQ;
+		result.error() << "empty string";
 	}
-	const char* c = s.data();
+	else {
+		const char* c = s.data();
 
-	int c1 = toupper(c[0]);
-	int c2 = 0;
-	str_rc upw;
-	str_ptr ps(s);
+		int c1 = toupper(c[0]);
+		int c2 = 0;
+		str_rc upw;
+		str_ptr ps(s);
 
-	switch(c1)
+		result = OP_ERROR;
+
+		switch(c1)
+		{
+		case '=':
+			result = OP_EQ;
+			break;
+		case '<':
+			if (opsize==1)
+			{
+				result = OP_LT;
+				break;
+			}	
+			else if (opsize==2)
+			{
+				c2 = toupper(c[1]);
+				if (c2 == '>')
+				{
+					result = OP_NEQ;
+				}
+				else if (c2 == '=')
+				{
+					result = OP_LE;
+				}
+			}
+			break;
+		case '>':
+			if (opsize==1)
+			{
+				result = OP_GT;
+			}
+			else if (opsize==2)
+			{
+				c2 = toupper(c[1]);
+				if (c2 == '=')
+				{
+					result = OP_GE;
+				}
+			}
+			break;
+		case 'L':
+			upw = ps;
+			upw.uppercase();
+			if (upw.vstr() == SQSTR.op_like.vstr()) {
+				result = OP_LIKE;
+			}
+			break;
+		case 'A':
+			upw = ps;
+			upw.uppercase();
+			if (upw.vstr() == SQSTR.op_and.vstr()) {
+				result = OP_AND;
+			}
+			break;
+		case 'O':
+			upw = ps;
+			upw.uppercase();
+			if (upw.vstr() == SQSTR.op_or.vstr())
+			{
+				result =  OP_OR;
+			}
+			break;
+		case 'I':
+			upw = ps;
+			upw.uppercase();
+			if (upw.vstr() == SQSTR.is_null.vstr())
+			{
+				result =  OP_ISNULL;
+			}
+			if (upw.vstr() == SQSTR.is_not_null.vstr()) {
+				result =  OP_NOTNULL;		
+			}
+			break;
+		default:
+			result = OP_ERROR;
+			break;
+		}
+	}
+
+	if (result == OP_ERROR)
 	{
-	case '=':
-		return OP_EQ;
-	case '<':
-		if (opsize==1)
-		{
-			return OP_LT;
-		}	
-		if (opsize==2)
-		{
-			c2 = toupper(c[1]);
-			if (c2 == '>')
-			{
-				return OP_NEQ;
-			}
-			else if (c2 == '=')
-			{
-				return OP_LE;
-			}
-		}
-		//error
-		break;
-	case '>':
-		if (opsize==1)
-		{
-			return OP_GT;
-		}
-		if (opsize==2)
-		{
-			c2 = toupper(c[1]);
-			if (c2 == '=')
-			{
-				return OP_GE;
-			}
-		}
-		//error
-		break;
-	case 'L':
-		upw = ps;
-		upw.uppercase();
-		if (upw.vstr() == SQSTR.op_like.vstr())
-			return OP_LIKE;
-		//error
-		break;
-	case 'A':
-		upw = ps;
-		upw.uppercase();
-		if (upw.vstr() == SQSTR.op_and.vstr())
-			return OP_AND;
-		//error
-		break;
-	case 'O':
-		upw = ps;
-		upw.uppercase();
-		if (upw.vstr() == SQSTR.op_or.vstr())
-			return OP_OR;
-		//error
-		break;
-	case 'I':
-		upw = ps;
-		upw.uppercase();
-		if (upw.vstr() == SQSTR.is_null.vstr())
-			return OP_ISNULL;
-		if (upw.vstr() == SQSTR.is_not_null.vstr())
-			return OP_NOTNULL;		
-		//ERROR
-	default:
-		break;
+		result.error() << "Invalid toOperator arg: " << s;
 	}
-	throw std::runtime_error("Invalid SQL comparison operator");
+	return result;
+	
 }
 
 //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@

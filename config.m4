@@ -14,7 +14,8 @@ if test "$PHP_WCC" != "no"; then
   AC_DEFINE(COMPILE_DL_WCC, 1, [ Have wcc support ])
   
   FLAGS="-fPIC"
-  CXXFLAGS="$CXXFLAGS -Wall -O2 --std=c++23 -I./include -I/usr/include/libxml2 -lc++ -lstdc++"
+  CXXFLAGS="$CXXFLAGS -fno-exceptions -fno-rtti -Wall -O2 --std=c++23 -I./include -lc++ -lstdc++"
+
   PHP_REQUIRE_CXX()
   AC_LANG([C++])
   

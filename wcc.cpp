@@ -97,7 +97,7 @@ extern "C" {
 
 //WCC_SERVICES_CPP
 // miscellaneous, wccm
-#include "toml/toml_php.cpp"
+//#include "toml/toml_php.cpp"
 
 #ifndef DIRECT_LIBXML
 #include "wcc/xmlread.cpp"
@@ -370,8 +370,15 @@ PHP_MINFO_FUNCTION(wcc)
 extern "C" {
 #endif
 
+static const zend_module_dep wcc_deps[] = { /* {{{ */
+	ZEND_MOD_REQUIRED("intl")
+	ZEND_MOD_END
+};
+
 zend_module_entry wcc_module_entry = {
-	STANDARD_MODULE_HEADER,
+	STANDARD_MODULE_HEADER_EX,
+	nullptr,
+	wcc_deps,
 	"Wcc",					/* Extension name */
 	ext_functions,			
 	PHP_MINIT(wcc),		/* PHP_MINIT - Module initialization */
