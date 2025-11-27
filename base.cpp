@@ -32,6 +32,8 @@
 #include "fn_call.cpp"
 #include "preg.cpp"
 
+#include "bireturn.cpp"
+
 #include "zarg_rd.cpp"
 #else
 

@@ -196,10 +196,13 @@ htab_ptr::htab_ptr(val_ptr zptr)
 	{
 		return;
 	}
+	ht_ = nullptr;
+	/*
 	if (!ht_)
 	{
 		throw std::logic_error("Expected zval_ptr with HashTable");
 	}
+	*/
 }
 
 uint32_t 

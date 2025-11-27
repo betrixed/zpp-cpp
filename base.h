@@ -15,11 +15,11 @@
 
 // ZPP_BUILD_ALL tells base.cpp to be one compile unit
 #define ZPP_BUILD_ALL
-#define DEBUG_EXTRA
+//#define DEBUG_EXTRA
 
 #ifdef DEBUG_EXTRA
 //base.h Enable templates have trace output statements
-//#define BASE_DEBUG
+//#define BASE_DEBUG // this will trigger typeid C++ rtti
 #endif
 
 #include "str_ptr.h"
@@ -43,13 +43,15 @@
 #include "fn_call.h"
 #include "show_zpp.h"
 
-#include "zarg_rd.h"
-
 #include "str_buf.h"
 
 #include "datetime.h"
 
 #include "preg.h"
+
+#include "zarg_rd.h"
+
+#include "bireturn.h"
 
 
 #define BASE_ZOBJPTR
@@ -539,10 +541,11 @@ Link all instances of a class T, by optionally mixing in this template.
 
 		// establish self pointer
 		base_obj_mgr() : mgr_link() {
+			/*
 			 if (self_count_ > 0)
 	         {
 	            throw std::logic_error{ "Instance exists already!" };
-	         }
+	         } */
 	         self_count_++;
 	         mydef::self_ = this;
 		}
@@ -553,10 +556,11 @@ Link all instances of a class T, by optionally mixing in this template.
 
 		static zend_class_entry* classEntry(zend_class_entry* zce)
 		{
-			if (zce == nullptr)
+			/* if (zce == nullptr)
 			{
 				throw std::logic_error("zend_class_entry cannot be 0\n");
 			}
+			*/
 			mydef::class_entry_ = zce;
 
 			mydef::self_->init_class_fn();

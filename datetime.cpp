@@ -105,6 +105,10 @@ datetime_obj::date(str_ptr fmt, zval* value)
 	return result;
 }
 
+static void lodge_error(const char* msg)
+{
+	zend_throw_error(zend_ce_error,"datetime_obj error %s", msg);
+}
 
 datetime_obj::datetime_obj(str_ptr zs)
 {
@@ -118,10 +122,11 @@ datetime_obj::datetime_obj(str_ptr zs)
 
 	if (!php_date_initialize(dobj, vs.data(), vs.size(), nullptr, nullptr, 0) )
 	{
-		throw std::logic_error("Failed to init DateTime object");
+		lodge_error("Failed to init");
 	}
 
 }
+
 
 datetime_obj::datetime_obj(const std::string_view& c)
 {
@@ -134,7 +139,7 @@ datetime_obj::datetime_obj(const std::string_view& c)
 
 	if (! php_date_initialize(dobj, c.data(), c.size(), nullptr, nullptr, 0) )
 	{
-		throw std::logic_error("Failed to init DateTime object");
+		lodge_error("Failed to init");
 	}
 }
 
@@ -147,8 +152,13 @@ datetime_obj::datetime_obj()
 	auto dobj = php_date_obj_from_obj(obj_);
 	if (! php_date_initialize(dobj, nullptr, 0, nullptr, nullptr, 0) )
 	{
+		lodge_error("Failed to init");
+	}
+	/*if (! php_date_initialize(dobj, nullptr, 0, nullptr, nullptr, 0) )
+	{
 		throw std::logic_error("Failed to init DateTime object");
 	}
+	*/
 }
 
 void 
