@@ -7,17 +7,17 @@
 
 namespace zpp {
 
-struct serror {
+struct error_return {
 	str_buf*  errors_;
 
-	serror() : errors_(nullptr) {}
+	error_return() : errors_(nullptr) {}
 
-	serror(serror&& m) {
+	error_return(error_return&& m) {
 		errors_ = m.errors_;
 		m.errors_ = nullptr;
 	}
 
-	const serror& operator=(serror&& m)
+	const error_return& operator=(error_return&& m)
 	{
 		errors_ = m.errors_;
 		m.errors_ = nullptr;
@@ -34,7 +34,7 @@ struct serror {
 
 	void     del_errors();
 
-	~serror() {
+	~error_return() {
 		del_errors();
 	}
 
@@ -42,15 +42,15 @@ struct serror {
 
 
 template <typename T>
-struct bireturn  : public serror 
+struct bireturn  : public error_return 
 {
 	T   	  value_;
 
-	bireturn() : serror()
+	bireturn() : error_return()
 	{
 	}
 
-	bireturn(bireturn&& m) : serror()
+	bireturn(bireturn&& m) : error_return()
 	{
 		errors_ = m.errors_;
 		m.errors_ = nullptr;
@@ -58,7 +58,7 @@ struct bireturn  : public serror
 		m.value_ = T();
 	}
 
-	bireturn(T&& v) : serror()
+	bireturn(T&& v) : error_return()
 	{	
 		value_ = v;
 	}
@@ -78,7 +78,7 @@ struct bireturn  : public serror
 		return (value_ == c);
 	}
 
-	const bireturn& operator=(serror&& e)
+	const bireturn& operator=(error_return&& e)
 	{
 		errors_ = e.errors_;
 		e.errors_ = nullptr;
@@ -93,8 +93,6 @@ struct bireturn  : public serror
 		m.value_ = T();
 		return *this;
 	}
-
-	
 };
 
 }//namespace

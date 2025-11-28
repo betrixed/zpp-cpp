@@ -10,7 +10,7 @@ namespace zpp {
 
 
 void     
-serror::del_errors()
+error_return::del_errors()
 	{
 		if (errors_)
 		{
@@ -20,7 +20,7 @@ serror::del_errors()
 	}
 
 str_buf& 
-serror::error()
+error_return::error()
 {
 	if (!errors_)
 	{
@@ -30,7 +30,7 @@ serror::error()
 }
 
 str_rc 
-serror::get_errors()
+error_return::get_errors()
 {
 	str_rc result;
 
@@ -44,7 +44,7 @@ serror::get_errors()
 }
 
 bool 
-serror::throw_errors(const char* fncstr)
+error_return::throw_errors(const char* fncstr)
 {
 	if (errors_)
 	{

@@ -206,6 +206,8 @@ public:
         return (ref_type() == IS_TRUE);
     }
 
+    bool zbool() const;
+    
     bool isFalse() const 
     {
         return (ref_type() == IS_FALSE);

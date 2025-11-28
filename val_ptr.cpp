@@ -169,6 +169,7 @@ val_ptr::empty() const
 
 	switch (rtype)
 	{
+	case IS_NULL:
 	case IS_FALSE:
 		return true;
 	case IS_LONG:
@@ -369,7 +370,7 @@ val_ptr::zbool() const {
 		case IS_TRUE: return true;
 		case IS_FALSE: return false;
 		default: {
-			// become ridiculous
+			// so ridiculous
 			val_rc temp(zv);
 			convert_to_boolean(temp);
 			return val_ptr(temp).zbool();

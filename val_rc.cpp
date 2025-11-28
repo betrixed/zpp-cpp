@@ -159,6 +159,12 @@ val_rc::addref()
     
 }
 
+bool 
+val_rc::zbool() const
+{
+    return !(val_ptr(&zv_).empty());
+}
+
 void // protected
 val_rc::lose()
 {
