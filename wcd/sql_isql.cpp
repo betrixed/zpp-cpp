@@ -267,30 +267,44 @@ JoinInfo::joinTypeStr() const
 	return SQSTR.joinstr[joinType_];
 }
 
-int //static
+int_return //static
 JoinInfo::getJoinType(str_ptr s)
 {
+	int_return result;
+
+
 	if (s.size() == 0)
 	{
-		return 0;
+		result = J_ERROR;
+		result.error() << "Empty join string";
 	}
-	const char* c = s.data();
-	int c1 = toupper(c[0]);
-	switch(c1)
+	else {
+		const char* c = s.data();
+		int c1 = toupper(c[0]);
+		switch(c1)
+		{
+		case 'I':
+			result = J_INNER;
+			break;
+		case 'L':
+			result = J_LEFT;
+			break;
+		case 'R':
+			result = J_RIGHT;
+			break;
+		case 'F':
+			result = J_FULL;
+			break;
+		default:
+			result = J_ERROR;
+			break;
+		}
+	}
+	if (result == J_ERROR)
 	{
-	case 'I':
-		return J_INNER;
-	case 'L':
-		return J_LEFT;
-	case 'R':
-		return J_RIGHT;
-	case 'F':
-		return J_FULL;
-	default:
-		break;
+		result.error() << "Unknown Join specifier: " << s;
 	}
-	return J_ERROR;
-	//throw std::runtime_error("Join Type string not recognized");
+	return result;
 
 }
 
@@ -659,14 +673,20 @@ ISql::orderBy(htab_ptr obind)
 	return buf.zstr();
 }
 
-obj_rc 
+obj_return 
 ISql::deleteSql(Bindings& bind)
 {
 	str_buf buf;
+	obj_return result;
 
 	buf << "DELETE FROM";
 
 	htab_ptr tables = this->getTables(bind);
+	obj_rc paramList = bind.getParamList();
+
+	result = paramList;
+
+	ParamList* plist = zobj_toc<ParamList> (paramList);
 
 	htab_walk pos;
 	// first table
@@ -686,9 +706,13 @@ ISql::deleteSql(Bindings& bind)
 
 		if (wbind.size())
 		{
-			str_rc whstr(this->where(bind, wbind));
-			//showstr("WHERE ", whstr);
-			buf << " WHERE" << whstr;
+			str_return temp = this->where(bind, wbind);
+			if (temp.has_errors())
+			{
+				result = std::move(temp);
+				return result;
+			}
+			buf << " WHERE" << temp.value_;
 		}
 	}
 
@@ -699,8 +723,8 @@ ISql::deleteSql(Bindings& bind)
 		buf << " ORDER BY" << this->orderBy(order);
 	}
 
-	obj_rc paramList = bind.getParamList();
-	ParamList* plist = zobj_toc<ParamList> (paramList);
+	
+
 	//htab_ptr params = plist->getParams();
 
 	str_rc sql = buf.zstr();
@@ -710,74 +734,101 @@ ISql::deleteSql(Bindings& bind)
 	return paramList;
 }
 
-SqlPartId* getPartObj(val_ptr ret)
+SqlPart_return   //static 
+getPartObj(val_ptr ret)
 {
+	SqlPart_return result;
+	bool missed = true;
+
 	if (ret.isObject())
 	{
 		obj_ptr test(ret.zobject());
 		if (test.instanceof(zclass_sql_ifipart))
 		{
-			return zobj_toc<SqlPartId>(test);
+			result = zobj_toc<SqlPartId>(test);
+			missed = false;
 		}
 	}
-	return nullptr;
-	//throw std::runtime_error("SqlPartId object expected");
+	if (missed)
+	{
+		result = nullptr;
+		result.error() << "SqlPartId object expected";
+	}
+	return result;
 }
 
 //* called from a JoinExpr
-str_rc
+str_return
 ISql::emit(val_ptr sp, Bindings* bind, str_ptr lalias, str_ptr ralias)
 {
- 	SqlPartId* part = getPartObj(sp);
- 	int partid = part->getPartId();
-
- 	str_buf buf;
- 	str_rc str;
-
- 	switch(partid)
+	str_return result;
+ 	SqlPart_return partret = getPartObj(sp);
+ 	if (partret.has_errors())
  	{
- 	case SqlPartId::TA_PID:
- 		{
- 			TableAttr* ta = static_cast<TableAttr*>(part);
- 			str_ptr ta_alias = ta->getTable();
- 			str_ptr ta_name = ta->getAttr();
-
- 			buf << ta_alias << '.' << this->quoteName(ta_name);
- 		}
- 		break;
- 	case SqlPartId::LIT_PID:
- 		{
- 			Literal* lit = static_cast<Literal*>(part);
- 			buf << lit->toString();
- 		}
- 		break;
- 	case SqlPartId::EXPR_PID:
- 		{
- 			Expr* expr = static_cast<Expr*>(part);
- 			str = expr->toString();
- 			buf << str;
- 		}
- 		break;
- 	case SqlPartId::JE_PID:
- 		{
- 			JoinExpr* je = static_cast<JoinExpr*>(part);
- 			buf << " (" << je->emit(0, bind, lalias, ralias) << " )";
- 		}
- 		break;
- 	case SqlPartId::PARAM_PID:
- 		{
- 			Param* p = static_cast<Param*>(part);
- 			val_ptr pvalue = p->getValue();
-			obj_rc paramList = bind->getParamList();
-			ParamList* list = zobj_toc<ParamList> (paramList);
- 			buf << list->addParam(pvalue);
- 		}
- 		break;
- 	default:
- 		return str_rc("Unmatched partid in emit");
+ 		result = std::move(partret);
  	}
- 	
- 	return buf.zstr();		
+ 	else {
+
+	 	SqlPartId* part = partret;
+	 	int partid = part->getPartId();
+		str_buf buf;
+ 		str_rc str;
+ 		str_return temp;
+
+	 	switch(partid)
+	 	{
+	 	case SqlPartId::TA_PID:
+	 		{
+	 			TableAttr* ta = static_cast<TableAttr*>(part);
+	 			str_ptr ta_alias = ta->getTable();
+	 			str_ptr ta_name = ta->getAttr();
+
+	 			buf << ta_alias << '.' << this->quoteName(ta_name);
+	 		}
+	 		break;
+	 	case SqlPartId::LIT_PID:
+	 		{
+	 			Literal* lit = static_cast<Literal*>(part);
+	 			buf << lit->toString();
+	 		}
+	 		break;
+	 	case SqlPartId::EXPR_PID:
+	 		{
+	 			Expr* expr = static_cast<Expr*>(part);
+	 			str = expr->toString();
+	 			buf << str;
+	 		}
+	 		break;
+	 	case SqlPartId::JE_PID:
+	 		{
+	 			JoinExpr* je = static_cast<JoinExpr*>(part);
+	 			temp = je->emit(0, bind, lalias, ralias);
+	 			if (temp.has_errors())
+	 			{
+	 				result = std::move(temp);
+	 				goto RET_ALL;
+	 			}
+	 			buf << " (" << temp << " )";
+	 		}
+	 		break;
+	 	case SqlPartId::PARAM_PID:
+	 		{
+	 			Param* p = static_cast<Param*>(part);
+	 			val_ptr pvalue = p->getValue();
+				obj_rc paramList = bind->getParamList();
+				ParamList* list = zobj_toc<ParamList> (paramList);
+	 			buf << list->addParam(pvalue);
+	 		}
+	 		break;
+	 	default:
+	 		result.error() << "Unmatched partid in emit";
+	 		goto RET_ALL;
+	 		break;
+	 	}
+	 	result = buf.zstr();
+ 	}
+ RET_ALL:
+ 	return result;
 }
 
 str_rc 
@@ -793,14 +844,17 @@ ISql::getTables(Bindings& bind)
 	return jt->getTables();
 }
 
-str_rc 
+str_return 
 ISql::truncate(Bindings& bind)
 {
 	str_buf buf;
+	str_return result;
 
 	buf << this->getTruncateSql();
 
 	JoinTables* jt = bind.getJoinTables();
+
+	bool missed = true;
 
 	if (jt) {
 		obj_rc pobj = jt->getPrime();
@@ -808,10 +862,16 @@ ISql::truncate(Bindings& bind)
 		{
 			IColumns* icol = zobj_toc<IColumns>(pobj);
 			buf << ' ' << this->quoteName(icol->getName());
-			return buf.zstr();
+			result = buf.zstr();
+			missed = false;
 		}
 	}
-	return str_rc("Error: Truncate table not set");
+
+	if (missed)
+	{
+		result.error() << "Error: Truncate table not set";
+	}
+	return result;
 }
 
 str_rc
@@ -873,9 +933,11 @@ ISql::insert_col_params(Bindings& bind, htab_ptr rowbind)
 	return ctext.zstr();
 }
 
-str_rc
+str_return
 ISql::setSeqValue(int value, htab_ptr data)
 {
+	str_return result;
+
 	str_rc seq_name = data.get(SQSTR.seq_key);
 
 	if (!seq_name.isNull())
@@ -883,9 +945,12 @@ ISql::setSeqValue(int value, htab_ptr data)
 		str_buf buf;
 
 		buf << "select setval('" << seq_name << "'," << value << ")";
-		return buf.zstr();
+		result = buf.zstr();
 	}
-	return str_rc("Missing name for setSeqValue");
+	else {
+		result.error() << "Missing name for setSeqValue";
+	}
+	return result;
 }
 
 str_rc
@@ -898,18 +963,18 @@ ISql::seqLastValue(str_ptr seq)
 	return buf.zstr();
 }
 
-IColumns* getIColumns(val_ptr zv)
+static SqlPart_return getIColumns(val_ptr zv)
 {
+	SqlPart_return result;
+
 	if (zv.isObject())
 	{
-		IColumns* icol = zobj_toc<IColumns>(zv.zobject());
-		return icol;
+		result = zobj_toc<IColumns>(zv.zobject());
 	}
 	else {
-
-		//throw std::runtime_error("IColumns object expected");
+		result.error() << "IColumns object expected";
 	}
-	return nullptr;
+	return result;
 }
 
 void extract_params(htab_ptr rowbind, htab_ptr plist, htab_rw params);
@@ -931,10 +996,10 @@ void extract_params(htab_ptr rowbind, htab_ptr plist, htab_rw params)
 	return;
 }
 
-obj_rc 
+obj_return 
 ISql::insert(Bindings& bind)
 {
-	obj_rc result;
+	obj_return result;
 
 	str_buf buf;
 
@@ -943,27 +1008,31 @@ ISql::insert(Bindings& bind)
 	htab_ptr jtables = this->getTables(bind);
 
 	if (!jtables.size()) {
-		zend_throw_error(zend_ce_error, "No tables set");
+		result.error() << "No insert table set";
 		return result;
 	}
 
 	htab_walk pos;
 	pos.start(jtables);
 	
-	IColumns* icol = getIColumns(pos.value());
+	auto icolpart = getIColumns(pos.value());
+
+	if (icolpart.has_errors())
+	{
+		result = std::move(icolpart);
+		return result;
+	}
+	IColumns* icol = (IColumns*) icolpart.value_;
 
 	buf << ' ' << this->quoteName(icol->getName());
 
 	htab_rc sql_insert;
-	// C++ pass by reference, return if set
+
 	if (!bind.getArray(ISql::SQL_INSERT, sql_insert))
 	{
-		zend_throw_error(zend_ce_error, "Insert table not set");
-		result = buf.zstr();
+		result.error() << "Insert table not set";
 		return result;
 	}
-	//zend_printf("insert: %s ", buf.data());
-	//showdata("insert bind", sql_insert);
 
 	htab_walk  insert_wk;
 	htab_ptr  rowbind;
@@ -980,16 +1049,13 @@ ISql::insert(Bindings& bind)
 		{
 			pcount += rsize;
 			buf << this->insert_col_params(bind, rowbind);
-			//zend_printf("insert 2: %s\n ", buf.data());
 		}
 	}
 	if (pcount == 0)
     {
-    	//zend_printf("\nValues Default\n");
     	obj_rc self(this->vobj());
     	val_rc dtext = self.call(SQSTR.valuesdefault);
 		buf << ' ' << val_ptr(dtext).zstr() << ' ';
-		//zend_printf("insert 3: %s\n ", buf.data());
     }
 	htab_rc rettab;
 	val_ptr  valset;
@@ -1016,8 +1082,7 @@ ISql::insert(Bindings& bind)
 	}
 	
 	obj_rc   pobj = bind.getParamList();
-
-	//showobj("pobj", pobj);
+	result = pobj;
 
 	ParamList* plist = zobj_toc<ParamList>(pobj);
 
@@ -1029,7 +1094,6 @@ ISql::insert(Bindings& bind)
 	if (params.size())
 	{
 		extract_params(rowbind, params, ret_params);
-		//ret_params.show_data("ret_params");
 
 		if (sql_insert.size() > 1)
 		{
@@ -1053,22 +1117,19 @@ ISql::insert(Bindings& bind)
 
 	}
 	str_rc sql = buf.zstr();
-	//showstr("sql", sql);
 
 	plist->setSql(sql);
 
 	if (ret_params.size())
 	{
-		//showarray("ret_params_mgr", ret_params_mgr);
 		plist->setValues(ret_params_mgr);
 	}
 	if (rettab.size())
 	{
-		//showarray("rettab", rettab);
 		plist->setReturns(rettab);
 	}
-	//showobj("return pobj", pobj);
-	return pobj;
+
+	return result;
 }
 
 str_rc 
@@ -1263,13 +1324,15 @@ ISql::limit(ParamList* plist, htab_ptr ltab)
 
 }
 
-obj_rc
+obj_return
 ISql::select(Bindings& bind)
 {
+	obj_return result;
+	str_return temp;
+
 	JoinTables* from = bind.getJoinTables();
 
 	str_buf buf;
-	str_rc temp;
 
 	str_rc what = this->select_jt(bind, from);
 
@@ -1285,6 +1348,7 @@ ISql::select(Bindings& bind)
 	*/
 
 	obj_rc   pobj = bind.getParamList();
+	result = pobj;
 
 	ParamList* plist = zobj_toc<ParamList>(pobj);
 
@@ -1292,6 +1356,11 @@ ISql::select(Bindings& bind)
 	if (where.isArray())
 	{
 		temp = this->where(bind, where.zarray());
+		if (temp.has_errors())
+		{
+			result = std::move(temp);
+			return result;
+		}
 		buf << " WHERE" << temp;
 	}
 
@@ -1306,7 +1375,12 @@ ISql::select(Bindings& bind)
 
 	if (limit.isArray())
 	{
-		str_rc temp = this->limit(plist, limit.zarray());
+		str_return temp = this->limit(plist, limit.zarray());
+		if (temp.has_errors())
+		{
+			result = std::move(temp);
+			return result;
+		}
 		buf << temp;
 	}
 
@@ -1315,22 +1389,26 @@ ISql::select(Bindings& bind)
 	plist->setSql(sql);
 	//showstr("sql", sql);
 	plist->useOwnValues();
-	return pobj;
+	return result;
 }
 
-obj_rc
+obj_return
 ISql::update(Bindings& bind)
 {
 	str_buf buf;
+	obj_return result;
 
 	JoinTables* joins = bind.getJoinTables();
 	htab_ptr   tables = joins->getTables();
-	obj_rc result = bind.getParamList();
+	result = bind.getParamList();
+
+	obj_rc pobj = result;
 
 	htab_walk wk;
 
 	if (!wk.start(tables))
-	{
+	{	
+		result.error() << "No update table";
 		return result;
 	}
 
@@ -1342,7 +1420,7 @@ ISql::update(Bindings& bind)
 	val_ptr upset = bind.get(SQL_UPDATE);
 	
 
-	ParamList* plist = zobj_toc<ParamList>(result);
+	ParamList* plist = zobj_toc<ParamList>(pobj);
 
 	if (upset.isArray())
 	{
@@ -1446,9 +1524,12 @@ ISql::entityClass(str_ptr s)
 	return ISql::tableClass(s);
 }
 
-str_rc
+str_return
 ISql::where(Bindings &bind, htab_ptr wtab)
 {
+	str_return result;
+
+
 	str_buf buf;
 
 	// TODO: jtables set wether needed or not!
@@ -1585,8 +1666,8 @@ ISql::where(Bindings &bind, htab_ptr wtab)
 			harray = where_tab[SQSTR.value];
 			if (!harray.isArray() || (harray.size() < 2))
 			{
-				//throw std::runtime_error("Between data needs 2 values");
-				return str_rc("Error: Between data needs 2 values");
+				result.error() << "SQL BETWEEN: requires needs 2 values";
+				return result;
 			}
 			htab_ptr duo(harray.zarray());
 			buf << " BETWEEN " << params->addParam(duo[int(0)]) << " AND " << params->addParam(duo[int(1)]);
@@ -1604,7 +1685,8 @@ ISql::where(Bindings &bind, htab_ptr wtab)
 
 			if (!value.isArray())
 			{
-				std::runtime_error("IN needs values array");
+				result.error() << "IN needs values array";
+				return result;
 			}
 			buf << " ("  << params->addParamList(value) << ')';
 		}
@@ -1617,7 +1699,8 @@ ISql::where(Bindings &bind, htab_ptr wtab)
 			partid = sqlpart->getPartId();
 			if (partid != SqlPartId::EXPR_PID)
 			{
-				std::runtime_error("'raw' needs Expr object");
+				result.error() << "'raw' needs Expr object";
+				return result;
 			}
 			Expr* exp = static_cast<Expr*>(sqlpart);
 			buf << exp->toString();
@@ -1632,10 +1715,11 @@ ISql::where(Bindings &bind, htab_ptr wtab)
 			}
 		}
 	}
-	return buf.zstr();
+	result = buf.zstr();
+	return result;
 }
 
-//@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+//                     @@@@@@@@@@@@@@@@@@@@@@@@
 
 
 
@@ -1721,7 +1805,10 @@ ZEND_METHOD(Wcd_Sql_JoinInfo, toJoinType)
 	Z_PARAM_STR(join)
 	ZEND_PARSE_PARAMETERS_END();
 
-	RETURN_LONG(JoinInfo::getJoinType(join));
+	int_return result = JoinInfo::getJoinType(join);
+
+	result.throw_errors();
+	RETURN_LONG(result);
 
 }
 
@@ -1942,8 +2029,9 @@ ZEND_METHOD(Wcd_Sql_ISql, deleteSql)
 	ISql* cobj = zval_toc<ISql>(ZEND_THIS);
 	Bindings& refbind = *zval_toc<Bindings>(bind);
 
-	obj_rc plist = cobj->deleteSql(refbind);
-	plist.move_zv(return_value);
+	obj_return plist = cobj->deleteSql(refbind);
+	plist.throw_errors();
+	plist.value_.move_zv(return_value);
 }
 
 /* public function emit(
@@ -1969,8 +2057,10 @@ ZEND_METHOD(Wcd_Sql_ISql, emit)
 	ISql* cobj = zval_toc<ISql>(ZEND_THIS);
 	Bindings* pbind = zval_toc<Bindings>(bind);
 
-	str_rc result = cobj->emit(part, pbind, lalias, ralias);
-	result.move_zv(return_value);
+	str_return result = cobj->emit(part, pbind, lalias, ralias);
+
+	result.throw_errors();
+	result.value_.move_zv(return_value);
 
 }
 
@@ -2022,8 +2112,10 @@ ZEND_METHOD(Wcd_Sql_ISql, insert)
 	ISql* cobj = zval_toc<ISql>(ZEND_THIS);
 	Bindings* refbind = zval_toc<Bindings>(bind);
 
-	obj_rc plist = cobj->insert(*refbind);
-	plist.move_zv(return_value);
+	obj_return plist = cobj->insert(*refbind);
+	plist.throw_errors();
+
+	plist.value_.move_zv(return_value);
 }
 
 /* public function quoteName(string $name): string {} */
@@ -2051,8 +2143,9 @@ ZEND_METHOD(Wcd_Sql_ISql, select)
 	ISql* cobj = zval_toc<ISql>(ZEND_THIS);
 	Bindings& refbind = *zval_toc<Bindings>(bind);
 
-	obj_rc plist = cobj->select(refbind);
-	plist.move_zv(return_value);
+	obj_return plist = cobj->select(refbind);
+	plist.throw_errors();
+	plist.value_.move_zv(return_value);
 }
 
 /* public function seqLastValue(string $seq_name): string {} */
@@ -2081,8 +2174,9 @@ ZEND_METHOD(Wcd_Sql_ISql, setSeqValue)
 
 	ISql* cobj = zval_toc<ISql>(ZEND_THIS);
 
-	str_rc sql = cobj->setSeqValue(value, data);
-	sql.move_zv(return_value);
+	str_return sqlret = cobj->setSeqValue(value, data);
+	sqlret.throw_errors();
+	sqlret.value_.move_zv(return_value);
 }
 
 /* public function truncate(Bindings $bindings) : string {} */
@@ -2096,8 +2190,11 @@ ZEND_METHOD(Wcd_Sql_ISql, truncate)
 	ISql* cobj = zval_toc<ISql>(ZEND_THIS);
 	Bindings& refbind = *zval_toc<Bindings>(bind);
 
-	str_rc sql = cobj->truncate(refbind);
-	sql.move_zv(return_value);
+	str_return sqlret = cobj->truncate(refbind);
+	sqlret.throw_errors();
+	str_rc result = sqlret;
+
+	result.move_zv(return_value);
 }
 
 /*public function update(Bindings $bind) : ParamList {}*/
@@ -2111,8 +2208,9 @@ ZEND_METHOD(Wcd_Sql_ISql, update)
 	ISql* cobj = zval_toc<ISql>(ZEND_THIS);
 	Bindings& refbind = *zval_toc<Bindings>(bind);
 
-	obj_rc plist = cobj->update(refbind);
-	plist.move_zv(return_value);
+	obj_return pobjret = cobj->update(refbind);
+	pobjret.throw_errors();
+	pobjret.value_.move_zv(return_value);
 }
 
 /* public function valuesDefault(): string {} */

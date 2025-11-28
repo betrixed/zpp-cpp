@@ -5,6 +5,10 @@
 #include "zpp/base.h"
 #endif
 
+#ifndef SQL_PART_H
+#include "sql_ipart.h"
+#endif
+
 namespace wcd {
 
 using namespace zpp;
@@ -116,7 +120,7 @@ public:
 
 	bool saveRow(obj_ptr irow, bool reload = false);
 
-	bool deleteRow(obj_ptr irow);
+	bool_return deleteRow(obj_ptr irow);
 
 	obj_rc readRow(obj_ptr irow);
 

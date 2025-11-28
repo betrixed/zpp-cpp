@@ -7,10 +7,21 @@
 #include "zpp/base.h"
 #endif
 
+#ifndef BIRETURN_H
+#include  "zpp/bireturn.h"
+#endif
+
+#ifndef SQL_PART_H
+#include "sql_ipart.h"
+#endif
+
+
 
 namespace wcd {
 
 	using namespace zpp;
+
+	typedef bireturn<val_rc> val_return;
 
 	class Bindings;
 	class ISql;
@@ -34,14 +45,13 @@ namespace wcd {
 		val_rc allRows();
 
 		val_rc first(htab_ptr columns);
-		void where(val_ptr column, str_ptr bop, val_ptr value, str_ptr bval);
 
-
-		void whereKeyValue(val_ptr key, val_ptr value);
-		void whereRaw(obj_ptr rawobj, htab_ptr values, str_ptr bval);
+		error_return where(val_ptr column, str_ptr bop, val_ptr value, str_ptr bval);
+		error_return whereKeyValue(val_ptr key, val_ptr value);
+		error_return whereRaw(obj_ptr rawobj, htab_ptr values, str_ptr bval);
 		
-		obj_rc getInsertSql(htab_ptr columns);
-		val_rc update(obj_ptr irow, htab_ptr dirty);
+		obj_return getInsertSql(htab_ptr columns);
+		bireturn<val_rc> update(obj_ptr irow, htab_ptr dirty);
 
 		void setReturns(htab_ptr names);
 		val_rc insert(val_ptr rdata);
@@ -50,7 +60,7 @@ namespace wcd {
 		void offset(int value);
 		void orderBy(val_ptr colname, bool descend=false);
 		
-		val_rc deleteRow(obj_ptr rowobj);
+		val_return deleteRow(obj_ptr rowobj);
 		
 		int count(val_ptr columns);
 
@@ -96,10 +106,9 @@ namespace wcd {
 
 		int  ifetch_;
 
-		void where(val_ptr column, val_ptr bop, val_ptr value, val_ptr bval);
-
-		void where_unpack(htab_ptr aw);
-		void where_list(htab_ptr aw);
+		error_return where(val_ptr column, val_ptr bop, val_ptr value, val_ptr bval);
+		error_return where_unpack(htab_ptr aw);
+		error_return where_list(htab_ptr aw);
 
 		
 		val_rc get_first();

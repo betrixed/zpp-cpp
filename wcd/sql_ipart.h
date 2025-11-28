@@ -15,6 +15,7 @@ namespace wcd {
 	typedef zpp::bireturn<str_rc> str_return;
 	typedef zpp::bireturn<int>    int_return;
 	typedef zpp::bireturn<bool>   bool_return;
+	typedef zpp::bireturn<obj_rc> obj_return;
 	
 
 	class sql_strtab : public state_init {
@@ -187,6 +188,8 @@ namespace wcd {
 
 	};
 
+	typedef bireturn<SqlPartId*> SqlPart_return;
+
 
 
 	class Expr : public SqlPartId 
@@ -259,7 +262,7 @@ namespace wcd {
 		/*zstr_own emit(int ix, zobj_own bindobj, 
 				str_ptr Lalias, str_ptr Ralias);*/
 
-		str_rc emit(int ix, Bindings* bind, 
+		str_return emit(int ix, Bindings* bind, 
 				str_ptr Lalias, str_ptr Ralias);
 	};
 

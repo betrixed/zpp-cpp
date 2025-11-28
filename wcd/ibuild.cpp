@@ -44,13 +44,13 @@ using namespace zpp;
 
 	}
 
-	void throw_array_hole(unsigned int ix)
+	str_rc msg_array_hole(unsigned int ix)
 	{
 		str_buf buf;
 
 		buf << "Where list has missing index " << ix;
 
-		zend_throw_error(zend_ce_error, buf.data());
+		return buf.zstr();
 	}
 
 	void 
@@ -60,18 +60,22 @@ using namespace zpp;
 		val_rc value(set);
 		bind.set((int) ISql::SQL_DISTINCT, value);
 	}
-	void IBuild::where_unpack(htab_ptr aw)
+
+	error_return 
+	IBuild::where_unpack(htab_ptr aw)
 	{
+		error_return result;
+
 		auto wlen = aw.size();
 		if (wlen==0)
 		{
-			return;
+			return result;
 		}
 		val_ptr p0 = aw.get(int(0));
 		if (p0.isNull())
 		{
-			throw_array_hole(0);
-			return;
+			result.error() << msg_array_hole(0);
+			return result;
 		}
 		val_ptr p3;
 		if (wlen > 3)
@@ -79,8 +83,8 @@ using namespace zpp;
 			p3 = aw.get(int(3));
 			if (p3.isNull())
 			{
-				throw_array_hole(3);
-				return;
+				result.error() << msg_array_hole(3);
+				return result;
 			}
 		}
 		val_ptr p2;
@@ -89,59 +93,69 @@ using namespace zpp;
 			p2 = aw.get(int(2));
 			if (p2.isNull())
 			{
-				throw_array_hole(2);
-				return;
+				result.error() << msg_array_hole(2);
+				return result;
 			}
 		}
 		val_ptr p1 = aw.get(int(1));
 		if (p1.isNull()) 
 		{
-			throw_array_hole(1);
-			return;
+			result.error() << msg_array_hole(1);
+			return result;
 		}
 
 		switch(wlen)
 		{
 		case 4:
-			where(p0,p1,p2,p3);
+			result = where(p0,p1,p2,p3);
 			break;
 		case 3:
-			where(p0,p1,p2, val_ptr());
+			result = where(p0,p1,p2, val_ptr());
 			break;
 		case 2:
-			where(p0,p1, val_ptr(), val_ptr());
+			result = where(p0,p1, val_ptr(), val_ptr());
 			break;
 		}
+		return result;
 	}
 
-	void IBuild::where_list(htab_ptr aw)
+	error_return 
+	IBuild::where_list(htab_ptr aw)
 	{
+		error_return result;
+
 		auto wlen = aw.size();
 
 		if (wlen==0)
 		{
-			return;
+			//Not always an Error?
+			//result.error() << "Empty where list";
+			return result;
 		}
 
 		val_ptr p0 = aw.get(int(0));
 
 		if (p0.isNull())
 		{
-			throw_array_hole(0);
-			return;
+			result.error() << msg_array_hole(0);
 		}
-		if (p0.isArray())
+		else if (p0.isArray())
 		{
 			htab_walk wk;
 			auto item = wk.value();
 			for(wk.start(aw); wk.ok(); wk.next())
 			{
-				where_list(item.zarray());
+				result = where_list(item.zarray());
+				if (result.has_errors())
+				{
+					break;
+				}
 			}
 		}
 		else {
-			where_unpack(aw);
+			result = where_unpack(aw);
 		}
+		return result;
 	}
 
 	ISql& 
@@ -322,14 +336,14 @@ using namespace zpp;
 		return result;
 	}
 
-	val_rc 
+	val_return 
 	IBuild::update(obj_ptr irow, htab_ptr dirty)
 	{
 		Bindings& bind = bindings();
 
 		IRow* rowobj = zobj_toc<IRow>(irow);
 
-		val_rc result;
+		val_return result;
 
 		if (dirty.size())
 		{
@@ -354,8 +368,14 @@ using namespace zpp;
 				}
 			}
 
-			obj_rc plist_mgr = isql().update(bind);
-			ParamList* plist = zobj_toc<ParamList>(plist_mgr);
+			obj_return plist_mgr = isql().update(bind);
+			if (plist_mgr.has_errors())
+			{
+				result = std::move(plist_mgr);
+				return result;
+			}
+
+			ParamList* plist = zobj_toc<ParamList>(plist_mgr.value_);
 
 			str_ptr sql(plist->getSql());
 			htab_ptr params(plist->getValues());
@@ -409,14 +429,13 @@ using namespace zpp;
 		return result.zlong();
 	}
 
-	val_rc 
+	val_return 
 	IBuild::deleteRow(obj_ptr rowobj)
 	{
+		val_return result;
+
 		Model* model = zobj_toc<Model>(model_);
 		IRow*  irow = zobj_toc<IRow>(rowobj);
-
-		val_rc null_result;
-
 
 		htab_ptr pkey = model->getPKey();
 		//zend_printf("deleteRow - ");
@@ -443,31 +462,72 @@ using namespace zpp;
 	    	val_ptr wcond = bind.get(ISql::SQL_WHERE);
 	    	if (wcond.isNull())
 	    	{
-	    		zend_throw_error(zend_ce_error,"deleteRow() without primary key or where condition set");
-	    		return null_result;
+	    		result.error() << "deleteRow() without primary key or where condition set";
+	    		return result;
 	    	}
 	    }
 	    ISql& sp = isql();
-	    obj_rc params_mgr =  sp.deleteSql(bind);
-	    ParamList* plist = zobj_toc<ParamList>(params_mgr);
+	    obj_return params_mgr =  sp.deleteSql(bind);
+	    if (params_mgr.has_errors())
+	    {
+	    	   result = std::move(params_mgr);
+	    	   return result;
+	    }
+	    ParamList* plist = zobj_toc<ParamList>(params_mgr.value_);
 	    str_ptr sql(plist->getSql());
 	    //showstr("delete sql", sql);
 	    htab_ptr params(plist->getValues());
 	    //showdata("delete params", params);
 
-	    return RunSql::op(getDb(), sql, params);
-
-
+	    result = RunSql::op(getDb(), sql, params);
+	    return result;
 	}
 
-	void 
+	error_return 
 	IBuild::whereKeyValue(val_ptr key, val_ptr value)
 	{
 		Bindings& bind = bindings();
-		bind.whereKeyValue(key, value);
+		return bind.whereKeyValue(key, value);
 	}
 
-	void
+	
+
+	error_return
+	IBuild::where(val_ptr column, str_ptr opcmp, val_ptr value, str_ptr bval)
+	{
+		error_return result;
+
+		Bindings& bind = bindings();
+
+		if (column.isString())
+		{
+			bind.where(column, opcmp, value, bval);
+			return result;
+		}
+		if (column.isArray())
+		{
+			result = where_list(column.zarray());
+		}
+		else if (column.isObject())
+		{
+			obj_rc raw = column.zobject();
+			if (raw.instanceof(Raw::omg.classEntry())) {
+				result = whereRaw(raw, value, bval);
+			} 
+			else {
+				result.error() << "Expecting Raw sql object";
+			}
+		}
+		else {
+			str_buf buf;
+			buf << "column argument '" << zend_zval_type_name(column) << "' not supported";
+			result.error() << buf.zstr();
+		}
+		return result;
+		
+	}
+
+	error_return
 	IBuild::where(val_ptr column, val_ptr opcmp, val_ptr value, val_ptr bval)
 	{
 		val_rc arg2;
@@ -491,42 +551,10 @@ using namespace zpp;
 		else {
 			arg4 = bval;
 		}
-		where(column, arg2.zstr(), arg3, arg4.zstr());
+		return this->where(column, arg2.zstr(), arg3, arg4.zstr());
 
 	}
-
-	void
-	IBuild::where(val_ptr column, str_ptr opcmp, val_ptr value, str_ptr bval)
-	{
-		Bindings& bind = bindings();
-
-		if (column.isString())
-		{
-			bind.where(column, opcmp, value, bval);
-			return;
-		}
-		if (column.isArray())
-		{
-			where_list(column.zarray());
-			return;
-		}
-		if (column.isObject())
-		{
-			obj_rc raw = column.zobject();
-			if (raw.instanceof(Raw::omg.classEntry())) {
-				whereRaw(raw, value, bval);
-				return;
-			}
-		}
-		str_buf buf;
-		buf << "column type '" << zend_zval_type_name(column) << "' not supported";
-
-		zend_throw_error(zend_ce_error, buf.data());
-		return;
-		
-	}
-
-	obj_rc 
+	obj_return
 	IBuild::getInsertSql(htab_ptr columns)
 	{
 		Bindings& bind = bindings();
@@ -892,8 +920,9 @@ ZEND_METHOD(Wcd_IBuild, getInsertSql)
 	ZEND_PARSE_PARAMETERS_END();
 
 	IBuild* cobj = zval_toc<IBuild>(ZEND_THIS);
-	obj_rc result = cobj->getInsertSql(columns);
-	result.move_zv(return_value);
+	obj_return result = cobj->getInsertSql(columns);
+	result.throw_errors();
+	result.value_.move_zv(return_value);
 }
 
 
@@ -1159,9 +1188,9 @@ ZEND_METHOD(Wcd_IBuild, update)
 
 	IBuild* cobj = zval_toc<IBuild>(ZEND_THIS);
 
-	val_rc result = cobj->update(row, dirty);
-
-	result.move_zv(return_value);
+	val_return result = cobj->update(row, dirty);
+	result.throw_errors();
+	result.value_.move_zv(return_value);
 }
 
 /* public function where(mixed $column, ?string $operator = null, 

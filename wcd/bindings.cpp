@@ -259,7 +259,13 @@ Bindings::addJoinData(htab_ptr data)
 		tcol->construct(tname, tname, colnames); 
 
 		str_ptr   jtype = data.get(SQSTR.jointype);
-		int jenum = JoinInfo::getJoinType(jtype);
+		int_return jenum = JoinInfo::getJoinType(jtype);
+		if (jenum.has_errors())
+		{
+			result = false;
+			result = jenum;
+			goto RET_ALL;
+		}
 
 		obj_rc jiobj = JoinInfo::omg.new_zobj();
 		JoinInfo* ji = zobj_toc<JoinInfo>(jiobj);
@@ -316,6 +322,7 @@ Bindings::addJoinData(htab_ptr data)
 			
 		}
 	}
+RET_ALL:
 	return result;
 }
 
@@ -522,9 +529,11 @@ Bindings::where(val_ptr column, str_ptr opstr, val_ptr value, str_ptr blogic)
 	add(ISql::SQL_WHERE, args);
 }
 
-void
+error_return
 Bindings::whereKeyValue(val_ptr key, val_ptr value)
 {
+	error_return result;
+
 	if (key.isString() && !value.isArray())
 	{
 		where(key, SQSTR.cmp_equal, value, SQSTR.and_str);
@@ -565,10 +574,11 @@ Bindings::whereKeyValue(val_ptr key, val_ptr value)
 					where(v, SQSTR.cmp_equal, test, SQSTR.and_str);
 				}
 			}
-			return;
+			return result;
 		}
 	}
-	zend_throw_error(zend_ce_error,"whereKeyValue parameters do not match");
+	result.error() << "whereKeyValue parameters do not match";
+	return result;
 }
 
 val_rc 

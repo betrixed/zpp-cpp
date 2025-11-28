@@ -41,7 +41,7 @@ namespace wcd {
 
 		static base_obj_mgr<JoinInfo> omg;
 		
-		static int getJoinType(str_ptr s);
+		static int_return getJoinType(str_ptr s);
 		static str_ptr  joinStr(int jid);
 
 		IColumns* leftTable();
@@ -217,7 +217,7 @@ namespace wcd {
 		str_rc columns(htab_ptr bd);
 		void columnsTC(IColumns* tc, htab_rw col_list); //str_buf& col_list);
 		htab_ptr getTables(Bindings& bind);
-		str_rc where(Bindings &bind, htab_ptr wtab);
+		str_return where(Bindings &bind, htab_ptr wtab);
 		str_rc insert_col_params(Bindings& bind, htab_ptr rowbind);
 		str_rc orderBy(htab_ptr obind);
 		str_return limit(ParamList* plist, htab_ptr ltab);
@@ -256,23 +256,23 @@ namespace wcd {
 
 		str_rc seqLastValue(str_ptr seq);
 
-		str_rc setSeqValue(int value, htab_ptr data);
+		str_return setSeqValue(int value, htab_ptr data);
 		
 		str_rc entityClass(str_ptr s);
 
-		obj_rc deleteSql(Bindings& bind);
+		obj_return deleteSql(Bindings& bind);
 
-		obj_rc insert(Bindings& bind);
+		obj_return insert(Bindings& bind);
 
-		obj_rc select(Bindings& bind);
+		obj_return select(Bindings& bind);
 
-		str_rc truncate(Bindings& bind);
+		str_return truncate(Bindings& bind);
 
-		obj_rc update(Bindings& bind);
+		obj_return update(Bindings& bind);
 
 		str_rc quoteName(str_ptr name);
 
-		str_rc emit(val_ptr sp, Bindings* bind, str_ptr lalias, str_ptr ralias);
+		str_return emit(val_ptr sp, Bindings* bind, str_ptr lalias, str_ptr ralias);
 
 		str_rc getTruncateSql();
 
@@ -322,7 +322,7 @@ namespace wcd {
 		void limit(val_ptr limit, val_ptr offset);
 		void limit(int limit, int offset=0);
 
-		void whereKeyValue(val_ptr keys, val_ptr values);
+		error_return whereKeyValue(val_ptr keys, val_ptr values);
 		void where(val_ptr column, str_ptr opstr, val_ptr value, str_ptr blogic);
 
 		htab_rc columnAlias(obj_ptr tcol);

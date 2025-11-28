@@ -263,13 +263,16 @@ JoinExpr::destruct()
 	rattr_.set_null();
 }
 
-str_rc 
+str_return 
 JoinExpr::emit(int ix, Bindings* bind, 
 	str_ptr Lalias, str_ptr Ralias)
 {
 
+	str_return result;
+
 	str_buf sqlbuf;
-	str_rc    temp;
+
+	str_return    temp;
 
 	const char blank = ' ';
 
@@ -282,6 +285,8 @@ JoinExpr::emit(int ix, Bindings* bind,
 	}
 
 	val_ptr L_attr(lattr_);
+	val_ptr R_attr(rattr_);
+
 	if (!L_attr.isNull())
 	{
 		sqlbuf << blank;
@@ -297,15 +302,18 @@ JoinExpr::emit(int ix, Bindings* bind,
 		else {
 			temp = L_attr.to_zstr();
 		}
-		sqlbuf << temp; 
+		sqlbuf << temp;
+		if (temp.has_errors())
+		{
+			result = std::move(temp);
+			goto RET_ALL;
+		}
 	}
 
 	if (op_ < OP_NOP)
 	{
 		sqlbuf << blank << SQSTR.opstr[op_];
 	}
-
-	val_ptr R_attr(rattr_);
 
 	if (!R_attr.isNull())
 	{	
@@ -323,8 +331,14 @@ JoinExpr::emit(int ix, Bindings* bind,
 			temp = R_attr.to_zstr();
 		}
 		sqlbuf << temp;
+		if (temp.has_errors())
+		{
+			result = std::move(temp);
+		}
 	}
-	return sqlbuf.zstr();
+RET_ALL:
+	result = sqlbuf.zstr();
+	return result;
 }
 
 int_return
@@ -352,17 +366,14 @@ JoinExpr::toLogic(str_ptr s)
 			break;
 		default:
 			result = B_ERROR;
-			
+			result.error() << " - invalid toLogic arg: " << s;
 			break;
 		}
 	}
 	else {
 		result.error() << " empty string " << s;
 	}
-	if (result == B_ERROR)
-	{
-		result.error() << " - invalid toLogic arg: " << s;
-	}
+
 	return result;
 }
 
@@ -460,13 +471,9 @@ JoinExpr::toOperator(str_ptr s)
 			break;
 		default:
 			result = OP_ERROR;
+			result.error() << "Invalid toOperator arg: " << s;
 			break;
 		}
-	}
-
-	if (result == OP_ERROR)
-	{
-		result.error() << "Invalid toOperator arg: " << s;
 	}
 	return result;
 	
@@ -897,8 +904,10 @@ ZEND_METHOD(Wcd_Sql_JoinExpr, emit)
 	JoinExpr* cobj = zval_toc<JoinExpr> (ZEND_THIS);
 	Bindings* bind = zval_toc<Bindings>(bindings);
 	
-	str_rc s = cobj->emit(ix, bind, lalias, ralias);
-	s.move_zv(return_value);
+	str_return sret = cobj->emit(ix, bind, lalias, ralias);
+	str_rc result = sret;
+	sret.throw_errors();
+	result.move_zv(return_value);
 
 }
 

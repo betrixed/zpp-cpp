@@ -175,15 +175,22 @@ namespace wcd {
 
 	}
 
-	bool 
+	bool_return 
 	Model::deleteRow(obj_ptr rowobj)
 	{
-		//TODO: preconfirm exists? i.e. original_ has content
-		//zend_printf("deleteRow ");
-		//showobj("rowobj", rowobj);
 		obj_rc builder(getBuilderForMe());
 		IBuild* ib = zobj_toc<IBuild>(builder);
-		return ib->deleteRow(rowobj);
+
+		bool_return result;
+
+		val_return temp = ib->deleteRow(rowobj);
+		result = temp.value_.zbool();
+		if (temp.has_errors())
+		{
+			result = std::move(temp);
+			result = false;
+		}
+		return result;
 	}
 
 	int Model::getTSFlags() const
