@@ -82,7 +82,7 @@ namespace wcd {
 
 		void setInsert(htab_ptr data);
 
-		void setModel(obj_ptr obj, bool bind = true);
+		error_return setModel(obj_ptr obj, bool bind = true);
 
 		val_rc setSeqValue(int value, htab_ptr data);
 

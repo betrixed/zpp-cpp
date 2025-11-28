@@ -688,17 +688,20 @@ using namespace zpp;
 		bind.addarray(ISql::SQL_INSERT, data);
 	}
 
-	void 
+	error_return 
 	IBuild::setModel(obj_ptr model, bool bind)
 	{
+		error_return result;
+
 		if (model.ok())
 		{
 			if (!model.instanceof(Model::omg.class_entry_))
 			{
-				zend_throw_error(zend_ce_error, "Object not Model class");
-				return;
+				result.error() << "Object is not Model class"
+				return result;
 			}
 		}
+		
 		model_ = model;
 
 		if (model.ok() && bind)
@@ -715,6 +718,8 @@ using namespace zpp;
 			bind.set(ISql::MODEL_OBJ, temp);
 			bind.set(ISql::FETCH_AS, IDriver::FETCH_ASSOC);
 		}
+
+		return result;
 	}
 
 	val_rc 
