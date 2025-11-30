@@ -54,7 +54,7 @@ namespace wcd {
 		bireturn<val_rc> update(obj_ptr irow, htab_ptr dirty);
 
 		void setReturns(htab_ptr names);
-		val_rc insert(val_ptr rdata);
+		val_return insert(val_ptr rdata);
 
 		void limit(int lim, int offset=0);
 		void offset(int value);
@@ -115,6 +115,9 @@ namespace wcd {
 
 		friend class Model;
 	};
+
+
+	
 }; //  namespace
 
 

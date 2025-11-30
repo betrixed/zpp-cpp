@@ -30,7 +30,7 @@ protected:
 
 protected:
 
-	val_rc send(bool rval);
+	val_return send(bool rval);
 	
 public:
 
@@ -57,17 +57,17 @@ public:
 
 	val_rc insert(htab_ptr values);
 
-	bool prepare(str_ptr sql);
+	bool_return prepare(str_ptr sql);
 
 	str_rc quoteName(str_ptr name);
 
 	void returnsValues(bool rval);
 
-	val_rc run();
+	val_return run();
 
 	void setValues(htab_ptr values);
 
-	val_rc update(htab_ptr values);
+	val_return  update(htab_ptr values);
 };
 
 }; //namespace wcd

@@ -356,9 +356,11 @@ JoinTables::addJoin(obj_ptr jiobj)
 	return result;
 }
 
-void 
+error_return 
 JoinTables::addTable(obj_ptr icol)
 {
+	error_return result;
+
 	IColumns* tc = zobj_toc<IColumns>(icol);
 	str_ptr name = tc->getAlias();
 	if (name.isNull())
@@ -367,10 +369,11 @@ JoinTables::addTable(obj_ptr icol)
 	}
 	if (name.isNull())
 	{
-		zend_throw_error(zend_ce_error, "addTable with no Alias or Name");
-		return;
+		result.error() << "addTable with no Alias or Name";
+		return result;
 	}
 	htab_rw(byAlias_).set(name, icol);
+	return result;
 }
 
 void 

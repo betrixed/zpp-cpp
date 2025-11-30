@@ -24,9 +24,9 @@ public:
 
 	virtual void debug_info(htab_rw di);
 
-	void assign(htab_ptr cfg);
-	val_rc getValue(val_ptr keys, bool required, val_ptr ifnot);
-	val_rc getValue(str_ptr key, bool required, val_ptr ifnot);
+	error_return assign(htab_ptr cfg);
+	val_return getValue(val_ptr keys, bool required, val_ptr ifnot);
+	val_return getValue(str_ptr key, bool required, val_ptr ifnot);
 	
 	str_ptr getMyKey();
 	void      setMyKey(str_ptr key);
@@ -60,7 +60,7 @@ public:
 
 protected:
 
-	void set_data(str_ptr key, val_ptr values, bool required, val_ptr ifnot);
+	error_return set_data(str_ptr key, val_ptr values, bool required, val_ptr ifnot);
 	
 	htab_rc data_;
 	htab_rc cfg_;

@@ -197,85 +197,87 @@ using namespace zpp;
 		bind.addarray(ISql::SQL_RETURN, names);
 	}
 
-	val_rc 
+	val_return
 	IBuild::insert(val_ptr rdata)
 	{
-		//zend_printf("IBuild::insert\n");
+		val_return result;
+		
+		obj_rc     row_mgr; // IRow object
+		htab_ptr 	 rows;
+		bool       is_multiple = false;
+		bool 	 bad_argument = false;
 
-		Bindings& bind = bindings();
-		bind.wipe(ISql::SQL_INSERT);
-
-		val_rc result;
-		obj_rc row_mgr;
-		htab_rc timeStamps;
-		htab_ptr rows;
-
-		bool     is_multiple = false;
-
-		if (rdata.isArray())
+		if (rdata.isObject())
+		{
+			row_mgr = rdata.zobject();
+		} 
+		else if(rdata.isArray())
 		{
 			rows = rdata.zarray();
 
 			int rowct = rows.size();
 			if (rowct == 0)
 			{
-				result.set_bool(false);
-				return result;
-
+				result.value_.set_bool(false);
+				bad_argument = true;
 			}
 			else if (rowct > 0){
 				row_mgr = rows.get(int(0));
 			}
 			is_multiple = (rowct > 1);
-
 		}
-		else if (rdata.isObject())
+		else {
+			bad_argument = true;
+		}
+		if (!bad_argument && row_mgr.instanceof(IRow::omg.class_entry_))
 		{
-			row_mgr = rdata.zobject();
-		}
+			Bindings& bind = bindings();
+			htab_rc timeStamps;
+			val_rc temp;
 
-		IRow* irow = zobj_toc<IRow>(row_mgr);
-		obj_ptr model_mgr = irow->getModel();
+			bind.wipe(ISql::SQL_INSERT);	
 
-		Model* model = zobj_toc<Model>(model_mgr);
+			IRow* irow = zobj_toc<IRow>(row_mgr);
+			obj_ptr model_mgr = irow->getModel();
 
-		if (model->hasTimeStamps()) {
-			timeStamps = irow->stampTime(now());
-		}
-		val_rc temp;
+			Model* model = zobj_toc<Model>(model_mgr);
 
-		if (is_multiple) {
-			htab_walk wk;
-			auto row = wk.value();
+			if (model->hasTimeStamps()) {
+				timeStamps = irow->stampTime(now());
+			}
 
-			for(wk.start(rows); wk.ok(); wk.next())
-			{
-				irow = zval_toc<IRow>(row);
+			if (is_multiple) {
+				htab_walk wk;
+				auto row = wk.value();
 
-				if (timeStamps.size()) {
-					temp = timeStamps;
-					irow->mergeData(temp);
+				for(wk.start(rows); wk.ok(); wk.next())
+				{
+					irow = zval_toc<IRow>(row);
+
+					if (timeStamps.size()) {
+						temp = timeStamps;
+						irow->mergeData(temp);
+					}
+					temp = irow->getData();
+					bind.addarray(ISql::SQL_INSERT, temp);
 				}
+			}
+			else {
+				// already stamped time.
 				temp = irow->getData();
 				bind.addarray(ISql::SQL_INSERT, temp);
 			}
-		}
-		else {
-			// already stamped time.
-			temp = irow->getData();
-			bind.addarray(ISql::SQL_INSERT, temp);
-		}
+			obj_return plist_mgr = isql().insert(bind);
+			if (plist_mgr.has_errors())
+			{
+				result = std::move(plist_mgr);
+				result.error() << " IBuild::insert failed";
+				return result;
+			}
 
-		
-		obj_rc plist_mgr = isql().insert(bind);
-		//showobj("plist_mgr", plist_mgr);
-
-		bind.wipe(ISql::SQL_INSERT);
-
-		if (plist_mgr.ok())
-		{
-			ParamList* plist = zobj_toc<ParamList>(plist_mgr);
+			ParamList* plist = zobj_toc<ParamList>(plist_mgr.value_);
 			str_ptr sql(plist->getSql());
+
 			htab_ptr values(plist->getValues());
 			htab_ptr rets(plist->getReturns());
 
@@ -284,11 +286,14 @@ using namespace zpp;
 			int fetch = db.setFetch(IDriver::FETCH_ASSOC);
 
 			result = RunSql::op(getDb(), sql, values, (rets.size() > 0));
-
-			//showmem("result", result);
+			//restore fetch
 			db.setFetch(fetch);
 		}
-		return  result;
+		else {
+			result.value_.set_bool(false);
+			result.error() << "Require IRow object or Array of IRow";
+		}
+		return result;
 	}
 
 	void 
@@ -697,7 +702,7 @@ using namespace zpp;
 		{
 			if (!model.instanceof(Model::omg.class_entry_))
 			{
-				result.error() << "Object is not Model class"
+				result.error() << "Object is not Model class";
 				return result;
 			}
 		}
@@ -942,29 +947,17 @@ ZEND_METHOD(Wcd_IBuild, hasModel)
 //public function insert(array|IRow $rows) : mixed
 ZEND_METHOD(Wcd_IBuild, insert)
 {
-	zval* data;
-	ZEND_PARSE_PARAMETERS_START(1,1)
-	Z_PARAM_ZVAL(data)
-	ZEND_PARSE_PARAMETERS_END();
-	
-	val_ptr test(data);
-	if (test.isObject())
+	zarg_rd args(execute_data);
+
+	zval* data = args.need(0);
+
+	if (!args.throw_errors())
 	{
-		obj_rc irow(test.zobject());
-		if (! irow.instanceof(IRow::omg.class_entry_))
-		{
-			zend_throw_error(zend_ce_error,"Not IRow object");
-			RETURN_NULL();
-		}	
-	} 
-	else if(!test.isArray())
-	{
-		zend_throw_error(zend_ce_error,"Not an Array");
-		RETURN_NULL();
+		IBuild* cobj = zval_toc<IBuild>(ZEND_THIS);
+		val_return result = cobj->insert(data);
+		result.throw_errors();
+		result.value_.move_zv(return_value);
 	}
-	IBuild* cobj = zval_toc<IBuild>(ZEND_THIS);
-	val_rc result = cobj->insert(test);
-	result.move_zv(return_value);
 }
 
 //public function limit(int $limit, int $offset = 0): void

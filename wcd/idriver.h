@@ -47,7 +47,8 @@ namespace wcd {
 		void close();
 		
 		bool commit();
-		void connect();
+		
+		error_return connect();
 
 		bool closeStmt(val_ptr stmt);
 
@@ -66,7 +67,7 @@ namespace wcd {
 		htab_rc getColumnNames(str_ptr tableName);
 		htab_rc getConnectOptions();
 
-		str_rc getDSN();
+		str_return getDSN();
 
 		
 

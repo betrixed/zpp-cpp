@@ -91,7 +91,7 @@ namespace wcd {
 		obj_rc addJoin(obj_ptr jiobj);
 
 
-		void addTable(obj_ptr icol);
+		error_return addTable(obj_ptr icol);
 
 		void addResult(obj_ptr ta);
 

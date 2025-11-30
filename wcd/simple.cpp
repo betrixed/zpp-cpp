@@ -185,9 +185,11 @@ Simple::insert(htab_ptr values)
 	return this->send(retval_);
 }
 
-bool 
+bool_return 
 Simple::prepare(str_ptr sql)
 {
+	bool_return result;
+
 	IDriver* db = zobj_toc<IDriver>(db_);
 	if (stmt_.ok())
 	{
@@ -200,10 +202,13 @@ Simple::prepare(str_ptr sql)
 
 	if (!stmt_.ok())
 	{
-		zend_throw_error(zend_ce_error, "Prepare failed for: %s", sql.data());
-		return false;
+		result.error() << "Prepare failed for: " << sql.data();
+		result = false;
 	}
-	return true;
+	else {
+		result = true;
+	}
+	return result;
 }
 
 str_rc 
@@ -221,20 +226,20 @@ Simple::returnsValues(bool rval)
 	retval_ = rval;
 }
 
-val_rc 
+val_return 
 Simple::run()
 {
 	return this->send(retval_);
 }
 
-val_rc
+val_return
 Simple::send(bool retval)
 {
-	val_rc result;
+	val_return result;
 	int fsave = -1;
 	if (!stmt_.ok())
 	{
-		zend_throw_error(zend_ce_error, "Statement not prepared");
+		result.error() << "Statement not prepared";
 		return result;
 	}
 	IDriver* db = zobj_toc<IDriver>(db_);
@@ -253,6 +258,7 @@ Simple::send(bool retval)
 
 	if (retval)
 	{
+		//restore value
 		db->setFetch(fsave);
 	}
 	if (ac)
@@ -262,13 +268,8 @@ Simple::send(bool retval)
 			obj_ptr sobj(stmt_);
 			val_rc qstr = sobj.property(SQSTR.queryString);
 			stmt_.set_null();
-			//showmem("queryString", qstr);
-			
 		}
-		//showmem("autoclosed stmt", stmt_);
 	}
-	//showmem("Simple send result", result);
-
 	values_.reset();
 	return result;
 }
@@ -535,7 +536,8 @@ ZEND_METHOD(Wcd_Simple, run)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 	Simple* sobj = zval_toc<Simple>(ZEND_THIS);
-	val_rc result = sobj->run();
+	val_return result = sobj->run();
+	result.throw_errors();
 	result.move_zv(return_value);
 }
 

@@ -83,26 +83,40 @@ IConfig::debug_info(htab_rw di)
 	di.set(ICS.cfg_str, cfg_);
 }
 
-void
+// transform raw values (if any) into final form,
+// make error if missing and required is true
+error_return
 IConfig::set_data(str_ptr key, val_ptr values, bool required, val_ptr ifnot)
 {
+	error_return result;
+
 	htab_rw hw(data_);
 	//showarray("data_ - ", data_);
-	val_rc dput = getValue(values, required, ifnot);
-	hw.set(key, dput);
-	//showarray("data_ - ", data_);
+	val_return dput = getValue(values, required, ifnot);
+	if (!dput.has_errors())
+	{
+		hw.set(key, dput.value_);
+	}
+	else {
+		result = std::move(dput);
+	}
+	return result;
 }
-void 
+
+error_return 
 IConfig::assign(htab_ptr cfg)
 {
+	error_return result;
+
 	cfg_ = cfg;
 	val_rc null_val;
-	val_rc value;
+	val_return vret;
 
 	val_rc   keys_mgr;   // if passing list of values
 	htab_rw keys(keys_mgr); // do not reassign to keys_mgr!!
 
 	val_rc   skey; // if passing single value
+
 	//showarray("assign - ", sarray);
 
 	keys.push_items(ICS.k_driver, ICS.k_adapter);
@@ -112,22 +126,33 @@ IConfig::assign(htab_ptr cfg)
 	//arg.push_back(ICS.k_driver);
 	//arg.push_back(ICS.k_adapter);
 
-	set_data(ICS.k_driver, keys_mgr, true, null_val);
+	result = set_data(ICS.k_driver, keys_mgr, true, null_val);
+	if (result.has_errors())
+	{
+		return result;
+	}
 
 	keys.clear();
-	keys.push_items(ICS.k_host,ICS.k_hostname);
+	keys.push_items(ICS.k_host, ICS.k_hostname);
 
 	null_val = ICS.k_localhost;
+	// not required
 	set_data(ICS.k_host, keys_mgr, false, null_val);
 
 	skey = ICS.k_port;
 	null_val.set_null();
-	value = getValue(skey, false, null_val);
-	value.toLong();
-	set_data(ICS.k_port, skey, false, null_val);
+
+	// not required
+	vret = getValue(skey, false, null_val);
+	if (vret.value_.isLong() || vret.value_.isString())
+	{
+		vret.value_.toLong();
+		set(ICS.k_port, vret.value_);
+	}
 
 	keys.clear();
 	keys.push_items(ICS.k_dbname, ICS.k_database);
+	
 	set_data(ICS.k_dbname, keys_mgr, true, null_val);
 
 	keys.clear();
@@ -157,40 +182,43 @@ IConfig::assign(htab_ptr cfg)
 	skey = ICS.k_model_ns;
 	null_val = ICS.db_models_ns;
 	set_data(ICS.k_model_ns, skey, false, null_val);
-}
 
-val_rc 
-IConfig::getValue(str_ptr key, bool required, val_ptr ifnot)
-{
-	val_ptr result = cfg_.get(key);
-	if (!result.isNull())
-	{
-		return result;
-	}
-	if (!required)
-	{
-		result = ifnot;
-		return result;
-	}
-	str_buf buf;
-	buf << "IConfig needs value for : '" << key << '\'';
-	zend_throw_error(zend_ce_error, buf.data());
 	return result;
 }
 
-val_rc 
+val_return
+IConfig::getValue(str_ptr key, bool required, val_ptr ifnot)
+{
+	val_return result;
+	val_ptr test = cfg_.get(key);
+	if (!test.isNull())
+	{
+		result.value_ = test;
+	}
+	else if (!required)
+	{
+		result.value_ = ifnot;
+	}
+	else {
+		result.error() << "IConfig needs value for : '" << key << '\'';
+	}
+	return result;
+}
+
+val_return 
 IConfig::getValue(val_ptr keys, bool required, val_ptr ifnot)
 {
-	val_rc result;
+	val_return result;
 
 	bool asString = keys.isString();
+	val_ptr test;
 
 	if (asString)
 	{
-		val_ptr value = cfg_.get(keys.zstr());
-		if (!value.isNull())
+		test = cfg_.get(keys.zstr());
+		if (!test.isNull())
 		{
-			result = value;
+			result.value_ = test;
 			return result;
 		}
 	}
@@ -201,10 +229,10 @@ IConfig::getValue(val_ptr keys, bool required, val_ptr ifnot)
 		auto keyval = wk.value();
 		for(wk.start(keys.zarray()); wk.ok(); wk.next())
 		{
-			val_ptr value = cfg_.get(keyval.zstr());
-			if (!value.isNull())
+			test = cfg_.get(keyval.zstr());
+			if (!test.isNull())
 			{
-				result = value;
+				result.value_ = test;
 				return result;
 			}
 		}
@@ -214,23 +242,21 @@ IConfig::getValue(val_ptr keys, bool required, val_ptr ifnot)
 	}
 	if (!required)
 	{
-		result = ifnot;
+		result.value_ = ifnot;
 		return result;
 	}
-	str_buf buf;
 
-	buf << "Db IConfig needs : ";
+	result.error() << "Db IConfig needs : ";
 
 	if (!asString)
 	{
 		val_rc cat = implode(ICS.msg_or, keys);
-		buf << val_ptr(cat).zstr();
+		result.error() << val_ptr(cat).zstr();
 	}
 	else {
-		buf << keys.zstr();
+		result.error() << keys.zstr();
 	}
-	str_rc msg = buf.zstr();
-	zend_throw_error(zend_ce_error, "%s", msg.data());
+
 	return result;
 }
 
@@ -278,13 +304,27 @@ IConfig::getArray()
 str_rc 
 IConfig::getCharset()
 {
-	return getValue(ICS.k_charset, false, val_rc::empty_str());
+	val_return result = getValue(ICS.k_charset, false, val_rc::empty_str());
+	if (result.value_.isString())
+	{
+		return result.value_.zstr();
+	}
+	else {
+		return str_rc();
+	}
 }
 
 str_rc 
 IConfig::getCollation()
 {
-	return getValue(ICS.k_collation, false, val_rc::empty_str());
+	val_return result =  getValue(ICS.k_collation, false, val_rc::empty_str());
+	if (result.value_.isString())
+	{
+		return result.value_.zstr();
+	}
+	else {
+		return str_rc();
+	}
 }
 
 obj_rc 

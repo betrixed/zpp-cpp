@@ -186,10 +186,10 @@ IDriver::destruct()
 	//zend_printf("IDriver destruct\n");
 }
 
-str_rc 
+str_return 
 IDriver::getDSN()
 {
-	str_rc result;
+	str_return result;
 	str_rc dname = icfg_c()->getDriverName();
 	
 	dname.lowercase();
@@ -198,10 +198,10 @@ IDriver::getDSN()
 		dname = dname.substr(4);
 	}
 	else {
-		zend_throw_error(zend_ce_error,"PDO Driver names need to begin with 'pdo_'");
-		return dname;
+		result.error() << "PDO Driver names need to begin with 'pdo_' : " << dname;
+		return result;
 	}
-	//showstr("after sub", dname);
+
 	IConfig* cfg = icfg_c();
 	str_rc host = cfg->getHost();
 	str_rc dbname = cfg->getDatabase();
@@ -211,8 +211,8 @@ IDriver::getDSN()
 
 	buf << dname << ':' << "host=" << host
 	    << ";dbname=" << dbname;
-	result = buf.zstr();
-	//showstr("getDSN()", result);
+	result.value_ = buf.zstr();
+
 	return result;
 }
 
@@ -228,15 +228,23 @@ IDriver::getConnectOptions()
 	return result;
 }
 
-void 
+error_return 
 IDriver::connect()
 {
+	error_return result;
+
 	if (handle_.ok())
 	{
-		return;
+		result;
 	}
 
-	str_rc dsn = getDSN();
+	str_return test = getDSN();
+
+	if (test.has_errors())
+	{
+		result = std::move(test);
+		return result;
+	}
 
 	htab_rc options = getConnectOptions();
 
@@ -248,7 +256,7 @@ IDriver::connect()
 	htab_rc  args_mgr;
 	htab_rw args(args_mgr);
 
-	args.push_back(dsn);
+	args.push_back(dsn.value_);
 	args.push_back(user);
 	args.push_back(pw);
 	args.push_back(options);
@@ -256,6 +264,8 @@ IDriver::connect()
 	handle_ = ReflectCache::staticInstanceArgs(DBS.pdo_class, args_mgr);
 
 	afterConnect();
+
+	return result;
 }
 
 void //virtual

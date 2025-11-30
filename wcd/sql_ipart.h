@@ -11,11 +11,6 @@
 namespace wcd {
 
 	using namespace zpp;
-
-	typedef zpp::bireturn<str_rc> str_return;
-	typedef zpp::bireturn<int>    int_return;
-	typedef zpp::bireturn<bool>   bool_return;
-	typedef zpp::bireturn<obj_rc> obj_return;
 	
 
 	class sql_strtab : public state_init {
