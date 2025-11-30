@@ -87,8 +87,9 @@ base_init BI_str;
 
 	 mgr_link* mgr_link::l_start_ = nullptr;
 	 mgr_link* mgr_link::l_end_ = nullptr;
-
 	
+
+
 
 };//namespace
 

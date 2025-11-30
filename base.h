@@ -675,6 +675,12 @@ template<typename T> base_dlink<T> base_obj_mgr<T>::obj_list_;
 template<typename T> size_t  base_obj_mgr<T>::obj_count_ = 0;
 #endif
 
+typedef bireturn<str_rc> str_return;
+typedef bireturn<int>    int_return;
+typedef bireturn<bool>   bool_return;
+typedef bireturn<obj_rc> obj_return;
+typedef bireturn<val_rc> val_return;
+
 }; //namespace
 
 
