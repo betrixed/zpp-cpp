@@ -76,7 +76,7 @@ public:
 
 	static val_rc callStatic(str_ptr static_name, str_ptr method, val_ptr params);
 
-	static obj_rc find(str_ptr static_name, val_ptr id);
+	static obj_return find(str_ptr static_name, val_ptr id);
 
 	static str_rc getTableName(str_ptr cname);
 
@@ -90,11 +90,11 @@ public:
 
 	virtual void debug_info(htab_rw di);
 
-	obj_rc byKeyValue(val_ptr keynames, val_ptr values);
+	obj_return byKeyValue(val_ptr keynames, val_ptr values);
 
-	obj_rc byPrimaryValue(str_ptr values);
+	obj_return byPrimaryValue(str_ptr values);
 
-	obj_rc getConnect();
+	obj_return getConnect();
 
 	htab_rc getPKey();
 
@@ -118,11 +118,11 @@ public:
 
 	void sequenceMax();
 
-	bool saveRow(obj_ptr irow, bool reload = false);
+	bool_return saveRow(obj_ptr irow, bool reload = false);
 
 	bool_return deleteRow(obj_ptr irow);
 
-	obj_rc readRow(obj_ptr irow);
+	obj_return readRow(obj_ptr irow);
 
 	htab_rc getKeyOptions();
 

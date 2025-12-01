@@ -19,7 +19,7 @@ public:
 
 	void construct(str_ptr sql, obj_ptr driver);
 
-	val_rc execute();
+	val_return execute();
 
 	obj_rc getConnection();
 

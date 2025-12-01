@@ -18,7 +18,7 @@ public:
 
 	static base_obj_mgr<Delete> omg;
 
-	virtual obj_rc getSqlParams();
+	virtual obj_return getSqlParams();
 
 };
 

@@ -19,9 +19,11 @@ base_obj_mgr<Insert> Insert::omg;
 
 
 
-obj_rc 
+obj_return
 Insert::getSqlParams()
 {
+	obj_return result;
+
 	Bindings& bind = this->bindings();
 	obj_ptr isql_ptr = bind.isql();
 
@@ -54,15 +56,15 @@ Insert::getSqlParams()
 			bind.addarray(ISql::SQL_INSERT, coldata_rc);
 		}
 		else {
-			zend_throw_error(zend_ce_error,"Insert: values not set");
-			return obj_rc();
+			result.error() << "Insert: values not set";
+			return result;
 		}
 	}
-	obj_rc plist_rc = isql->insert(bind);
+	result = isql->insert(bind);
 
 	bind.wipe();
 
-	return plist_rc;
+	return result;
 }
 
 }; // namespace wcd

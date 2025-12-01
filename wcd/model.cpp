@@ -290,16 +290,23 @@ namespace wcd {
 		return m->getBuilderForMe();
 	}
 
-	obj_rc  
+	obj_return 
 	Model::byKeyValue(val_ptr keynames, val_ptr values)
 	{
+		error_return check;
+		obj_return   result;
+
 		obj_rc build = getBuilderForMe();
 		IBuild* ib = zobj_toc<IBuild>(build);
 		Bindings&  bind = ib->bindings();
 		bind.limit(1);
-		bind.whereKeyValue(keynames, values);
-		obj_rc result(bind.select());
-		//showobj("byKeyValue return", result);
+		check = bind.whereKeyValue(keynames, values);
+		if (check.has_errors())
+		{
+			result = std::move(check);
+			return result;
+		}
+		result = bind.select();
 		return result;	
 	}
 
@@ -312,7 +319,7 @@ namespace wcd {
 		return m;
 	}
 
-	obj_rc //static
+	obj_return //static
 	Model::keyValue(str_ptr static_class, val_ptr keynames, val_ptr values)
 	{
 		
@@ -320,7 +327,7 @@ namespace wcd {
 		return m->byKeyValue(keynames, values);
 	}
 
-	obj_rc 
+	obj_return 
 	Model::withValues(str_ptr static_class, val_ptr keyvalues)
 	{
 		Model* m = Model::model_instance(static_class);
@@ -427,11 +434,10 @@ namespace wcd {
 		return result;
 	}
 
-	obj_rc //static 
+	obj_return //static 
 	Model::find(str_ptr static_name, val_ptr id)
 	{
-		
-		obj_rc result;
+		obj_return result;
 
 		Model* m = model_instance(static_name);
 		htab_rc pkey = m->getPKey();
@@ -439,7 +445,8 @@ namespace wcd {
 
 		if (!pkey.size())
 		{
-			zend_throw_error(zend_ce_error,"Model without Primary key columns");
+			result.error() << "No Primary key columns: " << static_name;
+			return result;
 		}
 		else if (id.isArray())
 		{
@@ -460,9 +467,6 @@ namespace wcd {
 			vlist.push_back(id);
 			result = m->byKeyValue(pkey_mgr, vlist_tab);
 		}
-		//showdata("pkey_mgr", pkey_mgr.zarray());
-		//showdata("vlist_tab", vlist_tab.zarray());
-		//zend_printf("Return find\n");
 		return result;
 	}
 
@@ -857,12 +861,19 @@ namespace wcd {
 	    return (timestamps_ != NO_TS);
 	}
 
-	bool 
+	bool_return
 	Model::saveRow(obj_ptr row_obj, bool reload)
 	{
+		bool_return result;
+		error_return check;
+		val_return   vret;
+
+		result.value_ = false;
+
 		if (!row_obj.ok())
 		{
-			return false;
+			result.error() << "Null IRow object";
+			return result;
 		}
 		IRow* irow = zobj_toc<IRow>(row_obj);
 
@@ -874,7 +885,8 @@ namespace wcd {
 
 		if (wasRead && (dirty.size()==0) )
 		{
-			return true;
+			result.value_ = true;
+			return result;
 		}
 		// insert operation
 		//zend_printf("save-row\n");
@@ -891,30 +903,37 @@ namespace wcd {
 			//zend_printf("save-update\n");
 			if (pkey.size() == 0)
 			{
-				zend_throw_error(zend_ce_error, "Update table needs a primary key");
-				return false;
+				result.error() << "Update call has no primary key"
+				return result;
 			}
 
 			htab_rc id = irow->getDataValues(pkey_mgr);
 
 			if (id.size() == 0)
 			{
-				zend_throw_error(zend_ce_error, "Save record needs primary key values");
-				return false;
+				result.error() << "No values for primary key"
+				return result;
 			}
 
 			
 			val_rc pvalues(id);
-			ibuild->whereKeyValue(pkey_mgr, pvalues);
-			saved = ibuild->update(irow, dirty);
+			check = ibuild->whereKeyValue(pkey_mgr, pvalues);
+
+			if (check.has_errors())
+			{
+				result = std::move(check);
+				return result;
+			}
+			vret = ibuild->update(irow, dirty);
+			if (vret.has_errors())
+			{
+				result = std::move(vret);
+				return result;
+			}
 		}
 		else {
-			//zend_printf("save-create\n");
-
 			htab_ptr data = irow->reader();
 			htab_ptr options = getKeyOptions();
-
-			
 
 			htab_rc pkey_refresh_mgr;
 			htab_rw pkey_refresh(pkey_refresh_mgr);
@@ -952,9 +971,14 @@ namespace wcd {
 			}
 
 			val_rc row_mgr(row_obj);
-			saved = ibuild->insert(row_mgr);
-			
-
+			vret = ibuild->insert(row_mgr);
+			if (vret.has_errors())
+			{
+				result = std::move(vret);
+				return result;
+			}
+			val_rc& saved = vret.value_;
+			//update row values from return?
 			if (saved.isArray() && (pkey_refresh_mgr.size() > 0))
 			{
 				// its a double wrap
@@ -1012,13 +1036,13 @@ namespace wcd {
 		return saved.ok();
 	}
 
-	obj_rc 
+	obj_return 
 	Model::readRow(obj_ptr row_obj)
 	{
 		//zend_printf("Read Row\n");
+		obj_return result;
 
 		htab_rc pkey = getPKey();
-		obj_rc result(row_obj);
 
 		if (pkey.size())
 		{
@@ -1031,11 +1055,12 @@ namespace wcd {
 
 			
 			val_rc val_mgr(pkeyid);
+
 			result = byKeyValue(key_mgr, val_mgr);
 		}
 		else {
 			str_rc name = getName();
-			zend_throw_error(zend_ce_error,"No primary key for table %s", name.data());
+			result.error() << "No primary key for table " << name;
 		}
 		return result;
 
@@ -1637,9 +1662,9 @@ ZEND_METHOD(Wcd_Model, readRow)
 
 	Model* model = zval_toc<Model>(ZEND_THIS);
 
-	obj_rc result = model->readRow(rdata);
-
-	result.move_zv(return_value);
+	obj_return result = model->readRow(rdata);
+	result.throw_errors();
+	result.value_.move_zv(return_value);
 
 }
 

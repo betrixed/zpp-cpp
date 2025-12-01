@@ -18,7 +18,7 @@ public:
 
 	static base_obj_mgr<Update> omg;
 
-	virtual obj_rc getSqlParams();
+	virtual obj_return getSqlParams();
 
 	void set(str_ptr column, val_ptr value);
 };

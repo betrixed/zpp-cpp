@@ -46,7 +46,7 @@ public:
 	virtual ~Select() {
 		dlink_.unlink();
 	}
-	virtual obj_rc getSqlParams();
+	virtual obj_return getSqlParams();
 
 	void construct(obj_ptr db, bool autoAlias = false);
 

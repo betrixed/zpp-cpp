@@ -327,23 +327,20 @@ IConfig::getCollation()
 	}
 }
 
-obj_rc 
+obj_return 
 IConfig::newConnect(str_ptr name)
 {
 	str_rc dclass(getDriverClass());
-	//showstr("dclass", dclass);
-
 	htab_rc args_mgr;
 	htab_rw args(args_mgr);
 	args.push_back(vobj());
-	args.push_back(name);
-	//showdata("dclass args", args_mgr);
+	args.push_back(name)
 
-	obj_rc result = ReflectCache::staticInstanceArgs(dclass, args_mgr);
+	obj_return result.value_ = ReflectCache::staticInstanceArgs(dclass, args_mgr);
 	
-	if (!result.ok())
+	if (!result.value_.ok())
 	{
-		zend_throw_error(zend_ce_error, "Unable to create class %s", dclass.data());
+		result.error() << "Unable to create class ", dclass.data();
 	}
 	return result;
 }

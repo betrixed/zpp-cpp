@@ -34,8 +34,8 @@ namespace wcd {
 		htab_rc driverClasses_;
 
 
-		obj_rc activate(str_ptr name);
-		IConfig* needConfig(str_ptr name);
+		obj_return activate(str_ptr name);
+		obj_return needConfig(str_ptr name);
 
 	public:
 
@@ -50,11 +50,9 @@ namespace wcd {
 
 		obj_rc getDataCache();
 
-		obj_rc getConect(str_ptr name);
+		static obj_return connect(str_ptr name);
 
-		static obj_rc connect(str_ptr name);
-
-		obj_rc getConnect(str_ptr name);
+		obj_return getConnect(str_ptr name);
 		obj_rc getConfig(str_ptr name);
 		
 		str_rc getSqlClass(str_ptr dkey);

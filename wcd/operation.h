@@ -65,7 +65,7 @@ public:
 
 	val_rc getRows(int fetch = IDriver::FETCH_ASSOC);
 
-	virtual obj_rc getSqlParams();
+	virtual obj_return getSqlParams();
 
 	str_rc getSql();
 

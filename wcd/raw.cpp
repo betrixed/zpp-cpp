@@ -28,14 +28,14 @@ Raw::construct(str_ptr sql, obj_ptr driver)
 	db_ = driver;
 }
 
-val_rc  
+val_return 
 Raw::execute()
 {
-	val_rc result;
+	val_return result;
 
 	if (!db_.ok())
 	{
-		zend_throw_error(zend_ce_error,"DB Connection not set");
+		result.error() << "Raw: DB Connection not set";
 		return result;
 	}
 

@@ -236,12 +236,15 @@ IRow::isDirty(str_ptr colname)
 }
 
 
-void 
+error_return 
 IRow::mergeData(htab_ptr attrs)
 {
+	error_return result;
+
 	if (attrs.size() == 0)
 	{
-		return;
+		result.error() << "Array argument is empty!";
+		return result;
 	}
 	val_rc defs_zval_mgr = table_model_.call(IRSTR.getcoldefs);
 	val_ptr defs_zval(defs_zval_mgr);
@@ -264,11 +267,12 @@ IRow::mergeData(htab_ptr attrs)
 		str_ptr cname = key.zstr();
 		if (cdefs.size() && !cdefs.has_key(cname))
 		{
-			zend_throw_error(zend_ce_error, "Unknown attribute %s", cname.data());
-			return;
+			result.error() << "Unknown attribute " << cname;
+			return result;
 		}
 		hw.set(cname, value);
 	}
+	return result;
 }
 
 

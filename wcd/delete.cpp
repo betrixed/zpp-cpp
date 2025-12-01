@@ -18,7 +18,7 @@ using namespace wcc;
 base_obj_mgr<Delete> Delete::omg;
 
 
-obj_rc 
+obj_return 
 Delete::getSqlParams()
 {
 	Bindings& bind = this->bindings();

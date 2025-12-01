@@ -173,23 +173,24 @@ IServer::getDataCache()
 	return dbCache_;
 }
 
-obj_rc 
+obj_return 
 IServer::activate(str_ptr name)
 {
-	IConfig* cfg = needConfig(name);
-	obj_rc result;
+	obj_return cfg = needConfig(name);
 
-	if (!cfg)
+	obj_return result;
+
+	if (cfg.has_errors())
 	{	
-		zend_throw_error(zend_ce_error,"No connection named %s", name.data());
+		result = std::move(cfg);
 		return result;
 	}
 
-	result = cfg->newConnect(name);
-	if (result.ok())
+	result.value_ = cfg->newConnect(name);
+	if (result.value_.ok())
 	{
 		htab_rw hw(active_);
-		hw.set(name, result);
+		hw.set(name, result.value_);
 	}
 	return result;
 }
@@ -215,21 +216,24 @@ IServer::getConfig(str_ptr name)
 	return result;
 }
 
-IConfig*
+obj_return
 IServer::needConfig(str_ptr name)
 {
-	obj_rc cfg(config_.get(name));
-	if (!cfg.ok())
+	obj_return result;
+
+	result.value_ = cfg(config_.get(name));
+	if (!result.value_.ok())
 	{
-		zend_throw_error(zend_ce_error,"No configuration named %s", name.data());
+		result.error() << "No configuration named " << name;
 	}
-	return zobj_toc<IConfig>(cfg);
+	return result;
 }
 
-
-obj_rc 
+obj_return
 IServer::getConnect(str_ptr name)
 {
+	obj_return result;
+
 	if (svc_key_.ok())
 	{
 		str_rc key = svc_key_;
@@ -253,24 +257,30 @@ IServer::getConnect(str_ptr name)
 
 	if (conn.ok())
 	{
-		return conn;
+		result.value_ = conn;
 	}
-
-	str_rc alias = alias_.get(name);
-	if (alias.ok())
-	{
-		conn = active_.get(alias);
-		if (conn.ok())
+	else {
+		str_rc alias = alias_.get(name);
+		if (alias.ok())
 		{
-			return conn;
+			conn = active_.get(alias);
+			if (conn.ok())
+			{
+				result.value_ = conn;
+			}
+			else {
+				result = activate(alias);
+			}
 		}
-		return activate(alias);
+		else {
+			result = activate(name);
+		}
 	}
-	return activate(name);
+	return result;
 
 }
 
-obj_rc //static 
+obj_return //static 
 IServer::connect(str_ptr name)
 {
 	obj_ptr me = Services::getOne(IServer::omg.class_name());
@@ -357,20 +367,23 @@ IServer::config(htab_ptr data)
 
 }
 
-void 
+error_return 
 IServer::addConfig(obj_rc iconfig, str_ptr name)
 {
 	IConfig* cfg = zobj_toc<IConfig>(iconfig);
 	str_ptr key = cfg->getMyKey();
 
+	error_return result;
+
 	if (key.ok())
 	{
-		zend_throw_error(zend_ce_error,"IConfig object was already assigned to %s", key.data());
-		return;
+		result.error() << "IConfig object was already assigned to " << key;
+		return result;
 	}
 
 	cfg->setMyKey(name);
 	htab_rw(config_).set(name, iconfig);
+	return result;
 }
 
 void 

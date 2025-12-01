@@ -425,28 +425,33 @@ IDriver::escape(str_ptr value)
 	return result;
 }
 
-bool 
+error_return 
 check_results(val_ptr test)
 {
+	error_return result;
+
 	int rtype = test.ztype();
 	switch(rtype) {
 	case IS_FALSE:
 	case IS_TRUE:
 	case IS_LONG:
 	case IS_ARRAY:
-		return true;
+		break;
+	default:
+		result.error() << "Bad PHP return type: " << rtype;
+		break;
 	}
-	zend_throw_error(zend_ce_error,"Error on fetch results");
-	return false;
+
+	return result;
 }
-val_rc 
+val_return
 IDriver::execute(val_ptr stmt, bool close, bool fetch)
 {
 	//zend_printf("execute: bool(%d)\n", fetch);
 	obj_ptr sobj(stmt);
 	//showobj("Execute ", sobj);
 	val_rc pdo_result = sobj.call(DBS.execute_fn);
-	val_rc result;
+	val_return result;
 
 
 	//showmem("pdo_result", pdo_result);
@@ -458,10 +463,10 @@ IDriver::execute(val_ptr stmt, bool close, bool fetch)
 	{
 		if (fetch) {
 			val_rc farg(ifetch_);
-			result = sobj.call(DBS.fetchall_fn, farg);
+			result.value_ = sobj.call(DBS.fetchall_fn, farg);
 		}
 		else {
-			result = sobj.call(DBS.rowcount_fn);
+			result.value_ = sobj.call(DBS.rowcount_fn);
 			//showmem("RowCount", result);
 		}
 	}
@@ -478,11 +483,15 @@ IDriver::execute(val_ptr stmt, bool close, bool fetch)
 	if (good_result) {
 		if (fetch)
 		{
-			check_results(result);
+			error_return derr = check_results(result.value_);
+			if (derr.has_errors())
+			{
+				result = std::move(derr);
+			}
 		}
 	}
 	else {
-		result.set_bool(false);
+		result.value_.set_bool(false);
 	}
 
 	return result;
@@ -646,17 +655,25 @@ IDriver::getAttribute(int key)
 	return pdo.call(DBS.getattribute_fn, arg);
 
 }
-val_rc 
+
+val_return 
 IDriver::querySingle(str_ptr query)
 {
+	val_return result;
+
 	obj_ptr pdo(handle());
 
 	val_rc arg1(query);
-
 	obj_rc stmt = pdo.call(DBS.query_str, arg1);
 
+	if (!stmt.ok())
+	{
+		result.error() << "pdo call " << query;
+		return result;
+	}
+
 	arg1 = (zend_long) ifetch_;
-	val_rc result = stmt.call(DBS.fetch_str, arg1);
+	result.value_ = stmt.call(DBS.fetch_str, arg1);
 
 	stmt.call(DBS.close_cursor);
 
@@ -811,10 +828,11 @@ IDriver::param(int pno)
 	return DBS.place_holder;		
 }
 
-val_rc 
+val_return
 IDriver::prepare(str_ptr query)
 {
 	//zend_printf("IDriver::prepare-- ");
+	val_return result;
 
 	obj_rc pdo(handle());
 
@@ -824,28 +842,31 @@ IDriver::prepare(str_ptr query)
 	// with reference count error for sql string
 	lastsql_ = query.duplicate();
 	val_rc sql(query);
-	val_rc stmt = pdo.call(DBS.prepare_fn, sql);
-	//showmem("IDriver prepare", stmt);
-	/** if (!stmt.ok())
+	result.value_ = pdo.call(DBS.prepare_fn, sql);
+
+	if (!result.value_.ok())
 	{
-		zend_throw_error(zend_ce_error, "Prepare: %s", lastsql_.data());
+		result.error() << "Prepare: " << query;
 	}
-	*/
-	return stmt;
+
+	return result;
 }
 
 
-val_rc
+val_return
 IDriver::prepareQuery(str_ptr query, htab_ptr values, htab_ptr bindTypes)
 {
-	val_rc stmt_mgr = prepare(query);
+	val_return result;
 
-	obj_ptr stmt(stmt_mgr);
+	result = prepare(query);
 
-	if (!stmt.ok())
+	if (result.has_errors())
 	{
-		return stmt_mgr;
+		return result;
 	}
+
+	obj_ptr stmt(result.value_);
+
 	val_rc test;
 	val_rc temp;
 
@@ -880,12 +901,12 @@ IDriver::prepareQuery(str_ptr query, htab_ptr values, htab_ptr bindTypes)
 	}
 	if (!test.ok())
 	{
-		zend_throw_error(zend_ce_error,"Statement execute failed %s", lastsql_.data());
+		result.error() << "Statement execute failed: " << query;
 	}
-	return stmt_mgr;
+	return result;
 }
 
-val_rc 
+val_return
 IDriver::query(str_ptr query, htab_ptr params)
 {
 	htab_ptr btypes;
@@ -914,14 +935,15 @@ IDriver::rollback()
 	return result.isTrue();
 }
 
-bool 
+error_return 
 IDriver::transaction()
 {
-	bool result = begin();
+	bool test = begin();
+	error_return result;
 
-	if (!result)
+	if (!test)
 	{
-		zend_throw_error(zend_ce_error, "Begin transaction failed");
+		result.error() << "Begin transaction failed";
 	}
 
 	return result;

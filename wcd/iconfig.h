@@ -31,7 +31,7 @@ public:
 	str_ptr getMyKey();
 	void      setMyKey(str_ptr key);
 	
-	obj_rc newConnect(str_ptr name);
+	obj_return newConnect(str_ptr name);
 	obj_rc newSql();
 	//obj_rc newDmlBuild(obj_rc idriver);
 	

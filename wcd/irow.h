@@ -85,7 +85,7 @@ namespace wcd {
 
     	bool isDirty(str_ptr colname);
 
-    	void mergeData(htab_ptr attrlist);
+    	error_return mergeData(htab_ptr attrlist);
 
     	void setData(htab_ptr data, bool exists = false);
 

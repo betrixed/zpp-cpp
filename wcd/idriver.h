@@ -53,7 +53,7 @@ namespace wcd {
 		bool closeStmt(val_ptr stmt);
 
 		str_rc escape(str_ptr value);
-		val_rc execute(val_ptr stmt, bool close = true, bool fetch = false);
+		val_return execute(val_ptr stmt, bool close = true, bool fetch = false);
 
 		htab_rc fetchAllRows(val_ptr stmt, int mode);
 		val_rc fetchRow(val_ptr stmt, int mode);
@@ -105,12 +105,15 @@ namespace wcd {
 		obj_rc newParamList();
 		str_rc param(int pno);
 
-		val_rc prepare(str_ptr query);
-		void  	 prepareExecute(str_ptr query, htab_ptr values, htab_ptr bindTypes);
-		val_rc prepareQuery(str_ptr query, htab_ptr values, htab_ptr bindTypes);
+		val_return prepare(str_ptr query);
 
-		val_rc query(str_ptr query, htab_ptr params);
-		val_rc querySingle(str_ptr query);
+		void   prepareExecute(str_ptr query, htab_ptr values, htab_ptr bindTypes);
+
+		val_return prepareQuery(str_ptr query, htab_ptr values, htab_ptr bindTypes);
+
+		val_return query(str_ptr query, htab_ptr params);
+
+		val_return querySingle(str_ptr query);
 
 		
 
@@ -123,7 +126,7 @@ namespace wcd {
 		bool setAttribute(int key, val_ptr value);
 		int  setFetch(int mode);
 
-		bool transaction();
+		error_return transaction();
 
 		obj_rc getTableModel(str_ptr tableName);
 

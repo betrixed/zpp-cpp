@@ -51,7 +51,7 @@ namespace wcd {
 		error_return whereRaw(obj_ptr rawobj, htab_ptr values, str_ptr bval);
 		
 		obj_return getInsertSql(htab_ptr columns);
-		bireturn<val_rc> update(obj_ptr irow, htab_ptr dirty);
+		val_return update(obj_ptr irow, htab_ptr dirty);
 
 		void setReturns(htab_ptr names);
 		val_return insert(val_ptr rdata);
