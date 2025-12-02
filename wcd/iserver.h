@@ -63,7 +63,7 @@ namespace wcd {
 
 		void config(htab_ptr data);
 
-		void addConfig(obj_rc iconfig, str_ptr name);
+		error_return addConfig(obj_rc iconfig, str_ptr name);
 
 		void setAlias(str_ptr alias, str_ptr name);
 		htab_ptr getAliases();

@@ -334,9 +334,10 @@ IConfig::newConnect(str_ptr name)
 	htab_rc args_mgr;
 	htab_rw args(args_mgr);
 	args.push_back(vobj());
-	args.push_back(name)
+	args.push_back(name);
 
-	obj_return result.value_ = ReflectCache::staticInstanceArgs(dclass, args_mgr);
+	obj_return result;
+	result.value_ = ReflectCache::staticInstanceArgs(dclass, args_mgr);
 	
 	if (!result.value_.ok())
 	{

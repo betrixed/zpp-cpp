@@ -235,7 +235,7 @@ IDriver::connect()
 
 	if (handle_.ok())
 	{
-		result;
+		return result;
 	}
 
 	str_return test = getDSN();
@@ -256,7 +256,7 @@ IDriver::connect()
 	htab_rc  args_mgr;
 	htab_rw args(args_mgr);
 
-	args.push_back(dsn.value_);
+	args.push_back(test.value_);
 	args.push_back(user);
 	args.push_back(pw);
 	args.push_back(options);
@@ -911,15 +911,28 @@ IDriver::query(str_ptr query, htab_ptr params)
 {
 	htab_ptr btypes;
 
-	obj_rc stmt = prepareQuery(query, params, btypes);
+	val_return result = prepareQuery(query, params, btypes);
 
-	val_rc result = stmt.call(DBS.fetchall_fn);
+	if (result.has_errors())
+	{
+		return result;
+	}
+
+	obj_rc stmt = result.value_.zobject();
+
+	val_rc data = stmt.call(DBS.fetchall_fn);
 
 	stmt.call(DBS.close_cursor);
 
-	if (!check_results(result)) 
+	error_return check = check_results(data);
+
+	if (check.has_errors()) 
 	{
-		result.set_bool(false);
+		result.value_.set_bool(false);
+		result = std::move(check);
+	}
+	else {
+		result.value_ = data;
 	}
 
 	return result;
@@ -1616,9 +1629,11 @@ ZEND_METHOD(Wcd_IDriver, transaction)
 
 	IDriver* db = zval_toc<IDriver>(ZEND_THIS);
 
-	bool result = db->transaction();
+	error_return result = db->transaction();
 
-	RETURN_BOOL(result);
+	bool check = !result.has_errors();
+	RETURN_BOOL(check);
+	result.throw_errors();
 }
 
 PHP_MINIT_FUNCTION(Wcd_IDriver_reg)

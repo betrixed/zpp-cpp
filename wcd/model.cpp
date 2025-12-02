@@ -234,7 +234,7 @@ namespace wcd {
 		return rec;
 	}
 
-	obj_rc 
+	obj_return
 	Model::getConnect()
 	{
 		if (db_.ok())

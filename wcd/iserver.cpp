@@ -185,8 +185,9 @@ IServer::activate(str_ptr name)
 		result = std::move(cfg);
 		return result;
 	}
+	IConfig* ic = zobj_toc<IConfig>(cfg.value_);
 
-	result.value_ = cfg->newConnect(name);
+	result.value_ = ic->newConnect(name);
 	if (result.value_.ok())
 	{
 		htab_rw hw(active_);
@@ -221,7 +222,8 @@ IServer::needConfig(str_ptr name)
 {
 	obj_return result;
 
-	result.value_ = cfg(config_.get(name));
+	result.value_ = config_.get(name);
+
 	if (!result.value_.ok())
 	{
 		result.error() << "No configuration named " << name;
