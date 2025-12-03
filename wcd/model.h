@@ -70,9 +70,9 @@ public:
 
 	static val_rc createFromResult(str_ptr classname, htab_ptr results);
 	
-	static obj_rc keyValue(str_ptr static_name, val_ptr keynames, val_ptr values);
+	static obj_return keyValue(str_ptr static_name, val_ptr keynames, val_ptr values);
 
-	static obj_rc withValues(str_ptr static_name, val_ptr keyvalues);
+	static obj_return withValues(str_ptr static_name, val_ptr keyvalues);
 
 	static val_rc callStatic(str_ptr static_name, str_ptr method, val_ptr params);
 

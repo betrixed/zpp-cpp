@@ -25,7 +25,7 @@ void Select::debug_info(htab_rw di)
 	di.set(SQSTR.auto_alias, autoAlias_);
 }
 
-obj_rc 
+obj_return 
 Select::getSqlParams()
 {
 	Bindings& bind = this->bindings();
@@ -35,7 +35,7 @@ Select::getSqlParams()
 	obj_rc isql_mgr = bind.isql();
 	ISql* isq = zobj_toc<ISql>(isql_mgr);
 
-	obj_rc plist_mgr = isq->select(bind);
+	obj_return result = isq->select(bind);
 	bind.wipe();
 
 	//showobj("\nSelect::ParamList ", plist_mgr);
@@ -48,7 +48,7 @@ Select::getSqlParams()
 
 	
 
-	return plist_mgr;
+	return result;
 }
 
 void 
@@ -363,10 +363,10 @@ ZEND_METHOD(Wcd_Sql_Select, getSqlParams)
 
 	Select* sobj = zval_toc<Select>(ZEND_THIS);
 
-	obj_rc result = sobj->getSqlParams();
+	obj_return result = sobj->getSqlParams();
 
-
-	result.move_zv(return_value);
+	result.throw_errors();
+	result.value_.move_zv(return_value);
 }
 
 ZEND_METHOD(Wcd_Sql_Select, icols)

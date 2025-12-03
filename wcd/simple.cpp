@@ -282,7 +282,7 @@ Simple::setValues(htab_ptr values)
 	values_ = values;
 }
 
-val_rc 
+val_return 
 Simple::update(htab_ptr values)
 {
 	setValues(values);
@@ -538,7 +538,7 @@ ZEND_METHOD(Wcd_Simple, run)
 	Simple* sobj = zval_toc<Simple>(ZEND_THIS);
 	val_return result = sobj->run();
 	result.throw_errors();
-	result.move_zv(return_value);
+	result.value_.move_zv(return_value);
 }
 
 ZEND_METHOD(Wcd_Simple, setValues)

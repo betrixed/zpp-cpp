@@ -143,13 +143,15 @@ Operation::getRows(int fetch)
 	return result;
 }
 
-obj_rc
+obj_return
 Operation::getSqlParams()
 {
 	Bindings& bind = bindings();
-	obj_rc plist = bind.getParamList();
+	obj_return result;
+
+	result.value_ = bind.getParamList();
 	this->wipe();
-	return plist;
+	return result;
 }
 
 /* this throws away the ParamList object
@@ -419,9 +421,9 @@ ZEND_METHOD(Wcd_Sql_Operation, getSqlParams)
 
 	Operation* cobj = zval_toc<Operation>(ZEND_THIS);
 
-	obj_rc result = cobj->getSqlParams();
-
-	result.move_zv(return_value);
+	obj_return result = cobj->getSqlParams();
+	result.throw_errors();
+	result.value_.move_zv(return_value);
 }
 
 ZEND_METHOD(Wcd_Sql_Operation, getSql)

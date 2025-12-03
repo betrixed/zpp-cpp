@@ -27,11 +27,11 @@ Delete::getSqlParams()
 
 	ISql* isql = zobj_toc<ISql>(isql_mgr);
 
-	obj_rc plist_rc = isql->deleteSql(bind);
+	obj_return result = isql->deleteSql(bind);
 
 	bind.wipe();
 
-	return plist_rc;
+	return result;
 }
 
 }; // namespace wcd
@@ -45,9 +45,10 @@ ZEND_METHOD(Wcd_Sql_Delete, getSqlParams)
 
 	Delete* cobj = zval_toc<Delete>(ZEND_THIS);
 
-	obj_rc result = cobj->getSqlParams();
+	obj_return result = cobj->getSqlParams();
 
-	result.move_zv(return_value);
+	result.throw_errors();
+	result.value_.move_zv(return_value);
 }
 
 

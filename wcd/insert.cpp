@@ -79,9 +79,9 @@ ZEND_METHOD(Wcd_Sql_Insert, getSqlParams)
 
 	Insert* cobj = zval_toc<Insert>(ZEND_THIS);
 
-	obj_rc result = cobj->getSqlParams();
-
-	result.move_zv(return_value);
+	obj_return result = cobj->getSqlParams();
+	result.throw_errors();
+	result.value_.move_zv(return_value);
 }
 
 

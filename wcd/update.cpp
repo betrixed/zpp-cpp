@@ -30,7 +30,7 @@ Update::set(str_ptr column, val_ptr value)
 	bind.addarray(ISql::SQL_UPDATE, args_rc);
 }
 
-obj_rc 
+obj_return 
 Update::getSqlParams()
 {
 	Bindings& bind = this->bindings();
@@ -39,11 +39,11 @@ Update::getSqlParams()
 
 	ISql* isql = zobj_toc<ISql>(isql_ptr);
 
-	obj_rc plist_rc = isql->update(bind);
+	obj_rc result = isql->update(bind);
 
 	bind.wipe();
 
-	return plist_rc;
+	return result;
 }
 
 }; // namespace wcd
@@ -74,9 +74,9 @@ ZEND_METHOD(Wcd_Sql_Update, getSqlParams)
 
 	Update* cobj = zval_toc<Update>(ZEND_THIS);
 
-	obj_rc result = cobj->getSqlParams();
-
-	result.move_zv(return_value);
+	obj_return result = cobj->getSqlParams();
+	result.throw_errors();
+	result.value_.move_zv(return_value);
 }
 
 #endif

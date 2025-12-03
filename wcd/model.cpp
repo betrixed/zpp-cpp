@@ -903,7 +903,7 @@ namespace wcd {
 			//zend_printf("save-update\n");
 			if (pkey.size() == 0)
 			{
-				result.error() << "Update call has no primary key"
+				result.error() << "Update call has no primary key";
 				return result;
 			}
 
@@ -911,7 +911,7 @@ namespace wcd {
 
 			if (id.size() == 0)
 			{
-				result.error() << "No values for primary key"
+				result.error() << "No values for primary key";
 				return result;
 			}
 
