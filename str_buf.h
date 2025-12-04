@@ -49,7 +49,7 @@ namespace zpp {
 		void lose();
 
 	public:
-
+		
 		str_buf();
 
 		str_buf(zval *v);
