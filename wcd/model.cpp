@@ -977,7 +977,7 @@ namespace wcd {
 				result = std::move(vret);
 				return result;
 			}
-			val_rc& saved = vret.value_;
+			saved = vret.value_;
 			//update row values from return?
 			if (saved.isArray() && (pkey_refresh_mgr.size() > 0))
 			{
@@ -1026,14 +1026,30 @@ namespace wcd {
 			}
 		}
 
+
 		irow->setExists();
+		
+		result.value_ = saved.ok();
 
 		if (reload) {
-			obj_rc rec = readRow(irow);
-			irow->copy(rec);
+			obj_return rec = readRow(irow);
+			if (rec.has_errors())
+			{
+				zend_printf("readRow has errors\n");
+				result = std::move(rec);
+				if (!result.has_errors())
+				{
+					zend_printf("Should have errors\n");
+				}
+				result.value_ = false;
+			}
+			else if (rec.value_.ok())
+			{
+				irow->copy(rec.value_);
+			}
 		}
-
-		return saved.ok();
+		
+		return result;
 	}
 
 	obj_return 
@@ -1043,6 +1059,7 @@ namespace wcd {
 		obj_return result;
 
 		htab_rc pkey = getPKey();
+		//showdata("pkey", pkey);
 
 		if (pkey.size())
 		{
@@ -1061,7 +1078,9 @@ namespace wcd {
 		else {
 			str_rc name = getName();
 			result.error() << "No primary key for table " << name;
+			//zend_printf("error %s\n", result.errors_->data());
 		}
+		//showobj("obj_return", result.value_);
 		return result;
 
 	}
@@ -1400,23 +1419,33 @@ ZEND_METHOD(Wcd_Model, rowSaved)
 void 
 row_output(zend_execute_data *execute_data, zval *return_value)
 {
-	zval* data;
-	bool  reload = false;
+	zarg_rd args(execute_data);
+	obj_ptr irow_obj;
+	bool    reload = false;
 
-	ZEND_PARSE_PARAMETERS_START(1,2)
-	Z_PARAM_OBJECT_OF_CLASS(data, IRow::omg.classEntry())
-	Z_PARAM_OPTIONAL
-	Z_PARAM_BOOL(reload)
-	ZEND_PARSE_PARAMETERS_END();
+	args.obj_ofclass(irow_obj, args.need(0), IRow::omg.classEntry());
+	args.zbool(reload, args.option(1));
 
-	Model* model = zval_toc<Model>(ZEND_THIS);
-
-	RETURN_BOOL(model->saveRow(data, reload));	
+	if (!args.throw_errors())
+	{
+		Model* model = zval_toc<Model>(ZEND_THIS);
+		//zend_printf("\nCall save row\n");
+		bool_return result = model->saveRow(irow_obj, reload);
+		if (result.has_errors())
+		{	
+			//zend_printf("\nsaveRow errors %s\n", result.errors_->data());
+			result.throw_errors();
+		}
+		RETURN_BOOL(result.value_);
+		
+	}
+	else {
+		RETURN_BOOL(false);
+	}		
 }
 
 ZEND_METHOD(Wcd_Model, createRow)
 {
-
 	row_output(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 
@@ -1663,6 +1692,8 @@ ZEND_METHOD(Wcd_Model, readRow)
 	Model* model = zval_toc<Model>(ZEND_THIS);
 
 	obj_return result = model->readRow(rdata);
+	//zend_printf("result & %lx\n", (uint64_t) &result);
+
 	result.throw_errors();
 	result.value_.move_zv(return_value);
 

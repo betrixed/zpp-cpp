@@ -98,7 +98,7 @@ IRow::setData(htab_ptr data, bool exists)
 	}
 }
 
-bool 
+bool
 IRow::create(bool reload)
 {
 	return save(reload);
@@ -128,9 +128,11 @@ IRow::save(bool reload)
 	val_rc arg;
 
 	arg.set_bool(reload);
+	// calls PHP method // TODO ? virtualize
+	val_rc vret = table_model_.call(IRSTR.save_key, self, arg);
 
-	val_rc result = table_model_.call(IRSTR.save_key, self, arg);
-	return val_ptr(result).isTrue(); 
+	return vret.isTrue();
+	
 }
 
 

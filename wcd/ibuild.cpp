@@ -286,6 +286,7 @@ using namespace zpp;
 			int fetch = db.setFetch(IDriver::FETCH_ASSOC);
 
 			result = RunSql::op(getDb(), sql, values, (rets.size() > 0));
+			//showmem("RunSql::op", result.value_);
 			//restore fetch
 			db.setFetch(fetch);
 		}

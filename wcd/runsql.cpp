@@ -30,10 +30,10 @@ namespace wcd {
 		retval_ = rval;
 	}
 
-	val_rc 
+	val_return 
 	RunSql::operation()
 	{
-		val_rc exresult;
+		val_return exresult;
 
 		IDriver* db = zobj_toc<IDriver>(db_);
 
@@ -52,7 +52,7 @@ namespace wcd {
 			{
 				if (pct > 1)
 				{
-					htab_rw result(exresult);
+					htab_rw result(exresult.value_);
 
 					htab_walk wk;
 
@@ -60,8 +60,12 @@ namespace wcd {
 					for(wk.start(params); wk.ok(); wk.next())
 					{
 						db->bind(stmt, val.zarray());
-						val_rc x2 = db->execute(stmt, false, retval_);
-						result.push_back(x2);
+						val_return x2 = db->execute(stmt, false, retval_);
+						if (x2.has_errors())
+						{
+							return x2;
+						}
+						result.push_back(x2.value_);
 					}
 					db->closeStmt(stmt);
 					return exresult;
@@ -73,11 +77,12 @@ namespace wcd {
 			db->bind(stmt, params);
 		}
 		exresult  = db->execute(stmt, true, retval_);
+		//showmem("exresult Runsql", exresult.value_);
 		return exresult;
 
 	}
 
-	val_rc //static 
+	val_return //static 
 	RunSql::op(obj_ptr db, str_ptr sql, htab_ptr bind, bool rval)
 	{
 		//showstr("runsql", sql);
@@ -90,9 +95,9 @@ namespace wcd {
 		return rs->run();
 	}
 
-	val_rc RunSql::run()
+	val_return RunSql::run()
 	{
-		val_rc result = operation();
+		val_return result = operation();
 		return result;
 	}
 }; // namespace wcd
@@ -142,8 +147,9 @@ ZEND_METHOD(Wcd_Sql_RunSql, Op)
 	Z_PARAM_BOOL(retval)
 	ZEND_PARSE_PARAMETERS_END();
 
-	val_rc result = RunSql::op(db, sql, binds, retval);
-	result.move_zv(return_value);
+	val_return result = RunSql::op(db, sql, binds, retval);
+	result.value_.move_zv(return_value);
+	result.throw_errors();
 }
 
 ZEND_METHOD(Wcd_Sql_RunSql, operation)
@@ -152,8 +158,9 @@ ZEND_METHOD(Wcd_Sql_RunSql, operation)
 
 	RunSql* cobj = zval_toc<RunSql>(ZEND_THIS);
 
-	val_rc result = cobj->operation();
-	result.move_zv(return_value);
+	val_return result = cobj->operation();
+	result.value_.move_zv(return_value);
+	result.throw_errors();
 
 }
 ZEND_METHOD(Wcd_Sql_RunSql, run)
@@ -162,8 +169,9 @@ ZEND_METHOD(Wcd_Sql_RunSql, run)
 
 	RunSql* cobj = zval_toc<RunSql>(ZEND_THIS);
 
-	val_rc result = cobj->run();
-	result.move_zv(return_value);
+	val_return result = cobj->run();
+	result.value_.move_zv(return_value);
+	result.throw_errors();
 
 }
 

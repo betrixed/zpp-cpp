@@ -56,8 +56,6 @@ namespace wcd {
 
     	void construct(obj_ptr tmodel, htab_ptr data = htab_ptr(), bool exists = false);
 
-    	bool create(bool reload = false);
-
     	void delete_row();
 
     	bool exists();
@@ -65,6 +63,8 @@ namespace wcd {
     	bool save(bool reload = false);
 
     	bool update(bool reload = false);
+
+    	bool create(bool reload = false);
 
     	void copy(obj_rc recobj);
     	

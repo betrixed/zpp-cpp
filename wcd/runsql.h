@@ -22,10 +22,10 @@ namespace wcd {
 		void construct(obj_ptr db, str_ptr sql, 
 			 htab_ptr bind, bool rval = false);
 
-		val_rc operation();
-		val_rc run();
+		val_return operation();
+		val_return run();
 		
-		static val_rc op(obj_ptr db, str_ptr sql, 
+		static val_return op(obj_ptr db, str_ptr sql, 
 			htab_ptr bind = htab_ptr(), bool rval = false );
 
 	};
