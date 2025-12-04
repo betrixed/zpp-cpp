@@ -226,7 +226,10 @@ str_out::operator<<(zend_string* s)
 str_out& 
 str_out::operator<<(const char* c)
 {
-	append(c, strlen(c));
+	if (c)
+	{
+		append(c, strlen(c));
+	}
 	return *this;
 }
 

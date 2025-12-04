@@ -17,7 +17,7 @@ struct error_return {
 		m.errors_ = nullptr;
 	}
 
-	const error_return& operator=(error_return&& m)
+	error_return& operator=(error_return&& m)
 	{
 		errors_ = m.errors_;
 		m.errors_ = nullptr;
@@ -52,6 +52,7 @@ struct bireturn  : public error_return
 
 	bireturn(bireturn&& m) : error_return()
 	{
+		//zend_printf("bireturn(bireturn&&)\n");
 		errors_ = m.errors_;
 		m.errors_ = nullptr;
 		value_ = m.value_;
@@ -78,16 +79,25 @@ struct bireturn  : public error_return
 		return (value_ == c);
 	}
 
-	const bireturn& operator=(error_return&& e)
+	bireturn& operator=(error_return&& e)
 	{
+
 		errors_ = e.errors_;
 		e.errors_ = nullptr;
 		return *this;
 	}
 
-	const bireturn& operator=(bireturn&& m)
+	bireturn& operator=(bireturn&& m)
 	{
+
 		errors_ = m.errors_;
+		/*if (errors_) {
+			zend_printf("bireturn= && %s %lx\n", errors_->data(), (uint64_t) this);
+		}
+		else {
+			zend_printf("bireturn= && %lx\n", (uint64_t) this);
+		}*/
+
 		m.errors_ = nullptr;
 		value_ = m.value_;
 		m.value_ = T();

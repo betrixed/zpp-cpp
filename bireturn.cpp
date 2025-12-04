@@ -14,6 +14,7 @@ error_return::del_errors()
 	{
 		if (errors_)
 		{
+			//zend_printf("del_errors %s %lx\n", errors_->data(), (uint64_t) this);
 			delete errors_;
 			errors_ = nullptr;
 		}
@@ -48,8 +49,11 @@ error_return::throw_errors(const char* fncstr)
 {
 	if (errors_)
 	{
-		*errors_ << "*** ERROR " << fncstr;
+		//zend_printf("\nThrow errors \n");
+
+		*errors_ << "\n*** ERROR " << fncstr;
 		str_rc s = errors_->zstr();
+		//zend_printf("\nThrow errors %s\n", s.data());
 		zend_throw_error(zend_ce_error,"%s", s.data());
 		delete errors_;
 		errors_ = nullptr;
