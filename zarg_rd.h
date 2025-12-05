@@ -79,6 +79,8 @@ public:
 
 	bool zbool(bool& value, zval* arg);
 	
+	bool ztype(val_ptr& value, zval* arg, int ptype);
+
 	bool     has_errors() const { return (errors_); }
 	str_rc   get_errors();
 	bool     throw_errors(const char* fncstr = nullptr);

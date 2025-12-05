@@ -60,6 +60,19 @@ zarg_rd::option(size_t ix)
 	return zptr;
 }
 
+bool 
+zarg_rd::ztype(val_ptr& value, zval* arg, int ptype)
+{
+	value = arg;
+	int rtype = value.ref_type();
+	if (rtype != ptype)
+	{
+		error() << "; Expected TYPE " << ptype << ",  got " << rtype;
+		return false;
+	}
+	return true;
+}
+
 zval* 
 zarg_rd::need(size_t ix)
 {
