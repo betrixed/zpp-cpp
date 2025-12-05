@@ -28,26 +28,30 @@ void Select::debug_info(htab_rw di)
 obj_return 
 Select::getSqlParams()
 {
-	Bindings& bind = this->bindings();
-	if (autoAlias_) {
-		bind.aliasSelect();
+	obj_return result;
+	Bindings* bind = nullptr;
+	if (!bindPtr(result, bind))
+	{
+		return result;
 	}
-	obj_rc isql_mgr = bind.isql();
+
+	if (autoAlias_) {
+		bool_return bret = bind->aliasSelect();
+		if (bret.has_errors())
+		{
+			result = std::move(bret);
+			return result;
+		}
+	}
+	obj_rc isql_mgr = bind->isql();
 	ISql* isq = zobj_toc<ISql>(isql_mgr);
 
-	obj_return result = isq->select(bind);
-	bind.wipe();
-
-	//showobj("\nSelect::ParamList ", plist_mgr);
-	//ParamList* pl = zobj_toc<ParamList>(plist_mgr);
-	//str_rc sql = pl->getSql();
-	//showstr("\nSql", sql);
-
-	//htab_ptr values = pl->getValues();
-	//showdata("\nValues", values);
-
-	
-
+	result = isq->select( *bind);
+	if (result.has_errors())
+	{
+		return result;
+	}
+	bind->wipe();
 	return result;
 }
 
@@ -78,9 +82,17 @@ Select::construct(obj_ptr db, bool autoAlias)
  	return values;
  }
 
-void
+error_return
 Select::aggregate(str_ptr aggfn, str_ptr alias, htab_ptr aggargs)
 {
+	error_return result;
+
+	Bindings* bind = nullptr;
+	if (!bindPtr(result, bind))
+	{
+		return result;
+	}
+
 	htab_rc data;
 
 	htab_rw hw(data);
@@ -96,8 +108,9 @@ Select::aggregate(str_ptr aggfn, str_ptr alias, htab_ptr aggargs)
 		hw.set(SQSTR.columns, aggargs);
 	}
 
-	Bindings& bind = this->bindings();
-	bind.set(ISql::SQL_AGGREGATE, data);
+
+	bind->set(ISql::SQL_AGGREGATE, data);
+	return result;
 }
 
 void 
@@ -115,54 +128,90 @@ Select::wipe()
 	Operation::wipe();
 }
 
-void 
+void
 Select::add(htab_ptr cols)
 {
 	icol().add(cols);
 }
 
-obj_rc 
+obj_return
 Select::addJoin(obj_ptr ltable, obj_ptr rtable, int jtype)
 {
+	obj_return result;
+
 	obj_rc ji_mgr = JoinInfo::omg.new_zobj();
 	JoinInfo*  ji = zobj_toc<JoinInfo>(ji_mgr);
 
 	ji->construct(ltable, rtable, jtype);
 
-	JoinTables& jt = this->joiner();
-	
-	jt.addJoin(ji_mgr);
-	return ji_mgr;
+	obj_return jret = this->getJoiner();
+	if (jret.has_errors())
+	{
+		result = std::move(jret);
+		return result;
+	}
+	JoinTables* jt = zobj_toc<JoinTables>(jret.value_);
+
+	jt->addJoin(ji_mgr);
+
+	result.value_ = ji_mgr;
+	return result;
 }
 
-obj_rc 
+obj_return 
 Select::addTable(str_ptr table, str_ptr alias, htab_ptr cols)
 {
+	obj_return result;
+
 	obj_rc tc_mgr = TColumns::omg.new_zobj();
 	TColumns* tc = zobj_toc<TColumns>(tc_mgr);
 
 	val_rc cols_mgr(cols);
 	tc->construct(table, alias, cols_mgr);
 
-	JoinTables& jt = this->joiner();
-	jt.addTable(tc);
+	obj_return jret = this->getJoiner();
+	if (jret.has_errors())
+	{
+		result = std::move(jret);
+		return result;
+	}
 
-	return tc_mgr;
+	JoinTables* jt = zobj_toc<JoinTables>(jret.value_);
+
+	jt->addTable(tc);
+
+	result.value_ = tc_mgr;
+
+	return result;
 }
 
-val_rc 
+htab_return
 Select::getRenamed()
 {
-	val_rc results = this->getRows();
+	htab_return result;
 
-	val_rc rename = bindings().get(ISql::SQL_RENAME);
+	val_return row_ret= this->getRows();
 
-	if (results.isArray() && rename.isArray())
+	if (row_ret.has_errors())
+	{
+		result = std::move(row_ret);
+		return result;
+	}
+	Bindings* bind = nullptr;
+	if (!bindPtr(result, bind))
+	{
+		return result;
+	}
+
+	val_rc rename = bind->get(ISql::SQL_RENAME);
+	val_rc& rowset = row_ret.value_;
+
+	if (rowset.isArray() && rename.isArray())
 	{
 		htab_rc objset;
 		htab_rw hw(objset);
 
-		htab_ptr rows(results);
+		htab_ptr rows(rowset);
 		htab_ptr rtab(rename);
 		htab_walk wk;
 
@@ -171,14 +220,15 @@ Select::getRenamed()
 			obj_rc split = JoinTables::rowSplit(rows, rtab);
 			hw.push_back(split);
 		}
-		results = objset;
+		result.value_ = objset;
 	}
-	return results;
+	return result;
 }
 
-obj_ptr
+obj_return
 Select::iCols()
 {
+	obj_return result;
 	if (!icols_.ok())
 	{
 		icols_ = IColumns::omg.new_zobj();
@@ -186,7 +236,8 @@ Select::iCols()
 		obj_ptr self(vobj());
 		ip->construct(self);
 	}
-	return icols_;
+	result.value_ = icols_;
+	return result;
 }
 
 void 
@@ -304,7 +355,7 @@ ZEND_METHOD(Wcd_Sql_Select, addJoin)
 	obj_ptr ltable;
 	obj_ptr rtable;
 	zend_long jtype = JoinInfo::J_INNER;
-	obj_rc result;
+	obj_return result;
 
 	args.obj_ofclass(ltable, args.need(0), zclass_sql_icolumns);
 	args.obj_ofclass_null(rtable, args.option(1), zclass_sql_icolumns);
@@ -316,9 +367,10 @@ ZEND_METHOD(Wcd_Sql_Select, addJoin)
 		Select* sobj = zval_toc<Select>(ZEND_THIS);
 
 		result = sobj->addJoin(ltable,rtable,jtype);
+		result.throw_errors();
 	}	
 
-	result.move_zv(return_value);
+	result.value_.move_zv(return_value);
 }
 
 ZEND_METHOD(Wcd_Sql_Select, addTable)
@@ -329,7 +381,7 @@ ZEND_METHOD(Wcd_Sql_Select, addTable)
 	str_ptr talias;
 	htab_ptr cols;
 
-	obj_rc result;
+	obj_return result;
 
 	args.zstring(tname, args.need(0));
 	args.zstring_null(talias, args.option(1));
@@ -341,9 +393,10 @@ ZEND_METHOD(Wcd_Sql_Select, addTable)
 		Select* sobj = zval_toc<Select>(ZEND_THIS);
 
 		result = sobj->addTable(tname,talias,cols);
+		result.throw_errors();
 	}	
 
-	result.move_zv(return_value);
+	result.value_.move_zv(return_value);
 }
 
 ZEND_METHOD(Wcd_Sql_Select, getRenamed)
@@ -352,9 +405,10 @@ ZEND_METHOD(Wcd_Sql_Select, getRenamed)
 
 	Select* sobj = zval_toc<Select>(ZEND_THIS);
 
-	htab_rc result = sobj->getRenamed();
+	htab_return result = sobj->getRenamed();
+	result.throw_errors();
 
-	result.move_zv(return_value);
+	result.value_.move_zv(return_value);
 }
 
 ZEND_METHOD(Wcd_Sql_Select, getSqlParams)
@@ -375,9 +429,9 @@ ZEND_METHOD(Wcd_Sql_Select, icols)
 
 	Select* sobj = zval_toc<Select>(ZEND_THIS);
 
-	obj_ptr result = sobj->iCols();
-
-	result.return_zv(return_value);
+	obj_return result = sobj->iCols();
+	result.throw_errors();
+	result.value_.return_zv(return_value);
 }
 
 ZEND_METHOD(Wcd_Sql_Select, wipe)

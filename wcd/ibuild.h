@@ -36,15 +36,15 @@ namespace wcd {
 		void construct(val_ptr driver);
 		void destruct();
 
-		obj_rc    getDb();
+		obj_return    getDb();
 
-		val_rc aggregate(str_ptr agfn, htab_ptr columns);
-		val_rc get(htab_ptr columns);
+		val_return aggregate(str_ptr agfn, htab_ptr columns);
+		val_return get(htab_ptr columns);
 
-		val_rc oneRow();
-		val_rc allRows();
+		val_return oneRow();
+		val_return allRows();
 
-		val_rc first(htab_ptr columns);
+		val_return first(htab_ptr columns);
 
 		error_return where(val_ptr column, str_ptr bop, val_ptr value, str_ptr bval);
 		error_return whereKeyValue(val_ptr key, val_ptr value);
@@ -62,7 +62,7 @@ namespace wcd {
 		
 		val_return deleteRow(obj_ptr rowobj);
 		
-		int count(val_ptr columns);
+		int_return count(val_ptr columns);
 
 		void table(str_ptr table, bool wipe=true);
 
@@ -74,7 +74,9 @@ namespace wcd {
 
 		str_rc now();
 
-		val_rc seqLastValue(str_ptr seqname);
+		val_return seqLastValue(str_ptr seqname);
+
+		val_return setSeqValue(int value, htab_ptr data);
 
 		void set(str_ptr cname, val_ptr value);
 
@@ -84,11 +86,13 @@ namespace wcd {
 
 		error_return setModel(obj_ptr obj, bool bind = true);
 
-		val_rc setSeqValue(int value, htab_ptr data);
+		
 
 		void wipe();
 		
-		str_rc driver_;
+		// db connection by name, not object reference.
+		str_rc driver_; 
+		
 		obj_rc isql_;
 		obj_rc bindings_;
 
@@ -111,7 +115,7 @@ namespace wcd {
 		error_return where_list(htab_ptr aw);
 
 		
-		val_rc get_first();
+		val_return get_first();
 
 		friend class Model;
 	};

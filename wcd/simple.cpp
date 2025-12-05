@@ -57,10 +57,12 @@ Simple::debug_info(htab_rw di)
 	di.set(SQSTR.statement, stmt_);
 }
 
-htab_rc 
+htab_return 
 Simple::arrayMap(str_ptr keycol, 
 					str_ptr valcol, str_ptr table)
 {	
+	htab_return result;
+
 	IDriver* db = zobj_toc<IDriver>(db_);
 	
 	ISql* isql = db->isql_c();
@@ -81,7 +83,14 @@ Simple::arrayMap(str_ptr keycol,
 
 	fetch_ = IDriver::FETCH_NUM;
 
-	htab_rc rows = this->arraySet(msql);
+	result = this->arraySet(msql);
+	if (result.has_errors())
+	{
+		return result;
+
+	}
+	htab_rc& rows = result.value_;
+
 	htab_rc result_mgr;
 
 	if (rows.size())
@@ -102,31 +111,40 @@ Simple::arrayMap(str_ptr keycol,
 
 		//showdata("\narrayMap results", result_mgr);
 	}
-	return result_mgr;
+	result.value_ = result_mgr;
+	return result;
 
 }
 
-htab_rc 
+htab_return 
 Simple::arraySet(str_ptr sql, htab_ptr params)
 {
-	htab_rc result;
+	htab_return result;
+
 	IDriver* db = zobj_toc<IDriver>(db_);
 
-	stmt_ = db->prepare(sql);
-
-
-	if (stmt_.ok())
+	val_return stmt_ret = db->prepare(sql);
+	if (stmt_ret.has_errors())
 	{
-		autoclose_ = false;
-		if (params.size())
-		{
-			setValues(params);
-		}
-		result = this->send(true);
-		db->closeStmt(stmt_);
-		stmt_.set_null();
-
+		result = std::move(stmt_ret);
+		return result;
 	}
+	stmt_ = stmt_ret.value_;
+	autoclose_ = false;
+	if (params.size())
+	{
+		setValues(params);
+	}
+	val_return rows = this->send(true);
+	db->closeStmt(stmt_);
+	stmt_.set_null();
+
+	if (rows.has_errors())
+	{
+		result = std::move(rows);
+		return result;
+	}
+	result.value_ = rows.value_.zarray();
 	return result;
 }
 
@@ -139,7 +157,7 @@ Simple::bind(val_ptr value)
 	return db->param(values_.size());
 }
 
-val_rc 
+val_return 
 Simple::exec(str_ptr sql, htab_ptr params)
 {
 	this->prepare(sql);
@@ -151,20 +169,26 @@ Simple::exec(str_ptr sql, htab_ptr params)
 	return this->run();
 }
 
-val_rc 
+val_return 
 Simple::firstrow(str_ptr sql, htab_ptr params)
 {
-	htab_rc aset = this->arraySet(sql, params);
-	val_rc result;
+	val_return result;
 
+	htab_return aset_ret = this->arraySet(sql, params);
+	if (aset_ret.has_errors())
+	{
+		result = std::move(aset_ret);
+		return result;
+	}
+	htab_rc& aset = aset_ret.value_;
 	if (aset.size())
 	{
-		result =  aset.get(int(0));
+		result.value_ =  aset.get(int(0));
 	}
 	return result;
 }
 
-val_rc 
+val_return 
 Simple::getRows()
 {
 	autoclose_ = true;
@@ -178,7 +202,7 @@ Simple::getSchemaName()
 	return db->getDatabaseName();
 }
 
-val_rc 
+val_return
 Simple::insert(htab_ptr values)
 {
 	setValues(values);
@@ -197,8 +221,13 @@ Simple::prepare(str_ptr sql)
 		stmt_.set_null();
 	}
 
-	stmt_ = db->prepare(sql);
-
+	val_return stmt_ret = db->prepare(sql);
+	if (stmt_ret.has_errors())
+	{
+		result = std::move(stmt_ret);
+		return result;
+	}
+	stmt_ = stmt_ret.value_;
 
 	if (!stmt_.ok())
 	{
@@ -343,7 +372,7 @@ ZEND_METHOD(Wcd_Simple, arrayMap)
 	args.zstring(valcol, args.need(1));
 	args.zstring(table, args.need(2));
 
-	htab_rc result;
+	htab_return result;
 
 	if (args.throw_errors())
 	{
@@ -353,7 +382,8 @@ ZEND_METHOD(Wcd_Simple, arrayMap)
 		Simple* sobj = zval_toc<Simple>(ZEND_THIS);
 		result = sobj->arrayMap(keycol,valcol, table);
 	}
-	result.move_zv(return_value);
+	result.throw_errors();
+	result.value_.move_zv(return_value);
 }
 
 ZEND_METHOD(Wcd_Simple, arraySet)
@@ -366,17 +396,18 @@ ZEND_METHOD(Wcd_Simple, arraySet)
 	args.zstring(sql, args.need(0));
 	args.zarray_null(params, args.option(1));
 
-	htab_rc result;
+	htab_return result;
 
 	if (args.throw_errors())
 	{
-		result = htab_rc::empty_array();
+		result.value_ = htab_rc::empty_array();
 	}
 	else {
 		Simple* sobj = zval_toc<Simple>(ZEND_THIS);
 		result = sobj->arraySet(sql,params);
 	}
-	result.move_zv(return_value);
+	result.throw_errors();
+	result.value_.move_zv(return_value);
 }
 
 ZEND_METHOD(Wcd_Simple, bind)
@@ -404,15 +435,17 @@ ZEND_METHOD(Wcd_Simple, exec)
 	args.zstring(sql, args.need(0));
 	args.zarray(params, args.option(1));
 
-	val_rc result;
+	val_return result;
 
 	if(!args.throw_errors())
 	{
 		Simple* sobj = zval_toc<Simple>(ZEND_THIS);
 
 		result = sobj->exec(sql, params);
+
+		result.throw_errors();
 	}
-	result.move_zv(return_value);
+	result.value_.move_zv(return_value);
 }
 
 ZEND_METHOD(Wcd_Simple, firstRow)
@@ -425,15 +458,17 @@ ZEND_METHOD(Wcd_Simple, firstRow)
 	args.zstring(sql, args.need(0));
 	args.zarray(params, args.option(1));
 
-	val_rc result;
+	val_return result;
 
 	if(!args.throw_errors())
 	{
 		Simple* sobj = zval_toc<Simple>(ZEND_THIS);
 
 		result = sobj->firstrow(sql, params);
+
+		result.throw_errors();
 	}
-	result.move_zv(return_value);
+	result.value_.move_zv(return_value);
 }
 
 ZEND_METHOD(Wcd_Simple, getRows)
@@ -442,9 +477,9 @@ ZEND_METHOD(Wcd_Simple, getRows)
 
 	Simple* sobj = zval_toc<Simple>(ZEND_THIS);
 
-	htab_rc result = sobj->getRows();
-
-	result.move_zv(return_value);
+	val_return result = sobj->getRows();
+	result.throw_errors();
+	result.value_.move_zv(return_value);
 }
 
 ZEND_METHOD(Wcd_Simple, getSchemaName)
@@ -466,16 +501,18 @@ ZEND_METHOD(Wcd_Simple, insert)
 
 	args.zarray(values, args.need(0));
 
-	val_rc result;
+	val_return result;
 
 	if(!args.throw_errors())
 	{
 		Simple* sobj = zval_toc<Simple>(ZEND_THIS);
 
 		result = sobj->insert(values);
+
+		result.throw_errors();
 	}
 
-	result.move_zv(return_value);
+	result.value_.move_zv(return_value);
 }
 
 ZEND_METHOD(Wcd_Simple, prepare)
@@ -486,15 +523,17 @@ ZEND_METHOD(Wcd_Simple, prepare)
 
 	args.zstring(sql, args.need(0));
 
-	bool result = false;
+	bool_return result;
 
 	if(!args.throw_errors())
 	{
 		Simple* sobj = zval_toc<Simple>(ZEND_THIS);
 
 		result = sobj->prepare(sql);
+
+		result.throw_errors();
 	}
-	RETURN_BOOL(result);
+	RETURN_BOOL(result.value_);
 }
 
 ZEND_METHOD(Wcd_Simple, quoteName)
@@ -563,15 +602,17 @@ ZEND_METHOD(Wcd_Simple, update)
 
 	args.zarray(values, args.need(0));
 	
-	val_rc result;
+	val_return result;
 
 	if(!args.throw_errors())
 	{
 		Simple* sobj = zval_toc<Simple>(ZEND_THIS);
 
 		result = sobj->update(values);
+
+		result.throw_errors();
 	}
-	result.move_zv(return_value);
+	result.value_.move_zv(return_value);
 }
 
 PHP_MINIT_FUNCTION(Wcd_Simple_reg)

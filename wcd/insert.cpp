@@ -24,7 +24,14 @@ Insert::getSqlParams()
 {
 	obj_return result;
 
-	Bindings& bind = this->bindings();
+	obj_return bret = getBind();
+	if (bret.has_errors())
+	{
+		result = std::move(bret);
+		return result;
+	}
+	Bindings& bind = *zobj_toc<Bindings>(bret.value_);
+
 	obj_ptr isql_ptr = bind.isql();
 
 	ISql* isql = zobj_toc<ISql>(isql_ptr);
@@ -33,7 +40,14 @@ Insert::getSqlParams()
 
 	if (idata.empty())
 	{
-		JoinTables& jt = this->joiner();
+		bret = this->getJoiner();
+		if (bret.has_errors())
+		{
+			result = std::move(bret);
+			return result;
+		}
+		JoinTables& jt = *zobj_toc<JoinTables>(bret.value_);
+
 		obj_rc  ptable = jt.getPrime();
 		if (ptable.ok())
 		{
@@ -61,9 +75,11 @@ Insert::getSqlParams()
 		}
 	}
 	result = isql->insert(bind);
-
+	if (result.has_errors())
+	{
+		return result;
+	}
 	bind.wipe();
-
 	return result;
 }
 

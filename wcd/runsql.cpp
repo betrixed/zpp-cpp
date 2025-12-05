@@ -37,8 +37,14 @@ namespace wcd {
 
 		IDriver* db = zobj_toc<IDriver>(db_);
 
-		val_rc stmt = db->prepare(sql_);
+		val_return stmt_ret = db->prepare(sql_);
+		if (stmt_ret.has_errors())
+		{
+			exresult = std::move(stmt_ret);
+			return exresult;
+		}
 
+		val_rc& stmt = stmt_ret.value_;
 		htab_rc  params = bind_;
 
 		//showdata("bind", params);

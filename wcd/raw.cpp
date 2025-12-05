@@ -118,8 +118,9 @@ ZEND_METHOD(Wcd_Sql_Raw, execute)
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	Raw* cobj = zval_toc<Raw>(ZEND_THIS);
-	val_rc data = cobj->execute();
-	data.move_zv(return_value);
+	val_return data = cobj->execute();
+	data.throw_errors();
+	data.value_.move_zv(return_value);
 }
 
 

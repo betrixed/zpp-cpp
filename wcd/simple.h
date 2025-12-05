@@ -41,21 +41,21 @@ public:
 	void construct(obj_ptr db, int fetch = IDriver::FETCH_ASSOC);
 	void destruct();
 
-	htab_rc arrayMap(str_ptr keycol, str_ptr valcol, str_ptr table);
+	htab_return arrayMap(str_ptr keycol, str_ptr valcol, str_ptr table);
 
-	htab_rc arraySet(str_ptr sql, htab_ptr params = htab_ptr());
+	htab_return arraySet(str_ptr sql, htab_ptr params = htab_ptr());
 
 	str_rc bind(val_ptr value);
 
-	val_rc exec(str_ptr sql, htab_ptr params);
+	val_return exec(str_ptr sql, htab_ptr params);
 
-	val_rc firstrow(str_ptr sql, htab_ptr params);
+	val_return firstrow(str_ptr sql, htab_ptr params);
 
-	val_rc getRows();
+	val_return getRows();
 
 	str_rc getSchemaName();
 
-	val_rc insert(htab_ptr values);
+	val_return insert(htab_ptr values);
 
 	bool_return prepare(str_ptr sql);
 

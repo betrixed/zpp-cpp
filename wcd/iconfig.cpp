@@ -399,8 +399,8 @@ IConfig::getUsername()
 int 
 IConfig::getPort()
 {
-	val_rc result = getValue(ICS.k_port,false,val_rc());
-	return result.zlong();
+	val_return result = getValue(ICS.k_port,false,val_rc());
+	return result.value_.zlong();
 }
 
 str_rc 
@@ -416,8 +416,8 @@ IConfig::getDatabase()
 	htab_rw list(list_mgr);
 	list.push_items(ICS.k_dbname, ICS.k_database);
 
-	val_rc result = getValue(list_mgr, true, val_rc::empty_str());
-	return result;
+	val_return result = getValue(list_mgr, true, val_rc::empty_str());
+	return result.value_.zstr();
 }
 
 obj_rc
@@ -558,9 +558,10 @@ ZEND_METHOD(Wcd_IConfig, newConnect)
 	ZEND_PARSE_PARAMETERS_END();
 
 	IConfig* cobj = zval_toc<IConfig>(ZEND_THIS);
-	obj_rc result = cobj->newConnect(name);	
+	obj_return result = cobj->newConnect(name);	
+	result.throw_errors();
 
-	result.move_zv(return_value);	
+	result.value_.move_zv(return_value);	
 }
 
 ZEND_METHOD(Wcd_IConfig, getDriverClass)

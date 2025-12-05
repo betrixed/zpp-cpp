@@ -685,11 +685,16 @@ ISql::deleteSql(Bindings& bind)
 	buf << "DELETE FROM";
 
 	htab_ptr tables = this->getTables(bind);
-	obj_rc paramList = bind.getParamList();
+	obj_return paramList_ret = bind.getParamList();
 
-	result = paramList;
+	if (paramList_ret.has_errors())
+	{
+		result = std::move(paramList_ret);
+		return result;
+	}
 
-	ParamList* plist = zobj_toc<ParamList> (paramList);
+	obj_rc& pobj = paramList_ret.value_;
+	ParamList* plist = zobj_toc<ParamList> (pobj);
 
 	htab_walk pos;
 	// first table
@@ -733,8 +738,9 @@ ISql::deleteSql(Bindings& bind)
 	str_rc sql = buf.zstr();
 	plist->setSql(sql);
 	plist->useOwnValues();
+	result.value_ = pobj;
 
-	return paramList;
+	return result;
 }
 
 SqlPart_return   //static 
@@ -772,7 +778,7 @@ ISql::emit(val_ptr sp, Bindings* bind, str_ptr lalias, str_ptr ralias)
  	}
  	else {
 
-	 	SqlPartId* part = partret;
+	 	SqlPartId* part = partret.value_;
 	 	int partid = part->getPartId();
 		str_buf buf;
  		str_rc str;
@@ -811,15 +817,20 @@ ISql::emit(val_ptr sp, Bindings* bind, str_ptr lalias, str_ptr ralias)
 	 				result = std::move(temp);
 	 				goto RET_ALL;
 	 			}
-	 			buf << " (" << temp << " )";
+	 			buf << " (" << temp.value_ << " )";
 	 		}
 	 		break;
 	 	case SqlPartId::PARAM_PID:
 	 		{
 	 			Param* p = static_cast<Param*>(part);
 	 			val_ptr pvalue = p->getValue();
-				obj_rc paramList = bind->getParamList();
-				ParamList* list = zobj_toc<ParamList> (paramList);
+				obj_return paramList = bind->getParamList();
+				if (paramList.has_errors())
+				{
+					result = std::move(paramList);
+					return result;
+				}
+				ParamList* list = zobj_toc<ParamList> (paramList.value_);
 	 			buf << list->addParam(pvalue);
 	 		}
 	 		break;
@@ -877,9 +888,11 @@ ISql::truncate(Bindings& bind)
 	return result;
 }
 
-str_rc
+str_return
 ISql::insert_col_params(Bindings& bind, htab_ptr rowbind)
 {
+	str_return result;
+
 	htab_walk wk;
 
 	str_buf ptext;
@@ -887,9 +900,13 @@ ISql::insert_col_params(Bindings& bind, htab_ptr rowbind)
 
 	str_rc place;
 
-	obj_rc paramList = bind.getParamList();
-
-	ParamList* params = zobj_toc<ParamList> (paramList);
+	obj_return paramList = bind.getParamList();
+	if (paramList.has_errors())
+	{
+		result = std::move(paramList);
+		return result;
+	}
+	ParamList* params = zobj_toc<ParamList> (paramList.value_);
 
 	val_rc   zpass;
 
@@ -932,8 +949,8 @@ ISql::insert_col_params(Bindings& bind, htab_ptr rowbind)
 	str_rc plist = ptext.zstr();
 
 	ctext << ") VALUES (" << plist << ")";
-
-	return ctext.zstr();
+	result.value_ = ctext.zstr();
+	return result;
 }
 
 str_return
@@ -1039,7 +1056,7 @@ ISql::insert(Bindings& bind)
 
 	htab_walk  insert_wk;
 	htab_ptr  rowbind;
-
+	str_return temp;
 
 	int pcount = 0;
 	if (insert_wk.start(sql_insert))
@@ -1048,10 +1065,17 @@ ISql::insert(Bindings& bind)
 		
 		size_t rsize = rowbind.size();
 
+		 
 		if (rsize)
 		{
+			temp = this->insert_col_params(bind, rowbind);
+			if (temp.has_errors())
+			{
+				result = std::move(temp);
+				return result;
+			}
 			pcount += rsize;
-			buf << this->insert_col_params(bind, rowbind);
+			buf << temp.value_;
 		}
 	}
 	if (pcount == 0)
@@ -1084,10 +1108,13 @@ ISql::insert(Bindings& bind)
 		}
 	}
 	
-	obj_rc   pobj = bind.getParamList();
-	result = pobj;
+	result = bind.getParamList();
+	if (result.has_errors())
+	{
+		return result;
+	}
 
-	ParamList* plist = zobj_toc<ParamList>(pobj);
+	ParamList* plist = zobj_toc<ParamList>(result.value_);
 
 	htab_ptr params = plist->getParams();
 
@@ -1135,10 +1162,14 @@ ISql::insert(Bindings& bind)
 	return result;
 }
 
-str_rc 
+str_return 
 ISql::fromJT(Bindings& bind, JoinTables* jt)
 {
+	str_return result;
+	str_return temp;
+
 	str_buf buf;
+
 	buf << " FROM";
 	//zend_printf("buflen %ld, %ld\n", buf.size(), buf.len());
 
@@ -1158,6 +1189,8 @@ ISql::fromJT(Bindings& bind, JoinTables* jt)
 	}
 
 	str_rc name;
+
+
 	htab_walk wk;
 	auto join_info = wk.value();
 	for(wk.start(joins); wk.ok(); wk.next())
@@ -1211,20 +1244,28 @@ ISql::fromJT(Bindings& bind, JoinTables* jt)
 			for(jwk.start(expr); jwk.ok(); jwk.next(), jix++)
 			{
 				JoinExpr* jex = zval_toc<JoinExpr>(jexp_obj);
-				name = jex->emit(jix, &bind, l_alias, r_alias );
-				buf << name;
+				temp = jex->emit(jix, &bind, l_alias, r_alias );
+				if (temp.has_errors())
+				{
+					result = std::move(temp);
+					return result;
+				}
+				buf << temp.value_;
 			}
 		}
 	}
-
-	return buf.zstr();
+	result.value_ = buf.zstr();
+	return result;
 
 
 }
 
-str_rc 
+str_return 
 ISql::select_jt(Bindings& bind, JoinTables* jt)
 {
+	str_return result;
+	str_return temp;
+
 	str_buf buf;
 
 	val_ptr aggregate = bind.get(ISql::SQL_AGGREGATE);
@@ -1285,9 +1326,15 @@ ISql::select_jt(Bindings& bind, JoinTables* jt)
 
 		buf << ' ' << val_ptr(columns).zstr();
 	}
-	buf << this->fromJT(bind,jt);
-
-	return buf.zstr();
+	temp = this->fromJT(bind,jt);
+	if (temp.has_errors())
+	{
+		result = std::move(temp);
+		return result;
+	}
+	buf << temp.value_;
+	result.value_ = buf.zstr();
+	return result;
 }
 
 
@@ -1301,30 +1348,31 @@ ISql::limit(ParamList* plist, htab_ptr ltab)
 
 	str_buf buf;
 	str_return result;
-	bool       hasError = false;
+	str_return temp;
 
 	if (!limit_val.isNull())
 	{
-		result = plist->paramLiteral(limit_val);
-		if (!result.has_errors()) {
-			buf << " LIMIT " << result;
+		temp = plist->paramLiteral(limit_val);
+		if (temp.has_errors()) 
+		{
+			result = std::move(temp);
+			return result;
 		}
-		else {
-			hasError = true;
-		}
+		buf << " LIMIT " << temp.value_;
 	}
-	if (!hasError && !offset_val.isNull())
+	if (!offset_val.isNull())
 	{
-		result = plist->paramLiteral(offset_val);
-		if (!result.has_errors()) {
-			buf << " OFFSET " << result;
+		temp = plist->paramLiteral(offset_val);
+		if (temp.has_errors())
+		{
+			result = std::move(temp);
+			return result;
 		}
-	}
-	if (!result.has_errors()) {
-		result = buf.zstr();
-	}
-	return result;
+		buf << " OFFSET " << temp.value_;
 
+	}
+	result.value_ = buf.zstr();
+	return result;
 }
 
 obj_return
@@ -1337,9 +1385,14 @@ ISql::select(Bindings& bind)
 
 	str_buf buf;
 
-	str_rc what = this->select_jt(bind, from);
+	str_return what_ret = this->select_jt(bind, from);
+	if (what_ret.has_errors())
+	{
+		result = std::move(what_ret);
+		return result;
+	}
 
-	buf << "SELECT" << what;
+	buf << "SELECT" << what_ret.value_;
 
 	// TODO: still need this, check for old-style join specification? 
 	/*
@@ -1350,10 +1403,13 @@ ISql::select(Bindings& bind)
 	}
 	*/
 
-	obj_rc   pobj = bind.getParamList();
-	result = pobj;
+	result = bind.getParamList();
+	if (result.has_errors())
+	{
+		return result;
+	}
 
-	ParamList* plist = zobj_toc<ParamList>(pobj);
+	ParamList* plist = zobj_toc<ParamList>(result.value_);
 
 	val_ptr where = bind.get(SQL_WHERE);
 	if (where.isArray())
@@ -1364,14 +1420,14 @@ ISql::select(Bindings& bind)
 			result = std::move(temp);
 			return result;
 		}
-		buf << " WHERE" << temp;
+		buf << " WHERE" << temp.value_;
 	}
 
 	val_ptr order = bind.get(SQL_ORDER);
 	if (order.isArray())
 	{
-		temp = this->orderBy(order.zarray());
-		buf << " ORDER BY" << temp;
+		temp.value_ = this->orderBy(order.zarray());
+		buf << " ORDER BY" << temp.value_;
 	}
 
 	val_ptr limit = bind.get(SQL_LIMIT);
@@ -1384,7 +1440,7 @@ ISql::select(Bindings& bind)
 			result = std::move(temp);
 			return result;
 		}
-		buf << temp;
+		buf << temp.value_;
 	}
 
 	str_rc sql = buf.zstr();
@@ -1405,7 +1461,7 @@ ISql::update(Bindings& bind)
 	htab_ptr   tables = joins->getTables();
 	result = bind.getParamList();
 
-	obj_rc pobj = result;
+	obj_rc& pobj = result.value_;
 
 	htab_walk wk;
 
@@ -1469,9 +1525,17 @@ ISql::update(Bindings& bind)
 	}
 
 	val_ptr where_val = bind.get(SQL_WHERE);
+
+	str_return temp = this->where(bind, where_val.zarray());
+
+	if (temp.has_errors())
+	{
+		result = std::move(temp);
+		return result;
+	}
 	if (where_val.isArray())
 	{
-		buf << " WHERE" << this->where(bind, where_val.zarray());
+		buf << " WHERE" << temp.value_;
 	}
 
 	str_rc sql = buf.zstr();
@@ -1540,8 +1604,13 @@ ISql::where(Bindings &bind, htab_ptr wtab)
 
 	htab_ptr jtables(jtab->getTables());
 
-	obj_rc paramList = bind.getParamList();
-	ParamList* params = zobj_toc<ParamList> (paramList);
+	obj_return pobjret = bind.getParamList();
+	if (pobjret.has_errors())
+	{
+		result = std::move(pobjret);
+		return result;
+	}
+	ParamList* params = zobj_toc<ParamList> (pobjret.value_);
 
 	str_rc bop; // sql boolean operator eg "AND"
 	val_ptr wcol; // column name or object, being processed from where entry
@@ -1551,8 +1620,10 @@ ISql::where(Bindings &bind, htab_ptr wtab)
 
 	val_ptr harray; // a data array
 	obj_rc part; // part, some kind of SqlPartId.
+	SqlPart_return pret;
 
 	SqlPartId* sqlpart;
+	str_return temp;
 
 	int partid; // vaguely obsolete and trad. way of identifying the part.
 	str_rc col_name; // column name as string
@@ -1574,19 +1645,32 @@ ISql::where(Bindings &bind, htab_ptr wtab)
 		wcol = where_tab[SQSTR.column];
 		if (wcol.isObject())
 		{
-			sqlpart = getPartObj(wcol);
+			SqlPart_return partret = getPartObj(wcol);
+			if (partret.has_errors())
+			{
+				result = std::move(partret);
+				return result;
+			}
+			SqlPartId* sqlpart = partret.value_;
+
 			partid = sqlpart->getPartId();
 			if (partid ==  SqlPartId::TA_PID)
 			{
 				TableAttr* ta = static_cast<TableAttr*>(sqlpart);
-				str_buf temp;
-				temp << ta->getTable() << '.' << this->quoteName(ta->getAttr());
-				col_name = temp.zstr();
+				str_buf coltemp;
+				coltemp << ta->getTable() << '.' << this->quoteName(ta->getAttr());
+				col_name = coltemp.zstr();
 			}
 			else if (partid == SqlPartId::JE_PID)
 			{
 				JoinExpr* je = static_cast<JoinExpr*>(sqlpart);
-				buf << je->emit(0, &bind, zend_empty_string, zend_empty_string);
+				temp = je->emit(0, &bind, zend_empty_string, zend_empty_string);
+				if (temp.has_errors())
+				{
+					result = std::move(temp);
+					return result;
+				}
+				buf << temp.value_;
 				continue; // next where entry
 			}
 		}
@@ -1610,7 +1694,14 @@ ISql::where(Bindings &bind, htab_ptr wtab)
 
 			if (value.isObject())
 			{ 
-				sqlpart = getPartObj(value);
+				pret = getPartObj(value);
+				if (pret.has_errors())
+				{
+					result = std::move(pret);
+					return result;
+				}
+				sqlpart = pret.value_;
+
 				partid = sqlpart->getPartId();
 				// 4 kinds at this level
 				if (partid == SqlPartId::TA_PID)
@@ -1647,7 +1738,13 @@ ISql::where(Bindings &bind, htab_ptr wtab)
 		{
 			harray = where_tab[SQSTR.nested];
 			//TODO: sure this will be array??
-			buf << " (" << this->where(bind, harray.zarray()) << ')';
+			temp = this->where(bind, harray.zarray());
+			if (temp.has_errors())
+			{
+				result = std::move(temp);
+				return result;
+			}
+			buf << " (" << temp.value_ << ')';
 		}
 		else if (wtype == "isNull") //NB: case sensitive
 		{
@@ -1698,7 +1795,13 @@ ISql::where(Bindings &bind, htab_ptr wtab)
 			str_ptr key = wcol.zstr();
 
 			value = where_tab[key];
-			sqlpart = getPartObj(value);
+			pret = getPartObj(value);
+			if (pret.has_errors())
+			{
+				result = std::move(pret);
+				return result;
+			}
+			sqlpart = pret.value_;
 			partid = sqlpart->getPartId();
 			if (partid != SqlPartId::EXPR_PID)
 			{
@@ -1811,7 +1914,7 @@ ZEND_METHOD(Wcd_Sql_JoinInfo, toJoinType)
 	int_return result = JoinInfo::getJoinType(join);
 
 	result.throw_errors();
-	RETURN_LONG(result);
+	RETURN_LONG(result.value_);
 
 }
 
@@ -2193,11 +2296,9 @@ ZEND_METHOD(Wcd_Sql_ISql, truncate)
 	ISql* cobj = zval_toc<ISql>(ZEND_THIS);
 	Bindings& refbind = *zval_toc<Bindings>(bind);
 
-	str_return sqlret = cobj->truncate(refbind);
-	sqlret.throw_errors();
-	str_rc result = sqlret;
-
-	result.move_zv(return_value);
+	str_return result = cobj->truncate(refbind);
+	result.throw_errors();
+	result.value_.move_zv(return_value);
 }
 
 /*public function update(Bindings $bind) : ParamList {}*/
@@ -2325,8 +2426,9 @@ ZEND_METHOD(Wcd_Sql_ParamList, paramLiteral)
 
 	ParamList* cobj = zval_toc<ParamList>(ZEND_THIS);
 
-	str_rc result = cobj->paramLiteral(value);
-	result.move_zv(return_value);
+	str_return result = cobj->paramLiteral(value);
+	result.throw_errors();
+	result.value_.move_zv(return_value);
 }
 
 /* public function setParams(array $replace) : void {} */

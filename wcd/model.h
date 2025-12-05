@@ -58,9 +58,9 @@ public:
 	
 	void destruct();
 	
-	obj_rc getBuilderForMe();
+	obj_return getBuilderForMe();
 
-	obj_rc getBuilder();
+	obj_return getBuilder();
 
 	obj_rc newRow(htab_ptr rdata, bool isSaved = false);
 
@@ -74,15 +74,15 @@ public:
 
 	static obj_return withValues(str_ptr static_name, val_ptr keyvalues);
 
-	static val_rc callStatic(str_ptr static_name, str_ptr method, val_ptr params);
+	static val_return callStatic(str_ptr static_name, str_ptr method, val_ptr params);
 
 	static obj_return find(str_ptr static_name, val_ptr id);
 
 	static str_rc getTableName(str_ptr cname);
 
-	static int importFromCSV(str_ptr static_name, str_ptr filename);
+	static int_return importFromCSV(str_ptr static_name, str_ptr filename);
 
-	static obj_rc modelBuild(str_ptr static_name);
+	static obj_return modelBuild(str_ptr static_name);
 
 	static obj_rc row(str_ptr static_name, htab_ptr data);
 
@@ -96,15 +96,15 @@ public:
 
 	obj_return getConnect();
 
-	htab_rc getPKey();
+	htab_return getPKey();
 
 	str_rc getName();
 
-	htab_rc getColDefs();
+	htab_return getColDefs();
 
-	htab_rc getSeqDefs();
+	htab_return getSeqDefs();
 
-	obj_rc getTableDef();
+	obj_return getTableDef();
 
 	str_rc createdAtName();
 
@@ -114,7 +114,7 @@ public:
 
 	int getTSFlags() const;
 
-	bool exists(obj_ptr rowobj);
+	bool_return exists(obj_ptr rowobj);
 
 	void sequenceMax();
 
@@ -124,11 +124,11 @@ public:
 
 	obj_return readRow(obj_ptr irow);
 
-	htab_rc getKeyOptions();
+	htab_return getKeyOptions();
 
-	htab_rc getFieldDef(str_ptr name);
+	htab_return getFieldDef(str_ptr name);
 
-	htab_rc getForeignKey();
+	htab_return getForeignKey();
 
 	str_rc now() const;
 

@@ -178,10 +178,15 @@ namespace wcd {
 	bool_return 
 	Model::deleteRow(obj_ptr rowobj)
 	{
-		obj_rc builder(getBuilderForMe());
-		IBuild* ib = zobj_toc<IBuild>(builder);
-
 		bool_return result;
+
+		obj_return ibret = getBuilderForMe();
+		if (ibret.has_errors())
+		{
+			result = std::move(ibret);
+			return result;
+		}
+		IBuild* ib = zobj_toc<IBuild>(ibret.value_);
 
 		val_return temp = ib->deleteRow(rowobj);
 		result = temp.value_.zbool();
@@ -242,10 +247,10 @@ namespace wcd {
 			return IServer::connect(db_);
 		}
 
-		obj_rc dbobj = IServer::connect(val_ptr());
-		if (dbobj.ok())
+		obj_return dbobj = IServer::connect(val_ptr());
+		if (!dbobj.has_errors())
 		{
-			IDriver* driver = zobj_toc<IDriver>(dbobj);
+			IDriver* driver = zobj_toc<IDriver>(dbobj.value_);
 			db_ = driver->getName();
 		}
 		return dbobj;
@@ -263,27 +268,33 @@ namespace wcd {
 		return MIS.k_updated_at;
 	}
 
-	obj_rc 
+	obj_return
 	Model::getBuilderForMe()
 	{
+		obj_return result;
+
 		if (!builder_me_.ok())
 		{
- 
-			obj_rc db_mgr = getConnect();
-			IDriver* db = zobj_toc<IDriver>(db_mgr);
+			obj_return db_mgr = getConnect();
+			if (db_mgr.has_errors())
+			{
+				result = std::move(db_mgr);
+				return result;
+			}
 
+			IDriver* db = zobj_toc<IDriver>(db_mgr.value_);
 			builder_me_ = db->newDmlBuild();
 		}
 		if (builder_me_.ok())
 		{
 			IBuild* ib = zobj_toc<IBuild>(builder_me_);
-
 			ib->setModel(obj_ptr(this->vobj()));
+			result.value_ = builder_me_;
 		}
-		return builder_me_;
+		return result;
 	}
 
-	obj_rc
+	obj_return
 	Model::modelBuild(str_ptr classname)
 	{
 		Model* m = model_instance(classname);
@@ -296,8 +307,14 @@ namespace wcd {
 		error_return check;
 		obj_return   result;
 
-		obj_rc build = getBuilderForMe();
-		IBuild* ib = zobj_toc<IBuild>(build);
+		result = getBuilderForMe();
+		if (result.has_errors())
+		{
+			return result;
+		}
+
+		IBuild* ib = zobj_toc<IBuild>(result.value_);
+
 		Bindings&  bind = ib->bindings();
 		bind.limit(1);
 		check = bind.whereKeyValue(keynames, values);
@@ -306,7 +323,19 @@ namespace wcd {
 			result = std::move(check);
 			return result;
 		}
-		result = bind.select();
+		val_return row = bind.select();
+		if (row.has_errors())
+		{
+			result = std::move(row);
+			return result;
+		}
+		obj_rc rowobj = row.value_.zobject();
+		if (!rowobj.ok())
+		{
+			result.error() << "No Row found byKeyValue";
+			return result;
+		}
+		result.value_ = rowobj;
 		return result;	
 	}
 
@@ -341,13 +370,21 @@ namespace wcd {
 		return m->byKeyValue(keynames_mgr, values_mgr);
 	}
 
-	val_rc 
+	val_return 
 	Model::callStatic(str_ptr static_name, str_ptr method, val_ptr params)
 	{
+		val_return result;
+
 		htab_ptr  parray(params.zarray());
 
 		Model* m = Model::model_instance(static_name);
-		obj_rc build = m->getBuilderForMe();
+		obj_return buildret = m->getBuilderForMe();
+		if (buildret.has_errors())
+		{
+			result = std::move(buildret);
+			return result;
+		}
+		obj_rc& build = buildret.value_;
 
 		IBuild* ib = zobj_toc<IBuild>(build);
 
@@ -379,20 +416,23 @@ namespace wcd {
 		}
 		else if (zs_cmp(mlower, MIS.find_all)==0)
 		{
-			val_rc result;
 			if (parray.size())
 			{
 				ib->where(params, nullstr, nullval, SQSTR.and_str);
 			}
 			result = ib->allRows();
-
-			if (result.isObject())
+			if (result.has_errors())
+			{
+				return result;
+			}
+			val_rc& val = result.value_;
+			if (val.isObject())
 			{
 				htab_rc rows_mgr;
 				htab_rw rows(rows_mgr);
 
-				rows.push_back(result);
-				result = rows_mgr;
+				rows.push_back(val);
+				result.value_ = rows_mgr;
 			}
 			return result;
 		}
@@ -402,7 +442,8 @@ namespace wcd {
 		arg1.push_back(build);
 		arg1.push_back(mlower);
 		
-		return call_user_func_array(obj_method, params);
+		result.value_ = call_user_func_array(obj_method, params);
+		return result;
 	}
 
 	str_rc //static
@@ -440,7 +481,16 @@ namespace wcd {
 		obj_return result;
 
 		Model* m = model_instance(static_name);
-		htab_rc pkey = m->getPKey();
+
+		htab_return pkey_ret = m->getPKey();
+
+		if (pkey_ret.has_errors())
+		{
+			result = std::move(pkey_ret);
+			return result;
+		}
+		htab_rc& pkey = pkey_ret.value_;
+
 		val_rc pkey_mgr(pkey);
 
 		if (!pkey.size())
@@ -470,27 +520,45 @@ namespace wcd {
 		return result;
 	}
 
-	htab_rc 
+	htab_return 
 	Model::getKeyOptions()
 	{
-		htab_rc result;
+		htab_return result;
 
-		result = pkey_options_;
-
-		if (result.ok())
+		if (pkey_options_.ok())
 		{
 			//showdata("options set", result);
+			result.value_ = pkey_options_;
 			return result;
 		}
 		
-		htab_rc pkey_fields = getPKey();
+		htab_return pkey_fields_ret = getPKey();
+		if (pkey_fields_ret.has_errors())
+		{
+			result = std::move(pkey_fields_ret);
+			return result;
+		}
+		htab_rc& pkey_fields = pkey_fields_ret.value_;
 		//showdata("pkey get", pkey_fields);
 		if (pkey_fields.size())
 		{
-			htab_rw pkey_options(result);
+			htab_rw pkey_options(pkey_options_);
 
-			htab_rc cdefs = getColDefs();
-			htab_rc seqdefs = getSeqDefs();
+			htab_return cdefs_ret = getColDefs();
+			if (cdefs_ret.has_errors())
+			{
+				result = std::move(cdefs_ret);
+				return result;
+			}
+			htab_rc& cdefs = cdefs_ret.value_;
+
+			htab_return seqdef_ret = getSeqDefs();
+			if (seqdef_ret.has_errors())
+			{
+				result = std::move(seqdef_ret);
+				return result;
+			}
+			htab_rc& seqdefs = seqdef_ret.value_;
 
 			htab_walk wk;
 			auto pkey = wk.value();
@@ -551,26 +619,30 @@ namespace wcd {
 				}
 				pkey_options.set(key_name, options_mgr);
 			}
-			pkey_options_ = result;
+			result.value_ = pkey_options;
 		}
 		return result;
 	}
 
-	htab_rc Model::getColDefs()
+	htab_return Model::getColDefs()
 	{
+		htab_return result;
+
 		if (class_cdefs_.ok())
 		{
-			return class_cdefs_;
+			result.value_ = class_cdefs_;
+			return result;
 		}
 
-		obj_rc tabledef_mgr = getTableDef();
+		obj_return tabledef_mgr = getTableDef();
 
-		if (tabledef_mgr.ok())
+		if (!tabledef_mgr.has_errors())
 		{
-			class_cdefs_ = tabledef_mgr.property(MIS.columns_str);
+			class_cdefs_ = tabledef_mgr.value_.property(MIS.columns_str);
+			result.value_ = class_cdefs_;
 		}
 		//showdata("getColDefs", class_cdefs_);
-		return class_cdefs_;
+		return result;
 	}
 
 	str_rc Model::getName()
@@ -589,45 +661,48 @@ namespace wcd {
 		return result;
 	}
 
-	htab_rc 
+	htab_return 
 	Model::getPKey()
 	{
 		//zend_printf("in getPKey()\n");
-		htab_rc result;
+		htab_return result;
 		if (class_pkey_.ok())
 		{
-			result = class_pkey_;
+			result.value_ = class_pkey_;
 			//showdata("class pkey", result);
 			return result;
 		}
-		obj_rc tdef = getTableDef();
-		if (tdef.ok())
+		obj_return tdef_ret = getTableDef();
+		if (tdef_ret.has_errors())
 		{	
-			//zend_printf("got TDEF\n");
-			obj_rc pkeydef = tdef.call(MIS.get_primary_key);
+			result = std::move(tdef_ret);
+			return result;
+		}
+		obj_rc& tdef = tdef_ret.value_;
+
+		obj_rc pkeydef = tdef.call(MIS.get_primary_key);
 			//showobj("pkeydef:", pkeydef);
 
-			if (pkeydef.ok())
-			{
-				result = pkeydef.property(MIS.columns_str);
-			}
-		}
-	
-		if (!result.ok())
+		if (pkeydef.ok())
 		{
-			result = htab_rc::empty_array();
+			class_pkey_ = pkeydef.property(MIS.columns_str);
+			result.value_ = class_pkey_;
+			return result;
 		}
-		class_pkey_ = result;
+
+		class_pkey_ = htab_rc::empty_array();
+		result.value_ = class_pkey_;
 		return result;
 	}
 
-	int // static
+	int_return // static
 	Model::importFromCSV(str_ptr static_name, str_ptr filename)
 	{
 		if (! std::filesystem::exists(filename.vstr()) )
 		{
 			return 0;
 		}
+		int_return result;
 
 		int datarowct = -1;
 
@@ -635,10 +710,24 @@ namespace wcd {
 
 		str_rc tableName = m->getName();
 
-		obj_rc db = m->getConnect();
+		obj_return dbret = m->getConnect();
+		if (dbret.has_errors())
+		{
+			result = std::move(dbret);
+			return result;
+		}
+		obj_rc& db = dbret.value_;
+
 		IDriver* driver = zobj_toc<IDriver>(db);
 
-		htab_rc columns = m->getColDefs();
+		htab_return columns_ret = m->getColDefs();
+		if (columns_ret.has_errors())
+		{
+			result = std::move(columns_ret);
+			return result;
+		}
+
+		htab_rc& columns = columns_ret.value_;
 		//showdata("columns", columns);
 
 		htab_rc fieldNames;
@@ -646,7 +735,13 @@ namespace wcd {
 		bool init = false;
 		unsigned int  colcount = 0;
 
-		obj_rc builder = m->getBuilderForMe();
+		obj_return buildret = m->getBuilderForMe();
+		if (buildret.has_errors())
+		{
+			result = std::move(buildret);
+			return result;
+		}
+		obj_rc& builder = buildret.value_;
 
 		val_rc import_mgr = fopen(filename, MIS.r_arg);
 
@@ -734,8 +829,14 @@ namespace wcd {
 					}
 					IBuild* ib = zobj_toc<IBuild>(builder);
 
-					obj_rc plist_mgr = ib->getInsertSql(columns_mgr);
-					ParamList* plist = zobj_toc<ParamList>(plist_mgr);
+					obj_return plist_ret = ib->getInsertSql(columns_mgr);
+					if (plist_ret.has_errors())
+					{
+						result = std::move(plist_ret);
+						return result;
+					}
+
+					ParamList* plist = zobj_toc<ParamList>(plist_ret.value_);
 
 					str_ptr sql(plist->getSql());
 					htab_ptr record(plist->getValues());
@@ -743,7 +844,14 @@ namespace wcd {
 					//showstr("sql", sql);
 					//showdata("record", record);
 
-					stmt = driver->prepare(sql);
+					val_return stmt_ret = driver->prepare(sql);
+					if (stmt_ret.has_errors())
+					{
+						result = std::move(stmt_ret);
+						return result;
+					}
+
+					stmt = stmt_ret.value_;
 
 					driver->bind(stmt, record);
 					driver->execute(stmt, false, false);
@@ -763,7 +871,14 @@ namespace wcd {
 
 			fclose(import);
 
-			htab_rc seq_defs = m->getSeqDefs();
+			htab_return rseq_defs = m->getSeqDefs();
+			if (rseq_defs.has_errors())
+			{
+				result = std::move(rseq_defs);
+				return result;
+			}
+
+			htab_rc& seq_defs = rseq_defs.value_;
 
 			if (seq_defs.size())
 			{
@@ -774,23 +889,32 @@ namespace wcd {
 			//zend_printf("ROWS %d\n", datarowct);
 
 		}
-		return datarowct+1;
+		result.value_ = datarowct+1;
+		return result;
 	}
 
-	obj_rc 
+	obj_return 
 	Model::getTableDef()
 	{
+		obj_return result;
+
 		if (class_tdef_.ok())
 		{
-			return class_tdef_;
+			result.value_ = class_tdef_;
+			return result;
 		}
 
 		str_rc name = getName();
 		//showstr("name", name);
 
-		obj_rc driver = getConnect();
+		obj_return driver_ret = getConnect();
+		if (driver_ret.has_errors())
+		{
+			result = std::move(driver_ret);
+			return result;
+		}
 
-		IDriver* db = zobj_toc<IDriver>(driver);
+		IDriver* db = zobj_toc<IDriver>(driver_ret.value_);
 
 		obj_rc schema = db->getSchema();
 
@@ -852,7 +976,8 @@ namespace wcd {
 				}
 			}
 		}
-		return class_tdef_;
+		result.value_ = class_tdef_;
+		return result;
 	}
 
 	bool 
@@ -880,8 +1005,14 @@ namespace wcd {
 		htab_rc dirty = irow->getDirty();
 		bool wasRead = irow->exists();
 
-		obj_rc builder = getBuilderForMe();
-		IBuild* ibuild = zobj_toc<IBuild>(builder);
+		obj_return build_ret = getBuilderForMe();
+		if (build_ret.has_errors())
+		{
+			result = std::move(build_ret);
+			return result;
+		}
+
+		IBuild* ibuild = zobj_toc<IBuild>(build_ret.value_);
 
 		if (wasRead && (dirty.size()==0) )
 		{
@@ -890,7 +1021,16 @@ namespace wcd {
 		}
 		// insert operation
 		//zend_printf("save-row\n");
-		val_rc pkey_mgr(getPKey());
+
+		htab_return pk_ret = getPKey();
+		if (pk_ret.has_errors())
+		{
+			result = std::move(pk_ret);
+			return result;
+		}
+
+		val_rc pkey_mgr(pk_ret.value_);
+
 		//showmem("pkey_mgr", pkey_mgr);
 
 		htab_ptr pkey(pkey_mgr);
@@ -933,7 +1073,13 @@ namespace wcd {
 		}
 		else {
 			htab_ptr data = irow->reader();
-			htab_ptr options = getKeyOptions();
+			htab_return options_ret = getKeyOptions();
+			if (options_ret.has_errors())
+			{
+				result = std::move(options_ret);
+				return result;
+			}
+			htab_rc& options = options_ret.value_;
 
 			htab_rc pkey_refresh_mgr;
 			htab_rw pkey_refresh(pkey_refresh_mgr);
@@ -1058,7 +1204,14 @@ namespace wcd {
 		//zend_printf("Read Row\n");
 		obj_return result;
 
-		htab_rc pkey = getPKey();
+		htab_return pkey_ret = getPKey();
+		if (pkey_ret.has_errors())
+		{
+			result = std::move(pkey_ret);
+			return result;
+		}
+		htab_rc& pkey = pkey_ret.value_;
+
 		//showdata("pkey", pkey);
 
 		if (pkey.size())
@@ -1085,14 +1238,28 @@ namespace wcd {
 
 	}
 
-	bool 
+	bool_return
 	Model::exists(obj_ptr rowobj)
 	{
-		obj_rc builder = getBuilderForMe();
-		IBuild* ib = zobj_toc<IBuild>(builder);
+		bool_return result;
+
+		obj_return buildret = getBuilderForMe();
+		if (buildret.has_errors())
+		{
+			result = std::move(buildret);
+			return result;
+		}
+
+		IBuild* ib = zobj_toc<IBuild>(buildret.value_);
 		IRow*   irow = zobj_toc<IRow>(rowobj);
 
-		val_rc pkey_mgr(getPKey());
+		htab_return pkeyret = getPKey();
+		if (pkeyret.has_errors())
+		{
+			result = std::move(pkeyret);
+			return result;
+		}
+		val_rc pkey_mgr(pkeyret.value_);
 
 		val_rc pkeyid(irow->getDataValues(pkey_mgr));
 
@@ -1102,36 +1269,60 @@ namespace wcd {
 		ib->whereKeyValue(pkey_mgr, pkeyid);
 		val_rc columns(SQSTR.asterisk);
 
-		int rowct = ib->count(columns);
-
-		return (rowct > 0);
+		int_return rowctret = ib->count(columns);
+		if (rowctret.has_errors())
+		{
+			result = std::move(rowctret);
+			return result;
+		}
+		result.value_ = (rowctret.value_ > 0);
+		return result;
 
 	}
 
-	htab_rc 
+	htab_return 
 	Model::getFieldDef(str_ptr name)
 	{
-		htab_rc cdefs = getColDefs();
-		htab_rc result;
+		htab_return result;
 
+		htab_return cdefs_ret = getColDefs();
+
+		if (cdefs_ret.has_errors())
+		{
+			result = std::move(cdefs_ret);
+			return result;
+		}
+		htab_rc& cdefs = cdefs_ret.value_;
 		if (cdefs.size())
 		{
-			result = cdefs.get(name);
+			result.value_ = cdefs.get(name);
 		}
 		return result;
 	}
 
-	htab_rc 
+	htab_return 
 	Model::getForeignKey()
 	{
-		htab_rc pkey = getPKey();
+
+		htab_return result;
+
+		htab_return pkeyret = getPKey();
+
+		if (pkeyret.has_errors())
+		{
+			result = std::move(pkeyret);
+			return result;
+		}
+
+		htab_rc& pkey = pkeyret.value_;
+
 		str_rc table = Model::getTableName(vobj()->ce->name);
 
 		htab_walk wk;
 		auto name = wk.value();
 
-		htab_rc result;
-		htab_rw hw(result);
+		htab_rc fkey_list;
+		htab_rw hw(fkey_list);
 		str_buf buf;
 
 		for(wk.start(pkey); wk.ok(); wk.next())
@@ -1140,27 +1331,32 @@ namespace wcd {
 			str_rc fkey = buf.zstr();
 			hw.push_back(fkey);
 		}
+		result.value_ = fkey_list;
 		return result;
 	}
 
-	htab_rc 
+	htab_return 
 	Model::getSeqDefs()
 	{
-
-		htab_rc result;
+		htab_return result;
 
 		if (seq_defs_.ok())
 		{
-			result = seq_defs_;
+			result.value_ = seq_defs_;
 			return result;
 		}
 
-		obj_rc tdef = getTableDef();
-
+		obj_return tdefret = getTableDef();
+		if (tdefret.has_errors())
+		{
+			result = std::move(tdefret);
+			return result;
+		}
+		obj_rc& tdef = tdefret.value_;
 		seq_defs_ = tdef.call(MIS.fn_getseqcols);
-		result = seq_defs_;
-		return result;
+		result.value_ = seq_defs_;
 
+		return result;
 	}
 
 	void Model::setConnect(obj_ptr db)
@@ -1269,9 +1465,9 @@ ZEND_METHOD(Wcd_Model, KeyValue)
 
 	zend_class_entry* static_class = zend_get_called_scope(execute_data);
 
-	obj_rc result = Model::keyValue(static_class->name, keynames, values);
-
-	result.move_zv(return_value);
+	obj_return result = Model::keyValue(static_class->name, keynames, values);
+	result.throw_errors();
+	result.value_.move_zv(return_value);
 }
 
 ZEND_METHOD(Wcd_Model, WithValues)
@@ -1284,9 +1480,9 @@ ZEND_METHOD(Wcd_Model, WithValues)
 
 	zend_class_entry* static_class = zend_get_called_scope(execute_data);
 
-	obj_rc result = Model::withValues(static_class->name, values);
-
-	result.move_zv(return_value);
+	obj_return result = Model::withValues(static_class->name, values);
+	result.throw_errors();
+	result.value_.move_zv(return_value);
 }
 
 ZEND_METHOD(Wcd_Model, __callStatic)
@@ -1300,8 +1496,9 @@ ZEND_METHOD(Wcd_Model, __callStatic)
 	ZEND_PARSE_PARAMETERS_END();
 
 	zend_class_entry* static_class = zend_get_called_scope(execute_data);
-	val_rc result = Model::callStatic(static_class->name, method, params);
-	result.move_zv(return_value);
+	val_return result = Model::callStatic(static_class->name, method, params);
+	result.throw_errors();
+	result.value_.move_zv(return_value);
 
 }
 
@@ -1342,9 +1539,9 @@ ZEND_METHOD(Wcd_Model, find)
 
 	zend_class_entry* static_class = zend_get_called_scope(execute_data);
 
-	obj_rc result = Model::find(static_class->name, values);
-
-	result.move_zv(return_value);	
+	obj_return result = Model::find(static_class->name, values);
+	result.throw_errors();
+	result.value_.move_zv(return_value);	
 
 }
 
@@ -1368,8 +1565,9 @@ ZEND_METHOD(Wcd_Model, importFromCSV)
 
 	zend_class_entry* static_class = zend_get_called_scope(execute_data);
 
-	int icount = Model::importFromCSV(static_class->name, filename);
-	RETURN_LONG(icount);
+	int_return icount = Model::importFromCSV(static_class->name, filename);
+	icount.throw_errors();
+	RETURN_LONG(icount.value_);
 }
 
 ZEND_METHOD(Wcd_Model, modelBuild)
@@ -1378,9 +1576,9 @@ ZEND_METHOD(Wcd_Model, modelBuild)
 
 	zend_class_entry* static_class = zend_get_called_scope(execute_data);
 
-	obj_rc ibuild = Model::modelBuild(static_class->name);
-
-	ibuild.move_zv(return_value);
+	obj_return ibuild = Model::modelBuild(static_class->name);
+	ibuild.throw_errors();
+	ibuild.value_.move_zv(return_value);
 }
 
 ZEND_METHOD(Wcd_Model, row)
@@ -1491,9 +1689,9 @@ ZEND_METHOD(Wcd_Model, deleteRow)
 
 	Model* model = zval_toc<Model>(ZEND_THIS);
 
-	bool result = model->deleteRow(data);
-
-	RETURN_BOOL(result);
+	bool_return result = model->deleteRow(data);
+	result.throw_errors();
+	RETURN_BOOL(result.value_);
 }
 
 ZEND_METHOD(Wcd_Model, exists)
@@ -1506,9 +1704,9 @@ ZEND_METHOD(Wcd_Model, exists)
 
 	Model* model = zval_toc<Model>(ZEND_THIS);
 
-	bool result = model->exists(data);
-
-	RETURN_BOOL(result);
+	bool_return result = model->exists(data);
+	result.throw_errors();
+	RETURN_BOOL(result.value_);
 }
 
 ZEND_METHOD(Wcd_Model, getBuilder)
@@ -1517,9 +1715,9 @@ ZEND_METHOD(Wcd_Model, getBuilder)
 
 	Model* model = zval_toc<Model>(ZEND_THIS);
 
-	obj_rc result = model->getBuilder();
-
-	result.move_zv(return_value);	
+	obj_return result = model->getBuilder();
+	result.throw_errors();
+	result.value_.move_zv(return_value);	
 }
 
 ZEND_METHOD(Wcd_Model, getBuilderForMe)
@@ -1528,9 +1726,10 @@ ZEND_METHOD(Wcd_Model, getBuilderForMe)
 
 	Model* model = zval_toc<Model>(ZEND_THIS);
 
-	obj_rc result = model->getBuilderForMe();
+	obj_return result = model->getBuilderForMe();
 
-	result.move_zv(return_value);	
+	result.throw_errors();
+	result.value_.move_zv(return_value);	
 }
 
 ZEND_METHOD(Wcd_Model, getColDefs)
@@ -1539,9 +1738,10 @@ ZEND_METHOD(Wcd_Model, getColDefs)
 
 	Model* model = zval_toc<Model>(ZEND_THIS);
 
-	htab_rc result = model->getColDefs();
+	htab_return result = model->getColDefs();
+	result.throw_errors();
 
-	result.move_zv(return_value);	
+	result.value_.move_zv(return_value);	
 }
 
 ZEND_METHOD(Wcd_Model, getConnect)
@@ -1550,9 +1750,9 @@ ZEND_METHOD(Wcd_Model, getConnect)
 
 	Model* model = zval_toc<Model>(ZEND_THIS);
 
-	obj_rc result = model->getConnect();
-
-	result.move_zv(return_value);	
+	obj_return result = model->getConnect();
+	result.throw_errors();
+	result.value_.move_zv(return_value);	
 }
 
 ZEND_METHOD(Wcd_Model, getFieldDef)
@@ -1565,8 +1765,9 @@ ZEND_METHOD(Wcd_Model, getFieldDef)
 
 	Model* model = zval_toc<Model>(ZEND_THIS);
 
-	htab_rc result = model->getFieldDef(data);
-	result.move_zv(return_value);	
+	htab_return result = model->getFieldDef(data);
+	result.throw_errors();
+	result.value_.move_zv(return_value);	
 
 }
 
@@ -1576,9 +1777,10 @@ ZEND_METHOD(Wcd_Model, getForeignKey)
 
 	Model* model = zval_toc<Model>(ZEND_THIS);
 
-	htab_rc result = model->getForeignKey();
+	htab_return result = model->getForeignKey();
+	result.throw_errors();
 
-	result.move_zv(return_value);	
+	result.value_.move_zv(return_value);	
 }
 
 
@@ -1588,9 +1790,11 @@ ZEND_METHOD(Wcd_Model, getKeyOptions)
 
 	Model* model = zval_toc<Model>(ZEND_THIS);
 
-	htab_rc result = model->getKeyOptions();
+	htab_return result = model->getKeyOptions();
 
-	result.move_zv(return_value);	
+	result.throw_errors();
+
+	result.value_.move_zv(return_value);	
 }
 
 ZEND_METHOD(Wcd_Model, getName)
@@ -1611,9 +1815,9 @@ ZEND_METHOD(Wcd_Model, getPKey)
 
 	Model* model = zval_toc<Model>(ZEND_THIS);
 
-	htab_rc result = model->getPKey();
-
-	result.move_zv(return_value);
+	htab_return result = model->getPKey();
+	result.throw_errors();
+	result.value_.move_zv(return_value);
 }
 
 ZEND_METHOD(Wcd_Model, getSeqDefs)
@@ -1622,9 +1826,10 @@ ZEND_METHOD(Wcd_Model, getSeqDefs)
 
 	Model* model = zval_toc<Model>(ZEND_THIS);
 
-	htab_rc result = model->getSeqDefs();
+	htab_return result = model->getSeqDefs();
 
-	result.move_zv(return_value);
+	result.throw_errors();
+	result.value_.move_zv(return_value);
 }
 
 ZEND_METHOD(Wcd_Model, getTSFlags)
@@ -1645,9 +1850,10 @@ ZEND_METHOD(Wcd_Model, getTableDef)
 
 	Model* model = zval_toc<Model>(ZEND_THIS);
 
-	obj_rc result = model->getTableDef();
+	obj_return result = model->getTableDef();
 
-	result.move_zv(return_value);
+	result.throw_errors();
+	result.value_.move_zv(return_value);
 }
 
 ZEND_METHOD(Wcd_Model, hasTimeStamps)

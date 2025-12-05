@@ -20,7 +20,7 @@ public:
 
 	virtual obj_return getSqlParams();
 
-	void set(str_ptr column, val_ptr value);
+	error_return set(str_ptr column, val_ptr value);
 };
 
 }; //namespace wcd

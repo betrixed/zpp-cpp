@@ -187,7 +187,7 @@ IServer::activate(str_ptr name)
 	}
 	IConfig* ic = zobj_toc<IConfig>(cfg.value_);
 
-	result.value_ = ic->newConnect(name);
+	result = ic->newConnect(name);
 	if (result.value_.ok())
 	{
 		htab_rw hw(active_);
@@ -421,9 +421,9 @@ ZEND_METHOD(Wcd_IServer, Connect)
 	Z_PARAM_STR_OR_NULL(name)
 	ZEND_PARSE_PARAMETERS_END();
 
-	obj_rc result = IServer::connect(name);
-
-	result.move_zv(return_value);
+	obj_return result = IServer::connect(name);
+	result.throw_errors();
+	result.value_.move_zv(return_value);
 }
 
 
@@ -474,8 +474,9 @@ ZEND_METHOD(Wcd_IServer, getConnect)
 
 	IServer* cobj = zval_toc<IServer>(ZEND_THIS);
 
-	obj_rc result = cobj->getConnect(name);
-	result.move_zv(return_value);
+	obj_return result = cobj->getConnect(name);
+	result.throw_errors();
+	result.value_.move_zv(return_value);
 }
 
 //void config(htab_ptr data);

@@ -28,22 +28,8 @@ protected:
 	
 	void genSql();
 
-	Bindings& bindings() {
-		obj_ptr bind = getBind();
-		return *zobj_toc<Bindings>(bind);
-	}
-
-	IDriver& driver()
-	{
-		obj_ptr db = getDb();
-		return  *zobj_toc<IDriver>(db);
-	}
-	
-	JoinTables& joiner() 
-	{
-		obj_ptr jobj = getJoiner();
-		return *zobj_toc<JoinTables>(jobj);
-	}
+	bool bindPtr(error_return& e, Bindings*&);
+	bool dbPtr(error_return& e, IDriver*&)
 public:
 
 	static base_obj_mgr<Operation> omg;
@@ -53,33 +39,33 @@ public:
 	void construct(obj_ptr db);
 	void destruct();
 
-	obj_rc addPrime(str_ptr table, str_ptr alias, htab_ptr cols);
+	obj_return addPrime(str_ptr table, str_ptr alias, htab_ptr cols);
 
-	val_rc firstRow(int fetch);
+	val_return firstRow(int fetch);
 	
-	obj_ptr getBind();
+	obj_return getBind();
 
-	obj_ptr getDb();
+	obj_return getDb();
 
-	obj_ptr getJoiner();
+	obj_return getJoiner();
 
-	val_rc getRows(int fetch = IDriver::FETCH_ASSOC);
+	val_return getRows(int fetch = IDriver::FETCH_ASSOC);
 
 	virtual obj_return getSqlParams();
 
-	str_rc getSql();
+	str_return getSql();
 
-	void limit(val_ptr ct, val_ptr start);
+	error_return limit(val_ptr ct, val_ptr start);
 
-	void orderBy(val_ptr column, bool descend);
+	error_return orderBy(val_ptr column, bool descend);
 
-	obj_rc prepare(int fetch);
+	obj_return prepare(int fetch);
 
-	void returns(htab_ptr list);
+	error_return returns(htab_ptr list);
 
-	val_rc run();
+	val_return run();
 
-	void where(val_ptr lattr, val_ptr rattr, int op, int blogic);
+	error_return where(val_ptr lattr, val_ptr rattr, int op, int blogic);
 
 	virtual void wipe();
 };

@@ -52,17 +52,17 @@ public:
 
 	void destruct();
 
-	void aggregate(str_ptr fn, str_ptr alias, htab_ptr args);
+	error_return aggregate(str_ptr fn, str_ptr alias, htab_ptr args);
 
 	void add(htab_ptr cols);
 
-	obj_rc addJoin(obj_ptr ltable, obj_ptr rtable, int jtype);
+	obj_return addJoin(obj_ptr ltable, obj_ptr rtable, int jtype);
 
-	obj_rc addTable(str_ptr table, str_ptr alias, htab_ptr cols);
+	obj_return addTable(str_ptr table, str_ptr alias, htab_ptr cols);
 
-	val_rc getRenamed();
+	htab_return getRenamed();
 
-	obj_ptr iCols();
+	obj_return iCols();
 
 	void wipe() override;
 

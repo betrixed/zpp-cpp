@@ -42,27 +42,73 @@ Operation::debug_info(htab_rw di)
 	di.set(SQSTR.join_tables, joiner_);
 }
 
-obj_ptr
+obj_return
 Operation::getDb()
 {
+	obj_return result;
 	if (!driver_.ok())
 	{
 		//zend_printf("get Driver");
-		driver_ = IServer::connect(db_name_);
+		result = IServer::connect(db_name_);
+		if (result.has_errors())
+		{
+			return result;
+		}
+		driver_ = result.value_;
 		//showobj("Driver", driver_);
 	}
-	return driver_;
+	result.value_ = driver_;
+	return result;
 }
 
-obj_ptr
-Operation::getBind()
+bool 
+Operation::bindPtr(error_return& e, Bindings*& ptr)
 {
 	if (!bind_.ok())
 	{
-		IDriver& dv = driver();
-		bind_ = dv.newBindings();
+		obj_return obret = getBind();
+		if (obret.has_errors())
+		{
+			e = std::move(obret);
+			return false;
+		}	
 	}
-	return bind_;
+	ptr = zobj_toc<Bindings>(bind_);
+	return true;
+}
+
+bool 
+Operation::dbPtr(error_return& e, IDriver*& ptr)
+{
+	if (!driver_.ok())
+	{
+		obj_return obret = getDb();
+		if (obret.has_errors())
+		{
+			e = std::move(obret);
+			return false;
+		}	
+	}
+	ptr = zobj_toc<IDriver>(driver_);
+	return true;
+}
+
+obj_return
+Operation::getBind()
+{
+	obj_return result;
+
+	if (!bind_.ok())
+	{
+		IDriver* dv = nullptr;
+		if (!dbPtr(result,dv))
+		{
+			return result;
+		}
+		bind_ = dv->newBindings();
+	}
+	result.value_ = bind_;
+	return result;
 }
 
 void 
@@ -83,9 +129,11 @@ Operation::destruct()
 	
 }
 
-obj_rc 
+obj_return 
 Operation::addPrime(str_ptr table, str_ptr alias, htab_ptr cols)
 {
+	obj_return result;
+
 	obj_rc tc = TColumns::omg.new_zobj();
 	TColumns* tcobj = zobj_toc<TColumns>(tc);
 
@@ -94,69 +142,98 @@ Operation::addPrime(str_ptr table, str_ptr alias, htab_ptr cols)
 
 	//showobj("tcobj", tc);
 
-	JoinTables& jt = joiner();
-	jt.setPrime(tc);
-	return tc;
-}
-
-val_rc 
-Operation::firstRow(int fetch)
-{
-	val_rc result = getRows(fetch);
-
-	htab_ptr rows(result.zarray());
-	if (rows.size())
+	obj_return jt_ret = getJoiner();
+	if (jt_ret.has_errors())
 	{
-		return rows.get(int(0));
-	}
-	result.set_null();
+		result = std::move(jt_ret);
+		return result;
+	}	
+	JoinTables* jt = zobj_toc<JoinTables>(jt_ret.value_);
+	jt->setPrime(tc);
+	result.value_ = tc;
 	return result;
 }
 
-obj_ptr
+val_return
+Operation::firstRow(int fetch)
+{
+	val_return result = getRows(fetch);
+	if (result.has_errors())
+	{
+		return result;
+	}
+	val_rc& data = result.value_;
+	htab_ptr rows(data.zarray());
+	if (rows.size())
+	{
+		result.value_ = rows.get(int(0));
+		return result;
+	}
+	result.value_.set_null();
+	return result;
+}
+
+obj_return
 Operation::getJoiner()
 {
+	obj_return result;
+
 	if (!joiner_.ok())
 	{
 		joiner_ = JoinTables::omg.new_zobj();
-		Bindings& bind = bindings();
-
+		Bindings* bind = nullptr;
+		if (!bindPtr(result, bind))
+		{
+			return result;
+		}
 		val_rc arg(joiner_);
-		bind.set(ISql::SQL_FROM, arg);
+		bind->set(ISql::SQL_FROM, arg);
 	}
-	return joiner_;
+	result.value_ = joiner_;
+	return result;
 }
 
-val_rc 
+val_return 
 Operation::getRows(int fetch)
 {
-	val_rc result;
+	val_return result;
 
-	obj_rc simple = prepare( fetch );
+	obj_return simple_ret = prepare( fetch );
 
-	if (simple.ok())
+	if (simple_ret.has_errors())
 	{
-		Simple* s = zobj_toc<Simple>(simple);
-
-		result = s->getRows();
+		result = std::move(simple_ret);
+		return result;
 	}
-	return result;
+	
+	Simple* s = zobj_toc<Simple>(simple_ret.value_);
+
+	return s->getRows();
 }
 
 obj_return
 Operation::getSqlParams()
 {
-	Bindings& bind = bindings();
 	obj_return result;
+	Bindings* bind = nullptr;
 
-	result.value_ = bind.getParamList();
+	if (!bindPtr(result, bind))
+	{
+		return result;
+	}
+
+	result = bind->getParamList();
+	if (result.has_errors())
+	{
+		return result;
+	}
 	this->wipe();
 	return result;
 }
 
 /* this throws away the ParamList object
 */
-str_rc 
+str_return 
 Operation::getSql()
 {
 	str_rc sql;
@@ -172,23 +249,38 @@ Operation::getSql()
 	return sql;
 }
 
-void 
+error_return 
 Operation::limit(val_ptr ct, val_ptr start)
 {
-	Bindings& bind = bindings();
-	bind.limit(ct, start);
+	error_return err;
+	Bindings* bind = nullptr;
+	
+	if (!bindPtr(err, bind))
+	{
+		return err;
+	}
+	bind->limit(ct, start);
+	return err;
 }
 
-void 
+error_return 
 Operation::orderBy(val_ptr column, bool descend)
 {
-	Bindings& bind = bindings();
-	bind.orderBy(column, descend);
+	error_return err;
+	Bindings* bind = nullptr;
+	if (!bindPtr(err, bind))
+	{
+		return err;
+	}
+	bind->orderBy(column, descend);
+	return err;
 }
 
-obj_rc 
+obj_return 
 Operation::prepare(int fetch)
 {
+	obj_return result;
+
 	if (fetch < 0)
 	{
 		fetch = IDriver::FETCH_ASSOC;
@@ -197,12 +289,21 @@ Operation::prepare(int fetch)
 	obj_rc s = Simple::omg.new_zobj();
 
 	Simple* sobj = zobj_toc<Simple>(s);
-	sobj->construct(getDb(), fetch);
 
-	//showobj("Simple", s);
+	IDriver* dv = nullptr;
+	if (!dbPtr(result, dv))
+	{
+		return result;
+	}
 
-	Bindings& bind = bindings();
-	val_rc retvals = bind.get(ISql::SQL_RETURN);
+	sobj->construct(dv->vobj(), fetch);
+	Bindings* bind = nullptr;
+	if (!bindPtr(result, bind))
+	{
+		return result;
+	}
+
+	val_rc retvals = bind->get(ISql::SQL_RETURN);
 
 	if (retvals.ok())
 	{
@@ -212,44 +313,73 @@ Operation::prepare(int fetch)
 	obj_ptr self(vobj());
 
 	obj_rc pobj_mgr = self.call(SQSTR.get_sql_params);
-	ParamList* plist = zobj_toc<ParamList>(pobj_mgr);
 
-	this->wipe();
-
-	str_rc sql = plist->getSql();
-	//showstr("prepare", sql);
-
-	sobj->prepare(sql);
-
-	htab_ptr values( plist->getValues());
-
-	if (values.size())
+	if (pobj_mgr.ok())
 	{
-		sobj->setValues(values);
+		ParamList* plist = zobj_toc<ParamList>(pobj_mgr);
+
+		this->wipe();
+
+		str_rc sql = plist->getSql();
+		//showstr("prepare", sql);
+
+		bool_return check = sobj->prepare(sql);
+
+		if (check.has_errors())
+		{
+			result = std::move(check);
+			return result;
+		}
+
+		htab_ptr values( plist->getValues());
+
+		if (values.size())
+		{
+			sobj->setValues(values);
+		}
 	}
-
-	return s;
-
+	result.value_ = s;
+	return result;
 }
 
-void 
+error_return 
 Operation::returns(htab_ptr list)
 {
-	Bindings& bind = bindings();
-	bind.addarray(ISql::SQL_RETURN, list);
+	error_return err;
+
+	obj_return bind_ret = getBind();
+	if (bind_ret.has_errors())
+	{
+		err = std::move(bind_ret);
+		return err;
+	}
+	Bindings* bind = zobj_toc<Bindings>(bind_ret.value_);
+	bind->addarray(ISql::SQL_RETURN, list);
+	return err;
 }
 
-val_rc 
+val_return
 Operation::run()
 {
-	obj_rc s = prepare(IDriver::FETCH_ASSOC);
-	Simple* sobj = zobj_toc<Simple>(s);
+	val_return result;
+
+	obj_return sret = prepare(IDriver::FETCH_ASSOC);
+
+	if (sret.has_errors())
+	{
+		result = std::move(sret);
+		return result;
+	}
+
+	Simple* sobj = zobj_toc<Simple>(sret.value_);
 	return sobj->run();
 }
 
-void 
+error_return 
 Operation::where(val_ptr lattr, val_ptr rattr, int op, int blogic)
 {
+	error_return err;
+
 	htab_rc data;
 
 	htab_rw hw(data);
@@ -264,9 +394,15 @@ Operation::where(val_ptr lattr, val_ptr rattr, int op, int blogic)
 		blogic = JoinExpr::B_AND;
 	}
 	str_ptr bstr = JoinExpr::boolStr(blogic);
-	Bindings& bind = bindings();
-	bind.where(lattr, opstr, rattr, bstr);
-
+	obj_return bind_ret = getBind();
+	if (bind_ret.has_errors())
+	{
+		err = std::move(bind_ret);
+		return err;
+	}
+	Bindings* bind = zobj_toc<Bindings>(bind_ret.value_);
+	bind->where(lattr, opstr, rattr, bstr);
+	return err;
 }
 
 void 
@@ -329,9 +465,9 @@ ZEND_METHOD(Wcd_Sql_Operation, addPrime)
 	{
 		Operation* cobj = zval_toc<Operation>(ZEND_THIS);
 
-		obj_rc result(cobj->addPrime(table, alias, cols));
-
-		result.move_zv(return_value);
+		obj_return result = cobj->addPrime(table, alias, cols);
+		result.throw_errors();
+		result.value_.move_zv(return_value);
 	}
 }
 
@@ -352,9 +488,9 @@ ZEND_METHOD(Wcd_Sql_Operation, firstRow)
 	{
 		Operation* cobj = zval_toc<Operation>(ZEND_THIS);
 
-		obj_rc result(cobj->addPrime(table, alias, cols));
-
-		result.move_zv(return_value);
+		obj_return result = cobj->addPrime(table, alias, cols);
+		result.throw_errors();
+		result.value_.move_zv(return_value);
 	}
 }
 
@@ -364,9 +500,9 @@ ZEND_METHOD(Wcd_Sql_Operation, getBind)
 
 	Operation* cobj = zval_toc<Operation>(ZEND_THIS);
 
-	obj_ptr result = cobj->getBind();
-
-	result.return_zv(return_value);
+	obj_return result = cobj->getBind();
+	result.throw_errors();
+	result.value_.return_zv(return_value);
 }
 
 ZEND_METHOD(Wcd_Sql_Operation, getDb)
@@ -375,9 +511,9 @@ ZEND_METHOD(Wcd_Sql_Operation, getDb)
 
 	Operation* cobj = zval_toc<Operation>(ZEND_THIS);
 
-	obj_ptr result = cobj->getDb();
-
-	result.return_zv(return_value);
+	obj_return result = cobj->getDb();
+	result.throw_errors();
+	result.value_.return_zv(return_value);
 }
 
 ZEND_METHOD(Wcd_Sql_Operation, getJoiner)
@@ -386,9 +522,9 @@ ZEND_METHOD(Wcd_Sql_Operation, getJoiner)
 
 	Operation* cobj = zval_toc<Operation>(ZEND_THIS);
 
-	obj_ptr result = cobj->getJoiner();
-
-	result.return_zv(return_value);
+	obj_return result = cobj->getJoiner();
+	result.throw_errors();
+	result.value_.return_zv(return_value);
 }
 
 
@@ -405,13 +541,14 @@ ZEND_METHOD(Wcd_Sql_Operation, getRows)
 	{
 		fetch = IDriver::FETCH_ASSOC;
 	}
-	val_rc result;
+	val_return result;
 
 	if (!args.throw_errors())
 	{
 		Operation* cobj = zval_toc<Operation>(ZEND_THIS);
 		result = cobj->getRows(fetch);
-		result.move_zv(return_value);
+		result.throw_errors();
+		result.value_.move_zv(return_value);
 	}
 }
 
@@ -432,9 +569,9 @@ ZEND_METHOD(Wcd_Sql_Operation, getSql)
 
 	Operation* cobj = zval_toc<Operation>(ZEND_THIS);
 
-	str_rc result = cobj->getSql();
-
-	result.move_zv(return_value);
+	str_return result = cobj->getSql();
+	result.throw_errors();
+	result.value_.move_zv(return_value);
 }
 
 ZEND_METHOD(Wcd_Sql_Operation, limit)
@@ -444,9 +581,13 @@ ZEND_METHOD(Wcd_Sql_Operation, limit)
 	val_ptr maxct(args.need(0));
 	val_ptr start(args.option(1));
 
-	Operation* cobj = zval_toc<Operation>(ZEND_THIS);
+	if (!args.throw_errors())
+	{
+		Operation* cobj = zval_toc<Operation>(ZEND_THIS);
 
-	cobj->limit(maxct, start);
+		error_return result = cobj->limit(maxct, start);
+		result.throw_errors();
+	}
 
 }
 
@@ -466,7 +607,8 @@ ZEND_METHOD(Wcd_Sql_Operation, orderBy)
 	{
 		Operation* cobj = zval_toc<Operation>(ZEND_THIS);
 
-		cobj->orderBy(column, descend);
+		error_return result = cobj->orderBy(column, descend);
+		result.throw_errors();
 	}
 }
 
@@ -482,13 +624,14 @@ ZEND_METHOD(Wcd_Sql_Operation, prepare)
 	{
 		fetch = IDriver::FETCH_ASSOC;
 	}
-	obj_rc result;
+	obj_return result;
 
 	if (!args.throw_errors())
 	{
 		Operation* cobj = zval_toc<Operation>(ZEND_THIS);
 		result = cobj->prepare(fetch);
-		result.move_zv(return_value);
+		result.throw_errors();
+		result.value_.move_zv(return_value);
 	}
 }
 
@@ -503,7 +646,8 @@ ZEND_METHOD(Wcd_Sql_Operation, returns)
 	if (!args.throw_errors())
 	{
 		Operation* cobj = zval_toc<Operation>(ZEND_THIS);
-		cobj->returns(rvalues);
+		error_return result = cobj->returns(rvalues);
+		result.throw_errors();
 	}
 }
 
@@ -513,9 +657,9 @@ ZEND_METHOD(Wcd_Sql_Operation, run)
 
 	Operation* cobj = zval_toc<Operation>(ZEND_THIS);
 
-	val_rc result(cobj->run());
-
-	result.move_zv(return_value);
+	val_return result = cobj->run();
+	result.throw_errors();
+	result.value_.move_zv(return_value);
 }
 
 ZEND_METHOD(Wcd_Sql_Operation, where)
@@ -534,7 +678,8 @@ ZEND_METHOD(Wcd_Sql_Operation, where)
 	if (!args.throw_errors())
 	{
 		Operation* cobj = zval_toc<Operation>(ZEND_THIS);
-		cobj->where(lattr, rattr, op, blogic);
+		error_return result = cobj->where(lattr, rattr, op, blogic);
+		result.throw_errors();
 	}
 }
 

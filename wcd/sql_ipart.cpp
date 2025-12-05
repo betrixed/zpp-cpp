@@ -272,7 +272,7 @@ JoinExpr::emit(int ix, Bindings* bind,
 
 	str_buf sqlbuf;
 
-	str_return    temp;
+	str_return	temp;
 
 	const char blank = ' ';
 
@@ -302,12 +302,13 @@ JoinExpr::emit(int ix, Bindings* bind,
 		else {
 			temp = L_attr.to_zstr();
 		}
-		sqlbuf << temp;
+		
 		if (temp.has_errors())
 		{
 			result = std::move(temp);
 			goto RET_ALL;
 		}
+		sqlbuf << temp.value_;
 	}
 
 	if (op_ < OP_NOP)
@@ -330,14 +331,15 @@ JoinExpr::emit(int ix, Bindings* bind,
 		else {
 			temp = R_attr.to_zstr();
 		}
-		sqlbuf << temp;
 		if (temp.has_errors())
 		{
 			result = std::move(temp);
 		}
+		sqlbuf << temp.value_;
+
 	}
 RET_ALL:
-	result = sqlbuf.zstr();
+	result.value_ = sqlbuf.zstr();
 	return result;
 }
 
@@ -904,10 +906,9 @@ ZEND_METHOD(Wcd_Sql_JoinExpr, emit)
 	JoinExpr* cobj = zval_toc<JoinExpr> (ZEND_THIS);
 	Bindings* bind = zval_toc<Bindings>(bindings);
 	
-	str_return sret = cobj->emit(ix, bind, lalias, ralias);
-	str_rc result = sret;
-	sret.throw_errors();
-	result.move_zv(return_value);
+	str_return result = cobj->emit(ix, bind, lalias, ralias);
+	result.throw_errors();
+	result.value_.move_zv(return_value);
 
 }
 

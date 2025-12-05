@@ -680,7 +680,7 @@ IDriver::querySingle(str_ptr query)
 	return result;
 }
 
-htab_rc 
+htab_return 
 IDriver::getTableColumns(str_ptr tableName)
 {
 	obj_rc model_mgr = getTableModel(tableName);
@@ -689,11 +689,15 @@ IDriver::getTableColumns(str_ptr tableName)
 	return m->getColDefs();
 }
 
-htab_rc 
+htab_return 
 IDriver::getColumnNames(str_ptr tableName)
 {
-	htab_rc cols = getTableColumns(tableName);
-	return htab_rc::getKeys(cols);
+	htab_return cols = getTableColumns(tableName);
+	if (!cols.has_errors())
+	{
+		cols.value_ = htab_rc::getKeys(cols.value_);
+	}
+	return cols;
 }
 
 obj_rc 
@@ -803,7 +807,7 @@ IDriver::lastInsertId()
 	return pdo.call(DBS.lastinsertid_fn);
 }
 
-val_rc 
+val_return 
 IDriver::lastSeqValue(str_ptr name)
 {
 	str_buf buf;
@@ -812,12 +816,16 @@ IDriver::lastSeqValue(str_ptr name)
 	str_rc  sql = buf.zstr();
 	htab_ptr empty;
 
-	val_rc srow = query(sql, empty);
-	val_rc result;
-	if (srow.isArray())
-	{
-		htab_ptr rows(srow);
-		result = rows.get(int(0));
+	val_return result = query(sql, empty);
+
+	if (!result.has_errors())
+	{	
+		val_rc& test = result.value_;
+		if (test.isArray())
+		{
+			htab_ptr rows(test);
+			result.value_ = rows.get(int(0));
+		}
 	}
 	return result;
 }
@@ -1090,23 +1098,23 @@ ZEND_METHOD(Wcd_IDriver, escape)
 
 ZEND_METHOD(Wcd_IDriver, execute)
 {
-	zval* stmt;
+	val_ptr stmt;
+
 	bool  close = true;
 	bool  fetch = false;
 
-	ZEND_PARSE_PARAMETERS_START(1,3)
-	Z_PARAM_OBJECT(stmt)
-	Z_PARAM_OPTIONAL
-	Z_PARAM_BOOL(close);
-	Z_PARAM_BOOL(fetch);
+	zarg_rd args(execute_data);
 
-	ZEND_PARSE_PARAMETERS_END();
+	args.ztype(stmt, args.need(0), IS_OBJECT);
+	args.zbool(close, args.option(1));
+	args.zbool(fetch, args.option(2));
 
-	IDriver* db = zval_toc<IDriver>(ZEND_THIS);	
-
-	val_rc result = db->execute(stmt, close, fetch);
-
-	result.move_zv(return_value);
+	if (!args.throw_errors())
+	{
+		IDriver* db = zval_toc<IDriver>(ZEND_THIS);	
+		val_return result = db->execute(stmt, close, fetch);
+		result.value_.move_zv(return_value);
+	}
 }
 
 ZEND_METHOD(Wcd_IDriver, fetchAllRows)
@@ -1194,9 +1202,9 @@ ZEND_METHOD(Wcd_IDriver, getColumnNames)
 
 	IDriver* db = zval_toc<IDriver>(ZEND_THIS);	
 
-	htab_rc result = db->getColumnNames(table);
-
-	result.move_zv(return_value);
+	htab_return result = db->getColumnNames(table);
+	result.throw_errors();
+	result.value_.move_zv(return_value);
 }
 
 ZEND_METHOD(Wcd_IDriver, getConnectOptions)
@@ -1215,8 +1223,10 @@ ZEND_METHOD(Wcd_IDriver, getDSN)
 
 	IDriver* db = zval_toc<IDriver>(ZEND_THIS);
 
-	str_rc result = db->getDSN();
-	result.move_zv(return_value);
+	str_return result = db->getDSN();
+	result.throw_errors();
+
+	result.value_.move_zv(return_value);
 }
 
 ZEND_METHOD(Wcd_IDriver, getDatabaseName)
@@ -1280,9 +1290,9 @@ ZEND_METHOD(Wcd_IDriver, getTableColumns)
 
 	IDriver* db = zval_toc<IDriver>(ZEND_THIS);	
 
-	htab_rc result = db->getTableColumns(table);
-
-	result.move_zv(return_value);
+	htab_return result = db->getTableColumns(table);
+	result.throw_errors();
+	result.value_.move_zv(return_value);
 }
 
 ZEND_METHOD(Wcd_IDriver, getTableModel)
@@ -1391,17 +1401,20 @@ ZEND_METHOD(Wcd_IDriver, lastInsertId)
 
 ZEND_METHOD(Wcd_IDriver, lastSeqValue)
 {
-	zend_string*   seqname;
+	str_ptr   seqname;
 
-	ZEND_PARSE_PARAMETERS_START(1,1)
-	Z_PARAM_STR(seqname)
-	ZEND_PARSE_PARAMETERS_END();
+	zarg_rd args(execute_data);
 
-	IDriver* db = zval_toc<IDriver>(ZEND_THIS);
+	args.zstring(seqname, args.need(0));
 
-	val_rc result = db->lastSeqValue(seqname);
+	if (!args.throw_errors())
+	{
+		IDriver* db = zval_toc<IDriver>(ZEND_THIS);
 
-	result.move_zv(return_value);
+		val_return result = db->lastSeqValue(seqname);
+		result.throw_errors();
+		result.value_.move_zv(return_value);
+	}
 }
 
 ZEND_METHOD(Wcd_IDriver, lastSQL)
@@ -1487,39 +1500,40 @@ ZEND_METHOD(Wcd_IDriver, param)
 
 ZEND_METHOD(Wcd_IDriver, prepare)
 {
-	zend_string*   sql;
+	str_ptr   sql;
 
-	ZEND_PARSE_PARAMETERS_START(1,1)
-	Z_PARAM_STR(sql)
-	ZEND_PARSE_PARAMETERS_END();
+	zarg_rd args(execute_data);
 
-	IDriver* db = zval_toc<IDriver>(ZEND_THIS);	
+	args.zstring(sql, args.need(0));
 
-	val_rc result = db->prepare(sql);
-
-	result.move_zv(return_value);
+	if (!args.throw_errors())
+	{
+		IDriver* db = zval_toc<IDriver>(ZEND_THIS);	
+		val_return result = db->prepare(sql);
+		result.throw_errors();
+		result.value_.move_zv(return_value);	
+	}
 }
 
 ZEND_METHOD(Wcd_IDriver, prepareQuery)
 {
-	zend_string* sql;
-	zval*        pvalues = nullptr;
-	zval*        ptypes = nullptr;
-	ZEND_PARSE_PARAMETERS_START(1,3)
-	Z_PARAM_STR(sql)
-	Z_PARAM_OPTIONAL
-	Z_PARAM_ARRAY(pvalues)
-	Z_PARAM_ARRAY(ptypes)
-	ZEND_PARSE_PARAMETERS_END();
+	str_ptr sql;
+	htab_ptr        values;
+	htab_ptr        types;
 
-	htab_rc values(pvalues);
-	htab_rc vtypes(ptypes);
+	zarg_rd args(execute_data);
 
+	args.zstring(sql, args.need(0));
+	args.zarray_null(values, args.option(1));
+	args.zarray_null(types, args.option(2));
 
-	IDriver* db = zval_toc<IDriver>(ZEND_THIS);	
-
-	val_rc result = db->prepareQuery( sql, values, vtypes);
-	result.move_zv(return_value);
+	if (!args.throw_errors())
+	{
+		IDriver* db = zval_toc<IDriver>(ZEND_THIS);	
+		val_return result = db->prepareQuery( sql, values, types);
+		result.throw_errors();
+		result.value_.move_zv(return_value);
+	}
 }
 
 ZEND_METHOD(Wcd_IDriver, query)
@@ -1536,8 +1550,9 @@ ZEND_METHOD(Wcd_IDriver, query)
 
 	IDriver* db = zval_toc<IDriver>(ZEND_THIS);	
 
-	val_rc result = db->query(sql, values);
-	result.move_zv(return_value);	
+	val_return result = db->query(sql, values);
+	result.throw_errors();
+	result.value_.move_zv(return_value);	
 }
 
 ZEND_METHOD(Wcd_IDriver, querySingle)
@@ -1550,8 +1565,8 @@ ZEND_METHOD(Wcd_IDriver, querySingle)
 
 	IDriver* db = zval_toc<IDriver>(ZEND_THIS);	
 
-	val_rc result = db->querySingle( sql );
-	result.move_zv(return_value);	
+	val_return result = db->querySingle( sql );
+	result.value_.move_zv(return_value);	
 }
 
 ZEND_METHOD(Wcd_IDriver, quoteName)

@@ -64,7 +64,7 @@ namespace wcd {
 
 		void setCaseAttribute(int value);
 
-		htab_rc getColumnNames(str_ptr tableName);
+		htab_return getColumnNames(str_ptr tableName);
 		htab_rc getConnectOptions();
 
 		str_return getDSN();
@@ -77,7 +77,7 @@ namespace wcd {
 
 		obj_rc getSchema();
 		str_rc getSchemaClass();
-		htab_rc getTableColumns(str_ptr tableName);
+		htab_return getTableColumns(str_ptr tableName);
 		obj_rc getTableMode(str_ptr tableName);
 
 		htab_rc getTableNames();
@@ -94,7 +94,7 @@ namespace wcd {
 
 
 		val_rc lastInsertId();
-		val_rc lastSeqValue(str_ptr name);
+		val_return lastSeqValue(str_ptr name);
 
 		void log(htab_ptr info);
 

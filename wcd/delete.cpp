@@ -21,15 +21,26 @@ base_obj_mgr<Delete> Delete::omg;
 obj_return 
 Delete::getSqlParams()
 {
-	Bindings& bind = this->bindings();
+	obj_return result;
 
-	obj_rc isql_mgr = bind.isql();
+	Bindings* bind = nullptr;
+	if (!bindPtr(result, bind))
+	{
+		return result;
+	}
+
+	obj_rc isql_mgr = bind->isql();
 
 	ISql* isql = zobj_toc<ISql>(isql_mgr);
 
-	obj_return result = isql->deleteSql(bind);
+	result = isql->deleteSql(*bind);
 
-	bind.wipe();
+	if (result.has_errors())
+	{
+		return result;
+	}
+
+	bind->wipe();
 
 	return result;
 }

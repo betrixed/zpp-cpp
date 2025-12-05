@@ -16,9 +16,11 @@ using namespace wcc;
 
 base_obj_mgr<Update> Update::omg;
 
-void 
+error_return 
 Update::set(str_ptr column, val_ptr value)
 {
+	error_return result;
+
 	htab_rc args_rc;
 
 	htab_rw args(args_rc);
@@ -26,23 +28,44 @@ Update::set(str_ptr column, val_ptr value)
 	args.set(SQSTR.column, column);
 	args.set(SQSTR.valuekey, value);
 
-	Bindings& bind = this->bindings();
-	bind.addarray(ISql::SQL_UPDATE, args_rc);
+	obj_return bret = getBind();
+	if (bret.has_errors())
+	{
+		result = std::move(bret);
+		return result;
+	}
+
+	Bindings* bind = zobj_toc<Bindings>(bret.value_);
+
+	bind->addarray(ISql::SQL_UPDATE, args_rc);
+
+	return result;
 }
 
 obj_return 
 Update::getSqlParams()
 {
-	Bindings& bind = this->bindings();
+	obj_return result;
 
-	obj_ptr isql_ptr = bind.isql();
+	obj_return bret = getBind();
+	if (bret.has_errors())
+	{
+		result = std::move(bret);
+		return result;
+	}
+
+	Bindings* bind = zobj_toc<Bindings>(bret.value_);
+
+	obj_ptr isql_ptr = bind->isql();
 
 	ISql* isql = zobj_toc<ISql>(isql_ptr);
 
-	obj_rc result = isql->update(bind);
-
-	bind.wipe();
-
+	result = isql->update(*bind);
+	if (result.has_errors())
+	{
+		return result;
+	}
+	bind->wipe();
 	return result;
 }
 
@@ -64,7 +87,8 @@ ZEND_METHOD(Wcd_Sql_Update, set)
 	if (!args.throw_errors())
 	{
 		Update* cobj = zval_toc<Update>(ZEND_THIS);
-		cobj->set(column,value);
+		error_return result = cobj->set(column,value);
+		result.throw_errors();
 	}
 }
 
