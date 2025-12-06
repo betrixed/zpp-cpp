@@ -32,6 +32,7 @@ namespace zpp {
 		zend_object* obj_;
 
 		friend class obj_rc;
+		friend class weak_ref;
 		
 	public:
 		obj_ptr() : obj_(nullptr) {}

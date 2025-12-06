@@ -172,30 +172,7 @@ namespace zpp {
         bool call(val_ptr fres);
     };
 
-    class fn_isdir : public fn_call_args<1> {
-    public:
-        bool call(str_ptr path);
-    };
-
-    class fn_opendir : public fn_call_args<1> {
-    public:
-        val_rc call(str_ptr path);
-    };
-
-    class fn_readdir : public fn_call_args<1> {
-    public:
-        val_rc call(val_ptr dh);
-    };
-
-    class fn_closedir : public fn_call_args<1> {
-    public:
-        void call(val_ptr dh);
-    };
-
-    class fn_mkdir : public fn_call_args<3> {
-    public:
-        bool call(str_ptr path, int permissions = 0755, bool recurse = false);
-    };
+   
 
     class fn_filemtime : public fn_call_args<1> {
     public:
@@ -285,22 +262,6 @@ namespace zpp {
         val_rc call(zval* arg1, zval* arg2);
     };
 
-    class fn_constant : public fn_call_args<1>
-    {
-    public:
-        val_rc call(str_ptr name);
-    };
-    class fn_dirname : public fn_call_args<1>
-    {
-    public:
-        str_rc call(str_ptr name, int level=1);
-    };
-
-    class fn_realpath : public fn_call_args<1>
-    {
-    public:
-        str_rc call(str_ptr path);
-    };
     
     /** 
      *  zend_string passed to set_fname
@@ -332,6 +293,8 @@ namespace zpp {
         str_intern  s_defined;
         str_intern  s_define;
         str_intern  s_getcwd;
+        str_intern  s_weakref_create;
+        str_intern  s_weakref_get;
 
         str_intern  s_isdir;
         str_intern  s_readdir;
@@ -441,6 +404,11 @@ namespace zpp {
     str_rc realpath(str_ptr path);
 
     bool mkdir(str_ptr path, int permissions = 0755, bool recurse = false);
+
+    obj_rc weakref_create(obj_ptr obj);
+
+    obj_rc weakref_get(obj_ptr wref);
+
 
 }; // end namespace zpp
 #endif

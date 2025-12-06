@@ -26,6 +26,59 @@ fntable FTAB;
 strtable STAB;
 
 
+class fn_weakref_create : public fn_call_args<1>
+{
+public:
+    obj_rc call(obj_ptr wref);
+};
+
+class fn_weakref_get : public fn_call
+{
+public:
+    obj_rc call(obj_ptr wref);
+};
+
+class fn_constant : public  fn_call_args<1>
+{
+public:
+    val_rc call(str_ptr name);
+};
+class fn_dirname : public fn_call_args<1>
+{
+public:
+    str_rc call(str_ptr name, int level=1);
+};
+
+class fn_realpath : public fn_call_args<1>
+{
+public:
+    str_rc call(str_ptr path);
+};
+
+ class fn_isdir : public fn_call_args<1> {
+public:
+    bool call(str_ptr path);
+};
+
+class fn_opendir : public fn_call_args<1> {
+public:
+    val_rc call(str_ptr path);
+};
+
+class fn_readdir : public fn_call_args<1> {
+public:
+    val_rc call(val_ptr dh);
+};
+
+class fn_closedir : public fn_call_args<1> {
+public:
+    void call(val_ptr dh);
+};
+
+class fn_mkdir : public fn_call_args<3> {
+public:
+    bool call(str_ptr path, int permissions = 0755, bool recurse = false);
+};
 
 class TLfnTable {
 public:
@@ -57,6 +110,8 @@ public:
     fn_mkdir      mkdir;
     fn_realpath   realpath;
 
+    fn_weakref_create weakref_create;
+    fn_weakref_get    weakref_get;
 
     void init(const fntable& ftab)
     {
@@ -84,7 +139,10 @@ public:
         mkdir.set_fname(ftab.s_mkdir);
 
         realpath.set_fname(ftab.s_realpath);
-        
+
+        weakref_create.set_fname(ftab.s_weakref_create);
+        weakref_create.set_fname(ftab.s_weakref_get);
+
         defined.set_fname(ftab.s_defined);
         define.set_fname(ftab.s_define);
         get_constant.set_fname(ftab.s_constant);
@@ -669,6 +727,9 @@ fntable::init()
     s_function_exists = "function_exists";
     s_class_exists = "class_exists";
 
+    s_weakref_create = "weakreference::create";
+    s_weakref_get = "get";
+
     s_preg_quote = "preg_quote";
     s_file_get_contents = "file_get_contents";
     s_pathinfo = "pathinfo";
@@ -847,6 +908,34 @@ void closedir(val_ptr dh)
 bool mkdir(str_ptr path, int permissions, bool recurse)
 {
     return TLFNs.mkdir.call(path, permissions, recurse);
+}
+
+obj_rc 
+fn_weakref_create::call(obj_ptr wref)
+{
+    ZVAL_OBJ(argsptr(), wref);
+    val_rc result = call_fn();
+    return result.zobject();
+}
+
+obj_rc 
+weakref_create(obj_ptr obj)
+{
+    return TLFNs.weakref_create.call(obj);
+}
+
+obj_rc
+fn_weakref_get::call(obj_ptr wref)
+{
+    set_obj(wref);
+    val_rc result = call_fn();
+    return result.zobject();
+}
+
+obj_rc 
+weakref_get(obj_ptr wref)
+{
+    return TLFNs.weakref_get.call(wref);
 }
 
 } // end namespace zpp

@@ -31,9 +31,6 @@ namespace zpp {
 		static void try_decref(zend_object* ob);
 		static void try_addref(zend_object* ob);
 		
-
-
-
 		obj_rc() : obj_ptr() {}
 
 		obj_rc(zend_object* rc);
@@ -87,6 +84,25 @@ namespace zpp {
 		static bool new_object(str_ptr classname, obj_rc& host);
 	};
 
+	// weak_ref is another kind of PHP object,
+	class weak_ref : public obj_rc {
+	protected:
+		weak_ref(const obj_ptr&);
+		const weak_ref& operator=(const obj_ptr& c);
+
+	public:
+
+		weak_ref();
+		
+		weak_ref(const weak_ref& obj);
+
+		static weak_ref refObject(obj_ptr p);
+
+		const weak_ref& operator=(const weak_ref& c);
+
+		// get referred object (or null?)
+		obj_rc get();
+	};
 };
 
 
