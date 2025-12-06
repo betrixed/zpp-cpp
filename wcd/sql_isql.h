@@ -144,7 +144,7 @@ namespace wcd {
 	class ParamList : public base_d {
 	protected:
 		/** IDriver object */
-		obj_rc	driver_;
+		obj_rc	   driver_;
 		/** SQL param values */
 		htab_rc    params_;
 		/** generated SQL */

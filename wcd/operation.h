@@ -29,7 +29,7 @@ protected:
 	void genSql();
 
 	bool bindPtr(error_return& e, Bindings*&);
-	bool dbPtr(error_return& e, IDriver*&)
+	bool dbPtr(error_return& e, IDriver*&);
 public:
 
 	static base_obj_mgr<Operation> omg;

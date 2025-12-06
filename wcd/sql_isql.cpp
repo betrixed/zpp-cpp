@@ -1215,9 +1215,9 @@ ISql::fromJT(Bindings& bind, JoinTables* jt)
 		else  if (partid == SqlPartId::ICOL_PID)
 		{
 			TColumns* tcol = static_cast<TColumns*>(left);
-			obj_rc  owner(tcol->getOwner());
+			obj_rc  owner = tcol->getOwner();
 			// Owner is an "Operation" , usually a Select
-			//showobj("subq owner",subq);
+			// TODO: owner must exist?
 			obj_rc plist_mgr(owner.call(SQSTR.get_sql_params));
 		    ParamList* plist = zobj_toc<ParamList>(plist_mgr);
 		    str_rc   sub_sql = plist->getSql();

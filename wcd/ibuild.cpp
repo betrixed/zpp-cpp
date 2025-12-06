@@ -33,15 +33,15 @@ using namespace zpp;
 
 	base_obj_mgr<IBuild> IBuild::omg;
 
-	void IBuild::construct(val_ptr driver)
+	void 
+	IBuild::construct(obj_ptr driver)
 	{
-		obj_rc dbobj(driver.zobject());
-		IDriver* db = zobj_toc<IDriver>(dbobj);
+		IDriver* db = zobj_toc<IDriver>(driver);
 
-		driver_ = db->getName();
+		driver_ = weak_ref::refObject(driver);
+
 		bindings_ = db->newBindings();
 		isql_ = db->isql_;
-
 	}
 
 	str_rc msg_array_hole(unsigned int ix)
@@ -173,14 +173,14 @@ using namespace zpp;
 	obj_return
 	IBuild::getDb()
 	{
-		return IServer::connect(driver_);
+		return driver_.get();
 	}
 
 	IDriver& 
 	IBuild::idb()
 	{
-		obj_return db = IServer::connect(driver_);
-		return *(zobj_toc<IDriver>(db.value_));
+		obj_rc db = driver_.get();
+		return *(zobj_toc<IDriver>(db));
 	}
 
 	void IBuild::destruct()
@@ -808,15 +808,17 @@ using namespace wcd;
 
 ZEND_METHOD(Wcd_IBuild, __construct)
 {
-	zval* dbobj;
+	obj_ptr db;
 
-	ZEND_PARSE_PARAMETERS_START(1,1)
-	Z_PARAM_OBJECT_OF_CLASS(dbobj, IDriver::omg.class_entry_)
-	ZEND_PARSE_PARAMETERS_END();
+	zarg_rd args(execute_data);
 
-	IBuild* cobj = zval_toc<IBuild>(ZEND_THIS);
+	args.obj_ofclass(db, args.need(0),IDriver::omg.class_entry_);
 
-	cobj->construct(dbobj);
+	if (!args.throw_errors())
+	{
+		IBuild* cobj = zval_toc<IBuild>(ZEND_THIS);
+		cobj->construct(db);
+	}
 }
 
 ZEND_METHOD(Wcd_IBuild, __destruct)

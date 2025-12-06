@@ -86,8 +86,6 @@ namespace wcd {
 
 		str_intern getTableModel;
 		str_intern getColDefs;
-		str_intern get_str;
-		str_intern weakref_create;
 
 		str_intern param_list;
 		str_intern connect;

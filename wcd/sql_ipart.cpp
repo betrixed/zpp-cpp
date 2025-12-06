@@ -117,8 +117,6 @@ void sql_strtab::init()
 
 	getTableModel = "getTableModel";
 	getColDefs = "getColDefs";
-	get_str = "get";
-	weakref_create = "weakreference::create";
 
 	param_list = "param_list";
 	connect = "connect";
@@ -506,11 +504,7 @@ IColumns::getOwner()
 
 	if (owner_.ok())
 	{
-		val_rc wref = owner_.call(SQSTR.get_str);
-		if (wref.isObject())
-		{
-			ref = std::move(wref);
-		}
+		ref = weakref_get(owner_);
 	}
 	return ref;
 }
@@ -521,15 +515,7 @@ void IColumns::setOwner(obj_ptr obj)
 
 	if (obj.ok())
 	{
-		val_rc result;
-		val_rc fnstr(SQSTR.weakref_create);
-		zval   arg = {0};
-		ZVAL_OBJ(&arg, obj);
-		if (callable_fn(result, fnstr, 1, &arg))
-		{
-			owner_ = std::move(result);
-		}
-		//showobj("WeakReference ??", owner_);
+		owner_ = weakref_create(obj);
 	}
 	else {
 		owner_.init();

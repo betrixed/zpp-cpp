@@ -53,7 +53,7 @@ extern "C" {
 //#define DIRECT_LIBXML
 
 
-#define DEBUG_EXTRA
+//#define DEBUG_EXTRA
 
 //core wcc
 #include "zpp/base.cpp"

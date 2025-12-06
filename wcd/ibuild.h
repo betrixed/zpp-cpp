@@ -33,7 +33,7 @@ namespace wcd {
 
 		virtual void debug_info(htab_rw di);
 		
-		void construct(val_ptr driver);
+		void construct(obj_ptr driver);
 		void destruct();
 
 		obj_return    getDb();
@@ -90,8 +90,8 @@ namespace wcd {
 
 		void wipe();
 		
-		// db connection by name, not object reference.
-		str_rc driver_; 
+		// weak_reference object
+		weak_ref driver_; 
 		
 		obj_rc isql_;
 		obj_rc bindings_;
