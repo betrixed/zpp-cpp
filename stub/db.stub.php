@@ -118,6 +118,7 @@ class IDriver {
 
     public function rollback(): bool {}
 
+    public function getWeakRef() : \WeakReference {}
 
     public function setAttribute(int $attkey, mixed $value) : void {}
 

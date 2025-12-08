@@ -134,14 +134,20 @@ IDriver::construct(obj_ptr icfgobj, str_ptr name)
 	icfg_ = icfgobj;
 	name_ = name;
 
+
 	obj_ptr self(vobj());
 
+	self_ = weak_ref::refObject(self);
+	showobj("WeakRef", self_);
+	
 	val_rc parg(name);
 	self.property(DBS.cfg_name, parg);
 
 	IConfig* cfg = icfg_c();
 	db_name_ = cfg->getDatabase();
 	isql_ = cfg->newSql();
+
+
 }
 
 void 
@@ -729,9 +735,10 @@ IDriver::getTableModel(str_ptr tableName)
 	if (result.ok())
 	{
 		result.call(STAB.construct_key);
-		obj_ptr self(vobj());
+		
 		Model* m = zobj_toc<Model>(result);
-		m->setConnect(self);
+		
+		m->setConnect(self_);
 		m->setName(tableName);
 		
 		htab_rw hw(table_models_);
@@ -1649,6 +1656,17 @@ ZEND_METHOD(Wcd_IDriver, transaction)
 	bool check = !result.has_errors();
 	RETURN_BOOL(check);
 	result.throw_errors();
+}
+
+ZEND_METHOD(Wcd_IDriver, getWeakRef)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	IDriver* db = zval_toc<IDriver>(ZEND_THIS);
+
+	weak_ref& result = db->selfRef();
+
+	result.return_zv(return_value);
 }
 
 PHP_MINIT_FUNCTION(Wcd_IDriver_reg)

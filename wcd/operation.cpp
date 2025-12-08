@@ -37,7 +37,7 @@ void
 Operation::debug_info(htab_rw di)
 {
 	base_d::debug_info(di);
-	di.set(SQSTR.db_name, db_name_);
+	di.set(SQSTR.db_ref, dbref_);
 	di.set(SQSTR.driver, driver_);
 	di.set(SQSTR.join_tables, joiner_);
 }
@@ -48,13 +48,13 @@ Operation::getDb()
 	obj_return result;
 	if (!driver_.ok())
 	{
-		//zend_printf("get Driver");
-		result = IServer::connect(db_name_);
-		if (result.has_errors())
+		//zend_printf(	"get Driver");
+		driver_ = dbref_.get();
+
+		if (!driver_.ok())
 		{
-			return result;
+			result.error() << "IDriver weak_ref fail";
 		}
-		driver_ = result.value_;
 		//showobj("Driver", driver_);
 	}
 	result.value_ = driver_;
@@ -114,9 +114,7 @@ Operation::getBind()
 void 
 Operation::construct(obj_ptr db)
 {
-	IDriver* dv = zobj_toc<IDriver>(db);
-
-	db_name_ = dv->getName();
+	dbref_ = weak_ref::refObject(db);
 }
 
 void 
@@ -125,7 +123,7 @@ Operation::destruct()
 	bind_.init();
 	joiner_.init();
 	driver_.init();
-	db_name_.init();
+	dbref_.init();
 	
 }
 

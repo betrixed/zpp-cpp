@@ -116,7 +116,7 @@ class Model implements IfCrud {
 
     public function setColDefs(array $cdefs) : void {}
 
-    public function setConnect(IDriver $db) : void {}
+    public function setConnect(\WeakReference $db) : void {}
     
     public function setKeyOptions(array $options) : void {}
 

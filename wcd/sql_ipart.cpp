@@ -149,7 +149,7 @@ void sql_strtab::init()
 	valuesdefault = "valuesdefault";
 	eager_load = "eager_load";
 	statement = "stmt";
-	db_name = "dbname";
+	db_ref = "db_ref";
 	queryString = "queryString";
 	icolumns = "icols";
 	auto_alias = "auto_alias";

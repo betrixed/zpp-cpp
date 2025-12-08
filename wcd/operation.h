@@ -21,10 +21,10 @@ namespace wcd {
 class Operation : public base_d {
 protected:
 
-	str_rc db_name_;
-	obj_rc driver_;
-	obj_rc bind_;
-	obj_rc joiner_;
+	weak_ref dbref_;
+	obj_rc   driver_;
+	obj_rc   bind_;
+	obj_rc   joiner_;
 	
 	void genSql();
 

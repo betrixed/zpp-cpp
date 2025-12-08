@@ -29,7 +29,7 @@ void Bindings::debug_info(htab_rw di)
 	di.set(SQSTR.data_key, data_);
 	di.set(SQSTR.param_list, paramList_);
 	di.set(SQSTR.isql, isql_);
-	di.set(SQSTR.db_name, dbname_);
+	di.set(SQSTR.db_ref, dbref_);
 	di.set(SQSTR.connect, db_);
 }
 
@@ -40,13 +40,10 @@ Bindings::getDb()
 
 	if (!db_.ok())
 	{
-		obj_return test = IServer::connect(dbname_);
-		if (test.has_errors())
-		{
-			result = std::move(test);
-			return result;
+		db_ = dbref_.get();
+		if (!db_.ok()) {
+			result.error() << "Weakref access fail";
 		}
-		db_ = test.value_;
 	}
 	result.value_ = db_;
 	return  result;
@@ -130,7 +127,8 @@ void
 Bindings::construct(obj_ptr sql, obj_ptr connect)
 {
 	isql_ = sql;
-	dbname_ = connect.property(SQSTR.namekey);
+	dbref_ = weak_ref::refObject(connect);
+	//dbname_ = connect.property(SQSTR.namekey);
 }
 
 

@@ -122,7 +122,7 @@ namespace wcd {
 	void 
 	Model::destruct()
 	{
-		db_.init();
+		dbname_.init();
 		builder_.init();
 		builder_me_.init();
 	}
@@ -163,7 +163,7 @@ namespace wcd {
 	{
 
 		base_d::debug_info(di);
-		di.set(MIS.k_driver, db_);
+		di.set(MIS.k_driver, dbref_);
 
 		di.set(MIS.k_pkey_options, pkey_options_);
 		di.set(MIS.k_col_defs, class_cdefs_);
@@ -242,18 +242,19 @@ namespace wcd {
 	obj_return
 	Model::getConnect()
 	{
-		if (db_.ok())
+		obj_return result;
+		if (dbref_.ok())
 		{
-			return IServer::connect(db_);
+			result = dbref_.get();
+			return result;
 		}
-
-		obj_return dbobj = IServer::connect(val_ptr());
-		if (!dbobj.has_errors())
+		// get the default connection
+		result = IServer::connect(val_ptr());
+		if (!result.has_errors())
 		{
-			IDriver* driver = zobj_toc<IDriver>(dbobj.value_);
-			db_ = driver->getName();
+			setConnect(result.value_);
 		}
-		return dbobj;
+		return result;
 	}
 
 	str_rc 
@@ -1359,10 +1360,13 @@ namespace wcd {
 		return result;
 	}
 
-	void Model::setConnect(obj_ptr db)
+	void Model::setConnect(const weak_ref& db)
 	{
-		IDriver* driver = zobj_toc<IDriver>(db);
-		db_ = driver->getName();
+		dbref_ = db;
+		obj_rc driver = dbref_.get(); 
+
+		IDriver* dv = zobj_toc<IDriver>(driver);
+		dbname_ = dv->getName();
 	}
 
 	void 
@@ -1919,14 +1923,17 @@ ZEND_METHOD(Wcd_Model, setColDefs)
 
 ZEND_METHOD(Wcd_Model, setConnect)
 {
-	zval* db;
+	weak_ref cobj;
 
-	ZEND_PARSE_PARAMETERS_START(1,1)
-	Z_PARAM_OBJECT_OF_CLASS(db, IDriver::omg.class_entry_)
-	ZEND_PARSE_PARAMETERS_END();
+	zarg_rd args(execute_data);
 
-	Model* model = zval_toc<Model>(ZEND_THIS);
-	model->setConnect(db);
+	args.weakref(cobj, args.need(0));
+
+	if (!args.throw_errors())
+	{
+		Model* model = zval_toc<Model>(ZEND_THIS);
+		model->setConnect(cobj);
+	}
 }
 
 ZEND_METHOD(Wcd_Model, setKeyOptions)

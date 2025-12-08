@@ -286,11 +286,11 @@ namespace wcd {
 	class Bindings : public base_d
 	{
 	protected:
-		htab_rc	data_;
-		obj_rc  paramList_;
-		obj_rc	isql_;
-		obj_rc  db_;
-		str_rc  dbname_;
+		htab_rc	  data_;
+		obj_rc    paramList_;
+		obj_rc	  isql_;
+		obj_rc    db_;
+		weak_ref  dbref_;
 
 		void addToArray(int key, val_ptr value);
 		obj_return getDb();

@@ -91,10 +91,10 @@ namespace wcd {
 		void wipe();
 		
 		// weak_reference object
-		weak_ref driver_; 
-		
-		obj_rc isql_;
-		obj_rc bindings_;
+		weak_ref dbref_; 
+		obj_rc   driver_;
+		obj_rc 	 isql_;
+		obj_rc   bindings_;
 
 		obj_rc model_;
 		str_rc modelClass_;

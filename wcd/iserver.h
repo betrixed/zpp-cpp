@@ -53,6 +53,7 @@ namespace wcd {
 		static obj_return connect(str_ptr name);
 
 		obj_return getConnect(str_ptr name);
+		
 		obj_rc getConfig(str_ptr name);
 		
 		str_rc getSqlClass(str_ptr dkey);

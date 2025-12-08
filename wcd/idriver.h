@@ -115,7 +115,10 @@ namespace wcd {
 
 		val_return querySingle(str_ptr query);
 
-		
+		weak_ref& selfRef() 
+		{
+			return self_;
+		}
 
 		str_rc quoteName(str_ptr name);
 
@@ -139,7 +142,8 @@ namespace wcd {
 	protected:
 
 
-
+		weak_ref  self_; // hold own reference
+		
 		obj_rc    icfg_;
 		str_rc    name_;
 		str_rc	  db_name_;

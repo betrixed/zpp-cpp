@@ -9,6 +9,10 @@
 #include "iconfig.h"
 #endif
 
+#ifndef WCD_IDRIVER_H
+#include "idriver.h"
+#endif
+
 #ifndef ICONFIG_ARGINFO_H
 #define ICONFIG_ARGINFO_H
 extern "C" {
@@ -278,6 +282,15 @@ IServer::getConnect(str_ptr name)
 			result = activate(name);
 		}
 	}
+	obj_ptr test = result.value_;
+	if (test.ok())
+	{
+
+		IDriver* db = zobj_toc<IDriver>(test);
+		result.value_ = db->selfRef();
+		//showobj("activate return", result.value_);
+	}
+
 	return result;
 
 }

@@ -121,7 +121,7 @@ namespace wcd {
 		str_intern  and_str;
 		str_intern  count_str;
 		str_intern  statement;
-		str_intern  db_name;
+		str_intern  db_ref;
 
 		str_intern  queryString;
 		str_intern  icolumns;

@@ -38,7 +38,7 @@ using namespace zpp;
 	{
 		IDriver* db = zobj_toc<IDriver>(driver);
 
-		driver_ = weak_ref::refObject(driver);
+		dbref_ = weak_ref::refObject(driver);
 
 		bindings_ = db->newBindings();
 		isql_ = db->isql_;
@@ -173,14 +173,29 @@ using namespace zpp;
 	obj_return
 	IBuild::getDb()
 	{
-		return driver_.get();
+		obj_return result;
+
+		if (!driver_.ok())
+		{
+			driver_ = dbref_.get();
+			if (!driver_.ok())
+			{
+				result.error() << "weakref db fail";
+			}
+
+		}
+		result.value_ = driver_;
+		return result;
 	}
 
 	IDriver& 
 	IBuild::idb()
 	{
-		obj_rc db = driver_.get();
-		return *(zobj_toc<IDriver>(db));
+		if (!driver_.ok())
+		{
+			driver_ = dbref_.get();
+		}
+		return *(zobj_toc<IDriver>(driver_));
 	}
 
 	void IBuild::destruct()

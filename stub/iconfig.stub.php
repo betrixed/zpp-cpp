@@ -38,7 +38,7 @@ class IServer {
 
     public static string $activecfg = "default";
     
-    public static function Connect(?string $name = null) : ?IDriver {}
+    public static function Connect(?string $name = null) : ?\WeakReference {}
 
     public function __construct(string $svkey) {}
 
@@ -46,7 +46,7 @@ class IServer {
 
     public function addConfig(IConfig $cfg, string $name = "default") : void {}
 
-    public function getConnect(?string $name = null): ?IDriver {}
+    public function getConnect(?string $name = null): ?\WeakReference {}
 
     public function config(array $data) : void {}
 

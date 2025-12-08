@@ -34,7 +34,8 @@ protected:
 
 	int  timestamps_;
 
-	str_rc db_;
+	str_rc 	 dbname_;
+	weak_ref dbref_;
 	//str_rc name_;
 	htab_rc pkey_options_;
 	htab_rc seq_defs_;
@@ -42,7 +43,6 @@ protected:
 	htab_rc class_pkey_;
 
 	obj_rc class_tdef_;
-
 	obj_rc builder_;
 	obj_rc builder_me_;
 
@@ -136,7 +136,7 @@ public:
 
 	void setKeyOptions(htab_ptr options);
 
-	void setConnect(obj_ptr db);
+	void setConnect(const weak_ref& db);
 
 	void setPKey(htab_ptr options);
 
