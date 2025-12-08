@@ -141,7 +141,7 @@ public:
         realpath.set_fname(ftab.s_realpath);
 
         weakref_create.set_fname(ftab.s_weakref_create);
-        weakref_create.set_fname(ftab.s_weakref_get);
+        weakref_get.set_fname(ftab.s_weakref_get);
 
         defined.set_fname(ftab.s_defined);
         define.set_fname(ftab.s_define);
@@ -715,14 +715,14 @@ json_decode(str_ptr str, bool asArray,  int flags)
 
 void fntable::init_req()
 {
+    //zend_printf("init_req\n");
+
     TLFNs.init(*this);
 }
 
 void  // virtual
 fntable::init()
 {        
-    //zend_printf("fntable init\n");
-
     s_extension_loaded = "extension_loaded";
     s_function_exists = "function_exists";
     s_class_exists = "class_exists";
@@ -913,8 +913,11 @@ bool mkdir(str_ptr path, int permissions, bool recurse)
 obj_rc 
 fn_weakref_create::call(obj_ptr wref)
 {
+    //showobj("weakref arg", wref);
+    //showmem("fn_name", &fci_.function_name);
     ZVAL_OBJ(argsptr(), wref);
     val_rc result = call_fn();
+    //showmem("fn_weakref_create", result);
     return result.zobject();
 }
 

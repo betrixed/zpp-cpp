@@ -86,19 +86,17 @@ namespace zpp {
 
 	// weak_ref is another kind of PHP object,
 	class weak_ref : public obj_rc {
-	protected:
-		weak_ref(const obj_ptr&);
-		const weak_ref& operator=(const obj_ptr& c);
-
 	public:
 
 		weak_ref();
-		
+		weak_ref(const obj_ptr&);
 		weak_ref(const weak_ref& obj);
 
 		static weak_ref refObject(obj_ptr p);
 
 		const weak_ref& operator=(const weak_ref& c);
+
+		const weak_ref& operator=(const obj_ptr& c);
 
 		// get referred object (or null?)
 		obj_rc get();

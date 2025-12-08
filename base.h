@@ -681,6 +681,7 @@ typedef bireturn<bool>   bool_return;
 typedef bireturn<obj_rc> obj_return;
 typedef bireturn<val_rc> val_return;
 typedef bireturn<htab_rc> htab_return;
+typedef bireturn<weak_ref> wref_return;
 
 }; //namespace
 

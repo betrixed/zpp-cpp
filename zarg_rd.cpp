@@ -13,7 +13,14 @@
 #include "zarg_rd.h"
 #endif
 
+#ifndef ZEND_WEAKREFS_H
+extern "C" {
+    #include <zend_weakrefs.h>
+}
+#endif
+
 namespace zpp {
+
 str_buf& 
 zarg_rd::error()
 {
@@ -188,6 +195,22 @@ zarg_rd::obj(obj_ptr& value, zval* arg)
 }
 
 bool 
+zarg_rd::weakref(weak_ref& value, zval* arg)
+{
+	value = obj_ptr(arg);
+	bool result = value.ok();
+	if (result)
+	{
+		if (value.class_entry() != zend_ce_weakref)
+		{
+			error() << "; Expected WeakReference class";
+			result = false;
+		}
+	}
+	return result;
+}
+
+bool 
 zarg_rd::obj_null(obj_ptr& value, zval* arg)
 {
 	val_ptr test(arg);
@@ -298,6 +321,7 @@ zarg_rd::throw_errors(const char* fncstr)
 	}
 	return false;
 }
+
 
 }; //namespace
 #endif

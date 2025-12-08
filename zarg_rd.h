@@ -68,6 +68,8 @@ public:
 	bool obj(obj_ptr& value, zval* arg);
 	bool obj_null(obj_ptr& value, zval* arg);
 
+	bool weakref(weak_ref& value, zval* arg);
+	
 	bool obj_ofclass(obj_ptr& value, zval* arg, zend_class_entry* ce);
 	bool obj_ofclass_null(obj_ptr& value, zval* arg, zend_class_entry* ce);
 	
