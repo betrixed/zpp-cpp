@@ -274,7 +274,7 @@ class ISql implements IfSql
 };
 
 class ParamList {
-    public function __construct(\Wcd\IDriver $gen);
+    public function __construct(\WeakReference $gen);
 
     public function addParam(mixed $value) : void {}
 

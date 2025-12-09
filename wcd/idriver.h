@@ -115,7 +115,7 @@ namespace wcd {
 
 		val_return querySingle(str_ptr query);
 
-		weak_ref& selfRef() 
+		weak_ref selfRef() 
 		{
 			return self_;
 		}

@@ -129,7 +129,7 @@ class IDriver {
 };
 
 class IBuild {
-    public function __construct(IDriver $db);
+    public function __construct(\WeakReference $db);
 
     public function __destruct();
 

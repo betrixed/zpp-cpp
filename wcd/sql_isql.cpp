@@ -64,18 +64,23 @@ void ParamList::debug_info(htab_rw di)
 	if (!val_params_.isNull())
 		di.set(SQSTR.values_key, val_params_);
 
+	di.set(SQSTR.db_ref, dbref_);
 	di.set(SQSTR.driver, driver_);
 }
 
 void 
-ParamList::construct(obj_ptr driver)
+ParamList::construct(weak_ref& driver)
 {
-	driver_ = driver;
+	dbref_ = driver;
 }
 
 str_rc 
 ParamList::paramStr(int ct)
 {
+	if (!driver_.ok())
+	{
+		driver_ = dbref_.get();
+	}
 	return driver_.call(SQSTR.param, val_rc(ct));
 }
 
@@ -190,7 +195,8 @@ ParamList::wipe()
 
 	sql_.init();
 	params_.reset();
-
+	driver_.init();
+	
 	ret_values_.reset();
 	val_params_.reset();
 }
@@ -2330,12 +2336,17 @@ ZEND_METHOD(Wcd_Sql_ISql, valuesDefault)
 /* public function __construct(\Wcd\IDriver $gen); */
 ZEND_METHOD(Wcd_Sql_ParamList, __construct)
 {
-	zval* driver;
-	ZEND_PARSE_PARAMETERS_START(1,1)
-	Z_PARAM_OBJECT(driver)
-	ZEND_PARSE_PARAMETERS_END();
-	ParamList* cobj = zval_toc<ParamList>(ZEND_THIS);
-	cobj->construct(driver);
+	weak_ref  wref;
+
+	zarg_rd args(execute_data);
+
+	args.weakref(wref, args.need(0));
+
+	if (!args.throw_errors())
+	{
+		ParamList* cobj = zval_toc<ParamList>(ZEND_THIS);
+		cobj->construct(wref);
+	}
 }
 
 /* public function addParam(mixed $value) : void {} */

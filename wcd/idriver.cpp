@@ -134,12 +134,10 @@ IDriver::construct(obj_ptr icfgobj, str_ptr name)
 	icfg_ = icfgobj;
 	name_ = name;
 
-
 	obj_ptr self(vobj());
 
 	self_ = weak_ref::refObject(self);
-	showobj("WeakRef", self_);
-	
+
 	val_rc parg(name);
 	self.property(DBS.cfg_name, parg);
 
@@ -157,6 +155,8 @@ IDriver::debug_info(htab_rw di)
 
 	di.set(DBS.cfg_name, name_);
 	di.set(DBS.db_name, db_name_);
+	di.set(SQSTR.db_ref, self_);
+	
 	di.set(DBS.tbl_models, table_models_);
 	di.set(DBS.iconfig_key, icfg_);
 	di.set(DBS.schema_def, schema_def_);
@@ -533,11 +533,13 @@ IDriver::fetchRow(val_ptr stmt, int mode)
 obj_rc 
 IDriver::newBindings()
 {
-	obj_rc result(Bindings::omg.new_zobj());
+	obj_rc result = Bindings::omg.new_zobj();
 
 	Bindings& bind = *zobj_toc<Bindings>(result);
 	
-	bind.construct(isql_, obj_ptr(vobj()));
+	//showobj("newBindings", self_);
+
+	bind.construct(isql_, self_);
 
 	obj_rc plist = this->newParamList();
 
@@ -551,7 +553,7 @@ IDriver::newParamList()
 {
 	obj_rc result(ParamList::omg.new_zobj());
 	ParamList* plist = zobj_toc<ParamList>(result);
-	plist->construct(obj_ptr(vobj()));
+	plist->construct( self_ );
 	return result;
 }
 
@@ -564,7 +566,7 @@ IDriver::newDmlBuild()
 
 	htab_rc args_mgr;
 	htab_rw args(args_mgr);
-	args.push_back(obj_ptr(vobj()));
+	args.push_back( self_ );
 	return ReflectCache::staticInstanceArgs(bclass,args);
 }
 
@@ -611,7 +613,6 @@ IDriver::readSchema()
 	{
 		obj_rc sdef = ReflectCache::staticInstance(getSchemaClass());
 		val_rc self(vobj());
-
 		sdef.call(DBS.readschema_fn, self);
 		schema_def_ = sdef;
 	}
@@ -1664,9 +1665,10 @@ ZEND_METHOD(Wcd_IDriver, getWeakRef)
 
 	IDriver* db = zval_toc<IDriver>(ZEND_THIS);
 
-	weak_ref& result = db->selfRef();
+	weak_ref result = db->selfRef();
 
-	result.return_zv(return_value);
+	//showobj("getWeakRef", result);
+	result.move_zv(return_value);
 }
 
 PHP_MINIT_FUNCTION(Wcd_IDriver_reg)

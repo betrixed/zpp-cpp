@@ -248,11 +248,17 @@ namespace wcd {
 			result = dbref_.get();
 			return result;
 		}
+
 		// get the default connection
-		result = IServer::connect(val_ptr());
-		if (!result.has_errors())
+		wref_return wref = IServer::connect(val_ptr());
+
+		if (!wref.has_errors())
 		{
-			setConnect(result.value_);
+			setConnect(wref.value_);
+			result.value_ = dbref_.get();
+		}
+		else {
+			result = std::move(wref);
 		}
 		return result;
 	}
@@ -1363,6 +1369,7 @@ namespace wcd {
 	void Model::setConnect(const weak_ref& db)
 	{
 		dbref_ = db;
+
 		obj_rc driver = dbref_.get(); 
 
 		IDriver* dv = zobj_toc<IDriver>(driver);

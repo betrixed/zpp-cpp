@@ -8,7 +8,7 @@ namespace Wcd\Sql;
 
 class Bindings 
 {
-    public function __construct(ISql $gen, \Wcd\IDriver $connect);
+    public function __construct(ISql $gen, \WeakReference $db);
 
     public function __destruct();
 

@@ -34,14 +34,18 @@ using namespace zpp;
 	base_obj_mgr<IBuild> IBuild::omg;
 
 	void 
-	IBuild::construct(obj_ptr driver)
+	IBuild::construct(const weak_ref& driver)
 	{
-		IDriver* db = zobj_toc<IDriver>(driver);
+		dbref_ = driver;
 
-		dbref_ = weak_ref::refObject(driver);
+		obj_rc dbobj = dbref_.get();
+		
+		IDriver& db = *zobj_toc<IDriver>(dbobj);
 
-		bindings_ = db->newBindings();
-		isql_ = db->isql_;
+		weak_ref ref = db.selfRef();
+
+		bindings_ = db.newBindings();
+		isql_ = db.isql_;
 	}
 
 	str_rc msg_array_hole(unsigned int ix)
@@ -170,32 +174,21 @@ using namespace zpp;
 		return *(zobj_toc<Bindings>(bindings_));
 	}
 
-	obj_return
+	obj_rc
 	IBuild::getDb()
 	{
-		obj_return result;
+		obj_rc result;
 
-		if (!driver_.ok())
-		{
-			driver_ = dbref_.get();
-			if (!driver_.ok())
-			{
-				result.error() << "weakref db fail";
-			}
+		result = dbref_.get();
 
-		}
-		result.value_ = driver_;
 		return result;
 	}
 
 	IDriver& 
 	IBuild::idb()
 	{
-		if (!driver_.ok())
-		{
-			driver_ = dbref_.get();
-		}
-		return *(zobj_toc<IDriver>(driver_));
+		obj_rc test = dbref_.get();
+		return *(zobj_toc<IDriver>(test));
 	}
 
 	void IBuild::destruct()
@@ -315,7 +308,7 @@ using namespace zpp;
 	void 
 	IBuild::debug_info(htab_rw di)
 	{
-		di.set(SQSTR.driver, driver_);
+		di.set(SQSTR.db_ref, dbref_);
 		di.set(SQSTR.isql, isql_);
 
 		di.set(SQSTR.bind_key, bindings_);
@@ -823,11 +816,11 @@ using namespace wcd;
 
 ZEND_METHOD(Wcd_IBuild, __construct)
 {
-	obj_ptr db;
+	weak_ref db;
 
 	zarg_rd args(execute_data);
 
-	args.obj_ofclass(db, args.need(0),IDriver::omg.class_entry_);
+	args.weakref(db, args.need(0));
 
 	if (!args.throw_errors())
 	{

@@ -37,6 +37,7 @@ obj_return
 Bindings::getDb()
 {
 	obj_return result;
+	//showobj("Bindings::getDb()", dbref_);
 
 	if (!db_.ok())
 	{
@@ -44,7 +45,9 @@ Bindings::getDb()
 		if (!db_.ok()) {
 			result.error() << "Weakref access fail";
 		}
+		
 	}
+	
 	result.value_ = db_;
 	return  result;
 }
@@ -124,10 +127,12 @@ Bindings::primeJoin(val_ptr tcol)
 }
 
 void 
-Bindings::construct(obj_ptr sql, obj_ptr connect)
+Bindings::construct(obj_ptr sql, weak_ref& connect)
 {
 	isql_ = sql;
-	dbref_ = weak_ref::refObject(connect);
+	dbref_ = connect;
+	//showobj("Bindings::construct ", dbref_);
+	
 	//dbname_ = connect.property(SQSTR.namekey);
 }
 
@@ -631,6 +636,7 @@ Bindings::select()
 	ISql* sql = zobj_toc<ISql>(isql_);
 
 	obj_return plistret = sql->select(*this);
+
 	if (plistret.has_errors())
 	{
 		result = std::move(plistret);
@@ -853,16 +859,20 @@ using namespace wcd;
 /* public function __construct(ISql $gen, IConnect $connect); */
 ZEND_METHOD(Wcd_Sql_Bindings, __construct)
 {
-	zval* gen;
-	zval* connect;
+	obj_rc gensql;
+	weak_ref wref;
 
-	ZEND_PARSE_PARAMETERS_START(2,2)
-	Z_PARAM_OBJECT(gen)
-	Z_PARAM_OBJECT(connect)
-	ZEND_PARSE_PARAMETERS_END();
+	zarg_rd args(execute_data);
 
-	Bindings* cobj = zval_toc<Bindings>(ZEND_THIS);
-	cobj->construct(gen,connect);
+	args.obj(gensql, args.need(0));
+	args.weakref(wref, args.need(1));
+
+	if (!args.throw_errors())
+	{
+		Bindings* cobj = zval_toc<Bindings>(ZEND_THIS);
+		cobj->construct(gensql,wref);
+	}
+
 }
 
 /* public function aliasSelect(): bool {} */

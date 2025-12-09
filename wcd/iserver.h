@@ -50,9 +50,9 @@ namespace wcd {
 
 		obj_rc getDataCache();
 
-		static obj_return connect(str_ptr name);
+		static wref_return connect(str_ptr name);
 
-		obj_return getConnect(str_ptr name);
+		wref_return getConnect(str_ptr name);
 		
 		obj_rc getConfig(str_ptr name);
 		

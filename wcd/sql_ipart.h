@@ -330,7 +330,7 @@ namespace wcd {
 		str_rc 		alias_;
 		htab_rc  	colnames_;
 		htab_rc 	expr_;
-		obj_rc 		owner_; // a WeakReference
+		weak_ref 	owner_; // a WeakReference
 	public:
 
 		static base_obj_mgr<IColumns> omg;

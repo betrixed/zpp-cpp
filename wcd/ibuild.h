@@ -33,10 +33,10 @@ namespace wcd {
 
 		virtual void debug_info(htab_rw di);
 		
-		void construct(obj_ptr driver);
+		void construct(const weak_ref& driver);
 		void destruct();
 
-		obj_return    getDb();
+		obj_rc    getDb();
 
 		val_return aggregate(str_ptr agfn, htab_ptr columns);
 		val_return get(htab_ptr columns);
@@ -92,7 +92,7 @@ namespace wcd {
 		
 		// weak_reference object
 		weak_ref dbref_; 
-		obj_rc   driver_;
+
 		obj_rc 	 isql_;
 		obj_rc   bindings_;
 

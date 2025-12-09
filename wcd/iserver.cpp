@@ -196,7 +196,9 @@ IServer::activate(str_ptr name)
 	{
 		htab_rw hw(active_);
 		hw.set(name, result.value_);
+		//showobj("activate", result.value_);
 	}
+
 	return result;
 }
 
@@ -235,10 +237,11 @@ IServer::needConfig(str_ptr name)
 	return result;
 }
 
-obj_return
+wref_return
 IServer::getConnect(str_ptr name)
 {
-	obj_return result;
+	wref_return result;
+	
 
 	if (svc_key_.ok())
 	{
@@ -263,39 +266,52 @@ IServer::getConnect(str_ptr name)
 
 	if (conn.ok())
 	{
-		result.value_ = conn;
+		IDriver* db = zobj_toc<IDriver>(conn);
+		result.value_ = db->selfRef();
 	}
 	else {
+
 		str_rc alias = alias_.get(name);
-		if (alias.ok())
+		if (!alias.ok())
 		{
-			conn = active_.get(alias);
-			if (conn.ok())
-			{
-				result.value_ = conn;
-			}
-			else {
-				result = activate(alias);
-			}
+			alias = name;
+		}
+
+		conn = active_.get(alias);
+		if (conn.ok())
+		{
+
+			IDriver* db = zobj_toc<IDriver>(conn);
+			result.value_ = db->selfRef();
 		}
 		else {
-			result = activate(name);
+			obj_return  dbresult;
+			dbresult = activate(alias);
+			if (dbresult.has_errors())
+			{
+				result = std::move(dbresult);
+			}
+			else {
+				IDriver* db = zobj_toc<IDriver>(dbresult.value_);
+				result.value_ = db->selfRef();
+			}
 		}
 	}
-	obj_ptr test = result.value_;
-	if (test.ok())
-	{
+	/*
+	showobj("GetConnect", result.value_);
+	#ifdef DEBUG_EXTRA
+		obj_rc dbfinal = result.value_.get();
 
-		IDriver* db = zobj_toc<IDriver>(test);
-		result.value_ = db->selfRef();
-		//showobj("activate return", result.value_);
-	}
+		IDriver* db = zobj_toc<IDriver>(dbfinal);
+		showstr("dbname referenced ", db->getDatabaseName());
 
+	#endif
+	*/
 	return result;
 
 }
 
-obj_return //static 
+wref_return //static 
 IServer::connect(str_ptr name)
 {
 	obj_ptr me = Services::getOne(IServer::omg.class_name());
@@ -306,12 +322,15 @@ IServer::connect(str_ptr name)
 	
 	str_rc conkey;
 
+	//showstr("::connect askfor", name);
+
 	if (!name.ok())
 	{	
 		conkey = cd.static_property(ISV.active_cfg);
+		//showstr("\nactivecfg: ", conkey);
 	}
 	else {
-		
+		//showstr("\nNew activecfg: ", name);
 		val_rc value(name);
 		cd.static_property(ISV.active_cfg, value);
 		conkey = name;
@@ -434,7 +453,7 @@ ZEND_METHOD(Wcd_IServer, Connect)
 	Z_PARAM_STR_OR_NULL(name)
 	ZEND_PARSE_PARAMETERS_END();
 
-	obj_return result = IServer::connect(name);
+	wref_return result = IServer::connect(name);
 	result.throw_errors();
 	result.value_.move_zv(return_value);
 }
@@ -487,7 +506,7 @@ ZEND_METHOD(Wcd_IServer, getConnect)
 
 	IServer* cobj = zval_toc<IServer>(ZEND_THIS);
 
-	obj_return result = cobj->getConnect(name);
+	wref_return result = cobj->getConnect(name);
 	result.throw_errors();
 	result.value_.move_zv(return_value);
 }
