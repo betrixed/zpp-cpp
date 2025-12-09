@@ -48,7 +48,7 @@ public:
 	}
 	virtual obj_return getSqlParams();
 
-	void construct(obj_ptr db, bool autoAlias = false);
+	void construct(const weak_ref& db, bool autoAlias = false);
 
 	void destruct();
 

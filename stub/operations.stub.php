@@ -8,7 +8,7 @@ namespace Wcd\Sql;
 
 class Operation {
 	
-	public function __construct(\Wcd\IDriver $db);
+	public function __construct(\WeakReference $db);
 
 	public function __destruct();
 
@@ -45,7 +45,7 @@ class Operation {
 };
 
 class Select extends Operation {
-	public function __construct(\Wcd\IDriver $db, bool $autoAlias = false);
+	public function __construct(\WeakReference $db, bool $autoAlias = false);
 
 	public function __destruct();
 

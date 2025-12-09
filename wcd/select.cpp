@@ -56,7 +56,7 @@ Select::getSqlParams()
 }
 
 void 
-Select::construct(obj_ptr db, bool autoAlias)
+Select::construct(const weak_ref& db, bool autoAlias)
 {
 	Operation::construct(db);
 
@@ -254,10 +254,10 @@ using namespace wcd;
 ZEND_METHOD(Wcd_Sql_Select, __construct)
 {
 	zarg_rd args(execute_data);
-	obj_ptr   db;
+	weak_ref   db;
 	bool      auto_alias = false;
 
-	args.obj_ofclass(db, args.need(0), IDriver::omg.class_entry_);
+	args.weakref(db, args.need(0));
 
 	if (!args.zbool(auto_alias, args.option(1)))
 	{

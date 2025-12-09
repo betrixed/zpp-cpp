@@ -36,7 +36,7 @@ public:
 
 	virtual void debug_info(htab_rw di);
 	
-	void construct(obj_ptr db);
+	void construct(const weak_ref& db);
 	void destruct();
 
 	obj_return addPrime(str_ptr table, str_ptr alias, htab_ptr cols);

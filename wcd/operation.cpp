@@ -112,9 +112,9 @@ Operation::getBind()
 }
 
 void 
-Operation::construct(obj_ptr db)
+Operation::construct(const weak_ref& db)
 {
-	dbref_ = weak_ref::refObject(db);
+	dbref_ = db;
 }
 
 void 
@@ -426,9 +426,9 @@ ZEND_METHOD(Wcd_Sql_Operation, __construct)
 {
 	zarg_rd args(execute_data);
 
-	obj_ptr driver;
+	weak_ref driver;
 
-	args.obj_ofclass(driver, args.need(0), IDriver::omg.class_entry_);
+	args.weakref(driver, args.need(0));
 
 	if (!args.throw_errors())
 	{

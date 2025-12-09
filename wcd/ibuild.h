@@ -108,7 +108,7 @@ namespace wcd {
 		IDriver&  idb();
 
 
-		int  ifetch_;
+		//int  ifetch_;
 
 		error_return where(val_ptr column, val_ptr bop, val_ptr value, val_ptr bval);
 		error_return where_unpack(htab_ptr aw);
