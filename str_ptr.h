@@ -95,7 +95,7 @@ namespace zpp {
 		
 		bool contains(str_ptr needle);
 
-		void return_zv(zval* ret) const;
+		void copy_zv(zval* ret) const;
 
 		bool starts_with(str_ptr match) const;
 

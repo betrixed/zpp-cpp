@@ -119,7 +119,7 @@ namespace zpp {
         void  init();
         void  reset();
         
-        void  return_zv(zval* return_value);
+        void  copy_zv(zval* return_value);
         void  move_zv(zval* return_value);
 
         bool isNull() const { return !(ht_); }

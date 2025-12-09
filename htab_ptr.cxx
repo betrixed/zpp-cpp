@@ -429,7 +429,7 @@ htab_ptr::slice(int offset, int length, bool preserve_keys)
 	return result_mgr;
 }
 
-void htab_ptr::return_zv(zval* return_value) const
+void htab_ptr::copy_zv(zval* return_value) const
 {
 	 val_ptr(return_value).bind_array(ht_);
 }

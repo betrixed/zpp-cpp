@@ -123,7 +123,7 @@ namespace zpp {
 
 	    void move_zv(zval* ret);
 
-		void return_zv(zval* ret);
+		void copy_zv(zval* ret);
 
 	    void adopt(zend_string* rc);
 

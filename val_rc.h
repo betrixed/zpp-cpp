@@ -146,7 +146,7 @@ public:
     val_rc& operator=(val_rc&& rc);
 
     void move_zv(zval* ret);
-    void return_zv(zval* ret);
+    void copy_zv(zval* ret);
 
     zend_string* zstr() const;
     HashTable*   zarray() const;

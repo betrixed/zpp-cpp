@@ -368,7 +368,7 @@ htab_rc::operator=(htab_rc&& m)
 	return *this;
 }
 
-void htab_rc::return_zv(zval* return_value)
+void htab_rc::copy_zv(zval* return_value)
 {
 	//showarray("move_zv", ht_);
 	val_ptr::array_bind(return_value, ht_);

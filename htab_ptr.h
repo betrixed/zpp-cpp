@@ -111,7 +111,7 @@ namespace zpp {
 
         bool try_fetch(val_ptr key, val_ptr& store) const;
         
-        void return_zv(zval* return_value) const;
+        void copy_zv(zval* return_value) const;
 
         str_rc print_kv(const char* label) const;
 

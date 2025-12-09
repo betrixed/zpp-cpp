@@ -58,7 +58,7 @@ namespace zpp {
 		const obj_ptr& operator=(zval* rc);
 		//const obj_ptr& operator=(const val_rc& rc);
 
-		void return_zv(zval* ret) const;
+		void copy_zv(zval* ret) const;
 		
 		bool property_list(htab_rc& mgr);
 

@@ -350,7 +350,7 @@ str_rc::~str_rc()
 }
 
 void 
-str_rc::return_zv(zval* ret)
+str_rc::copy_zv(zval* ret)
 {
 	if (s)
 	{

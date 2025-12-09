@@ -410,7 +410,7 @@ val_ptr::zarray() const
 }
 
 void 
-val_ptr::return_zv(zval* ret) const
+val_ptr::copy_zv(zval* ret) const
 {
 	if (p_)
 	{

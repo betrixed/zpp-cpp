@@ -429,7 +429,7 @@ val_rc::move_zv(zval* return_value)
 }
 
 void 
-val_rc::return_zv(zval* return_value)
+val_rc::copy_zv(zval* return_value)
 {
     ZVAL_COPY_VALUE(return_value, &zv_);
     zv_ = {0};
