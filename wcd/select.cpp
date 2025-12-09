@@ -431,7 +431,7 @@ ZEND_METHOD(Wcd_Sql_Select, icols)
 
 	obj_return result = sobj->iCols();
 	result.throw_errors();
-	result.value_.return_zv(return_value);
+	result.value_.copy_zv(return_value);
 }
 
 ZEND_METHOD(Wcd_Sql_Select, wipe)

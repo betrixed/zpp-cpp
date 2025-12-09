@@ -248,7 +248,7 @@ ZEND_METHOD(Wcc_ServiceAccess, getServices)
 	auto cobj = zval_toc<ServiceAccess>(ZEND_THIS);
 	obj_ptr result = cobj->getServices();
 
-	result.return_zv(return_value);
+	result.copy_zv(return_value);
 }
 
 

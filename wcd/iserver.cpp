@@ -534,7 +534,7 @@ ZEND_METHOD(Wcd_IServer, getAliases)
 
 	htab_ptr result = cobj->getAliases();
 
-	result.return_zv(return_value);
+	result.copy_zv(return_value);
 }
 
 //obj_rc getConfig(str_ptr name);
@@ -599,7 +599,7 @@ ZEND_METHOD(Wcd_IServer, getDriverClasses)
 
 	htab_ptr result = cobj->getDriverClasses();
 
-	result.return_zv(return_value);
+	result.copy_zv(return_value);
 }
 
 ZEND_METHOD(Wcd_IServer, getSqlClass)
@@ -624,7 +624,7 @@ ZEND_METHOD(Wcd_IServer, getSqlClasses)
 
 	htab_ptr result = cobj->getSqlClasses();
 
-	result.return_zv(return_value);
+	result.copy_zv(return_value);
 }
 
 //void initDone();

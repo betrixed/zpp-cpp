@@ -308,7 +308,7 @@ ZEND_METHOD(Wcc_Str, test_wcc)
 		zstr_make<false> astr("String Value");
 		ht.set("key", astr);	
 	}
-	xarg.return_zv(return_value);
+	xarg.copy_zv(return_value);
 	
 
 	showmem("global_ref", gref);

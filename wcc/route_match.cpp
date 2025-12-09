@@ -672,7 +672,7 @@ PHP_METHOD(Wcc_RouteMatch, getErrors)
 	RouteMatch* cobj = zval_toc<RouteMatch>(ZEND_THIS);
 
 	htab_ptr errors = cobj->getErrors();
-	errors.return_zv(return_value);
+	errors.copy_zv(return_value);
 }
 
 PHP_METHOD(Wcc_RouteMatch, getUri)
@@ -681,7 +681,7 @@ PHP_METHOD(Wcc_RouteMatch, getUri)
 	RouteMatch* cobj = zval_toc<RouteMatch>(ZEND_THIS);
 	str_ptr ret = cobj->getUri();
 
-	ret.return_zv(return_value);
+	ret.copy_zv(return_value);
 }
 
 PHP_METHOD(Wcc_RouteMatch, getVerb)
@@ -704,7 +704,7 @@ PHP_METHOD(Wcc_RouteMatch, getRoles)
 	RouteMatch* cobj = zval_toc<RouteMatch>(ZEND_THIS);
 
 	htab_ptr roles = cobj->getRoles();
-	roles.return_zv(return_value);
+	roles.copy_zv(return_value);
 }
 
 PHP_METHOD(Wcc_RouteMatch, getModuleName)
@@ -713,7 +713,7 @@ PHP_METHOD(Wcc_RouteMatch, getModuleName)
 	RouteMatch* cobj = zval_toc<RouteMatch>(ZEND_THIS);
 	str_ptr name = cobj->getModuleName();
 
-	name.return_zv(return_value);
+	name.copy_zv(return_value);
 }
 
 PHP_METHOD(Wcc_RouteMatch, getObjClass)
@@ -721,7 +721,7 @@ PHP_METHOD(Wcc_RouteMatch, getObjClass)
 	ZEND_PARSE_PARAMETERS_NONE();
 	RouteMatch* cobj = zval_toc<RouteMatch>(ZEND_THIS);
 	str_ptr name = cobj->getObjClass();
-	name.return_zv(return_value);
+	name.copy_zv(return_value);
 }
 
 PHP_METHOD(Wcc_RouteMatch, getObjMethod)
@@ -729,7 +729,7 @@ PHP_METHOD(Wcc_RouteMatch, getObjMethod)
 	ZEND_PARSE_PARAMETERS_NONE();
 	RouteMatch* cobj = zval_toc<RouteMatch>(ZEND_THIS);
 	str_ptr name = cobj->getObjMethod();
-	name.return_zv(return_value);
+	name.copy_zv(return_value);
 }
 
 PHP_METHOD(Wcc_RouteMatch, getObjArgs)
@@ -737,7 +737,7 @@ PHP_METHOD(Wcc_RouteMatch, getObjArgs)
 	ZEND_PARSE_PARAMETERS_NONE();
 	RouteMatch* cobj = zval_toc<RouteMatch>(ZEND_THIS);
 	htab_ptr args = cobj->getObjArgs();
-	args.return_zv(return_value);
+	args.copy_zv(return_value);
 }
 
 
@@ -775,7 +775,7 @@ PHP_METHOD(Wcc_RouteMatch, getMatch)
 	RouteMatch* cobj = zval_toc<RouteMatch>(ZEND_THIS);
 	obj_ptr match = cobj->getMatch();
 
-	return match.return_zv(return_value);
+	return match.copy_zv(return_value);
 }
 
 PHP_METHOD(Wcc_RouteMatch, findRoute)

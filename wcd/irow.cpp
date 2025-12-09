@@ -360,7 +360,7 @@ ZEND_METHOD(Wcd_IRow, getData)
 	ZEND_PARSE_PARAMETERS_NONE();
 	auto cobj = zval_toc<IRow>(ZEND_THIS);
 	htab_ptr data = cobj->toArray();
-	data.return_zv(return_value);
+	data.copy_zv(return_value);
 
 }
 
@@ -378,7 +378,7 @@ ZEND_METHOD(Wcd_IRow, getModel)
 	ZEND_PARSE_PARAMETERS_NONE();
 	auto cobj = zval_toc<IRow>(ZEND_THIS);
 	obj_ptr data = cobj->getModel();
-	data.return_zv(return_value);
+	data.copy_zv(return_value);
 }
 
 ZEND_METHOD(Wcd_IRow, hasValue)

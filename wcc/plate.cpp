@@ -518,7 +518,7 @@ ZEND_METHOD(Wcc_Plate, getData)
 	auto cobj = zval_toc<Plate>(ZEND_THIS);
 	htab_ptr data = cobj->getData();
 	//showarray("Plate getData", data);
-	data.return_zv(return_value);
+	data.copy_zv(return_value);
 }
 
 ZEND_METHOD(Wcc_Plate, setData)
@@ -598,7 +598,7 @@ ZEND_METHOD(Wcc_Plate, getPath)
 
 	auto cobj = zval_toc<Plate>(ZEND_THIS);
 	str_ptr ret = cobj->getPath();
-	ret.return_zv(return_value);
+	ret.copy_zv(return_value);
 }
 
 
@@ -698,7 +698,7 @@ ZEND_METHOD(Wcc_Plate, section)
 
 	str_ptr ret = cobj->getSection(name, ifnot);
 
-	ret.return_zv(return_value);
+	ret.copy_zv(return_value);
 }
 
 

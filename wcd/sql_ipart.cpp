@@ -796,7 +796,7 @@ ZEND_METHOD(Wcd_Sql_Literal, getValue)
 	ZEND_PARSE_PARAMETERS_NONE();
 	Literal* cobj = zval_toc<Literal> (ZEND_THIS);
 	val_ptr value = cobj->getValue();
-	value.return_zv(return_value);
+	value.copy_zv(return_value);
 }
 
 ZEND_METHOD(Wcd_Sql_Literal, getPartId)
@@ -839,7 +839,7 @@ ZEND_METHOD(Wcd_Sql_Expr, __toString)
 	ZEND_PARSE_PARAMETERS_NONE();
 	Expr* cobj = zval_toc<Expr> (ZEND_THIS);
 	str_ptr s = cobj->toString();
-	s.return_zv(return_value);	
+	s.copy_zv(return_value);	
 }
 
 ZEND_METHOD(Wcd_Sql_JoinExpr, __construct)
@@ -907,7 +907,7 @@ ZEND_METHOD(Wcd_Sql_JoinExpr, opstr)
 	ZEND_PARSE_PARAMETERS_END();
 
 	str_ptr s = JoinExpr::opStr(ix);
-	s.return_zv(return_value);
+	s.copy_zv(return_value);
 }
 
 ZEND_METHOD(Wcd_Sql_JoinExpr, boolstr)
@@ -919,7 +919,7 @@ ZEND_METHOD(Wcd_Sql_JoinExpr, boolstr)
 	ZEND_PARSE_PARAMETERS_END();
 
 	str_ptr s = JoinExpr::boolStr(ix);
-	s.return_zv(return_value);
+	s.copy_zv(return_value);
 }
 
 //@@@@@@@@@@@@@ 
@@ -975,7 +975,7 @@ ZEND_METHOD(Wcd_Sql_IColumns, getColNames)
 
 	IColumns* cobj = zval_toc<IColumns> (ZEND_THIS);
 	htab_ptr array = cobj->getColNames();
-	array.return_zv(return_value);
+	array.copy_zv(return_value);
 
 }
 
@@ -994,7 +994,7 @@ ZEND_METHOD(Wcd_Sql_IColumns, getAlias)
 	ZEND_PARSE_PARAMETERS_NONE();
 	IColumns* cobj = zval_toc<IColumns> (ZEND_THIS);
 	str_ptr str = cobj->getAlias();
-	str.return_zv(return_value);
+	str.copy_zv(return_value);
 }
 
 ZEND_METHOD(Wcd_Sql_IColumns, getName)
@@ -1002,7 +1002,7 @@ ZEND_METHOD(Wcd_Sql_IColumns, getName)
 	ZEND_PARSE_PARAMETERS_NONE();
 	IColumns* cobj = zval_toc<IColumns> (ZEND_THIS);
 	str_ptr str = cobj->getName();
-	str.return_zv(return_value);
+	str.copy_zv(return_value);
 }
 
 ZEND_METHOD(Wcd_Sql_IColumns, setColAlias)
@@ -1097,7 +1097,7 @@ ZEND_METHOD(Wcd_Sql_IColumns, getExpr)
 	ZEND_PARSE_PARAMETERS_NONE();
 	IColumns* cobj = zval_toc<IColumns> (ZEND_THIS);
 	htab_ptr array = cobj->getExpr();
-	array.return_zv(return_value);
+	array.copy_zv(return_value);
 }
 
 ZEND_METHOD(Wcd_Sql_TableAttr, __construct)
@@ -1137,7 +1137,7 @@ ZEND_METHOD(Wcd_Sql_TableAttr, getTable)
 	ZEND_PARSE_PARAMETERS_NONE();
 	TableAttr* cobj = zval_toc<TableAttr> (ZEND_THIS);
 	str_ptr s = cobj->getTable();
-	s.return_zv(return_value);
+	s.copy_zv(return_value);
 
 }
 
@@ -1146,7 +1146,7 @@ ZEND_METHOD(Wcd_Sql_TableAttr, getAttr)
 	ZEND_PARSE_PARAMETERS_NONE();
 	TableAttr* cobj = zval_toc<TableAttr> (ZEND_THIS);
 	str_ptr s = cobj->getAttr();
-	s.return_zv(return_value);
+	s.copy_zv(return_value);
 }
 
 ZEND_METHOD(Wcd_Sql_TableAttr, splitDot)
@@ -1234,7 +1234,7 @@ ZEND_METHOD(Wcd_Sql_TColumns, getName)
 	ZEND_PARSE_PARAMETERS_NONE();
 	TColumns* cobj = zval_toc<TColumns> (ZEND_THIS);
 	str_ptr s = cobj->getName();
-	s.return_zv(return_value);
+	s.copy_zv(return_value);
 }
 
 ZEND_METHOD(Wcd_Sql_TColumns, tableCol)

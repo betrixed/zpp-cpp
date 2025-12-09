@@ -239,7 +239,7 @@ PHP_METHOD(Wcc_ReflectCache, instance)
 	ZEND_PARSE_PARAMETERS_END();
 
 	obj_ptr result(ReflectCache::instance());
-	result.return_zv(return_value);
+	result.copy_zv(return_value);
 }
 
 

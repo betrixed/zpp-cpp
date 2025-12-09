@@ -609,7 +609,7 @@ PHP_METHOD(Wcc_Route, getCompiled)
 
 	Route* cobj = zval_toc<Route>(ZEND_THIS);
 	str_ptr s = cobj->getCompiled();
-	s.return_zv(return_value);
+	s.copy_zv(return_value);
 }
 
 PHP_METHOD(Wcc_Route, getPattern) 
@@ -619,7 +619,7 @@ PHP_METHOD(Wcc_Route, getPattern)
 
 	Route* cobj = zval_toc<Route>(ZEND_THIS);
 	str_ptr s = cobj->getPattern();
-	s.return_zv(return_value);
+	s.copy_zv(return_value);
 }
 
 PHP_METHOD(Wcc_Route, getVerbs) 
@@ -637,7 +637,7 @@ PHP_METHOD(Wcc_Route, getParams)
 
 	Route* cobj = zval_toc<Route>(ZEND_THIS);
 	htab_ptr hr = cobj->getParams();
-	hr.return_zv(return_value);
+	hr.copy_zv(return_value);
 }
 
 
@@ -784,7 +784,7 @@ PHP_METHOD(Wcc_Route, getTarget)
 	Route* cobj = zval_toc<Route>(ZEND_THIS);
 	val_ptr ret = cobj->getTarget();
 
-	ret.return_zv(return_value);
+	ret.copy_zv(return_value);
 
 }
 
@@ -837,7 +837,7 @@ PHP_METHOD(Wcc_Route,getName)
 	Route* cobj = zval_toc<Route>(ZEND_THIS);
 
 	str_ptr name = cobj->getName();
-	name.return_zv(return_value);
+	name.copy_zv(return_value);
 
 }
 

@@ -184,7 +184,7 @@ ZEND_METHOD(Wcc_Money, symbol)
 
 	auto cobj = zval_toc<MoneyFmt>(ZEND_THIS);
 	str_ptr result = cobj->symbol();
-	result.return_zv(return_value);
+	result.copy_zv(return_value);
 }
 
 ZEND_METHOD(Wcc_Money, language)
@@ -194,7 +194,7 @@ ZEND_METHOD(Wcc_Money, language)
 
 	auto cobj = zval_toc<MoneyFmt>(ZEND_THIS);
 	str_ptr result = cobj->language();
-	result.return_zv(return_value);
+	result.copy_zv(return_value);
 }
 
 PHP_MINIT_FUNCTION(Wcc_Money_reg)

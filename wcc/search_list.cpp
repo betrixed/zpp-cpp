@@ -262,7 +262,7 @@ ZEND_METHOD(Wcc_SearchList, getPaths)
 	SearchList* cobj = zval_toc<SearchList>(ZEND_THIS);
 
 	htab_ptr result = cobj->getPaths();
-	result.return_zv(return_value); 
+	result.copy_zv(return_value); 
 }
 
 

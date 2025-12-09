@@ -990,7 +990,7 @@ ZEND_METHOD(Wcd_IBuild, getFrom)
 
 	obj_ptr result = bind.get(ISql::SQL_FROM);
 
-	result.return_zv(return_value);
+	result.copy_zv(return_value);
 }
 
 ZEND_METHOD(Wcd_IBuild, getInsertSql)

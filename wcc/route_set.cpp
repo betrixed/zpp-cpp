@@ -653,7 +653,7 @@ PHP_METHOD(Wcc_RouteSet, getFile)
 	RouteSet* cobj = zval_toc<RouteSet>(ZEND_THIS);
 	str_ptr file = cobj->getFile();
 
-	file.return_zv(return_value);
+	file.copy_zv(return_value);
 }
 
 PHP_METHOD(Wcc_RouteSet, getFixed)
@@ -663,7 +663,7 @@ PHP_METHOD(Wcc_RouteSet, getFixed)
 	RouteSet* cobj = zval_toc<RouteSet>(ZEND_THIS);
 	htab_ptr fixed =cobj->getFixed();
 
-	fixed.return_zv(return_value);
+	fixed.copy_zv(return_value);
 }
 
 PHP_METHOD(Wcc_RouteSet, getVary)
@@ -674,7 +674,7 @@ PHP_METHOD(Wcc_RouteSet, getVary)
 
 	htab_ptr vary = cobj->getVary();
 
-	vary.return_zv(return_value);
+	vary.copy_zv(return_value);
 }
 
 PHP_METHOD(Wcc_RouteSet, addRoutes)
@@ -782,7 +782,7 @@ ZEND_METHOD(Wcc_RouteSet, rex_url)
 
 	str_ptr rex = RouteSet::rex_url();
 
-	rex.return_zv(return_value);
+	rex.copy_zv(return_value);
 }
 
 PHP_METHOD(Wcc_RouteSet, routeUrl)

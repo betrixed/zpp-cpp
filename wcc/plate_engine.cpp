@@ -393,7 +393,7 @@ ZEND_METHOD(Wcc_PlateEngine, getFinder)
 	auto cobj = zval_toc<PlateEngine>(ZEND_THIS);
 	obj_ptr ref = cobj->getFinder();
 
-	ref.return_zv(return_value);
+	ref.copy_zv(return_value);
 }
 
 
@@ -405,7 +405,7 @@ ZEND_METHOD(Wcc_PlateEngine, getLoadHtml)
 
 	auto cobj = zval_toc<PlateEngine>(ZEND_THIS);
 	obj_ptr ref = cobj->getLoadHtml();
-	ref.return_zv(return_value);
+	ref.copy_zv(return_value);
 }
 
 
@@ -455,7 +455,7 @@ ZEND_METHOD(Wcc_PlateEngine, getPlate)
 
 	obj_ptr ret = cobj->getPlate(name);
 
-	ret.return_zv(return_value);
+	ret.copy_zv(return_value);
 }
 
 

@@ -1906,7 +1906,7 @@ ZEND_METHOD(Wcd_Sql_JoinInfo, getConditions)
 	JoinInfo* cobj = zval_toc<JoinInfo>(ZEND_THIS);
 
 	htab_ptr htab = cobj->getConditions();
-	htab.return_zv(return_value);
+	htab.copy_zv(return_value);
 }
 
 /* static public function toJoinType(string $join) : int {} */
@@ -1999,7 +1999,7 @@ ZEND_METHOD(Wcd_Sql_JoinTables, getData)
 	ZEND_PARSE_PARAMETERS_NONE();
 	JoinTables* cobj = zval_toc<JoinTables>(ZEND_THIS);
 	htab_ptr htab = cobj->getData();
-	htab.return_zv(return_value);
+	htab.copy_zv(return_value);
 }
 
 /* public function getModel() : ?string {} */
@@ -2008,7 +2008,7 @@ ZEND_METHOD(Wcd_Sql_JoinTables, getModel)
 	ZEND_PARSE_PARAMETERS_NONE();
 	JoinTables* cobj = zval_toc<JoinTables>(ZEND_THIS);
 	str_ptr name = cobj->getModel();
-	name.return_zv(return_value);
+	name.copy_zv(return_value);
 }
 
 /* public function getOrder() : array {} */
@@ -2017,7 +2017,7 @@ ZEND_METHOD(Wcd_Sql_JoinTables, getOrder)
 	ZEND_PARSE_PARAMETERS_NONE();
 	JoinTables* cobj = zval_toc<JoinTables>(ZEND_THIS);
 	htab_ptr htab = cobj->getOrder();
-	htab.return_zv(return_value);
+	htab.copy_zv(return_value);
 }
 
 /*  public function getPivot(): ?IColumns {} */
@@ -2070,7 +2070,7 @@ ZEND_METHOD(Wcd_Sql_JoinTables, getTables)
 	ZEND_PARSE_PARAMETERS_NONE();
 	JoinTables* cobj = zval_toc<JoinTables>(ZEND_THIS);
 	htab_ptr htab = cobj->getTables();
-	htab.return_zv(return_value);
+	htab.copy_zv(return_value);
 }
 
 /* public function order(string $name, bool $ascend = true) : void {} */
@@ -2379,7 +2379,7 @@ ZEND_METHOD(Wcd_Sql_ParamList, getParams)
 
 	ParamList* cobj = zval_toc<ParamList>(ZEND_THIS);
 	htab_ptr htab = cobj->getParams();
-	htab.return_zv(return_value);
+	htab.copy_zv(return_value);
 }
 
 ZEND_METHOD(Wcd_Sql_ParamList, getReturns)
@@ -2388,7 +2388,7 @@ ZEND_METHOD(Wcd_Sql_ParamList, getReturns)
 
 	ParamList* cobj = zval_toc<ParamList>(ZEND_THIS);
 	htab_ptr htab = cobj->getReturns();
-	htab.return_zv(return_value);
+	htab.copy_zv(return_value);
 }
 
 ZEND_METHOD(Wcd_Sql_ParamList, getSql)
@@ -2397,7 +2397,7 @@ ZEND_METHOD(Wcd_Sql_ParamList, getSql)
 
 	ParamList* cobj = zval_toc<ParamList>(ZEND_THIS);
 	str_ptr sql = cobj->getSql();
-	sql.return_zv(return_value);
+	sql.copy_zv(return_value);
 }
 
 ZEND_METHOD(Wcd_Sql_ParamList, getValues)
@@ -2406,7 +2406,7 @@ ZEND_METHOD(Wcd_Sql_ParamList, getValues)
 
 	ParamList* cobj = zval_toc<ParamList>(ZEND_THIS);
 	htab_ptr htab = cobj->getValues();
-	htab.return_zv(return_value);
+	htab.copy_zv(return_value);
 }
 
 /*public function makeList(int $start, int $count): string {}*/

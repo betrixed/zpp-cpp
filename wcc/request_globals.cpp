@@ -1506,7 +1506,7 @@ ZEND_METHOD(Wcc_RequestGlobals, getScheme)
 
 	RequestGlobals* cobj = zval_toc<RequestGlobals>(ZEND_THIS);
 	str_ptr result = cobj->getScheme();
-	result.return_zv(return_value);
+	result.copy_zv(return_value);
 }
 
 ZEND_METHOD(Wcc_RequestGlobals, getURI)
@@ -1805,7 +1805,7 @@ ZEND_METHOD(Wcc_RequestGlobals, post)
 
 	RequestGlobals* cobj = zval_toc<RequestGlobals>(ZEND_THIS);
 	obj_ptr result = cobj->post();
-	result.return_zv(return_value);
+	result.copy_zv(return_value);
 
 }
 
@@ -1817,7 +1817,7 @@ ZEND_METHOD(Wcc_RequestGlobals, query)
 	RequestGlobals* cobj = zval_toc<RequestGlobals>(ZEND_THIS);
 	obj_ptr result = cobj->query();
 	//showmem("getQuery result", result);
-	result.return_zv(return_value);
+	result.copy_zv(return_value);
 
 }
 
@@ -1829,7 +1829,7 @@ ZEND_METHOD(Wcc_RequestGlobals, server)
 	RequestGlobals* cobj = zval_toc<RequestGlobals>(ZEND_THIS);
 	obj_ptr result = cobj->server();
 	//showmem("getQuery result", result);
-	result.return_zv(return_value);
+	result.copy_zv(return_value);
 
 }
 
@@ -1840,7 +1840,7 @@ ZEND_METHOD(Wcc_RequestGlobals, getPost)
 
 	RequestGlobals* cobj = zval_toc<RequestGlobals>(ZEND_THIS);
 	htab_ptr result = cobj->getPost();
-	result.return_zv(return_value);
+	result.copy_zv(return_value);
 
 }
 
@@ -1852,7 +1852,7 @@ ZEND_METHOD(Wcc_RequestGlobals, getQuery)
 	RequestGlobals* cobj = zval_toc<RequestGlobals>(ZEND_THIS);
 	htab_ptr result = cobj->getQuery();
 	//showmem("getQuery result", result);
-	result.return_zv(return_value);
+	result.copy_zv(return_value);
 
 }
 
@@ -1864,7 +1864,7 @@ ZEND_METHOD(Wcc_RequestGlobals, getServer)
 	RequestGlobals* cobj = zval_toc<RequestGlobals>(ZEND_THIS);
 	htab_ptr result = cobj->getServer();
 	//showmem("getQuery result", result);
-	result.return_zv(return_value);
+	result.copy_zv(return_value);
 
 }
 

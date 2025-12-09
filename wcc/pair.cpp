@@ -67,7 +67,7 @@ ZEND_METHOD(Wcc_Pair, first)
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	Pair* cobj = zval_toc<Pair>(ZEND_THIS);
-	cobj->one_.return_zv(return_value);
+	cobj->one_.copy_zv(return_value);
 
 }
 
@@ -76,7 +76,7 @@ ZEND_METHOD(Wcc_Pair, second)
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	Pair* cobj = zval_toc<Pair>(ZEND_THIS);
-	cobj->two_.return_zv(return_value);
+	cobj->two_.copy_zv(return_value);
 }
 
 ZEND_METHOD(Wcc_Pair, key)
@@ -84,7 +84,7 @@ ZEND_METHOD(Wcc_Pair, key)
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	Pair* cobj = zval_toc<Pair>(ZEND_THIS);
-	cobj->one_.return_zv(return_value);
+	cobj->one_.copy_zv(return_value);
 
 }
 
@@ -93,7 +93,7 @@ ZEND_METHOD(Wcc_Pair, value)
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	Pair* cobj = zval_toc<Pair>(ZEND_THIS);
-	cobj->two_.return_zv(return_value);
+	cobj->two_.copy_zv(return_value);
 }
 
 ZEND_METHOD(Wcc_Pair, test_calc)
@@ -102,7 +102,7 @@ ZEND_METHOD(Wcc_Pair, test_calc)
 
 	Pair* cobj = zval_toc<Pair>(ZEND_THIS);
 	ZVAL_DOUBLE(return_value, cobj->test_calc());
-	//cobj->value_.return_zv(return_value);
+	//cobj->value_.copy_zv(return_value);
 }
 
 PHP_MINIT_FUNCTION(wcc_pair_d)

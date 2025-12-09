@@ -391,7 +391,7 @@ ZEND_METHOD(Wcc_Services, getOne)
 	//showstr("getOne call", skey);
 
 	obj_ptr result = Services::getOne(skey);
-	result.return_zv(return_value);
+	result.copy_zv(return_value);
 }
 
 ZEND_METHOD(Wcc_Services, instance)
@@ -400,7 +400,7 @@ ZEND_METHOD(Wcc_Services, instance)
 	ZEND_PARSE_PARAMETERS_END();
 
 	obj_ptr result = Services::instance();
-	result.return_zv(return_value);
+	result.copy_zv(return_value);
 }
 
 ZEND_METHOD(Wcc_Services, service)
@@ -430,7 +430,7 @@ ZEND_METHOD(Wcc_Services, setOne)
 	val_ptr test(obj);
 	obj_ptr result = svc->setOne(skey, test.zobject());
 
-	result.return_zv(return_value);
+	result.copy_zv(return_value);
 }
 
 
@@ -471,7 +471,7 @@ ZEND_METHOD(Wcc_Services, getObject)
 
 	Services* svc = zval_toc<Services>(ZEND_THIS);
 	obj_ptr result = svc->getObject(skey);
-	result.return_zv(return_value);
+	result.copy_zv(return_value);
 }
 
 ZEND_METHOD(Wcc_Services, has)
@@ -511,7 +511,7 @@ ZEND_METHOD(Wcc_Services, newInstance)
 
 	Services* svc = zval_toc<Services>(ZEND_THIS);
 	obj_ptr result = svc->newInstance(skey);
-	result.return_zv(return_value);
+	result.copy_zv(return_value);
 }
 
 
@@ -549,7 +549,7 @@ ZEND_METHOD(Wcc_Services, setObject)
 
 	val_ptr test(obj);
 	obj_ptr result = svc->setObject(test.zobject(), skey);
-	result.return_zv(return_value);
+	result.copy_zv(return_value);
 }
 
 ZEND_METHOD(Wcc_Services, setDefer)

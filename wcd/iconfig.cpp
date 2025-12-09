@@ -500,7 +500,7 @@ ZEND_METHOD(Wcd_IConfig, getArray)
 
 	htab_ptr result = cobj->getArray();
 
-	result.return_zv(return_value);
+	result.copy_zv(return_value);
 }
 
 //str_rc getCharset()
@@ -638,7 +638,7 @@ ZEND_METHOD(Wcd_IConfig, getMyKey)
 
 	str_ptr result = cobj->getMyKey();
 
-	result.return_zv(return_value);	
+	result.copy_zv(return_value);	
 }
 
 //void setMyKey(str_ptr key)

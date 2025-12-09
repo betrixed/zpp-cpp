@@ -935,7 +935,7 @@ ZEND_METHOD(Wcd_Sql_Bindings, get)
 
 	Bindings* cobj = zval_toc<Bindings>(ZEND_THIS);
 	val_ptr ret = cobj->get(key);
-	ret.return_zv(return_value);
+	ret.copy_zv(return_value);
 }
 
 /* public function getArray(int $key) : array|null {} */
@@ -964,7 +964,7 @@ ZEND_METHOD(Wcd_Sql_Bindings, getData)
 
 	Bindings* cobj = zval_toc<Bindings>(ZEND_THIS);
 	htab_ptr data = cobj->getData();
-	data.return_zv(return_value);
+	data.copy_zv(return_value);
 }
 
 /* public function getJoins(): JoinTables {} */
@@ -986,7 +986,7 @@ ZEND_METHOD(Wcd_Sql_Bindings, getParamList)
 	Bindings* cobj = zval_toc<Bindings>(ZEND_THIS);
 	obj_return result = cobj->getParamList();
 	result.throw_errors();
-	result.value_.return_zv(return_value);
+	result.value_.copy_zv(return_value);
 }
 
 ZEND_METHOD(Wcd_Sql_Bindings, iSql)
@@ -996,7 +996,7 @@ ZEND_METHOD(Wcd_Sql_Bindings, iSql)
 	Bindings* cobj = zval_toc<Bindings>(ZEND_THIS);
 	obj_ptr result = cobj->isql();
 
-	result.return_zv(return_value);
+	result.copy_zv(return_value);
 }
 
 ZEND_METHOD(Wcd_Sql_Bindings, orderBy)

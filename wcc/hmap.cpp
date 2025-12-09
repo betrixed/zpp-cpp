@@ -803,7 +803,7 @@ ZEND_METHOD(Wcc_Hmap, toArray)
 	auto cobj = zval_toc<Hmap>(ZEND_THIS);
 
 	htab_ptr result = cobj->toArray();
-	result.return_zv(return_value);
+	result.copy_zv(return_value);
 }
 
 ZEND_METHOD(Wcc_Hmap, unhive)

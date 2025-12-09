@@ -500,7 +500,7 @@ ZEND_METHOD(Wcd_Sql_Operation, getBind)
 
 	obj_return result = cobj->getBind();
 	result.throw_errors();
-	result.value_.return_zv(return_value);
+	result.value_.copy_zv(return_value);
 }
 
 ZEND_METHOD(Wcd_Sql_Operation, getDb)
@@ -511,7 +511,7 @@ ZEND_METHOD(Wcd_Sql_Operation, getDb)
 
 	obj_return result = cobj->getDb();
 	result.throw_errors();
-	result.value_.return_zv(return_value);
+	result.value_.copy_zv(return_value);
 }
 
 ZEND_METHOD(Wcd_Sql_Operation, getJoiner)
@@ -522,7 +522,7 @@ ZEND_METHOD(Wcd_Sql_Operation, getJoiner)
 
 	obj_return result = cobj->getJoiner();
 	result.throw_errors();
-	result.value_.return_zv(return_value);
+	result.value_.copy_zv(return_value);
 }
 
 

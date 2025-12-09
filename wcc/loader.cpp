@@ -309,7 +309,7 @@ ZEND_METHOD(Wcc_Loader, instance)
 
 	obj_ptr result = Loader::instance();
 
-	result.return_zv(return_value);
+	result.copy_zv(return_value);
 }
 
 ZEND_METHOD(Wcc_Loader, __destruct)
@@ -373,7 +373,7 @@ ZEND_METHOD(Wcc_Loader, getFinder)
 
 	obj_ptr finder = lob->getFinder();
 
-	finder.return_zv(return_value);
+	finder.copy_zv(return_value);
 }
 
 ZEND_METHOD(Wcc_Loader, require)

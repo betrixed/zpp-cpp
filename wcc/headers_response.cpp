@@ -180,7 +180,7 @@ ZEND_METHOD(Wcc_Headers, toArray)
 	auto cobj = zval_toc<Headers>(ZEND_THIS);
 	htab_ptr result = cobj->toArray();
 
-	result.return_zv(return_value);
+	result.copy_zv(return_value);
 }
 
 PHP_MINIT_FUNCTION(Wcc_Headers_reg)

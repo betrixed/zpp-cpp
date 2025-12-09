@@ -454,7 +454,7 @@ ZEND_METHOD(Wcc_Finder, getNSPaths)
 	auto cobj = zval_toc<Finder>(ZEND_THIS);
 	htab_ptr result = cobj->getNSPaths();
 
-	result.return_zv(return_value);
+	result.copy_zv(return_value);
 }
 
 ZEND_METHOD(Wcc_Finder, getClassPaths)
@@ -465,7 +465,7 @@ ZEND_METHOD(Wcc_Finder, getClassPaths)
 	auto cobj = zval_toc<Finder>(ZEND_THIS);
 	htab_ptr result = cobj->getClassPaths();
 
-	result.return_zv(return_value);	
+	result.copy_zv(return_value);	
 }
 
 ZEND_METHOD(Wcc_Finder, getFolders)
@@ -476,7 +476,7 @@ ZEND_METHOD(Wcc_Finder, getFolders)
 	auto cobj = zval_toc<Finder>(ZEND_THIS);
 	htab_ptr result = cobj->getFolders();
 
-	result.return_zv(return_value);	
+	result.copy_zv(return_value);	
 }
 
 ZEND_METHOD(Wcc_Finder, find)

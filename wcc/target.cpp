@@ -182,7 +182,7 @@ ZEND_METHOD(Wcc_Target, getClass)
 	Target* cobj = zval_toc<Target>(ZEND_THIS);
 	str_ptr cname = cobj->getClass();
 
-	cname.return_zv(return_value);
+	cname.copy_zv(return_value);
 }
 
 
@@ -193,7 +193,7 @@ ZEND_METHOD(Wcc_Target, getFunc)
 	Target* cobj = zval_toc<Target>(ZEND_THIS);
 	str_ptr name = cobj->getFunc();
 
-	name.return_zv(return_value);	
+	name.copy_zv(return_value);	
 }
 
 
@@ -204,7 +204,7 @@ ZEND_METHOD(Wcc_Target, getModule)
 	Target* cobj = zval_toc<Target>(ZEND_THIS);
 	str_ptr name = cobj->getModule();
 
-	name.return_zv(return_value);	
+	name.copy_zv(return_value);	
 }
 
 

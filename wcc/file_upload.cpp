@@ -119,7 +119,7 @@ ZEND_METHOD(Wcc_FileUpload, getName)
 
 	FileUpload* fobj = zval_toc<FileUpload>(ZEND_THIS);
 	str_ptr result = fobj->getName();
-	result.return_zv(return_value);
+	result.copy_zv(return_value);
 }
 ZEND_METHOD(Wcc_FileUpload, getKey)
 {
@@ -128,7 +128,7 @@ ZEND_METHOD(Wcc_FileUpload, getKey)
 
 	FileUpload* fobj = zval_toc<FileUpload>(ZEND_THIS);
 	str_ptr result = fobj->getKey();
-	result.return_zv(return_value);
+	result.copy_zv(return_value);
 }
 
 ZEND_METHOD(Wcc_FileUpload, getRealType)
@@ -158,7 +158,7 @@ ZEND_METHOD(Wcc_FileUpload, getTempName)
 
 	FileUpload* fobj = zval_toc<FileUpload>(ZEND_THIS);
 	str_ptr result = fobj->getTempName();
-	result.return_zv(return_value);
+	result.copy_zv(return_value);
 }
 
 ZEND_METHOD(Wcc_FileUpload, getType)
@@ -168,7 +168,7 @@ ZEND_METHOD(Wcc_FileUpload, getType)
 
 	FileUpload* fobj = zval_toc<FileUpload>(ZEND_THIS);
 	str_ptr result = fobj->getType();
-	result.return_zv(return_value);
+	result.copy_zv(return_value);
 }
 
 ZEND_METHOD(Wcc_FileUpload, isUploadedFile)
@@ -188,7 +188,7 @@ ZEND_METHOD(Wcc_FileUpload, getError)
 
 	FileUpload* fobj = zval_toc<FileUpload>(ZEND_THIS);
 	str_ptr result = fobj->getError();
-	result.return_zv(return_value);
+	result.copy_zv(return_value);
 
 }
 

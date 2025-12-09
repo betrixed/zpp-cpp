@@ -591,7 +591,7 @@ ZEND_METHOD(Wcc_ICache, getPrefix)
 
 	auto cobj = zval_toc<ICache>(ZEND_THIS);
 	str_ptr result = cobj->getPrefix();
-	result.return_zv(return_value);
+	result.copy_zv(return_value);
 }
 
 ZEND_METHOD(Wcc_ICache, getService)

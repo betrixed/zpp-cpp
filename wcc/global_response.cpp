@@ -957,7 +957,7 @@ ZEND_METHOD(Wcc_Response, getHeaders)
 
 	auto cobj = zval_toc<Response> (ZEND_THIS);
 	obj_ptr result = cobj->getHeaders();
-	result.return_zv(return_value);	
+	result.copy_zv(return_value);	
 }
 
 ZEND_METHOD(Wcc_Response, getStatusCode)

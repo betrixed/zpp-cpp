@@ -495,7 +495,7 @@ ZEND_METHOD(Wcc_CacheMgr, getCache)
 		CacheMgr*  cobj = zval_toc<CacheMgr>(ZEND_THIS);
 		result = cobj->getCache(svckey);
 	}
-	result.return_zv(return_value);
+	result.copy_zv(return_value);
 }
 
 ZEND_METHOD(Wcc_CacheMgr, getCacheClass)

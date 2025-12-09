@@ -180,7 +180,7 @@ ZEND_METHOD(Wcc_ICacheData, getData)
 
 	ICacheData* cobj = zval_toc<ICacheData>(ZEND_THIS);
 	val_ptr result = cobj->getData();
-	result.return_zv(return_value);
+	result.copy_zv(return_value);
 }
 
 ZEND_METHOD(Wcc_ICacheData, getExpiry)
@@ -201,7 +201,7 @@ ZEND_METHOD(Wcc_ICacheData, getKey)
 
 	ICacheData* cobj = zval_toc<ICacheData>(ZEND_THIS);
 	str_ptr result = cobj->getKey();
-	result.return_zv(return_value);
+	result.copy_zv(return_value);
 }
 
 ZEND_METHOD(Wcc_ICacheData, getStored)

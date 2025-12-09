@@ -387,7 +387,7 @@ ZEND_METHOD(Wcc_RouteAdd, getRouteSet)
 	RouteAdd* cobj = zval_toc<RouteAdd>(ZEND_THIS);
 	obj_ptr rset = cobj->getRouteSet();
 
-	rset.return_zv(return_value);
+	rset.copy_zv(return_value);
 }
 
 
