@@ -77,7 +77,7 @@ namespace zpp {
         void set_fci(zend_object* obj , str_ptr method, HashTable* nargs = nullptr);
         
         void set_fname(str_ptr name);
-        void set_obj(zend_object* obj);
+        void set_obj(zend_object* obj); // for method calls
         
         void set_named_args(HashTable* nargs);
 

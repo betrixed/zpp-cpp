@@ -214,7 +214,11 @@ fn_call::set_fci(zend_object* obj, str_ptr method, HashTable* nargs)
 void 
 fn_call::set_obj(zend_object* obj)
 {
+    //TODO: ?why this is required both? 
+    //Maybe first pass the cache_ value will be empty?
+    
     fci_.object = obj;
+    cache_.object = obj;
 }
 
 /**
