@@ -11,5 +11,6 @@
 
 #include "obj_ptr.cxx"
 #include "obj_rc.cxx"
+#include "weak_ref.cxx"
 
 #endif

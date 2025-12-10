@@ -1,6 +1,14 @@
 #ifndef BIRETURN_CPP
 #define BIRETURN_CPP
 
+/**
+ * @file zpp/bireturn.cpp
+ * @author Michael Rynn <michael.rynn.500@gmail.com>
+ * @brief Return types with error report propagation
+ * @copyright 2025 Michael Rynn
+ * @license BSD 3-Clause License
+ */
+
 #ifndef BIRETURN_H
 #include "bireturn.h"
 #endif

@@ -16,6 +16,10 @@
 #include "str_buf.h"
 #endif
 
+#ifndef WEAK_REF_H
+#include "weak_ref.h"
+#endif
+
 namespace zpp {
 
 /**

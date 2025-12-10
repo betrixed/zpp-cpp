@@ -11,6 +11,7 @@
 #include "str_rc.cxx"
 #include "str_out.cxx"
 #include "str_buf.cxx"
+#include "zarg_rd.cxx"
 #include "ucode8.cpp"
 
 #endif
