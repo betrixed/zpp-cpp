@@ -312,7 +312,7 @@ zarg_rd::throw_errors(const char* fncstr)
 {
 	if (errors_)
 	{
-		*errors_ << " *** ZARG_RD: ERROR in " << fncstr;
+		*errors_ << "ZARG_RD ERROR in " << fncstr;
 		str_rc s = errors_->zstr();
 		zend_throw_error(zend_ce_error,"%s", s.data());
 		delete errors_;

@@ -47,7 +47,7 @@ weak_ref::operator=(const weak_ref& c)
 
 // get referred object (or null?)
 obj_rc 
-weak_ref::get()
+weak_ref::get() const
 {
 	return weakref_get(obj_);
 }

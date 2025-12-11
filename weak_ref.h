@@ -22,7 +22,7 @@ public:
 	const weak_ref& operator=(const obj_ptr& c);
 
 	// get referred object (or null?)
-	obj_rc get();
+	obj_rc get() const;
 };
 
 } // namespace
