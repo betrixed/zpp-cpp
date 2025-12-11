@@ -294,7 +294,7 @@ Operation::prepare(int fetch)
 		return result;
 	}
 
-	sobj->construct(dv->vobj(), fetch);
+	sobj->construct(dbref_, fetch);
 	Bindings* bind = nullptr;
 	if (!bindPtr(result, bind))
 	{

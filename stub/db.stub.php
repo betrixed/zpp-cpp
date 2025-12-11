@@ -199,7 +199,7 @@ class IBuild {
 class Simple {
     
 
-    public function __construct(\Wcd\IDriver $db, ?int $fetch = null);
+    public function __construct(\WeakReference $db, ?int $fetch = null);
 
     public function __destruct();
 
@@ -220,19 +220,16 @@ class Simple {
 
     public function getSchemaName() : string {}
 
-    public function insert(array $values) : mixed {}
+    public function sendValues(array $values, bool $retval=true) : mixed {}
 
     public function prepare(string $sql) : bool {}
 
     public function quoteName(string $name) : string {}
 
-    public function returnsValues(bool $retval) : void {}
-
-    public function run() : mixed {}
+    public function run( bool $retval=true) : mixed {}
 
     public function setValues(array $params) : void {}
 
-    public function update(array $values) : mixed {}
 };
 
 

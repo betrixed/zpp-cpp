@@ -24,9 +24,9 @@ namespace wcd {
 base_obj_mgr<Simple> Simple::omg;
 
 void 
-Simple::construct(obj_ptr db, int fetch)
+Simple::construct(const weak_ref& db, int fetch)
 {
-	db_ = db;
+	db_ = db.get();
 	fetch_ =  (fetch >= 0) ? fetch : IDriver::FETCH_ASSOC;
 	//showobj("\nSimple construct", vobj());
 
@@ -203,10 +203,10 @@ Simple::getSchemaName()
 }
 
 val_return
-Simple::insert(htab_ptr values)
+Simple::sendValues(htab_ptr values, bool retval)
 {
 	setValues(values);
-	return this->send(retval_);
+	return this->send(retval);
 }
 
 bool_return 
@@ -256,9 +256,9 @@ Simple::returnsValues(bool rval)
 }
 
 val_return 
-Simple::run()
+Simple::run(bool retval)
 {
-	return this->send(retval_);
+	return this->send(retval);
 }
 
 val_return
@@ -311,12 +311,6 @@ Simple::setValues(htab_ptr values)
 	values_ = values;
 }
 
-val_return 
-Simple::update(htab_ptr values)
-{
-	setValues(values);
-	return this->send(retval_);
-}
 
 };
 //simple.cpp
@@ -331,16 +325,17 @@ ZEND_METHOD(Wcd_Simple, __construct)
 {
 	zarg_rd args(execute_data);
 
-	obj_ptr db;
+	weak_ref db;
 	zend_long fetch = IDriver::FETCH_ASSOC;
 
-	args.obj_ofclass(db, args.need(0),IDriver::omg.class_entry_);
+	args.weakref(db, args.need(0));
+
 	if (!args.zlong_null(fetch, args.option(1)))
 	{
 		fetch = IDriver::FETCH_ASSOC;
 	}
 
-	if (args.throw_errors())
+	if (args.throw_errors(__FUNCTION__))
 	{
 		return;
 	}
@@ -374,7 +369,7 @@ ZEND_METHOD(Wcd_Simple, arrayMap)
 
 	htab_return result;
 
-	if (args.throw_errors())
+	if (args.throw_errors(__FUNCTION__))
 	{
 		result = htab_rc::empty_array();
 	}
@@ -398,7 +393,7 @@ ZEND_METHOD(Wcd_Simple, arraySet)
 
 	htab_return result;
 
-	if (args.throw_errors())
+	if (args.throw_errors(__FUNCTION__))
 	{
 		result.value_ = htab_rc::empty_array();
 	}
@@ -416,7 +411,7 @@ ZEND_METHOD(Wcd_Simple, bind)
 
 	zval* arg = args.need(0);
 	str_rc result;
-	if (!args.throw_errors())
+	if (!args.throw_errors(__FUNCTION__))
 	{
 		Simple* sobj = zval_toc<Simple>(ZEND_THIS);
 
@@ -437,7 +432,7 @@ ZEND_METHOD(Wcd_Simple, exec)
 
 	val_return result;
 
-	if(!args.throw_errors())
+	if(!args.throw_errors(__FUNCTION__))
 	{
 		Simple* sobj = zval_toc<Simple>(ZEND_THIS);
 
@@ -460,7 +455,7 @@ ZEND_METHOD(Wcd_Simple, firstRow)
 
 	val_return result;
 
-	if(!args.throw_errors())
+	if(!args.throw_errors(__FUNCTION__))
 	{
 		Simple* sobj = zval_toc<Simple>(ZEND_THIS);
 
@@ -493,21 +488,23 @@ ZEND_METHOD(Wcd_Simple, getSchemaName)
 	result.move_zv(return_value);
 }
 
-ZEND_METHOD(Wcd_Simple, insert)
+ZEND_METHOD(Wcd_Simple, sendValues)
 {
 	zarg_rd args(execute_data);
 
 	htab_ptr values;
+        bool     retval = true;
 
 	args.zarray(values, args.need(0));
+        args.zbool(retval, args.option(1));
 
 	val_return result;
 
-	if(!args.throw_errors())
+	if(!args.throw_errors(__FUNCTION__))
 	{
 		Simple* sobj = zval_toc<Simple>(ZEND_THIS);
 
-		result = sobj->insert(values);
+		result = sobj->sendValues(values);
 
 		result.throw_errors();
 	}
@@ -525,7 +522,7 @@ ZEND_METHOD(Wcd_Simple, prepare)
 
 	bool_return result;
 
-	if(!args.throw_errors())
+	if(!args.throw_errors(__FUNCTION__))
 	{
 		Simple* sobj = zval_toc<Simple>(ZEND_THIS);
 
@@ -546,7 +543,7 @@ ZEND_METHOD(Wcd_Simple, quoteName)
 
 	str_rc result;
 
-	if(!args.throw_errors())
+	if(!args.throw_errors(__FUNCTION__))
 	{
 		Simple* sobj = zval_toc<Simple>(ZEND_THIS);
 
@@ -563,7 +560,7 @@ ZEND_METHOD(Wcd_Simple, returnsValues)
 
 	args.zbool(bval, args.need(0));
 
-	if(!args.throw_errors())
+	if(!args.throw_errors(__FUNCTION__))
 	{
 		Simple* sobj = zval_toc<Simple>(ZEND_THIS);
 
@@ -587,7 +584,7 @@ ZEND_METHOD(Wcd_Simple, setValues)
 
 	args.zarray(values, args.need(0));
 
-	if(!args.throw_errors())
+	if(!args.throw_errors(__FUNCTION__))
 	{
 		Simple* sobj = zval_toc<Simple>(ZEND_THIS);
 
@@ -595,25 +592,6 @@ ZEND_METHOD(Wcd_Simple, setValues)
 	}
 }
 
-ZEND_METHOD(Wcd_Simple, update)
-{
-	zarg_rd args(execute_data);
-	htab_ptr values;
-
-	args.zarray(values, args.need(0));
-	
-	val_return result;
-
-	if(!args.throw_errors())
-	{
-		Simple* sobj = zval_toc<Simple>(ZEND_THIS);
-
-		result = sobj->update(values);
-
-		result.throw_errors();
-	}
-	result.value_.move_zv(return_value);
-}
 
 PHP_MINIT_FUNCTION(Wcd_Simple_reg)
 {

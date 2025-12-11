@@ -38,7 +38,7 @@ public:
 	
 	virtual void debug_info(htab_rw di);
 
-	void construct(obj_ptr db, int fetch = IDriver::FETCH_ASSOC);
+	void construct(const weak_ref& db, int fetch = IDriver::FETCH_ASSOC);
 	void destruct();
 
 	htab_return arrayMap(str_ptr keycol, str_ptr valcol, str_ptr table);
@@ -55,19 +55,17 @@ public:
 
 	str_rc getSchemaName();
 
-	val_return insert(htab_ptr values);
-
 	bool_return prepare(str_ptr sql);
 
 	str_rc quoteName(str_ptr name);
 
 	void returnsValues(bool rval);
 
-	val_return run();
+	val_return run(bool retval=true);
 
 	void setValues(htab_ptr values);
 
-	val_return  update(htab_ptr values);
+	val_return  sendValues(htab_ptr values, bool retval=true);
 };
 
 }; //namespace wcd
