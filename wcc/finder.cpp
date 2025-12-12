@@ -561,6 +561,25 @@ ZEND_METHOD(Wcc_Finder, dirList_fileExt)
 	result.move_zv(return_value);
 }
 
+ZEND_METHOD(Wcc_Finder, find_extension)
+{
+	zarg_rd args(execute_data);
+
+	str_ptr path;
+	htab_ptr extlist;
+
+	str_rc result;
+
+	args.zstring(path, args.need(0));
+	args.zarray(extlist, args.need(1));
+
+	if (!args.throw_errors())
+	{
+		result = Finder::find_extension(path,extlist);
+	}
+	result.move_zv(return_value);
+}
+
 PHP_MINIT_FUNCTION(Wcc_Finder_reg)
 {
 	auto ce = register_class_Wcc_Finder();

@@ -28,6 +28,8 @@ class Finder {
 
 	public static function dirList_dir(string $s) : array {}
 
+	public static function find_extension(string $path, array $extlist) : array {}
+
 	public static function dirList_fileExt(string $dir, ?array $extlist = null) : array {}
 	
 
