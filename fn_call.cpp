@@ -75,6 +75,11 @@ public:
     void call(val_ptr dh);
 };
 
+class fn_glob : public fn_call_args<2> {
+public:
+    htab_rc call(str_ptr name, int flags=0);
+};
+
 class fn_mkdir : public fn_call_args<3> {
 public:
     bool call(str_ptr path, int permissions = 0755, bool recurse = false);
@@ -108,7 +113,8 @@ public:
     fn_readdir    readdir;
     fn_closedir   closedir;
     fn_mkdir      mkdir;
-    fn_realpath   realpath;
+    fn_realpath   realpath; 
+    fn_glob       glob;
 
     fn_weakref_create weakref_create;
     fn_weakref_get    weakref_get;
@@ -151,8 +157,7 @@ public:
         call_user_func_array.set_fname(ftab.s_call_user_func_array);
         php_sapi_name.set_fname(ftab.s_php_sapi_name);
         filemtime.set_fname(ftab.s_filemtime);
-
-
+        glob.set_fname(ftab.s_glob);
     }
 
 
@@ -756,6 +761,7 @@ fntable::init()
     s_php_sapi_name = "php_sapi_name";
     s_filemtime = "filemtime";
     s_realpath = "realpath";
+    s_glob = "glob";
 
 
 }
@@ -912,6 +918,26 @@ void closedir(val_ptr dh)
 bool mkdir(str_ptr path, int permissions, bool recurse)
 {
     return TLFNs.mkdir.call(path, permissions, recurse);
+}
+
+htab_rc 
+fn_glob::call(str_ptr name, int flags)
+{
+    zval* pz = argsptr();
+    ZVAL_STR(pz, name);
+    ZVAL_LONG(pz+1, flags);
+
+    htab_rc result;
+    result = call_fn();
+    return result;
+}
+
+htab_rc 
+glob(str_ptr wcard, int flags)
+{
+    htab_rc result;
+    result = TLFNs.glob.call(wcard, flags);
+    return result;
 }
 
 obj_rc 

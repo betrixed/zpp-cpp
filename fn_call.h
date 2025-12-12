@@ -172,7 +172,7 @@ namespace zpp {
         bool call(val_ptr fres);
     };
 
-   
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 
 
     class fn_filemtime : public fn_call_args<1> {
     public:
@@ -184,6 +184,8 @@ namespace zpp {
         fn_fgetcsv();
         val_rc call(val_ptr file_res);
     };
+
+  
 
     class fn_stripslashes : public fn_call_args<1> {
     public:
@@ -304,6 +306,7 @@ namespace zpp {
         str_intern  s_php_sapi_name;
         str_intern  s_filemtime;
         str_intern  s_realpath;
+        str_intern  s_glob;
         
         void init() override;
         void init_req() override;
@@ -402,6 +405,8 @@ namespace zpp {
     void closedir(val_ptr dh);
 
     str_rc realpath(str_ptr path);
+
+    htab_rc glob(str_ptr wcard, int flags = 0);
 
     bool mkdir(str_ptr path, int permissions = 0755, bool recurse = false);
 
