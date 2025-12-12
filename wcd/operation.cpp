@@ -203,7 +203,7 @@ Operation::getRows(int fetch)
 		result = std::move(simple_ret);
 		return result;
 	}
-	
+
 	Simple* s = zobj_toc<Simple>(simple_ret.value_);
 
 	return s->getRows();
@@ -319,7 +319,7 @@ Operation::prepare(int fetch)
 		this->wipe();
 
 		str_rc sql = plist->getSql();
-		//showstr("prepare", sql);
+		//showstr("sql ", sql);
 
 		bool_return check = sobj->prepare(sql);
 

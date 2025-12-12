@@ -842,7 +842,9 @@ Bindings::limit(val_ptr limit, val_ptr offset)
 
 	htab_rw hw(data);
 
+	
 	hw.set(SQSTR.limit, limit);
+
 	if (offset.ok())
 	{
 		hw.set(SQSTR.offset, offset);

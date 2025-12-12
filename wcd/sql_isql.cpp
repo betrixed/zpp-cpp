@@ -131,9 +131,11 @@ ParamList::paramLiteral(val_ptr value)
 			case SqlPartId::PARAM_PID:
 				temp = static_cast<Param*>(part)->getValue();
 				result = this->addParam(temp);
+				break;
 			case SqlPartId::LIT_PID:
 				temp = static_cast<Literal*>(part)->getValue();
 				result = val_ptr(temp).to_zstr();
+				break;
 			}
 		}
 
@@ -1344,40 +1346,42 @@ ISql::select_jt(Bindings& bind, JoinTables* jt)
 }
 
 
-
+static str_return plimit(const char* s, ParamList* plist, val_ptr value, str_buf& buf)
+{
+	str_return result;
+	if (!value.isNull())
+	{
+		result = plist->paramLiteral(value);
+		if (result.has_errors())
+		{
+			return result;
+		}
+		buf << s << result.value_;
+	}
+	return result;
+}
 
 str_return 
 ISql::limit(ParamList* plist, htab_ptr ltab)
 {
 	val_ptr limit_val = ltab.get(SQSTR.limit);
 	val_ptr offset_val = ltab.get(SQSTR.offset);
-
-	str_buf buf;
 	str_return result;
-	str_return temp;
+	str_buf buf;
+	
+	//showmem("limit_val", limit_val);
+	//showmem("offset_val", offset_val);
 
-	if (!limit_val.isNull())
-	{
-		temp = plist->paramLiteral(limit_val);
-		if (temp.has_errors()) 
-		{
-			result = std::move(temp);
-			return result;
-		}
-		buf << " LIMIT " << temp.value_;
-	}
-	if (!offset_val.isNull())
-	{
-		temp = plist->paramLiteral(offset_val);
-		if (temp.has_errors())
-		{
-			result = std::move(temp);
-			return result;
-		}
-		buf << " OFFSET " << temp.value_;
+	result = plimit(" LIMIT ", plist, limit_val, buf);
 
+	if (!result.has_errors())
+	{
+		result = plimit(" OFFSET ", plist, offset_val, buf);
 	}
-	result.value_ = buf.zstr();
+	if (!result.has_errors())
+	{
+		result.value_ = buf.zstr();
+	}
 	return result;
 }
 

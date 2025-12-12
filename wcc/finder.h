@@ -25,6 +25,8 @@ public:
 
 	static str_rc  path_base(str_ptr path); 
 	
+	static str_rc  find_extension(str_ptr fpath, htab_ptr extlist);
+
 	virtual void debug_info(htab_rw hw);
 
 	virtual ~Finder();

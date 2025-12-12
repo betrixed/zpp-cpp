@@ -35,7 +35,7 @@ public:
 	str_intern dir_sep;
 	str_intern dir_dot;
 	str_intern dir_two;
-
+	str_intern glob_all;
 
 
 	void init() override 
@@ -47,6 +47,7 @@ public:
 		php_ext = ".php";
 		dir_dot = ".";
 		dir_two = "..";
+		glob_all = ".*";
 	}
 
 };
@@ -244,7 +245,39 @@ Finder::find(str_ptr cname)
 	return result;
 }
 
+str_rc //static 
+Finder::find_extension(str_ptr fpath, htab_ptr extlist)
+{
+	str_rc result;
+	str_rc path;
 
+	if (fpath.ends_with(FDit.glob_all)) {
+		path = fpath;
+	}
+	else {
+		path = fpath + FDit.glob_all;
+	}
+	htab_rc data = glob(path);
+	str_rc  extn;
+
+	if (data.size())
+	{
+		htab_walk wk;
+		auto cpath = wk.value();
+		for(wk.start(data); wk.ok(); wk.next())
+		{
+			result = cpath.zstr();
+			extn = path_ext(result);
+			int test = extlist.value_index(extn);
+			if (test >= 0)
+			{
+				return result;
+			}
+		}
+	}
+	result.init();
+	return result;
+}
 
 str_rc  
 Finder::path_base(str_ptr path)

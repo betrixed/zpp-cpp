@@ -274,6 +274,8 @@ Simple::send(bool retval)
 	IDriver* db = zobj_toc<IDriver>(db_);
 	if (values_.size())
 	{
+		//zend_printf("Values \n");
+		//showdata("Values ", values_);
 		db->bind(stmt_, values_);
 	}
 	if (retval)

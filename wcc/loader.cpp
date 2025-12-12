@@ -170,6 +170,7 @@ Loader::setBaseDir(str_ptr dir)
 	this->setFinder(finder);
 
 	this->regLoader();
+	
 	Services* sobj = Services::cpp_global();
 
 	obj_ptr self(this->self());
