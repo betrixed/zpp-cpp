@@ -250,7 +250,7 @@ namespace wcd {
 		}
 
 		// get the default connection
-		wref_return wref = IServer::connect(val_ptr());
+		wref_return wref = IServer::connect(str_ptr::empty_str());
 
 		if (!wref.has_errors())
 		{

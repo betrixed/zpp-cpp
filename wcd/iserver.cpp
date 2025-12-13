@@ -324,7 +324,7 @@ IServer::connect(str_ptr name)
 
 	//showstr("::connect askfor", name);
 
-	if (!name.ok())
+	if (!name.size())
 	{	
 		conkey = cd.static_property(ISV.active_cfg);
 		//showstr("\nactivecfg: ", conkey);
@@ -446,15 +446,19 @@ using namespace wcd;
 //static obj_rc connect(str_ptr name);
 ZEND_METHOD(Wcd_IServer, Connect)
 {
-	zend_string* name = nullptr;
+	zarg_rd args(execute_data);
 
-	ZEND_PARSE_PARAMETERS_START(0,1)
-	Z_PARAM_OPTIONAL
-	Z_PARAM_STR_OR_NULL(name)
-	ZEND_PARSE_PARAMETERS_END();
+	str_ptr name;
 
-	wref_return result = IServer::connect(name);
-	result.throw_errors();
+	args.zstring_null(name, args.option(0));
+
+	wref_return result;
+
+	if (!args.throw_errors(__FUNCTION__))
+	{
+		result = IServer::connect(name);
+		result.throw_errors();
+	}
 	result.value_.move_zv(return_value);
 }
 
@@ -495,19 +499,22 @@ ZEND_METHOD(Wcd_IServer, addConfig)
 	cobj->addConfig(config, name);	
 }
 
-//obj_rc getConnect(str_ptr name);
+//WeakReference getConnect(str_ptr name);
 ZEND_METHOD(Wcd_IServer, getConnect)
 {
-	zend_string* name;
+	zarg_rd args(execute_data);
 
-	ZEND_PARSE_PARAMETERS_START(1,1)
-	Z_PARAM_STR_OR_NULL(name)
-	ZEND_PARSE_PARAMETERS_END();
+	str_ptr name;
 
-	IServer* cobj = zval_toc<IServer>(ZEND_THIS);
+	args.zstring(name, args.need(0));
 
-	wref_return result = cobj->getConnect(name);
-	result.throw_errors();
+	wref_return result;
+
+	if (!args.throw_errors(__FUNCTION__))
+	{
+		result = IServer::connect(name);
+		result.throw_errors();
+	}
 	result.value_.move_zv(return_value);
 }
 
