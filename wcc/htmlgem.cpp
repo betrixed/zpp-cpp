@@ -583,24 +583,18 @@ str_rc HtmlGem::checkbox(val_ptr pset)
 
 	str_rc wrapdiv = ps.get(HTG.divkey);
 
-	str_ptr test(wrapdiv);
-
-	if (test.size()) {
-		outWrapDiv(out, test);
+	if (wrapdiv.size()) {
+		outWrapDiv(out, wrapdiv);
 		ps.unset(HTG.divkey);
 	}
 
 	str_rc text = ps.get(HTG.labelkey);
-
-	test = text;
-	if (test.size()) {
+	if (text.size()) {
 		ps.unset(HTG.labelkey);
 	}
 	else {
 		text = ps.get(HTG.textkey);
-		test = text;
-
-		if (test.size()) {
+		if (text.size()) {
 			ps.unset(HTG.textkey);
 		}
 	}
@@ -612,7 +606,7 @@ str_rc HtmlGem::checkbox(val_ptr pset)
 		ps.unset(HTG.checked); 
 		//check.init(); //  check now invalid
 		if (checkval != 0) {
-			str_ptr cval = HTG.checked;
+			str_rc cval = HTG.checked;
 			//showstr("pushback", cval);
 			ps.push_back(cval);
 			//showdata("checkbox", ps);
@@ -627,7 +621,7 @@ str_rc HtmlGem::checkbox(val_ptr pset)
 
 	htab_rw hp(htemp);
 
-	hp.set(HTG.typekey,HTG.checkboxkey);
+	hp.set(HTG.typekey, HTG.checkboxkey);
 
 	str_rc tag = getTag(ps, hp, HTG.inputtag);
 	out << tag << '\n';
