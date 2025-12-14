@@ -290,6 +290,9 @@ void Run::construct()
 	sobj->set(Run_i.run_str, self);
 
 	obj_rc config = Config::omg.new_zobj();
+
+	sobj->setObject(config);
+	
 	//showobj("config", config);
 	//config.property(Run_i.services, services);
 	self.property(Run_i.config_str, config);
