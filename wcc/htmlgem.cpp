@@ -810,13 +810,12 @@ HtmlGem::label_method(htab_rw ps, int& labeltype)
 	//showdata("hw_label", hw_label);
 
 	str_rc ltext = ps.get(HTG.labelkey);
-	str_ptr label(ltext);
 
-	if (label.size()) {
+	if (ltext.size()) {
 		
 		labeltype = LabelLocate::OUT_LABEL;
 
-		hw_label.set(HTG.labelkey, label);
+		hw_label.set(HTG.labelkey, ltext);
 		ps.unset(HTG.labelkey);
 	}
 	else {
@@ -825,12 +824,12 @@ HtmlGem::label_method(htab_rw ps, int& labeltype)
 		//showmem("ltext", ltext);
 
 		ltext = ps.get(HTG.inlabel);
-		label = ltext;
+
 		//showmem("ltext", ltext);
 		
-		if (label.size()) {
+		if (ltext.size()) {
 			labeltype = LabelLocate::IN_LABEL;
-			hw_label.set(HTG.labelkey, label);
+			hw_label.set(HTG.labelkey, ltext);
 			ps.unset(HTG.inlabel);
 		}
 		else {
@@ -868,10 +867,9 @@ HtmlGem::inputType(val_ptr pset, str_ptr itype)
 	}
 
 	str_rc wrapdiv = ps.get(HTG.divkey);
-	str_ptr wuse(wrapdiv);
 
-	if (wuse.size()) {
-		outWrapDiv(out, wuse);
+	if (wrapdiv.size()) {
+		outWrapDiv(out, wrapdiv);
 		ps.unset(HTG.divkey);
 	}
 	
@@ -896,7 +894,7 @@ HtmlGem::inputType(val_ptr pset, str_ptr itype)
 		out << '\n' << input;
 	}
 
-	if (wuse.size()) {
+	if (wrapdiv.size()) {
 		endWrapDiv(out);
 	}
 	return out.zstr();
@@ -923,9 +921,8 @@ HtmlGem::radio(val_ptr pset)
 	htab_rw ps(pscopy);
 
 	str_rc label_s = ps.get(HTG.labelkey);
-	str_ptr label(label_s);
 
-	if (label.size()) {
+	if (label_s.size()) {
 		ps.unset(HTG.labelkey);
 	}
 	str_rc id = ensureIdValue(ps);
@@ -935,13 +932,13 @@ HtmlGem::radio(val_ptr pset)
 	val_rc altered(ps);
 	out << inputType(altered, HTG.radio);
 
-	if (label.size()) 
+	if (label_s.size()) 
 	{
 		htab_rc ldata_ht;
 		htab_rw ldata(ldata_ht);
 
 		ldata.set(HTG.idkey, id);
-		ldata.set(HTG.labelkey,label);
+		ldata.set(HTG.labelkey,label_s);
 
 		out << HTG.nbspace << out_label(ldata);
 	}
@@ -954,7 +951,7 @@ HtmlGem::email(val_ptr pset)
 	htab_rc pscopy(pset.zarray());
 	htab_rw ps(pscopy);
 
-	str_ptr test = ps.get(HTG.placehold);
+	str_rc test = ps.get(HTG.placehold);
 
 	if (test.isNull()) {
 		ps.set(HTG.placehold, HTG.placehold_d);
@@ -1034,9 +1031,8 @@ HtmlGem::linkTo(val_ptr pset)
 	htab_rw ps(pscopy);
 	
 	str_rc href = ps.get(HTG.hrefkey);
-	str_ptr test(href);
 
-	if (test.size()) {
+	if (href.size()) {
 		ps.unset(HTG.hrefkey);
 	}
 	else {
@@ -1048,16 +1044,16 @@ HtmlGem::linkTo(val_ptr pset)
 		ps.unset(HTG.iconkey);
 	}
 	str_rc text = ps.get(HTG.textkey);
-	test = text;
-	if (test.size()) {
+
+	if (text.size()) {
 		ps.unset(HTG.textkey);
 	}
 	else {
 		str_rc glyph = ps.get(HTG.glyphkey);
-		test = glyph;
-		if (test.size()) {
+
+		if (glyph.size()) {
 			ps.unset(HTG.glyphkey);
-			text = glyph_out(test);
+			text = glyph_out(glyph);
 		}
 		else {
 			text = str_empty();
@@ -1080,10 +1076,10 @@ HtmlGem::linkTo(val_ptr pset)
 		outAttr(out, wkey, wval);
 	}
 	out << '>';
-	test = icon;
-	if (test.size()) {
+
+	if (icon.size()) {
 		out << "<i";
-		outAttr(out, HTG.classkey, test);
+		outAttr(out, HTG.classkey, icon);
 		out << '>' << "</i>";
 	}
 
@@ -1124,7 +1120,7 @@ HtmlGem::select_list(val_ptr pset)
 	htab_rw ps(pscopy);
 
 	val_rc list = ps.get(HTG.listkey);
-	test = list;
+
 
 	if (test.isArray()) {
 		htab_ptr options(list);
@@ -1219,10 +1215,9 @@ str_rc
 	str_buf out;
 
 	str_rc wrapdiv = ps.get(HTG.divkey);
-	str_ptr test(wrapdiv);
 
-	if (test.size()) {
-		outWrapDiv(out,test);
+	if (wrapdiv.size()) {
+		outWrapDiv(out,wrapdiv);
 		ps.unset(HTG.divkey);
 	}
 	int method = 0;
@@ -1553,16 +1548,14 @@ HtmlGem::multiline(val_ptr pset)
 	}
 	
 	str_rc wrapdiv = ps.get(HTG.divkey);
-	str_ptr test(wrapdiv);
 
-	if (test.size()) {
-		outWrapDiv(out, test);
+	if (wrapdiv.size()) {
+		outWrapDiv(out, wrapdiv);
 		ps.unset(HTG.divkey);
 	}
 
 	str_rc value = ps.get(HTG.valuekey);
-	test = value;
-	if (test.size()) {
+	if (value.size()) {
 		ps.unset(HTG.valuekey);
 	}
 

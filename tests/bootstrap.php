@@ -2,6 +2,8 @@
 //bootstrap.php
 namespace Wcc;
 
+
+
 /** Folder containing Wcc PHP source */
 $workdir = dirname(__DIR__);
 
@@ -33,23 +35,23 @@ function boolstr(bool $value) : string
     return $value ? "true" : "false";
 }
 
+$extloader = function(string $file) {
+    echo "load $file\n";
+    return require_once($file);
+};
 
 if (!class_exists(Loader::class))
 {
-    require $wcc_root . DIRECTORY_SEPARATOR . "Loader.php";
+    $extloader($wcc_root . DIRECTORY_SEPARATOR . 'Wcc/Loader.php');
 }
 
 $loader = Loader::instance();
-
+$loader->setExtLoader($extloader);
 $loader->setBaseDir($wcc_root);
 
-$loader->setExtLoader(function(string $file) {
-    echo "load $file\n";
-    return require_once($file);
-});
+
 
 echo "BaseDir is " . $loader->getBaseDir() . PHP_EOL;
-$loader->regLoader();
 
 
 class EmptyTest {
