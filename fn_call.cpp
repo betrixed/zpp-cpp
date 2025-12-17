@@ -206,6 +206,9 @@ fn_call::set_fci(zend_object* obj, str_ptr method, HashTable* nargs)
 
     fci_.size = sizeof(fci_);
     fci_.object = obj;
+
+    // in case changing the object?
+    //cache_.object = obj; 
     //showstr("method", method);
 
     zval *p = &fci_.function_name;
