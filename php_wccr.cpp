@@ -11,14 +11,28 @@
 #include "zpp/base.h"
 #include "zpp/show_zpp.h"
 
-// compile 
+// compile in binary
+
+#include "wcc/finder.cpp"
+#include "wcc/loader.cpp"
+
+#include "wcc/reflect_cache.cpp"
+#include "wcc/services.cpp"
+#include "wcc/service_access.cpp"
+
+#include "wcc/config.cpp"
+#include "wcc/hmap.cpp"
+#include "wcc/replace.cpp"
+
 #include "wcc/icache.cpp"
 #include "wcc/icachedata.cpp"
 #include "wcc/cachemgr.cpp"
+
 #include "wcc/file_upload.cpp"
 #include "wcc/global_response.cpp"
 #include "wcc/pair.cpp"
 #include "wcc/request_globals.cpp"
+
 #include "wcc/route.cpp"
 #include "wcc/route_match.cpp"
 #include "wcc/route_set.cpp"
