@@ -71,9 +71,16 @@ PHP_MINFO_FUNCTION(wcch)
 }
 /* }}} */
 
+static const zend_module_dep wcch_deps[] = { /* {{{ */
+	ZEND_MOD_REQUIRED("wccr")
+	ZEND_MOD_END
+};
+
 /* {{{ wcch_module_entry */
 zend_module_entry wcch_module_entry = {
-	STANDARD_MODULE_HEADER,
+	STANDARD_MODULE_HEADER_EX,
+	nullptr,
+	wcch_deps,
 	"wcch",					/* Extension name */
 	nullptr,					/* zend_function_entry */
 	PHP_MINIT(wcch),							/* PHP_MINIT - Module initialization */
