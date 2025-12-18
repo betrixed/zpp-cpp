@@ -24,6 +24,8 @@ class CacheMgr {
 	public function getCache(string $service_key) : ?ICache {}
 
 	public function getCacheClass(string $service_key) : string {}
+    
+    public function getCacheKeys() : array {}
 
 	public function readCache(string $filename, string $cache_name) : mixed {}
 

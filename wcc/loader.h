@@ -1,7 +1,6 @@
 #ifndef WCC_LOADER_H
 #define WCC_LOADER_H
 
-
 #ifndef ZPP_BASE_H
 #include "zpp/base.h"
 #endif

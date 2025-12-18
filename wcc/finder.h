@@ -8,6 +8,8 @@
 
 namespace wcc {
 
+using namespace zpp;
+
 class  Finder : public base_d {
 protected:
 	htab_empty nsPaths_;

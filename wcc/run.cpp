@@ -238,13 +238,16 @@ void Run::construct()
 
 	if (!defined(Run_i.br_eol_str))
 	{
+
+
 		if (is_web)
 		{
-			define(Run_i.br_eol_str, Run_i.br_html);
+			temp = Run_i.br_html;
 		}
 		else {
-			define(Run_i.br_eol_str, Run_i.br_eol);
+			temp = Run_i.br_eol;
 		}
+		define(Run_i.br_eol_str, temp);
 	}
 
 	//showobj("Loader", loader);

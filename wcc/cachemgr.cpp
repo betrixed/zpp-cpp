@@ -498,6 +498,16 @@ ZEND_METHOD(Wcc_CacheMgr, getCache)
 	result.copy_zv(return_value);
 }
 
+ZEND_METHOD(Wcc_CacheMgr, getCacheKeys)
+{
+	zarg_rd::more_args(execute_data, __FUNCTION__, 0);
+	CacheMgr*  cobj = zval_toc<CacheMgr>(ZEND_THIS);
+	htab_rc result = cobj->getCacheKeys();
+
+	result.move_zv(return_value);
+
+}
+
 ZEND_METHOD(Wcc_CacheMgr, getCacheClass)
 {
 	str_rc 		result;

@@ -11,7 +11,12 @@
 extern "C" {
 	#include "stub/finder_arginfo.h"
 }
+#endif
 
+#ifndef PHP_STRING_H
+extern "C" {
+	#include <ext/standard/php_string.h>
+}
 #endif
 
 #include <filesystem>

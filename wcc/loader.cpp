@@ -5,13 +5,15 @@
 #include "loader.h"
 #endif
 
+#ifndef WCC_SERVICES_H
+#include "services.h"
+#endif
+
 #ifndef LOADER_ARGINFO_H
 #define LOADER_ARGINFO_H
-
 extern "C" {
 	#include "stub/loader_arginfo.h"
 }
-
 #endif
 
 namespace wcc {
@@ -20,7 +22,7 @@ using namespace zpp;
 
 base_obj_mgr<Loader> Loader::omg;
 
-thread_local obj_rc     gLoader;
+thread_local obj_rc     gLoader = obj_rc();
 
 class Loader_init : public state_init {
 public:
@@ -40,6 +42,8 @@ public:
 	str_intern isreg_str;
 	str_intern throwon_err;
 
+	Loader_init();
+
 	void init() override;
 
 	void init_req() override;
@@ -48,6 +52,11 @@ public:
 };
 
 Loader_init LDRi;
+
+
+Loader_init::Loader_init() : state_init()
+{
+}
 
 void Loader_init::init()
 {
@@ -65,10 +74,7 @@ void Loader_init::init()
 	basedir_str = "basedir";
 	isreg_str = "registered";
 	throwon_err = "throwerr";
-
 }
-
-
 
 void Loader_init::init_req()
 {
