@@ -1,7 +1,7 @@
 /* wccz extension for PHP */
 
 #ifndef PHP_WCCZ_H
-# define PHP_WCCZ_H
+#define PHP_WCCZ_H
 
 extern "C" {
 #ifdef HAVE_CONFIG_H

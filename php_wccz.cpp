@@ -1,28 +1,24 @@
 /* wccz extension for PHP */
 
-#define ZPP_BUILD_ALL
-
+/* include zpp classes, dump info support, and the state_init auto initialize */
 #include "php_wccz.h"
 
 #include "zpp/base.cpp"
+#include "zpp/state_init.cpp"
+
+// for dump_info
 #include "zpp/show_zpp.cpp"
-#include "wcc/replace.cpp"
-#include "wcc/config.cpp"
-#include "wcc/finder.cpp"
-#include "wcc/hmap.cpp"
-#include "wcc/reflect_cache.cpp"
-#include "wcc/services.cpp"
-#include "wcc/service_access.cpp"
+
+
+//#include "wcc/replace.cpp"
+//#include "wcc/config.cpp"
+//#include "wcc/finder.cpp"
+//#include "wcc/hmap.cpp"
+//#include "wcc/reflect_cache.cpp"
+//#include "wcc/services.cpp"
+//#include "wcc/service_access.cpp"
 #include "wcc/strfns.cpp"
 
-
-//#include "wcc/money_fmt.cpp"
-//#include "toml/toml_php.cpp"
-//#include "wcc/htmlgem.cpp"
-//#include "wcc/search_list.cpp"
-//#include "wcc/plate.cpp"
-//#include "wcc/plate_engine.cpp"
-//#include "wcc/htmlplates.cpp"
 
 
 
@@ -40,14 +36,17 @@ PHP_MINIT_FUNCTION(wccz)
 #endif
 	zpp::state_init::init_all();
 
+#ifdef WCC_LOADER_CPP
+	PHP_MINIT(wcc_loader_reg)(INIT_FUNC_ARGS_PASSTHRU);
+#endif
 
+#ifdef WCC_FINDER_CPP
+	PHP_MINIT(Wcc_Finder_reg)(INIT_FUNC_ARGS_PASSTHRU);
+#endif
 
 #ifdef WCC_CONFIG_CPP
 	PHP_MINIT(wcc_replace_reg)(INIT_FUNC_ARGS_PASSTHRU);
 	PHP_MINIT(Wcc_Config_reg)(INIT_FUNC_ARGS_PASSTHRU);
-#endif
-#ifdef WCC_FINDER_CPP
-	PHP_MINIT(Wcc_Finder_reg)(INIT_FUNC_ARGS_PASSTHRU);
 #endif
 
 #ifdef WCC_HMAP_CPP
@@ -112,9 +111,16 @@ PHP_MINFO_FUNCTION(wccz)
 }
 /* }}} */
 
+static const zend_module_dep wccz_deps[] = { /* {{{ */
+	ZEND_MOD_REQUIRED("intl")
+	ZEND_MOD_END
+};
+
 /* {{{ wccz_module_entry */
 zend_module_entry wccz_module_entry = {
-	STANDARD_MODULE_HEADER,
+	STANDARD_MODULE_HEADER_EX,
+	nullptr,
+	wccz_deps,
 	"wccz",					/* Extension name */
 	ext_functions,			/* zend_function_entry */
 	PHP_MINIT(wccz),		/* PHP_MINIT - Module initialization */
