@@ -92,9 +92,16 @@ PHP_MINFO_FUNCTION(wccd)
 }
 /* }}} */
 
+static const zend_module_dep wccd_deps[] = { /* {{{ */
+	ZEND_MOD_REQUIRED("wccr")
+	ZEND_MOD_END
+};
+
 /* {{{ wccd_module_entry */
 zend_module_entry wccd_module_entry = {
-	STANDARD_MODULE_HEADER,
+	STANDARD_MODULE_HEADER_EX,
+	nullptr,
+	wccd_deps,
 	"wccd",					/* Extension name */
 	nullptr,					/* zend_function_entry */
 	PHP_MINIT(wccd),							/* PHP_MINIT - Module initialization */
