@@ -51,6 +51,8 @@ public:
 	void di_showref(zend_reference* ref);
 	void di_show_resource(zval *r);
 	void output(const char* msg);
+
+	void di_show_slice(zval* p0, size_t ct);
 	void endl();
 	
 	void show_properties(zend_object* zobj, HashTable* h, int level, int refadj=0);

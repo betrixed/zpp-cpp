@@ -45,6 +45,7 @@ public:
 	}
 };
 
+
 class zarg_rd : public zval_slice
 {
 protected:
@@ -95,6 +96,7 @@ public:
 		return nargs_;
 	}
 
+	static bool more_args(zend_execute_data* ze, const char* fname=nullptr, size_t maxa=0);
 };
 
 }; //namespace zpp

@@ -40,7 +40,6 @@ state_init::state_init() : next_((state_init*)nullptr)
     }
 }
 
-
 void //static
 state_init::init_all()
 {
@@ -126,7 +125,7 @@ state_init::end_req()
 }
 
 /* not expecting any work here */
-//virtual
+
 state_init::~state_init()
 {
 }

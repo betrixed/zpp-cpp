@@ -380,6 +380,16 @@ void dump_info::indent(int ct)
 		return;
 	}
 
+	void dump_info::di_show_slice(zval* p0, size_t ct)
+	{
+		for(size_t i = 0; i < ct; i++)
+		{
+			ss << i << ": ";
+			di_showmem(p0+i);
+		}
+		this->endl();
+	}
+
 	void dump_info::di_showstr(zend_string* p) 
 	{
 		if (!p) {

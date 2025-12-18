@@ -39,6 +39,22 @@ zarg_rd::~zarg_rd()
 	}
 }
 
+bool //static 
+zarg_rd::more_args(zend_execute_data* ze, const char* fn, size_t maxa)
+{
+	size_t  nargs = ZEND_CALL_NUM_ARGS(ze);
+	if (nargs > maxa) {
+		str_buf args;
+		zval*   p0 = (zval*)(ZEND_CALL_VAR_NUM(ze, 0));
+		args << fn << " More than " << maxa << " arguments: " << nargs << ':' << endl;
+		dump_info  din(args);
+		din.di_show_slice(p0, nargs);
+		str_rc msg = args.zstr();
+		zend_throw_error(zend_ce_error,"%s", msg.data());
+		return false;
+	}
+	return true;
+}
 zarg_rd::zarg_rd(zend_execute_data* ze) : errors_(nullptr)
 {
 	zptr0_ = (zval*)(ZEND_CALL_VAR_NUM(ze, 0));
@@ -312,7 +328,7 @@ zarg_rd::throw_errors(const char* fncstr)
 {
 	if (errors_)
 	{
-		*errors_ << " : zard_rd::throw_errors in " << fncstr;
+		*errors_ << " : zard_rd::threw_errors in " << fncstr;
 		str_rc s = errors_->zstr();
 		zend_throw_error(zend_ce_error,"%s", s.data());
 		delete errors_;
