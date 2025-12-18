@@ -6,6 +6,8 @@
 
 #define ZPP_BUILD_ALL
 
+
+
 #include "php_wccr.h"
 
 #include "zpp/base.h"
@@ -38,9 +40,42 @@
 #include "wcc/route_set.cpp"
 #include "wcc/target.cpp"
 
+// CacheMgr wants one of these
+#ifndef DIRECT_LIBXML
+#include "wcc/xmlread.cpp"
+#else
+#include "wcc/dxmlread.cpp"
+#endif
 
 PHP_MINIT_FUNCTION(wccr)
 {
+
+#ifdef WCC_LOADER_CPP
+	PHP_MINIT(wcc_loader_reg)(INIT_FUNC_ARGS_PASSTHRU);
+#endif
+
+#ifdef WCC_FINDER_CPP
+	PHP_MINIT(Wcc_Finder_reg)(INIT_FUNC_ARGS_PASSTHRU);
+#endif
+
+#ifdef WCC_CONFIG_CPP
+	PHP_MINIT(wcc_replace_reg)(INIT_FUNC_ARGS_PASSTHRU);
+	PHP_MINIT(Wcc_Config_reg)(INIT_FUNC_ARGS_PASSTHRU);
+#endif
+
+#ifdef WCC_HMAP_CPP
+	PHP_MINIT(Wcc_Hmap_reg)(INIT_FUNC_ARGS_PASSTHRU);
+#endif
+
+#ifdef WCC_SERVICES_CPP
+PHP_MINIT(wc_services_md)(INIT_FUNC_ARGS_PASSTHRU);
+PHP_MINIT(Wcc_ReflectCache)(INIT_FUNC_ARGS_PASSTHRU);
+#endif
+
+#ifdef SERVICE_ACCESS_CPP
+	PHP_MINIT(ServiceAccess_reg)(INIT_FUNC_ARGS_PASSTHRU);
+#endif
+
 #ifdef GLOBAL_RESPONSE_CPP
 	PHP_MINIT(Wcc_Response_reg)(INIT_FUNC_ARGS_PASSTHRU);
 #endif
@@ -77,6 +112,17 @@ PHP_MINIT(wcc_pair_d)(INIT_FUNC_ARGS_PASSTHRU);
 #ifdef WCC_CACHEMGR_CPP
 	PHP_MINIT(Wcc_CacheMgr_reg)(INIT_FUNC_ARGS_PASSTHRU);
 #endif
+
+#ifdef DIRECT_LIBXML
+#	ifdef DXMLREAD_CPP
+	PHP_MINIT(Wcc_XmlRead_reg)(INIT_FUNC_ARGS_PASSTHRU);
+#	endif
+#else
+#	ifdef XMLREAD_CPP
+	PHP_MINIT(Wcc_XmlRead_reg)(INIT_FUNC_ARGS_PASSTHRU);
+#	endif
+#endif
+
 	return SUCCESS;
 }
 
@@ -100,10 +146,18 @@ PHP_MINFO_FUNCTION(wccr)
 }
 /* }}} */
 
+static const zend_module_dep wccr_deps[] = { /* {{{ */
+	ZEND_MOD_REQUIRED("intl")
+	ZEND_MOD_REQUIRED("wccz")
+	ZEND_MOD_END
+};
+
 /* {{{ wccr_module_entry */
 zend_module_entry wccr_module_entry = {
-	STANDARD_MODULE_HEADER,
-	"wccr",					/* Extension name */
+	STANDARD_MODULE_HEADER_EX,
+	nullptr,
+	wccr_deps,
+	"wccr",						/* Extension name */
 	nullptr,					/* zend_function_entry */
 	PHP_MINIT(wccr),			/* PHP_MINIT - Module initialization */
 	nullptr,					/* PHP_MSHUTDOWN - Module shutdown */
