@@ -11,11 +11,8 @@
 #include "zpp/fn_call.h"
 #endif
 
-#ifndef __XML_XMLREADER_H__
-extern "C" {
-#include <libxml/xmlreader.h>
-#include <libxml/uri.h>
-};
+#ifndef TINYXML2_INCLUDED
+#include "tinyxml2.h"
 #endif
 
 namespace zpp {
@@ -66,7 +63,7 @@ namespace zpp {
 namespace wcc {
 	//using xmlstr = zstr_own;
 	using namespace zpp;
-
+	using namespace tinyxml2;
 
 	/**
 	 * intended for single parse.
@@ -81,10 +78,22 @@ namespace wcc {
 
 	class  XmlWrap
 	{
+	public:
+		enum Xntype {
+			V_DOCUMENT = 0,
+			V_ELEMENT = 1,
+			V_EMPTY = 2, // empty element
+			V_END_ELEMENT = 3,
+			V_END_DOCUMENT = 4
+		};
 	protected:
-		xmlTextReaderPtr		xrptr_;
-		xmlParserInputBufferPtr xrbuf_;
-		xmlChar*				xrpath_;
+		XMLDocument              xdoc_;
+		XMLElement*              xele_;
+		
+		// Visit status for elements
+
+
+		Xntype   visit_;
 
 
 		bool      				fileOpen_;
@@ -106,6 +115,7 @@ namespace wcc {
 		bool fromFile(str_ptr path);
 		bool fromString(str_ptr xml);
 
+
 		str_rc  xml_name();
 
 		str_rc  get_attribute(str_ptr name);
@@ -114,8 +124,10 @@ namespace wcc {
 		val_rc  xml_name_zval();
 		val_rc  xml_str_zval();
 
+		XMLElement*  nextElement();
+		
 		bool      read();
-		long	  nodeType();
+		XmlWrap::Xntype	  nodeType();
 		void      closeFile();
 
 		bool      ok() {

@@ -50,9 +50,7 @@ extern "C" {
 	
 };
 
-//#define DIRECT_LIBXML
-
-
+#define DIRECT_LIBXML
 //#define DEBUG_EXTRA
 
 //core wcc
@@ -102,7 +100,7 @@ extern "C" {
 #ifndef DIRECT_LIBXML
 #include "wcc/xmlread.cpp"
 #else
-#include "wcc/dxmlread.cpp"
+#include "tinyxml/dxmlread.cpp"
 #endif
 
 #include "wcc/run.cpp"

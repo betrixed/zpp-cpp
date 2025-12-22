@@ -5,12 +5,8 @@
 #include "dxmlread.h"
 #endif
 
-#ifndef PHP_LIBXML_H
-extern "C" {
-	#include <ext/libxml/php_libxml.h>
-	#include <zend_virtual_cwd.h>
-}
-#endif
+// only place to include tinyxml2.cpp
+#include "tinyxml2.cpp"
 
 #ifndef REFLECT_CACHE_H
 #include "reflect_cache.h"
@@ -58,11 +54,14 @@ namespace zpp {
 
 namespace wcc {
 	using namespace zpp;
+	using namespace tinyxml2;
 
 	base_obj_mgr<Wcc_XmlRead> Wcc_XmlRead::omg;
 
+
+
 	XmlWrap::XmlWrap() : 
-		xrptr_(nullptr), xrbuf_(nullptr), xrpath_(nullptr)
+		xele_(nullptr)
 		, fileOpen_(false)
 	{
 		/* getNameValue_ = (xr_strfn) xmlTextReaderConstName;
@@ -73,106 +72,15 @@ namespace wcc {
 		*/
 	}
 
-	struct URIDefer {
-		xmlURI* uri_;
-
-		URIDefer()
-		{
-			uri_ = xmlCreateURI(); //API
-		}
-		~URIDefer()
-		{
-			xmlFreeURI(uri_);
-		}
-
-		xmlURI* operator->()
-		{
-			return uri_;
-		}
-
-		operator xmlURI* ()
-		{
-			return uri_;
-		}
-	};
 
 	
 	str_rc //static
 	XmlWrap::get_valid_file_path(str_ptr src) 
-	{
-		xmlChar *escsource; 
-
-		str_rc  resolved_path;
-		str_rc  result;
-
-
-		const char* source = src.data();
-
-		
-		bool isFileUri = false;
-
-		//uri = xmlCreateURI(); //API
-		URIDefer uri;
-
-		if (uri == NULL) {
-			return result; // libxml2 not present?
-		}
-		escsource = xmlURIEscapeStr((xmlChar *)source, (xmlChar *)":");
-
-		int test = xmlParseURIReference(uri, (const char *)escsource);
-	
-		if (test != 0) {
-			return result; // libxml2 not present?
-		}
-		xmlFree(escsource);
-
-
-
-		bool hasSchema = (uri->scheme != nullptr);
-
-		if (hasSchema) {
-			/* absolute file uris - libxml only supports localhost or empty host */
-			if (strncasecmp(source, "file:///",8) == 0) 
-			{
-				isFileUri = true;
-		#ifdef PHP_WIN32
-				source += 8;
-		#else
-				source += 7;
-		#endif
-			} 
-			else if (strncasecmp(source, "file://localhost/",17) == 0) 
-			{
-				isFileUri = true;
-		#ifdef PHP_WIN32
-				source += 17;
-		#else
-				source += 16;
-		#endif
-			}
+	{	
+		return src;
 	}
 
-	result = source;
 
-	if ((!hasSchema || isFileUri)) {
-
-		val_rc rpath = realpath(result);
-
-		if (rpath.isString())
-		{
-			result = rpath;
-		}
-		/** else {
-			expand_filepath(result) {
-			result = resolved_path;
-		}
-		**/
-	}
-
-	return result;
-}
-
-/* }}} */
 	XmlWrap::~XmlWrap()
 	{
 		if (fileOpen_)
@@ -185,26 +93,8 @@ namespace wcc {
 	{
 		if (fileOpen_)
 		{
+			xdoc_.Clear();
 			fileOpen_ = false;
-			
-			if (xrpath_)
-			{
-				xmlFree(xrpath_);
-				xrpath_ = nullptr;
-			}
-
-			if (xrbuf_)
-			{
-				//zend_printf("Free input buffer, ");
-				xmlFreeParserInputBuffer(xrbuf_);
-				xrbuf_ = nullptr;
-			}
-			if (xrptr_)
-			{
-				//zend_printf("Free reader\n");
-				xmlFreeTextReader(xrptr_);
-				xrptr_ = nullptr;
-			}
 		}
 	}
 
@@ -222,35 +112,20 @@ namespace wcc {
 	bool XmlWrap::fromString(str_ptr xml)
 	{
 		hold_ = xml;
-		//showstr("string hold_", hold_);	
+		xele_ = nullptr;
 
-		xrbuf_ = xmlParserInputBufferCreateMem(hold_.data(), hold_.size(), XML_CHAR_ENCODING_NONE);
+		XMLError error = xdoc_.Parse(xml.data(), xml.size());
 
-		str_buf buf;
-		str_rc wkdir = getcwd();
-
-		buf << wkdir << '/';
-
-		wkdir = buf.zstr();
-		xrpath_ = xmlCanonicPath( (const xmlChar*) wkdir.data());
-		//PHP_LIBXML_SANITIZE_GLOBALS(string_xml_wrap);
-		xrptr_ = xmlNewTextReader(xrbuf_, (const char*) xrpath_);
-
-		fileOpen_ = (xrptr_ != nullptr);
-
+		//zend_printf("fromString %d\n",error);
+		fileOpen_ = (error == XML_SUCCESS);
 		if (fileOpen_)
 		{
-			int ok = xmlTextReaderSetup(xrptr_, nullptr, (const char*) xrpath_, nullptr, 0);
-			if (ok != 0) {
-				fileOpen_ = false;
-			}
+			visit_ = V_DOCUMENT;
 		}
-
-		if (xrpath_)
-		{
-			xmlFree(xrpath_);
-			xrpath_ = nullptr;
+		else {
+			visit_ = V_END_DOCUMENT;
 		}
+		
 
 		return fileOpen_;
 	}
@@ -258,15 +133,18 @@ namespace wcc {
 	bool XmlWrap::fromFile(str_ptr path)
 	{
 		hold_ = XmlWrap::get_valid_file_path(path);
-		//showstr("Path", hold_);
-		
+		xele_ = nullptr;
 
-		PHP_LIBXML_SANITIZE_GLOBALS(reader_for_file);
-		xrptr_ = xmlReaderForFile(hold_.data(), nullptr, 0);
-		PHP_LIBXML_RESTORE_GLOBALS(reader_for_file);
-
-		fileOpen_ = (xrptr_ != nullptr);
-		//printf("xrptr_ %lx\n", (size_t) xrptr_);
+		XMLError error = xdoc_.LoadFile(path.data());
+		//zend_printf("fromFile %d\n",error);
+		fileOpen_ = (error == XML_SUCCESS);
+		if (fileOpen_)
+		{
+			visit_ = V_DOCUMENT;
+		}
+		else {
+			visit_ = V_END_DOCUMENT;
+		}
 
 		return fileOpen_;
 	}
@@ -275,11 +153,10 @@ namespace wcc {
 	{
 		val_rc result;
 		
-		const xmlChar* name = xmlTextReaderConstName(xrptr_) ;
-
-		if (name) 
+		if (xele_)
 		{
-			result =(const char*)name;
+			str_rc test(xele_->Value());
+			result = test;
 		}
 
 		return result;
@@ -287,12 +164,11 @@ namespace wcc {
 
 	str_rc XmlWrap::xml_name()
 	{
-		const xmlChar* name = xmlTextReaderConstName(xrptr_) ;
 		str_rc result;
 
-		if (name)
+		if (xele_)
 		{
-			result = (const char*) name;
+			result = xele_->Value();
 		}
 		return result;
 	}
@@ -301,10 +177,14 @@ namespace wcc {
 	XmlWrap::get_attribute(str_ptr name)
 	{	
 		str_rc result;
-		const xmlChar* val = xmlTextReaderGetAttribute( xrptr_ , (const xmlChar*) name.data());
-		if (val)
+
+		if (xele_)
 		{
-			result = (const char*) val;
+			const XMLAttribute* a = xele_->FindAttribute(name.data());
+			if (a)
+			{
+				result = a->Value();
+			}
 		}
 		return result;
 	}
@@ -312,42 +192,128 @@ namespace wcc {
 	val_rc
 	XmlWrap::xml_str_zval()
 	{
-		const xmlChar* inner = xmlTextReaderReadString(xrptr_);
 		val_rc result;
-
-		if (inner)
+		if (xele_)
 		{
-			result = (const char*) inner;
-		//showmem("readstring", result);
+			const XMLNode* node = xele_->FirstChild();
+			str_buf buf;
+			while (node) 
+			{
+				if (node->ToText())
+				{
+					buf << node->Value();
+				}
+				node = node->NextSibling();
+			}
+			result = buf.zstr();
 		}
 		return result;
 	}
 
-	bool XmlWrap::read()
+	static XMLElement* firstElementNode(XMLNode* node)
 	{
-		int result = xmlTextReaderRead(xrptr_);
-		return (result != 0);
-	}
-
-	long XmlWrap::nodeType()
-	{
-		long result = xmlTextReaderNodeType(xrptr_);
-
-		//zend_printf("nodeType = %ld\n", result);
+		XMLElement* result = nullptr;
+		while(node)
+		{
+			result = node->ToElement();
+			if (result)
+			{
+				break;
+			}
+			node = node->NextSibling();
+		}
 		return result;
 	}
 
+	XMLElement*  
+	XmlWrap::nextElement()
+	{
+		// Need to visit each element in the tree.
+		// Depth first. 
+		// Indicate start of node with
+		// ect_ ==  XMLElement::OPEN
+		// Indicate End of node, (No more children)
+		// ect_ == XMLElement::CLOSING
+		// a Node with no Children ect_ == XMLElement::CLOSED
+		// visit next element node.
+		// First or Next child that is Element
+		// If No more children, Return parent ended.
+		// If Parent ended, Next Sibling.
+
+		XMLElement* result = nullptr;
+
+		switch(visit_)
+		{
+		case Xntype::V_DOCUMENT:
+			result = firstElementNode(xdoc_.FirstChild());
+			if(result)
+			{
+				visit_ = (result->NoChildren() ? V_EMPTY : V_ELEMENT);
+				return result;
+			}
+			break;
+		case Xntype::V_ELEMENT:
+			result = firstElementNode(xele_->FirstChild());
+			if(result)
+			{
+				visit_ = (result->NoChildren() ? V_EMPTY : V_ELEMENT);
+				return result;
+			}
+			else {
+				result = xele_;
+				visit_ =  V_END_ELEMENT;
+			}
+			break;
+		case Xntype::V_EMPTY:
+			{
+			result = xele_;
+			visit_ = V_END_ELEMENT;
+			}
+			break;
+		case Xntype::V_END_ELEMENT:
+			result = firstElementNode(xele_->NextSibling());
+			if(result)
+			{
+				visit_ = (result->NoChildren() ? V_EMPTY : V_ELEMENT);
+				return result;
+			}
+			else {
+				result = (XMLElement*) xele_->Parent();
+				visit_ = (result ? V_END_ELEMENT : V_END_DOCUMENT);
+			}
+			break;
+		case Xntype::V_END_DOCUMENT:
+			break;
+		}
+		return result;
+
+	}
+	bool XmlWrap::read()
+	{
+		xele_ = this->nextElement();
+
+		bool result = (xele_ ? true : false);
+		if (result)
+		{
+			//str_rc value(xele_->Value());
+			//zend_printf("%lx visit %d ", (long unsigned int)xele_, visit_);
+			//showstr("tag", value);
+		}
+		else {
+			zend_printf("ENDED\n");
+		}
+		return result;
+	}
+
+	// In this implementation, returns the visit_ enum value
+	XmlWrap::Xntype XmlWrap::nodeType()
+	{
+		return visit_;
+	}
+
 };
 
 
-using namespace wcc;
-
-
-// special Xml node constants
-enum Xntype {
-	ELEMENT = 1,
-	END_ELEMENT = 15
-};
 
 constexpr std::string_view tb_tag = "tb";
 constexpr std::string_view root_tag = "root";
@@ -420,7 +386,7 @@ Wcc_XmlRead::openstring(str_ptr str)
 	//zend_printf("called openstring\n");
 	if (!xml_.fromString(str))
 	{
-		zend_throw_error(zend_ce_error,"Cannot open xml parser");
+		zend_throw_error(zend_ce_error,"Cannot parse");
 		return false;
 	}
 	return true;
@@ -486,10 +452,10 @@ Wcc_XmlRead::loop()
 	while(!done_ && xml_.read())
 	{
 		auto ntype = xml_.nodeType();
-		//zend_printf("ntype %ld\n", ntype);
 
 		switch(ntype) {
-			case Xntype::ELEMENT:
+			case XmlWrap::V_ELEMENT:
+			case XmlWrap::V_EMPTY:
 			{
 				str_rc tagstr = xml_.xml_name();
 				//showstr("tag start", tagstr);
@@ -515,16 +481,17 @@ Wcc_XmlRead::loop()
 
 			}
 			break;
-		case Xntype::END_ELEMENT:
+		case XmlWrap::V_END_ELEMENT:
 			{
 				str_rc tag = xml_.xml_name();
 				tag_end(tag);
 				//showstr("exit tag", tag);
 			}
 			break;
+		case XmlWrap::V_END_DOCUMENT:
 		case 0:
 			done_ = true;
-			//zend_printf("End reached\n");
+			zend_printf("End reached\n");
 			break;
 		}
 	}
@@ -574,7 +541,8 @@ Wcc_XmlRead::tagsTable()
 	while(xml_.read()) {
 		auto ntype = xml_.nodeType();
 		switch(ntype) {
-			case Xntype::ELEMENT:
+			case XmlWrap::V_ELEMENT:
+			case XmlWrap::V_EMPTY:
 				{
 					tag = xml_.xml_name();
 					value = xml_.xml_str_zval();
@@ -583,7 +551,7 @@ Wcc_XmlRead::tagsTable()
 					htab_rw(tag_objs_).set(tag, value);	
 				}
 				break;
-			case Xntype::END_ELEMENT:
+			case XmlWrap::V_END_ELEMENT:
 				{
 					tag = xml_.xml_name();
 					std::string_view test = val_ptr(tag).vstr();
@@ -593,7 +561,9 @@ Wcc_XmlRead::tagsTable()
 						return;
 					}
 				}
-				break;			
+				break;	
+			default:
+				break;		
 		}
 	}
 }
@@ -987,9 +957,12 @@ bool Wcc_XmlRead::tag_start(
 void Wcc_XmlRead::nextEnd() {
 	while(xml_.read())
 	{
-		if (xml_.nodeType() == Xntype::END_ELEMENT)
+		switch(xml_.nodeType())
 		{
-			return;
+			case XmlWrap::V_END_ELEMENT:
+				return;
+			default:
+				break;
 		}
 	}
 }

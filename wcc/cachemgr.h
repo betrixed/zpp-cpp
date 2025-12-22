@@ -11,7 +11,7 @@
 # endif
 #else
 # ifndef DXML_READ_H
-#   include "wcc/dxmlread.h"
+#   include "tinyxml/dxmlread.h"
 # endif
 #endif
 
