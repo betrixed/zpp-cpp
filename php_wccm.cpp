@@ -1,7 +1,4 @@
 /* wccm extension for PHP */
-
-
-
 #define ZPP_BUILD_ALL
 
 #include "php_wccm.h"
@@ -9,8 +6,6 @@
 #include "zpp/base.h"
 #include "zpp/show_zpp.h"
 
-// compile 
-#include "wcc/xmlread.cpp"
 #include "toml/toml_php.cpp"
 
 
@@ -22,10 +17,6 @@ PHP_MINIT_FUNCTION(wccm)
 
 #ifdef TOML_PHP_CPP
 	PHP_MINIT(Toml_reg)(INIT_FUNC_ARGS_PASSTHRU);
-#endif
-
-#ifdef XMLREAD_CPP
-	PHP_MINIT(Wcc_XmlRead_reg)(INIT_FUNC_ARGS_PASSTHRU);
 #endif
 	return SUCCESS;
 }
