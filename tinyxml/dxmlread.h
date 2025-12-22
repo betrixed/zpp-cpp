@@ -25,39 +25,9 @@ namespace zpp {
 
     
 
-    class xml_fns : public state_init {
-    public:
-
-    	//str_intern   	  xmlreader;
-    	//str_intern   	  fromString;
-    	//str_intern   	  open;
-        //str_intern    	  get_attribute;
-        //str_intern    	  read_string;
-        //str_intern    	  read;
-
-		//str_intern 	  	  k_nodeType;
-		//str_intern	      k_attribute;
-		//str_intern	      k_name;
-		
-		str_intern 	  	  k_c;
-		str_intern	      k_k;
-
-		//str_intern	      k_close;
-
-		//str_intern       reader;
-
-		str_intern       root;
-
-		str_intern       tags;
-		
-		xml_fns();
-		
-        virtual void init();
-    };
 
 
 
-    extern xml_fns  XML_FNS;
 };
 
 namespace wcc {

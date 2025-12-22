@@ -13,9 +13,9 @@ function rutime($ru, $rus, $index){
 
 $rd = new XmlRead();
 
-$testfile1 = "tests/assets.xml";
-$testfile2 = "tests/assets_full.xml";
-
+$testfile3 = "tests/assets.xml";
+$testfile1 = "tests/assets_full.xml";
+$testfile2 = "tests/.test_secrets.xml";
 
 /*
 $config = ReflectCache::staticInstance("Wcc\\Config");
@@ -30,10 +30,9 @@ $config = null;
 
 echo "DIES NOW\n"; return;
 */
-function testone()
+function testone($testfile)
 {
-	global $testfile1;
-	$data = XmlRead::fromFile($testfile1);
+	$data = XmlRead::fromFile($testfile);
 	if (empty($data))
 	{
 	    throw new Exception("File read error");
@@ -51,8 +50,8 @@ function testone()
 	//die;
 }
 
-testone();
-testone();
+testone($testfile3);
+testone($testfile2);
 
 //echo "DIE NOW\n";
 //return;
@@ -75,12 +74,12 @@ $rd = new XmlRead();
 
 //debug_zval_dump($rd);
 
-function test() : mixed {
+function test($testfile) : mixed {
 
 	global $rd, $testfile2;
 	echo "CWD is " . \getcwd() . PHP_EOL;
 
-	$s = file_get_contents($testfile2);
+	$s = file_get_contents($testfile);
 	$result = $rd->parse($s);
 
 	if (is_bool($result)) {
@@ -105,7 +104,7 @@ function test() : mixed {
 	return $result;
 }
 
-$data = test();
+$data = test($testfile1);
 debug_zpp_dump($data);
 //echo "DIES NOW\n"; return;
 

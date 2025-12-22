@@ -18,16 +18,21 @@ function get_version(string $extname)
     $result = phpversion($extname);
     if (empty($result))
     {
-        $result = " -- ";
+        return null;
     }
     return $result;
 }
 function show_versions() 
 {
-    $version = get_version("wcc");
-    $xdebug = get_version("xdebug");
-
-    echo "wcc $version, xdebug $xdebug\n";    
+    echo "Versions -- " . PHP_EOL;
+    $elist = ["wcc","wccz", "wccr", "wccd", "wccm", "runsa","xdebug"];
+    foreach($elist as $extn)
+    {
+        $version = get_version($extn);
+        if ($version) {
+            echo "$extn $version" . PHP_EOL;
+        }
+    }  
 }
 
 function boolstr(bool $value) : string

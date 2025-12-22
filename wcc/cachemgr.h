@@ -5,15 +5,16 @@
 #include "zpp/base.h"
 #endif
 
-#ifndef DIRECT_LIBXML
-# ifndef XML_READ_H
-#   include "wcc/xmlread.h"
-# endif
-#else
+#ifdef DIRECT_XML
 # ifndef DXML_READ_H
 #   include "tinyxml/dxmlread.h"
 # endif
+#else
+# ifndef XML_READ_H
+#   include "wcc/xmlread.h"
+# endif
 #endif
+
 
 
 namespace wcc {

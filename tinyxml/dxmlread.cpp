@@ -9,8 +9,9 @@
 #include "tinyxml2.cpp"
 
 #ifndef REFLECT_CACHE_H
-#include "reflect_cache.h"
+#include "wcc/reflect_cache.h"
 #endif
+
 
 extern "C" {
 	#include "stub/xmlread_arginfo.h"
@@ -18,6 +19,35 @@ extern "C" {
 
 
 namespace zpp {
+	class xml_fns : public state_init {
+    public:
+
+    	//str_intern   	  xmlreader;
+    	//str_intern   	  fromString;
+    	//str_intern   	  open;
+        //str_intern    	  get_attribute;
+        //str_intern    	  read_string;
+        //str_intern    	  read;
+
+		//str_intern 	  	  k_nodeType;
+		//str_intern	      k_attribute;
+		//str_intern	      k_name;
+		
+		str_intern 	  	  k_c;
+		str_intern	      k_k;
+
+		//str_intern	      k_close;
+
+		//str_intern       reader;
+
+		str_intern       root;
+
+		str_intern       tags;
+		
+		xml_fns();
+		
+        virtual void init();
+    };
 
 	xml_fns XML_FNS;
 
@@ -97,16 +127,6 @@ namespace wcc {
 			fileOpen_ = false;
 		}
 	}
-
-	/*
-	bool XmlWrap::newobj()
-	{
-		self_ = class_data::create_object(XML_FNS.xmlreader);
-
-		return true;
-	}
-	*/
-
 	
 
 	bool XmlWrap::fromString(str_ptr xml)
@@ -286,8 +306,8 @@ namespace wcc {
 			break;
 		}
 		return result;
-
 	}
+
 	bool XmlWrap::read()
 	{
 		xele_ = this->nextElement();
@@ -300,7 +320,7 @@ namespace wcc {
 			//showstr("tag", value);
 		}
 		else {
-			zend_printf("ENDED\n");
+			//zend_printf("ENDED\n");
 		}
 		return result;
 	}
@@ -310,10 +330,6 @@ namespace wcc {
 	{
 		return visit_;
 	}
-
-};
-
-
 
 constexpr std::string_view tb_tag = "tb";
 constexpr std::string_view root_tag = "root";
@@ -648,7 +664,7 @@ void Wcc_XmlRead::popStack()
 		top_ = last->ds_prev_;
 		stacked_ = ct;
 
-		//zend_printf("popStack %ld\n", ct);
+		
 		if (ct > 0) {
 			//showmem("last ref", last->ref_);
 			//showstr("last key", last->key_);
@@ -662,7 +678,8 @@ void Wcc_XmlRead::popStack()
 			delete last;		
 		}
 		else {
-
+			//zend_printf("popStack %ld\n", ct);
+			done_ = true;
 			// keep root_ around a bit longer
 		}
 	}
@@ -695,11 +712,12 @@ void Wcc_XmlRead::tag_end(str_ptr tag)
 		return;
 	}
 
-    if ( (s == pdoc_tag)) 
+    /* if ( (s == pdoc_tag)) 
     {
     	done_ = true;
     	return;
     }
+    */
 
 	val_ptr otag(htab_ptr(tag_objs_).get(tag));
 
@@ -980,6 +998,10 @@ Wcc_XmlRead::DStack::DStack(str_ptr k, const val_rc& val, int eval)
 	//showstr("+Stack key", key_);
 	//showmem("+Stack ref", ref_);
 }
+
+}; // namespace wcc
+
+using namespace wcc;
 
 ZEND_METHOD(Wcc_XmlRead, fromString)
 {
