@@ -23,7 +23,7 @@ distribution.
 
 #include "tinyxml2.h"
 
-#include <new>		// yes, this one new style header, is in the Android SDK.
+//#include <new>		// yes, this one new style header, is in the Android SDK.
 #if defined(ANDROID_NDK) || defined(__BORLANDC__) || defined(__QNXNTO__) || defined(__CC_ARM)
 #   include <stddef.h>
 #   include <stdarg.h>
@@ -94,7 +94,7 @@ distribution.
 			int len = 512;
 			for (;;) {
 				len = len*2;
-				char* str = new char[len]();
+				char* str = ::new char[len]();
 				const int required = _vsnprintf(str, len, format, va);
 				delete[] str;
 				if ( required != -1 ) {
@@ -151,6 +151,7 @@ static const unsigned char TIXML_UTF_LEAD_0 = 0xefU;
 static const unsigned char TIXML_UTF_LEAD_1 = 0xbbU;
 static const unsigned char TIXML_UTF_LEAD_2 = 0xbfU;
 
+
 namespace tinyxml2
 {
 
@@ -204,7 +205,8 @@ void StrPair::TransferTo( StrPair* other )
 void StrPair::Reset()
 {
     if ( _flags & NEEDS_DELETE ) {
-        delete [] _start;
+        //delete [] _start;
+        efree(_start);
     }
     _flags = 0;
     _start = 0;
@@ -218,7 +220,8 @@ void StrPair::SetStr( const char* str, int flags )
     Reset();
     size_t len = strlen( str );
     TIXMLASSERT( _start == 0 );
-    _start = new char[ len+1 ];
+    //_start = ::new char[ len+1 ];
+    _start = (char*) emalloc(len+1);
     memcpy( _start, str, len+1 );
     _end = _start + len;
     _flags = flags | NEEDS_DELETE;
@@ -2253,8 +2256,8 @@ void XMLDocument::Clear()
     const bool hadError = Error();
 #endif
     ClearError();
-
-    delete [] _charBuffer;
+    efree(_charBuffer);
+    //::delete [] _charBuffer;
     _charBuffer = 0;
 	_parsingDepth = 0;
 
@@ -2421,7 +2424,10 @@ XMLError XMLDocument::LoadFile( FILE* fp )
 
     const size_t size = static_cast<size_t>(filelength);
     TIXMLASSERT( _charBuffer == 0 );
-    _charBuffer = new char[size+1];
+
+    _charBuffer = (char*) emalloc((size+1));
+    //_charBuffer = ::new char[size+1];
+
     const size_t read = fread( _charBuffer, 1, size, fp );
     if ( read != size ) {
         SetError( XML_ERROR_FILE_READ_ERROR, 0, 0 );
@@ -2477,7 +2483,10 @@ XMLError XMLDocument::Parse( const char* xml, size_t nBytes )
         nBytes = strlen( xml );
     }
     TIXMLASSERT( _charBuffer == 0 );
-    _charBuffer = new char[ nBytes+1 ];
+
+    _charBuffer = (char*) emalloc(nBytes+1);
+    //_charBuffer = ::new char[ nBytes+1 ];
+
     memcpy( _charBuffer, xml, nBytes );
     _charBuffer[nBytes] = 0;
 
@@ -2523,7 +2532,8 @@ void XMLDocument::SetError( XMLError error, int lineNum, const char* format, ...
 	_errorStr.Reset();
 
     const size_t BUFFER_SIZE = 1000;
-    char* buffer = new char[BUFFER_SIZE];
+    //char* buffer = ::new char[BUFFER_SIZE];
+    char* buffer = (char*) emalloc(BUFFER_SIZE);
 
     TIXMLASSERT(sizeof(error) <= sizeof(int));
     TIXML_SNPRINTF(buffer, BUFFER_SIZE, "Error=%s ErrorID=%d (0x%x) Line number=%d",
@@ -2540,7 +2550,8 @@ void XMLDocument::SetError( XMLError error, int lineNum, const char* format, ...
 		va_end(va);
 	}
 	_errorStr.SetStr(buffer);
-	delete[] buffer;
+	//delete[] buffer;
+    efree(buffer);
 }
 
 

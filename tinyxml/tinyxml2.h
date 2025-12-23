@@ -24,6 +24,8 @@ distribution.
 #ifndef TINYXML2_INCLUDED
 #define TINYXML2_INCLUDED
 
+#include <new>
+
 #if defined(ANDROID_NDK) || defined(__BORLANDC__) || defined(__QNXNTO__)
 #   include <ctype.h>
 #   include <limits.h>
@@ -111,6 +113,7 @@ static const int TIXML2_PATCH_VERSION = 0;
 // so there needs to be a limit in place.
 static const int TINYXML2_MAX_ELEMENT_DEPTH = 500;
 
+
 namespace tinyxml2
 {
 class XMLDocument;
@@ -130,6 +133,8 @@ class XMLPrinter;
 
     Isn't clear why TINYXML2_LIB is needed; but seems to fix #719
 */
+
+
 class TINYXML2_LIB StrPair
 {
 public:
@@ -212,7 +217,8 @@ public:
 
     ~DynArray() {
         if ( _mem != _pool ) {
-            delete [] _mem;
+            efree(_mem);
+            //::delete[] _mem;
         }
     }
 
@@ -300,11 +306,15 @@ private:
         if ( cap > _allocated ) {
             TIXMLASSERT( cap <= SIZE_MAX / 2 / sizeof(T));
             const size_t newAllocated = cap * 2;
-            T* newMem = new T[newAllocated];
+            //T* newMem = new T[newAllocated];
+            T* newMem = (T*) emalloc(sizeof(T) * newAllocated);
+            //T* newMem = ::new T[newAllocated];
+
             TIXMLASSERT( newAllocated >= _size );
             memcpy( newMem, _mem, sizeof(T) * _size );	// warning: not using constructors, only works for PODs
             if ( _mem != _pool ) {
-                delete [] _mem;
+                efree(_mem);
+                //::delete[] _mem;
             }
             _mem = newMem;
             _allocated = newAllocated;
@@ -351,6 +361,7 @@ public:
         // Delete the blocks.
         while( !_blockPtrs.Empty()) {
             Block* lastBlock = _blockPtrs.Pop();
+            //::delete lastBlock;
             delete lastBlock;
         }
         _root = 0;
@@ -440,7 +451,9 @@ private:
         Item*   next;
         char    itemData[static_cast<size_t>(ITEM_SIZE)];
     };
-    struct Block {
+    struct Block
+        : public PHPAlloc 
+    {
         Item items[ITEMS_PER_BLOCK];
     };
     DynArray< Block*, 10 > _blockPtrs;

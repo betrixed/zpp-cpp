@@ -6,29 +6,19 @@
 #include "zpp/base.h"
 #endif
 
+#include <new>
 
 #ifndef FN_CALL_H
 #include "zpp/fn_call.h"
 #endif
 
+#ifndef ALLOC_PHPREQ_H
+#include "zpp/alloc_phpreq.h"
+#endif
+
 #ifndef TINYXML2_INCLUDED
 #include "tinyxml2.h"
 #endif
-
-namespace zpp {
-		/**
-		fn_call_args<1> getattribute_;
-		fn_call readstring_;
-		fn_call read_;
-		*/
-
-
-    
-
-
-
-
-};
 
 namespace wcc {
 	//using xmlstr = zstr_own;
@@ -128,25 +118,13 @@ namespace wcc {
 
 		static val_rc fromString(str_ptr src);
 		
-		class DStack {
+		class DStack : public PHPAlloc {
 		protected:
 			DStack*   ds_next_;
 			DStack*   ds_prev_;
 
 			friend class Wcc_XmlRead;
 		public:
-
-			void* operator new(size_t size)
-			{
-				//zend_printf("new DStack %ld\n",size);
-				return emalloc(size);
-			}
-
-			void operator delete(void* ptr)
-			{
-				//zend_printf("delete DStack %lx\n",ptr);
-				efree(ptr);
-			}
 
 			val_rc  ref_; // storage always a zval
 			str_rc  key_; // key must always be a string

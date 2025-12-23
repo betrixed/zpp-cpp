@@ -1,9 +1,19 @@
 #ifndef DXMLREAD_CPP
 #define DXMLREAD_CPP
 
+
 #ifndef DXMLREAD_H
 #include "dxmlread.h"
 #endif
+
+// custom new, new[], delete, delete[]
+/* #ifndef ALLOC_NEW_CPP
+// These fail to "replace" the standard versions,
+// So cannot be used to redirect allocations to emalloc
+#include "zpp/alloc_new.cpp"
+#endif
+*/
+
 
 // only place to include tinyxml2.cpp
 #include "tinyxml2.cpp"

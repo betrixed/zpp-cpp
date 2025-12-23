@@ -51,6 +51,7 @@ function testone($testfile)
 }
 
 testone($testfile3);
+
 testone($testfile2);
 
 //echo "DIE NOW\n";
@@ -119,6 +120,7 @@ $start = microtime(true);
 
 function testavg(int $ct, string $msg) {
 	$cpu_before = getrusage();
+
 	for($i = 0; $i < $ct; $i++)
 	{
 		$rd = new XmlRead();
@@ -139,11 +141,34 @@ function testavg(int $ct, string $msg) {
 }
 
 
-echo "Test file is " . $testfile2 . PHP_EOL;
-
-
 testavg(10, "Warm up");
 testavg(2000, "Final");
+
+function testavgstr(int $ct, string $msg) {
+	$cpu_before = getrusage();
+	$rd = new XmlRead();
+	$s = file_get_contents("tests/assets_full.xml");
+	
+	for($i = 0; $i < $ct; $i++)
+	{
+		//$s = file_get_contents("tests/assets_full.xml");
+		//$result = $rd->parse($s);
+		$result = $rd->parse($s);
+	}//$emty = new EmptyTest();
+	$cpu_after = getrusage();
+	echo "$msg CPU usage Per iteration of $ct in \u{00B5}s" . PHP_EOL;
+
+	$user = rutime($cpu_after, $cpu_before, "utime") * 1000.0 / $ct;
+	$system = rutime($cpu_after, $cpu_before, "stime")* 1000.0 / $ct;
+	$total = $user + $system;
+
+	echo "   User   " . $user . PHP_EOL;
+	echo "   System " . $system . PHP_EOL;
+	echo "   Total  " . $total . PHP_EOL;
+}
+
+echo "Test parse of " . $testfile1 . PHP_EOL;
+testavgstr(2000, "Parse String");
 
 show_versions();
 
