@@ -3,6 +3,7 @@
 /* include zpp classes, dump info support, and the state_init auto initialize */
 #include "php_wccz.h"
 
+#include "zpp/alloc_new.cpp" // emalloc, efree new and delete
 #include "zpp/base.cpp"
 #include "zpp/state_init.cpp"
 
