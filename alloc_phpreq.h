@@ -75,13 +75,13 @@ class PHPAlloc {
 public:
     void* operator new(size_t size)
     {
-        //zend_printf("new DStack %ld\n",size);
+        //zend_printf("PHPAlloc new\n");
         return emalloc(size);
     }
 
     void operator delete(void* ptr)
     {
-        //zend_printf("delete DStack %lx\n",ptr);
+        //zend_printf("PHPAlloc delete\n");
         efree(ptr);
     }
 };
