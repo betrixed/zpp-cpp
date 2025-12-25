@@ -24,7 +24,12 @@ distribution.
 #ifndef TINYXML2_INCLUDED
 #define TINYXML2_INCLUDED
 
+
+//#define MYOP_NEWCPP
+
+#ifdef MYOP_NEWCPP
 #include <new>
+#endif
 
 #if defined(ANDROID_NDK) || defined(__BORLANDC__) || defined(__QNXNTO__)
 #   include <ctype.h>
@@ -217,8 +222,12 @@ public:
 
     ~DynArray() {
         if ( _mem != _pool ) {
-            efree(_mem);
-            //::delete[] _mem;
+            #ifdef MYOP_NEWCPP
+                ::delete[] _mem;
+            #else
+                efree(_mem);
+            #endif
+            //
         }
     }
 
@@ -306,15 +315,23 @@ private:
         if ( cap > _allocated ) {
             TIXMLASSERT( cap <= SIZE_MAX / 2 / sizeof(T));
             const size_t newAllocated = cap * 2;
-            //T* newMem = new T[newAllocated];
-            T* newMem = (T*) emalloc(sizeof(T) * newAllocated);
+
+            #ifdef MYOP_NEWCPP
+                T* newMem = ::new T[newAllocated];
+            #else
+                T* newMem = (T*) emalloc(sizeof(T) * newAllocated);
+            #endif
             //T* newMem = ::new T[newAllocated];
 
             TIXMLASSERT( newAllocated >= _size );
             memcpy( newMem, _mem, sizeof(T) * _size );	// warning: not using constructors, only works for PODs
             if ( _mem != _pool ) {
-                efree(_mem);
-                //::delete[] _mem;
+                #ifdef MYOP_NEWCPP
+                    ::delete[] _mem;
+                #else
+                    efree(_mem);
+                #endif
+                //
             }
             _mem = newMem;
             _allocated = newAllocated;

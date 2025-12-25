@@ -32,6 +32,8 @@ distribution.
 #   include <cstdarg>
 #endif
 
+
+
 // Handle fallthrough attribute for different compilers
 #ifndef __has_attribute
 #   define __has_attribute(x) 0
@@ -206,7 +208,11 @@ void StrPair::Reset()
 {
     if ( _flags & NEEDS_DELETE ) {
         //delete [] _start;
-        efree(_start);
+        #ifdef MYOP_NEWCPP
+            efree(_start);
+        #else
+            delete[] _start;
+        #endif
     }
     _flags = 0;
     _start = 0;
@@ -220,8 +226,11 @@ void StrPair::SetStr( const char* str, int flags )
     Reset();
     size_t len = strlen( str );
     TIXMLASSERT( _start == 0 );
-    //_start = ::new char[ len+1 ];
+#ifdef MYOP_NEWCPP
+    _start = ::new char[ len+1 ];
+#else
     _start = (char*) emalloc(len+1);
+#endif
     memcpy( _start, str, len+1 );
     _end = _start + len;
     _flags = flags | NEEDS_DELETE;
@@ -2256,8 +2265,12 @@ void XMLDocument::Clear()
     const bool hadError = Error();
 #endif
     ClearError();
-    efree(_charBuffer);
-    //::delete [] _charBuffer;
+    #ifdef MYOP_NEWCPP
+        ::delete [] _charBuffer;
+    #else
+        efree(_charBuffer);
+    #endif
+    
     _charBuffer = 0;
 	_parsingDepth = 0;
 
@@ -2425,8 +2438,12 @@ XMLError XMLDocument::LoadFile( FILE* fp )
     const size_t size = static_cast<size_t>(filelength);
     TIXMLASSERT( _charBuffer == 0 );
 
-    _charBuffer = (char*) emalloc((size+1));
-    //_charBuffer = ::new char[size+1];
+    #ifdef MYOP_NEWCPP
+        _charBuffer = ::new char[size+1];
+    #else
+        _charBuffer = (char*) emalloc((size+1));
+    #endif
+    //
 
     const size_t read = fread( _charBuffer, 1, size, fp );
     if ( read != size ) {
@@ -2483,9 +2500,12 @@ XMLError XMLDocument::Parse( const char* xml, size_t nBytes )
         nBytes = strlen( xml );
     }
     TIXMLASSERT( _charBuffer == 0 );
-
+    #ifdef MYOP_NEWCPP
+    _charBuffer = ::new char[ nBytes+1 ];
+    #else
     _charBuffer = (char*) emalloc(nBytes+1);
-    //_charBuffer = ::new char[ nBytes+1 ];
+    #endif
+    //
 
     memcpy( _charBuffer, xml, nBytes );
     _charBuffer[nBytes] = 0;
