@@ -13,6 +13,10 @@
 #include "base.h"
 
 #ifdef ZPP_BUILD_ALL
+
+
+#include "phpalloc.cpp"
+
 #include "str.cpp"
 
 #include "obj.cpp"

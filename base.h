@@ -22,6 +22,9 @@
 //#define BASE_DEBUG // this will trigger typeid C++ rtti
 #endif
 
+
+#include "phpalloc.h"
+
 #include "str_ptr.h"
 #include "str_rc.h"
 

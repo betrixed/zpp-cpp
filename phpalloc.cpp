@@ -1,13 +1,22 @@
-#ifndef ALLOC_NEW_CPP
-#define ALLOC_NEW_CPP
+#ifndef PHPALLOC_CPP
+#define PHPALLOC_CPP
+
+//#include <cstdlib>
+//#include <print>
+
+#ifndef PHPALLOC_H
+#include "phpalloc.h"
+#endif
+
+#include <cstddef>
 
 extern "C" {
+	
     #include <php.h>
     #include <Zend/zend.h>  
 	#include <Zend/zend_alloc.h>
 }
 
-// must be in global namespace
 #define CONCATENATE(s1, s2) s1##s2
 #define EXPAND_THEN_CONCATENATE(s1, s2) CONCATENATE(s1, s2)
 #define UNIQUE_IDENTIFIER(prefix) EXPAND_THEN_CONCATENATE(prefix, __LINE__)
@@ -19,12 +28,19 @@ struct UNIQUE_IDENTIFIER(namespace_detector_on_line_) { \
 
 //DETECT_NAMESPACE
 
+/* global alloc operators fail to be linked and called by PHP extensions loader */
+
+/*
+
+// must be in global namespace
+
+
 void*
 operator new(std::size_t size) noexcept(false)
 {
-	zend_printf("global op new called, size = %zu\n", size);
+	zend_write("global op new\n", sizeof("global op new\n"));
 	return emalloc(size);
-}
+} 
 
 void 
 operator delete(void* ptr) noexcept
@@ -35,7 +51,7 @@ operator delete(void* ptr) noexcept
 void*
 operator new[](std::size_t size) noexcept(false)
 {
-	zend_printf("global op new[] called, size = %zu\n", size);
+	zend_write("global op new[]\n", sizeof("global op new[]\n"));
 	if (size==0)
 		size++;
 	return emalloc(size);
@@ -44,6 +60,22 @@ operator new[](std::size_t size) noexcept(false)
 void operator delete[](void* ptr) noexcept
 {
    efree(ptr);
+}
+*/
+
+
+void* 
+PHPAlloc::operator new(size_t size)
+{
+    //zend_printf("PHPAlloc new\n");
+    return emalloc(size);
+}
+
+void 
+PHPAlloc::operator delete(void* ptr)
+{
+    //zend_printf("PHPAlloc delete\n");
+    efree(ptr);
 }
 
 
