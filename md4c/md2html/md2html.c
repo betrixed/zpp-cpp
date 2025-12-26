@@ -87,9 +87,9 @@ membuf_fini(struct membuffer* buf)
 static void
 membuf_grow(struct membuffer* buf, size_t new_asize)
 {
-    buf->data = realloc(buf->data, new_asize);
+    buf->data = erealloc(buf->data, new_asize);
     if(buf->data == NULL) {
-        fprintf(stderr, "membuf_grow: realloc() failed.\n");
+        fprintf(stderr, "membuf_grow: erealloc() failed.\n");e
         exit(1);
     }
     buf->asize = new_asize;

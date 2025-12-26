@@ -22,6 +22,8 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
  * IN THE SOFTWARE.
  */
+#ifndef MD4C_C
+#define MD4C_C
 
 #include "md4c.h"
 
@@ -68,8 +70,13 @@
 #define STRINGIZE_(x)       #x
 #define STRINGIZE(x)        STRINGIZE_(x)
 
+#ifndef MAX
 #define MAX(a,b)            ((a) > (b) ? (a) : (b))
+#endif
+
+#ifndef MIN
 #define MIN(a,b)            ((a) < (b) ? (a) : (b))
+#endif
 
 #ifndef TRUE
     #define TRUE            1
@@ -219,7 +226,7 @@ struct MD_CTX_tag {
 #define BRACKET_OPENERS                 (ctx->opener_stacks[14])
 #define DOLLAR_OPENERS                  (ctx->opener_stacks[15])
 
-    /* Stack of dummies which need to call GFREE() for pointers stored in them.
+    /* Stack of dummies which need to call MDH_FREE() for pointers stored in them.
      * These are constructed during inline parsing and freed after all the block
      * is processed (i.e. all callbacks referring those strings are called). */
     MD_MARKSTACK ptr_stack;
@@ -304,33 +311,13 @@ struct MD_VERBATIMLINE_tag {
     OFF indent;
 };
 
-
-/*****************
- ***  Helpers  ***
- *****************/
+#ifndef CH_MACRO_H
+#include "ch_macro.h"
+#endif
 
 /* Character accessors. */
 #define CH(off)                 (ctx->text[(off)])
 #define STR(off)                (ctx->text + (off))
-
-/* Character classification.
- * Note we assume ASCII compatibility of code points < 128 here. */
-#define ISIN_(ch, ch_min, ch_max)       ((ch_min) <= (unsigned)(ch) && (unsigned)(ch) <= (ch_max))
-#define ISANYOF_(ch, palette)           ((ch) != _T('\0')  &&  md_strchr((palette), (ch)) != NULL)
-#define ISANYOF2_(ch, ch1, ch2)         ((ch) == (ch1) || (ch) == (ch2))
-#define ISANYOF3_(ch, ch1, ch2, ch3)    ((ch) == (ch1) || (ch) == (ch2) || (ch) == (ch3))
-#define ISASCII_(ch)                    ((unsigned)(ch) <= 127)
-#define ISBLANK_(ch)                    (ISANYOF2_((ch), _T(' '), _T('\t')))
-#define ISNEWLINE_(ch)                  (ISANYOF2_((ch), _T('\r'), _T('\n')))
-#define ISWHITESPACE_(ch)               (ISBLANK_(ch) || ISANYOF2_((ch), _T('\v'), _T('\f')))
-#define ISCNTRL_(ch)                    ((unsigned)(ch) <= 31 || (unsigned)(ch) == 127)
-#define ISPUNCT_(ch)                    (ISIN_(ch, 33, 47) || ISIN_(ch, 58, 64) || ISIN_(ch, 91, 96) || ISIN_(ch, 123, 126))
-#define ISUPPER_(ch)                    (ISIN_(ch, _T('A'), _T('Z')))
-#define ISLOWER_(ch)                    (ISIN_(ch, _T('a'), _T('z')))
-#define ISALPHA_(ch)                    (ISUPPER_(ch) || ISLOWER_(ch))
-#define ISDIGIT_(ch)                    (ISIN_(ch, _T('0'), _T('9')))
-#define ISXDIGIT_(ch)                   (ISDIGIT_(ch) || ISIN_(ch, _T('A'), _T('F')) || ISIN_(ch, _T('a'), _T('f')))
-#define ISALNUM_(ch)                    (ISALPHA_(ch) || ISDIGIT_(ch))
 
 #define ISANYOF(off, palette)           ISANYOF_(CH(off), (palette))
 #define ISANYOF2(off, ch1, ch2)         ISANYOF2_(CH(off), (ch1), (ch2))
@@ -347,7 +334,6 @@ struct MD_VERBATIMLINE_tag {
 #define ISDIGIT(off)                    ISDIGIT_(CH(off))
 #define ISXDIGIT(off)                   ISXDIGIT_(CH(off))
 #define ISALNUM(off)                    ISALNUM_(CH(off))
-
 
 #if defined MD4C_USE_UTF16
     #define md_strchr wcschr
@@ -426,9 +412,9 @@ md_text_with_null_replacement(MD_CTX* ctx, MD_TEXTTYPE type, const CHAR* str, SZ
             CHAR* new_buffer;                                               \
             SZ new_size = ((sz) + (sz) / 2 + 128) & ~127;                   \
                                                                             \
-            new_buffer = realloc(ctx->buffer, new_size);                    \
+            new_buffer = (CHAR*)  MDH_REALLOC(ctx->buffer, new_size);                    \
             if(new_buffer == NULL) {                                        \
-                MD_LOG("realloc() failed.");                                \
+                MD_LOG("MDH_REALLOC() failed.");                                \
                 ret = -1;                                                   \
                 goto abort;                                                 \
             }                                                               \
@@ -1032,9 +1018,9 @@ md_merge_lines_alloc(MD_CTX* ctx, OFF beg, OFF end, const MD_LINE* lines, MD_SIZ
 {
     CHAR* buffer;
 
-    buffer = (CHAR*) GALLOC(sizeof(CHAR) * (end - beg));
+    buffer = (CHAR*) MDH_ALLOC(sizeof(CHAR) * (end - beg));
     if(buffer == NULL) {
-        MD_LOG("GALLOC() failed.");
+        MD_LOG("MDH_ALLOC() failed.");
         return -1;
     }
 
@@ -1434,18 +1420,18 @@ md_build_attr_append_substr(MD_CTX* ctx, MD_ATTRIBUTE_BUILD* build,
         build->substr_alloc = (build->substr_alloc > 0
                 ? build->substr_alloc + build->substr_alloc / 2
                 : 8);
-        new_substr_types = (MD_TEXTTYPE*) realloc(build->substr_types,
+        new_substr_types = (MD_TEXTTYPE*) MDH_REALLOC(build->substr_types,
                                     build->substr_alloc * sizeof(MD_TEXTTYPE));
         if(new_substr_types == NULL) {
-            MD_LOG("realloc() failed.");
+            MD_LOG("MDH_REALLOC() failed.");
             return -1;
         }
         /* Note +1 to reserve space for final offset (== raw_size). */
-        new_substr_offsets = (OFF*) realloc(build->substr_offsets,
+        new_substr_offsets = (OFF*) MDH_REALLOC(build->substr_offsets,
                                     (build->substr_alloc+1) * sizeof(OFF));
         if(new_substr_offsets == NULL) {
-            MD_LOG("realloc() failed.");
-            GFREE(new_substr_types);
+            MD_LOG("MDH_REALLOC() failed.");
+            MDH_FREE(new_substr_types);
             return -1;
         }
 
@@ -1465,9 +1451,9 @@ md_free_attribute(MD_CTX* ctx, MD_ATTRIBUTE_BUILD* build)
     MD_UNUSED(ctx);
 
     if(build->substr_alloc > 0) {
-        GFREE(build->text);
-        GFREE(build->substr_types);
-        GFREE(build->substr_offsets);
+        MDH_FREE(build->text);
+        MDH_FREE(build->substr_types);
+        MDH_FREE(build->substr_offsets);
     }
 }
 
@@ -1482,7 +1468,7 @@ md_build_attribute(MD_CTX* ctx, const CHAR* raw_text, SZ raw_size,
     memset(build, 0, sizeof(MD_ATTRIBUTE_BUILD));
 
     /* If there is no backslash and no ampersand, build trivial attribute
-     * without any GALLOC(). */
+     * without any MDH_ALLOC(). */
     is_trivial = TRUE;
     for(raw_off = 0; raw_off < raw_size; raw_off++) {
         if(ISANYOF3_(raw_text[raw_off], _T('\\'), _T('&'), _T('\0'))) {
@@ -1502,9 +1488,9 @@ md_build_attribute(MD_CTX* ctx, const CHAR* raw_text, SZ raw_size,
         build->trivial_offsets[1] = raw_size;
         off = raw_size;
     } else {
-        build->text = (CHAR*) GALLOC(raw_size * sizeof(CHAR));
+        build->text = (CHAR*) MDH_ALLOC(raw_size * sizeof(CHAR));
         if(build->text == NULL) {
-            MD_LOG("GALLOC() failed.");
+            MD_LOG("MDH_ALLOC() failed.");
             goto abort;
         }
 
@@ -1746,9 +1732,9 @@ md_build_ref_def_hashtable(MD_CTX* ctx)
         return 0;
 
     ctx->ref_def_hashtable_size = (ctx->n_ref_defs * 5) / 4;
-    ctx->ref_def_hashtable = GALLOC(ctx->ref_def_hashtable_size * sizeof(void*));
+    ctx->ref_def_hashtable = (void**) MDH_ALLOC(ctx->ref_def_hashtable_size * sizeof(void*));
     if(ctx->ref_def_hashtable == NULL) {
-        MD_LOG("GALLOC() failed.");
+        MD_LOG("MDH_ALLOC() failed.");
         goto abort;
     }
     memset(ctx->ref_def_hashtable, 0, ctx->ref_def_hashtable_size * sizeof(void*));
@@ -1785,9 +1771,9 @@ md_build_ref_def_hashtable(MD_CTX* ctx)
             }
 
             /* Make the bucket complex, i.e. able to hold more ref. defs. */
-            list = (MD_REF_DEF_LIST*) GALLOC(sizeof(MD_REF_DEF_LIST) + 2 * sizeof(MD_REF_DEF*));
+            list = (MD_REF_DEF_LIST*) MDH_ALLOC(sizeof(MD_REF_DEF_LIST) + 2 * sizeof(MD_REF_DEF*));
             if(list == NULL) {
-                MD_LOG("GALLOC() failed.");
+                MD_LOG("MDH_ALLOC() failed.");
                 goto abort;
             }
             list->ref_defs[0] = old_def;
@@ -1807,10 +1793,10 @@ md_build_ref_def_hashtable(MD_CTX* ctx)
         list = (MD_REF_DEF_LIST*) bucket;
         if(list->n_ref_defs >= list->alloc_ref_defs) {
             int alloc_ref_defs = list->alloc_ref_defs + list->alloc_ref_defs / 2;
-            MD_REF_DEF_LIST* list_tmp = (MD_REF_DEF_LIST*) realloc(list,
+            MD_REF_DEF_LIST* list_tmp = (MD_REF_DEF_LIST*) MDH_REALLOC(list,
                         sizeof(MD_REF_DEF_LIST) + alloc_ref_defs * sizeof(MD_REF_DEF*));
             if(list_tmp == NULL) {
-                MD_LOG("realloc() failed.");
+                MD_LOG("MDH_REALLOC() failed.");
                 goto abort;
             }
             list = list_tmp;
@@ -1863,10 +1849,10 @@ md_free_ref_def_hashtable(MD_CTX* ctx)
                 continue;
             if(ctx->ref_defs <= (MD_REF_DEF*) bucket  &&  (MD_REF_DEF*) bucket < ctx->ref_defs + ctx->n_ref_defs)
                 continue;
-            GFREE(bucket);
+            MDH_FREE(bucket);
         }
 
-        GFREE(ctx->ref_def_hashtable);
+        MDH_FREE(ctx->ref_def_hashtable);
     }
 }
 
@@ -2232,9 +2218,9 @@ md_is_link_reference_definition(MD_CTX* ctx, const MD_LINE* lines, MD_SIZE n_lin
         ctx->alloc_ref_defs = (ctx->alloc_ref_defs > 0
                 ? ctx->alloc_ref_defs + ctx->alloc_ref_defs / 2
                 : 16);
-        new_defs = (MD_REF_DEF*) realloc(ctx->ref_defs, ctx->alloc_ref_defs * sizeof(MD_REF_DEF));
+        new_defs = (MD_REF_DEF*) MDH_REALLOC(ctx->ref_defs, ctx->alloc_ref_defs * sizeof(MD_REF_DEF));
         if(new_defs == NULL) {
-            MD_LOG("realloc() failed.");
+            MD_LOG("MDH_REALLOC() failed.");
             goto abort;
         }
 
@@ -2273,9 +2259,9 @@ md_is_link_reference_definition(MD_CTX* ctx, const MD_LINE* lines, MD_SIZE n_lin
 abort:
     /* Failure. */
     if(def != NULL  &&  def->label_needs_free)
-        GFREE(def->label);
+        MDH_FREE(def->label);
     if(def != NULL  &&  def->title_needs_free)
-        GFREE(def->title);
+        MDH_FREE(def->title);
     return ret;
 }
 
@@ -2321,7 +2307,7 @@ md_is_link_reference(MD_CTX* ctx, const MD_LINE* lines, MD_SIZE n_lines,
     }
 
     if(is_multiline)
-        GFREE(label);
+        MDH_FREE(label);
 
     if(def != NULL) {
         /* See https://github.com/mity/md4c/issues/238 */
@@ -2444,12 +2430,12 @@ md_free_ref_defs(MD_CTX* ctx)
         MD_REF_DEF* def = &ctx->ref_defs[i];
 
         if(def->label_needs_free)
-            GFREE(def->label);
+            MDH_FREE(def->label);
         if(def->title_needs_free)
-            GFREE(def->title);
+            MDH_FREE(def->title);
     }
 
-    GFREE(ctx->ref_defs);
+    MDH_FREE(ctx->ref_defs);
 }
 
 
@@ -2604,9 +2590,9 @@ md_add_mark(MD_CTX* ctx)
         ctx->alloc_marks = (ctx->alloc_marks > 0
                 ? ctx->alloc_marks + ctx->alloc_marks / 2
                 : 64);
-        new_marks = realloc(ctx->marks, ctx->alloc_marks * sizeof(MD_MARK));
+        new_marks = (MD_MARK*) MDH_REALLOC(ctx->marks, ctx->alloc_marks * sizeof(MD_MARK));
         if(new_marks == NULL) {
-            MD_LOG("realloc() failed.");
+            MD_LOG("MDH_REALLOC() failed.");
             return NULL;
         }
 
@@ -3576,7 +3562,7 @@ md_resolve_links(MD_CTX* ctx, const MD_LINE* lines, MD_SIZE n_lines)
                             if(ctx->marks[mark->next].beg >= inline_link_end) {
                                 /* Cancel the link status. */
                                 if(attr.title_needs_free)
-                                    GFREE(attr.title);
+                                    MDH_FREE(attr.title);
                                 is_link = FALSE;
                                 break;
                             }
@@ -4352,7 +4338,7 @@ md_process_inlines(MD_CTX* ctx, const MD_LINE* lines, MD_SIZE n_lines)
                     MD_CHECK(md_enter_leave_span_a(ctx, (mark->ch != ']'),
                                 (opener->ch == '!' ? MD_SPAN_IMG : MD_SPAN_A),
                                 STR(dest_mark->beg), dest_mark->end - dest_mark->beg, FALSE,
-                                md_mark_get_ptr(ctx, (int)(title_mark - ctx->marks)),
+                    (const MD_CHAR*) md_mark_get_ptr(ctx, (int)(title_mark - ctx->marks)),
 								title_mark->prev));
 
                     /* link/image closer may span multiple lines. */
@@ -4571,9 +4557,9 @@ md_process_table_row(MD_CTX* ctx, MD_BLOCKTYPE cell_type, OFF beg, OFF end,
     /* We have to remember the cell boundaries in local buffer because
      * ctx->marks[] shall be reused during cell contents processing. */
     n = ctx->n_table_cell_boundaries + 2;
-    pipe_offs = (OFF*) GALLOC(n * sizeof(OFF));
+    pipe_offs = (OFF*) MDH_ALLOC(n * sizeof(OFF));
     if(pipe_offs == NULL) {
-        MD_LOG("GALLOC() failed.");
+        MD_LOG("MDH_ALLOC() failed.");
         ret = -1;
         goto abort;
     }
@@ -4599,7 +4585,7 @@ md_process_table_row(MD_CTX* ctx, MD_BLOCKTYPE cell_type, OFF beg, OFF end,
     MD_LEAVE_BLOCK(MD_BLOCK_TR, NULL);
 
 abort:
-    GFREE(pipe_offs);
+    MDH_FREE(pipe_offs);
 
     ctx->table_cell_boundaries_head = -1;
     ctx->table_cell_boundaries_tail = -1;
@@ -4618,9 +4604,9 @@ md_process_table_block_contents(MD_CTX* ctx, int col_count, const MD_LINE* lines
      * with the underlines. */
     MD_ASSERT(n_lines >= 2);
 
-    align = GALLOC(col_count * sizeof(MD_ALIGN));
+    align = (MD_ALIGN*) MDH_ALLOC(col_count * sizeof(MD_ALIGN));
     if(align == NULL) {
-        MD_LOG("GALLOC() failed.");
+        MD_LOG("MDH_ALLOC() failed.");
         ret = -1;
         goto abort;
     }
@@ -4642,7 +4628,7 @@ md_process_table_block_contents(MD_CTX* ctx, int col_count, const MD_LINE* lines
     }
 
 abort:
-    GFREE(align);
+    MDH_FREE(align);
     return ret;
 }
 
@@ -4699,7 +4685,7 @@ md_process_normal_block_contents(MD_CTX* ctx, const MD_LINE* lines, MD_SIZE n_li
 abort:
     /* Free any temporary memory blocks stored within some dummy marks. */
     for(i = ctx->ptr_stack.top; i >= 0; i = ctx->marks[i].next)
-        GFREE(md_mark_get_ptr(ctx, i));
+        MDH_FREE(md_mark_get_ptr(ctx, i));
     ctx->ptr_stack.top = -1;
 
     return ret;
@@ -4987,9 +4973,9 @@ md_push_block_bytes(MD_CTX* ctx, int n_bytes)
         ctx->alloc_block_bytes = (ctx->alloc_block_bytes > 0
                 ? ctx->alloc_block_bytes + ctx->alloc_block_bytes / 2
                 : 512);
-        new_block_bytes = realloc(ctx->block_bytes, ctx->alloc_block_bytes);
+        new_block_bytes = MDH_REALLOC(ctx->block_bytes, ctx->alloc_block_bytes);
         if(new_block_bytes == NULL) {
-            MD_LOG("realloc() failed.");
+            MD_LOG("MDH_REALLOC() failed.");
             return NULL;
         }
 
@@ -5635,9 +5621,9 @@ md_push_container(MD_CTX* ctx, const MD_CONTAINER* container)
         ctx->alloc_containers = (ctx->alloc_containers > 0
                 ? ctx->alloc_containers + ctx->alloc_containers / 2
                 : 16);
-        new_containers = realloc(ctx->containers, ctx->alloc_containers * sizeof(MD_CONTAINER));
+        new_containers = (MD_CONTAINER*)MDH_REALLOC(ctx->containers, ctx->alloc_containers * sizeof(MD_CONTAINER));
         if(new_containers == NULL) {
-            MD_LOG("realloc() failed.");
+            MD_LOG("MDH_REALLOC() failed.");
             return -1;
         }
 
@@ -6483,10 +6469,12 @@ md_parse(const MD_CHAR* text, MD_SIZE size, const MD_PARSER* parser, void* userd
     /* Clean-up. */
     md_free_ref_defs(&ctx);
     md_free_ref_def_hashtable(&ctx);
-    GFREE(ctx.buffer);
-    GFREE(ctx.marks);
-    GFREE(ctx.block_bytes);
-    GFREE(ctx.containers);
+    MDH_FREE(ctx.buffer);
+    MDH_FREE(ctx.marks);
+    MDH_FREE(ctx.block_bytes);
+    MDH_FREE(ctx.containers);
 
     return ret;
 }
+
+#endif

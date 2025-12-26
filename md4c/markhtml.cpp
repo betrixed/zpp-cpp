@@ -7,8 +7,15 @@
 #endif
 
 
-#include "src/md4c-html.c"
+
+// order of c files important
+
+
+#include "src/md4c.c"
 #include "src/entity.c"
+#include "src/md4c-html.c"
+
+
 
 #ifndef MARKHTML_ARGINFO
 #define MARKHTML_ARGINFO

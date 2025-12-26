@@ -64,10 +64,9 @@ struct MD_HTML_tag {
  ***  HTML rendering helper functions  ***
  *****************************************/
 
-#define ISDIGIT(ch)     ('0' <= (ch) && (ch) <= '9')
-#define ISLOWER(ch)     ('a' <= (ch) && (ch) <= 'z')
-#define ISUPPER(ch)     ('A' <= (ch) && (ch) <= 'Z')
-#define ISALNUM(ch)     (ISLOWER(ch) || ISUPPER(ch) || ISDIGIT(ch))
+#ifndef CH_MACRO_H
+#include "ch_macro.h"
+#endif
 
 
 static inline void
@@ -522,6 +521,10 @@ debug_log_callback(const char* msg, void* userdata)
         fprintf(stderr, "MD4C: %s\n", msg);
 }
 
+#ifndef CH_MACRO_H
+#include "ch_macro.h"
+#endif
+
 int
 md_html(const MD_CHAR* input, MD_SIZE input_size,
         void (*process_output)(const MD_CHAR*, MD_SIZE, void*),
@@ -549,7 +552,7 @@ md_html(const MD_CHAR* input, MD_SIZE input_size,
         if(strchr("\"&<>", ch) != NULL)
             render.escape_map[i] |= NEED_HTML_ESC_FLAG;
 
-        if(!ISALNUM(ch)  &&  strchr("~-_.+!*(),%#@?=;:/,+$", ch) == NULL)
+        if(!ISALNUM_(ch)  &&  strchr("~-_.+!*(),%#@?=;:/,+$", ch) == NULL)
             render.escape_map[i] |= NEED_URL_ESC_FLAG;
     }
 

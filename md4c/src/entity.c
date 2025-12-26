@@ -2177,7 +2177,7 @@ entity_lookup(const char* name, size_t name_size)
 {
     ENTITY_KEY key = { name, name_size };
 
-    return bsearch(&key,
+    return (const ENTITY*) bsearch(&key,
                    ENTITY_MAP,
                    sizeof(ENTITY_MAP) / sizeof(ENTITY_MAP[0]),
                    sizeof(ENTITY),
