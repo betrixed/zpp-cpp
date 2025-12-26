@@ -3,13 +3,24 @@
 
 #include <new>
 
-/* This completedly fails to link for the PHP extension loader */
-/*
-extern void* operator new(std::size_t size) noexcept(false);
-extern void  operator delete(void* ptr) noexcept;
-extern void* operator new[](std::size_t size) noexcept(false);
-extern void  operator delete[](void* ptr) noexcept;
-*/
+extern "C" {
+    
+    /* #include <php.h>
+    #include <Zend/zend.h>  
+    #include <Zend/zend_alloc.h>
+
+    */
+
+    /** Somewhere in PHP headers */
+    /** is found most the awful use of C-Macro definitions */
+
+    #ifdef _emalloc
+    #undef _emalloc
+    #endif
+
+    extern void* _emalloc(size_t);
+    extern void  _efree(void* ptr);
+}
 
 struct PHPAlloc {
 public:

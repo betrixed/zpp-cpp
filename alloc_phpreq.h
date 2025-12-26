@@ -3,8 +3,6 @@
 
 extern "C" {
     #include <php.h>
-    #include <Zend/zend.h>  
-	#include <Zend/zend_alloc.h>
 }
 /**
  *  Allocator for C++ STL that uses PHP request memory allocations, emalloc and efree.

@@ -16,7 +16,6 @@ extern "C" {
     #include <Zend/zend_API.h>
 	#include <zend_types.h>
 	#include <Zend/zend_exceptions.h>
-    #include <Zend/zend_alloc.h>
     #include <ext/json/php_json.h>
 	#include <ext/standard/file.h>
 	#include <ext/standard/php_array.h>

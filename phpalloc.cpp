@@ -10,12 +10,7 @@
 
 #include <cstddef>
 
-extern "C" {
-	
-    #include <php.h>
-    #include <Zend/zend.h>  
-	#include <Zend/zend_alloc.h>
-}
+
 
 #define CONCATENATE(s1, s2) s1##s2
 #define EXPAND_THEN_CONCATENATE(s1, s2) CONCATENATE(s1, s2)
