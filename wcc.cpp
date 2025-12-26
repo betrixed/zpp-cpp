@@ -56,6 +56,7 @@ extern "C" {
 //core wcc
 #include "zpp/base.cpp"
 #include "zpp/show_zpp.cpp"
+#include "md4c/markhtml.cpp"
 
 #include "wcc/str8.cpp"
 #include "wcc/strfns.cpp"
@@ -225,6 +226,9 @@ PHP_MINIT_FUNCTION(wcc)
 	PHP_MINIT(Wcc_XmlRead_reg)(INIT_FUNC_ARGS_PASSTHRU);
 #	endif
 
+#  ifdef MARKHTML_CPP
+	PHP_MINIT(Wcc_MarkToHtml_reg)(INIT_FUNC_ARGS_PASSTHRU);
+#  endif
 
 #ifdef WCC_SERVICES_CPP
 PHP_MINIT(wc_services_md)(INIT_FUNC_ARGS_PASSTHRU);
