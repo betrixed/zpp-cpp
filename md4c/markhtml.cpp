@@ -8,7 +8,7 @@
 
 
 #include "src/md4c-html.c"
-
+#include "src/entity.c"
 
 #ifndef MARKHTML_ARGINFO
 #define MARKHTML_ARGINFO
