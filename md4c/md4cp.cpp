@@ -22,10 +22,10 @@
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
  * IN THE SOFTWARE.
  */
-#ifndef MD4C_C
-#define MD4C_C
+#ifndef MD4CP_C
+#define MD4CP_C
 
-#include "md4c.h"
+#include "md4cp.h"
 
 #include <limits.h>
 #include <stdint.h>
@@ -1304,243 +1304,219 @@ md_is_html_any(MD_CTX* ctx, const MD_LINE* lines, MD_SIZE n_lines, OFF beg, OFF 
  ***  Recognizing Entity  ***
  ****************************/
 
-static int
-md_is_hex_entity_contents(MD_CTX* ctx, const CHAR* text, OFF beg, OFF max_end, OFF* p_end)
+// return number of valid hexadecimal digits, 1 to 6
+static bool
+md_is_hex_entity_contents(const CHAR* text, size_t slen, size_t &plen)
 {
-    OFF off = beg;
-    MD_UNUSED(ctx);
 
-    while(off < max_end  &&  ISXDIGIT_(text[off])  &&  off - beg <= 8)
-        off++;
+    size_t ct = 0;
 
-    if(1 <= off - beg  &&  off - beg <= 6) {
-        *p_end = off;
-        return TRUE;
+    while(ct < slen  &&  ISXDIGIT_(*text)  &&  ct <= 8)
+    {
+        ct++;
+        text++;
+    }
+    if(1 <= ct &&  ct <= 6) {
+        plen = ct;
+        return true;
     } else {
-        return FALSE;
+        return false;
+    }
+}
+// return number of valid hexadecimal digits, 1 to 7
+static bool
+md_is_dec_entity_contents(const CHAR* text, size_t slen, size_t &plen)
+{
+     size_t ct = 0;
+
+    // allow for overrrun
+    while(ct < slen  &&  ISDIGIT_(*text)  &&  ct <= 8)
+    {
+        text++;
+        ct++;
+    }
+
+    if(1 <= ct  &&  ct <= 7) {
+        plen = ct;
+        return true;
+    } else {
+        return false;
     }
 }
 
-static int
-md_is_dec_entity_contents(MD_CTX* ctx, const CHAR* text, OFF beg, OFF max_end, OFF* p_end)
+// 2 to 48 alpha-alphanum* 
+static bool
+md_is_named_entity_contents(const CHAR* text, size_t slen, size_t &plen)
 {
-    OFF off = beg;
-    MD_UNUSED(ctx);
+    size_t ct = 0;
 
-    while(off < max_end  &&  ISDIGIT_(text[off])  &&  off - beg <= 8)
-        off++;
-
-    if(1 <= off - beg  &&  off - beg <= 7) {
-        *p_end = off;
-        return TRUE;
-    } else {
-        return FALSE;
+    if(ct < slen  &&  ISALPHA_(*text) )
+    {
+        text++;
+        ct++;
     }
-}
-
-static int
-md_is_named_entity_contents(MD_CTX* ctx, const CHAR* text, OFF beg, OFF max_end, OFF* p_end)
-{
-    OFF off = beg;
-    MD_UNUSED(ctx);
-
-    if(off < max_end  &&  ISALPHA_(text[off]))
-        off++;
     else
-        return FALSE;
+        return false;
 
-    while(off < max_end  &&  ISALNUM_(text[off])  &&  off - beg <= 48)
-        off++;
+    while( (ct < slen)  &&  ISALNUM_(*text)  &&  ct <= 48)
+    {
+        text++;
+        ct++;
+    }
 
-    if(2 <= off - beg  &&  off - beg <= 48) {
-        *p_end = off;
-        return TRUE;
+    if(2 <= ct  &&  ct <= 48) {
+        plen = ct;
+        return true;
     } else {
-        return FALSE;
+        return false;
     }
 }
 
-static int
-md_is_entity_str(MD_CTX* ctx, const CHAR* text, OFF beg, OFF max_end, OFF* p_end)
+// if is entity, starting with text, return its length.
+static bool
+md_is_entity_str(const CHAR* text, size_t slen, size_t& plen)
 {
-    int is_contents;
-    OFF off = beg;
+    bool is_contents = false;
+    size_t ct = 0;
 
-    MD_ASSERT(text[off] == _T('&'));
-    off++;
-
-    if(off+2 < max_end  &&  text[off] == _T('#')  &&  (text[off+1] == _T('x') || text[off+1] == _T('X')))
-        is_contents = md_is_hex_entity_contents(ctx, text, off+2, max_end, &off);
-    else if(off+1 < max_end  &&  text[off] == _T('#'))
-        is_contents = md_is_dec_entity_contents(ctx, text, off+1, max_end, &off);
-    else
-        is_contents = md_is_named_entity_contents(ctx, text, off, max_end, &off);
-
-    if(is_contents  &&  off < max_end  &&  text[off] == _T(';')) {
-        *p_end = off+1;
-        return TRUE;
-    } else {
-        return FALSE;
+    if ((ct >= slen) || (*text != '&'))
+    {
+        return false;
     }
+
+    ct++;
+    text++;
+    // # ?
+    if ((ct < slen) && (*text == '#'))
+    {
+        ct++;
+        text++;
+        // #x OR #X
+        if (ct == slen){
+            return false;
+        }
+        if (*text == 'x' || *text == 'X')
+        {
+            ct++;
+            text++;
+            if (ct == slen) {
+                return false;
+            }
+            is_contents =  md_is_hex_entity_contents(text, slen-ct, plen);
+        }
+        else {
+            is_contents =  md_is_dec_entity_contents(text, slen-ct, plen);
+        }
+    }
+    else {
+        is_contents = md_is_named_entity_contents(text, slen-ct, plen);
+    }
+
+    if(is_contents)
+    {
+        ct += plen;
+        text += plen;
+        if ( (ct < slen) && (*text == ';'))
+        {
+            plen = ct;
+            return true;
+        }
+    } 
+    return false;
 }
 
 static inline int
-md_is_entity(MD_CTX* ctx, OFF beg, OFF max_end, OFF* p_end)
+md_is_entity(MD_CTX* ctx, OFF beg, OFF max_end, size_t& p_end)
 {
-    return md_is_entity_str(ctx, ctx->text, beg, max_end, p_end);
+    return md_is_entity_str(ctx->text+beg, max_end, p_end);
 }
 
 
 /******************************
  ***  Attribute Management  ***
  ******************************/
-
-typedef struct MD_ATTRIBUTE_BUILD_tag MD_ATTRIBUTE_BUILD;
-struct MD_ATTRIBUTE_BUILD_tag {
-    CHAR* text;
-    MD_TEXTTYPE* substr_types;
-    OFF* substr_offsets;
+/*
+struct MD_ATTRIBUTE_BUILD {
+    MD_ATTRIBUTE& attr_;
     int substr_count;
     int substr_alloc;
-    MD_TEXTTYPE trivial_types[1];
-    OFF trivial_offsets[2];
-};
 
+    MD_ATTRIBUTE_BUILD(MD_ATTRIBUTE& ref) 
+        : attr_(ref), substr_count(0), substr_alloc(0)
+    {}
+
+
+
+    int append_substr(MD_CTX* ctx, MD_TEXTTYPE type, OFF off);
+    int build(MD_CTX* ctx, const CHAR* raw_text, SZ raw_size, unsigned flags);
+};
+*/
 
 #define MD_BUILD_ATTR_NO_ESCAPES    0x0001
 
-static int
-md_build_attr_append_substr(MD_CTX* ctx, MD_ATTRIBUTE_BUILD* build,
-                            MD_TEXTTYPE type, OFF off)
+
+// return a valid string if a seg found, with type, plen (source consumed)
+// caller must repeat call with src + plen, until all used up
+str_rc 
+walk_attribute(const CHAR* src, size_t slen, bool escapes, int& ptype, size_t& plen)
 {
-    if(build->substr_count >= build->substr_alloc) {
-        MD_TEXTTYPE* new_substr_types;
-        OFF* new_substr_offsets;
+    const CHAR* raw_text = src;
+    size_t      ct = 0;
+    str_buf     buf;
+    str_rc      result;
 
-        build->substr_alloc = (build->substr_alloc > 0
-                ? build->substr_alloc + build->substr_alloc / 2
-                : 8);
-        new_substr_types = (MD_TEXTTYPE*) MDH_REALLOC(build->substr_types,
-                                    build->substr_alloc * sizeof(MD_TEXTTYPE));
-        if(new_substr_types == NULL) {
-            MD_LOG("MDH_REALLOC() failed.");
-            return -1;
-        }
-        /* Note +1 to reserve space for final offset (== raw_size). */
-        new_substr_offsets = (OFF*) MDH_REALLOC(build->substr_offsets,
-                                    (build->substr_alloc+1) * sizeof(OFF));
-        if(new_substr_offsets == NULL) {
-            MD_LOG("MDH_REALLOC() failed.");
-            MDH_FREE(new_substr_types);
-            return -1;
-        }
-
-        build->substr_types = new_substr_types;
-        build->substr_offsets = new_substr_offsets;
-    }
-
-    build->substr_types[build->substr_count] = type;
-    build->substr_offsets[build->substr_count] = off;
-    build->substr_count++;
-    return 0;
-}
-
-static void
-md_free_attribute(MD_CTX* ctx, MD_ATTRIBUTE_BUILD* build)
-{
-    MD_UNUSED(ctx);
-
-    if(build->substr_alloc > 0) {
-        MDH_FREE(build->text);
-        MDH_FREE(build->substr_types);
-        MDH_FREE(build->substr_offsets);
-    }
-}
-
-static int
-md_build_attribute(MD_CTX* ctx, const CHAR* raw_text, SZ raw_size,
-                   unsigned flags, MD_ATTRIBUTE* attr, MD_ATTRIBUTE_BUILD* build)
-{
-    OFF raw_off, off;
-    int is_trivial;
-    int ret = 0;
-
-    memset(build, 0, sizeof(MD_ATTRIBUTE_BUILD));
-
-    /* If there is no backslash and no ampersand, build trivial attribute
-     * without any MDH_ALLOC(). */
-    is_trivial = TRUE;
-    for(raw_off = 0; raw_off < raw_size; raw_off++) {
-        if(ISANYOF3_(raw_text[raw_off], _T('\\'), _T('&'), _T('\0'))) {
-            is_trivial = FALSE;
-            break;
-        }
-    }
-
-    if(is_trivial) {
-        build->text = (CHAR*) (raw_size ? raw_text : NULL);
-        build->substr_types = build->trivial_types;
-        build->substr_offsets = build->trivial_offsets;
-        build->substr_count = 1;
-        build->substr_alloc = 0;
-        build->trivial_types[0] = MD_TEXT_NORMAL;
-        build->trivial_offsets[0] = 0;
-        build->trivial_offsets[1] = raw_size;
-        off = raw_size;
-    } else {
-        build->text = (CHAR*) MDH_ALLOC(raw_size * sizeof(CHAR));
-        if(build->text == NULL) {
-            MD_LOG("MDH_ALLOC() failed.");
-            goto abort;
+    ptype = MD_TEXT_NORMAL;
+    while(ct < slen) 
+    {
+        if(*raw_text == '\0') {
+            if (ct == 0) {
+                plen = 1;
+                // signal string all by itself.
+                ptype = MD_TEXT_NULLCHAR;
+                buf.append(*raw_text);
+                result = buf.zstr();
+                return result;
+            }
+            else {
+                break;
+            }
         }
 
-        raw_off = 0;
-        off = 0;
+        if(*raw_text == '&') {
 
-        while(raw_off < raw_size) {
-            if(raw_text[raw_off] == _T('\0')) {
-                MD_CHECK(md_build_attr_append_substr(ctx, build, MD_TEXT_NULLCHAR, off));
-                memcpy(build->text + off, raw_text + raw_off, 1);
-                off++;
-                raw_off++;
+            if(ct > 0)
+            {
+                break;
+            }
+            size_t extra = 0;
+            if(md_is_entity_str(raw_text+ct, slen-ct, extra)) {
+                ptype = MD_TEXT_ENTITY;
+                plen = ct + extra;
+                buf.append(raw_text,extra);
+                result = buf.zstr();
+                return result;
+            }
+        }
+
+        if(escapes && (*raw_text == '\\') && ((ct+1) < slen)) 
+        {
+            CHAR test = *(raw_text+1);
+            if (ISPUNCT_(test) || ISNEWLINE_(test))
+            {
+                ct++; // forget this
+                raw_text++;
                 continue;
             }
-
-            if(raw_text[raw_off] == _T('&')) {
-                OFF ent_end;
-
-                if(md_is_entity_str(ctx, raw_text, raw_off, raw_size, &ent_end)) {
-                    MD_CHECK(md_build_attr_append_substr(ctx, build, MD_TEXT_ENTITY, off));
-                    memcpy(build->text + off, raw_text + raw_off, ent_end - raw_off);
-                    off += ent_end - raw_off;
-                    raw_off = ent_end;
-                    continue;
-                }
-            }
-
-            if(build->substr_count == 0  ||  build->substr_types[build->substr_count-1] != MD_TEXT_NORMAL)
-                MD_CHECK(md_build_attr_append_substr(ctx, build, MD_TEXT_NORMAL, off));
-
-            if(!(flags & MD_BUILD_ATTR_NO_ESCAPES)  &&
-               raw_text[raw_off] == _T('\\')  &&  raw_off+1 < raw_size  &&
-               (ISPUNCT_(raw_text[raw_off+1]) || ISNEWLINE_(raw_text[raw_off+1])))
-                raw_off++;
-
-            build->text[off++] = raw_text[raw_off++];
         }
-        build->substr_offsets[build->substr_count] = off;
+        ct++;
+        buf.append(*raw_text);
     }
-
-    attr->text = build->text;
-    attr->size = off;
-    attr->substr_offsets = build->substr_offsets;
-    attr->substr_types = build->substr_types;
-    return 0;
-
-abort:
-    md_free_attribute(ctx, build);
-    return -1;
+    plen = ct;
+    ptype = MD_TEXT_NORMAL;
+    result = buf.zstr();
+    return result;
 }
+
 
 
 /*********************************************
@@ -3659,7 +3635,7 @@ md_analyze_entity(MD_CTX* ctx, int mark_index)
 {
     MD_MARK* opener = &ctx->marks[mark_index];
     MD_MARK* closer;
-    OFF off;
+    size_t plen;
 
     /* Cannot be entity if there is no closer as the next mark.
      * (Any other mark between would mean strange character which cannot be
@@ -3674,8 +3650,9 @@ md_analyze_entity(MD_CTX* ctx, int mark_index)
     if(closer->ch != ';')
         return;
 
-    if(md_is_entity(ctx, opener->beg, closer->end, &off)) {
-        MD_ASSERT(off == closer->end);
+    if(md_is_entity(ctx, opener->beg, closer->end, plen)) 
+    {
+        MD_ASSERT(plen == closer->end);
 
         md_resolve_range(ctx, mark_index, mark_index+1);
         opener->end = closer->end;
@@ -4145,24 +4122,23 @@ md_enter_leave_span_a(MD_CTX* ctx, int enter, MD_SPANTYPE type,
                       const CHAR* dest, SZ dest_size, int is_autolink,
                       const CHAR* title, SZ title_size)
 {
-    MD_ATTRIBUTE_BUILD href_build = { 0 };
-    MD_ATTRIBUTE_BUILD title_build = { 0 };
     MD_SPAN_A_DETAIL det;
-    int ret = 0;
 
-    /* Note we here rely on fact that MD_SPAN_A_DETAIL and
-     * MD_SPAN_IMG_DETAIL are binary-compatible. */
-    memset(&det, 0, sizeof(MD_SPAN_A_DETAIL));
-    MD_CHECK(md_build_attribute(ctx, dest, dest_size,
-                    (is_autolink ? MD_BUILD_ATTR_NO_ESCAPES : 0),
-                    &det.href, &href_build));
-    MD_CHECK(md_build_attribute(ctx, title, title_size, 0, &det.title, &title_build));
+    det.href.text_ = str_rc(dest, dest_size);
+    det.href.flags_ = is_autolink ? MD_BUILD_ATTR_NO_ESCAPES : 0;
+
+    if (title && title_size)
+    {
+        det.title.text_ = str_rc(title, title_size);
+    }
+
     det.is_autolink = is_autolink;
+    int ret = 0;
+    // note this macro uses ctx, and sets ret, and uses label abort:
     if(enter)
         MD_ENTER_SPAN(type, &det);
     else
         MD_LEAVE_SPAN(type, &det);
-
 abort:
     return ret;
 }
@@ -4170,13 +4146,11 @@ abort:
 static int
 md_enter_leave_span_wikilink(MD_CTX* ctx, int enter, const CHAR* target, SZ target_size)
 {
-    MD_SPAN_WIKILINK_DETAIL det;
-    MD_ATTRIBUTE_BUILD target_build
     
-    int ret = 0;
+    MD_SPAN_WIKILINK_DETAIL det;
+    det.target.text_ = str_rc(target, target_size);
 
-    memset(&det, 0, sizeof(MD_SPAN_WIKILINK_DETAIL));
-    MD_CHECK(md_build_attribute(ctx, target, target_size, 0, &det.target, &target_build));
+    int ret = 0;
 
     if (enter)
         MD_ENTER_SPAN(MD_SPAN_WIKILINK, &det);
@@ -4749,8 +4723,7 @@ md_process_code_block_contents(MD_CTX* ctx, int is_fenced, const MD_VERBATIMLINE
 }
 
 static int
-md_setup_fenced_code_detail(MD_CTX* ctx, const MD_BLOCK* block, MD_BLOCK_CODE_DETAIL* det,
-                            MD_ATTRIBUTE_BUILD* info_build, MD_ATTRIBUTE_BUILD* lang_build)
+md_setup_fenced_code_detail(MD_CTX* ctx, const MD_BLOCK* block, MD_BLOCK_CODE_DETAIL& code)
 {
     const MD_VERBATIMLINE* fence_line = (const MD_VERBATIMLINE*)(block + 1);
     OFF beg = fence_line->beg;
@@ -4771,35 +4744,33 @@ md_setup_fenced_code_detail(MD_CTX* ctx, const MD_BLOCK* block, MD_BLOCK_CODE_DE
         end--;
 
     /* Build info string attribute. */
-    MD_CHECK(md_build_attribute(ctx, STR(beg), end - beg, 0, &det->info, info_build));
+    code.info.text_ = str_rc(STR(beg), end-beg);
 
     /* Build info string attribute. */
     lang_end = beg;
+
     while(lang_end < end  &&  !ISWHITESPACE(lang_end))
         lang_end++;
-    MD_CHECK(md_build_attribute(ctx, STR(beg), lang_end - beg, 0, &det->lang, lang_build));
 
-    det->fence_char = fence_ch;
+    code.lang.text_ = str_rc(STR(beg), lang_end - beg);
+    code.fence_char = fence_ch;
 
-abort:
     return ret;
 }
 
 static int
 md_process_leaf_block(MD_CTX* ctx, const MD_BLOCK* block)
 {
-    union {
-        MD_BLOCK_H_DETAIL header;
-        MD_BLOCK_CODE_DETAIL code;
-        MD_BLOCK_TABLE_DETAIL table;
-    } det;
-    MD_ATTRIBUTE_BUILD info_build;
-    MD_ATTRIBUTE_BUILD lang_build;
+
+    MD_BLOCK_H_DETAIL header;
+    MD_BLOCK_CODE_DETAIL code;
+    MD_BLOCK_TABLE_DETAIL table;
+
     int is_in_tight_list;
-    int clean_fence_code_detail = FALSE;
+
     int ret = 0;
 
-    memset(&det, 0, sizeof(det));
+    void* detail_ptr = nullptr;
 
     if(ctx->n_containers == 0)
         is_in_tight_list = FALSE;
@@ -4808,22 +4779,23 @@ md_process_leaf_block(MD_CTX* ctx, const MD_BLOCK* block)
 
     switch(block->type) {
         case MD_BLOCK_H:
-            det.header.level = block->data;
+            header.level = block->data;
+            detail_ptr = &header;
             break;
 
         case MD_BLOCK_CODE:
             /* For fenced code block, we may need to set the info string. */
             if(block->data != 0) {
-                memset(&det.code, 0, sizeof(MD_BLOCK_CODE_DETAIL));
-                clean_fence_code_detail = TRUE;
-                MD_CHECK(md_setup_fenced_code_detail(ctx, block, &det.code, &info_build, &lang_build));
+                MD_CHECK(md_setup_fenced_code_detail(ctx, block, code));
             }
+            detail_ptr = &code;
             break;
 
         case MD_BLOCK_TABLE:
-            det.table.col_count = block->data;
-            det.table.head_row_count = 1;
-            det.table.body_row_count = block->n_lines - 2;
+            table.col_count = block->data;
+            table.head_row_count = 1;
+            table.body_row_count = block->n_lines - 2;
+            detail_ptr = &table;
             break;
 
         default:
@@ -4832,7 +4804,7 @@ md_process_leaf_block(MD_CTX* ctx, const MD_BLOCK* block)
     }
 
     if(!is_in_tight_list  ||  block->type != MD_BLOCK_P)
-        MD_ENTER_BLOCK(block->type, (void*) &det);
+        MD_ENTER_BLOCK(block->type, detail_ptr);
 
     /* Process the block contents accordingly to is type. */
     switch(block->type) {
@@ -4862,13 +4834,9 @@ md_process_leaf_block(MD_CTX* ctx, const MD_BLOCK* block)
     }
 
     if(!is_in_tight_list  ||  block->type != MD_BLOCK_P)
-        MD_LEAVE_BLOCK(block->type, (void*) &det);
+        MD_LEAVE_BLOCK(block->type, detail_ptr);
 
 abort:
-    if(clean_fence_code_detail) {
-        md_free_attribute(ctx, &info_build);
-        md_free_attribute(ctx, &lang_build);
-    }
     return ret;
 }
 

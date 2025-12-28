@@ -11,11 +11,9 @@
 // order of c files important
 
 
-#include "src/md4c.c"
+#include "md4cp.cpp"
 #include "src/entity.c"
-#include "src/md4c-html.c"
-
-
+#include "md-html.cpp"
 
 #ifndef MARKHTML_ARGINFO
 #define MARKHTML_ARGINFO
@@ -84,10 +82,20 @@ struct membuffer {
 };
 */
 
-static void  
-md4c_callback(const char* html, size_t hlen, void* userdata)
+MTHInit  MTH;
+
+void 
+MarkToHtml::debug_info(htab_rw info)
 {
-    MarkToHtml* mth = (MarkToHtml*) userdata;
+    info.set(MTH.pflags_s, pflags_);
+    info.set(MTH.rflags_s, rflags_);
+}
+
+
+static void  
+md4c_callback(const MD_CHAR* html, MD_SIZE hlen, obj_ptr userdata)
+{
+    MarkToHtml* mth = (MarkToHtml*) zobj_toc<MarkToHtml>(userdata);
 
     mth->html_append(html, hlen);
 }   
@@ -108,7 +116,7 @@ MarkToHtml::text(str_ptr markdown)
     htmlbuf_.reset();
 
     int ret = md_html(input_.data(), input_.size(),  md4c_callback,
-                (void*) this, pflags_, rflags_);
+                this->self_, pflags_, rflags_);
 
     if (ret)
     {
