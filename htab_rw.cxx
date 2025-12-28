@@ -266,27 +266,21 @@ void htab_rw::set(zend_string* key, zval* val)
 	}	
 }
 
-/*
-void
-htab_rw::set(str_ptr key, const str_rc& value)
-{
-	val_rc temp(value);
-	update(key, temp);
-}
-*/
-
 void 
 htab_rw::set(zend_string* key, zend_string* value)
 {
-	//showstr("htab_rw::set key", key);
-	//showstr("htab_rw::set value", value);
 	zval temp = {0};
 	bool refct = val_ptr::string_bind(&temp, value);
 	if (zend_hash_update(ht_, key, &temp))
 	{
 		if (refct) GC_ADDREF(value);
-
 	}
+}
+
+void htab_rw::set(zend_string* key, const char* value, size_t vlen)
+{
+	str_rc temp(value, vlen);
+	set(key, temp);
 }
 
 void 

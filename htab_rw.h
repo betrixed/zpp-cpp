@@ -100,6 +100,8 @@ namespace zpp {
         
         void set(zend_string* key, zval* value);
         void set(zend_string* key, zend_string* value);
+
+        void set(zend_string* key, const char* value, size_t vlen);
         void set(zend_string* key, HashTable* value);
         void set(zend_string* key, zend_object* obj);
         void set(zend_string* key, int value);
