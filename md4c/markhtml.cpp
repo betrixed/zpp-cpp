@@ -128,6 +128,12 @@ MarkToHtml::text(str_ptr markdown)
     return result;
 }
 
+htab_rc 
+MarkToHtml::cblink(htab_ptr link)
+{
+    return htab_rc(link);
+}
+
 void 
 MarkToHtml::html_append(const char* txt, size_t tlen)
 {
@@ -173,6 +179,24 @@ ZEND_METHOD(Wcc_MarkToHtml, text)
         result.value_.move_zv(return_value);
     }
 }
+
+ZEND_METHOD(Wcc_MarkToHtml, cblink)
+{
+    zarg_rd args(execute_data);
+
+    htab_ptr    input;
+    htab_rc     result;
+
+    args.zarray(input, args.need(0));
+
+    if (!args.throw_errors())
+    {
+        MarkToHtml* mth = zval_toc<MarkToHtml>(ZEND_THIS);
+        result = mth->cblink(input);
+        result.move_zv(return_value);
+    }
+}
+
 
 PHP_MINIT_FUNCTION(Wcc_MarkToHtml_reg)
 {

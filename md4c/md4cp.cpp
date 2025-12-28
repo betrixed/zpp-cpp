@@ -1460,7 +1460,7 @@ struct MD_ATTRIBUTE_BUILD {
 str_rc 
 walk_attribute(const CHAR* src, size_t slen, bool escapes, int& ptype, size_t& plen)
 {
-    const CHAR* raw_text = src;
+    const CHAR* text = src;
     size_t      ct = 0;
     str_buf     buf;
     str_rc      result;
@@ -1468,12 +1468,12 @@ walk_attribute(const CHAR* src, size_t slen, bool escapes, int& ptype, size_t& p
     ptype = MD_TEXT_NORMAL;
     while(ct < slen) 
     {
-        if(*raw_text == '\0') {
+        if(*text == '\0') {
             if (ct == 0) {
                 plen = 1;
                 // signal string all by itself.
                 ptype = MD_TEXT_NULLCHAR;
-                buf.append(*raw_text);
+                buf.append(*text);
                 result = buf.zstr();
                 return result;
             }
@@ -1482,34 +1482,36 @@ walk_attribute(const CHAR* src, size_t slen, bool escapes, int& ptype, size_t& p
             }
         }
 
-        if(*raw_text == '&') {
+        if(*text == '&') {
 
             if(ct > 0)
             {
                 break;
             }
             size_t extra = 0;
-            if(md_is_entity_str(raw_text+ct, slen-ct, extra)) {
+            if(md_is_entity_str(text+ct, slen-ct, extra)) {
                 ptype = MD_TEXT_ENTITY;
                 plen = ct + extra;
-                buf.append(raw_text,extra);
+                buf.append(text,extra);
                 result = buf.zstr();
                 return result;
             }
         }
 
-        if(escapes && (*raw_text == '\\') && ((ct+1) < slen)) 
+        if(escapes && (*text == '\\') && ((ct+1) < slen)) 
         {
-            CHAR test = *(raw_text+1);
+            CHAR test = *(text+1);
             if (ISPUNCT_(test) || ISNEWLINE_(test))
             {
                 ct++; // forget this
-                raw_text++;
+                text++;
                 continue;
             }
         }
+        
+        buf.append(*text);
         ct++;
-        buf.append(*raw_text);
+        text++;
     }
     plen = ct;
     ptype = MD_TEXT_NORMAL;
