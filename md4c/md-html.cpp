@@ -250,6 +250,86 @@ render_entity(MD_HTML* r, const MD_CHAR* text, MD_SIZE size,
     fn_append(r, text, size);
 }
 
+// return a valid string if a seg found, with type, plen (source consumed)
+// caller must repeat call with src + plen, until all used up
+// flags should reference a temporary, as may change during iteration
+str_rc 
+walk_attribute(const CHAR* src, size_t slen, size_t& flags, int& ptype, size_t& plen)
+{
+    const CHAR* text = src;
+    size_t      ct = 0;
+    str_buf     buf;
+    str_rc      result;
+
+    ptype = MD_TEXT_NORMAL;
+
+    bool escapes = !(flags & MD_ATTRIBUTE::NO_ESCAPES);
+    bool is_url = (flags & MD_ATTRIBUTE::IS_URL);
+    bool is_query = (flags & MD_ATTRIBUTE::IS_QUERY);
+
+    while(ct < slen) 
+    {
+        if(*text == '\0') {
+            if (ct == 0) {
+                plen = 1;
+                // signal string all by itself.
+                ptype = MD_TEXT_NULLCHAR;
+                buf.append(*text);
+                result = buf.zstr();
+                return result;
+            }
+            else {
+                break;
+            }
+        }
+
+        if (*text == '?')
+        {
+            if (is_url)
+            {
+                is_query = true;
+                flags = (flags | MD_ATTRIBUTE::IS_QUERY);
+            }
+        }
+
+        if((*text == '&') && (!is_query))
+        {
+            if(ct > 0)
+            {
+                break;
+            }
+            size_t extra = 0;
+            if(md_is_entity_str(text+ct, slen-ct, extra)) {
+                ptype = MD_TEXT_ENTITY;
+                plen = ct + extra;
+                buf.append(text,extra);
+                result = buf.zstr();
+                return result;
+            }
+        }
+
+        if(escapes && (*text == '\\') && ((ct+1) < slen)) 
+        {
+            CHAR test = *(text+1);
+            if (ISPUNCT_(test) || ISNEWLINE_(test))
+            {
+                ct++; // forget this
+                text++;
+                continue;
+            }
+        }
+        
+        buf.append(*text);
+        ct++;
+        text++;
+    }
+    plen = ct;
+    ptype = MD_TEXT_NORMAL;
+    result = buf.zstr();
+    return result;
+}
+
+
 // Render the text contents of an attribute value
 static void
 render_attribute(MD_HTML* r, const MD_ATTRIBUTE* attr,
@@ -263,26 +343,31 @@ render_attribute(MD_HTML* r, const MD_ATTRIBUTE* attr,
 
     str_rc   segment;
 
-    bool     allow_escapes = (attr->flags_ & MD_BUILD_ATTR_NO_ESCAPES) != 0;
+    size_t   walk_flags = attr->flags_;
 
-    segment = walk_attribute(text, tlen,  allow_escapes, ptype, plen);
+    segment = walk_attribute(text, tlen,  walk_flags, ptype, plen);
     while(segment.ok())
     {
+     //showstr("Segment", segment);
+     //zend_printf("flags  %ld\n", walk_flags);
+        const char* ssp = segment.data();
+        size_t      ssz = segment.size();
+
         switch(ptype) 
         {
         case MD_TEXT_NULLCHAR:
             render_utf8_codepoint(r, 0x0000, render_verbatim); 
             break;
         case MD_TEXT_ENTITY:   
-            render_entity(r, segment.data(), segment.size(), fn_append); 
+            render_entity(r, ssp, ssz, fn_append); 
             break;
         default:                
-            fn_append(r, segment.data(), segment.size()); 
+            fn_append(r,  ssp, ssz); 
             break; 
         }
         if (plen < tlen)
         {
-            segment = walk_attribute(text+plen, tlen-plen, allow_escapes, ptype, plen);
+            segment = walk_attribute(text+plen, tlen-plen, walk_flags, ptype, plen);
         }   
         else {
             break;
@@ -359,8 +444,11 @@ render_open_a_span(MD_HTML* r,  MD_SPAN_A_DETAIL* det)
     htab_rw all_attr(link_title_rc);
 
     MD_ATTRIBUTE& attr_href = det->href;
-    if (attr_href.text_.ok()) {
-        all_attr.set(wcc::MTH.href_attr, attr_href.text_);
+
+    str_rc  href = attr_href.text_;
+
+    if (href.ok()) {
+        all_attr.set(wcc::MTH.href_attr, href);
     }
 
     MD_ATTRIBUTE& attr_title = det->title;
@@ -376,10 +464,10 @@ render_open_a_span(MD_HTML* r,  MD_SPAN_A_DETAIL* det)
 
     if (all_attr.size())
     {
-        str_rc href_val = all_attr.get(wcc::MTH.href_attr);
-        if (href_val.ok())
+        href = all_attr.get(wcc::MTH.href_attr);
+        if (href.ok())
         {
-            attr_href.text_ = href_val;
+            attr_href.text_ = href;
             all_attr.unset(wcc::MTH.href_attr);
         }
     }
@@ -387,26 +475,29 @@ render_open_a_span(MD_HTML* r,  MD_SPAN_A_DETAIL* det)
     render_attribute(r, &attr_href, render_url_escaped);    
 
     // all other attributes
+    
     htab_walk wk;
-    auto      key = wk.key();
+    auto      key_zp = wk.key();
     auto      value = wk.value();
     str_buf   buf;
 
     for(wk.start(all_attr); wk.ok(); wk.next())
     {
-        MD_ATTRIBUTE extra;
-
-        extra.text_ = value.zstr();
         // close previous, render next
+        str_ptr key = key_zp.zstr();
 
         // attribute name
+
         buf << "\" "  << key << "=\"";
         render_verbatim(r, buf.data(), buf.size());
 
+        MD_ATTRIBUTE extra(value.zstr());
         render_attribute(r, &extra, render_html_escaped);
+
         buf.reset();
     }
-    // end 'a' tag
+    
+    // end last attribute of 'a' tag
     RENDER_VERBATIM(r, "\">");
 }
 

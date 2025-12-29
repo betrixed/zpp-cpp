@@ -241,7 +241,17 @@ struct MD_ATTRIBUTE {
     str_rc   text_;
     unsigned flags_;
 
+    enum {
+        NO_ESCAPES = 1,
+        IS_URL = 2,
+        IS_QUERY = 4
+    };
+
     MD_ATTRIBUTE() : flags_(0) {}
+
+    MD_ATTRIBUTE(const str_rc& value) : text_(value), flags_(0)
+    {
+    }
 
     void move(MD_ATTRIBUTE &&m)
     {

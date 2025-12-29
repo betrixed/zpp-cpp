@@ -1425,7 +1425,7 @@ md_is_entity_str(const CHAR* text, size_t slen, size_t& plen)
     return false;
 }
 
-static inline int
+static inline bool
 md_is_entity(MD_CTX* ctx, OFF beg, OFF max_end, size_t& p_end)
 {
     return md_is_entity_str(ctx->text+beg, max_end, p_end);
@@ -1452,72 +1452,7 @@ struct MD_ATTRIBUTE_BUILD {
 };
 */
 
-#define MD_BUILD_ATTR_NO_ESCAPES    0x0001
 
-
-// return a valid string if a seg found, with type, plen (source consumed)
-// caller must repeat call with src + plen, until all used up
-str_rc 
-walk_attribute(const CHAR* src, size_t slen, bool escapes, int& ptype, size_t& plen)
-{
-    const CHAR* text = src;
-    size_t      ct = 0;
-    str_buf     buf;
-    str_rc      result;
-
-    ptype = MD_TEXT_NORMAL;
-    while(ct < slen) 
-    {
-        if(*text == '\0') {
-            if (ct == 0) {
-                plen = 1;
-                // signal string all by itself.
-                ptype = MD_TEXT_NULLCHAR;
-                buf.append(*text);
-                result = buf.zstr();
-                return result;
-            }
-            else {
-                break;
-            }
-        }
-
-        if(*text == '&') {
-
-            if(ct > 0)
-            {
-                break;
-            }
-            size_t extra = 0;
-            if(md_is_entity_str(text+ct, slen-ct, extra)) {
-                ptype = MD_TEXT_ENTITY;
-                plen = ct + extra;
-                buf.append(text,extra);
-                result = buf.zstr();
-                return result;
-            }
-        }
-
-        if(escapes && (*text == '\\') && ((ct+1) < slen)) 
-        {
-            CHAR test = *(text+1);
-            if (ISPUNCT_(test) || ISNEWLINE_(test))
-            {
-                ct++; // forget this
-                text++;
-                continue;
-            }
-        }
-        
-        buf.append(*text);
-        ct++;
-        text++;
-    }
-    plen = ct;
-    ptype = MD_TEXT_NORMAL;
-    result = buf.zstr();
-    return result;
-}
 
 
 
@@ -4126,8 +4061,19 @@ md_enter_leave_span_a(MD_CTX* ctx, int enter, MD_SPANTYPE type,
 {
     MD_SPAN_A_DETAIL det;
 
+
     det.href.text_ = str_rc(dest, dest_size);
-    det.href.flags_ = is_autolink ? MD_BUILD_ATTR_NO_ESCAPES : 0;
+    
+    size_t flags = MD_ATTRIBUTE::IS_URL;
+
+    if (is_autolink)
+    {
+        flags = flags | MD_ATTRIBUTE::NO_ESCAPES;
+    }
+
+    det.href.flags_ = flags;
+
+    //zend_printf("flags autolink %d\n", is_autolink);
 
     if (title && title_size)
     {
@@ -4135,6 +4081,7 @@ md_enter_leave_span_a(MD_CTX* ctx, int enter, MD_SPANTYPE type,
     }
 
     det.is_autolink = is_autolink;
+    
     int ret = 0;
     // note this macro uses ctx, and sets ret, and uses label abort:
     if(enter)
