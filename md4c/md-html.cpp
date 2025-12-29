@@ -250,6 +250,7 @@ render_entity(MD_HTML* r, const MD_CHAR* text, MD_SIZE size,
     fn_append(r, text, size);
 }
 
+// Render the text contents of an attribute value
 static void
 render_attribute(MD_HTML* r, const MD_ATTRIBUTE* attr,
                  void (*fn_append)(MD_HTML*, const MD_CHAR*, MD_SIZE))
@@ -350,45 +351,62 @@ render_open_td_block(MD_HTML* r, const MD_CHAR* cell_type, const MD_BLOCK_TD_DET
 static void
 render_open_a_span(MD_HTML* r,  MD_SPAN_A_DETAIL* det)
 {
+    //open a tag, href value first
     RENDER_VERBATIM(r, "<a href=\"");
 
     val_rc link_title_rc;
 
-    htab_rw link_title(link_title_rc);
-
+    htab_rw all_attr(link_title_rc);
 
     MD_ATTRIBUTE& attr_href = det->href;
     if (attr_href.text_.ok()) {
-        link_title.set(wcc::MTH.href_attr, attr_href.text_);
+        all_attr.set(wcc::MTH.href_attr, attr_href.text_);
     }
 
     MD_ATTRIBUTE& attr_title = det->title;
 
     if (attr_title.text_.ok()) {
-        link_title.set(wcc::MTH.title_attr, attr_title.text_);
+        all_attr.set(wcc::MTH.title_attr, attr_title.text_);
     }
 
     val_rc rval = r->php_obj.call(wcc::MTH.cb_link_s, link_title_rc);
-    MD_ATTRIBUTE& attr = attr_href;
 
-    if (rval.isArray())
+    all_attr = rval.zarray();
+
+
+    if (all_attr.size())
     {
-        htab_ptr rd(rval);
-
-        str_rc href = rd.get(wcc::MTH.href_attr);
-        if (href.ok())
+        str_rc href_val = all_attr.get(wcc::MTH.href_attr);
+        if (href_val.ok())
         {
-            attr.text_ = href;
+            attr_href.text_ = href_val;
+            all_attr.unset(wcc::MTH.href_attr);
         }
     }
+    // href attr value
+    render_attribute(r, &attr_href, render_url_escaped);    
 
-    render_attribute(r, &attr, render_url_escaped);
+    // all other attributes
+    htab_walk wk;
+    auto      key = wk.key();
+    auto      value = wk.value();
+    str_buf   buf;
 
-    if(det->title.text_.ok()) {
-        RENDER_VERBATIM(r, "\" title=\"");
-        render_attribute(r, &det->title, render_html_escaped);
+    for(wk.start(all_attr); wk.ok(); wk.next())
+    {
+        MD_ATTRIBUTE extra;
+
+        extra.text_ = value.zstr();
+        // close previous, render next
+
+        // attribute name
+        buf << "\" "  << key << "=\"";
+        render_verbatim(r, buf.data(), buf.size());
+
+        render_attribute(r, &extra, render_html_escaped);
+        buf.reset();
     }
-
+    // end 'a' tag
     RENDER_VERBATIM(r, "\">");
 }
 
