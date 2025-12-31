@@ -51,11 +51,12 @@
 #endif
 
 using namespace zpp;
+using namespace wcc;
 
 struct MD_HTML {
     // php_obj is userdata for callback
     void (*process_output)(const MD_CHAR*, MD_SIZE, obj_ptr);
-    obj_ptr   php_obj;
+    obj_ptr  php_obj;
     unsigned flags;
     int image_nesting_level;
     char escape_map[256];
@@ -530,7 +531,16 @@ render_open_wikilink_span(MD_HTML* r, const MD_SPAN_WIKILINK_DETAIL* det)
     RENDER_VERBATIM(r, "\">");
 }
 
-
+static void AddTagClass(str_ptr tagkey, htab_ptr classes, str_buf& buf)
+{
+    str_rc tclass = classes.get(tagkey);
+    buf << '<' << tagkey;
+    if (!tclass.ok())
+    {
+        tclass = tagkey;
+    }
+    buf << " class='" << tclass << "'>\n";
+}
 /**************************************
  ***  HTML renderer implementation  ***
  **************************************/
@@ -538,12 +548,33 @@ render_open_wikilink_span(MD_HTML* r, const MD_SPAN_WIKILINK_DETAIL* det)
 static int
 enter_block_callback(MD_BLOCKTYPE type, void* detail, void* userdata)
 {
+    //zend_printf("enter block callback with userdata = %lx\n", (unsigned long) userdata);
+
     static const MD_CHAR* head[6] = { "<h1>", "<h2>", "<h3>", "<h4>", "<h5>", "<h6>" };
     MD_HTML* r = (MD_HTML*) userdata;
 
+    //showobj("render_obj", r->php_obj);
+
+    MarkToHtml* mtd = zobj_toc<MarkToHtml>(r->php_obj);
+
+    htab_ptr  classes(mtd->tagclass_);
+
+    str_rc tagkey;
+    str_buf  html;
+    str_rc output;
+
     switch(type) {
-        case MD_BLOCK_DOC:      /* noop */ break;
-        case MD_BLOCK_QUOTE:    RENDER_VERBATIM(r, "<blockquote>\n"); break;
+        case MD_BLOCK_DOC:      
+            /* noop */ break;
+
+        case MD_BLOCK_QUOTE: 
+            html << "<div class='content'>";
+            tagkey = "blockquote";
+            AddTagClass(tagkey, classes, html);
+            output = html.zstr();
+            render_verbatim(r, output.data(), output.size()); 
+            break;
+
         case MD_BLOCK_UL:       RENDER_VERBATIM(r, "<ul>\n"); break;
         case MD_BLOCK_OL:       render_open_ol_block(r, (const MD_BLOCK_OL_DETAIL*)detail); break;
         case MD_BLOCK_LI:       render_open_li_block(r, (const MD_BLOCK_LI_DETAIL*)detail); break;
@@ -551,8 +582,18 @@ enter_block_callback(MD_BLOCKTYPE type, void* detail, void* userdata)
         case MD_BLOCK_H:        RENDER_VERBATIM(r, head[((MD_BLOCK_H_DETAIL*)detail)->level - 1]); break;
         case MD_BLOCK_CODE:     render_open_code_block(r, (const MD_BLOCK_CODE_DETAIL*) detail); break;
         case MD_BLOCK_HTML:     /* noop */ break;
-        case MD_BLOCK_P:        RENDER_VERBATIM(r, "<p>"); break;
-        case MD_BLOCK_TABLE:    RENDER_VERBATIM(r, "<table>\n"); break;
+
+        case MD_BLOCK_P:        
+            RENDER_VERBATIM(r, "<p>"); 
+            break;
+
+        case MD_BLOCK_TABLE: 
+            tagkey = "table";
+            AddTagClass(tagkey, classes, html);
+            output = html.zstr();
+            render_verbatim(r, output.data(), output.size());    
+            break;
+
         case MD_BLOCK_THEAD:    RENDER_VERBATIM(r, "<thead>\n"); break;
         case MD_BLOCK_TBODY:    RENDER_VERBATIM(r, "<tbody>\n"); break;
         case MD_BLOCK_TR:       RENDER_VERBATIM(r, "<tr>\n"); break;
@@ -571,7 +612,7 @@ leave_block_callback(MD_BLOCKTYPE type, void* detail, void* userdata)
 
     switch(type) {
         case MD_BLOCK_DOC:      /*noop*/ break;
-        case MD_BLOCK_QUOTE:    RENDER_VERBATIM(r, "</blockquote>\n"); break;
+        case MD_BLOCK_QUOTE:    RENDER_VERBATIM(r, "</blockquote><div>\n"); break;
         case MD_BLOCK_UL:       RENDER_VERBATIM(r, "</ul>\n"); break;
         case MD_BLOCK_OL:       RENDER_VERBATIM(r, "</ol>\n"); break;
         case MD_BLOCK_LI:       RENDER_VERBATIM(r, "</li>\n"); break;
@@ -695,8 +736,12 @@ md_html(const MD_CHAR* input, MD_SIZE input_size,
         void (*process_output)(const MD_CHAR*, MD_SIZE, obj_ptr),
         obj_ptr userdata, unsigned parser_flags, unsigned renderer_flags)
 {
+    
+    //showobj("render md_html", userdata);
+
     MD_HTML render = { process_output, userdata, renderer_flags, 0, { 0 } };
     int i;
+
 
     MD_PARSER parser = {
         0,

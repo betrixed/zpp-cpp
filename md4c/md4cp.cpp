@@ -83,17 +83,12 @@
     #define FALSE           0
 #endif
 
-#define MD_LOG(msg)                                                     \
-    do {                                                                \
-        if(ctx->parser.debug_log != NULL)                               \
-            ctx->parser.debug_log((msg), ctx->userdata);                \
-    } while(0)
 
 #ifdef DEBUG
     #define MD_ASSERT(cond)                                             \
             do {                                                        \
                 if(!(cond)) {                                           \
-                    MD_LOG(__FILE__ ":" STRINGIZE(__LINE__) ": "        \
+                    ctx->log(__FILE__ ":" STRINGIZE(__LINE__) ": "        \
                            "Assertion '" STRINGIZE(cond) "' failed.");  \
                     exit(1);                                            \
                 }                                                       \
@@ -164,151 +159,9 @@ typedef struct MD_REF_DEF_tag MD_REF_DEF;
  * openers of the given type.
  * The stack connects the marks via MD_MARK::next;
  */
-typedef struct MD_MARKSTACK_tag MD_MARKSTACK;
-struct MD_MARKSTACK_tag {
-    int top;        /* -1 if empty. */
-};
 
-/* Context propagated through all the parsing. */
-typedef struct MD_CTX_tag MD_CTX;
-struct MD_CTX_tag {
-    /* Immutable stuff (parameters of md_parse()). */
-    const CHAR* text;
-    SZ size;
-    MD_PARSER parser;
-    void* userdata;
-
-    /* When this is true, it allows some optimizations. */
-    int doc_ends_with_newline;
-
-    /* Helper temporary growing buffer. */
-    CHAR* buffer;
-    unsigned alloc_buffer;
-
-    /* Reference definitions. */
-    MD_REF_DEF* ref_defs;
-    int n_ref_defs;
-    int alloc_ref_defs;
-    void** ref_def_hashtable;
-    int ref_def_hashtable_size;
-    SZ max_ref_def_output;
-
-    /* Stack of inline/span markers.
-     * This is only used for parsing a single block contents but by storing it
-     * here we may reuse the stack for subsequent blocks; i.e. we have fewer
-     * (re)allocations. */
-    MD_MARK* marks;
-    int n_marks;
-    int alloc_marks;
-
-#if defined MD4C_USE_UTF16
-    char mark_char_map[128];
-#else
-    char mark_char_map[256];
-#endif
-
-    /* For resolving of inline spans. */
-    MD_MARKSTACK opener_stacks[16];
-#define ASTERISK_OPENERS_oo_mod3_0      (ctx->opener_stacks[0])     /* Opener-only */
-#define ASTERISK_OPENERS_oo_mod3_1      (ctx->opener_stacks[1])
-#define ASTERISK_OPENERS_oo_mod3_2      (ctx->opener_stacks[2])
-#define ASTERISK_OPENERS_oc_mod3_0      (ctx->opener_stacks[3])     /* Both opener and closer candidate */
-#define ASTERISK_OPENERS_oc_mod3_1      (ctx->opener_stacks[4])
-#define ASTERISK_OPENERS_oc_mod3_2      (ctx->opener_stacks[5])
-#define UNDERSCORE_OPENERS_oo_mod3_0    (ctx->opener_stacks[6])     /* Opener-only */
-#define UNDERSCORE_OPENERS_oo_mod3_1    (ctx->opener_stacks[7])
-#define UNDERSCORE_OPENERS_oo_mod3_2    (ctx->opener_stacks[8])
-#define UNDERSCORE_OPENERS_oc_mod3_0    (ctx->opener_stacks[9])     /* Both opener and closer candidate */
-#define UNDERSCORE_OPENERS_oc_mod3_1    (ctx->opener_stacks[10])
-#define UNDERSCORE_OPENERS_oc_mod3_2    (ctx->opener_stacks[11])
-#define TILDE_OPENERS_1                 (ctx->opener_stacks[12])
-#define TILDE_OPENERS_2                 (ctx->opener_stacks[13])
-#define BRACKET_OPENERS                 (ctx->opener_stacks[14])
-#define DOLLAR_OPENERS                  (ctx->opener_stacks[15])
-
-    /* Stack of dummies which need to call MDH_FREE() for pointers stored in them.
-     * These are constructed during inline parsing and freed after all the block
-     * is processed (i.e. all callbacks referring those strings are called). */
-    MD_MARKSTACK ptr_stack;
-
-    /* For resolving table rows. */
-    int n_table_cell_boundaries;
-    int table_cell_boundaries_head;
-    int table_cell_boundaries_tail;
-
-    /* For resolving links. */
-    int unresolved_link_head;
-    int unresolved_link_tail;
-
-    /* For resolving raw HTML. */
-    OFF html_comment_horizon;
-    OFF html_proc_instr_horizon;
-    OFF html_decl_horizon;
-    OFF html_cdata_horizon;
-
-    /* For block analysis.
-     * Notes:
-     *   -- It holds MD_BLOCK as well as MD_LINE structures. After each
-     *      MD_BLOCK, its (multiple) MD_LINE(s) follow.
-     *   -- For MD_BLOCK_HTML and MD_BLOCK_CODE, MD_VERBATIMLINE(s) are used
-     *      instead of MD_LINE(s).
-     */
-    void* block_bytes;
-    MD_BLOCK* current_block;
-    int n_block_bytes;
-    int alloc_block_bytes;
-
-    /* For container block analysis. */
-    MD_CONTAINER* containers;
-    int n_containers;
-    int alloc_containers;
-
-    /* Minimal indentation to call the block "indented code block". */
-    unsigned code_indent_offset;
-
-    /* Contextual info for line analysis. */
-    SZ code_fence_length;   /* For checking closing fence length. */
-    int html_block_type;    /* For checking closing raw HTML condition. */
-    int last_line_has_list_loosening_effect;
-    int last_list_item_starts_with_two_blank_lines;
-};
-
-enum MD_LINETYPE_tag {
-    MD_LINE_BLANK,
-    MD_LINE_HR,
-    MD_LINE_ATXHEADER,
-    MD_LINE_SETEXTHEADER,
-    MD_LINE_SETEXTUNDERLINE,
-    MD_LINE_INDENTEDCODE,
-    MD_LINE_FENCEDCODE,
-    MD_LINE_HTML,
-    MD_LINE_TEXT,
-    MD_LINE_TABLE,
-    MD_LINE_TABLEUNDERLINE
-};
-typedef enum MD_LINETYPE_tag MD_LINETYPE;
-
-typedef struct MD_LINE_ANALYSIS_tag MD_LINE_ANALYSIS;
-struct MD_LINE_ANALYSIS_tag {
-    MD_LINETYPE type;
-    unsigned data;
-    int enforce_new_block;
-    OFF beg;
-    OFF end;
-    unsigned indent;        /* Indentation level. */
-};
-
-typedef struct MD_LINE_tag MD_LINE;
-struct MD_LINE_tag {
-    OFF beg;
-    OFF end;
-};
-
-typedef struct MD_VERBATIMLINE_tag MD_VERBATIMLINE;
-struct MD_VERBATIMLINE_tag {
-    OFF beg;
-    OFF end;
-    OFF indent;
+struct MD_MARKSTACK {
+    int top {-1};        
 };
 
 #ifndef CH_MACRO_H
@@ -334,6 +187,183 @@ struct MD_VERBATIMLINE_tag {
 #define ISDIGIT(off)                    ISDIGIT_(CH(off))
 #define ISXDIGIT(off)                   ISXDIGIT_(CH(off))
 #define ISALNUM(off)                    ISALNUM_(CH(off))
+
+/* Context propagated through all the parsing. */
+
+struct MD_CTX {
+    /* Immutable stuff (parameters of md_parse()). */
+    const CHAR* text {};
+    SZ size {};
+    MD_PARSER& parser;
+    void* userdata; // html renderer object
+
+    /* When this is true, it allows some optimizations. */
+    int doc_ends_with_newline {};
+
+    /* Helper temporary growing buffer. */
+    CHAR* buffer {};
+    unsigned alloc_buffer {};
+
+    /* Reference definitions. */
+    MD_REF_DEF* ref_defs {};
+    int n_ref_defs {};
+    int alloc_ref_defs {};
+    void** ref_def_hashtable {};
+    int ref_def_hashtable_size {};
+    SZ max_ref_def_output {};
+
+    /* Stack of inline/span markers.
+     * This is only used for parsing a single block contents but by storing it
+     * here we may reuse the stack for subsequent blocks; i.e. we have fewer
+     * (re)allocations. */
+    MD_MARK* marks {};
+    int n_marks {};
+    int alloc_marks {};
+
+#if defined MD4C_USE_UTF16
+    char mark_char_map[128] {};
+#else
+    char mark_char_map[256] {};
+#endif
+
+    /* For resolving of inline spans. */
+    MD_MARKSTACK opener_stacks[16] {};
+
+
+    /* Stack of dummies which need to call MDH_FREE() for pointers stored in them.
+     * These are constructed during inline parsing and freed after all the block
+     * is processed (i.e. all callbacks referring those strings are called). */
+    MD_MARKSTACK ptr_stack {};
+
+    /* For resolving table rows. */
+    int n_table_cell_boundaries {};
+    int table_cell_boundaries_head {};
+    int table_cell_boundaries_tail {};
+
+    /* For resolving links. */
+    int unresolved_link_head {};
+    int unresolved_link_tail {};
+
+    /* For resolving raw HTML. */
+    OFF html_comment_horizon {};
+    OFF html_proc_instr_horizon {};
+    OFF html_decl_horizon {};
+    OFF html_cdata_horizon {};
+
+    /* For block analysis.
+     * Notes:
+     *   -- It holds MD_BLOCK as well as MD_LINE structures. After each
+     *      MD_BLOCK, its (multiple) MD_LINE(s) follow.
+     *   -- For MD_BLOCK_HTML and MD_BLOCK_CODE, MD_VERBATIMLINE(s) are used
+     *      instead of MD_LINE(s).
+     */
+    void* block_bytes {};
+    MD_BLOCK* current_block {};
+    int n_block_bytes {};
+    int alloc_block_bytes {};
+
+    /* For container block analysis. */
+    MD_CONTAINER* containers {};
+    int n_containers {};
+    int alloc_containers {};
+
+    /* Minimal indentation to call the block "indented code block". */
+    unsigned code_indent_offset {};
+
+    /* Contextual info for line analysis. */
+    SZ code_fence_length {};   /* For checking closing fence length. */
+    int html_block_type {};    /* For checking closing raw HTML condition. */
+    int last_line_has_list_loosening_effect {};
+    int last_list_item_starts_with_two_blank_lines {};
+
+
+    void build_mark_char_map();
+
+    void free_ref_defs();
+
+    int build_ref_def_hashtable();
+
+    void free_ref_def_hashtable();
+
+    const MD_REF_DEF* lookup_ref_def(const CHAR* label, SZ label_size);
+
+    MD_CTX(const char* in, size_t sz, MD_PARSER* pp, void* ud)
+        : text(in), size(sz), parser(*pp), userdata(ud)
+    {
+        code_indent_offset = (parser.flags & MD_FLAG_NOINDENTEDCODEBLOCKS) ? (OFF)(-1) : 4;
+        build_mark_char_map();
+        doc_ends_with_newline = (size > 0  &&  ISNEWLINE_(text[size-1]));
+        max_ref_def_output = MIN(MIN(16 * (uint64_t)size, (uint64_t)(1024 * 1024)), (uint64_t)SZ_MAX);
+
+        unresolved_link_head = -1;
+        unresolved_link_tail = -1;
+        table_cell_boundaries_head = -1;
+        table_cell_boundaries_tail = -1;
+
+
+    }
+
+
+    ~MD_CTX()
+    {
+            /* Clean-up. */
+        free_ref_defs();
+        free_ref_def_hashtable();
+
+        MDH_FREE(buffer);
+        MDH_FREE(marks);
+        MDH_FREE(block_bytes);
+        MDH_FREE(containers);
+    }
+
+    void log(const CHAR* msg)
+    {
+        if (parser.debug_log != NULL)
+        {
+            parser.debug_log(msg, userdata);
+        }
+    }
+
+};
+
+enum MD_LINETYPE_tag {
+    MD_LINE_BLANK,
+    MD_LINE_HR,
+    MD_LINE_ATXHEADER,
+    MD_LINE_SETEXTHEADER,
+    MD_LINE_SETEXTUNDERLINE,
+    MD_LINE_INDENTEDCODE,
+    MD_LINE_FENCEDCODE,
+    MD_LINE_HTML,
+    MD_LINE_TEXT,
+    MD_LINE_TABLE,
+    MD_LINE_TABLEUNDERLINE
+};
+typedef enum MD_LINETYPE_tag MD_LINETYPE ;
+
+
+struct MD_LINE_ANALYSIS {
+    MD_LINETYPE type {};
+    unsigned data {};
+    int enforce_new_block {};
+    OFF beg {};
+    OFF end {};
+    unsigned indent {};        /* Indentation level. */
+};
+
+
+struct MD_LINE {
+    OFF beg  {};
+    OFF end  {};
+};
+
+struct MD_VERBATIMLINE {
+    OFF beg   {};
+    OFF end   {};
+    OFF indent   {};
+};
+
+
 
 #if defined MD4C_USE_UTF16
     #define md_strchr wcschr
@@ -414,7 +444,7 @@ md_text_with_null_replacement(MD_CTX* ctx, MD_TEXTTYPE type, const CHAR* str, SZ
                                                                             \
             new_buffer = (CHAR*)  MDH_REALLOC(ctx->buffer, new_size);                    \
             if(new_buffer == NULL) {                                        \
-                MD_LOG("MDH_REALLOC() failed.");                                \
+                ctx->log("MDH_REALLOC() failed.");                                \
                 ret = -1;                                                   \
                 goto abort;                                                 \
             }                                                               \
@@ -429,7 +459,7 @@ md_text_with_null_replacement(MD_CTX* ctx, MD_TEXTTYPE type, const CHAR* str, SZ
     do {                                                                    \
         ret = ctx->parser.enter_block((type), (arg), ctx->userdata);        \
         if(ret != 0) {                                                      \
-            MD_LOG("Aborted from enter_block() callback.");                 \
+            ctx->log("Aborted from enter_block() callback.");                 \
             goto abort;                                                     \
         }                                                                   \
     } while(0)
@@ -438,7 +468,7 @@ md_text_with_null_replacement(MD_CTX* ctx, MD_TEXTTYPE type, const CHAR* str, SZ
     do {                                                                    \
         ret = ctx->parser.leave_block((type), (arg), ctx->userdata);        \
         if(ret != 0) {                                                      \
-            MD_LOG("Aborted from leave_block() callback.");                 \
+            ctx->log("Aborted from leave_block() callback.");                 \
             goto abort;                                                     \
         }                                                                   \
     } while(0)
@@ -447,7 +477,7 @@ md_text_with_null_replacement(MD_CTX* ctx, MD_TEXTTYPE type, const CHAR* str, SZ
     do {                                                                    \
         ret = ctx->parser.enter_span((type), (arg), ctx->userdata);         \
         if(ret != 0) {                                                      \
-            MD_LOG("Aborted from enter_span() callback.");                  \
+            ctx->log("Aborted from enter_span() callback.");                  \
             goto abort;                                                     \
         }                                                                   \
     } while(0)
@@ -456,7 +486,7 @@ md_text_with_null_replacement(MD_CTX* ctx, MD_TEXTTYPE type, const CHAR* str, SZ
     do {                                                                    \
         ret = ctx->parser.leave_span((type), (arg), ctx->userdata);         \
         if(ret != 0) {                                                      \
-            MD_LOG("Aborted from leave_span() callback.");                  \
+            ctx->log("Aborted from leave_span() callback.");                  \
             goto abort;                                                     \
         }                                                                   \
     } while(0)
@@ -466,7 +496,7 @@ md_text_with_null_replacement(MD_CTX* ctx, MD_TEXTTYPE type, const CHAR* str, SZ
         if(size > 0) {                                                      \
             ret = ctx->parser.text((type), (str), (size), ctx->userdata);   \
             if(ret != 0) {                                                  \
-                MD_LOG("Aborted from text() callback.");                    \
+                ctx->log("Aborted from text() callback.");                    \
                 goto abort;                                                 \
             }                                                               \
         }                                                                   \
@@ -477,7 +507,7 @@ md_text_with_null_replacement(MD_CTX* ctx, MD_TEXTTYPE type, const CHAR* str, SZ
         if(size > 0) {                                                      \
             ret = md_text_with_null_replacement(ctx, type, str, size);      \
             if(ret != 0) {                                                  \
-                MD_LOG("Aborted from text() callback.");                    \
+                ctx->log("Aborted from text() callback.");                    \
                 goto abort;                                                 \
             }                                                               \
         }                                                                   \
@@ -1020,7 +1050,7 @@ md_merge_lines_alloc(MD_CTX* ctx, OFF beg, OFF end, const MD_LINE* lines, MD_SIZ
 
     buffer = (CHAR*) MDH_ALLOC(sizeof(CHAR) * (end - beg));
     if(buffer == NULL) {
-        MD_LOG("MDH_ALLOC() failed.");
+        ctx->log("MDH_ALLOC() failed.");
         return -1;
     }
 
@@ -1636,43 +1666,43 @@ md_ref_def_cmp_for_sort(const void* a, const void* b)
     return cmp;
 }
 
-static int
-md_build_ref_def_hashtable(MD_CTX* ctx)
+int
+MD_CTX::build_ref_def_hashtable()
 {
     int i, j;
 
-    if(ctx->n_ref_defs == 0)
+    if(n_ref_defs == 0)
         return 0;
 
-    ctx->ref_def_hashtable_size = (ctx->n_ref_defs * 5) / 4;
-    ctx->ref_def_hashtable = (void**) MDH_ALLOC(ctx->ref_def_hashtable_size * sizeof(void*));
-    if(ctx->ref_def_hashtable == NULL) {
-        MD_LOG("MDH_ALLOC() failed.");
+    ref_def_hashtable_size = (n_ref_defs * 5) / 4;
+    ref_def_hashtable = (void**) MDH_ALLOC(ref_def_hashtable_size * sizeof(void*));
+    if(ref_def_hashtable == NULL) {
+        log("MDH_ALLOC() failed.");
         goto abort;
     }
-    memset(ctx->ref_def_hashtable, 0, ctx->ref_def_hashtable_size * sizeof(void*));
+    memset(ref_def_hashtable, 0, ref_def_hashtable_size * sizeof(void*));
 
-    /* Each member of ctx->ref_def_hashtable[] can be:
+    /* Each member of ref_def_hashtable[] can be:
      *  -- NULL,
-     *  -- pointer to the MD_REF_DEF in ctx->ref_defs[], or
+     *  -- pointer to the MD_REF_DEF in ref_defs[], or
      *  -- pointer to a MD_REF_DEF_LIST, which holds multiple pointers to
      *     such MD_REF_DEFs.
      */
-    for(i = 0; i < ctx->n_ref_defs; i++) {
-        MD_REF_DEF* def = &ctx->ref_defs[i];
+    for(i = 0; i < n_ref_defs; i++) {
+        MD_REF_DEF* def = &ref_defs[i];
         void* bucket;
         MD_REF_DEF_LIST* list;
 
         def->hash = md_link_label_hash(def->label, def->label_size);
-        bucket = ctx->ref_def_hashtable[def->hash % ctx->ref_def_hashtable_size];
+        bucket = ref_def_hashtable[def->hash % ref_def_hashtable_size];
 
         if(bucket == NULL) {
             /* The bucket is empty. Make it just point to the def. */
-            ctx->ref_def_hashtable[def->hash % ctx->ref_def_hashtable_size] = def;
+            ref_def_hashtable[def->hash % ref_def_hashtable_size] = def;
             continue;
         }
 
-        if(ctx->ref_defs <= (MD_REF_DEF*) bucket  &&  (MD_REF_DEF*) bucket < ctx->ref_defs + ctx->n_ref_defs) {
+        if(ref_defs <= (MD_REF_DEF*) bucket  &&  (MD_REF_DEF*) bucket < ref_defs + n_ref_defs) {
             /* The bucket already contains one ref. def. Lets see whether it
              * is the same label (ref. def. duplicate) or different one
              * (hash conflict). */
@@ -1686,14 +1716,14 @@ md_build_ref_def_hashtable(MD_CTX* ctx)
             /* Make the bucket complex, i.e. able to hold more ref. defs. */
             list = (MD_REF_DEF_LIST*) MDH_ALLOC(sizeof(MD_REF_DEF_LIST) + 2 * sizeof(MD_REF_DEF*));
             if(list == NULL) {
-                MD_LOG("MDH_ALLOC() failed.");
+                log("MDH_ALLOC() failed.");
                 goto abort;
             }
             list->ref_defs[0] = old_def;
             list->ref_defs[1] = def;
             list->n_ref_defs = 2;
             list->alloc_ref_defs = 2;
-            ctx->ref_def_hashtable[def->hash % ctx->ref_def_hashtable_size] = list;
+            ref_def_hashtable[def->hash % ref_def_hashtable_size] = list;
             continue;
         }
 
@@ -1709,12 +1739,12 @@ md_build_ref_def_hashtable(MD_CTX* ctx)
             MD_REF_DEF_LIST* list_tmp = (MD_REF_DEF_LIST*) MDH_REALLOC(list,
                         sizeof(MD_REF_DEF_LIST) + alloc_ref_defs * sizeof(MD_REF_DEF*));
             if(list_tmp == NULL) {
-                MD_LOG("MDH_REALLOC() failed.");
+                log("MDH_REALLOC() failed.");
                 goto abort;
             }
             list = list_tmp;
             list->alloc_ref_defs = alloc_ref_defs;
-            ctx->ref_def_hashtable[def->hash % ctx->ref_def_hashtable_size] = list;
+            ref_def_hashtable[def->hash % ref_def_hashtable_size] = list;
         }
 
         list->ref_defs[list->n_ref_defs] = def;
@@ -1722,13 +1752,13 @@ md_build_ref_def_hashtable(MD_CTX* ctx)
     }
 
     /* Sort the complex buckets so we can use bsearch() with them. */
-    for(i = 0; i < ctx->ref_def_hashtable_size; i++) {
-        void* bucket = ctx->ref_def_hashtable[i];
+    for(i = 0; i < ref_def_hashtable_size; i++) {
+        void* bucket = ref_def_hashtable[i];
         MD_REF_DEF_LIST* list;
 
         if(bucket == NULL)
             continue;
-        if(ctx->ref_defs <= (MD_REF_DEF*) bucket  &&  (MD_REF_DEF*) bucket < ctx->ref_defs + ctx->n_ref_defs)
+        if(ref_defs <= (MD_REF_DEF*) bucket  &&  (MD_REF_DEF*) bucket < ref_defs + n_ref_defs)
             continue;
 
         list = (MD_REF_DEF_LIST*) bucket;
@@ -1737,7 +1767,7 @@ md_build_ref_def_hashtable(MD_CTX* ctx)
         /* Disable all duplicates in the complex bucket by forcing all such
          * records to point to the 1st such ref. def. I.e. no matter which
          * record is found during the lookup, it will always point to the right
-         * ref. def. in ctx->ref_defs[]. */
+         * ref. def. in ref_defs[]. */
         for(j = 1; j < list->n_ref_defs; j++) {
             if(md_ref_def_cmp(&list->ref_defs[j-1], &list->ref_defs[j]) == 0)
                 list->ref_defs[j] = list->ref_defs[j-1];
@@ -1750,40 +1780,40 @@ abort:
     return -1;
 }
 
-static void
-md_free_ref_def_hashtable(MD_CTX* ctx)
+void
+MD_CTX::free_ref_def_hashtable()
 {
-    if(ctx->ref_def_hashtable != NULL) {
+    if(ref_def_hashtable != NULL) {
         int i;
 
-        for(i = 0; i < ctx->ref_def_hashtable_size; i++) {
-            void* bucket = ctx->ref_def_hashtable[i];
+        for(i = 0; i < ref_def_hashtable_size; i++) {
+            void* bucket = ref_def_hashtable[i];
             if(bucket == NULL)
                 continue;
-            if(ctx->ref_defs <= (MD_REF_DEF*) bucket  &&  (MD_REF_DEF*) bucket < ctx->ref_defs + ctx->n_ref_defs)
+            if(ref_defs <= (MD_REF_DEF*) bucket  &&  (MD_REF_DEF*) bucket < ref_defs + n_ref_defs)
                 continue;
             MDH_FREE(bucket);
         }
 
-        MDH_FREE(ctx->ref_def_hashtable);
+        MDH_FREE(ref_def_hashtable);
     }
 }
 
-static const MD_REF_DEF*
-md_lookup_ref_def(MD_CTX* ctx, const CHAR* label, SZ label_size)
+const MD_REF_DEF*
+MD_CTX::lookup_ref_def(const CHAR* label, SZ label_size)
 {
     unsigned hash;
     void* bucket;
 
-    if(ctx->ref_def_hashtable_size == 0)
+    if(ref_def_hashtable_size == 0)
         return NULL;
 
     hash = md_link_label_hash(label, label_size);
-    bucket = ctx->ref_def_hashtable[hash % ctx->ref_def_hashtable_size];
+    bucket = ref_def_hashtable[hash % ref_def_hashtable_size];
 
     if(bucket == NULL) {
         return NULL;
-    } else if(ctx->ref_defs <= (MD_REF_DEF*) bucket  &&  (MD_REF_DEF*) bucket < ctx->ref_defs + ctx->n_ref_defs) {
+    } else if(ref_defs <= (MD_REF_DEF*) bucket  &&  (MD_REF_DEF*) bucket < ref_defs + n_ref_defs) {
         const MD_REF_DEF* def = (MD_REF_DEF*) bucket;
 
         if(md_link_label_cmp(def->label, def->label_size, label, label_size) == 0)
@@ -2133,7 +2163,7 @@ md_is_link_reference_definition(MD_CTX* ctx, const MD_LINE* lines, MD_SIZE n_lin
                 : 16);
         new_defs = (MD_REF_DEF*) MDH_REALLOC(ctx->ref_defs, ctx->alloc_ref_defs * sizeof(MD_REF_DEF));
         if(new_defs == NULL) {
-            MD_LOG("MDH_REALLOC() failed.");
+            ctx->log("MDH_REALLOC() failed.");
             goto abort;
         }
 
@@ -2210,7 +2240,7 @@ md_is_link_reference(MD_CTX* ctx, const MD_LINE* lines, MD_SIZE n_lines,
         label_size = end - beg;
     }
 
-    def = md_lookup_ref_def(ctx, label, label_size);
+    def = ctx->lookup_ref_def(label, label_size);
     if(def != NULL) {
         attr->dest_beg = def->dest_beg;
         attr->dest_end = def->dest_end;
@@ -2229,7 +2259,7 @@ md_is_link_reference(MD_CTX* ctx, const MD_LINE* lines, MD_SIZE n_lines,
             ctx->max_ref_def_output -= output_size_estimation;
             ret = TRUE;
         } else {
-            MD_LOG("Too many link reference definition instantiations.");
+            ctx->log("Too many link reference definition instantiations.");
             ctx->max_ref_def_output = 0;
         }
     }
@@ -2334,13 +2364,13 @@ abort:
     return ret;
 }
 
-static void
-md_free_ref_defs(MD_CTX* ctx)
+void
+MD_CTX::free_ref_defs()
 {
     int i;
 
-    for(i = 0; i < ctx->n_ref_defs; i++) {
-        MD_REF_DEF* def = &ctx->ref_defs[i];
+    for(i = 0; i < n_ref_defs; i++) {
+        MD_REF_DEF* def = &ref_defs[i];
 
         if(def->label_needs_free)
             MDH_FREE(def->label);
@@ -2348,7 +2378,7 @@ md_free_ref_defs(MD_CTX* ctx)
             MDH_FREE(def->title);
     }
 
-    MDH_FREE(ctx->ref_defs);
+    MDH_FREE(ref_defs);
 }
 
 
@@ -2452,6 +2482,24 @@ struct MD_MARK_tag {
 #define MD_MARK_VALIDPERMISSIVEAUTOLINK     0x20  /* For permissive autolinks. */
 #define MD_MARK_HASNESTEDBRACKETS           0x20  /* For '[' to rule out invalid link labels early */
 
+
+#define ASTERISK_OPENERS_oo_mod3_0      (ctx->opener_stacks[0])     /* Opener-only */
+#define ASTERISK_OPENERS_oo_mod3_1      (ctx->opener_stacks[1])
+#define ASTERISK_OPENERS_oo_mod3_2      (ctx->opener_stacks[2])
+#define ASTERISK_OPENERS_oc_mod3_0      (ctx->opener_stacks[3])     /* Both opener and closer candidate */
+#define ASTERISK_OPENERS_oc_mod3_1      (ctx->opener_stacks[4])
+#define ASTERISK_OPENERS_oc_mod3_2      (ctx->opener_stacks[5])
+#define UNDERSCORE_OPENERS_oo_mod3_0    (ctx->opener_stacks[6])     /* Opener-only */
+#define UNDERSCORE_OPENERS_oo_mod3_1    (ctx->opener_stacks[7])
+#define UNDERSCORE_OPENERS_oo_mod3_2    (ctx->opener_stacks[8])
+#define UNDERSCORE_OPENERS_oc_mod3_0    (ctx->opener_stacks[9])     /* Both opener and closer candidate */
+#define UNDERSCORE_OPENERS_oc_mod3_1    (ctx->opener_stacks[10])
+#define UNDERSCORE_OPENERS_oc_mod3_2    (ctx->opener_stacks[11])
+#define TILDE_OPENERS_1                 (ctx->opener_stacks[12])
+#define TILDE_OPENERS_2                 (ctx->opener_stacks[13])
+#define BRACKET_OPENERS                 (ctx->opener_stacks[14])
+#define DOLLAR_OPENERS                  (ctx->opener_stacks[15])
+
 static MD_MARKSTACK*
 md_emph_stack(MD_CTX* ctx, MD_CHAR ch, unsigned flags)
 {
@@ -2505,7 +2553,7 @@ md_add_mark(MD_CTX* ctx)
                 : 64);
         new_marks = (MD_MARK*) MDH_REALLOC(ctx->marks, ctx->alloc_marks * sizeof(MD_MARK));
         if(new_marks == NULL) {
-            MD_LOG("MDH_REALLOC() failed.");
+            ctx->log("MDH_REALLOC() failed.");
             return NULL;
         }
 
@@ -2626,48 +2674,48 @@ md_rollback(MD_CTX* ctx, int opener_index, int closer_index, int how)
     }
 }
 
-static void
-md_build_mark_char_map(MD_CTX* ctx)
+void
+MD_CTX::build_mark_char_map()
 {
-    memset(ctx->mark_char_map, 0, sizeof(ctx->mark_char_map));
+    memset(&this->mark_char_map, 0, sizeof(mark_char_map));
 
-    ctx->mark_char_map['\\'] = 1;
-    ctx->mark_char_map['*'] = 1;
-    ctx->mark_char_map['_'] = 1;
-    ctx->mark_char_map['`'] = 1;
-    ctx->mark_char_map['&'] = 1;
-    ctx->mark_char_map[';'] = 1;
-    ctx->mark_char_map['<'] = 1;
-    ctx->mark_char_map['>'] = 1;
-    ctx->mark_char_map['['] = 1;
-    ctx->mark_char_map['!'] = 1;
-    ctx->mark_char_map[']'] = 1;
-    ctx->mark_char_map['\0'] = 1;
+    mark_char_map['\\'] = 1;
+    mark_char_map['*'] = 1;
+    mark_char_map['_'] = 1;
+    mark_char_map['`'] = 1;
+    mark_char_map['&'] = 1;
+    mark_char_map[';'] = 1;
+    mark_char_map['<'] = 1;
+    mark_char_map['>'] = 1;
+    mark_char_map['['] = 1;
+    mark_char_map['!'] = 1;
+    mark_char_map[']'] = 1;
+    mark_char_map['\0'] = 1;
 
-    if(ctx->parser.flags & MD_FLAG_STRIKETHROUGH)
-        ctx->mark_char_map['~'] = 1;
+    if(parser.flags & MD_FLAG_STRIKETHROUGH)
+        mark_char_map['~'] = 1;
 
-    if(ctx->parser.flags & MD_FLAG_LATEXMATHSPANS)
-        ctx->mark_char_map['$'] = 1;
+    if(parser.flags & MD_FLAG_LATEXMATHSPANS)
+        mark_char_map['$'] = 1;
 
-    if(ctx->parser.flags & MD_FLAG_PERMISSIVEEMAILAUTOLINKS)
-        ctx->mark_char_map['@'] = 1;
+    if(parser.flags & MD_FLAG_PERMISSIVEEMAILAUTOLINKS)
+        mark_char_map['@'] = 1;
 
-    if(ctx->parser.flags & MD_FLAG_PERMISSIVEURLAUTOLINKS)
-        ctx->mark_char_map[':'] = 1;
+    if(parser.flags & MD_FLAG_PERMISSIVEURLAUTOLINKS)
+        mark_char_map[':'] = 1;
 
-    if(ctx->parser.flags & MD_FLAG_PERMISSIVEWWWAUTOLINKS)
-        ctx->mark_char_map['.'] = 1;
+    if(parser.flags & MD_FLAG_PERMISSIVEWWWAUTOLINKS)
+        mark_char_map['.'] = 1;
 
-    if((ctx->parser.flags & MD_FLAG_TABLES) || (ctx->parser.flags & MD_FLAG_WIKILINKS))
-        ctx->mark_char_map['|'] = 1;
+    if((parser.flags & MD_FLAG_TABLES) || (parser.flags & MD_FLAG_WIKILINKS))
+        mark_char_map['|'] = 1;
 
-    if(ctx->parser.flags & MD_FLAG_COLLAPSEWHITESPACE) {
+    if(parser.flags & MD_FLAG_COLLAPSEWHITESPACE) {
         int i;
 
-        for(i = 0; i < (int) sizeof(ctx->mark_char_map); i++) {
+        for(i = 0; i < (int) sizeof(mark_char_map); i++) {
             if(ISWHITESPACE_(i))
-                ctx->mark_char_map[i] = 1;
+                mark_char_map[i] = 1;
         }
     }
 }
@@ -4480,7 +4528,7 @@ md_process_table_row(MD_CTX* ctx, MD_BLOCKTYPE cell_type, OFF beg, OFF end,
     n = ctx->n_table_cell_boundaries + 2;
     pipe_offs = (OFF*) MDH_ALLOC(n * sizeof(OFF));
     if(pipe_offs == NULL) {
-        MD_LOG("MDH_ALLOC() failed.");
+        ctx->log("MDH_ALLOC() failed.");
         ret = -1;
         goto abort;
     }
@@ -4527,7 +4575,7 @@ md_process_table_block_contents(MD_CTX* ctx, int col_count, const MD_LINE* lines
 
     align = (MD_ALIGN*) MDH_ALLOC(col_count * sizeof(MD_ALIGN));
     if(align == NULL) {
-        MD_LOG("MDH_ALLOC() failed.");
+        ctx->log("MDH_ALLOC() failed.");
         ret = -1;
         goto abort;
     }
@@ -4890,7 +4938,7 @@ md_push_block_bytes(MD_CTX* ctx, int n_bytes)
                 : 512);
         new_block_bytes = MDH_REALLOC(ctx->block_bytes, ctx->alloc_block_bytes);
         if(new_block_bytes == NULL) {
-            MD_LOG("MDH_REALLOC() failed.");
+            ctx->log("MDH_REALLOC() failed.");
             return NULL;
         }
 
@@ -5213,7 +5261,7 @@ md_is_table_underline(MD_CTX* ctx, OFF beg, OFF* p_end, unsigned* p_col_count)
 
         col_count++;
         if(col_count > TABLE_MAXCOLCOUNT) {
-            MD_LOG("Suppressing table (column_count >" STRINGIZE(TABLE_MAXCOLCOUNT) ")");
+            ctx->log("Suppressing table (column_count >" STRINGIZE(TABLE_MAXCOLCOUNT) ")");
             return FALSE;
         }
 
@@ -5538,7 +5586,7 @@ md_push_container(MD_CTX* ctx, const MD_CONTAINER* container)
                 : 16);
         new_containers = (MD_CONTAINER*)MDH_REALLOC(ctx->containers, ctx->alloc_containers * sizeof(MD_CONTAINER));
         if(new_containers == NULL) {
-            MD_LOG("MDH_REALLOC() failed.");
+            ctx->log("MDH_REALLOC() failed.");
             return -1;
         }
 
@@ -6305,7 +6353,7 @@ md_process_doc(MD_CTX *ctx)
 
     md_end_current_block(ctx);
 
-    MD_CHECK(md_build_ref_def_hashtable(ctx));
+    MD_CHECK(ctx->build_ref_def_hashtable());
 
     /* Process all blocks. */
     MD_CHECK(md_leave_child_containers(ctx, 0));
@@ -6321,19 +6369,19 @@ abort:
         char buffer[256];
         sprintf(buffer, "Alloced %u bytes for block buffer.",
                     (unsigned)(ctx->alloc_block_bytes));
-        MD_LOG(buffer);
+        ctx->log(buffer);
 
         sprintf(buffer, "Alloced %u bytes for containers buffer.",
                     (unsigned)(ctx->alloc_containers * sizeof(MD_CONTAINER)));
-        MD_LOG(buffer);
+        ctx->log(buffer);
 
         sprintf(buffer, "Alloced %u bytes for marks buffer.",
                     (unsigned)(ctx->alloc_marks * sizeof(MD_MARK)));
-        MD_LOG(buffer);
+        ctx->log(buffer);
 
         sprintf(buffer, "Alloced %u bytes for aux. buffer.",
                     (unsigned)(ctx->alloc_buffer * sizeof(MD_CHAR)));
-        MD_LOG(buffer);
+        ctx->log(buffer);
     }
 #endif
 
@@ -6346,48 +6394,25 @@ abort:
  ********************/
 
 int
-md_parse(const MD_CHAR* text, MD_SIZE size, const MD_PARSER* parser, void* userdata)
+md_parse(const MD_CHAR* text, MD_SIZE size, MD_PARSER* parser, void* userdata)
 {
-    MD_CTX ctx;
-    int i;
-    int ret;
-
-    if(parser->abi_version != 0) {
+     if(parser->abi_version != 0) {
         if(parser->debug_log != NULL)
             parser->debug_log("Unsupported abi_version.", userdata);
         return -1;
     }
 
-    /* Setup context structure. */
-    memset(&ctx, 0, sizeof(MD_CTX));
-    ctx.text = text;
-    ctx.size = size;
-    memcpy(&ctx.parser, parser, sizeof(MD_PARSER));
-    ctx.userdata = userdata;
-    ctx.code_indent_offset = (ctx.parser.flags & MD_FLAG_NOINDENTEDCODEBLOCKS) ? (OFF)(-1) : 4;
-    md_build_mark_char_map(&ctx);
-    ctx.doc_ends_with_newline = (size > 0  &&  ISNEWLINE_(text[size-1]));
-    ctx.max_ref_def_output = MIN(MIN(16 * (uint64_t)size, (uint64_t)(1024 * 1024)), (uint64_t)SZ_MAX);
+    MD_CTX ctx(text,size, parser, userdata);
 
-    /* Reset all mark stacks and lists. */
-    for(i = 0; i < (int) SIZEOF_ARRAY(ctx.opener_stacks); i++)
-        ctx.opener_stacks[i].top = -1;
-    ctx.ptr_stack.top = -1;
-    ctx.unresolved_link_head = -1;
-    ctx.unresolved_link_tail = -1;
-    ctx.table_cell_boundaries_head = -1;
-    ctx.table_cell_boundaries_tail = -1;
+    //zend_printf("ctx made userdata = %lx\n", (unsigned long) userdata);
+    //zend_printf("ctx userdata = %lx\n", (unsigned long) ctx.userdata);
+
+    int ret;
 
     /* All the work. */
     ret = md_process_doc(&ctx);
 
-    /* Clean-up. */
-    md_free_ref_defs(&ctx);
-    md_free_ref_def_hashtable(&ctx);
-    MDH_FREE(ctx.buffer);
-    MDH_FREE(ctx.marks);
-    MDH_FREE(ctx.block_bytes);
-    MDH_FREE(ctx.containers);
+
 
     return ret;
 }

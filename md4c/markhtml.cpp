@@ -105,6 +105,16 @@ MarkToHtml::construct(int parse, int render)
 {
 	pflags_ = parse;
     rflags_ = render;
+    htab_rw hw(tagclass_);
+
+    hw.set(MTH.blockquote, MTH.is_info);
+}
+
+void 
+MarkToHtml::set_flags(int parse, int render)
+{
+    pflags_ = parse;
+    rflags_ = render;
 }
 
 str_return 
@@ -140,6 +150,14 @@ MarkToHtml::html_append(const char* txt, size_t tlen)
     htmlbuf_.append(txt, tlen);
 }
 
+void 
+MarkToHtml::setTagClass(str_ptr tag, str_ptr classattr)
+{
+    htab_rw tc(tagclass_);
+
+    tc.set(tag, classattr);
+}
+
 };
 
 using namespace wcc;
@@ -159,6 +177,40 @@ ZEND_METHOD(Wcc_MarkToHtml, __construct)
     {
         MarkToHtml* mth = zval_toc<MarkToHtml>(ZEND_THIS);
         mth->construct(parse,render);
+    }
+}
+
+ZEND_METHOD(Wcc_MarkToHtml, setFlags)
+{
+    zarg_rd args(execute_data);
+
+    zend_long parse = 0;
+    zend_long render = 0;
+
+    args.zlong(parse, args.option(0));
+    args.zlong(render, args.option(1));
+
+    if (!args.throw_errors())
+    {
+        MarkToHtml* mth = zval_toc<MarkToHtml>(ZEND_THIS);
+        mth->set_flags(parse,render);
+    }
+}
+
+ZEND_METHOD(Wcc_MarkToHtml, setTagClass)
+{
+    zarg_rd args(execute_data);
+
+    str_ptr tag;
+    str_ptr cvalue;
+
+    args.zstring(tag, args.need(0));
+    args.zstring(cvalue, args.need(1));
+
+    if (!args.throw_errors())
+    {
+        MarkToHtml* mth = zval_toc<MarkToHtml>(ZEND_THIS);
+        mth->setTagClass(tag,cvalue);
     }
 }
 

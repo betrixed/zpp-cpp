@@ -21,6 +21,8 @@ public:
     str_intern  cb_link_s;
     str_intern  title_attr;
     str_intern  href_attr;
+    str_intern  blockquote;
+    str_intern  is_info;
 
     MTHInit() : state_init() {
         
@@ -32,6 +34,8 @@ public:
     	cb_link_s = "cblink";
     	title_attr = "title";
     	href_attr = "href";
+    	blockquote = "blockquote";
+    	is_info = "is-info";
     }
 };
 
@@ -41,21 +45,29 @@ class  MarkToHtml : public base_d {
 protected:
 	int     pflags_;
 	int     rflags_;
-	str_buf htmlbuf_;
+	str_buf htmlbuf_; // accumulate output
 	str_rc  input_;
+	
 
 public:
+
+	htab_rc tagclass_; // inject class attribute
+
 	static base_obj_mgr<MarkToHtml> omg;
 
 	void debug_info(htab_rw info) override;
 
 	void construct(int parse = 0, int render = 0);
 
+	void set_flags(int parse, int render = 0);
+
 	str_return text(str_ptr markdown);
 
 	void html_append(const char* txt, size_t tlen);
 
 	htab_rc cblink(htab_ptr link);
+
+	void setTagClass(str_ptr tag, str_ptr classattr);
 };
 
 
