@@ -19,7 +19,6 @@
 #include "wcc/plate.cpp"
 #include "wcc/plate_engine.cpp"
 #include "wcc/search_list.cpp"
-#include "md4c/markhtml.cpp"
 
 /* For compatibility with older PHP versions */
 #ifndef ZEND_PARSE_PARAMETERS_NONE
@@ -50,9 +49,7 @@ PHP_MINIT_FUNCTION(wcch)
 	PHP_MINIT(Wcc_HtmlPlates_reg)(INIT_FUNC_ARGS_PASSTHRU);	
 #endif
 
-#  ifdef MARKHTML_CPP
-	PHP_MINIT(Wcc_MarkToHtml_reg)(INIT_FUNC_ARGS_PASSTHRU);
-#  endif
+
 	
 	return SUCCESS;
 }
