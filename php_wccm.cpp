@@ -5,7 +5,7 @@
 
 #include "zpp/base.h"
 #include "zpp/show_zpp.h"
-
+#include "md4c/markhtml.cpp"
 #include "toml/toml_php.cpp"
 
 
@@ -18,6 +18,11 @@ PHP_MINIT_FUNCTION(wccm)
 #ifdef TOML_PHP_CPP
 	PHP_MINIT(Toml_reg)(INIT_FUNC_ARGS_PASSTHRU);
 #endif
+
+#  ifdef MARKHTML_CPP
+	PHP_MINIT(Wcc_MarkToHtml_reg)(INIT_FUNC_ARGS_PASSTHRU);
+#  endif
+	
 	return SUCCESS;
 }
 
