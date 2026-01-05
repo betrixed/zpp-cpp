@@ -21,6 +21,10 @@
 #include "replace.h"
 #endif
 
+#ifndef FN_CALL_H
+#include "zpp/fn_call.h"
+#endif
+
 #ifndef ASSETS_ARGINFO_H
 #define ASSETS_ARGINFO_H
 
@@ -703,7 +707,8 @@ Assets::styleHeader()
 
 
 
-str_rc Assets::implode_blob(htab_ptr blobs)
+str_rc 
+Assets::implode_blob(htab_ptr blobs)
 {
 	str_ptr estr = str_ptr::empty_str();
 	if (blobs.size())
@@ -714,6 +719,35 @@ str_rc Assets::implode_blob(htab_ptr blobs)
 		return estr;
 	}
 }
+
+void 
+Assets::unmark(str_ptr item)
+{
+	if (mark_.has_key(item)) 
+	{
+		int ix = order_.value_index(item);
+		if (ix >= 0)
+		{
+			array_splice(this->order_, ix, 1);
+		}
+		htab_rw hw(mark_);
+		hw.unset(item);
+	}
+}
+
+/*
+    public function unmark(string $item) : void
+    {
+        if (isset($this->mark[$item]))
+        {
+            $ix = array_search($item,$this->order);
+            if (is_integer($ix))
+            {
+                array_splice($this->order,$ix,1);
+            }
+            unset($this->mark[$item]);
+        }
+    }*/
 
 
 }; //end namespace wcc
