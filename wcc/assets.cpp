@@ -956,6 +956,21 @@ ZEND_METHOD(Wcc_Assets, styleHeader)
 	text.move_zv(return_value);
 }
 
+ZEND_METHOD(Wcc_Assets, unmark)
+{
+	zarg_rd args(execute_data);
+
+	str_ptr item;
+
+	args.zstring(item, args.need(0));
+
+	if (!args.throw_errors())
+	{
+		Assets* cobj = zval_toc<Assets>(ZEND_THIS);
+		cobj->unmark(item);
+	}
+}
+
 PHP_MINIT_FUNCTION(wcc_assets_reg)
 {
 

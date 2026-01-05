@@ -5,6 +5,9 @@
  */
 namespace Wcc;
 
+/** Contant values are taken from the "md4c" project, the original C source code is in md4c/src, and the derived cpp
+ *  code with some zpp integration is in md4c folder. The signifcant features value is  DIALECT_GITHUB */
+
 class MarkToHtml 
 {
 	const int COLLAPSE_WHITESPACE  = 0x1; /* In MD_TEXT_NORMAL, collapse non-trivial whitespace into single space */

@@ -137,6 +137,8 @@ public:
  	void reset();
 
  	str_rc styleHeader();
+
+ 	void unmark(str_ptr item);
 };
 
 }; //namespace wcc

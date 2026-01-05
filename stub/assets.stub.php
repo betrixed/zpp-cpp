@@ -44,6 +44,8 @@ class Assets {
  	public function reset() : void {}
 
  	public function styleHeader() : string {}
+
+ 	public function unmark(string $item) : void {}
 };
 
 
