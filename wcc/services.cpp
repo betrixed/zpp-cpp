@@ -536,19 +536,23 @@ ZEND_METHOD(Wcc_Services, set)
 
 ZEND_METHOD(Wcc_Services, setObject)
 {
-	zval* 		 obj;
-	zend_string* skey = nullptr;
+	obj_ptr obj;
+	str_ptr key;
+	obj_ptr result;
 
-	ZEND_PARSE_PARAMETERS_START(1, 2)
-		Z_PARAM_OBJECT(obj)
-		Z_PARAM_OPTIONAL
-		Z_PARAM_STR(skey)
-	ZEND_PARSE_PARAMETERS_END();
+	zarg_rd args(execute_data);
 
-	Services* svc = zval_toc<Services>(ZEND_THIS);
+	args.obj(obj, args.need(0));
+	args.zstring_null(key, args.option(1));
 
-	val_ptr test(obj);
-	obj_ptr result = svc->setObject(test.zobject(), skey);
+	if (!args.throw_errors())
+	{
+		Services* svc = zval_toc<Services>(ZEND_THIS);
+		// result is now referenced in services
+		
+		result = svc->setObject(obj, key);
+	}
+	// handles potential null
 	result.copy_zv(return_value);
 }
 

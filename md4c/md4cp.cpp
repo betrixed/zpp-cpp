@@ -5786,6 +5786,8 @@ md_analyze_line(MD_CTX* ctx, OFF beg, OFF* p_end,
     line->beg = off;
     line->enforce_new_block = FALSE;
 
+    //zend_printf("analyse_line\n");
+
     /* Given the indentation and block quote marks '>', determine how many of
      * the current containers are our parents. */
     while(n_parents < ctx->n_containers) {
@@ -6259,6 +6261,7 @@ abort:
 static int
 md_process_line(MD_CTX* ctx, const MD_LINE_ANALYSIS** p_pivot_line, MD_LINE_ANALYSIS* line)
 {
+    //zend_printf("line type %d\n", line->type);
     const MD_LINE_ANALYSIS* pivot_line = *p_pivot_line;
     int ret = 0;
 
@@ -6341,6 +6344,8 @@ md_process_doc(MD_CTX *ctx)
     OFF off = 0;
     int ret = 0;
 
+    //zend_printf("process_doc\n");
+
     MD_ENTER_BLOCK(MD_BLOCK_DOC, NULL);
 
     while(off < ctx->size) {
@@ -6401,6 +6406,8 @@ md_parse(const MD_CHAR* text, MD_SIZE size, MD_PARSER* parser, void* userdata)
             parser->debug_log("Unsupported abi_version.", userdata);
         return -1;
     }
+
+    //zend_printf("md_parse\n");
 
     MD_CTX ctx(text,size, parser, userdata);
 

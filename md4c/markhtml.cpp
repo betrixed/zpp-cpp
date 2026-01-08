@@ -125,6 +125,7 @@ MarkToHtml::text(str_ptr markdown)
     input_ = markdown;
     htmlbuf_.reset();
 
+    //zend_printf("Call text\n");
     int ret = md_html(input_.data(), input_.size(),  md4c_callback,
                 this->self_, pflags_, rflags_);
 
@@ -147,6 +148,7 @@ MarkToHtml::cblink(htab_ptr link)
 void 
 MarkToHtml::html_append(const char* txt, size_t tlen)
 {
+
     htmlbuf_.append(txt, tlen);
 }
 
@@ -252,6 +254,7 @@ ZEND_METHOD(Wcc_MarkToHtml, cblink)
 
 PHP_MINIT_FUNCTION(Wcc_MarkToHtml_reg)
 {
+    //zend_printf("register\n");
     MarkToHtml::omg.classEntry(register_class_Wcc_MarkToHtml());
 
     return SUCCESS;

@@ -10,7 +10,7 @@
 
 	$finder->addPath("App", "/home/michael/www/book/private/sites/book/lib/App");
 	
-	$file = file_get_contents("/home/michael/www/book/web/zppbook/dev/src/SUMMARY.md");
+	$file = file_get_contents("/home/michael/www/book/web/zppbook/dev/src/break_up.md");
 
 	$md = new MarkDown();
 

@@ -182,8 +182,8 @@ public:
 
 	//Route_init() : route_verbs((HashTable*)nullptr), verb_names((HashTable*)nullptr) {}
 
-	virtual void init();
-	virtual void end();
+	void init() override;
+	void end() override;
 
 	void init_ce(zend_class_entry* ce);
 
