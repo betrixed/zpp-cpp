@@ -171,13 +171,13 @@ str_ptr::getDouble() const
 	return strtod(ZSTR_VAL(s), &endptr);
 }
 
-std::string 
+rqstring 
 str_ptr::cstr() const
 {
     const char* ps = s ? (const char*) ZSTR_VAL(s) : empty;
 	size_t      slen = s ? ZSTR_LEN(s) : 0;
 
-	return std::string(ps, slen);
+	return rqstring(ps, slen);
 }
 
 std::string_view 

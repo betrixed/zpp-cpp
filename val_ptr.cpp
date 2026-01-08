@@ -297,11 +297,11 @@ val_ptr::zstr() const
 	return Z_STR_P(zv);
 }
 
-std::string 
+rqstring
 val_ptr::cstr() const
 {
 	str_rc temp = to_zstr();
-	return str_ptr(temp).cstr();	
+	return rqstring(temp.data(), temp.size());	
 }
 
 std::string_view 

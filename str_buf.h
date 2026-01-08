@@ -58,7 +58,7 @@ namespace zpp {
 
 		str_buf (const std::string_view& cs);
 
-		str_buf (const std::string& cs);
+		str_buf (const rqstring& cs);
 
 		str_buf (const char* c, size_t slen);
 
@@ -77,7 +77,7 @@ namespace zpp {
 		void printf(const char *format, ...);
 
 		// Finalize, 0-terminate, return as std::string, 
-		std::string str();
+		rqstring str();
 
 		// Finalize, 0-terminate give away
 		str_ptr zstr();

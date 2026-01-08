@@ -13,9 +13,16 @@
 #include "php_extern.h"
 #endif
 
+#ifndef ALLOC_PHPREQ_H
+#include "alloc_phpreq.h"
+#endif
+
 #include <string>
 
 namespace zpp {
+
+	// zpp::qstring is a PHP request memory allocated std::string
+	typedef std::basic_string<char,std::char_traits<char>, alloc_phpreq<char> >  rqstring;
 
 	class str_rc;
 	class val_ptr;
@@ -70,7 +77,7 @@ namespace zpp {
 
 		long getLong(int base = 10) const;
 
-		std::string cstr() const;
+		rqstring cstr() const;
 
 		std::string_view vstr() const;	
 

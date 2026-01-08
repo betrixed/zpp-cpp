@@ -419,6 +419,7 @@ preg_quote(str_ptr expr, str_ptr delimiter)
     return TLFNs.preg_quote.call(expr, delimiter);
 }
 
+// TODO: The throw_failed won't get through. A bireturn?
 val_rc
 fn_call::call_fn()
 {
@@ -429,17 +430,14 @@ fn_call::call_fn()
     else
     {
         zend_result ok =  zend_call_function(&fci_, &cache_);
-
         if (ok != SUCCESS)
         {
             throw_failed();
         }
     }
-    //showmem("call_fn result", result_);
 
     val_rc temp(std::move(result_));
     return temp;
-    //return result_;
 }
 
 str_rc 

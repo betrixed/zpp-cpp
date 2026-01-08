@@ -187,7 +187,7 @@ public:
     zend_string* zstr() const;
 
     //! return value as a string
-    std::string  cstr() const;
+    rqstring  cstr() const;
 
     //! return string value, if references real string
     std::string_view vstr() const;

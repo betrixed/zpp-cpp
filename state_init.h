@@ -26,13 +26,15 @@ namespace zpp {
 
         state_init();
         
-        // iterate links for module start/end
+        
+        // At module start/end (Call in one extension only)
         static void init_all();
         static void end_all();
 
-        // iterate links for request start/end
+        // At request start/end  (Call in one extension only)
         static void  init_request();
         static void  end_request();
+
 
         // module init/end calls
         virtual void init();
