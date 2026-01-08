@@ -37,6 +37,8 @@ namespace zpp {
      * Create parameter space dynamically.
      *  and copy array values starting at prefix index.
      */ 
+
+    /* somehow this hasn't found a use */
     class args_spread  {
         size_t              argct_;
         zval*               argv_;
@@ -75,7 +77,6 @@ namespace zpp {
         ~fn_call();
         
         void set_fci(zend_object* obj , str_ptr method, HashTable* nargs = nullptr);
-        
         void set_fname(str_ptr name);
         void set_obj(zend_object* obj); // for method calls
         
@@ -91,8 +92,6 @@ namespace zpp {
         //! must call only once for each call setup.
         //! 
         zval* argsptr() { wipe(); return fci_.params; }
-
-
     };
 /**
     @class  fn_call_args

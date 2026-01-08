@@ -104,7 +104,7 @@ str_buf::str_buf (const char* c) : str_out()
 	}
 }
 
-str_buf::str_buf(const std::string& cs) : str_out()
+str_buf::str_buf(const rqstring& cs) : str_out()
 {
 	initbuf();
 	auto slen = cs.size();
@@ -166,17 +166,17 @@ str_buf::size() const
 }
 
 
-// return buffer copy so far, as C-string
+// return rqstring duplicate of the buffer far, as std::string type
 
-std::string 
+rqstring
 str_buf::str()
 {
 	if (buf.s)
 	{
-		return std::string(data(), size());
+		return rqstring(data(), size());
 	}
 	else {
-		return std::string();
+		return rqstring(); // don't know what this points to
 	}
 }
 
