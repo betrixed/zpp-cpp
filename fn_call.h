@@ -328,6 +328,7 @@ namespace zpp {
         str_intern  ucwords;
         str_intern  stripslashes;
         str_intern  array_pop;
+        str_intern  array_splice;
 
         
         void init() override;
@@ -413,6 +414,8 @@ namespace zpp {
     obj_rc weakref_create(obj_ptr obj);
 
     obj_rc weakref_get(obj_ptr wref);
+
+    htab_rc array_splice(htab_rc& input, int offset, int length = 0, htab_ptr replace = htab_ptr());
 
 
 }; // end namespace zpp

@@ -402,16 +402,46 @@ array_pop(val_rc& array_ref)
 
     fn.set_fname(STAB.array_pop);
     
-    zend_printf("\nprepare array_pop\n");
+    //zend_printf("\nprepare array_pop\n");
     htab_rw hw(array_ref); // must be writable
     
     array_ref.make_ref(); // must be reference
 
 
-    zend_printf("\nprepare 2 array_pop\n");
+    //zend_printf("\nprepare 2 array_pop\n");
     ZVAL_COPY_VALUE(fn.argsptr(), array_ref);
     return fn.call_fn();
 }
+
+
+htab_rc
+array_splice(htab_rc& input, int offset, int length, htab_ptr replace)
+{
+    fn_call_args<4> fn;
+    htab_rc result;
+
+    fn.set_fname(STAB.array_splice);
+    zval* args = fn.argsptr();
+
+    htab_rw hw(input); // make writable
+    ZVAL_ARR(args, input);
+    ZVAL_NEW_REF(args, args);
+    args++;
+    ZVAL_LONG(args,offset);
+    args++;
+    ZVAL_LONG(args, length);
+    args++;
+    if (replace.size())
+    {
+        ZVAL_ARR(args, replace);
+    }
+    else {
+        ZVAL_EMPTY_ARRAY(args);
+    }
+    result = fn.call_fn();
+    return result;
+}
+
 
 str_rc 
 preg_quote(str_ptr expr, str_ptr delimiter)
@@ -786,6 +816,7 @@ strtable::init()
     ucwords = "ucwords";
     stripslashes = "stripslashes"; 
     array_pop = "array_pop";
+    array_splice = "array_splice";
 }
 
 /**

@@ -103,6 +103,8 @@ namespace zpp {
         bool  has_key(zend_string* skey) const;
 
         bool  has_key(val_ptr skey) const;
+
+        // array value search for packed array; -1 for not found
         int   value_index(str_ptr fvalue) const;
 
 
