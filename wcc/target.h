@@ -19,7 +19,7 @@ namespace wcc {
 		str_rc class_;
 		str_rc func_;
 		str_rc module_;
-
+		htab_rc params_;
 
 		virtual void debug_info(htab_rw di);
 	
@@ -38,6 +38,12 @@ namespace wcc {
 
 		htab_rc serialize();
 		void unserialize(htab_ptr htab);
+
+		// params
+		void setParam(str_ptr key, val_ptr value);
+		val_rc getParam(str_ptr key);
+		htab_ptr getParams();
+		void setParams(htab_ptr data);
 
 		obj_rc copy();
 

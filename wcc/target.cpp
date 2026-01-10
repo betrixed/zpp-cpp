@@ -21,6 +21,7 @@ public:
 	str_intern method;
 	str_intern module;
 	str_intern index;
+	str_intern params;
 
 	TargetData() : state_init() {}
 
@@ -31,6 +32,7 @@ public:
 		method = "func_name";
 		module = "module_name";
 		index = "index";
+		params = "params";
 	}
 };
 
@@ -43,6 +45,7 @@ void Target::debug_info(htab_rw di)
 	di.set(target_data.class_name, class_);
 	di.set(target_data.method, func_);
 	di.set(target_data.module, module_);
+	di.set(target_data.params, params_);
 }
 	
 obj_rc 
@@ -76,6 +79,8 @@ Target::construct(str_ptr cname, str_ptr fname)
 
 }
 
+/** Completedly forgotten why this was necessary */
+
 obj_rc
 Target::copy()
 {
@@ -88,6 +93,39 @@ Target::copy()
 
 	return result;
 }
+
+void 
+Target::setParam(str_ptr key, val_ptr value)
+{
+	htab_rw hw(params_);
+	hw.set(key, value);
+}
+
+val_rc 
+Target::getParam(str_ptr key)
+{
+	val_rc result;
+
+	if (params_.size())
+	{
+		result = params_.get(key);
+	}
+
+	return result;
+}
+
+htab_ptr 
+Target::getParams()
+{
+	return params_;
+}
+
+void 
+Target::setParams(htab_ptr data)
+{
+	params_ = data;
+}
+
 
 str_ptr 
 Target::getClass()
@@ -136,6 +174,7 @@ Target::unserialize(htab_ptr htab)
 	class_ = htab.get(target_data.class_name);
 	func_ = htab.get(target_data.method);
 	module_ = htab.get(target_data.module);
+	params_ = htab.get(target_data.params);
 }
 
 }; //namespace wcc
@@ -264,7 +303,84 @@ ZEND_METHOD(Wcc_Target, __unserialize)
 	cobj->unserialize(htab);	
 }
 
+static void get_param(zend_execute_data* execute_data, zval* return_value)
+{
+	zarg_rd args(execute_data);
 
+	str_ptr key;
+	val_rc result;
+
+	args.zstring(key, args.need(0));
+
+	if (!args.throw_errors())
+	{
+		Target* cobj = zval_toc<Target>(ZEND_THIS);
+		result = cobj->getParam(key);
+	}
+	result.move_zv(return_value);
+}
+
+
+ZEND_METHOD(Wcc_Target, getParam)
+{
+	get_param(execute_data, return_value);
+}
+
+static void set_param(zend_execute_data* execute_data)
+{
+	zarg_rd args(execute_data);
+
+	str_ptr  key;
+	val_ptr value;
+
+	args.zstring(key, args.need(0));
+	value = args.need(1);
+
+	if (!args.throw_errors())
+	{
+		Target* cobj = zval_toc<Target>(ZEND_THIS);
+		cobj->setParam(key, value);
+	}	
+}
+
+ZEND_METHOD(Wcc_Target, setParam)
+{
+	set_param(execute_data);
+}
+
+ZEND_METHOD(Wcc_Target, __get)
+{
+	get_param(execute_data, return_value);
+}
+
+ZEND_METHOD(Wcc_Target, __set)
+{
+	set_param(execute_data);
+}
+
+ZEND_METHOD(Wcc_Target, getParams)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	Target* cobj = zval_toc<Target>(ZEND_THIS);
+	htab_ptr result = cobj->getParams();
+	result.copy_zv(return_value);
+}
+
+ZEND_METHOD(Wcc_Target, setParams)
+{
+	zarg_rd args(execute_data);
+
+	htab_ptr data;
+
+	args.zarray(data, args.need(0));
+
+	if (!args.throw_errors())
+	{
+		Target* cobj = zval_toc<Target>(ZEND_THIS);
+		cobj->setParams(data);
+	}
+}
 
 
 PHP_MINIT_FUNCTION(wcc_target)

@@ -20,6 +20,18 @@ class Target {
 
 	public function setModule(?string $name) : Target {}
 
+	public function getParams() : ?array {}
+
+	public function setParams(?array $params) : void {}
+
+	public function getParam(string $key) : mixed {}
+
+	public function setParam(string $key, mixed $value) : void {}
+
+	public function __set(string $key, mixed $value): void {}
+
+	public function __get(string $key) : mixed {}
+
 	public function __serialize() : array {}
 
 	public function __unserialize(array $data) : void {}
