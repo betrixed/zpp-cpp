@@ -432,14 +432,10 @@ RouteSet::copy_target(Route* route)
 
 			if (modifyTarget)
 			{
-				obj_rc ntobj = tcobj->copy();
-				Target* nt = zobj_toc<Target>(ntobj);
-				nt->setModule(target_module);
-				nt->setFunc(target_method);
-
-				val_rc new_target(ntobj);
-
-				route->setTarget(new_target);
+				//obj_rc ntobj = tcobj->copy();
+				//Target* nt = zobj_toc<Target>(ntobj);
+				tcobj->setModule(target_module);
+				tcobj->setFunc(target_method);
 			}
 
 		}

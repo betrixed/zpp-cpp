@@ -6,6 +6,7 @@
  */
 namespace Wcc;
 
+#[\AllowDynamicProperties]
 class Target {
 	public function __construct(
 		string $class, string $func = "index");

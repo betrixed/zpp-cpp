@@ -16,6 +16,7 @@ extern "C" {
 #include "route_match.h"
 #endif
 
+
 #ifndef WCC_ROUTE_H
 #include "route.h"
 #endif
@@ -26,6 +27,11 @@ extern "C" {
 
 #ifndef WCC_TARGET_H
 #include "target.h"
+#endif
+
+
+#ifndef REQUEST_GLOBALS_H
+#include "request_globals.h"
 #endif
 
 #ifndef REFLECT_CACHE_H
@@ -70,6 +76,7 @@ public:
 	str_intern cc_verb_flag;
 	str_intern cc_ajax_flag;
 	str_intern cc_route_id;
+	str_intern request_obj;
 
 	virtual void init()
 	{
@@ -87,6 +94,7 @@ public:
 		cc_verb_flag = "verb";
 		cc_ajax_flag = "ajax";
 		cc_route_id = "route_id";
+		request_obj = "request";
 	}
 };
 
@@ -243,6 +251,7 @@ RouteMatch::call(htab_ptr extra, obj_ptr before, obj_ptr after)
 
 	if (!ob_class_.size() || !ob_method_.size()) 
 	{
+
 		this->prepare_call();
 	}
 
@@ -528,6 +537,28 @@ bool RouteMatch::prepare_call()
 		 	ob_class_ = cobj->getClass();
 		 	ob_method_ = cobj->getFunc();
 		 	ob_args_ = this->fetchArgs();
+
+		 	htab_ptr defaults = cobj->getParams();
+
+		 	if (defaults.size())
+		 	{
+		 		//showdata("defaults", defaults);
+		 		
+		 		obj_rc request = Services::service(RM_data.request_obj);
+		 		RequestGlobals* rg = zobj_toc<RequestGlobals>(request);
+		 		obj_ptr  qry = rg->query();
+
+		 		Hmap*    hmap = zobj_toc<Hmap>(qry);
+
+		 		for_key_value   wk;
+		 		for(wk.start(defaults); wk.ok(); wk.next())
+		 		{
+		 			str_rc key = wk.key();
+		 			if (!hmap->has(key)) {
+		 				hmap->set(key, wk.value());
+		 			}
+		 		}
+		 	}
 		 	return true;
 		}
 		else if (route_target.isCallable())
