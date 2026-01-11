@@ -153,6 +153,13 @@ htab_rc::htab_rc(zval* p)
 	}
 }
 
+// need to copy, to avoid reference inc for c.
+htab_rc::htab_rc(const htab_rw& c)
+{
+	ht_ = zend_array_dup(c.ht_);
+}
+
+// Just share with reference count
 htab_rc::htab_rc(const htab_rc& c)
 {
 	ht_ = c.ht_;
@@ -441,6 +448,7 @@ htab_rc::getKeys(htab_ptr hr)
  * This version "pulls out" the key and value
  * from hfrom array, and returns a new array with the
  * extracted key => value found in key list exkeys.
+ * Requires a htab_rw - 
  */
 htab_rc //static
 htab_rc::extract(htab_ptr exkeys, htab_rw hfrom)
@@ -479,9 +487,10 @@ htab_rc::extract(htab_ptr exkeys, htab_rw hfrom)
 }
 
 /**
- * This version "pulls out" the key and value
+ * subset : finds the key and value
  * from hfrom array, and returns a new array with the
- * extracted key => value found in key list exkeys.
+ *  keys and values found in key list exkeys, shows missing
+ *  values as null.
  */
 htab_rc //static
 htab_rc::subset(htab_ptr exkeys, htab_ptr hfrom, bool nullmiss)

@@ -95,7 +95,11 @@ namespace zpp {
         /** passing nullptr can stop HashTable create */
         htab_rc(HashTable *h);
 
+        /** should make a copy of ht*/
+        htab_rc(const htab_rw&);
         htab_rc(const htab_rc& c);
+
+
         const htab_rc& operator=(const htab_rc& c);
         const htab_rc& operator=(const htab_ptr& c);
         
