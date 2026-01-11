@@ -12,6 +12,9 @@ echo "Made new HtmlGem" . PHP_EOL;
 //debug_zval_dump($hg);
 echo "multiline\n";
 
+echo $hg->hidden(['id' => "returl", 'name' => 'args', 'value' => 'these args here']) . PHP_EOL;
+die;
+
 echo $hg->multiline(["label" => "push", "name" => "test", "value" => "multiline text", "text"=>"anything"]) . PHP_EOL;
 
  echo $hg->plainText(['name' => 'title', 'value' => 'My Title', 'size' => 80,

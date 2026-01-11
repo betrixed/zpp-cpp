@@ -271,7 +271,8 @@ HtmlGem::ensureIdValue(htab_rw ht)
 
 	if( result.ok() )
 	{
-		//zend_printf("has id\n");
+		//zend_printf("has id");
+		//showstr("id: ", result);
 		return result;
 	}
 
@@ -407,8 +408,6 @@ HtmlGem::getTag(htab_ptr ps, htab_rw ex, str_ptr tag)
 {
 	ex.merge(ps);
 	val_ptr test = ex.get(HTG.classkey);
-	
-	//ex.show_data("merged ps");
 
 	//showmem("get_tag", test);
 	if (!test.isNull())
@@ -607,9 +606,8 @@ str_rc HtmlGem::checkbox(val_ptr pset)
 		//check.init(); //  check now invalid
 		if (checkval != 0) {
 			str_rc cval = HTG.checked;
-			//showstr("pushback", cval);
+
 			ps.push_back(cval);
-			//showdata("checkbox", ps);
 		}
 	}
 
@@ -800,14 +798,15 @@ HtmlGem::getLabelKeys1()
 	return label_keys1_;
 }
 
+// Force a copy of ps with ref count
 htab_rc
-HtmlGem::label_method(htab_rw ps, int& labeltype)
+HtmlGem::label_method(htab_rc pscopy, int& labeltype)
 {
 	htab_ptr kist = getLabelKeys1();
+	htab_rw  ps(pscopy);
+
 	htab_rc  result = htab_rc::extract(kist, ps);
 	htab_rw hw_label(result);
-
-	//showdata("hw_label", hw_label);
 
 	str_rc ltext = ps.get(HTG.labelkey);
 
@@ -849,15 +848,11 @@ HtmlGem::inputType(val_ptr pset, str_ptr itype)
 	htab_rw atype(atype_ht);
 
 	atype.set(HTG.typekey, itype);
-
-	//atype.show_data("atype ");
 	
 	htab_rc pscopy(pset.zarray());
 	htab_rw ps(pscopy);
 	
 	ensureIdValue(ps);
-
-	//ps.show_data("psid -- 1 ");
 
 	str_buf out;
 
@@ -875,12 +870,19 @@ HtmlGem::inputType(val_ptr pset, str_ptr itype)
 	
 	int label_loc = LabelLocate::NO_LABEL;
 
+
 	htab_rc ht_label = label_method(ps, label_loc);
 	htab_rw ldata(ht_label);
 
+	// label method will have "unset" is
+	/* if (id.ok())
+	{
+		ps.set(HTG.idkey, id);
+	}
+	*/
+
 	str_rc input =  getTag(ps, atype, HTG.inputtag);
 	
-	//showstr("input tag", input);
 	if (label_loc == LabelLocate::IN_LABEL) {
 		ldata.set(HTG.content_key, input);
 		out << in_label(ldata);
@@ -1068,8 +1070,6 @@ HtmlGem::linkTo(val_ptr pset)
 	htab_walk walk;
 	auto wkey = walk.key();
 	auto wval = walk.value();
-
-	//showdata("ps", ps);
 
 	for(walk.start(ps); walk.ok(); walk.next()) 
 	{

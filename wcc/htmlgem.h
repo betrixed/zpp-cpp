@@ -34,7 +34,7 @@ namespace wcc {
 
 		void  outWrapDiv(str_buf& out, str_ptr cname);
 		void  endWrapDiv(str_buf& out);
-		htab_rc label_method(htab_rw ps, int& labeltype);
+		htab_rc label_method(htab_rc ps, int& labeltype);
 		void outAttr(str_buf& out, str_ptr name, str_ptr value);
 		void ifKeyAttr(str_buf& out, str_ptr key, htab_ptr ps);
 		htab_ptr getLabelKeys1();
