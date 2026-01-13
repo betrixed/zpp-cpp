@@ -3,7 +3,6 @@
 
 namespace Wcc;
 
-use Toml;
 
 require __DIR__ . "/bootstrap.php";
 

@@ -221,7 +221,7 @@ using namespace wcc;
 
 
 
-ZEND_METHOD(Day24, __construct)
+ZEND_METHOD(Wcc_Day24, __construct)
 {
 	zend_string* s;
 	ZEND_PARSE_PARAMETERS_START(1, 1)
@@ -231,7 +231,7 @@ ZEND_METHOD(Day24, __construct)
 	cobj->construct(s);
 }
 
-ZEND_METHOD(Day24, str)
+ZEND_METHOD(Wcc_Day24, str)
 {
 	zend_string* s;
 	ZEND_PARSE_PARAMETERS_START(1, 1)
@@ -241,7 +241,7 @@ ZEND_METHOD(Day24, str)
 	cobj->str(s);
 }
 
-ZEND_METHOD(Day24, day)
+ZEND_METHOD(Wcc_Day24, day)
 {
 	double dval;
 	ZEND_PARSE_PARAMETERS_START(1, 1)
@@ -250,7 +250,7 @@ ZEND_METHOD(Day24, day)
 	auto cobj = zval_toc<Day24>(ZEND_THIS);
 	cobj->day(dval);
 }
-ZEND_METHOD(Day24, value)
+ZEND_METHOD(Wcc_Day24, value)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 	auto cobj = zval_toc<Day24>(ZEND_THIS);
@@ -258,7 +258,7 @@ ZEND_METHOD(Day24, value)
 	RETURN_DOUBLE(dval);
 }
 
-ZEND_METHOD(Day24, time)
+ZEND_METHOD(Wcc_Day24, time)
 {
 	
 	zend_long hours;
@@ -276,7 +276,7 @@ ZEND_METHOD(Day24, time)
 }
 
 
-ZEND_METHOD(Day24, split)
+ZEND_METHOD(Wcc_Day24, split)
 {
 	zval* hours;
 	zval* mins;
@@ -291,7 +291,7 @@ ZEND_METHOD(Day24, split)
 	auto cobj = zval_toc<Day24>(ZEND_THIS);
 	cobj->split(hours, mins, seconds);
 }
-ZEND_METHOD(Day24, format)
+ZEND_METHOD(Wcc_Day24, format)
 {
 	zend_long flags;
 	ZEND_PARSE_PARAMETERS_START(1, 1)
@@ -301,7 +301,7 @@ ZEND_METHOD(Day24, format)
 	str_rc result = cobj->format(flags);
 	result.move_zv(return_value);
 }
-ZEND_METHOD(Day24, __toString)
+ZEND_METHOD(Wcc_Day24, __toString)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
@@ -309,7 +309,7 @@ ZEND_METHOD(Day24, __toString)
 	str_rc result = cobj->toString();
 	result.move_zv(return_value);
 }
-ZEND_METHOD(Day24, day24_time)
+ZEND_METHOD(Wcc_Day24, day24_time)
 {
 	zend_long hours;
 	zend_long mins;
@@ -326,7 +326,7 @@ ZEND_METHOD(Day24, day24_time)
 	RETURN_DOUBLE(result);
 }
 
-ZEND_METHOD(Day24, day24_str)
+ZEND_METHOD(Wcc_Day24, day24_str)
 {
 	zend_string* s;
 	ZEND_PARSE_PARAMETERS_START(1, 1)
@@ -338,7 +338,7 @@ ZEND_METHOD(Day24, day24_str)
 	RETURN_DOUBLE(result);
 }
 
-ZEND_METHOD(Day24, day24_split)
+ZEND_METHOD(Wcc_Day24, day24_split)
 {
 	double dval;
 	zval* hours;
@@ -362,7 +362,7 @@ ZEND_METHOD(Day24, day24_split)
 	ZVAL_DOUBLE(Z_REFVAL_P(seconds), s60);
 }
 
-ZEND_METHOD(Day24, day24_format)
+ZEND_METHOD(Wcc_Day24, day24_format)
 {
 	zend_long flags = Day24::SEC_AUTO;
 	double    dval;

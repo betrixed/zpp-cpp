@@ -174,6 +174,33 @@ ZEND_METHOD(Wcc_Str, camel) {
 	result.move_zv(return_value);
 }
 
+ZEND_METHOD(Wcc_Str, grapheme) {
+	zend_string* src = NULL;
+	zend_long    offset = 0;
+	zval*	   code_ref = 0;
+	zend_long        rlen;
+	char32_t		ucode;
+
+	ZEND_PARSE_PARAMETERS_START(3, 3)
+		Z_PARAM_STR(src)
+		Z_PARAM_LONG(offset)
+		Z_PARAM_ZVAL(code_ref)
+	ZEND_PARSE_PARAMETERS_END();
+
+	char* s = ZSTR_VAL(src);
+	long  slen = ZSTR_LEN(src);
+	if (offset >= 0 && offset < slen) {
+		rlen = ucode8Fwd(s + offset, slen - offset, ucode);
+
+		ZVAL_LONG(Z_REFVAL_P(code_ref), ucode);
+		ZVAL_STRINGL(return_value,s+offset, rlen);
+	}
+	else {
+		ZVAL_LONG(Z_REFVAL_P(code_ref), 0);
+		ZVAL_EMPTY_STRING(return_value);
+	}
+}
+
 ZEND_METHOD(Wcc_Str, intern)
 {
 	zend_string* src = NULL;

@@ -1,4 +1,5 @@
 <?php
+use Wcc\{Day24, Toml};
 
 require "bootstrap.php";
 
@@ -27,15 +28,17 @@ function runit()
     global $data_path;
 
     $parseFiles = [
-    'example.toml',
-    'fruit.toml', 
-    'config.toml',
-    'hard_example.toml', 
-    'hard_example_unicode.toml'
+
+	'book.toml',
+	'example.toml',
+  	'fruit.toml', 
+  	'config.toml',
+	'hard_example.toml', 
+	'hard_example_unicode.toml'
     ];
 
     foreach($parseFiles as $name) {
-        $obj = new TomlReader();
+        $obj = new Toml();
         $td = file_get_contents($data_path . "/tests/" . $name);
         try {
             echo "try parse" . PHP_EOL;

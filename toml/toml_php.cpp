@@ -19,7 +19,7 @@ extern "C" {
 
 #include <filesystem>
 
-#include "daytime.cxx"
+//#include "daytime.cxx"
 
 
 namespace wcc {
@@ -380,7 +380,7 @@ Toml::decodeFile(str_ptr path)
 
 using namespace wcc;
 
-ZEND_METHOD(Toml, decode)
+ZEND_METHOD(Wcc_Toml, decode)
 {
 	zend_string* s;
 	ZEND_PARSE_PARAMETERS_START(1,1)
@@ -392,7 +392,7 @@ ZEND_METHOD(Toml, decode)
 
 }
 
-ZEND_METHOD(Toml, decodeFile)
+ZEND_METHOD(Wcc_Toml, decodeFile)
 {
 	zend_string* path;
 	ZEND_PARSE_PARAMETERS_START(1,1)
@@ -405,7 +405,7 @@ ZEND_METHOD(Toml, decodeFile)
 }
 
 
-ZEND_METHOD(Toml, parse)
+ZEND_METHOD(Wcc_Toml, parse)
 {
 	zend_string* s;
 	ZEND_PARSE_PARAMETERS_START(1,1)
@@ -418,7 +418,7 @@ ZEND_METHOD(Toml, parse)
 	result.move_zv(return_value);
 }
 
-ZEND_METHOD(Toml, parseFile)
+ZEND_METHOD(Wcc_Toml, parseFile)
 {
 	zend_string* path;
 	ZEND_PARSE_PARAMETERS_START(1,1)
@@ -431,9 +431,9 @@ ZEND_METHOD(Toml, parseFile)
 	result.move_zv(return_value);
 }
 
-PHP_MINIT_FUNCTION(Toml_reg)
+PHP_MINIT_FUNCTION(Wcc_Toml_reg)
 {
-	zend_class_entry* ce = register_class_Toml();
+	zend_class_entry* ce = register_class_Wcc_Toml();
 
 	Toml::omg.classEntry(ce);
 

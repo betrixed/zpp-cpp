@@ -1,5 +1,7 @@
 <?php
 
+use Wcc\Toml;
+
 require "bootstrap.php";
 
 
