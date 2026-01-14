@@ -18,13 +18,12 @@
 #include "wcc/finder.cpp"
 #include "wcc/loader.cpp"
 
-#include "wcc/reflect_cache.cpp"
-#include "wcc/services.cpp"
+//#include "wcc/reflect_cache.cpp"
+//#include "wcc/services.cpp"
 #include "wcc/service_access.cpp"
 
-#include "wcc/config.cpp"
 #include "wcc/hmap.cpp"
-#include "wcc/replace.cpp"
+//#include "wcc/replace.cpp"
 
 #include "wcc/icache.cpp"
 #include "wcc/icachedata.cpp"
