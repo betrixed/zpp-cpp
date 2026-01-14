@@ -90,7 +90,7 @@ Target::copy()
 
 	cobj->construct(this->class_, this->func_);
 	cobj->setModule(this->module_);
-
+	cobj->setParams(this->params_);
 	return result;
 }
 

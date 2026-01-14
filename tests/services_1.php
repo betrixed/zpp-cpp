@@ -2,7 +2,7 @@
 //services_1.php
 namespace Wcc;
 
-use Wc\Assets;
+use Wcc\Assets;
 
 use Wcc\RequestGlobals;
 use Wc\Link\LoginHelper;
@@ -195,7 +195,9 @@ echo "icache" . PHP_EOL;
 echo 'has = ' . $svc->has('cache') . PHP_EOL;
 
 
-$assets = new Assets("tests/assets_full.xml");
+$assets = new Assets();
+
+$assets->loadAssetFile("tests/assets_full.xml");
 
 $dump($assets);
 
