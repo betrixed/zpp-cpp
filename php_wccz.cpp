@@ -10,12 +10,13 @@
 #include "zpp/show_zpp.cpp"
 
 
-//#include "wcc/replace.cpp"
-//#include "wcc/config.cpp"
+#include "wcc/replace.cpp"
+#include "wcc/config.cpp"
+
 //#include "wcc/finder.cpp"
 //#include "wcc/hmap.cpp"
-//#include "wcc/reflect_cache.cpp"
-//#include "wcc/services.cpp"
+#include "wcc/reflect_cache.cpp"
+#include "wcc/services.cpp"
 //#include "wcc/service_access.cpp"
 #include "wcc/strfns.cpp"
 
