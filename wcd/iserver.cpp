@@ -26,7 +26,6 @@ base_obj_mgr<IServer> IServer::omg;
 
 class ISVinit : public state_init {
 public:
-	ISVinit() : state_init() {}
 
 	str_intern  wcd_sql_mysql;
 	str_intern  wcd_sql_postgres;

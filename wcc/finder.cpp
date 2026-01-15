@@ -31,7 +31,6 @@ base_obj_mgr<Finder> Finder::omg;
 class Finder_init : public state_init 
 {
 public:
-	Finder_init() : state_init() {}
 
 	str_intern nspaths_key;
 	str_intern classes_key;

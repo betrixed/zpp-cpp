@@ -13,7 +13,6 @@ namespace wcc {
 
 class ASinit : public state_init {
 public:
-	ASinit() : state_init() {}
 
 	str_intern assets_cfg;
 	str_intern assets_str;

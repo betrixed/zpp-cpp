@@ -38,7 +38,6 @@ OBtable   OBfn;
 
 class PlateInit : public state_init {
 public:
-	PlateInit() : state_init(){}
 
 	str_intern engine_key;
 	str_intern name_key;

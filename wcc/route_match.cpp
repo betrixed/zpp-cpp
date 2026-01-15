@@ -60,8 +60,6 @@ using namespace wcc;
 
 class RouteMatch_init : public state_init {
 public:
-	RouteMatch_init() : state_init() {}
-
 	str_intern cc_route_obj;
 	str_intern cc_match_args;
 	str_intern cc_roles;
@@ -78,7 +76,7 @@ public:
 	str_intern cc_route_id;
 	str_intern request_obj;
 
-	virtual void init()
+	void init() override
 	{
 		cc_route_obj = "route";
 		cc_match_args = "match_args";

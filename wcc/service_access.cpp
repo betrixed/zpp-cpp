@@ -25,14 +25,13 @@ base_obj_mgr<ServiceAccess> ServiceAccess::omg;
 
 class SADATA : public state_init {
 public:
-	SADATA() : state_init() {}
 
 	str_intern services;
 	str_intern cache;
 	str_intern init_access;
 	str_intern gservices;
 
-	virtual void init()
+	void init() override
 	{
 		services = "services";
 		cache = "cache";

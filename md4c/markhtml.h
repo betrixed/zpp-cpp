@@ -24,10 +24,6 @@ public:
     str_intern  blockquote;
     str_intern  is_info;
 
-    MTHInit() : state_init() {
-        
-    }
-
     void init() override  {
     	pflags_s = "pflags";
         rflags_s = "rflags";

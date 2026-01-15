@@ -53,18 +53,11 @@ namespace zpp {
 		str_intern       root;
 
 		str_intern       tags;
-		
-		xml_fns();
-		
-        virtual void init();
+
+        void init() override;
     };
 
 	xml_fns XML_FNS;
-
-	xml_fns::xml_fns() : state_init()
-	{
-
-	}
 
 	void xml_fns::init()
 	{

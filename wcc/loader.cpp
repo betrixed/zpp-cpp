@@ -42,8 +42,6 @@ public:
 	str_intern isreg_str;
 	str_intern throwon_err;
 
-	Loader_init();
-
 	void init() override;
 
 	void init_req() override;
@@ -54,12 +52,9 @@ public:
 Loader_init LDRi;
 
 
-Loader_init::Loader_init() : state_init()
-{
-}
-
 void Loader_init::init()
 {
+	//zend_printf("Loader_init::init\n");
 	s_mustload = "mustload";
 	s_register = "spl_autoload_register";
 	s_unregister = "spl_autoload_unregister";
@@ -78,11 +73,13 @@ void Loader_init::init()
 
 void Loader_init::init_req()
 {
+	//zend_printf("Loader_init::init_req\n");
 	gLoader = Loader::omg.new_zobj();
 }
 
 void Loader_init::end_req()
 {
+	//zend_printf("Loader_init::end_req\n");
 	gLoader.init();
 }
 

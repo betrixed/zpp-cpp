@@ -34,7 +34,6 @@ enum LabelLocate {
 
 class HTGInit : public state_init {
 public:
-	HTGInit() : state_init() {}
 
 	str_intern date_icon;
 	str_intern date_fmt;
@@ -119,7 +118,7 @@ public:
 
 	str_intern textarea;
 
-	virtual void init()
+	void init() override
 	{
 		date_icon = "date_icon";
 		date_fmt = "date_fmt";

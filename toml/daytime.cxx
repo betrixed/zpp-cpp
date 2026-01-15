@@ -16,7 +16,6 @@ namespace wcc {
 
 class D24Init : public state_init {
 public:
-	D24Init() : state_init() {}
 
 	void init() override 
 	{

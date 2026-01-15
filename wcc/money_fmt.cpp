@@ -21,7 +21,6 @@ namespace wcc {
 	class MFInit : public state_init
 	{
 	public:
-		MFInit() : state_init() {}
 
 		str_intern lang;
 		str_intern symbol;

@@ -27,9 +27,7 @@ using namespace zpp;
 
 
 class Hmap_init : public state_init {
-public:
-	Hmap_init() : state_init() {}
-            
+public:        
 	str_intern data_key;
 	str_intern obj_key;
 

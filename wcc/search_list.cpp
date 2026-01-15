@@ -12,12 +12,11 @@ base_obj_mgr<SearchList>  SearchList::omg;
 
 class SearchListInit : public state_init {
 public:
-	SearchListInit() : state_init() {}
 
 	str_intern paths_key;
 	str_intern name_key;
 
-	virtual void init()
+	void init() override
 	{
 		paths_key = "paths";
 		name_key = "name";

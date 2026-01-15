@@ -21,7 +21,6 @@ IRow_mgr IRow::omg;
 
 class IRInit : public state_init {
 public:
-	IRInit() : state_init() {}
 
 	void init() override;
 

@@ -42,7 +42,6 @@ namespace wcd {
 
 	class Model_init : public state_init {
 	public:
-		Model_init() : state_init() {}
 
 		str_intern find_first;
 		str_intern find_all;

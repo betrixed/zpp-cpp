@@ -18,7 +18,6 @@ zend_class_entry* gIfLoadHtmlCE;
 
 class PEng_init : public state_init {
 public:
-	PEng_init() : state_init() {}
 
 	str_intern search_list;
 	str_intern shared_data;

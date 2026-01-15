@@ -23,9 +23,7 @@ public:
 
 	str_intern rex_url;
 
-	RouteAddData() : state_init() {}
-
-	virtual void init()
+	void init() override
 	{
 		module_name = "module_name";
 		prefix = "prefix";

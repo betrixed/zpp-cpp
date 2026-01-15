@@ -22,7 +22,6 @@ base_obj_mgr<HtmlPlates>	HtmlPlates::omg;
 class HP_init : public state_init 
 {
 public:
-	HP_init() : state_init() {}
 
 	str_intern  view_model;
 	str_intern  model_svc;

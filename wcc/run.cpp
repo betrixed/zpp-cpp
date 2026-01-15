@@ -195,7 +195,7 @@ public:
 		user_session = "user_session";
 		is_ended = "isended";
 
-		state_init::init();
+		//state_init::init();
 	}
 };
 

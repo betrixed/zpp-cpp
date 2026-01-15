@@ -75,8 +75,6 @@ public:
 	str_intern  tbl_models;
 	str_intern  iconfig_key;
 	str_intern  schema_def;
-
-	DBSInit() : state_init() {}
 		
 
 	void init() override;

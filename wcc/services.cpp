@@ -37,9 +37,7 @@ namespace wcc
 		str_intern throw_fail;
 		str_intern defer_ct;
 
-		Services_data() : state_init() {}
-
-		virtual void init() 
+	 	void init() override 
 		{
 			
 			 active = "active";
@@ -53,13 +51,13 @@ namespace wcc
 			 defer_ct = "defer_ct";
 		}
 
-		virtual void init_req()
+		void init_req() override
 		{
 			g_services = Services::omg.new_zobj();
 			//showobj("new g_services", g_services);
 		}
 
-		virtual void end_req()
+		void end_req() override
 		{
 			//zend_printf("end_req Services_data ");
 			//showobj("g_services", g_services);

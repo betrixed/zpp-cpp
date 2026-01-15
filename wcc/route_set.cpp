@@ -55,9 +55,7 @@ public:
 	str_intern cc_vary;
 	str_intern cc_file;
 
-	RouteSetData() : state_init() {}
-
-	virtual void init()
+	void init() override
 	{
 		module_name = "module_name";
 		prefix = "prefix";
