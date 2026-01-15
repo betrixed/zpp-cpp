@@ -274,11 +274,6 @@ namespace zpp {
      */
     class fntable : public state_init {
     public:
-
-        fntable() : state_init() 
-        {
-        }
-
         str_intern  s_function_exists;
         str_intern  s_class_exists;
         str_intern  s_file_get_contents;

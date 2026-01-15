@@ -48,11 +48,10 @@ namespace zpp {
 
 class base_init : public state_init {
 public:
-	base_init() : state_init() {}
 
 	str_intern class_name;
 
-	virtual void init()
+	void init() override
 	{
 		class_name = "class";
 	}

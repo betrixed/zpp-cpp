@@ -20,7 +20,6 @@ namespace zpp {
 	*/
 	class Date_init : public state_init {
 	public:
-		Date_init() : state_init() {}
 		void init() override;
 
 		str_intern formatkey;
