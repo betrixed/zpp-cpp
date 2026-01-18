@@ -64,15 +64,6 @@ public:
 	dump_info(str_buf& buf) : ss(buf), total_(0) {}
 };
 
-
-
-/*
-	extern std::string di_showstr(const char* s, zend_string* p);
-	extern std::string di_showobj(const char* s, zend_object *obj);
-	extern std::string di_showarray(const char* s, HashTable *ht);
-	extern std::string di_showmem(const char* s, zval *m);
-	extern std::string di_showdata(const char* s, HashTable* ht);
-*/
 	extern void  showstr(const char* s, zend_string* p);
 	extern void  showobj(const char* s, zend_object *obj);
 	extern void  showarray(const char* s, HashTable *ht);

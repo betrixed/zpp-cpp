@@ -77,8 +77,10 @@ namespace zpp {
 
 		long getLong(int base = 10) const;
 
-		rqstring cstr() const;
+		rqstring rqstr() const;
 
+		std::string cstr() const;
+		
 		std::string_view vstr() const;	
 
 		bool ok() const { return (s); }

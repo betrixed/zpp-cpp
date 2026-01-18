@@ -172,12 +172,22 @@ str_ptr::getDouble() const
 }
 
 rqstring 
+str_ptr::rqstr() const
+{
+	
+    const char* ps = s ? (const char*) ZSTR_VAL(s) : empty;
+	size_t      slen = s ? ZSTR_LEN(s) : 0;
+
+	return rqstring(ps, slen);
+}
+
+std::string 
 str_ptr::cstr() const
 {
     const char* ps = s ? (const char*) ZSTR_VAL(s) : empty;
 	size_t      slen = s ? ZSTR_LEN(s) : 0;
 
-	return rqstring(ps, slen);
+	return std::string(ps, slen);
 }
 
 std::string_view 
