@@ -106,7 +106,14 @@ function test($testfile) : mixed {
 }
 
 $data = test($testfile1);
-debug_zpp_dump($data);
+
+if (extension_loaded("wccz"))
+{
+	debug_zpp_dump($data);
+}
+else {
+	debug_zval_dump($data);
+}
 //echo "DIES NOW\n"; return;
 
 
