@@ -274,6 +274,42 @@ Operation::orderBy(val_ptr column, bool descend)
 	return err;
 }
 
+error_return
+Operation::orderStr(str_ptr clauses)
+{
+	error_return result;
+
+	htab_rc ordlist = explode(SQSTR.comma_char, clauses);
+	if (ordlist.size())
+	{
+		htab_walk wk;
+		auto val = wk.value();
+		for(wk.start(ordlist); wk.ok(); wk.next())
+		{
+			str_rc ordstr = val.zstr();
+			htab_rc ord3 = explode(SQSTR.str_space, ordstr);
+			size_t olen = ord3.size();
+			if (olen)
+			{
+				val_rc field = ord3.get((int) 0);
+
+				bool isdesc = false;
+				if (olen>0)
+				{
+					val_rc desc = ord3.get((int) 1);
+					isdesc = (zs_cmp_ci(desc.zstr(),SQSTR.desc)==0);
+					result = this->orderBy(field, isdesc);
+					if (result.has_errors())
+					{
+						return result;
+					}
+				}	
+			}
+		}
+	}
+	return result;
+}
+
 obj_return 
 Operation::prepare(int fetch)
 {
@@ -606,6 +642,23 @@ ZEND_METHOD(Wcd_Sql_Operation, orderBy)
 		Operation* cobj = zval_toc<Operation>(ZEND_THIS);
 
 		error_return result = cobj->orderBy(column, descend);
+		result.throw_errors();
+	}
+}
+
+ZEND_METHOD(Wcd_Sql_Operation, orderStr)
+{
+	zarg_rd args(execute_data);
+
+	str_ptr clause;
+
+	args.zstring(clause, args.need(0));
+
+	if (!args.throw_errors())
+	{
+		Operation* cobj = zval_toc<Operation>(ZEND_THIS);
+
+		error_return result = cobj->orderStr(clause);
 		result.throw_errors();
 	}
 }

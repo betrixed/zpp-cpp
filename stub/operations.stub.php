@@ -31,6 +31,8 @@ class Operation {
 
 	public function limit(mixed $ct, mixed $start = null) : void {}
 
+	public function orderStr(string $clauses) : void {}
+
 	public function orderBy(mixed $column, bool $descend = false) : void {}
 
 	public function prepare(?int $fmode = null) : \Wcd\Simple {}

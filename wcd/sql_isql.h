@@ -128,7 +128,7 @@ namespace wcd {
 			return byAlias_;
 		}
 
-		void order(str_ptr name, bool ascend);
+		void order(str_ptr name, bool descend = false);
 
 
 

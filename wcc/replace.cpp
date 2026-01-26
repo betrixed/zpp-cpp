@@ -42,6 +42,10 @@ Replace::Replace() : base_d(), expr_()
 void 
 Replace::construct(obj_ptr obj, str_ptr rexpr)
 {
+	if (!rexpr.ok())
+	{
+		rexpr = REPi.prop_expr;
+	}
 	expr_.init(rexpr, preg::OFFSET_CAPTURE, true);
 	src_ = obj;
 }

@@ -811,7 +811,7 @@ Bindings::orderBy(val_ptr colspec, bool descend)
 	}
 	
 	val_rc boolmgr(descend); // otherwise taken as integer value
-	hw.set(SQSTR.descend, boolmgr);
+	hw.set(SQSTR.desc, boolmgr);
 
 	add(ISql::SQL_ORDER, args);
 }

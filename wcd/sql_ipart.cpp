@@ -80,8 +80,8 @@ void sql_strtab::init()
 	param = "param";
 
 	ok = "ok";
-	ascend = "ascend";
-	descend = "descend";
+	asc = "asc";
+	desc = "desc";
 
 	limit = "limit";
 	offset = "offset";

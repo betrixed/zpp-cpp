@@ -455,16 +455,16 @@ JoinTables::getTableAlias(str_ptr name)
 }
 
 void 
-JoinTables::order(str_ptr name, bool ascend)
+JoinTables::order(str_ptr name, bool descend)
 {
 	htab_rc pair;
-	val_rc bval;
+	val_rc desc;
 
-	bval.set_bool(ascend);
+	desc.set_bool(descend);
 	htab_rw hw(pair);
 
 	hw.set(SQSTR.column, name);
-	hw.set(SQSTR.ascend, bval);
+	hw.set(SQSTR.desc, desc);
 
 	htab_rw(orderby_).push_back(pair);
 }
@@ -672,11 +672,11 @@ ISql::orderBy(htab_ptr obind)
 				attr = col.zstr();
 				buf << this->quoteName(attr);
 			}
-			val_ptr descend = order.get(SQSTR.descend);
+			val_ptr descend = order.get(SQSTR.desc);
 			if (descend.isTrue()) {
 				buf << " DESC";
 			}
-			else {
+			else { // ?usually the default?
 				buf << " ASC";
 			}
 		}

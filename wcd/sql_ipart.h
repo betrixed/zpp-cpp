@@ -52,8 +52,8 @@ namespace wcd {
 		str_intern  param;
 
 		str_intern  ok;
-		str_intern  ascend;
-		str_intern  descend;
+		str_intern  asc;
+		str_intern  desc;
 
 		str_intern  limit;
 		str_intern  offset;

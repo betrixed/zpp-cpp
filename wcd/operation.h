@@ -59,6 +59,9 @@ public:
 
 	error_return orderBy(val_ptr column, bool descend);
 
+	error_return orderStr(str_ptr clauses);
+	
+
 	obj_return prepare(int fetch);
 
 	error_return returns(htab_ptr list);

@@ -228,7 +228,7 @@ class JoinTables {
 
     public function getTables(): array {}
 
-    public function order(string $name, bool $ascend = true) : void {}
+    public function order(string $name, bool $descend = false) : void {}
 
     public static function rowSplit(array $row, array $rename) : object {}
     
