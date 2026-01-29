@@ -11,6 +11,10 @@ class Run {
 
     public readonly Config $config;
 
+    public readonly string $site_dir;
+    public readonly string $gallery;
+    public readonly string $theme;
+    
     public readonly string $site_leaf;
     public readonly string $wc_leaf;
     public readonly string $vendor_leaf;

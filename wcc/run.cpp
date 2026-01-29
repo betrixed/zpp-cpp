@@ -61,6 +61,7 @@ public:
 	str_intern site_leaf;
 
 	str_intern site_leaf_const;
+	str_intern site_const;
 
 	str_intern wc_leaf;
 	str_intern vendor_leaf;
@@ -101,6 +102,9 @@ public:
 	str_intern br_eol;
 	str_intern br_html;
 	str_intern br_eol_str;
+
+	str_intern gallery_str;
+	str_intern site_dir;
 
 	str_intern ns_sep;
 	str_intern dir_sep;
@@ -174,6 +178,9 @@ public:
 		br_eol = "\n";
 		br_html = "<br>\n";
 		br_eol_str = "BR_EOL";
+
+		site_dir = "site_dir";
+		gallery_str = "gallery";
 
 		ns_sep = "\\";
 		dir_sep = "/";
@@ -273,7 +280,19 @@ void Run::construct()
 	str_rc site_leaf = get_constant(Run_i.site_leaf_const);
 	self.property(Run_i.site_leaf, site_leaf);
 
+	str_rc tstr = get_constant(Run_i.site_const);
+	self.property(Run_i.site_dir, tstr);
+
+
 	str_buf buf;
+
+	buf << '/' << site_dir << "/gallery";
+	tstr = buf.zstr();
+
+	self.property(Run_i.gallery_str, tstr);
+
+	self.property(Run_i.theme_str, buf.zstr());
+
 	buf << site_leaf << "/config";
 	self.property(Run_i.config_dir, buf.zstr());
 
