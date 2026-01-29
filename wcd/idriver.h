@@ -38,6 +38,9 @@ namespace wcd {
 		virtual void afterConnect();
 		virtual str_rc getSqlType();
 		virtual void debug_info(htab_rw di);
+		virtual htab_rc getConnectOptions();
+		virtual htab_return getTableNames();
+		virtual val_rc lastSeqValue(str_ptr name);
 		
 		static int pdo_type(unsigned int ztype);
 		
@@ -65,7 +68,7 @@ namespace wcd {
 		void setCaseAttribute(int value);
 
 		htab_return getColumnNames(str_ptr tableName);
-		htab_rc getConnectOptions();
+		
 
 		str_return getDSN();
 
@@ -80,7 +83,7 @@ namespace wcd {
 		htab_return getTableColumns(str_ptr tableName);
 		obj_rc getTableMode(str_ptr tableName);
 
-		htab_rc getTableNames();
+		
 
 		val_rc handle();
 
@@ -94,7 +97,7 @@ namespace wcd {
 
 
 		val_rc lastInsertId();
-		val_return lastSeqValue(str_ptr name);
+		
 
 		void log(htab_ptr info);
 

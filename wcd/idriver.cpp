@@ -1323,8 +1323,9 @@ ZEND_METHOD(Wcd_IDriver, getTableNames)
 
 	IDriver* db = zval_toc<IDriver>(ZEND_THIS);
 
-	htab_rc result = db->getTableNames();
-	result.move_zv(return_value);
+	htab_return result = db->getTableNames();
+	result.throw_errors();
+	result.value_.move_zv(return_value);
 }
 
 
@@ -1417,9 +1418,8 @@ ZEND_METHOD(Wcd_IDriver, lastSeqValue)
 	{
 		IDriver* db = zval_toc<IDriver>(ZEND_THIS);
 
-		val_return result = db->lastSeqValue(seqname);
-		result.throw_errors();
-		result.value_.move_zv(return_value);
+		val_rc result = db->lastSeqValue(seqname);
+		result.move_zv(return_value);
 	}
 }
 

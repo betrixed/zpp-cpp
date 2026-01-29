@@ -5,15 +5,6 @@
  */
 namespace Wcd;
 
-/*
-use Wcd\Sql\Bindings;
-use Wcd\Sql\ISql;
-use Wcd\Sql\JoinTables;
-use Wcd\Sql\ParamList;
-*/
-
-
-
 class IDriver {
 
     public readonly string $name;

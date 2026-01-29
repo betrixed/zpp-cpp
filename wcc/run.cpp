@@ -133,7 +133,8 @@ public:
 
 		site_leaf = "site_leaf";
 		site_leaf_const = "SITE_LEAF";
-
+		site_const = "SITE";
+		
 		wc_leaf = "wc_leaf";
 		vendor_leaf = "vendor_leaf";
 		vendor_str = "vendor";
@@ -286,10 +287,11 @@ void Run::construct()
 
 	str_buf buf;
 
-	buf << '/' << site_dir << "/gallery";
+	buf << '/' << tstr << "/gallery";
 	tstr = buf.zstr();
 
 	self.property(Run_i.gallery_str, tstr);
+	buf << tstr << "/site";
 
 	self.property(Run_i.theme_str, buf.zstr());
 
