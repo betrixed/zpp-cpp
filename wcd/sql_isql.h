@@ -73,8 +73,6 @@ namespace wcd {
 
 		obj_rc prime_;
 		str_rc model_;
-
-
 	public:
 
 		static base_obj_mgr<JoinTables> omg;

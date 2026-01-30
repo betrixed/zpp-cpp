@@ -40,7 +40,7 @@ namespace wcd {
 		virtual void debug_info(htab_rw di);
 		virtual htab_rc getConnectOptions();
 		virtual htab_return getTableNames();
-		virtual val_rc lastSeqValue(str_ptr name);
+		virtual val_return lastSeqValue(str_ptr name);
 		
 		static int pdo_type(unsigned int ztype);
 		

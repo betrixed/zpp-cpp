@@ -14,10 +14,11 @@ namespace wcd {
 	public:
 
 		static base_obj_mgr<Pdo_pgsql> omg;
-
+		static zend_class_entry* register_class(zend_class_entry* pclass);
+		
 		str_rc getSqlType() override;
 		htab_return getTableNames() override;
-		val_rc  lastSeqValue(str_ptr name) override;
+		val_return  lastSeqValue(str_ptr name) override;
 	};
 
 };

@@ -32,7 +32,13 @@ extern "C" {
 #include "model.h"
 #endif
 
+#ifndef WCD_ISQL_H
+#include "isql.h"
+#endif
 
+#ifndef WCD_PDO_PGSQL_H
+#include "pdo_pgsql.h"
+#endif
 
 namespace wcd {
 
@@ -1418,8 +1424,8 @@ ZEND_METHOD(Wcd_IDriver, lastSeqValue)
 	{
 		IDriver* db = zval_toc<IDriver>(ZEND_THIS);
 
-		val_rc result = db->lastSeqValue(seqname);
-		result.move_zv(return_value);
+		val_return result = db->lastSeqValue(seqname);
+		result.value_.move_zv(return_value);
 	}
 }
 
@@ -1671,8 +1677,12 @@ ZEND_METHOD(Wcd_IDriver, getWeakRef)
 
 PHP_MINIT_FUNCTION(Wcd_IDriver_reg)
 {
-	IDriver::omg.classEntry(register_class_Wcd_IDriver());
-	
+	zend_class_entry* dclass = register_class_Wcd_IDriver();
+
+	IDriver::omg.classEntry(dclass);
+	Pdo_pgsql::register_class(dclass);
+
+
 	class_data cval(IDriver::omg.class_entry_);
 
 	cval.add_constant("FETCH_OBJECT", PDO_FETCH_OBJ);

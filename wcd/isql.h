@@ -33,6 +33,7 @@ namespace wcd {
 		str_return select_jt(Bindings& bind, JoinTables* jt);
 
 	public:
+		// should mirror constants defined in IfSql
 		enum {
 			SQL_OBJ    = 0, 
 		    SQL_INSERT = 1,
@@ -62,7 +63,11 @@ namespace wcd {
 
 		static str_rc tableClass(str_ptr s);
 
-		str_rc seqLastValue(str_ptr seq);
+		virtual str_rc quoteName(str_ptr name);
+
+		virtual str_rc seqLastValue(str_ptr seq);
+
+		virtual str_return truncate(Bindings& bind);
 
 		str_return setSeqValue(int value, htab_ptr data);
 		
@@ -74,11 +79,11 @@ namespace wcd {
 
 		obj_return select(Bindings& bind);
 
-		str_return truncate(Bindings& bind);
+		
 
 		obj_return update(Bindings& bind);
 
-		str_rc quoteName(str_ptr name);
+		
 
 		str_return emit(val_ptr sp, Bindings* bind, str_ptr lalias, str_ptr ralias);
 

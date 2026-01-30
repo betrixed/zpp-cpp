@@ -33,6 +33,10 @@ extern "C" {
 };
 #endif
 
+#ifndef WCD_SQL_POSTGRES_H
+#include "postgres.h"
+#endif
+
 namespace wcd {
 
 using namespace zpp;
@@ -1020,10 +1024,15 @@ bool init_isql_module()
 {
 	// need the IfSql interface
 
+	// class register must be done in dependency order.
+
 	zintf_ce_Sql_IfSql = register_class_Wcd_Sql_IfSql();
 
 	zclass_isql = register_class_Wcd_Sql_ISql(zintf_ce_Sql_IfSql);
+
 	ISql::omg.classEntry(zclass_isql);
+
+	Postgres::register_class(zclass_isql);
 
 	zclass_bindings = register_class_Wcd_Sql_Bindings();
 	Bindings::omg.classEntry(zclass_bindings);
