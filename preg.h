@@ -46,7 +46,7 @@ namespace zpp {
 
 	class preg {
 	protected:
-		pcre_cache_entry* pce_;
+		pcre_cache_entry* pce_; // cached generated entry
 		str_rc      	  regexp_;
 		val_rc            result_; //hold result, array of matches
 		zend_long         count_;
@@ -72,6 +72,8 @@ namespace zpp {
 		preg();
 
 		~preg();
+
+		void release(); // release refcount on pce;
 
 		int 	 matches(str_ptr subject, zend_long offset = 0);
 		val_rc   splits(str_ptr data, int limit = -1);

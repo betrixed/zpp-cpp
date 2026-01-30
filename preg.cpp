@@ -154,11 +154,17 @@ preg::init(str_ptr expr, int flags, bool global)
 	global_ = global;
 }
 
-preg::~preg() {
+void
+preg::release()
+{
 	if (pce_ != nullptr) {
 		//zend_printf("Release PCE %lx\n", pce_);
 	    php_pcre_pce_decref(pce_);
 	}
+}
+
+preg::~preg() {
+	release();
 }
 
 pcre_cache_entry*  
