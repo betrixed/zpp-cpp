@@ -1,15 +1,23 @@
 #ifndef WCD_ISQL_CPP
 #define WCD_ISQL_CPP
 
+#ifndef WCD_ISQL_ARGINFO
+#define WCD_ISQL_ARGINFO
+
+extern "C" {
+	#include "stub/isql_arginfo.h"
+}
+#endif
+
 namespace wcd {
 using namespace zpp;
 
 
 
-base_obj_mgr<ISql>  		ISql::omg;
+base_obj_mgr<ISql> ISql::omg;
 
 zend_class_entry* 	zintf_ce_Sql_IfSql;
-zend_class_entry* zclass_isql;
+zend_class_entry* 	zclass_isql;
 
 
 str_rc
@@ -1324,12 +1332,36 @@ ISql::where(Bindings &bind, htab_ptr wtab)
 	return result;
 }
 
+//static 
+zend_class_entry* 
+ISql::register_class()
+{
+
+	zintf_ce_Sql_IfSql = register_class_Wcd_Sql_IfSql();
+
+	zclass_isql = register_class_Wcd_Sql_ISql(zintf_ce_Sql_IfSql);
+
+	ISql::omg.classEntry(zclass_isql);
+
+	Postgres::register_class(zclass_isql);
+
+	return zclass_isql;
+}
 
 
-}//namespace
+}//namespace wcd
 
 using namespace wcd;
 using namespace zpp;
+
+	
+
+	
+
+	
+
+	
+
 
 /* public function delete(Bindings $bind) : ParamList {} */
 ZEND_METHOD(Wcd_Sql_ISql, deleteSql)

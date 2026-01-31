@@ -18,6 +18,7 @@ extern "C" {
 
 namespace wcd {
 
+base_obj_mgr<Postgres> Postgres::omg;
 
 PGSInit PGSd;
 

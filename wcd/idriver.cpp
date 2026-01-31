@@ -311,6 +311,17 @@ int IDriver::pdo_type(unsigned int ztype)
 	}
 }
 
+htab_return 
+IDriver::getTableNames()
+{
+	htab_return result;
+
+	result.error() << "Not implemented in IDriver";
+
+	return result;
+}
+
+
 void 
 IDriver::close()
 {
@@ -1677,6 +1688,7 @@ ZEND_METHOD(Wcd_IDriver, getWeakRef)
 
 PHP_MINIT_FUNCTION(Wcd_IDriver_reg)
 {
+
 	zend_class_entry* dclass = register_class_Wcd_IDriver();
 
 	IDriver::omg.classEntry(dclass);

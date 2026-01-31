@@ -15,7 +15,8 @@ namespace wcd {
 	class ParamList;
 
 
-	extern zend_class_entry* zclass_isql;
+	extern zend_class_entry* 	zclass_isql;
+	extern zend_class_entry* 	zintf_ce_Sql_IfSql;
 
 	class ISql : public base_d 
 	{
@@ -60,6 +61,8 @@ namespace wcd {
 		};
 
 		static base_obj_mgr<ISql>  omg;
+
+		static zend_class_entry* register_class();
 
 		static str_rc tableClass(str_ptr s);
 

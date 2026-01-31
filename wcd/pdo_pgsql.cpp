@@ -11,6 +11,8 @@ extern "C" {
 namespace wcd {
 using namespace zpp;
 
+base_obj_mgr<Pdo_pgsql> Pdo_pgsql::omg;
+
 class PGInit : state_init 
 {
 public:
@@ -73,7 +75,7 @@ Pdo_pgsql::lastSeqValue(str_ptr name)
 
 //static 
 zend_class_entry* 
-register_class(zend_class_entry* pclass)
+Pdo_pgsql::register_class(zend_class_entry* pclass)
 {
 	zend_class_entry* me = register_class_Wcd_PdoPgsql(pclass);
 	Pdo_pgsql::omg.classEntry(me);

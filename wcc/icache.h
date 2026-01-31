@@ -29,23 +29,27 @@ public:
 
 	static obj_rc make_cache( val_ptr options, val_ptr services);
 
-	void construct(val_ptr options, val_ptr services);
+	virtual void construct(val_ptr options, val_ptr services);
+
+	virtual bool clear();
+
+	virtual bool deleteKey(str_ptr key);
+
+	virtual val_rc get(str_ptr key, val_ptr noval = val_ptr());
+
+	virtual bool set(str_ptr key, val_ptr data, zend_long ttl = 0);
+
+	virtual void debug_info(htab_rw s);
 
 	void addLocal(val_ptr pkg);
 
-	bool clear();
-
 	bool clearPrefix(str_ptr prefix);
-
-	bool deleteKey(str_ptr key);
 
 	htab_rc getExpired();
 	
 	int  deleteExpired();
 
 	bool deleteMultiple(htab_ptr keys);
-
-	val_rc get(str_ptr key, val_ptr noval = val_ptr());
 
 	val_rc getCached(str_ptr key);
 
@@ -69,8 +73,6 @@ public:
 	val_rc getOption(str_ptr key);
 
 	void setOption(str_ptr key, val_ptr value);
-	
-	bool set(str_ptr key, val_ptr data, zend_long ttl = 0);
 
 	obj_rc setCached(str_ptr key, val_ptr data, zend_long ttl = 0);
 
@@ -83,11 +85,7 @@ public:
 		ttl_ = ttl;
 	}
 
- 	virtual void debug_info(htab_rw s);
- 	
 	VIRTUAL_ZOBJPTR
-
-
 };
 
 
