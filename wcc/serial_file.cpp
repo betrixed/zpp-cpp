@@ -28,6 +28,32 @@ void SFData::init()
 	run_str = "run";
 	dos_str = "dos";
 	rm_alldir = "rm_alldir";
+
+	skip_dots = "SKIP_DOTS";
+	key_as_pathname = "KEY_AS_PATHNAME";
+	current_as_fileinfo = "CURRENT_AS_FILEINFO";
+
+	valid_s = "valid";
+	current_s = "current";
+	key_s = "key";
+	gettype_s = "gettype";
+
+	getchildren_s = "getchildren";
+	getextension_s = "getextension";
+	getpath_s = "getpath";
+
+	file_s = "file";
+	dir_s = "dir";
+	next_s = "next";
+
+	class_data cdata(file_iterator);
+
+	val_rc temp = cdata.constant_value(skip_dots);
+	file_itflags = temp.zlong();
+	temp = cdata.constant_value(key_as_pathname);
+	file_itflags |= temp.zlong();
+	temp = cdata.constant_value(current_as_fileinfo);
+	file_itflags |= temp.zlong();
 }
 
 
@@ -61,6 +87,113 @@ SerialFile::construct(val_ptr options, val_ptr services)
 	}
 }
 
+struct ExpiredCollect {
+public:
+	str_rc 	 root_dir_;
+	str_rc 	 extn_;
+	htab_rc  expired_;
+	zend_long now_;
+
+	fn_call  dit_valid;
+	fn_call  dit_current;
+	fn_call  dit_getType;
+	fn_call  dit_key;
+	fn_call  dit_getpath;
+	fn_call  dit_getchildren;
+	fn_call  dit_next;
+
+	fn_call  cur_getExt;
+
+
+	ExpiredCollect()
+	{
+		dit_valid.set_fname(SFDi.valid_s);
+		dit_current.set_fname(SFDi.current_s);
+		dit_getType.set_fname(SFDi.gettype_s);	
+		dit_key.set_fname(SFDi.key_s);
+		dit_getpath.set_fname(SFDi.getpath_s);
+		dit_getchildren.set_fname(SFDi.getchildren_s);
+		dit_next.set_fname(SFDi.next_s);
+
+		cur_getExt.set_fname(SFDi.getextension_s);
+
+	}
+
+	void setdirit(obj_ptr dit)
+	{
+		dit_valid.set_obj(dit);
+		dit_current.set_obj(dit);
+		dit_getType.set_obj(dit);
+		dit_key.set_obj(dit);
+		dit_getpath.set_obj(dit);
+		dit_getchildren.set_obj(dit);
+	}
+
+	htab_rc collect(str_ptr root, str_ptr extn)
+	{
+		now_ = time(nullptr);
+		htab_rc args_array;
+
+		htab_rw args(args_array);
+		root_dir_ = root;
+		extn_ = extn;
+
+		args.push_back(root);
+		args.push_back(SFDi.file_itflags);
+
+		obj_rc dit = ReflectCache::staticInstanceArgs(
+						SFDi.dir_iterator, args);
+
+		expired_ = htab_rc();
+
+		recurseDir(dit);
+
+		return expired_;
+	}
+
+	int recurseDir(obj_ptr dit)
+	{
+		int result = 0;
+
+		setdirit(dit);
+
+		htab_rw files(expired_);
+	
+		val_rc is_valid = dit_valid.call_fn();
+
+		while(is_valid.isTrue())
+		{
+			str_rc dtype = dit_gettype.call_fn();
+
+			if (zs_cmp_ci(dtype,SFDi.file_str)==0)
+			{
+				obj_rc cur = dit_current.call_fn();
+				cur_getExt.set_obj(cur);
+				str_rc ext = cur_getExt.call_fn();
+				if (zs_cmp_ci(ext, extn_)==0)
+				{
+					str_rc path = dit_key.call_fn();
+					if (is_expired(path))
+					{
+						files.push_back(path);
+						result += 1;
+					}
+				}
+			}
+			else if (zs_cmp_ci(dtype, SFDi.dir_str)==0)
+			{
+				obj_rc chdit = dit_getchildren.call_fn(); 
+				result += recurseDir(chdir);
+			}
+			dit_next.call_fn();
+			is_valid = dit_valid.call_fn();
+		} 
+		return result;
+	}
+
+
+};
+
 bool 
 SerialFile::clear()
 {
@@ -85,10 +218,34 @@ SerialFile::clear()
 	return result;
 }
 
+static zend_long 
+RecurseDir(obj_ptr dirit, str_ptr extension, htab_rw expired)
+{
+	zend_long now = time(nullptr);
+}
+
+htab_rc //static
+SerialFile::getExpiredFiles(str_ptr dir, str_ptr ext)
+{
+	ExpiredCollect collect;
+
+	return collect.collect(dir, ext);
+}
+
 int  
 SerialFile::deleteExpired()
 {
+	this->icache::deleteExpired();
 
+	htab_rc expired = getExpiredFiles(cache_dir_, SFDi.sfile_ext);
+
+	htab_walk wk;
+
+	auto path = wk.value();
+	for(wk.start(expired); wk.ok(); wk.next())
+	{
+		unlink(path);
+	}
 }
 
 bool 

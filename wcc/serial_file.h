@@ -26,6 +26,25 @@ public:
 	str_intern user_session;
 	str_intern rm_alldir;
 
+	str_intern skip_dots;
+	str_intern key_as_pathname;
+	str_intern current_as_fileinfo;
+
+	str_intern valid_s;
+	str_intern current_s;
+	str_intern key_s;
+	str_intern gettype_s;
+	
+	str_intern getpath_s;
+	str_intern getextension_s;
+	str_intern getchildren_s;
+
+	str_intern file_s;
+	str_intern dir_s;
+	str_intern next_s;
+
+	zend_long  file_itflags;
+
 	void init() override;
 };
 
@@ -40,6 +59,7 @@ protected:
 public:
 
 	static base_obj_mgr<SerialFile> omg;
+	static htab_rc getExpiredFiles(str_ptr dir, str_ptr ext);
 
 	void construct(val_ptr options, val_ptr services) override;
 	bool clear() override;
@@ -48,6 +68,7 @@ public:
 	val_rc get(str_ptr key, val_ptr noval = val_ptr()) override;
 	bool deleteKey(str_ptr key) override;
 
+	
  	virtual void debug_info(htab_rw s);
  	
 	VIRTUAL_ZOBJPTR
