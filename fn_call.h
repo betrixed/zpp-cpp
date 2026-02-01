@@ -301,6 +301,7 @@ namespace zpp {
         str_intern  s_filemtime;
         str_intern  s_realpath;
         str_intern  s_glob;
+        str_intern  s_unlink;
         
         void init() override;
         void init_req() override;
@@ -366,6 +367,7 @@ namespace zpp {
 
     bool fclose(val_ptr fres);
 
+
     str_rc preg_quote(str_ptr expr, str_ptr delimiter);
 
     str_rc file_get_contents(str_ptr path, int offset=0, size_t len=0);
@@ -390,6 +392,8 @@ namespace zpp {
     long filemtime(str_ptr path);
 
     bool is_dir(str_ptr path);
+
+    bool unlink(str_ptr path, val_ptr context = val_ptr());
 
     str_rc getcwd();
 

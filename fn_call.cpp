@@ -116,6 +116,7 @@ public:
     fn_realpath   realpath; 
     fn_glob       glob;
 
+    fn_call_args<2>     unlink;
     fn_weakref_create weakref_create;
     fn_weakref_get    weakref_get;
 
@@ -158,6 +159,7 @@ public:
         php_sapi_name.set_fname(ftab.s_php_sapi_name);
         filemtime.set_fname(ftab.s_filemtime);
         glob.set_fname(ftab.s_glob);
+        unlink.set_fname(ftab.s_unlink);
     }
 
 
@@ -793,6 +795,7 @@ fntable::init()
     s_filemtime = "filemtime";
     s_realpath = "realpath";
     s_glob = "glob";
+    s_unlink = "unlink";
 
 
 }
@@ -970,6 +973,23 @@ glob(str_ptr wcard, int flags)
     htab_rc result;
     result = TLFNs.glob.call(wcard, flags);
     return result;
+}
+
+bool
+unlink(str_ptr path, val_ptr context)
+{
+    auto& fn = TLFNs.unlink;
+    zval* ap = fn.argsptr();
+    ZVAL_STR(ap, path);
+    ap++;
+    if (context.ok())
+    {
+        ZVAL_COPY_VALUE(ap, context);
+    }
+    else {
+        ZVAL_NULL(ap);
+    }
+    val_rc result = fn.call_fn();
 }
 
 obj_rc 
