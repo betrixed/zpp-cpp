@@ -202,6 +202,10 @@ namespace zpp {
     public:
         bool call(str_ptr name);
     };
+
+    typedef fn_call_args<2> fn_call_args2;
+    typedef fn_call_args<3> fn_call_args3;
+
     /*
     class fn_simple_loader : public fn_call_args<1> {
     public:
@@ -283,6 +287,8 @@ namespace zpp {
         str_intern  s_call_user_func_array;
         str_intern  s_fgetcsv;
         str_intern  s_fopen;
+
+
         str_intern  s_fclose;
         str_intern  s_constant;
         str_intern  s_dirname;
@@ -302,6 +308,8 @@ namespace zpp {
         str_intern  s_realpath;
         str_intern  s_glob;
         str_intern  s_unlink;
+
+        str_intern  s_fwrite;
         
         void init() override;
         void init_req() override;
@@ -367,6 +375,7 @@ namespace zpp {
 
     bool fclose(val_ptr fres);
 
+    val_rc fwrite(val_ptr fres, str_ptr data, zend_long length = -1);
 
     str_rc preg_quote(str_ptr expr, str_ptr delimiter);
 

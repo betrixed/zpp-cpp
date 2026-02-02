@@ -116,7 +116,9 @@ public:
     fn_realpath   realpath; 
     fn_glob       glob;
 
-    fn_call_args<2>     unlink;
+    fn_call_args2     unlink;
+    fn_call_args3     fwrite;
+
     fn_weakref_create weakref_create;
     fn_weakref_get    weakref_get;
 
@@ -160,6 +162,7 @@ public:
         filemtime.set_fname(ftab.s_filemtime);
         glob.set_fname(ftab.s_glob);
         unlink.set_fname(ftab.s_unlink);
+        fwrite.set_fname(ftab.s_fwrite);
     }
 
 
@@ -797,6 +800,8 @@ fntable::init()
     s_glob = "glob";
     s_unlink = "unlink";
 
+    s_fwrite = "fwrite";
+
 
 }
 
@@ -975,6 +980,30 @@ glob(str_ptr wcard, int flags)
     return result;
 }
 
+val_rc 
+fwrite(val_ptr res, str_ptr data, zend_long len)
+{
+     val_rc result;
+
+     auto& fn = TLFNs.fwrite;
+
+     zval *ap = fn.argsptr();
+     ZVAL_COPY_VALUE(ap, res);
+     ap++;
+     ZVAL_STR(ap, data);
+     app++;
+     if (len > 0)
+     {
+        ZVAL_LONG(ap, len);
+     }
+     else 
+     {
+        ZVAL_NULL(ap);
+     }
+     result = fn.call_fn();
+     return result; 
+}
+
 bool
 unlink(str_ptr path, val_ptr context)
 {
@@ -990,6 +1019,7 @@ unlink(str_ptr path, val_ptr context)
         ZVAL_NULL(ap);
     }
     val_rc result = fn.call_fn();
+    return result.isTrue();
 }
 
 obj_rc 
