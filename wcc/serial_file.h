@@ -42,6 +42,8 @@ public:
 	str_intern file_s;
 	str_intern dir_s;
 	str_intern next_s;
+	str_intern fmode_w;
+	str_intern fmode_r;
 
 	zend_long  file_itflags;
 
@@ -66,11 +68,15 @@ public:
 	int  deleteExpired() override;
 	bool set(str_ptr key, val_ptr data, zend_long ttl = 0) override;
 	val_rc get(str_ptr key, val_ptr noval = val_ptr()) override;
-	bool deleteKey(str_ptr key) override;
+	val_rc getCached(str_ptr key) override;
 
-	
- 	virtual void debug_info(htab_rw s);
+	bool deleteKey(str_ptr key) override;
  	
+ 	void debug_info(htab_rw s) override;
+ 	
+ 	bool writePkg(obj_ptr pkg);
+
+
 	VIRTUAL_ZOBJPTR
 };
 

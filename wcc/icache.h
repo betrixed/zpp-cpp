@@ -39,6 +39,8 @@ public:
 
 	virtual bool set(str_ptr key, val_ptr data, zend_long ttl = 0);
 
+	virtual val_rc getCached(str_ptr key);
+
 	virtual void debug_info(htab_rw s);
 
 	void addLocal(val_ptr pkg);
@@ -51,7 +53,7 @@ public:
 
 	bool deleteMultiple(htab_ptr keys);
 
-	val_rc getCached(str_ptr key);
+	
 
 	val_rc getData(str_ptr key);
 

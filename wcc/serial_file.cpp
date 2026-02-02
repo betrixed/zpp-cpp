@@ -45,6 +45,8 @@ void SFData::init()
 	file_s = "file";
 	dir_s = "dir";
 	next_s = "next";
+	fmode_w = "w";
+	fmode_r = "r";
 
 	class_data cdata(file_iterator);
 
@@ -235,9 +237,11 @@ SerialFile::getExpiredFiles(str_ptr dir, str_ptr ext)
 int  
 SerialFile::deleteExpired()
 {
+	int result  = 0;
 	this->icache::deleteExpired();
 
 	htab_rc expired = getExpiredFiles(cache_dir_, SFDi.sfile_ext);
+	result = expired.size();
 
 	htab_walk wk;
 
@@ -246,23 +250,128 @@ SerialFile::deleteExpired()
 	{
 		unlink(path);
 	}
+
+	return result;
+}
+
+val_rc 
+SerialFile::getCached(str_ptr key)
+{
+	val_rc result;
+
+	if (keeplocal_)
+	{
+		result = ICache::getCached(key);
+		if (result.isObject())
+		{
+			return result;
+		}
+	}
+	int now = time(nullptr);
+
+	str_rc file_name = this->getFileName(key);
+	if (!is_file(file_name) || !is_readable(file_name))
+	{
+		return result;
+	}
+	val_rc fin = fopen(file_name, SFDi.fmode_r);
+
 }
 
 bool 
 SerialFile::set(str_ptr key, val_ptr data, zend_long ttl = 0)
 {
+	if (ttl <= 0)
+	{
+		ttl = this->getTTL();
+	}
 
+	obj_rc pkg = ICacheData::obm.new_zobj();
+	ICacheData* icd = zobj_toc<ICacheData>(pkg);
+	icd->construct(key, data, ttl);
+
+	if (keep_local_)
+	{
+		this->addLocal(pkg);
+	}
+
+	bool defer_write = (keep_local_) ? this->defer_write_ : false; 
+
+	if (defer_write)
+	{
+		return true;
+	}
+
+	return this->writePkg(pkg);
 }
 
 val_rc 
 SerialFile::get(str_ptr key, val_ptr noval = val_ptr())
 {
+	val_rc result;
 
+	val_rc dataobj = this->getCached(key);
+
+	if (dataobj.isObject())
+	{
+		ICacheData* icdata = zval_toc<ICacheData>(dataobj); 
+		result  = icdata->getData();
+	}
+
+	return result;
 }
 
 bool 
 SerialFile::deleteKey(str_ptr key)
 {
+	str_rc file = this->getFileName(key);
+	if (file_exists(file))
+	{
+		return unlink(file);
+	}
+	return true;
+}
+
+bool SerialFile::writePkg(obj_ptr pkg)
+{
+	str_rc key = pkg->getKey();
+
+	str_rc dir = this->getDirectory(key);
+
+	if (!is_dir(dir))
+	{
+		if (!mkdir(dir, 0755, true))
+		{
+			return false;
+		}
+	}
+
+	str_rc file_name = this->getFileName(key);
+
+	ICacheData* ic = zobj_toc<ICacheData>(pkg);
+
+	ic->setStored();
+
+	int expiry = ic->getExpiry();
+
+	str_rc sbin = serialize(pkg);
+
+	size_t plen = sbin.size();
+
+	val_rc fout = fopen(file_name, SFDi.fmode_w);
+
+	sbuf buf;
+	buf << expiry << endl;
+	fwrite(fout, buf.zstr());
+
+	buf << plen << endl;
+	fwrite(fout, buf.zstr());
+
+	fwrite(fout, sbin);
+
+	fclose(fout);
+
+	return true;
 
 }
 
