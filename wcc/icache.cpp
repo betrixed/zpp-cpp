@@ -17,6 +17,12 @@ extern "C" {
 };
 #endif
 
+
+
+#ifndef SERIAL_FILE_H
+#include "serial_file.h"
+#endif
+
 namespace wcc {
 
 using namespace zpp;
@@ -743,6 +749,8 @@ PHP_MINIT_FUNCTION(Wcc_ICache_reg)
 	auto ce = register_class_Wcc_ICache();
 
 	ICache::omg.classEntry(ce);
+
+	SerialFile::register_class(ce);
 
 	return SUCCESS;
 }

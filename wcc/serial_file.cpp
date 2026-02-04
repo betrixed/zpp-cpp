@@ -5,7 +5,19 @@
 #include "serial_file.h"
 #endif
 
-namespace wcd {
+
+#ifndef SERIALFILE_ARGINFO
+#define SERIALFILE_ARGINFO
+extern "C" {
+	#include "stub/serialfile_arginfo.h"
+};
+#endif
+
+#ifndef WCC_RUNSA_H
+#include "run.h"
+#endif
+
+namespace wcc {
 
 using namespace zpp;
 
@@ -84,7 +96,8 @@ SerialFile::construct(val_ptr options, val_ptr services)
 		test = this->getService(SFDi.run_str);
 		if (test.ok())
 		{
-			cache_dir_ = test.property(Run_i.temp_dir);
+			obj_ptr run = test.zobject();
+			cache_dir_ = run.property(Run_i.temp_dir);
 		}
 	}
 }
@@ -98,7 +111,7 @@ public:
 
 	fn_call  dit_valid;
 	fn_call  dit_current;
-	fn_call  dit_getType;
+	fn_call  dit_gettype;
 	fn_call  dit_key;
 	fn_call  dit_getpath;
 	fn_call  dit_getchildren;
@@ -111,7 +124,7 @@ public:
 	{
 		dit_valid.set_fname(SFDi.valid_s);
 		dit_current.set_fname(SFDi.current_s);
-		dit_getType.set_fname(SFDi.gettype_s);	
+		dit_gettype.set_fname(SFDi.gettype_s);	
 		dit_key.set_fname(SFDi.key_s);
 		dit_getpath.set_fname(SFDi.getpath_s);
 		dit_getchildren.set_fname(SFDi.getchildren_s);
@@ -125,7 +138,7 @@ public:
 	{
 		dit_valid.set_obj(dit);
 		dit_current.set_obj(dit);
-		dit_getType.set_obj(dit);
+		dit_gettype.set_obj(dit);
 		dit_key.set_obj(dit);
 		dit_getpath.set_obj(dit);
 		dit_getchildren.set_obj(dit);
@@ -167,7 +180,7 @@ public:
 		{
 			str_rc dtype = dit_gettype.call_fn();
 
-			if (zs_cmp_ci(dtype,SFDi.file_str)==0)
+			if (zs_cmp_ci(dtype,SFDi.file_s)==0)
 			{
 				obj_rc cur = dit_current.call_fn();
 				cur_getExt.set_obj(cur);
@@ -254,6 +267,25 @@ SerialFile::deleteExpired()
 	return result;
 }
 
+static bool toLong(str_ptr s, zend_long& ref)
+{
+	int slen = s.size();
+	if (s == 0)
+	{
+		return false;
+	}
+
+	const char* p = s.data();
+	char* endptr;
+	ref = strtol(p, &endptr, 10);
+	return (endptr > p);
+}
+
+static bool is_expired(str_ptr file)
+{
+
+}
+
 val_rc 
 SerialFile::getCached(str_ptr key)
 {
@@ -276,6 +308,26 @@ SerialFile::getCached(str_ptr key)
 	}
 	val_rc fin = fopen(file_name, SFDi.fmode_r);
 
+	str_rc expire_str = fgets(fin,28);
+	str_rc dlen_str = fgets(fin,28);
+
+	zend_long expire;
+
+	if (expire_str.getLong(expire) && expire > now)
+	{
+		zend_long dlen;
+		
+
+		if (dlen_str.getLong(dlen))
+		{	
+			str_rc fdata = fread(fin, dlen+3);
+			if (fdata.ok())
+			{
+				result = unserialize(fdata);
+			}
+		}
+	}
+	return result;
 }
 
 bool 
@@ -375,10 +427,24 @@ bool SerialFile::writePkg(obj_ptr pkg)
 
 }
 
+zend_class_entry* 
+SerialFile::register_class(zend_class_entry* ce)
+{
+	zend_class_entry *sf = register_class_Wcc_Cache_SerialFile(ce);
+
+	SerialFile::omg.classEntry(sf);
+	return
+}
+
 void 
 SerialFile::debug_info(htab_rw s)
 {
+	ICache::debug_info(s);
 
+	s.set(SFDi.opt_cachedir, cache_dir_);
+	s.set(SFDi.opt_keeplocal, keep_local_);
+	s.set(SFDi.opt_dirtree, dir_tree_);
+	s.set(SFDi.opt_deferwrite, defer_write_);
 }
 
 

@@ -43,13 +43,15 @@ public:
 
 	virtual void debug_info(htab_rw s);
 
+	virtual int  deleteExpired();
+
 	void addLocal(val_ptr pkg);
 
 	bool clearPrefix(str_ptr prefix);
 
 	htab_rc getExpired();
 	
-	int  deleteExpired();
+	
 
 	bool deleteMultiple(htab_ptr keys);
 

@@ -69,6 +69,7 @@ extern "C" {
 #include "wcc/hmap.cpp"
 #include "wcc/icachedata.cpp"
 #include "wcc/icache.cpp"
+#include "wcc/serial_file.cpp"
 #include "wcc/cachemgr.cpp"
 
 // route, wccr

@@ -62,7 +62,8 @@ public:
 
 	static base_obj_mgr<SerialFile> omg;
 	static htab_rc getExpiredFiles(str_ptr dir, str_ptr ext);
-
+	static zend_class_entry* register_class(zend_class_entry* ce);
+	
 	void construct(val_ptr options, val_ptr services) override;
 	bool clear() override;
 	int  deleteExpired() override;
@@ -74,6 +75,7 @@ public:
  	
  	void debug_info(htab_rw s) override;
  	
+
  	bool writePkg(obj_ptr pkg);
 
 

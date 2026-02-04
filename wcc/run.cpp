@@ -52,160 +52,88 @@ using namespace zpp;
 
 base_obj_mgr<Run> Run::omg;
 
-class Run_init : public state_init {
-public:
-	// property names
-	str_intern start_time;
-	str_intern target;
-	str_intern target_const;
-	str_intern site_leaf;
 
-	str_intern site_leaf_const;
-	str_intern site_const;
+void Run_init::init()
+{
+	start_time = "start_time";
+	target = "target";
+	target_const = "TARGET";
 
-	str_intern wc_leaf;
-	str_intern vendor_leaf;
-	str_intern vendor_str;
-	str_intern phproot;
+	site_leaf = "site_leaf";
+	site_leaf_const = "SITE_LEAF";
+	site_const = "SITE";
+	
+	wc_leaf = "wc_leaf";
+	vendor_leaf = "vendor_leaf";
+	vendor_str = "vendor";
+	phproot = "phproot";
 
-	str_intern config_dir;
-	str_intern temp_dir;
-	str_intern init_cwd;
-	str_intern dos_class;
-	str_intern dos_str;
+	config_dir = "config_dir";
+	temp_dir = "temp_dir";
+	init_cwd = "init_cwd";
+	dos_class = "Wcc\\Dos";
+	finder_class = "Wcc\\Finder";
 
-	str_intern page_hits;
-	str_intern user_name;
-	str_intern view_data;
-	str_intern finder;
-	str_intern finder_class;
+	dos_str = "dos";
 
-	str_intern s_services;
-	str_intern run_str;
-	str_intern phpstats_class;
-	str_intern phpstats_str;
-	str_intern default_str;
+	page_hits = "page_hits";
+	user_name = "user_name";
+	view_data = "view_data";
 
-	str_intern sapi_str;
-	str_intern cli_str;
-	str_intern begin_str;
-	str_intern stats_str;
+	finder = "finder";
 
-	str_intern is_web;
-	str_intern php_str;
-	str_intern config_str;
-	str_intern web_str;
-	str_intern assets_str;
-
-	str_intern web_dir;
-	str_intern theme_str;
-	str_intern br_eol;
-	str_intern br_html;
-	str_intern br_eol_str;
-
-	str_intern gallery_str;
-	str_intern site_dir;
-
-	str_intern ns_sep;
-	str_intern dir_sep;
-	str_intern addPathArray;
-	str_intern cache_mgr;
-	str_intern file_cache;
-
-	str_intern namespaces_str;
-	str_intern modules_str;
-	str_intern error_log;
-	str_intern temp_folder_names;
-	str_intern temp_folder_paths;
-
-	str_intern app_class;
-	str_intern s_prepare;
-	str_intern site_str;
-	str_intern cryptic_str;
-
-	str_intern user_session;
-	str_intern is_ended;
-
-	void init() override {
-		start_time = "start_time";
-		target = "target";
-		target_const = "TARGET";
-
-		site_leaf = "site_leaf";
-		site_leaf_const = "SITE_LEAF";
-		site_const = "SITE";
-		
-		wc_leaf = "wc_leaf";
-		vendor_leaf = "vendor_leaf";
-		vendor_str = "vendor";
-		phproot = "phproot";
-
-		config_dir = "config_dir";
-		temp_dir = "temp_dir";
-		init_cwd = "init_cwd";
-		dos_class = "Wcc\\Dos";
-		finder_class = "Wcc\\Finder";
-
-		dos_str = "dos";
-
-		page_hits = "page_hits";
-		user_name = "user_name";
-		view_data = "view_data";
- 
-		finder = "finder";
-
-		s_services = "services";
+	s_services = "services";
 
 
-		run_str = "run";
-		phpstats_class = "Wcc\\PhpStats";
-		phpstats_str = "phpstats";
-		default_str = "default";
+	run_str = "run";
+	phpstats_class = "Wcc\\PhpStats";
+	phpstats_str = "phpstats";
+	default_str = "default";
 
-		sapi_str = "sapi";
-		cli_str = "cli";
-		begin_str = "begin";
-		stats_str = "stats";
-		is_web = "is_web";
+	sapi_str = "sapi";
+	cli_str = "cli";
+	begin_str = "begin";
+	stats_str = "stats";
+	is_web = "is_web";
 
-		php_str = "php";
-		config_str = "config";
-		web_str = "web";
-		assets_str = "assets";
+	php_str = "php";
+	config_str = "config";
+	web_str = "web";
+	assets_str = "assets";
 
 
-		web_dir = "web_dir";
-		theme_str = "theme";
-		br_eol = "\n";
-		br_html = "<br>\n";
-		br_eol_str = "BR_EOL";
+	web_dir = "web_dir";
+	theme_str = "theme";
+	br_eol = "\n";
+	br_html = "<br>\n";
+	br_eol_str = "BR_EOL";
 
-		site_dir = "site_dir";
-		gallery_str = "gallery";
+	site_dir = "site_dir";
+	gallery_str = "gallery";
 
-		ns_sep = "\\";
-		dir_sep = "/";
-		addPathArray = "addpatharray";
-		cache_mgr = "cache_mgr";
-		file_cache = "file_cache";
+	ns_sep = "\\";
+	dir_sep = "/";
+	addPathArray = "addpatharray";
+	cache_mgr = "cache_mgr";
+	file_cache = "file_cache";
 
-		namespaces_str = "namespaces";
-		modules_str = "modules";
-		error_log = "error_log";
-		temp_folder_names = "temp_folder_names";
-		temp_folder_paths = "temp_folder_paths";
+	namespaces_str = "namespaces";
+	modules_str = "modules";
+	error_log = "error_log";
+	temp_folder_names = "temp_folder_names";
+	temp_folder_paths = "temp_folder_paths";
 
-		app_class = "app_class";
-		s_prepare = "prepare";
-		site_str = "site";
-		cryptic_str = "cryptic";
+	app_class = "app_class";
+	s_prepare = "prepare";
+	site_str = "site";
+	cryptic_str = "cryptic";
 
-		user_session = "user_session";
-		is_ended = "isended";
+	user_session = "user_session";
+	is_ended = "isended";
 
-		//state_init::init();
-	}
-};
+	//state_init::init();
+}
+
 
 Run_init Run_i;
 
