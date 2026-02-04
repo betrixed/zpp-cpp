@@ -117,7 +117,11 @@ public:
     fn_glob       glob;
 
     fn_call_args2     unlink;
+    fn_call_args2     fgets;
     fn_call_args3     fwrite;
+
+    fn_call_args2     unserialize;
+    fn_call_args1     serialize;
 
     fn_weakref_create weakref_create;
     fn_weakref_get    weakref_get;
@@ -163,6 +167,9 @@ public:
         glob.set_fname(ftab.s_glob);
         unlink.set_fname(ftab.s_unlink);
         fwrite.set_fname(ftab.s_fwrite);
+        fgets.set_fname(ftab.s_fgets);
+        serialize.set_fname(ftab.s_serialize);
+        unserialize.set_fname(ftab.s_unserialize);
     }
 
 
@@ -801,8 +808,9 @@ fntable::init()
     s_unlink = "unlink";
 
     s_fwrite = "fwrite";
-
-
+    s_fgets = "fgets";
+    s_serialize = "serialize";
+    s_unserialize = "unserialize";
 }
 
 void  // virtual
@@ -980,28 +988,48 @@ glob(str_ptr wcard, int flags)
     return result;
 }
 
+str_rc 
+fgets(val_ptr res, zend_long limit)
+{
+    auto& fn = TLFNs.fgets;
+
+    zval *ap = fn.argsptr();
+    ZVAL_COPY_VALUE(ap, res);
+    ap++;
+    if (limit > 0)
+    {
+        ZVAL_LONG(ap, limit);
+    }
+    else 
+    {
+        ZVAL_NULL(ap);
+    }
+    str_rc result = fn.call_fn();
+    return result;
+}
+
 val_rc 
 fwrite(val_ptr res, str_ptr data, zend_long len)
 {
-     val_rc result;
+    val_rc result;
 
-     auto& fn = TLFNs.fwrite;
+    auto& fn = TLFNs.fwrite;
 
-     zval *ap = fn.argsptr();
-     ZVAL_COPY_VALUE(ap, res);
-     ap++;
-     ZVAL_STR(ap, data);
-     app++;
-     if (len > 0)
-     {
+    zval *ap = fn.argsptr();
+    ZVAL_COPY_VALUE(ap, res);
+    ap++;
+    ZVAL_STR(ap, data);
+    ap++;
+    if (len > 0)
+    {
         ZVAL_LONG(ap, len);
-     }
-     else 
-     {
+    }
+    else 
+    {
         ZVAL_NULL(ap);
-     }
-     result = fn.call_fn();
-     return result; 
+    }
+    result = fn.call_fn();
+    return result; 
 }
 
 bool
@@ -1051,6 +1079,35 @@ obj_rc
 weakref_get(obj_ptr wref)
 {
     return TLFNs.weakref_get.call(wref);
+}
+
+str_rc 
+serialize(val_ptr value)
+{
+    auto& fn = TLFNs.serialize;
+    zval* ap = fn.argsptr();
+    ZVAL_COPY_VALUE(ap, value);
+    str_rc result = fn.call_fn();
+    return result;
+}
+
+
+val_rc 
+unserialize(str_ptr data, htab_ptr options)
+{
+    auto& fn = TLFNs.unserialize;
+    zval* ap = fn.argsptr();
+    ZVAL_STR(ap, data);
+    ap++;
+    if (options.size())
+    {
+        ZVAL_ARR(ap, options);
+    }
+    else {
+        ZVAL_ARR(ap, (zend_array*) &zend_empty_array);
+    }
+    val_rc result = fn.call_fn();
+    return result;
 }
 
 } // end namespace zpp

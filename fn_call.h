@@ -203,6 +203,8 @@ namespace zpp {
         bool call(str_ptr name);
     };
 
+
+    typedef fn_call_args<1> fn_call_args1;
     typedef fn_call_args<2> fn_call_args2;
     typedef fn_call_args<3> fn_call_args3;
 
@@ -310,6 +312,9 @@ namespace zpp {
         str_intern  s_unlink;
 
         str_intern  s_fwrite;
+        str_intern  s_fgets;
+        str_intern  s_serialize;
+        str_intern  s_unserialize;
         
         void init() override;
         void init_req() override;
@@ -373,6 +378,8 @@ namespace zpp {
 
     val_rc fopen(str_ptr name, str_ptr fmode);
 
+    str_rc fgets(val_ptr fres, zend_long limit = -1);
+
     bool fclose(val_ptr fres);
 
     val_rc fwrite(val_ptr fres, str_ptr data, zend_long length = -1);
@@ -424,6 +431,9 @@ namespace zpp {
 
     htab_rc array_splice(htab_rc& input, int offset, int length = 0, htab_ptr replace = htab_ptr());
 
+    str_rc serialize(val_ptr value);
+
+    val_rc unserialize(str_ptr data, htab_ptr options);
 
 }; // end namespace zpp
 #endif

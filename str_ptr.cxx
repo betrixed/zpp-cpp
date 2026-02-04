@@ -149,26 +149,32 @@ str_ptr::size() const
 	return ZSTR_LEN(s);
 }
 
-zend_long 
-str_ptr::getLong(int base) const
+bool 
+str_ptr::getLong(zend_long& lref, int base) const
 {
 	if (!s)
 	{
-		return 0;
+		return false;
 	}
+
 	char* endptr;
-	return strtol(ZSTR_VAL(s), &endptr, base);
+	const char* p = ZSTR_VAL(s);
+	lref = strtol(p, &endptr, base);
+	return(endptr > p);
 }
 
-double 
-str_ptr::getDouble() const
+bool 
+str_ptr::getDouble(double& dref) const
 {
 	if (!s)
 	{
-		return 0.0;
+		return false;
 	}
 	char* endptr;
-	return strtod(ZSTR_VAL(s), &endptr);
+	const char* p = ZSTR_VAL(s);
+	dref = strtod(p, &endptr);
+	return (endptr > p);
+
 }
 
 rqstring 

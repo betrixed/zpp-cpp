@@ -73,9 +73,9 @@ namespace zpp {
 
 		size_t size() const;
 
-		double getDouble() const;
+		bool getDouble(double& dref) const;
 
-		long getLong(int base = 10) const;
+		bool getLong(zend_long& lref, int base = 10) const;
 
 		rqstring rqstr() const;
 
