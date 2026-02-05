@@ -44,6 +44,7 @@ public:
 	str_intern next_s;
 	str_intern fmode_w;
 	str_intern fmode_r;
+	str_intern flash_s;
 
 	zend_long  file_itflags;
 
@@ -75,6 +76,8 @@ public:
  	
  	void debug_info(htab_rw s) override;
  	
+ 	str_rc getFileName(str_ptr id);
+ 	str_rc getDirectory(str_ptr id);
 
  	bool writePkg(obj_ptr pkg);
 

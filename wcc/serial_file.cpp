@@ -59,6 +59,7 @@ void SFData::init()
 	next_s = "next";
 	fmode_w = "w";
 	fmode_r = "r";
+	flash_s = "flash";
 
 	class_data cdata(file_iterator);
 
@@ -100,6 +101,24 @@ SerialFile::construct(val_ptr options, val_ptr services)
 			cache_dir_ = run.property(Run_i.temp_dir);
 		}
 	}
+}
+
+static bool is_expired(str_ptr file_name)
+{
+	file_res  fin(file_name, SFDi.fmode_r);
+
+	str_rc expire_str = fgets(fin,28);
+	str_rc dlen_str = fgets(fin,28);
+
+	zend_long expire;
+	bool result = false;
+	zend_long now = time(nullptr);
+
+	if ( expire_str.getLong(expire) && expire < now)
+	{
+		result = true;
+	}
+	return result;
 }
 
 struct ExpiredCollect {
@@ -166,6 +185,8 @@ public:
 		return expired_;
 	}
 
+	
+
 	int recurseDir(obj_ptr dit)
 	{
 		int result = 0;
@@ -195,10 +216,10 @@ public:
 					}
 				}
 			}
-			else if (zs_cmp_ci(dtype, SFDi.dir_str)==0)
+			else if (zs_cmp_ci(dtype, SFDi.dir_s)==0)
 			{
 				obj_rc chdit = dit_getchildren.call_fn(); 
-				result += recurseDir(chdir);
+				result += recurseDir(chdit);
 			}
 			dit_next.call_fn();
 			is_valid = dit_valid.call_fn();
@@ -218,25 +239,23 @@ SerialFile::clear()
 
 	obj_rc sess = this->getService(SFDi.user_session);
 
-	zval_rc path(cache_dir_);
-	zval_rc depth(int(0));
+	val_rc path(cache_dir_);
+	val_rc depth(int(0));
 
-	int ct = dos.call(SFDi.rm_alldir,  path, depth);
+	val_rc ctr = dos.call(SFDi.rm_alldir,  path, depth);
+	int ct = ctr.zlong();
+
 	result = (ct > 0);
-	sbuf buf;
+	str_buf buf;
 
 	if (sess.ok())
 	{
 		buf << "cleared " << ct << " from " << cache_dir_;
-		sess->call(SFDi.flash, buf.zstr());
+		val_rc arg1(buf.zstr());
+
+		sess.call(SFDi.flash_s, arg1);
 	}
 	return result;
-}
-
-static zend_long 
-RecurseDir(obj_ptr dirit, str_ptr extension, htab_rw expired)
-{
-	zend_long now = time(nullptr);
 }
 
 htab_rc //static
@@ -251,7 +270,8 @@ int
 SerialFile::deleteExpired()
 {
 	int result  = 0;
-	this->icache::deleteExpired();
+	
+	ICache::deleteExpired();
 
 	htab_rc expired = getExpiredFiles(cache_dir_, SFDi.sfile_ext);
 	result = expired.size();
@@ -267,31 +287,14 @@ SerialFile::deleteExpired()
 	return result;
 }
 
-static bool toLong(str_ptr s, zend_long& ref)
-{
-	int slen = s.size();
-	if (s == 0)
-	{
-		return false;
-	}
 
-	const char* p = s.data();
-	char* endptr;
-	ref = strtol(p, &endptr, 10);
-	return (endptr > p);
-}
-
-static bool is_expired(str_ptr file)
-{
-
-}
 
 val_rc 
 SerialFile::getCached(str_ptr key)
 {
 	val_rc result;
 
-	if (keeplocal_)
+	if (keep_local_)
 	{
 		result = ICache::getCached(key);
 		if (result.isObject())
@@ -306,7 +309,7 @@ SerialFile::getCached(str_ptr key)
 	{
 		return result;
 	}
-	val_rc fin = fopen(file_name, SFDi.fmode_r);
+	file_res fin(file_name, SFDi.fmode_r);
 
 	str_rc expire_str = fgets(fin,28);
 	str_rc dlen_str = fgets(fin,28);
@@ -328,6 +331,41 @@ SerialFile::getCached(str_ptr key)
 		}
 	}
 	return result;
+}
+
+str_rc
+SerialFile::getDirectory(str_ptr id)
+{
+    str_rc hash = sha1(id, false);
+    
+    str_ptr result = cache_dir_;
+    
+    if (dir_tree_)
+    {
+    	str_buf buf;
+
+    	str_rc f1 = hash.substr(0,2);
+    	str_rc f2 = hash.substr(2,2);
+
+    	buf << result << '/' << f1 << '/' << f2;
+    	result = buf.zstr();
+        
+    }
+    return result;
+}
+
+
+str_rc
+SerialFile::getFileName(str_ptr id)
+{
+    str_rc dir = this->getDirectory(id);
+    str_rc hash = sha1(id, false);
+    str_buf buf;
+
+    buf << dir << DIRECTORY_SEPARATOR << hash << '.' << SFDi.sfile_ext;
+
+    str_rc result = buf.zstr();
+    return result;
 }
 
 bool 
