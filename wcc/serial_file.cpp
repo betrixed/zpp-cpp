@@ -13,8 +13,12 @@ extern "C" {
 };
 #endif
 
-#ifndef WCC_RUNSA_H
-#include "run.h"
+#ifndef REFLECT_CACHE_H
+#include "reflect_cache.h"
+#endif
+
+#ifndef DIRECTORY_SEPARATOR
+#define DIRECTORY_SEPARATOR '/'
 #endif
 
 namespace wcc {
@@ -24,6 +28,25 @@ using namespace zpp;
 base_obj_mgr<SerialFile> SerialFile::omg;
 
 SFData SFDi;
+
+
+int  SFData::get_fsi_flags()
+{
+	if (file_itflags)
+	{
+		return file_itflags;
+	}
+	class_data cdata(file_iterator);
+
+	val_rc temp = cdata.constant_value(skip_dots);
+	file_itflags = temp.zlong();
+	temp = cdata.constant_value(key_as_pathname);
+	file_itflags |= temp.zlong();
+	temp = cdata.constant_value(current_as_fileinfo);
+	file_itflags |= temp.zlong();
+
+	return file_itflags;
+}
 
 void SFData::init()
 {
@@ -61,14 +84,8 @@ void SFData::init()
 	fmode_r = "r";
 	flash_s = "flash";
 
-	class_data cdata(file_iterator);
-
-	val_rc temp = cdata.constant_value(skip_dots);
-	file_itflags = temp.zlong();
-	temp = cdata.constant_value(key_as_pathname);
-	file_itflags |= temp.zlong();
-	temp = cdata.constant_value(current_as_fileinfo);
-	file_itflags |= temp.zlong();
+	file_itflags = 0;
+	
 }
 
 
@@ -92,6 +109,8 @@ SerialFile::construct(val_ptr options, val_ptr services)
 		test = options_.get(SFDi.opt_deferwrite);
 		this->defer_write_ = test.isTrue();
 	}
+	/*
+	This will interfere with extension modules link independence
 	if (!cache_dir_.ok())
 	{
 		test = this->getService(SFDi.run_str);
@@ -101,6 +120,7 @@ SerialFile::construct(val_ptr options, val_ptr services)
 			cache_dir_ = run.property(Run_i.temp_dir);
 		}
 	}
+	*/
 }
 
 static bool is_expired(str_ptr file_name)
@@ -173,7 +193,7 @@ public:
 		extn_ = extn;
 
 		args.push_back(root);
-		args.push_back(SFDi.file_itflags);
+		args.push_back(SFDi.get_fsi_flags());
 
 		obj_rc dit = ReflectCache::staticInstanceArgs(
 						SFDi.dir_iterator, args);
@@ -360,8 +380,8 @@ SerialFile::getFileName(str_ptr id)
 {
     str_rc dir = this->getDirectory(id);
     str_rc hash = sha1(id, false);
-    str_buf buf;
 
+    str_buf buf;
     buf << dir << DIRECTORY_SEPARATOR << hash << '.' << SFDi.sfile_ext;
 
     str_rc result = buf.zstr();
@@ -369,14 +389,14 @@ SerialFile::getFileName(str_ptr id)
 }
 
 bool 
-SerialFile::set(str_ptr key, val_ptr data, zend_long ttl = 0)
+SerialFile::set(str_ptr key, val_ptr data, zend_long ttl)
 {
 	if (ttl <= 0)
 	{
 		ttl = this->getTTL();
 	}
 
-	obj_rc pkg = ICacheData::obm.new_zobj();
+	obj_rc pkg = ICacheData::omg.new_zobj();
 	ICacheData* icd = zobj_toc<ICacheData>(pkg);
 	icd->construct(key, data, ttl);
 
@@ -396,7 +416,7 @@ SerialFile::set(str_ptr key, val_ptr data, zend_long ttl = 0)
 }
 
 val_rc 
-SerialFile::get(str_ptr key, val_ptr noval = val_ptr())
+SerialFile::get(str_ptr key, val_ptr noval)
 {
 	val_rc result;
 
@@ -424,7 +444,9 @@ SerialFile::deleteKey(str_ptr key)
 
 bool SerialFile::writePkg(obj_ptr pkg)
 {
-	str_rc key = pkg->getKey();
+	ICacheData* icd = zobj_toc<ICacheData>(pkg);
+
+	str_rc key = icd->getKey();
 
 	str_rc dir = this->getDirectory(key);
 
@@ -438,19 +460,18 @@ bool SerialFile::writePkg(obj_ptr pkg)
 
 	str_rc file_name = this->getFileName(key);
 
-	ICacheData* ic = zobj_toc<ICacheData>(pkg);
+	icd->setStored();
 
-	ic->setStored();
+	int expiry = icd->getExpiry();
 
-	int expiry = ic->getExpiry();
-
-	str_rc sbin = serialize(pkg);
+	val_rc sarg(pkg);
+	str_rc sbin = serialize(sarg);
 
 	size_t plen = sbin.size();
 
 	val_rc fout = fopen(file_name, SFDi.fmode_w);
 
-	sbuf buf;
+	str_buf buf;
 	buf << expiry << endl;
 	fwrite(fout, buf.zstr());
 
@@ -468,10 +489,15 @@ bool SerialFile::writePkg(obj_ptr pkg)
 zend_class_entry* 
 SerialFile::register_class(zend_class_entry* ce)
 {
+	
+
 	zend_class_entry *sf = register_class_Wcc_Cache_SerialFile(ce);
 
 	SerialFile::omg.classEntry(sf);
-	return
+
+	
+
+	return sf;
 }
 
 void 

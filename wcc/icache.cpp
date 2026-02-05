@@ -114,11 +114,11 @@ void ICache::debug_info(htab_rw s)
 	s.set(IC_STR.ttl_key, (int)ttl_);
 }
 
-void ICache::addLocal(val_ptr pkg)
+void ICache::addLocal(obj_ptr pkg)
 {
 	htab_rw hw(cached_);
 
-	ICacheData* icd = zval_toc<ICacheData>(pkg);
+	ICacheData* icd = zobj_toc<ICacheData>(pkg);
 	hw.set(icd->getKey(), pkg);
 }
 
@@ -464,16 +464,16 @@ ZEND_METHOD(Wcc_ICache, make_cache)
 
 ZEND_METHOD(Wcc_ICache, addLocal)
 {
-	zend_class_entry* cobj_ce = ICacheData::omg.classEntry();
-	zval* pkg;
+	zarg_rd args(execute_data);
+	obj_ptr     pkg;
 
-	ZEND_PARSE_PARAMETERS_START(1, 1)
-	Z_PARAM_OBJECT_OF_CLASS(pkg, cobj_ce)
-	ZEND_PARSE_PARAMETERS_END();
+	args.obj_ofclass(pkg, args.need(0), ICacheData::omg.classEntry());
 
-	auto cobj = zval_toc<ICache>(ZEND_THIS);
-	val_rc data(pkg);
-	cobj->addLocal(data);
+	if (!args.throw_errors())
+	{
+		auto cobj = zval_toc<ICache>(ZEND_THIS);
+		cobj->addLocal(pkg);
+	}
 }
 
 ZEND_METHOD(Wcc_ICache, clear)
@@ -746,6 +746,7 @@ ZEND_METHOD(Wcc_ICache, setTTL)
 
 PHP_MINIT_FUNCTION(Wcc_ICache_reg)
 {
+
 	auto ce = register_class_Wcc_ICache();
 
 	ICache::omg.classEntry(ce);

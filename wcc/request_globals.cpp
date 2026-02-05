@@ -957,21 +957,24 @@ int
 RequestGlobals::getPort()
 {
 	htab_ptr server(readServer());
+	zend_long result = 0;
 
-	str_ptr host = server.get(RQit.HTTP_HOST);
+	str_rc host = server.get(RQit.HTTP_HOST);
 	if (host.size())
 	{
 		int pos = host.rfind(':');
 		if (pos >= 0) {
 			str_rc sport = host.substr(pos+1);
-			return str_ptr(sport).getLong();
+			sport.getLong(result);
+			return result;
 		}
 	}
 	else {
 		host = server.get(RQit.SERVER_PORT);
 		if (host.size())
 		{
-			return host.getLong();
+			host.getLong(result);
+			return result;
 		}
 	}
 	str_ptr scheme = getScheme();

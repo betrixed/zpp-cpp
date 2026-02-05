@@ -46,7 +46,9 @@ public:
 	str_intern fmode_r;
 	str_intern flash_s;
 
-	zend_long  file_itflags;
+	int file_itflags;
+
+	int get_fsi_flags();
 
 	void init() override;
 };

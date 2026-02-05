@@ -45,7 +45,7 @@ public:
 
 	virtual int  deleteExpired();
 
-	void addLocal(val_ptr pkg);
+	void addLocal(obj_ptr pkg);
 
 	bool clearPrefix(str_ptr prefix);
 
