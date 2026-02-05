@@ -19,6 +19,10 @@
 
 #include <filesystem>
 
+#ifndef DIRECTORY_SEPARATOR
+#define DIRECTORY_SEPARATOR '/'
+#endif
+
 namespace zpp {
 
 // static and externals
@@ -53,11 +57,6 @@ class fn_realpath : public fn_call_args<1>
 {
 public:
     str_rc call(str_ptr path);
-};
-
- class fn_isdir : public fn_call_args<1> {
-public:
-    bool call(str_ptr path);
 };
 
 class fn_opendir : public fn_call_args<1> {
@@ -108,7 +107,8 @@ public:
     fn_filemtime  filemtime;
     //fn_simple_loader simple_loader;
 
-    fn_isdir      is_dir;
+    fn_call_args1 is_dir;
+
     fn_opendir    opendir;
     fn_readdir    readdir;
     fn_closedir   closedir;
@@ -119,10 +119,13 @@ public:
     fn_call_args2     unlink;
     fn_call_args2     fgets;
     fn_call_args3     fwrite;
+    fn_call_args2     fread;
     fn_call_args2     sha1;
 
     fn_call_args2     unserialize;
     fn_call_args1     serialize;
+
+    fn_call_args1     is_readable;
 
     fn_weakref_create weakref_create;
     fn_weakref_get    weakref_get;
@@ -168,10 +171,13 @@ public:
         glob.set_fname(ftab.s_glob);
         unlink.set_fname(ftab.s_unlink);
         fwrite.set_fname(ftab.s_fwrite);
+        fread.set_fname(ftab.s_fread);
+
         fgets.set_fname(ftab.s_fgets);
         serialize.set_fname(ftab.s_serialize);
         unserialize.set_fname(ftab.s_unserialize);
         sha1.set_fname(ftab.s_sha1);
+        is_readable.set_fname(ftab.s_isreadable);
     }
 
 
@@ -378,6 +384,15 @@ sha1(str_ptr value, bool binary)
     return result;
 }
 
+bool is_readable(str_ptr path)
+{
+    auto& fn = TLFNs.is_readable;
+
+    zval* p = fn.argsptr();
+    ZVAL_STR(p, path);
+    val_rc result= fn.call_fn();
+    return result.isTrue();
+}
 
 bool 
 fclose(val_ptr fres)
@@ -629,13 +644,7 @@ fn_fgetcsv::call(val_ptr file_res)
     return call_fn();
 }
 
-bool 
-fn_isdir::call(str_ptr path)
-{
-    ZVAL_STR(argsptr(), path);
-    val_rc result = call_fn();
-    return result.isTrue();
-}
+
 
 val_rc 
 fn_opendir::call(str_ptr path)
@@ -852,10 +861,13 @@ fntable::init()
     s_unlink = "unlink";
 
     s_fwrite = "fwrite";
+    s_fread = "fread";
+
     s_fgets = "fgets";
     s_serialize = "serialize";
     s_unserialize = "unserialize";
     s_sha1 = "sha1";
+    s_isreadable = "is_readable";
 }
 
 void  // virtual
@@ -988,7 +1000,10 @@ filemtime(str_ptr path)
 bool 
 is_dir(str_ptr path)
 {
-    return TLFNs.is_dir.call(path);
+    auto& fn = TLFNs.is_dir;
+    ZVAL_STR(fn.argsptr(), path);
+    val_rc result = fn.call_fn();
+    return result.isTrue();
 }
 
 val_rc 
@@ -1049,6 +1064,20 @@ fgets(val_ptr res, zend_long limit)
     {
         ZVAL_NULL(ap);
     }
+    str_rc result = fn.call_fn();
+    return result;
+}
+
+str_rc fread(val_ptr fres, int length)
+{
+    auto& fn = TLFNs.fread;
+
+    zval *ap = fn.argsptr();
+
+    ZVAL_COPY_VALUE(ap, fres);
+    ap++;
+    ZVAL_LONG(ap, length);
+
     str_rc result = fn.call_fn();
     return result;
 }

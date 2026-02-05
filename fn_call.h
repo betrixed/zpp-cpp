@@ -299,10 +299,14 @@ namespace zpp {
         str_intern  s_unlink;
 
         str_intern  s_fwrite;
+        str_intern  s_fread;
+
         str_intern  s_fgets;
+
         str_intern  s_serialize;
         str_intern  s_unserialize;
         str_intern  s_sha1;
+        str_intern  s_isreadable;
         
         void init() override;
         void init_req() override;
@@ -383,6 +387,8 @@ namespace zpp {
 
     val_rc fwrite(val_ptr fres, str_ptr data, zend_long length = -1);
 
+    str_rc fread(val_ptr fres, int length=-1);
+
     str_rc preg_quote(str_ptr expr, str_ptr delimiter);
 
     str_rc file_get_contents(str_ptr path, int offset=0, size_t len=0);
@@ -408,6 +414,10 @@ namespace zpp {
 
     bool is_dir(str_ptr path);
 
+    bool is_file(str_ptr path);
+
+    bool is_readable(str_ptr path);
+
     bool unlink(str_ptr path, val_ptr context = val_ptr());
 
     str_rc getcwd();
@@ -432,7 +442,7 @@ namespace zpp {
 
     str_rc serialize(val_ptr value);
 
-    val_rc unserialize(str_ptr data, htab_ptr options);
+    val_rc unserialize(str_ptr data, htab_ptr options = htab_ptr());
 
     str_rc sha1(str_ptr value, bool binary = false);
 
