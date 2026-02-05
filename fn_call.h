@@ -145,20 +145,7 @@ namespace zpp {
             int offset = 0, size_t len = 0);
     };
 
-    /**
-     * @class fn_fopen
-     * @brief call fopen with 2 arguments. 
-     * @details
-        * This class provides a call method with the path and mode arguments.
-        * The PHP function fopen has 3 arguments, the third is a boolean for
-        * whether to use the include path. This is set to false by default.
-        @returns a resource on success, or false on failure.
-    
-      */
-    class fn_fopen : public fn_call_args<2> {
-    public:
-        val_rc call(str_ptr path, str_ptr modestr);
-    };
+
 /**
 * @class fn_fclose
 * @brief call fclose with 1 argument.
@@ -207,7 +194,7 @@ namespace zpp {
     typedef fn_call_args<1> fn_call_args1;
     typedef fn_call_args<2> fn_call_args2;
     typedef fn_call_args<3> fn_call_args3;
-
+    typedef fn_call_args<4> fn_call_args4;
     /*
     class fn_simple_loader : public fn_call_args<1> {
     public:
@@ -315,6 +302,7 @@ namespace zpp {
         str_intern  s_fgets;
         str_intern  s_serialize;
         str_intern  s_unserialize;
+        str_intern  s_sha1;
         
         void init() override;
         void init_req() override;
@@ -343,7 +331,17 @@ namespace zpp {
     };
 
 
+    class file_res {
+    public:
+        val_rc    file_;//PHP file resource object
+        file_res(str_ptr path, str_ptr mode, 
+                    bool use_inc_path=false, val_ptr ctx = val_ptr());
+        ~file_res();
+        void close();
+        bool isopen();
 
+        operator val_ptr () { return (zval*) file_; }
+    };
     
 
     extern fntable   FTAB;
@@ -376,7 +374,8 @@ namespace zpp {
 
     bool class_exists(str_ptr name);
 
-    val_rc fopen(str_ptr name, str_ptr fmode);
+    val_rc fopen(str_ptr name, str_ptr fmode, 
+                bool use_include_path=false, val_ptr context=val_ptr());
 
     str_rc fgets(val_ptr fres, zend_long limit = -1);
 
@@ -434,6 +433,9 @@ namespace zpp {
     str_rc serialize(val_ptr value);
 
     val_rc unserialize(str_ptr data, htab_ptr options);
+
+    str_rc sha1(str_ptr value, bool binary = false);
+
 
 }; // end namespace zpp
 #endif

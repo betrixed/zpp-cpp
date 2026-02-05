@@ -94,9 +94,9 @@ public:
     fnexists         function_exists;
     fn_class_exists  class_exists;
     pregquote        preg_quote;
-    file_content  file_get_contents;
-    fn_fopen      fopen;
-    fn_fclose     fclose;
+    file_content     file_get_contents;
+    fn_call_args4    fopen;
+    fn_call_args1    fclose;
 
     fn_constant   get_constant;
     fn_dirname    get_dirname;
@@ -119,6 +119,7 @@ public:
     fn_call_args2     unlink;
     fn_call_args2     fgets;
     fn_call_args3     fwrite;
+    fn_call_args2     sha1;
 
     fn_call_args2     unserialize;
     fn_call_args1     serialize;
@@ -170,6 +171,7 @@ public:
         fgets.set_fname(ftab.s_fgets);
         serialize.set_fname(ftab.s_serialize);
         unserialize.set_fname(ftab.s_unserialize);
+        sha1.set_fname(ftab.s_sha1);
     }
 
 
@@ -313,36 +315,78 @@ pregquote::call(str_ptr str, str_ptr delimiter)
     return str_rc(val_ptr(result).zstr());
 }
 
-bool 
-fn_fclose::call(val_ptr fres)
-{
-    ZVAL_COPY_VALUE(argsptr(), fres);
-    val_rc result = call_fn();
-    return val_ptr(result).isTrue();
-}
 
 val_rc 
-fopen(str_ptr path, str_ptr mode)
+fopen(str_ptr path, str_ptr mode,
+    bool use_include_path, val_ptr context)
 {
-    return TLFNs.fopen.call(path,mode);
+    auto &fn = TLFNs.fopen;
+    zval* pz = fn.argsptr();
+    ZVAL_STR(pz, (zend_string*) path);
+    pz++;
+    ZVAL_STR(pz, (zend_string*) mode);
+    pz++;
+    ZVAL_BOOL(pz, use_include_path);
+    pz++;
+    if (context.ok())
+    {
+        ZVAL_COPY_VALUE(pz, context);
+    }
+    else {
+        ZVAL_NULL(pz);
+    }
+
+    return fn.call_fn();
 }
+
+
+file_res::file_res(
+    str_ptr path, str_ptr mode, 
+    bool use_inc_path, val_ptr ctx)
+{
+    file_ = fopen(path,mode, use_inc_path, ctx);
+}
+
+file_res::~file_res()
+{
+    close();
+}
+
+void file_res::close(){
+    if (file_.ok())
+    {
+        fclose(file_);
+        ZVAL_NULL(file_);
+    }
+}
+
+bool file_res::isopen()
+{
+    return file_.ok();
+}
+
+str_rc 
+sha1(str_ptr value, bool binary)
+{
+    auto& fn = TLFNs.sha1;
+    zval* p = fn.argsptr();
+
+    ZVAL_STR(p, value);
+    p++;
+    ZVAL_BOOL(p, binary);
+    str_rc result = fn.call_fn();
+    return result;
+}
+
 
 bool 
 fclose(val_ptr fres)
-{
-    return TLFNs.fclose.call(fres);
-}
+{   
+    auto& fn = TLFNs.fclose;
 
-
-
-val_rc 
-fn_fopen::call(str_ptr path, str_ptr mode)
-{
-    zval* pz = argsptr();
-
-    ZVAL_STR(pz, (zend_string*) path);
-    ZVAL_STR(pz+1, (zend_string*) mode);
-    return call_fn();
+    ZVAL_COPY_VALUE(fn.argsptr(), fres);
+    val_rc result = fn.call_fn();
+    return val_ptr(result).isTrue();
 }
 
 fn_stripslashes::fn_stripslashes() : fn_call_args<1>()
@@ -811,6 +855,7 @@ fntable::init()
     s_fgets = "fgets";
     s_serialize = "serialize";
     s_unserialize = "unserialize";
+    s_sha1 = "sha1";
 }
 
 void  // virtual
