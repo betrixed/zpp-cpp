@@ -18,11 +18,11 @@ extern "C" {
 #endif
 
 
-
-#ifndef SERIAL_FILE_H
-#include "serial_file.h"
+/*
+#ifndef DIR_CACHE_H
+#include "dircache.h"
 #endif
-
+*/
 namespace wcc {
 
 using namespace zpp;
@@ -102,6 +102,12 @@ void ICache::construct(val_ptr options, val_ptr services)
 }
 
 
+error_return
+ICache::flushCached()
+{
+	error_return result;
+	return result;
+}
 
 void ICache::debug_info(htab_rw s)
 {
@@ -171,14 +177,16 @@ ICache::deleteKey(str_ptr key)
 int 
 ICache::deleteExpired()
 {
-	htab_rc hset = getExpired();
+	htab_rc   hset = getExpired();
 	htab_ptr  expired(hset);
-	htab_rw cache(cached_);
+	htab_rw   cache(cached_);
 
 	int result = expired.size();
 
 	if (result > 0)
 	{
+		zend_printf("Delete %d\n", result);
+
 		htab_walk htw;
 		auto value = htw.value();
 
@@ -195,8 +203,8 @@ htab_rc
 ICache::getExpired()
 {
 	htab_rc  result;
-	htab_rw rtab(result);
-	htab_ptr  cache(cached_);
+	htab_rw  rtab(result);
+	htab_ptr cache(cached_);
 
 	htab_walk htw;
 
@@ -559,6 +567,14 @@ ZEND_METHOD(Wcc_ICache, getData)
 	result.move_zv(return_value);
 }
 
+ZEND_METHOD(Wcc_ICache, flushCached)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+	auto cobj = zval_toc<ICache>(ZEND_THIS);
+	error_return result = cobj->flushCached();
+	result.throw_errors();
+}
+
 ZEND_METHOD(Wcc_ICache, getMultiple)
 {
 	zval* keys;
@@ -750,9 +766,9 @@ PHP_MINIT_FUNCTION(Wcc_ICache_reg)
 	auto ce = register_class_Wcc_ICache();
 
 	ICache::omg.classEntry(ce);
-
-	SerialFile::register_class(ce);
-
+#ifdef DIR_CACHE_CPP
+	DirCache::register_class(ce);
+#endif
 	return SUCCESS;
 }
 

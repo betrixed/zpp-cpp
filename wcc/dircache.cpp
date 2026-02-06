@@ -1,15 +1,15 @@
-#ifndef SERIAL_FILE_CPP
-#define SERIAL_FILE_CPP
+#ifndef DIR_CACHE_CPP
+#define DIR_CACHE_CPP
 
-#ifndef SERIAL_FILE_H
-#include "serial_file.h"
+#ifndef DIR_CACHE_H
+#include "dircache.h"
 #endif
 
 
-#ifndef SERIALFILE_ARGINFO
-#define SERIALFILE_ARGINFO
+#ifndef DIR_CACHE_ARGINFO
+#define DIR_CACHE_ARGINFO
 extern "C" {
-	#include "stub/serialfile_arginfo.h"
+	#include "stub/dircache_arginfo.h"
 };
 #endif
 
@@ -25,7 +25,7 @@ namespace wcc {
 
 using namespace zpp;
 
-base_obj_mgr<SerialFile> SerialFile::omg;
+base_obj_mgr<DirCache> DirCache::omg;
 
 SFData SFDi;
 
@@ -90,7 +90,7 @@ void SFData::init()
 
 
 void 
-SerialFile::construct(val_ptr options, val_ptr services)
+DirCache::construct(val_ptr options, val_ptr services)
 {
 	ICache::construct(options, services);
 
@@ -147,6 +147,7 @@ public:
 	str_rc 	 extn_;
 	htab_rc  expired_;
 	zend_long now_;
+	bool     recurse_;
 
 	fn_call  dit_valid;
 	fn_call  dit_current;
@@ -155,10 +156,24 @@ public:
 	fn_call  dit_getpath;
 	fn_call  dit_getchildren;
 	fn_call  dit_next;
-
 	fn_call  cur_getExt;
 
+protected:
+	obj_rc newIterator(str_ptr root)
+	{
+		htab_rc args_array;
+		htab_rw args(args_array);
 
+		args.push_back(root);
+		args.push_back(SFDi.get_fsi_flags());
+
+		obj_rc dit = ReflectCache::staticInstanceArgs(
+						SFDi.dir_iterator, args);
+
+		return dit;
+	}
+
+public:
 	ExpiredCollect()
 	{
 		dit_valid.set_fname(SFDi.valid_s);
@@ -168,7 +183,6 @@ public:
 		dit_getpath.set_fname(SFDi.getpath_s);
 		dit_getchildren.set_fname(SFDi.getchildren_s);
 		dit_next.set_fname(SFDi.next_s);
-
 		cur_getExt.set_fname(SFDi.getextension_s);
 
 	}
@@ -181,24 +195,22 @@ public:
 		dit_key.set_obj(dit);
 		dit_getpath.set_obj(dit);
 		dit_getchildren.set_obj(dit);
+		dit_next.set_obj(dit);
 	}
 
-	htab_rc collect(str_ptr root, str_ptr extn)
+
+
+	htab_rc collect(str_ptr root, str_ptr extn, bool recurse=false)
 	{
 		now_ = time(nullptr);
-		htab_rc args_array;
-
-		htab_rw args(args_array);
-		root_dir_ = root;
+		
 		extn_ = extn;
-
-		args.push_back(root);
-		args.push_back(SFDi.get_fsi_flags());
-
-		obj_rc dit = ReflectCache::staticInstanceArgs(
-						SFDi.dir_iterator, args);
+		root_dir_ = root;
+		recurse_ = recurse;
 
 		expired_ = htab_rc();
+
+		obj_rc dit = this->newIterator(root);
 
 		recurseDir(dit);
 
@@ -216,8 +228,9 @@ public:
 		htab_rw files(expired_);
 	
 		val_rc is_valid = dit_valid.call_fn();
+		bool more = is_valid.isTrue();
 
-		while(is_valid.isTrue())
+		while(more)
 		{
 			str_rc dtype = dit_gettype.call_fn();
 
@@ -225,7 +238,9 @@ public:
 			{
 				obj_rc cur = dit_current.call_fn();
 				cur_getExt.set_obj(cur);
+
 				str_rc ext = cur_getExt.call_fn();
+
 				if (zs_cmp_ci(ext, extn_)==0)
 				{
 					str_rc path = dit_key.call_fn();
@@ -236,13 +251,16 @@ public:
 					}
 				}
 			}
-			else if (zs_cmp_ci(dtype, SFDi.dir_s)==0)
+			else if (recurse_ && (zs_cmp_ci(dtype, SFDi.dir_s)==0))
 			{
 				obj_rc chdit = dit_getchildren.call_fn(); 
 				result += recurseDir(chdit);
+				//!! Recursion changes the dit object
+				setdirit(dit); 
 			}
 			dit_next.call_fn();
 			is_valid = dit_valid.call_fn();
+			more = is_valid.isTrue();
 		} 
 		return result;
 	}
@@ -250,8 +268,31 @@ public:
 
 };
 
+error_return 
+DirCache::flushCached()
+{
+	error_return result;
+
+	htab_rc cached = ICache::getUnsaved();
+
+	htab_walk wk;
+	auto value = wk.value();
+
+	for(wk.start(cached); wk.ok(); wk.next())
+	{
+		obj_rc pkg = value.zobject();
+		if (pkg.ok() && !this->writePkg(pkg))
+		{
+			ICacheData* icd = zobj_toc<ICacheData>(pkg);
+			str_rc key = icd->getKey();
+			result.error() << "WritePkg failed for " << key << endl;
+		}
+	}
+	return result;
+}
+
 bool 
-SerialFile::clear()
+DirCache::clear()
 {
 	bool result = false;
 
@@ -279,15 +320,15 @@ SerialFile::clear()
 }
 
 htab_rc //static
-SerialFile::getExpiredFiles(str_ptr dir, str_ptr ext)
+DirCache::getExpiredFiles(str_ptr dir, str_ptr ext)
 {
 	ExpiredCollect collect;
 
-	return collect.collect(dir, ext);
+	return collect.collect(dir, ext, dir_tree_);
 }
 
 int  
-SerialFile::deleteExpired()
+DirCache::deleteExpired()
 {
 	int result  = 0;
 	
@@ -310,7 +351,7 @@ SerialFile::deleteExpired()
 
 
 val_rc 
-SerialFile::getCached(str_ptr key)
+DirCache::getCached(str_ptr key)
 {
 	val_rc result;
 
@@ -329,6 +370,7 @@ SerialFile::getCached(str_ptr key)
 	{
 		return result;
 	}
+
 	file_res fin(file_name, SFDi.fmode_r);
 
 	str_rc expire_str = fgets(fin,28);
@@ -354,7 +396,7 @@ SerialFile::getCached(str_ptr key)
 }
 
 str_rc
-SerialFile::getDirectory(str_ptr id)
+DirCache::getDirectory(str_ptr id)
 {
     str_rc hash = sha1(id, false);
     
@@ -376,7 +418,7 @@ SerialFile::getDirectory(str_ptr id)
 
 
 str_rc
-SerialFile::getFileName(str_ptr id)
+DirCache::getFileName(str_ptr id)
 {
     str_rc dir = this->getDirectory(id);
     str_rc hash = sha1(id, false);
@@ -389,7 +431,7 @@ SerialFile::getFileName(str_ptr id)
 }
 
 bool 
-SerialFile::set(str_ptr key, val_ptr data, zend_long ttl)
+DirCache::set(str_ptr key, val_ptr data, zend_long ttl)
 {
 	if (ttl <= 0)
 	{
@@ -416,7 +458,7 @@ SerialFile::set(str_ptr key, val_ptr data, zend_long ttl)
 }
 
 val_rc 
-SerialFile::get(str_ptr key, val_ptr noval)
+DirCache::get(str_ptr key, val_ptr noval)
 {
 	val_rc result;
 
@@ -432,7 +474,7 @@ SerialFile::get(str_ptr key, val_ptr noval)
 }
 
 bool 
-SerialFile::deleteKey(str_ptr key)
+DirCache::deleteKey(str_ptr key)
 {
 	str_rc file = this->getFileName(key);
 	if (file_exists(file))
@@ -442,7 +484,7 @@ SerialFile::deleteKey(str_ptr key)
 	return true;
 }
 
-bool SerialFile::writePkg(obj_ptr pkg)
+bool DirCache::writePkg(obj_ptr pkg)
 {
 	ICacheData* icd = zobj_toc<ICacheData>(pkg);
 
@@ -487,13 +529,13 @@ bool SerialFile::writePkg(obj_ptr pkg)
 }
 
 zend_class_entry* 
-SerialFile::register_class(zend_class_entry* ce)
+DirCache::register_class(zend_class_entry* ce)
 {
 	
 
-	zend_class_entry *sf = register_class_Wcc_Cache_SerialFile(ce);
+	zend_class_entry *sf = register_class_Wcc_Cache_DirCache(ce);
 
-	SerialFile::omg.classEntry(sf);
+	DirCache::omg.classEntry(sf);
 
 	
 
@@ -501,7 +543,7 @@ SerialFile::register_class(zend_class_entry* ce)
 }
 
 void 
-SerialFile::debug_info(htab_rw s)
+DirCache::debug_info(htab_rw s)
 {
 	ICache::debug_info(s);
 

@@ -453,7 +453,7 @@ void Run::shutdown()
 
 	obj_rc cache_mgr = sobj->get(Run_i.cache_mgr);
 	CacheMgr *cmgr = zobj_toc<CacheMgr>(cache_mgr);
-	cmgr->write_caches();
+	cmgr->flush_caches();
 	//zend_printf("Caches written\n");
 
 	obj_rc cfg = sobj->get(Run_i.config_str);

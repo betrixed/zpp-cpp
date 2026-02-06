@@ -45,6 +45,8 @@ public:
 
 	virtual int  deleteExpired();
 
+	virtual error_return flushCached();
+
 	void addLocal(obj_ptr pkg);
 
 	bool clearPrefix(str_ptr prefix);
@@ -88,6 +90,7 @@ public:
 	{
 		ttl_ = ttl;
 	}
+
 
 	VIRTUAL_ZOBJPTR
 };

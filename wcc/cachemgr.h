@@ -43,7 +43,7 @@ public:
 	str_intern s_delete;
 	str_intern s_getcached;
 	str_intern s_setoption;
-	str_intern s_writecached;
+	str_intern s_flushcached;
 	str_intern s_delete_expired;
 	
 	
@@ -111,7 +111,7 @@ public:
 
 	static val_rc readFile(str_ptr filename, str_ptr ext = str_ptr());
 
-	void write_caches();
+	void flush_caches();
 
 }; // CacheMgr
 

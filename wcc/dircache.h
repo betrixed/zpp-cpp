@@ -1,5 +1,5 @@
-#ifndef SERIAL_FILE_H
-#define SERIAL_FILE_H
+#ifndef DIR_CACHE_H
+#define DIR_CACHE_H
 
 #ifndef ICACHE_H
 #include "icache.h"
@@ -9,6 +9,46 @@ namespace wcc {
 
 using namespace zpp;
 	
+
+class  DirCache : public ICache {
+protected:
+	str_rc  cache_dir_;
+	bool    keep_local_;
+	bool    dir_tree_;
+	bool    defer_write_;
+
+public:
+
+	static base_obj_mgr<DirCache> omg;
+	
+	static zend_class_entry* register_class(zend_class_entry* ce);
+	
+	void construct(val_ptr options, val_ptr services) override;
+	bool clear() override;
+	int  deleteExpired() override;
+	bool set(str_ptr key, val_ptr data, zend_long ttl = 0) override;
+	
+	val_rc get(str_ptr key, val_ptr noval = val_ptr()) override;
+	val_rc getCached(str_ptr key) override;
+
+	bool deleteKey(str_ptr key) override;
+ 	
+ 	void debug_info(htab_rw s) override;
+
+ 	error_return flushCached() override;
+ 	
+ 	str_rc getFileName(str_ptr id);
+ 	str_rc getDirectory(str_ptr id);
+
+ 	bool writePkg(obj_ptr pkg);
+
+ 	htab_rc getExpiredFiles(str_ptr dir, str_ptr ext);
+ 	
+
+	VIRTUAL_ZOBJPTR
+};
+
+
 class  SFData : public state_init 
 {
 public:
@@ -52,41 +92,6 @@ public:
 
 	void init() override;
 };
-
-
-class  SerialFile : public ICache {
-protected:
-	str_rc  cache_dir_;
-	bool    keep_local_;
-	bool    dir_tree_;
-	bool    defer_write_;
-
-public:
-
-	static base_obj_mgr<SerialFile> omg;
-	static htab_rc getExpiredFiles(str_ptr dir, str_ptr ext);
-	static zend_class_entry* register_class(zend_class_entry* ce);
-	
-	void construct(val_ptr options, val_ptr services) override;
-	bool clear() override;
-	int  deleteExpired() override;
-	bool set(str_ptr key, val_ptr data, zend_long ttl = 0) override;
-	val_rc get(str_ptr key, val_ptr noval = val_ptr()) override;
-	val_rc getCached(str_ptr key) override;
-
-	bool deleteKey(str_ptr key) override;
- 	
- 	void debug_info(htab_rw s) override;
- 	
- 	str_rc getFileName(str_ptr id);
- 	str_rc getDirectory(str_ptr id);
-
- 	bool writePkg(obj_ptr pkg);
-
-
-	VIRTUAL_ZOBJPTR
-};
-
 
 }; // namespace
 

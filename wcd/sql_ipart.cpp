@@ -153,6 +153,11 @@ void sql_strtab::init()
 	queryString = "queryString";
 	icolumns = "icols";
 	auto_alias = "auto_alias";
+
+	nulls = "nulls";
+	last = "last";
+	first = "first";
+	nulls_last = "nulls_last";
 	
 	opstr = {
 		{"="}, {"<>"}, {">"}, {"<"}, {">="}, {"<="}, {op_like},
@@ -534,6 +539,12 @@ void IColumns::clear()
 	colnames_.reset();
 	expr_.reset();
 	alias_.init();
+}
+
+void IColumns::addExpr(str_ptr alias, str_ptr expr)
+{
+	htab_rw exp_w(expr_);
+	exp_w.set(alias, expr);
 }
 		
 void 

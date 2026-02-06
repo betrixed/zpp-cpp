@@ -33,7 +33,9 @@ class Operation {
 
 	public function orderStr(string $clauses) : void {}
 
-	public function orderBy(mixed $column, bool $descend = false) : void {}
+	public function orderBy(mixed $column, 
+		bool $descend = false, 
+		bool $nullslast = false) : void {}
 
 	public function prepare(?int $fmode = null) : \Wcd\Simple {}
 

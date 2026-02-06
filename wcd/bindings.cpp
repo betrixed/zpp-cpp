@@ -793,7 +793,7 @@ Bindings::select()
 }
 
 void 
-Bindings::orderBy(val_ptr colspec, bool descend)
+Bindings::orderBy(val_ptr colspec, bool descend, bool nullslast)
 {
 	val_rc args;
 
@@ -810,8 +810,19 @@ Bindings::orderBy(val_ptr colspec, bool descend)
 		hw.set(SQSTR.column, colspec);
 	}
 	
-	val_rc boolmgr(descend); // otherwise taken as integer value
-	hw.set(SQSTR.desc, boolmgr);
+	val_rc boolval;
+
+	boolval.set_bool(true);
+
+	if (descend)
+	{
+		hw.set(SQSTR.desc, boolval);
+	}
+
+	if (nullslast)
+	{
+		hw.set(SQSTR.nulls_last, boolval);
+	}
 
 	add(ISql::SQL_ORDER, args);
 }
@@ -1007,17 +1018,18 @@ ZEND_METHOD(Wcd_Sql_Bindings, orderBy)
 
 	val_ptr colspec( args.need(0));
 	bool descend = false;
-	
+	bool nullslast = false;
 
-	args.zbool(descend, args.option(1));
+	if (args.zbool(descend, args.option(1)))
+	{	
+		args.zbool(nullslast, args.option(2));
+	}
 
 	if (!args.throw_errors())
 	{
 		Bindings* cobj = zval_toc<Bindings>(ZEND_THIS);
-		cobj->orderBy(colspec, descend);
+		cobj->orderBy(colspec, descend, nullslast);
 	}
-
-
 }
 
 /* public function primeJoin(TColumns $tc): JoinTables {} */

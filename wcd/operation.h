@@ -57,10 +57,13 @@ public:
 
 	error_return limit(val_ptr ct, val_ptr start);
 
-	error_return orderBy(val_ptr column, bool descend);
+	error_return orderBy(val_ptr column, 
+					bool descend = false, 
+					bool nullslast = false);
 
 	error_return orderStr(str_ptr clauses);
 	
+	error_return parseOrder(str_ptr ostr);
 
 	obj_return prepare(int fetch);
 

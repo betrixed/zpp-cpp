@@ -124,7 +124,10 @@ ISql::columnsTC(IColumns* tc, htab_rw col_list)
 		for(wk.start(expr); wk.ok(); wk.next())
 		{
 			str_buf fbuf;
-			fbuf << exfn.zstr() << " as " << this->quoteName(exalias.zstr());
+			str_rc name = this->quoteName(exalias.zstr());
+
+			fbuf << exfn.zstr() << " as " << name;
+
 			cfrag = fbuf.zstr();
 			//showstr("expr:", cfrag);
 			col_list.push_back(cfrag);
@@ -136,6 +139,8 @@ ISql::columnsTC(IColumns* tc, htab_rw col_list)
 str_rc
 ISql::orderBy(htab_ptr obind)
 {
+	str_rc result;
+
 	str_buf buf;
 
 	buf << ' ';
@@ -170,15 +175,26 @@ ISql::orderBy(htab_ptr obind)
 				buf << this->quoteName(attr);
 			}
 			val_ptr descend = order.get(SQSTR.desc);
+
 			if (descend.isTrue()) {
 				buf << " DESC";
 			}
 			else { // ?usually the default?
 				buf << " ASC";
 			}
+
+			val_ptr nulls_last = order.get(SQSTR.nulls_last);
+			if (nulls_last.isTrue())
+			{
+				buf << " NULLS LAST";
+			}
 		}
 	}
-	return buf.zstr();
+	result = buf.zstr();
+	//showstr("orderby ", result);
+
+	return result;
+
 }
 
 obj_return 

@@ -54,4 +54,6 @@ class ICache {
 
 	public function setTTL(int $val): void {}
 
+	public function flushCached() : void {}
+
 };

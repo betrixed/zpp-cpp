@@ -29,6 +29,6 @@ class CacheMgr {
 
 	public function readCache(string $filename, string $cache_name) : mixed {}
 
-	public function write_caches() : void {}
+	public function flush_caches() : void {}
 
 };

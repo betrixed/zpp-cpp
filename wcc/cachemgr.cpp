@@ -66,7 +66,7 @@ void CacheMgr_init::init()
 	s_getcached = "getcached";
 	s_setoption = "setoption";
 
-	s_writecached = "writecached";
+	s_flushcached = "flushcached";
 	s_delete_expired = "deleteexpired";
 	s_clear_str = "clear";
 	defer_write = "defer_write";
@@ -335,7 +335,7 @@ CacheMgr::readCache(str_ptr filename, str_ptr cachename)
 }
 
 void 
-CacheMgr::write_caches()
+CacheMgr::flush_caches()
 {
 	htab_walk wk;
 	auto cache = wk.value();
@@ -343,7 +343,7 @@ CacheMgr::write_caches()
 	{
 		obj_ptr obj = cache.zobject();
 
-		obj.call(Cache_i.s_writecached);
+		obj.call(Cache_i.s_flushcached);
 
 		val_rc arg1(Cache_i.defer_write);
 		val_rc arg2(false);
@@ -544,12 +544,12 @@ ZEND_METHOD(Wcc_CacheMgr, readCache)
 	result.move_zv(return_value);
 }
 
-ZEND_METHOD(Wcc_CacheMgr, write_caches)
+ZEND_METHOD(Wcc_CacheMgr, flush_caches)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	CacheMgr*  cobj = zval_toc<CacheMgr>(ZEND_THIS);
-	cobj->write_caches();
+	cobj->flush_caches();
 }
 
 ZEND_METHOD(Wcc_CacheMgr, readFile)

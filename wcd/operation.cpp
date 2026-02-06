@@ -262,7 +262,7 @@ Operation::limit(val_ptr ct, val_ptr start)
 }
 
 error_return 
-Operation::orderBy(val_ptr column, bool descend)
+Operation::orderBy(val_ptr column, bool descend, bool nullslast)
 {
 	error_return err;
 	Bindings* bind = nullptr;
@@ -270,40 +270,93 @@ Operation::orderBy(val_ptr column, bool descend)
 	{
 		return err;
 	}
-	bind->orderBy(column, descend);
+	bind->orderBy(column, descend, nullslast);
 	return err;
 }
 
+static bool nextwd(htab_ptr src, unsigned& ix, str_rc& word)
+{
+	if (ix < src.size())
+	{
+		str_rc temp = src.get(ix);
+		word = temp;
+		word.to_lower();
+		ix++;
+		
+
+		return true;
+	}
+	word = str_ptr::empty_str();
+	return false;
+}
+
 error_return
+Operation::parseOrder(str_ptr clauses)
+{
+	error_return result;
+
+	unsigned ix = 0;
+	bool isdesc = false;
+	bool isnullslast = false;
+	str_rc word = str_ptr::empty_str();
+	val_rc field;
+
+	htab_rc order = explode(SQSTR.str_space, clauses);
+
+	if (nextwd(order, ix, word))
+	{
+		field = word;
+	}
+	while(nextwd(order, ix, word))
+	{
+		if (zs_cmp(word,SQSTR.desc)==0)
+		{
+			isdesc = true;
+		}
+		else if (zs_cmp(word,SQSTR.asc)==0)
+		{
+			isdesc = false;
+		}
+		else if (zs_cmp(word,SQSTR.nulls)==0)
+		{
+			if (nextwd(order, ix, word))
+			{
+				if (zs_cmp(word, SQSTR.last)==0)
+				{
+
+					isnullslast = true;
+				}
+				else if (zs_cmp(word,SQSTR.first)==0)
+				{
+					isnullslast = false;
+				}
+			}
+		}
+	}
+	if (field.isString())
+	{
+		result = this->orderBy(field, isdesc, isnullslast);
+	}
+	return result;
+}
+
+error_return 
 Operation::orderStr(str_ptr clauses)
 {
 	error_return result;
 
-	htab_rc ordlist = explode(SQSTR.comma_char, clauses);
-	if (ordlist.size())
-	{
-		htab_walk wk;
-		auto val = wk.value();
-		for(wk.start(ordlist); wk.ok(); wk.next())
-		{
-			str_rc ordstr = val.zstr();
-			htab_rc ord3 = explode(SQSTR.str_space, ordstr);
-			size_t olen = ord3.size();
-			if (olen)
-			{
-				val_rc field = ord3.get((int) 0);
+	htab_rc split = explode(SQSTR.comma_char,clauses);
 
-				bool isdesc = false;
-				if (olen>0)
-				{
-					val_rc desc = ord3.get((int) 1);
-					isdesc = (zs_cmp_ci(desc.zstr(),SQSTR.desc)==0);
-					result = this->orderBy(field, isdesc);
-					if (result.has_errors())
-					{
-						return result;
-					}
-				}	
+	if (split.size())
+	{
+		for_key_value wk;
+		for(wk.start(split); wk.ok(); wk.next())
+		{
+			val_ptr clause = wk.value();
+			result = this->parseOrder(clause.zstr());
+			if (result.has_errors())
+			{
+				break;
 			}
 		}
 	}
@@ -629,19 +682,22 @@ ZEND_METHOD(Wcd_Sql_Operation, orderBy)
 {
 	zarg_rd args(execute_data);
 
-	val_ptr column(args.need(0));
-	bool      descend;
+	
+	bool      descend = false;
+	bool      nullslast = false;
 
-	if (!args.zbool(descend,args.option(1)))
+	val_ptr column(args.need(0));
+
+	if (args.zbool(descend,args.option(1)))
 	{
-		descend = false;
+		args.zbool(nullslast,args.option(2));
 	}
 
 	if (!args.throw_errors())
 	{
 		Operation* cobj = zval_toc<Operation>(ZEND_THIS);
 
-		error_return result = cobj->orderBy(column, descend);
+		error_return result = cobj->orderBy(column, descend, nullslast);
 		result.throw_errors();
 	}
 }

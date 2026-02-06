@@ -5,7 +5,8 @@
  */
 namespace Wcc\Cache;
 
-class SerialFile extends \Wcc\ICache {
+class DirCache extends \Wcc\ICache {
 
-	public const string SFILE_EXT = "sfe";
+	public const string FILE_EXT = "sfe";
+
 };

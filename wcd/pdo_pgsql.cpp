@@ -46,7 +46,7 @@ Pdo_pgsql::getTableNames()
 	htab_return result;
 
 	val_return pstmt = this->prepareQuery(PGIs.tablenames_qry, empty, empty);
-
+	
 	if (pstmt.has_errors())
 	{
 		result = std::move(pstmt);

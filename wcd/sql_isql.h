@@ -267,7 +267,9 @@ namespace wcd {
 
 		void offset(int value);
 
-		void orderBy(val_ptr column, bool descend=false);
+		void orderBy(val_ptr column, 
+			bool descend=false, 
+			bool nullslast=false);
 
 		void update(str_ptr column, val_ptr value);
 

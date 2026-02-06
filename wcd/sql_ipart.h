@@ -126,6 +126,11 @@ namespace wcd {
 		str_intern  queryString;
 		str_intern  icolumns;
 		str_intern  auto_alias;
+
+		str_intern nulls;
+		str_intern last;
+		str_intern first;
+		str_intern nulls_last;
 		
 		std::vector<str_intern> opstr;
 		std::vector<str_intern> boolstr;
@@ -359,6 +364,8 @@ namespace wcd {
 			alias_ = name;
 		}
 
+		void    addExpr(str_ptr alias, str_ptr expr);
+
 		str_ptr getAlias() const
 		{
 			return alias_;
@@ -390,11 +397,7 @@ namespace wcd {
 			return (colnames_.size() > 0);
 		}
 
-		void addExpr(str_ptr alias, str_ptr expr)
-		{
-			htab_rw exp_w(expr_);
-			exp_w.set(alias, expr);
-		}
+
 
 		htab_ptr getExpr() const
 		{

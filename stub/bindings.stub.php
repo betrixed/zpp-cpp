@@ -30,7 +30,9 @@ class Bindings
 
     public function iSql() : ISql {}
 
-	public function orderBy(mixed $col, bool $desc) : void {}
+	public function orderBy(mixed $col, 
+        bool $desc, 
+        bool $nullslast) : void {}
     
     public function primeJoin(TColumns $tc): JoinTables {}
 
