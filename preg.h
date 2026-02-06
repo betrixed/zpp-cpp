@@ -152,7 +152,7 @@ namespace zpp {
 	// str_ptr version
 	str_rc preg_replace(str_ptr rexpr, str_ptr replace, str_ptr input, int limit = -1, size_t* rcount = nullptr);
 
-	val_rc explode(str_ptr sep,  str_ptr split, long limit = 0);
+	val_rc explode(str_ptr sep,  str_ptr split, long limit = INT_MAX);
 
 	str_rc implode(str_ptr sep, htab_ptr w);
 

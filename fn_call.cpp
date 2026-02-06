@@ -108,6 +108,7 @@ public:
     //fn_simple_loader simple_loader;
 
     fn_call_args1 is_dir;
+    fn_call_args1 is_file;
 
     fn_opendir    opendir;
     fn_readdir    readdir;
@@ -150,6 +151,8 @@ public:
         fclose.set_fname(ftab.s_fclose);
 
         is_dir.set_fname(ftab.s_isdir);
+        is_file.set_fname(ftab.s_isfile);
+
         opendir.set_fname(ftab.s_opendir);
         readdir.set_fname(ftab.s_readdir);
         closedir.set_fname(ftab.s_closedir);
@@ -350,7 +353,7 @@ file_res::file_res(
     str_ptr path, str_ptr mode, 
     bool use_inc_path, val_ptr ctx)
 {
-    file_ = fopen(path,mode, use_inc_path, ctx);
+    file_ = fopen(path, mode, use_inc_path, ctx);
 }
 
 file_res::~file_res()
@@ -362,7 +365,8 @@ void file_res::close(){
     if (file_.ok())
     {
         fclose(file_);
-        ZVAL_NULL(file_);
+        file_.set_null();
+        //showmem("After close", file_);
     }
 }
 
@@ -846,6 +850,8 @@ fntable::init()
     s_dirname = "dirname";
 
     s_isdir = "is_dir";
+    s_isfile = "is_file";
+
     s_opendir = "opendir";
     s_closedir = "closedir";
     s_readdir = "readdir";
@@ -1005,6 +1011,16 @@ is_dir(str_ptr path)
     val_rc result = fn.call_fn();
     return result.isTrue();
 }
+
+bool 
+is_file(str_ptr path)
+{
+    auto& fn = TLFNs.is_file;
+    ZVAL_STR(fn.argsptr(), path);
+    val_rc result = fn.call_fn();
+    return result.isTrue();
+}
+
 
 val_rc 
 opendir(str_ptr path)
@@ -1178,7 +1194,7 @@ unserialize(str_ptr data, htab_ptr options)
         ZVAL_ARR(ap, options);
     }
     else {
-        ZVAL_ARR(ap, (zend_array*) &zend_empty_array);
+        ZVAL_EMPTY_ARRAY(ap);
     }
     val_rc result = fn.call_fn();
     return result;

@@ -288,10 +288,14 @@ namespace zpp {
         str_intern  s_weakref_get;
 
         str_intern  s_isdir;
+        str_intern  s_isfile;
+        str_intern  s_isreadable;
+
         str_intern  s_readdir;
         str_intern  s_opendir;
         str_intern  s_closedir;
         str_intern  s_mkdir;
+
         str_intern  s_php_sapi_name;
         str_intern  s_filemtime;
         str_intern  s_realpath;
@@ -306,7 +310,7 @@ namespace zpp {
         str_intern  s_serialize;
         str_intern  s_unserialize;
         str_intern  s_sha1;
-        str_intern  s_isreadable;
+        
         
         void init() override;
         void init_req() override;
@@ -338,8 +342,11 @@ namespace zpp {
     class file_res {
     public:
         val_rc    file_;//PHP file resource object
-        file_res(str_ptr path, str_ptr mode, 
-                    bool use_inc_path=false, val_ptr ctx = val_ptr());
+        file_res(str_ptr path, 
+                 str_ptr mode, 
+                    bool use_inc_path = false, 
+                    val_ptr ctx = val_ptr());
+
         ~file_res();
         void close();
         bool isopen();
