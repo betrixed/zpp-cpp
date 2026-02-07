@@ -11,6 +11,7 @@
 #include "wcd/iserver.cpp"
 #include "wcd/idriver.cpp" 
 #include "wcd/ibuild.cpp"
+#include "wcd/pdo_pgsql.cpp"
 
 #include "wcd/raw.cpp"
 #include "wcd/model.cpp"
@@ -18,6 +19,9 @@
 
 #include "wcd/sql_ipart.cpp"
 #include "wcd/sql_isql.cpp"
+#include "wcd/isql.cpp"
+#include "wcd/postgres.cpp"
+
 #include "wcd/bindings.cpp"
 #include "wcd/runsql.cpp"
 #include "wcd/simple.cpp"
