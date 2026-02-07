@@ -406,9 +406,9 @@ int md_parse(const MD_CHAR* text, MD_SIZE size, const MD_PARSER* parser, void* u
 
 
 #ifdef PHP_H
-#define MDH_ALLOC(x) _emalloc(x)
+#define MDH_ALLOC(x) emalloc(x)
 #define MDH_REALLOC(x,y) erealloc(x,y)
-#define MDH_FREE(x)  _efree(x)
+#define MDH_FREE(x)  efree(x)
 #else
 #define MDH_ALLOC(x) malloc(x)
 #define MDH_REALLOC(x,y) realloc(x,y)

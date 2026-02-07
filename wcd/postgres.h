@@ -18,16 +18,20 @@ namespace wcd {
 
 	public:
 		str_intern  rex_pgname;
-		preg        req_pgname;
+		
 
 		void init() override;
-		void init_req() override;
-		void end_req() override;
+
 	};
 
 
 	class Postgres : public ISql {
+	protected:
+		preg	pgname;
 	public:
+
+		Postgres();
+		virtual ~Postgres() = default;
 
 		static base_obj_mgr<Postgres> omg;
 		static zend_class_entry* register_class(zend_class_entry* isql_class);

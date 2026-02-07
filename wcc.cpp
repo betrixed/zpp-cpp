@@ -67,9 +67,13 @@ extern "C" {
 #include "wcc/replace.cpp"
 #include "wcc/config.cpp"
 #include "wcc/hmap.cpp"
+
 #include "wcc/icachedata.cpp"
-#include "wcc/icache.cpp"
+
 #include "wcc/dircache.cpp"
+ // ICache registers DirCache if dircache code is first.
+#include "wcc/icache.cpp"
+
 #include "wcc/cachemgr.cpp"
 
 // route, wccr
@@ -271,7 +275,6 @@ PHP_MINIT(wcc_assets_reg)(INIT_FUNC_ARGS_PASSTHRU);
 #endif
 
 #ifdef ICACHE_CPP
-	PHP_MINIT(Wcc_ICacheData_reg)(INIT_FUNC_ARGS_PASSTHRU);
 	PHP_MINIT(Wcc_ICache_reg)(INIT_FUNC_ARGS_PASSTHRU);
 #endif
 

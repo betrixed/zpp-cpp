@@ -27,14 +27,10 @@ void PGSInit::init()
 	rex_pgname = "/^[a-z_][a-z_0-9]*$/";
 }
 
-void PGSInit::init_req()
-{
-	req_pgname.setExpr(rex_pgname);
-}
 
-void PGSInit::end_req()
+Postgres::Postgres()
 {
-	req_pgname.setExpr(str_ptr::empty_str());
+	pgname.setExpr(PGSd.rex_pgname);
 }
 
 str_rc 
@@ -52,7 +48,7 @@ Postgres::quoteName(str_ptr name)
 			result = name;
 			break;
 		default:
-			if (!PGSd.req_pgname.matches(name))
+			if (!pgname.matches(name))
 			{
 				str_buf buf;
 				buf << '"' << name << '"';

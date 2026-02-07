@@ -17,6 +17,12 @@ extern "C" {
 };
 #endif
 
+#ifndef ICACHE_DATA_ARGINFO
+#define ICACHE_DATA_ARGINFO
+extern "C" {
+	#include "stub/icachedata_arginfo.h"
+};
+#endif
 
 /*
 #ifndef DIR_CACHE_H
@@ -763,9 +769,14 @@ ZEND_METHOD(Wcc_ICache, setTTL)
 PHP_MINIT_FUNCTION(Wcc_ICache_reg)
 {
 
-	auto ce = register_class_Wcc_ICache();
+	auto ce = register_class_Wcc_ICacheData();
+
+	ICacheData::omg.classEntry(ce);
+
+	ce = register_class_Wcc_ICache();
 
 	ICache::omg.classEntry(ce);
+
 #ifdef DIR_CACHE_CPP
 	DirCache::register_class(ce);
 #endif

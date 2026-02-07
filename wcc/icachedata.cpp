@@ -262,14 +262,6 @@ ZEND_METHOD(Wcc_ICacheData, update)
 	cobj->update(dw, ttl);
 }
 
-PHP_MINIT_FUNCTION(Wcc_ICacheData_reg)
-{
-	auto ce = register_class_Wcc_ICacheData();
-
-	ICacheData::omg.classEntry(ce);
-
-	return SUCCESS;
-}
 
 //icachedata.cpp
 #endif
