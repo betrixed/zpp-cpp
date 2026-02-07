@@ -25,9 +25,15 @@
 #include "wcc/hmap.cpp"
 //#include "wcc/replace.cpp"
 
-#include "wcc/icache.cpp"
+
 #include "wcc/icachedata.cpp"
+#include "wcc/dircache.cpp"
+// ICache handles registration
+#include "wcc/icache.cpp"
+
+
 #include "wcc/cachemgr.cpp"
+
 
 #include "wcc/file_upload.cpp"
 #include "wcc/global_response.cpp"
@@ -104,7 +110,6 @@ PHP_MINIT(wcc_pair_d)(INIT_FUNC_ARGS_PASSTHRU);
 #endif
 
 #ifdef ICACHE_CPP
-	PHP_MINIT(Wcc_ICacheData_reg)(INIT_FUNC_ARGS_PASSTHRU);
 	PHP_MINIT(Wcc_ICache_reg)(INIT_FUNC_ARGS_PASSTHRU);
 #endif
 
