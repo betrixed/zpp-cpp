@@ -13,13 +13,20 @@ extern "C" {
 
     /** Somewhere in PHP headers */
     /** is found most the awful use of C-Macro definitions */
-
+/*
     #ifdef _emalloc
     #undef _emalloc
     #endif
 
+    #ifdef _efree
+    #undef _efree
+    #endif
+
+//#ifndef _emalloc
     extern void* _emalloc(size_t);
     extern void  _efree(void* ptr);
+//#endif
+*/
 }
 
 struct PHPAlloc {
