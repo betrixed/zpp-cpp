@@ -135,6 +135,48 @@ ISql::columnsTC(IColumns* tc, htab_rw col_list)
 	}
 }
 
+str_rc 
+ISql::orderField(htab_ptr order)
+{
+	str_buf buf;
+	str_rc  result;
+
+	val_ptr col = order.get(SQSTR.column);
+
+
+	str_rc attr, alias;
+	if (col.isObject())
+	{
+		TableAttr* ta = zval_toc<TableAttr>(col);
+		alias = ta->getTable();
+		attr = ta->getAttr();
+		buf << alias << '.' << this->quoteName(attr);
+	}
+	else {
+		attr = col.zstr();
+		buf << this->quoteName(attr);
+	}
+	val_ptr descend = order.get(SQSTR.desc);
+
+	if (descend.isTrue()) {
+		buf << " DESC";
+	}
+	else { // ?usually the default?
+		buf << " ASC";
+	}
+
+	/*
+	MySQL does not have NULLS LAST
+	val_ptr nulls_last = order.get(SQSTR.nulls_last);
+	if (nulls_last.isTrue())
+	{
+		buf << " NULLS LAST";
+	}
+	*/
+	result =  buf.zstr();
+	return result;
+}
+
 // 
 str_rc
 ISql::orderBy(htab_ptr obind)
@@ -155,39 +197,13 @@ ISql::orderBy(htab_ptr obind)
 	{
 		if (order_tab.isArray())
 		{
-			htab_ptr order(order_tab.zarray());
 			if (ix.zlong() > 0)
 			{
 				buf << ", ";
 			}
 
-			val_ptr col = order.get(SQSTR.column);
-
-			if (col.isObject())
-			{
-				TableAttr* ta = zval_toc<TableAttr>(col);
-				alias = ta->getTable();
-				attr = ta->getAttr();
-				buf << alias << '.' << this->quoteName(attr);
-			}
-			else {
-				attr = col.zstr();
-				buf << this->quoteName(attr);
-			}
-			val_ptr descend = order.get(SQSTR.desc);
-
-			if (descend.isTrue()) {
-				buf << " DESC";
-			}
-			else { // ?usually the default?
-				buf << " ASC";
-			}
-
-			val_ptr nulls_last = order.get(SQSTR.nulls_last);
-			if (nulls_last.isTrue())
-			{
-				buf << " NULLS LAST";
-			}
+			str_rc field = this->orderField(htab_ptr(order_tab.zarray()));
+			buf << field;
 		}
 	}
 	result = buf.zstr();

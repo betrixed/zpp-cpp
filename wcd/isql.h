@@ -27,6 +27,9 @@ namespace wcd {
 
 		str_return where(Bindings &bind, htab_ptr wtab);
 		str_return insert_col_params(Bindings& bind, htab_ptr rowbind);
+
+		virtual str_rc orderField(htab_ptr details);
+		
 		str_rc orderBy(htab_ptr obind);
 		
 		str_return limit(ParamList* plist, htab_ptr ltab);

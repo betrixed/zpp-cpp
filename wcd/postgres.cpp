@@ -100,6 +100,45 @@ Postgres::truncate(Bindings& bind)
 	return result;
 }
 
+
+str_rc 
+Postgres::orderField(htab_ptr order)
+{
+	str_buf buf;
+	str_rc result;
+
+	val_ptr col = order.get(SQSTR.column);
+	str_rc attr, alias;
+
+	if (col.isObject())
+	{
+		TableAttr* ta = zval_toc<TableAttr>(col);
+		alias = ta->getTable();
+		attr = ta->getAttr();
+		buf << alias << '.' << this->quoteName(attr);
+	}
+	else {
+		attr = col.zstr();
+		buf << this->quoteName(attr);
+	}
+	val_ptr descend = order.get(SQSTR.desc);
+
+	if (descend.isTrue()) {
+		buf << " DESC";
+	}
+	else { // ?usually the default?
+		buf << " ASC";
+	}
+
+	val_ptr nulls_last = order.get(SQSTR.nulls_last);
+	if (nulls_last.isTrue())
+	{
+		buf << " NULLS LAST";
+	}
+	result = buf.zstr();
+	return result;
+}
+
 }  // namespace wcd
 
 

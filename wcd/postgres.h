@@ -28,6 +28,9 @@ namespace wcd {
 	class Postgres : public ISql {
 	protected:
 		preg	pgname;
+
+		str_rc orderField(htab_ptr details) override;
+		
 	public:
 
 		Postgres();
