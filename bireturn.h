@@ -31,6 +31,10 @@ struct error_return {
 
 	str_rc   get_errors();
 
+	error_return&& move_error() {
+		return std::move(*this);
+	}
+
 	bool     throw_errors(const char* fncstr = nullptr);
 
 	void     del_errors();
