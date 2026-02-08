@@ -182,7 +182,7 @@ namespace wcd {
 		obj_return ibret = getBuilderForMe();
 		if (ibret.has_errors())
 		{
-			result = std::move(ibret);
+			result = ibret.move_error();
 			return result;
 		}
 		IBuild* ib = zobj_toc<IBuild>(ibret.value_);
@@ -311,37 +311,35 @@ namespace wcd {
 	Model::byKeyValue(val_ptr keynames, val_ptr values)
 	{
 		error_return check;
+		obj_return   builder;
 		obj_return   result;
 
-		result = getBuilderForMe();
-		if (result.has_errors())
+		builder = getBuilderForMe();
+		if (builder.has_errors())
 		{
+			result = builder.move_error();
 			return result;
 		}
 
-		IBuild* ib = zobj_toc<IBuild>(result.value_);
+		IBuild* ib = zobj_toc<IBuild>(builder.value_);
 
 		Bindings&  bind = ib->bindings();
 		bind.limit(1);
+
 		check = bind.whereKeyValue(keynames, values);
 		if (check.has_errors())
 		{
-			result = std::move(check);
+			result = check.move_error();
 			return result;
 		}
+
 		val_return row = bind.select();
 		if (row.has_errors())
 		{
-			result = std::move(row);
+			result = row.move_error();
 			return result;
 		}
-		obj_rc rowobj = row.value_.zobject();
-		if (!rowobj.ok())
-		{
-			result.error() << "No Row found byKeyValue";
-			return result;
-		}
-		result.value_ = rowobj;
+		result.value_ = row.value_.zobject();
 		return result;	
 	}
 
