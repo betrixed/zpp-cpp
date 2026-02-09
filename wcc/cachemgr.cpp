@@ -74,6 +74,7 @@ void CacheMgr_init::init()
 	php_ext = "php";
 	toml_ext = "toml";
 	xml_ext = "xml";
+	xmlread_c = "wcc\\xmlread::fromfile";
 }
 
 void CacheMgr::construct(htab_ptr cfg)
@@ -380,8 +381,11 @@ CacheMgr::readFile(str_ptr filename, str_ptr ext)
 
 	if (zs_cmp_ci(filetype,Cache_i.xml_ext)==0)
 	{
-		//showstr("filename", filename);
-		result = Wcc_XmlRead::fromFile(filename);
+		fn_call_args1 xmlfile;
+
+		xmlfile.set_fname(Cache_i.xmlread_c);
+		ZVAL_STR(xmlfile.argsptr(), filename);
+		result = xmlfile.call_fn();
 	}
 	else if (zs_cmp_ci(filetype, Cache_i.php_ext)==0)
 	{

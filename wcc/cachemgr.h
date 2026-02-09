@@ -5,20 +5,6 @@
 #include "zpp/base.h"
 #endif
 
-
-
-#ifdef DIRECT_XML
-# ifndef DXML_READ_H
-#   include "tinyxml/dxmlread.h"
-# endif
-#else
-# ifndef XML_READ_H
-#   include "wcc/xmlread.h"
-# endif
-#endif
-
-
-
 namespace wcc {
 
 using namespace zpp;
@@ -53,7 +39,8 @@ public:
 	str_intern php_ext;
 	str_intern toml_ext;
 	str_intern xml_ext;
-
+	str_intern xmlread_c;
+	
 	str_intern s_cache_obj;
 	str_intern s_cache_defaults;
 	str_intern s_default_cache;
@@ -80,6 +67,7 @@ protected:
 	int     delete_expired_;
 
 	obj_rc  loader_;
+
 
 	Loader* getLoader();
 

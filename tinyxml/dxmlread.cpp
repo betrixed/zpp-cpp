@@ -1043,6 +1043,12 @@ ZEND_METHOD(Wcc_XmlRead, fromFile)
 	result.move_zv(return_value);
 }
 
+//Place holder does nothing now
+ZEND_METHOD(Wcc_XmlRead, __construct)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+}
+
 ZEND_METHOD(Wcc_XmlRead, parseFile)
 {
 	zend_string* cname;
