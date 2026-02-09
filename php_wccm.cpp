@@ -8,6 +8,9 @@
 //#include "md4c/markhtml.cpp"
 #include "toml/toml_php.cpp"
 
+// CacheMgr wants one of these
+
+#include "tinyxml/dxmlread.cpp"
 
 PHP_MINIT_FUNCTION(wccm)
 {	
@@ -23,6 +26,12 @@ PHP_MINIT_FUNCTION(wccm)
 	PHP_MINIT(Wcc_MarkToHtml_reg)(INIT_FUNC_ARGS_PASSTHRU);
 #  endif
 	
+
+#	ifdef DXMLREAD_CPP
+	PHP_MINIT(Wcc_XmlRead_reg)(INIT_FUNC_ARGS_PASSTHRU);
+#	endif
+
+
 	return SUCCESS;
 }
 
