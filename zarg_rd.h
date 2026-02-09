@@ -51,6 +51,7 @@ class zarg_rd : public zval_slice
 protected:
 	str_buf*          	  errors_;
 	bool              	  maybe_;
+	int                   ix_;
 /*
 #if ZEND_DEBUG
 	zend_execute_data* 	  ze_;
@@ -64,6 +65,9 @@ public:
 
 	str_buf& error();
 
+	void wrong(zval* arg);
+	void wrong_notclass(zval* arg, zend_class_entry* ce);
+
 	zval* need(size_t ix);
 	zval* option(size_t ix);
 
@@ -72,6 +76,11 @@ public:
 
 	bool obj(obj_ptr& value, zval* arg);
 	bool obj_null(obj_ptr& value, zval* arg);
+
+	obj_ptr obj(zval* arg);
+	obj_ptr obj_ornull(zval* arg);
+	obj_ptr objclass_ornull(zval* arg, zend_class_entry* ce);
+	obj_ptr obj_class(zval* arg, zend_class_entry* ce);
 
 	bool weakref(weak_ref& value, zval* arg);
 	

@@ -637,8 +637,8 @@ Link all instances of a class T, by optionally mixing in this template.
 #ifdef BASE_DEBUG
 			zend_printf("class type %s\n", ZSTR_VAL(class_type->name));
 			obj_count_++;
-			showptr("cobj ",pzo);
-			showobj("zobj", zobj);
+			//showptr("cobj ",pzo);
+			//showobj("zobj", zobj);
 #endif
 			
 

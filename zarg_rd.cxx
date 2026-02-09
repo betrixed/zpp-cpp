@@ -13,6 +13,10 @@
 #include "zarg_rd.h"
 #endif
 
+#ifndef SHOW_ZPP_H
+#include "show_zpp.h"
+#endif
+
 #ifndef ZEND_WEAKREFS_H
 extern "C" {
     #include <zend_weakrefs.h>
@@ -72,6 +76,7 @@ zarg_rd::option(size_t ix)
 {
 	maybe_ = 1;
 	zval* zptr;
+	ix_ = ix;
 
 	if (ix >= nargs_)
 	{
@@ -90,7 +95,8 @@ zarg_rd::ztype(val_ptr& value, zval* arg, int ptype)
 	int rtype = value.ref_type();
 	if (rtype != ptype)
 	{
-		error() << "; Expected TYPE " << ptype << ",  got " << rtype;
+		error() << "; Expected TYPE " << ptype << ",  got ";
+		wrong(arg);
 		return false;
 	}
 	return true;
@@ -101,10 +107,11 @@ zarg_rd::need(size_t ix)
 {
 	maybe_ = false;
 	zval* zptr;
+	ix_ = ix;
 
 	if (ix >= nargs_)
 	{
-		error() << "; Bad argument index " << ix;
+		error() << "; Bad argument index " << ix_;
 		zptr = (zval*) nullptr;
 	}
 	else {
@@ -196,6 +203,96 @@ zarg_rd::obj_ofclass_null(obj_ptr& value, zval* arg, zend_class_entry* ce)
 		error() << "; Expect NULL or object of class " << name;
 	}
 	return false;
+}
+
+obj_ptr 
+zarg_rd::obj(zval* arg)
+{
+	obj_ptr result;
+
+	if (!arg && maybe_)
+	{
+		return result;
+	}
+	result = arg;
+	if (result.ok())
+	{
+		return result;
+	}
+	error() << "# Not object: ";
+	wrong(arg);
+
+	return result;
+}
+
+obj_ptr 
+zarg_rd::obj_ornull(zval* arg)
+{
+	obj_ptr result;
+
+	if (!arg && maybe_)
+	{
+		return result;
+	}
+	result = arg;
+
+	if (result.ok())
+	{
+		return result;
+	}
+
+	val_ptr test(arg);
+	if (test.isNull())
+	{
+		return result;
+	}
+
+	error() << "# Not object or null: ";
+	wrong(arg);
+
+	return result;
+}
+
+obj_ptr 
+zarg_rd::objclass_ornull(zval* arg, zend_class_entry* ce)
+{
+	obj_ptr result;
+
+	if (!arg && maybe_)
+	{
+		return result;
+	}
+
+	result = arg;
+
+	if (result.ok() && result.instanceof(ce))
+	{
+		return result;
+	}
+	error() << "# Not null or object of class ";
+	wrong_notclass(arg, ce);
+	return result;
+}
+
+obj_ptr 
+zarg_rd::obj_class(zval* arg, zend_class_entry* ce)
+{
+	obj_ptr result;
+
+	if (!arg && maybe_)
+	{
+		return result;
+	}
+
+	result = arg;
+
+	if (result.ok() && result.instanceof(ce))
+	{
+		return result;
+	}
+	error() << "# Not object of class ";
+	wrong_notclass(arg, ce);
+	return result;
 }
 
 bool 
@@ -338,6 +435,19 @@ zarg_rd::throw_errors(const char* fncstr)
 	return false;
 }
 
+void 
+zarg_rd::wrong(zval* arg)
+{
+	dump_info di(error());
+	*errors_ << endl;
+}
+
+void 
+zarg_rd::wrong_notclass(zval* arg, zend_class_entry* ce)
+{
+	dump_info di(error());
+	*errors_ << " Not class " << ce->name << endl;
+}
 
 }; //namespace
 #endif

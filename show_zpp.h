@@ -18,7 +18,7 @@ namespace zpp {
 
 class dump_info {
 private:
-	str_out& ss;
+	str_out& 	ss;
 	size_t       total_;
 
 	static str_out dumper_d;
