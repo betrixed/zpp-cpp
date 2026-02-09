@@ -81,6 +81,7 @@ public:
 	str_intern  tbl_models;
 	str_intern  iconfig_key;
 	str_intern  schema_def;
+	str_intern  sqlgen_s;
 		
 
 	void init() override;
@@ -121,6 +122,7 @@ void DBSInit::init() {
 		tbl_models = "table_models";
 		iconfig_key = "cfg";
 		schema_def = "schemaDef";
+		sqlgen_s = "sqlgen";
 
 
 	}
@@ -140,7 +142,7 @@ IDriver::construct(obj_ptr icfgobj, str_ptr name)
 
 	obj_ptr self(vobj());
 
-	self_ = weak_ref::refObject(self);
+	wkself_ = weak_ref::refObject(self);
 
 	val_rc parg(name);
 	self.property(DBS.cfg_name, parg);
@@ -159,16 +161,17 @@ IDriver::debug_info(htab_rw di)
 
 	di.set(DBS.cfg_name, name_);
 	di.set(DBS.db_name, db_name_);
-	di.set(SQSTR.db_ref, self_);
+	di.set(SQSTR.db_ref, wkself_);
 	
 	di.set(DBS.tbl_models, table_models_);
 	di.set(DBS.iconfig_key, icfg_);
 	di.set(DBS.schema_def, schema_def_);
 	di.set(DBS.fetch_str, ifetch_);
+	di.set(DBS.sqlgen_s, isql_);
 
 }
 
-obj_rc  
+obj_ptr  
 IDriver::iconfig()
 {
 	return icfg_;
@@ -187,11 +190,23 @@ IDriver::destruct()
 	{
 		close();
 	}
+	//will this fix shutdown errors?
+	//showobj("self_", self_);
+	//showobj("wkself_", wkself_);
+	wkself_.init(); 
 
+	//showobj("schema_def", schema_def_);
 	schema_def_.init();
+
+	//showarray("table_models", table_models_);
 	table_models_.init();
+
+	//showobj("isql", isql_);
 	isql_.init();
+
+	//showobj("icfg", icfg_);
 	icfg_.init();
+
 	//showobj("IDriver destruct ", vobj());
 	//zend_printf("IDriver destruct\n");
 }
@@ -551,10 +566,8 @@ IDriver::newBindings()
 	obj_rc result = Bindings::omg.new_zobj();
 
 	Bindings& bind = *zobj_toc<Bindings>(result);
-	
-	//showobj("newBindings", self_);
 
-	bind.construct(isql_, self_);
+	bind.construct(isql_, wkself_);
 
 	obj_rc plist = this->newParamList();
 
@@ -568,7 +581,7 @@ IDriver::newParamList()
 {
 	obj_rc result(ParamList::omg.new_zobj());
 	ParamList* plist = zobj_toc<ParamList>(result);
-	plist->construct( self_ );
+	plist->construct( wkself_ );
 	return result;
 }
 
@@ -581,7 +594,7 @@ IDriver::newDmlBuild()
 
 	htab_rc args_mgr;
 	htab_rw args(args_mgr);
-	args.push_back( self_ );
+	args.push_back( wkself_ );
 	return ReflectCache::staticInstanceArgs(bclass,args);
 }
 
@@ -640,7 +653,7 @@ IDriver::isql_c()
 	return zobj_toc<ISql>(isql_);
 }
 
-obj_rc 
+obj_ptr 
 IDriver::isql()
 {
 	return isql_;
@@ -754,7 +767,7 @@ IDriver::getTableModel(str_ptr tableName)
 		
 		Model* m = zobj_toc<Model>(result);
 		
-		m->setConnect(self_);
+		m->setConnect(wkself_);
 		m->setName(tableName);
 		
 		htab_rw hw(table_models_);
@@ -1363,9 +1376,9 @@ ZEND_METHOD(Wcd_IDriver, iConfig)
 
 	IDriver* db = zval_toc<IDriver>(ZEND_THIS);
 
-	obj_rc result = db->iconfig();
+	obj_ptr result = db->iconfig();
 
-	result.move_zv(return_value);
+	result.copy_zv(return_value);
 }
 
 ZEND_METHOD(Wcd_IDriver, iSql)
@@ -1374,9 +1387,9 @@ ZEND_METHOD(Wcd_IDriver, iSql)
 
 	IDriver* db = zval_toc<IDriver>(ZEND_THIS);
 
-	obj_rc result = db->isql();
+	obj_ptr result = db->isql();
 
-	result.move_zv(return_value);
+	result.copy_zv(return_value);
 }
 
 ZEND_METHOD(Wcd_IDriver, inTransaction)

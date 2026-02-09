@@ -2,7 +2,7 @@
 
 namespace Wcc;
 
-use Wcc\Db\IServer;
+use Wcd\IServer;
 
 $services = Services::instance();
 
@@ -13,7 +13,7 @@ $services->set('db',$servers);
 $dbconfig = require ("db_config.php");
 $servers->config($dbconfig);
 
-$dbalias = "db1"; // db1, ms1, sqlite, fb1, fbfn, pg1, pgfo, from db_config.php
+$dbalias = "pcan2"; // db1, ms1, sqlite, fb1, fbfn, pg1, pgfo, from db_config.php
 
 echo "DB alias is " . $dbalias . PHP_EOL;
 $servers->setAlias("default", $dbalias);

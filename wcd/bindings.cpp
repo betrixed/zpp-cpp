@@ -130,7 +130,9 @@ void
 Bindings::construct(obj_ptr sql, weak_ref& connect)
 {
 	isql_ = sql;
+
 	dbref_ = connect;
+	data_ = htab_ptr::empty_array();
 	//showobj("Bindings::construct ", dbref_);
 	
 	//dbname_ = connect.property(SQSTR.namekey);
@@ -161,8 +163,11 @@ Bindings::getJoins()
 	}
 
 	obj_rc result = JoinTables::omg.new_zobj();
-	
+
 	htab_rw(data_).set((zend_long) ISql::SQL_FROM, result);
+	//showobj("newJoins", result);
+	//showobj("isql_", isql_);
+
 	return result;
 }
 
@@ -503,15 +508,14 @@ void Bindings::unset(int key)
 
 void Bindings::wipe(int key)
 {
-	htab_rw hw(data_);
-
+	
 	if (key >= 0)
 	{
+		htab_rw hw(data_);
 		hw.unset(key);
 	}
 	else {
-
-		hw.clear();
+		data_ = htab_ptr::empty_array();
 	}
 	db_.init();
 	paramList_.init();
@@ -613,11 +617,14 @@ Bindings::whereKeyValue(val_ptr key, val_ptr value)
 val_return 
 Bindings::select()
 {
+	showobj("In select", self_);
 	val_return result;
 
 	obj_rc from = getJoins();
+	showobj("from joins", from);
 
 	val_ptr columns = get(ISql::NAME_LIST);
+	showmem("select columns", columns);
 
 	if (columns.ok())
 	{
@@ -872,12 +879,15 @@ using namespace wcd;
 /* public function __construct(ISql $gen, IConnect $connect); */
 ZEND_METHOD(Wcd_Sql_Bindings, __construct)
 {
-	obj_rc gensql;
+	
 	weak_ref wref;
 
 	zarg_rd args(execute_data);
 
-	args.obj(gensql, args.need(0));
+	obj_ptr gensql = args.obj_class(args.need(0), ISql::omg.class_entry_);
+
+	//args.obj(gensql, args.need(0));
+	
 	args.weakref(wref, args.need(1));
 
 	if (!args.throw_errors())

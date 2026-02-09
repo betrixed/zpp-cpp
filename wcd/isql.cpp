@@ -177,6 +177,12 @@ ISql::orderField(htab_ptr order)
 	return result;
 }
 
+void
+ISql::debug_info(htab_rw di)
+{
+	
+}
+
 // 
 str_rc
 ISql::orderBy(htab_ptr obind)

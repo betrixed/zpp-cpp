@@ -58,6 +58,21 @@ $loader->setBaseDir($wcc_root);
 
 echo "BaseDir is " . $loader->getBaseDir() . PHP_EOL;
 
+function shutdown()
+{
+    $svc = Services::instance();
+    $cfg = $svc->get('config');
+    if (is_object($cfg))
+    {
+        $cfg->clear();
+    }
+
+    $svc->clearDefer();
+    $svc->clearActive();
+    $svc->clearObjects();
+    ReflectCache::instance()->clear();
+
+}
 
 class EmptyTest {
     public array $empty = [];

@@ -87,8 +87,8 @@ namespace wcd {
 
 		val_rc handle();
 
-		obj_rc isql();
-		obj_rc iconfig();
+		obj_ptr isql();
+		obj_ptr iconfig();
 		
 
 		bool inTransaction();
@@ -120,7 +120,7 @@ namespace wcd {
 
 		weak_ref selfRef() 
 		{
-			return self_;
+			return wkself_;
 		}
 
 		str_rc quoteName(str_ptr name);
@@ -145,7 +145,7 @@ namespace wcd {
 	protected:
 
 
-		weak_ref  self_; // hold own reference
+		weak_ref  wkself_; // hold own reference
 		
 		obj_rc    icfg_;
 		str_rc    name_;

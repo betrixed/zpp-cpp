@@ -25,6 +25,7 @@ namespace wcd {
 		void columnsTC(IColumns* tc, htab_rw col_list); //str_buf& col_list);
 		htab_ptr getTables(Bindings& bind);
 
+
 		str_return where(Bindings &bind, htab_ptr wtab);
 		str_return insert_col_params(Bindings& bind, htab_ptr rowbind);
 
@@ -74,6 +75,8 @@ namespace wcd {
 		virtual str_rc seqLastValue(str_ptr seq);
 
 		virtual str_return truncate(Bindings& bind);
+
+		void debug_info(htab_rw di) override;
 
 		str_return setSeqValue(int value, htab_ptr data);
 		

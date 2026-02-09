@@ -1112,100 +1112,103 @@ htab_ptr HtmlGem::getSelectKeys()
 str_rc 
 HtmlGem::select_list(val_ptr pset)
 {
+	str_rc result;
+
 	str_buf out;
 	val_ptr test;
 
 	htab_rc   pscopy(pset.zarray());
-	htab_rw ps(pscopy);
+	htab_rw   ps(pscopy);
 
 	val_rc list = ps.get(HTG.listkey);
 
+	htab_ptr options(list);
 
-	if (test.isArray()) {
-		htab_ptr options(list);
+	val_rc selected = ps.get(HTG.valuekey);
 
-		val_rc selected = ps.get(HTG.valuekey);
+	ps.unset(HTG.listkey);
 
-		ps.unset(HTG.listkey);
+	test = selected;
+
+	if (!test.isNull()) {
+		ps.unset(HTG.valuekey);
+	}
+	else {
+		selected = (zend_long)0;
+	}
+
+	out << "<select";
+
+	ifKeyAttr(out, HTG.idkey, ps);
+	ifKeyAttr(out, HTG.classkey, ps);
+	ifKeyAttr(out, HTG.namekey, ps);
+
+	{
+		htab_ptr select_keys = getSelectKeys();
+
+		// any other attributes?
+		htab_walk wk;
+		auto attrkey = wk.key();
+		auto attrval = wk.value();
+		for (wk.start(ps); wk.ok(); wk.next())
+		{
+			test = select_keys.get(attrkey);
+
+			if (test.isNull()) {
+				outAttr(out, attrkey.zstr(), attrval.zstr());
+			}
+		}
+		out << HTG.tagendl;
+	}
+
+	{
+		htab_walk op;
+		auto  skey = op.key();
+		auto  sval = op.value();
+
+		str_rc  selected_as_str;
+		str_ptr suse;
 
 		test = selected;
 
-		if (!test.isNull()) {
-			ps.unset(HTG.valuekey);
-		}
-		else {
-			selected = (zend_long)0;
-		}
-
-		out << "<select";
-		ifKeyAttr(out, HTG.idkey, ps);
-		ifKeyAttr(out, HTG.classkey, ps);
-		ifKeyAttr(out, HTG.namekey, ps);
+		if (!test.isNull())
 		{
-			htab_ptr select_keys = getSelectKeys();
-
-			// any other attributes?
-			htab_walk wk;
-			auto attrkey = wk.key();
-			auto attrval = wk.value();
-			for (wk.start(ps); wk.ok(); wk.next())
-			{
-				test = select_keys.get(attrkey);
-
-				if (test.isNull()) {
-					outAttr(out, attrkey.zstr(), attrval.zstr());
-				}
-			}
-			out << HTG.tagendl;
+			selected_as_str = test.to_zstr();
+			//showstr("value selected_str", selected_as_str);
 		}
+		suse = selected_as_str;
 
+		for(op.start(options); op.ok(); op.next()) 
 		{
-			htab_walk op;
-			auto  skey = op.key();
-			auto  sval = op.value();
+			str_rc option_key = skey.to_zstr();
 
-			str_rc  selected_as_str;
-			str_ptr suse;
-
-			test = selected;
-
-			if (!test.isNull())
+			if (suse.isNull())
 			{
-				selected_as_str = test.to_zstr();
-				//showstr("value selected_str", selected_as_str);
+				selected_as_str = option_key;
+				suse = selected_as_str;
 			}
-			suse = selected_as_str;
+			out << HTG.begintag << HTG.optionkey;
+			outAttr(out, HTG.valuekey, option_key);
 
-			for(op.start(options); op.ok(); op.next()) 
-			{
-				str_rc option_key = skey.to_zstr();
-
-				if (suse.isNull())
-				{
-					selected_as_str = option_key;
-					suse = selected_as_str;
-				}
-				out << HTG.begintag << HTG.optionkey;
-				outAttr(out, HTG.valuekey, option_key);
-
-				if (!zs_cmp(suse, option_key)) {
-					out << " selected>";
-				}
-				else {
-					out << '>';
-				}
-				out << sval.to_zstr() << HTG.endtag << HTG.optionkey <<  HTG.tagendl;
+			if (!zs_cmp(suse, option_key)) {
+				out << " selected>";
 			}
-			out <<  HTG.endtag <<  HTG.selectkey <<  HTG.tagendl;
-			
+			else {
+				out << '>';
+			}
+			out << sval.to_zstr() << HTG.endtag << HTG.optionkey <<  HTG.tagendl;
 		}
+		out <<  HTG.endtag <<  HTG.selectkey <<  HTG.tagendl;
 	}
-	return out.zstr();
+	result = out.zstr();
+	return result;
 }
 
 str_rc
  HtmlGem::select(val_ptr pset)
 {
+	str_rc result;
+
 	htab_rc pset_copy(pset.zarray());
 
 	htab_rw ps(pset_copy);
@@ -1223,7 +1226,8 @@ str_rc
 	htab_rc label_ht = label_method(ps,method);
 	htab_rw label(label_ht);
 
-	str_rc select = select_list(pset);
+	val_rc  pscopy(pset_copy);
+	str_rc select = select_list(pscopy);
 
 	if (method == OUT_LABEL) {
 		label.set(HTG.content_key,select);
@@ -1236,7 +1240,8 @@ str_rc
 	else {
 		out << select << '\n';
 	}
-	return out.zstr();
+	result = out.zstr();
+	return result;
 }
 
 void HtmlGem::setStyle(str_ptr name, val_ptr value)

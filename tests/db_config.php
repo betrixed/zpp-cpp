@@ -51,6 +51,16 @@ return [
             'driver' => 'pdo_sqlite',
             'database' => __DIR__ . '/_data/sqlite_test.sdb'         
         ],
+        'pcan2' => [
+            'host' => 'localhost',
+            'port' => 3306,
+            'driver' => 'pdo_mysql',
+            'charset' => 'utf8mb4',
+            'collation' => 'utf8mb4_unicode_ci',
+            'database' => 'pcan2',
+            'username' => 'sapcan',
+            'password' => 'LeardF0rr3$t'
+        ],
         'db1' => [
             'host' => 'localhost',
             'port' => 3306,

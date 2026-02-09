@@ -13,7 +13,6 @@ echo "Made new HtmlGem" . PHP_EOL;
 echo "multiline\n";
 
 echo $hg->hidden(['id' => "returl", 'name' => 'args', 'value' => 'these args here']) . PHP_EOL;
-die;
 
 echo $hg->multiline(["label" => "push", "name" => "test", "value" => "multiline text", "text"=>"anything"]) . PHP_EOL;
 
@@ -57,7 +56,7 @@ $catItems = ["donate" => "Donation", "member" => "Membership", "other" => "Other
 $catId = "member";
 
 echo $hg->select(['label' => 'Category', 'class' => 'selectpicker', 'list' => $catItems, 'name' => 'strId', 'value' => $catId]) . PHP_EOL;
-
+die;
 echo $hg->hidden(['name' => 'args', 'value' => 'these args here']) . PHP_EOL;
 
 
