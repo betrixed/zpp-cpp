@@ -617,14 +617,14 @@ Bindings::whereKeyValue(val_ptr key, val_ptr value)
 val_return 
 Bindings::select()
 {
-	showobj("In select", self_);
+	//showobj("In select", self_);
 	val_return result;
 
 	obj_rc from = getJoins();
-	showobj("from joins", from);
+	//showobj("from joins", from);
 
 	val_ptr columns = get(ISql::NAME_LIST);
-	showmem("select columns", columns);
+	//showmem("select columns", columns);
 
 	if (columns.ok())
 	{
