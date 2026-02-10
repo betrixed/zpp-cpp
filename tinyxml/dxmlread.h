@@ -25,6 +25,22 @@ namespace wcc {
 	using namespace zpp;
 	using namespace tinyxml2;
 
+	class xml_fns : public state_init {
+	public:
+		str_intern  makeclass_s;
+		str_intern 	  	  k_c;
+		str_intern	      k_k;
+		str_intern       root;
+
+		str_intern       tags;
+
+		void init()
+		{
+			makeclass_s = "makeclass";
+		}
+	};
+
+	extern xml_fns  XML_FNS;
 	/**
 	 * intended for single parse.
 	 * mixed in with Wcc_XmlRead
@@ -51,9 +67,7 @@ namespace wcc {
 		XMLElement*              xele_;
 		
 		// Visit status for elements
-
-
-		Xntype   visit_;
+		Xntype   visit_; //
 
 
 		bool      				fileOpen_;
@@ -67,6 +81,8 @@ namespace wcc {
 		xr_intfn                nodeType_;
 		*/
 	public:
+		
+
 		XmlWrap();
 		~XmlWrap();
 
@@ -87,6 +103,7 @@ namespace wcc {
 		XMLElement*  nextElement();
 		
 		bool      read();
+		
 		XmlWrap::Xntype	  nodeType();
 		void      closeFile();
 
@@ -108,7 +125,7 @@ namespace wcc {
 			XC_TABLE, // indexed array
 			XC_ARRAY // packed array
 		};
-
+		fn_call_args1	mkclass_fn_;
 	public:
 
 		static base_obj_mgr<Wcc_XmlRead> omg;
@@ -154,8 +171,8 @@ namespace wcc {
 
 	protected:
 
-
-		obj_rc   addRoot_; /* preinstalled object root ? */
+		htab_rc  class_replace_; // classname key to replace classname
+		obj_rc   addRoot_; /* preinstalled root by constructor? */
 
 		htab_rc  tag_objs_; /* Array of tag name - class name */
 
@@ -172,6 +189,9 @@ namespace wcc {
 		DStack  *top_;
 		size_t  stacked_;
 
+		void	classReplace(htab_ptr cnames);
+		obj_rc	makeClass(str_ptr classname);
+
 		bool 	tag_start(str_ptr tag, str_ptr val);
 		void 	tag_end(str_ptr tag);
 
@@ -184,11 +204,13 @@ namespace wcc {
 		void	tagsTable();
 		void 	attach_ds(DStack* ds);
 
-		void    pushRoot(str_ptr classname);
+		
+
+		void       pushRoot(str_ptr classname);
 		void       pushClass(str_ptr classname, str_ptr val);
 		void 	   pushTable(int kind, str_ptr val);
 
-		obj_rc  newRoot(str_ptr classname);
+		obj_rc    newRoot(str_ptr classname);
 		void      popStack();
 
 		void      setEmptyArray(str_ptr key);
@@ -214,6 +236,10 @@ namespace wcc {
 		val_rc  loop();
 
 	public:
+
+		void construct(obj_ptr obj);
+		void destruct();
+
 		Wcc_XmlRead();
 		virtual ~Wcc_XmlRead();
 

@@ -80,6 +80,7 @@ void CacheMgr_init::init()
 
 void CacheMgr::construct(htab_ptr cfg)
 {
+	xml_call_.set_fname(Cache_i.xmlread_c);
 	this->init(cfg);
 }
 
@@ -383,29 +384,13 @@ CacheMgr::readFile(str_ptr filename, str_ptr ext)
 	if (zs_cmp_ci(filetype,Cache_i.xml_ext)==0)
 	{
 
-		/**
-		htab_rc args;
-		htab_rw hw(args);
+		obj_rc cache_mgr = Services::service(Cache_i.cache_mgr);
+		CacheMgr* cm = zobj_toc<CacheMgr>(cache_mgr);
+		auto& fn = cm->xml_call_;
 
-		hw.push_back(filename);
-
-		val_rc sfn(Cache_i.xmlread_c);
-		//xmlfile.set_fname(Cache_i.xmlread_c);
-
-		val_rc sarray(args);
-
-		//ZVAL_STR(xmlfile.argsptr(), filename);
-		//result = xmlfile.call_fn();
-		showmem("sfn", sfn);
-		showmem("sarray", sarray);
-		result = call_user_func_array(sfn, sarray);
-		*/
-
-		fn_call_args1 xcall;
-
-		xcall.set_fname(Cache_i.xmlread_c);
-		ZVAL_STR(xcall.argsptr(), filename);
-		result = xcall.call_fn();
+		zval* p = fn.argsptr();
+		ZVAL_STR(p, filename);
+		result = fn.call_fn();
 
 	}
 	else if (zs_cmp_ci(filetype, Cache_i.php_ext)==0)

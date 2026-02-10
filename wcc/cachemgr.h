@@ -56,6 +56,7 @@ extern CacheMgr_init Cache_i;
 class  Loader;
 
 class  CacheMgr : public base_d {
+
 protected:
 	htab_rc cache_obj_;
 	htab_rc cache_defaults_;
@@ -67,7 +68,7 @@ protected:
 	int     delete_expired_;
 
 	obj_rc  loader_;
-
+	fn_call_args1 xml_call_;
 
 	Loader* getLoader();
 

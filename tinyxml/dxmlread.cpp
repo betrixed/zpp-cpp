@@ -81,6 +81,9 @@ namespace zpp {
 		//reader = "reader";	
 		root = "root";	
 		tags = "tags";	
+		k_c = "c";
+		k_k = "k";
+	
 	}
 
 };
@@ -89,14 +92,16 @@ namespace wcc {
 	using namespace zpp;
 	using namespace tinyxml2;
 
-	base_obj_mgr<Wcc_XmlRead> Wcc_XmlRead::omg;
+base_obj_mgr<Wcc_XmlRead> Wcc_XmlRead::omg;
 
-
+xml_fns  XML_FNS;
 
 	XmlWrap::XmlWrap() : 
 		xele_(nullptr)
 		, fileOpen_(false)
 	{
+		
+
 		/* getNameValue_ = (xr_strfn) xmlTextReaderConstName;
 		getAttrValue_ = (xr_attrfn) xmlTextReaderGetAttribute;
 		getStrValue_ = (xr_strfn) xmlTextReaderReadString;
@@ -359,6 +364,12 @@ Wcc_XmlRead::init()
 
 	tag_objs_.reset();
 	clean();
+}
+
+void Wcc_XmlRead::construct(obj_ptr obj)
+{
+	addRoot_ = obj;
+	mkclass_fn_.set_fci(self_, XML_FNS.makeclass_s);
 }
 
 void
@@ -643,10 +654,34 @@ Wcc_XmlRead::pushRoot(str_ptr key)
 
 }
 
+obj_rc 
+Wcc_XmlRead::makeClass(str_ptr classname)
+{
+	str_rc cname;
+	if (class_replace_.size())
+	{
+		cname = class_replace_.get(classname);
+	}
+	if (!cname.ok())
+	{
+		cname = classname;
+	}
+	obj_rc result = ReflectCache::staticInstance(cname);
+	return result;
+}
+
+void Wcc_XmlRead::classReplace(htab_ptr cnames)
+{
+	class_replace_ = cnames;
+}
+
 void Wcc_XmlRead::pushClass(str_ptr classname, str_ptr key)
 {
-
-	obj_rc newroot = ReflectCache::staticInstance(classname);
+	// call through PHP to allow external override
+	auto& fn = mkclass_fn_;
+	
+	ZVAL_STR(fn.argsptr(), classname); 
+	obj_rc newroot = fn.call_fn();
 
 	//showobj("newroot", newroot);
 
@@ -1046,7 +1081,16 @@ ZEND_METHOD(Wcc_XmlRead, fromFile)
 //Place holder does nothing now
 ZEND_METHOD(Wcc_XmlRead, __construct)
 {
-	ZEND_PARSE_PARAMETERS_NONE();
+	zarg_rd args(execute_data);
+
+	obj_ptr root = args.obj_ornull(args.need(0));
+
+	if (!args.throw_errors())
+	{
+		auto cobj = zval_toc<Wcc_XmlRead>(ZEND_THIS);
+		cobj->construct(root);
+	}
+
 }
 
 ZEND_METHOD(Wcc_XmlRead, parseFile)

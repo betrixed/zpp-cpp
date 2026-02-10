@@ -1,4 +1,4 @@
-	#ifndef XMLREAD_CPP
+#ifndef XMLREAD_CPP
 #define XMLREAD_CPP
 
 #ifndef XMLREAD_H
@@ -35,14 +35,16 @@ namespace zpp {
 
 		k_nodeType = "nodeType";//property name
 		k_name = "name";
-		k_c = "c";
-		k_k = "k";
+		
 		k_close = "close";	
 
 		xml_file.set_fname(open);
 		xml_parse.set_fname(fromString);
 
 		reader = "reader";	
+
+		k_c = "c";
+		k_k = "k";
 		root = "root";	
 		tags = "tags";	
 	}

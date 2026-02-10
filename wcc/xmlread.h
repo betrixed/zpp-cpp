@@ -42,18 +42,19 @@ namespace zpp {
         str_intern    	  read_string;
         str_intern    	  read;
 
-		str_intern 	  k_nodeType;
+		str_intern 	  	  k_nodeType;
 		str_intern	      k_attribute;
 		str_intern	      k_name;
 		
-		str_intern 	  k_c;
-		str_intern	      k_k;
+
 
 		str_intern	      k_close;
 
 		str_intern       reader;
 
-		str_intern       root;
+		str_intern 	  	  k_c;
+		str_intern	      k_k;
+		str_intern        root;
 
 		str_intern       tags;
 		
@@ -194,8 +195,8 @@ namespace wcc {
 
 		/** cache zend_string  used for repeated property/call access */
 			
-		XmlWrap xml_; // derived from obj_rc, adopts XmlReader
-		bool done_; // or error condition
+		XmlWrap 	xml_; // Embedded wrapper for TinyXML
+		bool 		done_; // or error condition
 
 		/** PHP file handle returned by XMLReader::open */
 		
@@ -217,11 +218,11 @@ namespace wcc {
 		void	tagsTable();
 		void 	attach_ds(DStack* ds);
 
-		void    pushRoot(str_ptr classname);
-		void       pushClass(str_ptr classname, str_ptr val);
-		void 	   pushTable(int kind, str_ptr val);
+		void	pushRoot(str_ptr classname);
+		void	pushClass(str_ptr classname, str_ptr val);
+		void	pushTable(int kind, str_ptr val);
 
-		obj_rc  newRoot(str_ptr classname);
+		obj_rc    newRoot(str_ptr classname);
 		void      popStack();
 
 		void      setEmptyArray(str_ptr key);
