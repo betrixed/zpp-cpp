@@ -74,7 +74,8 @@ void CacheMgr_init::init()
 	php_ext = "php";
 	toml_ext = "toml";
 	xml_ext = "xml";
-	xmlread_c = "wcc\\xmlread::fromfile";
+	// The loader filesystem is case-sensitive
+	xmlread_c = "\\Wcc\\XmlRead::fromFile";
 }
 
 void CacheMgr::construct(htab_ptr cfg)
@@ -381,11 +382,31 @@ CacheMgr::readFile(str_ptr filename, str_ptr ext)
 
 	if (zs_cmp_ci(filetype,Cache_i.xml_ext)==0)
 	{
-		fn_call_args1 xmlfile;
 
-		xmlfile.set_fname(Cache_i.xmlread_c);
-		ZVAL_STR(xmlfile.argsptr(), filename);
-		result = xmlfile.call_fn();
+		/**
+		htab_rc args;
+		htab_rw hw(args);
+
+		hw.push_back(filename);
+
+		val_rc sfn(Cache_i.xmlread_c);
+		//xmlfile.set_fname(Cache_i.xmlread_c);
+
+		val_rc sarray(args);
+
+		//ZVAL_STR(xmlfile.argsptr(), filename);
+		//result = xmlfile.call_fn();
+		showmem("sfn", sfn);
+		showmem("sarray", sarray);
+		result = call_user_func_array(sfn, sarray);
+		*/
+
+		fn_call_args1 xcall;
+
+		xcall.set_fname(Cache_i.xmlread_c);
+		ZVAL_STR(xcall.argsptr(), filename);
+		result = xcall.call_fn();
+
 	}
 	else if (zs_cmp_ci(filetype, Cache_i.php_ext)==0)
 	{
