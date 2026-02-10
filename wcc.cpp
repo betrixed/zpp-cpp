@@ -97,18 +97,6 @@ extern "C" {
 #include "wcc/plate_engine.cpp"
 #include "wcc/htmlplates.cpp"
 
-
-
-//WCC_SERVICES_CPP
-// miscellaneous, wccm
-//#include "toml/toml_php.cpp"
-
-#ifdef DIRECT_XML
-#include "tinyxml/dxmlread.cpp"
-#else
-#include "wcc/xmlread.cpp"
-#endif
-
 #include "wcc/run.cpp"
 #include "wcc/loader.cpp"
 
@@ -228,14 +216,6 @@ PHP_MINIT_FUNCTION(wcc)
 #endif
 
 
-#	ifdef DXMLREAD_CPP
-	PHP_MINIT(Wcc_XmlRead_reg)(INIT_FUNC_ARGS_PASSTHRU);
-#	endif
-
-#	ifdef XMLREAD_CPP
-	PHP_MINIT(Wcc_XmlRead_reg)(INIT_FUNC_ARGS_PASSTHRU);
-#	endif
-
 #  ifdef MARKHTML_CPP
 	PHP_MINIT(Wcc_MarkToHtml_reg)(INIT_FUNC_ARGS_PASSTHRU);
 #  endif
@@ -286,9 +266,6 @@ PHP_MINIT(wcc_assets_reg)(INIT_FUNC_ARGS_PASSTHRU);
 	PHP_MINIT(Wcc_Day24_reg)(INIT_FUNC_ARGS_PASSTHRU);
 #endif
 
-#ifdef TOML_PHP_CPP
-	PHP_MINIT(Wcc_Toml_reg)(INIT_FUNC_ARGS_PASSTHRU);
-#endif
 
 /*
 #ifdef TOML_STREAM_CPP
