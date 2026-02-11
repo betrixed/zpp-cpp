@@ -27,74 +27,24 @@ extern "C" {
 	#include "stub/xmlread_arginfo.h"
 };
 
-
-namespace zpp {
-	class xml_fns : public state_init {
-    public:
-
-    	//str_intern   	  xmlreader;
-    	//str_intern   	  fromString;
-    	//str_intern   	  open;
-        //str_intern    	  get_attribute;
-        //str_intern    	  read_string;
-        //str_intern    	  read;
-
-		//str_intern 	  	  k_nodeType;
-		//str_intern	      k_attribute;
-		//str_intern	      k_name;
-		
-		str_intern 	  	  k_c;
-		str_intern	      k_k;
-
-		//str_intern	      k_close;
-
-		//str_intern       reader;
-
-		str_intern       root;
-
-		str_intern       tags;
-
-        void init() override;
-    };
-
-	xml_fns XML_FNS;
-
-	void xml_fns::init()
-	{
-		//xmlreader = "xmlreader";
-		//fromString = "xmlreader::fromstring";
-		//open = "xmlreader::open";
-
-		//get_attribute = "getattribute";
-        //read_string = "readstring";
-        //read = "read";
-
-		//k_nodeType = "nodeType";//property name
-		//k_name = "name";
-		k_c = "c";
-		k_k = "k";
-		//k_close = "close";	
-
-		//xml_file.set_fname(open);
-		//xml_parse.set_fname(fromString);
-
-		//reader = "reader";	
-		root = "root";	
-		tags = "tags";	
-		k_c = "c";
-		k_k = "k";
-	
-	}
-
-};
-
 namespace wcc {
 	using namespace zpp;
 	using namespace tinyxml2;
 
+xml_fns XML_FNS;
+
+void xml_fns::init()
+{
+	makeclass_s = "makeclass";
+	k_c = "c";
+	k_k = "k";
+	root = "root";	
+	tags = "tags";	
+	
+}
+
 base_obj_mgr<Wcc_XmlRead> Wcc_XmlRead::omg;
 
-xml_fns  XML_FNS;
 
 	XmlWrap::XmlWrap() : 
 		xele_(nullptr)
@@ -205,7 +155,6 @@ xml_fns  XML_FNS;
 	XmlWrap::get_attribute(str_ptr name)
 	{	
 		str_rc result;
-
 		if (xele_)
 		{
 			const XMLAttribute* a = xele_->FindAttribute(name.data());
@@ -478,6 +427,9 @@ Wcc_XmlRead::loop()
 	done_ = false;
 
 	result.set_bool(false);
+	str_rc tagstr;
+	str_rc attrstr;
+	str_rc classname;
 
 	while(!done_ && xml_.read())
 	{
@@ -487,19 +439,19 @@ Wcc_XmlRead::loop()
 			case XmlWrap::V_ELEMENT:
 			case XmlWrap::V_EMPTY:
 			{
-				str_rc tagstr = xml_.xml_name();
+				tagstr = xml_.xml_name();
 				//showstr("tag start", tagstr);
 
-				str_rc attrstr = xml_.get_attribute(XML_FNS.k_k);
+				attrstr = xml_.get_attribute(XML_FNS.k_k);
 
 				//showstr("tagstr", tagstr);
-				//showstr("attrstr", attrstr);
+				//showstr("attrstr k", attrstr);
 
 				bool result = tag_start(tagstr, attrstr);
 
 				if (!result) {
 
-					str_rc classname = htab_ptr(tag_objs_).get(tagstr);
+					classname = htab_ptr(tag_objs_).get(tagstr);
 
 					if (classname.isNull()) {
 						zend_throw_error(zend_ce_exception, "Unmapped tag %s", tagstr.data());
@@ -513,9 +465,10 @@ Wcc_XmlRead::loop()
 			break;
 		case XmlWrap::V_END_ELEMENT:
 			{
-				str_rc tag = xml_.xml_name();
-				tag_end(tag);
-				//showstr("exit tag", tag);
+				tagstr = xml_.xml_name();
+				//showstr("exit tag", tagstr);
+				tag_end(tagstr);
+				
 			}
 			break;
 		case XmlWrap::V_END_DOCUMENT:
@@ -640,7 +593,7 @@ Wcc_XmlRead::pushRoot(str_ptr key)
 	val_rc newroot;
 	//showstr("pushRoot c=", cname);
 	if (stacked_ == 0) {
-		if (!addRoot_.isNull()) {
+		if (addRoot_.ok()) {
 			newroot = addRoot_;
 		}
 		else {
@@ -650,23 +603,32 @@ Wcc_XmlRead::pushRoot(str_ptr key)
 	else {
 		newroot = newRoot(cname);
 	}
+	showmem("pushRoot ", newroot);
 	attach_ds(new DStack(key, newroot, XC_OBJECT));
 
 }
 
-obj_rc 
+obj_return 
 Wcc_XmlRead::makeClass(str_ptr classname)
 {
+	obj_return result;
+
 	str_rc cname;
 	if (class_replace_.size())
 	{
 		cname = class_replace_.get(classname);
 	}
+
 	if (!cname.ok())
 	{
 		cname = classname;
 	}
-	obj_rc result = ReflectCache::staticInstance(cname);
+
+	result.value_ = ReflectCache::staticInstance(cname);
+	if (!result.value_.ok())
+	{
+		result.error() << "Failed to make object of class " << classname;
+	}
 	return result;
 }
 
@@ -675,19 +637,19 @@ void Wcc_XmlRead::classReplace(htab_ptr cnames)
 	class_replace_ = cnames;
 }
 
-void Wcc_XmlRead::pushClass(str_ptr classname, str_ptr key)
+void
+Wcc_XmlRead::pushClass(str_ptr classname, str_ptr key)
 {
 	// call through PHP to allow external override
+
+	//showstr("pushClass", classname);
+
 	auto& fn = mkclass_fn_;
-	
 	ZVAL_STR(fn.argsptr(), classname); 
-	obj_rc newroot = fn.call_fn();
+	val_rc newroot = fn.call_fn();
+	//showmem("newclass", newroot);
 
-	//showobj("newroot", newroot);
-
-	val_rc store(newroot);
-
-	attach_ds(new DStack(key, store, XC_OBJECT));
+	attach_ds(new DStack(key, newroot, XC_OBJECT));
 }
 
 void Wcc_XmlRead::popStack()
@@ -722,7 +684,7 @@ void Wcc_XmlRead::popStack()
 		}
 	}
 	else {
-		zend_throw_error(zend_ce_error,"Pop with empty element stack");
+		//zend_throw_error(zend_ce_error,"Pop with empty element stack");
 		done_ = true;
 	}
 	//zend_printf("exit popStack\n");
@@ -848,13 +810,14 @@ void Wcc_XmlRead::setValue(val_ptr value,  str_ptr key)
 		break;
 	case XC_TABLE: // current anchor is  Array using associative keys
 		{
-			if (key.isNull()) 
+			//showstr("set array key", key);
+			if (!key.ok()) 
 			{
 				throwNoKey();
 			}
 			
 			htab_rw hw(ref);
-			//showstr("set array key", key);
+			
 			//showmem("value", value);
 
 			hw.set(key, value);
@@ -872,10 +835,11 @@ void Wcc_XmlRead::setValue(val_ptr value,  str_ptr key)
 			}
 			//showmem("ref", ref);
 			htab_rw hw(ref);
-			//showarray("array write", hw);
+			
 			//showmem("push value", value);
 
 			hw.push_back(value);
+			//showarray("pushback", hw);
 		}
 		break;
 	}
@@ -1083,7 +1047,7 @@ ZEND_METHOD(Wcc_XmlRead, __construct)
 {
 	zarg_rd args(execute_data);
 
-	obj_ptr root = args.obj_ornull(args.need(0));
+	obj_ptr root = args.obj_ornull(args.option(0));
 
 	if (!args.throw_errors())
 	{
@@ -1091,6 +1055,24 @@ ZEND_METHOD(Wcc_XmlRead, __construct)
 		cobj->construct(root);
 	}
 
+}
+
+//Place holder does nothing now
+ZEND_METHOD(Wcc_XmlRead, makeClass)
+{
+	zarg_rd args(execute_data);
+
+	str_ptr cname = args.str(args.need(0));
+	obj_return result;
+	if (!args.throw_errors())
+	{
+		auto cobj = zval_toc<Wcc_XmlRead>(ZEND_THIS);
+		result = cobj->makeClass(cname);
+		if (!result.throw_errors())
+		{
+			result.value_.move_zv(return_value);
+		}
+	}
 }
 
 ZEND_METHOD(Wcc_XmlRead, parseFile)

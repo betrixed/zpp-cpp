@@ -15,5 +15,7 @@ class XmlRead {
 
 	static public function fromString(string $src) : mixed {}
 	public function parse(string $src) : mixed {}
+
+	public function makeClass(string $cname) : object {}
 };
 

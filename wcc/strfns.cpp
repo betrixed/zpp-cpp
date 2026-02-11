@@ -5,12 +5,13 @@
 #include "strfns.h"
 #endif
 
-#ifndef WCC_ARGINFO_H
-#define WCC_ARGINFO_H
+#ifndef STRFN_ARGINFO_H
+#define STRFN_ARGINFO_H
 extern "C" {
-#include "stub/wcc_arginfo.h"
+#include "stub/strfn_arginfo.h"
 }
 #endif
+
 
 zend_class_entry* wcc_str_ce;
 

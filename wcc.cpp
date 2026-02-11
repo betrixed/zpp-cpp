@@ -28,12 +28,7 @@
 	ZEND_PARSE_PARAMETERS_END()
 #endif
 
-#ifndef WCC_ARGINFO_H
-#define WCC_ARGINFO_H
-extern "C" {
-#include "stub/wcc_arginfo.h"
-}
-#endif
+
 
 #include <vector>
 
@@ -50,24 +45,22 @@ extern "C" {
 	
 };
 
-#define DIRECT_XML
-//#define DEBUG_EXTRA
-
 //core wcc
-#include "zpp/base.cpp"
-#include "zpp/show_zpp.cpp"
-#include "md4c/markhtml.cpp"
+#include "zpp/base.h"
+#include "zpp/show_zpp.h"
+
+#include "wcc/reflect_cache.h"
+#include "wcc/services.h"
+#include "wcc/replace.h"
+#include "wcc/config.h"
+#include "wcc/strfns.h"
+
+#include "wcc/finder.cpp"
+#include "wcc/loader.cpp"
+#include "wcc/service_access.cpp"
 
 #include "wcc/str8.cpp"
-#include "wcc/strfns.cpp"
-#include "wcc/service_access.cpp"
-#include "wcc/finder.cpp"
-#include "wcc/reflect_cache.cpp"
-#include "wcc/services.cpp"
-#include "wcc/replace.cpp"
-#include "wcc/config.cpp"
 #include "wcc/hmap.cpp"
-
 #include "wcc/icachedata.cpp"
 
 #include "wcc/dircache.cpp"
@@ -96,8 +89,6 @@ extern "C" {
 #include "wcc/plate.cpp"
 #include "wcc/plate_engine.cpp"
 #include "wcc/htmlplates.cpp"
-
-#include "wcc/run.cpp"
 #include "wcc/loader.cpp"
 
  //ICACHE_DATA_CPP
@@ -132,25 +123,11 @@ extern "C" {
 
 PHP_MSHUTDOWN_FUNCTION(wcc)
 {
-
-	zpp::state_init::end_all();
-
-#ifdef DEBUG_EXTRA
-	dump_info::run_state_ = false;
-#endif
 	return (zend_result) SUCCESS;
 }
 
 PHP_MINIT_FUNCTION(wcc)
 {
-#ifdef DEBUG_EXTRA
-	dump_info::run_state_ = true;
-#endif
-
-	//so interned strings like property names
-	//are created before classes.
-	zpp::state_init::init_all();
-	
 	// init status code map
 #ifdef GLOBAL_RESPONSE_CPP
 	PHP_MINIT(Wcc_Response_reg)(INIT_FUNC_ARGS_PASSTHRU);
@@ -168,10 +145,6 @@ PHP_MINIT_FUNCTION(wcc)
 	PHP_MINIT(Wcc_Str8_reg)(INIT_FUNC_ARGS_PASSTHRU);
 #endif
 
-#ifdef STRFNS_CPP
-	PHP_MINIT(Strfns_reg)(INIT_FUNC_ARGS_PASSTHRU);
-#endif
-
 #ifdef REQUEST_GLOBALS_CPP
 	PHP_MINIT(RequestGlobals_reg)(INIT_FUNC_ARGS_PASSTHRU);
 	PHP_MINIT(FileUpload_reg)(INIT_FUNC_ARGS_PASSTHRU);
@@ -179,11 +152,6 @@ PHP_MINIT_FUNCTION(wcc)
 
 #ifdef WCC_FINDER_CPP
 	PHP_MINIT(Wcc_Finder_reg)(INIT_FUNC_ARGS_PASSTHRU);
-#endif
-
-#ifdef WCC_CONFIG_CPP
-	PHP_MINIT(wcc_replace_reg)(INIT_FUNC_ARGS_PASSTHRU);
-	PHP_MINIT(Wcc_Config_reg)(INIT_FUNC_ARGS_PASSTHRU);
 #endif
 
 #ifdef WCC_HMAP_CPP
@@ -215,15 +183,6 @@ PHP_MINIT_FUNCTION(wcc)
 	PHP_MINIT(Wcc_EmptyTest_reg)(INIT_FUNC_ARGS_PASSTHRU);
 #endif
 
-
-#  ifdef MARKHTML_CPP
-	PHP_MINIT(Wcc_MarkToHtml_reg)(INIT_FUNC_ARGS_PASSTHRU);
-#  endif
-
-#ifdef WCC_SERVICES_CPP
-PHP_MINIT(wc_services_md)(INIT_FUNC_ARGS_PASSTHRU);
-PHP_MINIT(Wcc_ReflectCache)(INIT_FUNC_ARGS_PASSTHRU);
-#endif
 
 #ifdef SERVICE_ACCESS_CPP
 	PHP_MINIT(ServiceAccess_reg)(INIT_FUNC_ARGS_PASSTHRU);
@@ -262,17 +221,6 @@ PHP_MINIT(wcc_assets_reg)(INIT_FUNC_ARGS_PASSTHRU);
 	PHP_MINIT(Wcc_CacheMgr_reg)(INIT_FUNC_ARGS_PASSTHRU);
 #endif
 
-#ifdef DAYTIME_CPP
-	PHP_MINIT(Wcc_Day24_reg)(INIT_FUNC_ARGS_PASSTHRU);
-#endif
-
-
-/*
-#ifdef TOML_STREAM_CPP
-	PHP_MINIT(TomlReader_reg)(INIT_FUNC_ARGS_PASSTHRU);
-#endif
-*/
-
 #ifdef SQL_IPART_CPP
 	PHP_MINIT(SqlIPart_reg)(INIT_FUNC_ARGS_PASSTHRU);
 #endif
@@ -304,15 +252,18 @@ PHP_MINIT(wcc_assets_reg)(INIT_FUNC_ARGS_PASSTHRU);
 #ifdef WCD_OPERATION_CPP
 	PHP_MINIT(Wcd_Operation_reg)(INIT_FUNC_ARGS_PASSTHRU);
 #endif
+
+#ifdef WCC_LOADER_CPP
+	PHP_MINIT(wcc_loader_reg)(INIT_FUNC_ARGS_PASSTHRU);
+#endif
 	
 #ifdef WCD_IBUILD_CPP
 	PHP_MINIT(Wcd_IBuild_reg)(INIT_FUNC_ARGS_PASSTHRU);
 #endif
+
 #ifdef WCC_RUN_CPP
 	PHP_MINIT(wcc_run_reg)(INIT_FUNC_ARGS_PASSTHRU);
-	PHP_MINIT(wcc_loader_reg)(INIT_FUNC_ARGS_PASSTHRU);
 #endif
-
 
 	return SUCCESS;
 }
@@ -323,20 +274,11 @@ PHP_RINIT_FUNCTION(wcc)
 #if defined(ZTS) && defined(COMPILE_DL_WCC)
 	ZEND_TSRMLS_CACHE_UPDATE();
 #endif
-
-	zpp::state_init::init_request();
 	return SUCCESS;
 }
 
 PHP_RSHUTDOWN_FUNCTION(wcc)
 {
-
-	zpp::state_init::end_request();
-
-#ifdef BASE_DEBUG
-	zpp::mgr_link::report();
-#endif
-
 	return SUCCESS;
 }
 /* }}} */
@@ -351,6 +293,10 @@ PHP_MINFO_FUNCTION(wcc)
 }
 /* }}} */
 
+static const zend_module_dep wccm_deps[] = { /* {{{ */
+	ZEND_MOD_REQUIRED("wccz")
+	ZEND_MOD_END
+};
 /* {{{ wcc_module_entry */
 
 
@@ -361,6 +307,7 @@ extern "C" {
 #endif
 
 static const zend_module_dep wcc_deps[] = { /* {{{ */
+   ZEND_MOD_REQUIRED("wccz")
 	ZEND_MOD_REQUIRED("intl")
 	ZEND_MOD_END
 };
@@ -370,7 +317,7 @@ zend_module_entry wcc_module_entry = {
 	nullptr,
 	wcc_deps,
 	"Wcc",					/* Extension name */
-	ext_functions,			
+	nullptr,					// no functions, only classes 
 	PHP_MINIT(wcc),		/* PHP_MINIT - Module initialization */
 	PHP_MSHUTDOWN(wcc),	/* PHP_MSHUTDOWN - Module shutdown */
 	PHP_RINIT(wcc),		/* PHP_RINIT - Request initialization */

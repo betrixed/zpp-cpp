@@ -27,17 +27,13 @@ namespace wcc {
 
 	class xml_fns : public state_init {
 	public:
-		str_intern  makeclass_s;
+		str_intern  	  makeclass_s;
 		str_intern 	  	  k_c;
 		str_intern	      k_k;
 		str_intern       root;
-
 		str_intern       tags;
 
-		void init()
-		{
-			makeclass_s = "makeclass";
-		}
+		void init() override;
 	};
 
 	extern xml_fns  XML_FNS;
@@ -190,7 +186,7 @@ namespace wcc {
 		size_t  stacked_;
 
 		void	classReplace(htab_ptr cnames);
-		obj_rc	makeClass(str_ptr classname);
+		
 
 		bool 	tag_start(str_ptr tag, str_ptr val);
 		void 	tag_end(str_ptr tag);
@@ -239,6 +235,7 @@ namespace wcc {
 
 		void construct(obj_ptr obj);
 		void destruct();
+		
 
 		Wcc_XmlRead();
 		virtual ~Wcc_XmlRead();
@@ -246,7 +243,8 @@ namespace wcc {
 		/** return PHP array version of xml data */
 		val_rc parseFile(str_ptr filename);
 		val_rc parse(str_ptr src);
-
+		obj_return	makeClass(str_ptr classname);
+		
 		virtual void debug_info(htab_rw ht);
 	
 		VIRTUAL_ZOBJPTR
