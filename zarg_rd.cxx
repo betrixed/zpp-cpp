@@ -137,6 +137,26 @@ zarg_rd::zstring(str_ptr& value, zval* arg)
 	return false;
 }
 
+str_ptr 
+zarg_rd::str(zval *arg)
+{
+	str_ptr result;
+
+	if (!arg && maybe_)
+	{
+		return result;
+	}
+	result = arg;
+	if (result.ok())
+	{
+		return result;
+	}
+	error() << "# Not a string ";
+	wrong(arg);
+
+	return result;
+}
+
 bool 
 zarg_rd::zstring_null(str_ptr& value, zval* arg)
 {

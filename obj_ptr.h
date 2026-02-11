@@ -89,8 +89,9 @@ namespace zpp {
 		htab_rc  properties();
 
 		bool isNull() const { return !(obj_); }
-		bool ok() const { return (obj_); }
 
+		bool ok() const { return (obj_); }
+		
 		zend_string* className() const;
 		zend_class_entry* class_entry() const;
 

@@ -71,22 +71,28 @@ public:
 	zval* need(size_t ix);
 	zval* option(size_t ix);
 
+	// Deprecate passing by reference? 
+	// Beware risk of passing a xxx_rc class, and
+	// losing a reference count.
+	
 	bool zstring(str_ptr& value, zval* arg);
 	bool zstring_null(str_ptr& value, zval* arg);
 
+	
+	bool obj_ofclass(obj_ptr& value, zval* arg, zend_class_entry* ce);
+	bool obj_ofclass_null(obj_ptr& value, zval* arg, zend_class_entry* ce);
 	bool obj(obj_ptr& value, zval* arg);
 	bool obj_null(obj_ptr& value, zval* arg);
 
+	// Returning by result probably better.
 	obj_ptr obj(zval* arg);
 	obj_ptr obj_ornull(zval* arg);
 	obj_ptr objclass_ornull(zval* arg, zend_class_entry* ce);
 	obj_ptr obj_class(zval* arg, zend_class_entry* ce);
 
+	str_ptr  str(zval *arg);
+	
 	bool weakref(weak_ref& value, zval* arg);
-	
-	bool obj_ofclass(obj_ptr& value, zval* arg, zend_class_entry* ce);
-	bool obj_ofclass_null(obj_ptr& value, zval* arg, zend_class_entry* ce);
-	
 	bool zarray_null(htab_ptr& value, zval* arg);
 	bool zarray(htab_ptr& value, zval* arg);
 
