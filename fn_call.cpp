@@ -930,7 +930,7 @@ args_spread::~args_spread()
 }
 
 
-
+/** result is reference */
 bool callable_fn(
     val_rc& result, 
     val_rc& callme, 
