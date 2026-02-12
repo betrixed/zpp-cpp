@@ -89,6 +89,18 @@ void Loader::setFinder(obj_ptr finder)
 	fdr_find_.set_fci(finder, LDRi.s_find);
 }
 
+htab_ptr
+Loader::getLoaded()
+{
+	return loaded_;
+}
+
+htab_ptr
+Loader::getRequired()
+{
+	return required_;
+}
+
 void
 Loader::call_spl(str_ptr fname)
 {
@@ -111,6 +123,7 @@ Loader::Loader() : base_d()
 {
 	isRegistered_ = false;
 	throwNotFound_ = false;
+	record_ = false;
 }
 
 void Loader::debug_info(htab_rw di)
@@ -134,11 +147,17 @@ Loader::cpp_global()
 	return zobj_toc<Loader>(gLoader);
 }
 
-val_rc //static
+void
+Loader::setRecord(bool val)
+{
+	record_ = val;
+}
+
+val_return //static
 Loader::readPHP(str_ptr path)
 {
 	Loader* lob = Loader::cpp_global();
-	val_rc result = lob->require(path);
+	val_return result = lob->require(path);
 	//showmem("readPHP result", result);
 	return result;
 }
@@ -194,32 +213,40 @@ Loader::destruct()
 	extloader_.set_null();
 }
 
-val_rc 
+val_return 
 Loader::require(str_ptr file)
 {
-	val_rc data;
+	val_return result;
 
 	if (!extloader_.ok())
 	{
-		zend_throw_error(zend_ce_error, "No callable function installed");
-		return data;
+		result.error() << "Loader callable not set";
+		return result;
 	}
-	val_rc path(file);
-	//showmem("ExtLoader", extloader_);
-	//showmem("path", path);
 
-	bool result = callable_fn(data, extloader_, 1, path);
-	if (!result)
-	{
-		zend_printf("Callable failed\n");
-		//data.set_null();
+	val_rc path(file);
+
+
+	bool ok = callable_fn(result.value_, extloader_, 1, path);
+	if (!ok && throwNotFound_)
+	{	// Load function may throw anyway.
+		result.error() << "Loader callable failed for " << file;
+		return result;
 	}
-	return data;
+	else if (record_) 
+	{
+		htab_rw wr(this->required_);
+		wr.push_back(path);
+	}
+	return result;
 }
 
-bool 
+
+bool_return
 Loader::load(str_ptr class_name)
 {
+	bool_return result;
+
 	str_rc path;
 
 	if (finder_.ok())
@@ -228,7 +255,12 @@ Loader::load(str_ptr class_name)
 		path = fdr_find_.call_fn();
 		if (!path.ok())
 		{
-			return false;
+			if (throwNotFound_)
+			{
+				result.error() << "Class " << class_name << " not found";
+			}
+			result.value_ = false;
+			return result;
 		}
 	}
 	else {
@@ -241,24 +273,21 @@ Loader::load(str_ptr class_name)
 		path = buf.zstr();
 	}
 //callable_fn(val_rc& result, val_rc& callme, int argct = 0, zval* argv = nullptr);
-	val_rc data = require(path);
+	val_return data = require(path);
 
-	bool result = data.ok();
+	if (data.has_errors())
+	{
+		result.value_ = false;
+		result = data.move_error();
+	}
+
 	return result;
 }
 
-bool 
+bool_return
 Loader::must_load(str_ptr class_name)
 {
-	if (!load(class_name))
-	{
-		if (throwNotFound_)
-		{
-			zend_throw_error(zend_ce_error, "Loader: class not found - %s", class_name.data());
-			return false;
-		}
-	}
-	return true;
+	return load(class_name);
 }
 
 void 
@@ -292,20 +321,22 @@ using namespace zpp;
 
 ZEND_METHOD(Wcc_Loader, readPHP)
 {
+	val_return result;
+
 	zarg_rd args(execute_data);
 
 	str_ptr path;
 
 	args.zstring(path, args.need(0));
 
-	val_rc result;
-
 	if (!args.throw_errors())
 	{
 		result = Loader::readPHP(path);
+		if (!result.throw_errors())
+		{
+			result.value_.move_zv(return_value);
+		}
 	}
-	//showmem("zend readPHP", result);
-	result.move_zv(return_value);
 }
 
 ZEND_METHOD(Wcc_Loader, instance)
@@ -381,42 +412,73 @@ ZEND_METHOD(Wcc_Loader, getFinder)
 	finder.copy_zv(return_value);
 }
 
+ZEND_METHOD(Wcc_Loader, getLoaded)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	Loader* lob = zval_toc<Loader>(ZEND_THIS);
+
+	htab_ptr loaded = lob->getLoaded();
+
+	loaded.copy_zv(return_value);
+}
+
+ZEND_METHOD(Wcc_Loader, getRequired)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	Loader* lob = zval_toc<Loader>(ZEND_THIS);
+
+	htab_ptr required = lob->getRequired();
+
+	required.copy_zv(return_value);
+}
+
 ZEND_METHOD(Wcc_Loader, require)
 {
+	val_return result;
+
 	zarg_rd args(execute_data);
 
 	str_ptr path;
 
 	args.zstring(path, args.need(0));
-
-	val_rc result;
 
 	if (!args.throw_errors())
 	{
 		Loader* lob = zval_toc<Loader>(ZEND_THIS);
 
-		result = lob->require(path);	
+		result = lob->require(path);
+
+		if (!result.throw_errors())
+		{
+			result.value_.move_zv(return_value);
+		}	
 	}
-	result.move_zv(return_value);
+	
 }
 
 ZEND_METHOD(Wcc_Loader, load)
 {
+	bool_return result;
+
 	zarg_rd args(execute_data);
 
 	str_ptr path;
 
 	args.zstring(path, args.need(0));
-
-	bool result = false;
 
 	if (!args.throw_errors())
 	{
 		Loader* lob = zval_toc<Loader>(ZEND_THIS);
 
 		result = lob->load(path);	
+
+		if (!result.throw_errors())
+		{
+			RETVAL_BOOL(result.value_);
+		}
 	}
-	RETVAL_BOOL(result);
 }
 
 ZEND_METHOD(Wcc_Loader, mustload)
@@ -427,15 +489,35 @@ ZEND_METHOD(Wcc_Loader, mustload)
 
 	args.zstring(path, args.need(0));
 
-	bool result = false;
+	bool_return result;
 
 	if (!args.throw_errors())
 	{
 		Loader* lob = zval_toc<Loader>(ZEND_THIS);
 
 		result = lob->must_load(path);	
+
+		if (result.throw_errors())
+		{
+			result.value_ = false;
+		}
 	}
-	RETVAL_BOOL(result);
+	RETVAL_BOOL(result.value_);
+}
+
+ZEND_METHOD(Wcc_Loader, setRecord)
+{
+	zarg_rd args(execute_data);
+
+	bool  value = true;
+
+	args.zbool(value, args.need(0));
+
+	if (!args.throw_errors())
+	{
+		Loader* lob = zval_toc<Loader>(ZEND_THIS);
+		lob->setRecord(value);
+	}
 }
 
 ZEND_METHOD(Wcc_Loader, setBaseDir)

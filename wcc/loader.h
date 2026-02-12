@@ -16,6 +16,12 @@ namespace wcc {
 		str_rc  basedir_;
 		bool    throwNotFound_;
 		bool    isRegistered_;
+		bool    record_;
+
+		/** loaded classes  */
+		htab_rc loaded_;
+		/** required files */
+		htab_rc required_;
 
 		fn_call_args<1> fdr_find_;
 
@@ -26,7 +32,7 @@ namespace wcc {
 
 		static obj_ptr instance();
 		
-		static val_rc  readPHP(str_ptr file);
+		static val_return  readPHP(str_ptr file);
 
 		static Loader* cpp_global();
 
@@ -44,15 +50,21 @@ namespace wcc {
 
     	obj_ptr getFinder() { return finder_; }
 
+    	void setRecord(bool val);
+    	
     	void setBaseDir(str_ptr dir);
    
     	str_ptr getBaseDir() { return basedir_; }
 
-    	val_rc require(str_ptr file);
+    	val_return require(str_ptr file);
 
-    	bool load(str_ptr class_name);
+    	bool_return load(str_ptr class_name);
 
-    	bool must_load(str_ptr class_name);
+    	htab_ptr  getLoaded();
+
+    	htab_ptr  getRequired();
+
+    	bool_return must_load(str_ptr class_name);
 
     	void regLoader();
 

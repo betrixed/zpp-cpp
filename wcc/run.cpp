@@ -138,26 +138,6 @@ void Run_init::init()
 Run_init Run_i;
 
 
-
-bool // static
-Run::class_load(str_ptr class_name, str_ptr php_root)
-{
-	if (!class_exists(class_name))
-	{
-		str_rc rname = str_replace(Run_i.ns_sep, Run_i.dir_sep, class_name);
-
-		str_buf buf;
-
-		buf << php_root << "/" << rname << ".php";
-
-		str_rc load_path = buf.zstr();
-		val_rc result = Loader::readPHP(load_path);
-		return (result.zlong() == 1);
-	}
-	return true;
-}
-
-
 void Run::construct()
 {
 	obj_ptr self = this->self();
@@ -289,17 +269,29 @@ void Run::destruct()
 }
 
 
-void Run::execute(str_ptr bootstrap)
+error_return
+Run::execute(str_ptr bootstrap)
 {
 	//zend_printf("In execute\n");
+	error_return result;
 
-	this->config_init(bootstrap);
+	result = this->config_init(bootstrap);
+
+	if (result.has_errors())
+	{
+		return result;
+	}
+
 	this->temp_folders();
-	this->setup_cryptic();
 
+	result = this->setup_cryptic();
+	if (result.has_errors())
+	{
+		return result;
+	}
 	obj_ptr site = this->setup_world();
 	site.call(Run_i.run_str);
-
+	return result;
 	
 }
 
@@ -315,9 +307,11 @@ static void transfer_str(str_ptr pname, htab_ptr from, obj_ptr to)
 	}
 }
 
-void 
+error_return 
 Run::setup_cryptic()
 {
+	error_return result;
+
 	obj_ptr self (this->self());
 
 	obj_ptr config = self.property(Run_i.config_str);
@@ -327,7 +321,7 @@ Run::setup_cryptic()
 
 	if (!cryptic_data.ok())
 	{
-		return;
+		return result;
 	}
 	str_buf buf;
 
@@ -337,18 +331,25 @@ Run::setup_cryptic()
 
 	Services* sobj = Services::cpp_global();
 
-	val_rc data;
+	val_return data;
 	if (file_exists(path))
 	{	
 		obj_rc cache_mgr = sobj->get(Run_i.cache_mgr);
 		CacheMgr *cmgr = zobj_toc<CacheMgr>(cache_mgr);
 		data = cmgr->readCache(path, Run_i.file_cache);
-		
+		if (data.has_errors())
+		{
+			result = data.move_error();
+		}
+		else {
+			sobj->set(Run_i.cryptic_str, data.value_);
+		}
 	}
 	else {
-		zend_throw_error(zend_ce_error,"File %s not found", path.data());
+		result.error() << "File " << path << " not found";
 	}
-	sobj->set(Run_i.cryptic_str, data);
+	return result;
+	
 
 }
 
@@ -469,8 +470,11 @@ void Run::shutdown()
 	rc->clear();
 }
 
-void Run::config_init(str_ptr bootstrap)
+error_return
+ Run::config_init(str_ptr bootstrap)
 {
+	error_return result;
+
 	obj_ptr self = this->self();
 	str_rc config_dir = self.property(Run_i.config_dir);
 
@@ -478,7 +482,7 @@ void Run::config_init(str_ptr bootstrap)
 	buf << config_dir << "/" << bootstrap;
 
 	str_rc path = buf.zstr();
-	val_rc value;
+	val_return value;
 	val_rc tlist;
 	htab_rc bcfg;
 
@@ -487,10 +491,22 @@ void Run::config_init(str_ptr bootstrap)
 		Loader* lob = Loader::cpp_global();
 
 		value = lob->require(path);
+
+		if (value.has_errors())
+		{
+			result = value.move_error();
+			return result;
+		}
 	}
-	if (value.isArray())
+	else {
+		result.error() << "No bootstrap file " << bootstrap;
+		return result;
+	}
+	val_ptr test(value.value_);
+
+	if (test.isArray())
 	{
-		bcfg = value.zarray();
+		bcfg = test.zarray();
 		str_rc target = self.property(Run_i.target);
 		target.lowercase();
 
@@ -505,44 +521,45 @@ void Run::config_init(str_ptr bootstrap)
 	}
 
 	if (!tlist.isArray()) {
-		zend_throw_error(zend_ce_error, "Invalid configuration from bootstrap %s", path.data());
-		return;
+		result.error() << "No Array returned from bootstrap " << path;
+		return result;
 	}
 	
 
 	bcfg = tlist.zarray();
 	//showdata("bcfg", bcfg);
 
-	val_ptr assets_p = bcfg.get(Run_i.assets_str);
+	test = bcfg.get(Run_i.assets_str);
 
-	if (assets_p.isArray())
+	if (test.isArray())
 	{
-		htab_ptr assets = assets_p.zarray();
+		htab_ptr assets = test.zarray();
 		transfer_str(Run_i.web_dir, assets, self);
 		transfer_str(Run_i.theme_str, assets, self);
 	}
 	
 
-	value = self.property(Run_i.is_web);
+	tlist = self.property(Run_i.is_web);
 	//showmem("is_web", value);
 
-	if (value.isFalse()) {
-		value = bcfg.get(Run_i.cli_str);
+
+	if (tlist.isFalse()) {
+		tlist = bcfg.get(Run_i.cli_str);
 	}
 	else {
-		value = bcfg.get(Run_i.web_str);
+		tlist = bcfg.get(Run_i.web_str);
 	}
 	
 	obj_rc config = self.property(Run_i.config_str);
 	//showobj("config", config);
 
-	if (value.isArray())
+	if (tlist.isArray())
 	{
-		bcfg = value.zarray();
-		value = bcfg.get(Run_i.php_str);
+		bcfg = tlist.zarray();
+		tlist = bcfg.get(Run_i.php_str);
 
 		//showmem("php select", value);
-		if (value.isArray())
+		if (tlist.isArray())
 		{
 			obj_rc cache_mgr = Services::service(Run_i.cache_mgr);
 			CacheMgr*  cmgr = zobj_toc<CacheMgr>(cache_mgr);
@@ -552,7 +569,7 @@ void Run::config_init(str_ptr bootstrap)
 
 			auto cfg_path = wk.value();
 
-			for(wk.start(value.zarray()); wk.ok(); wk.next())
+			for(wk.start(tlist.zarray()); wk.ok(); wk.next())
 			{
 				buf << config_dir << "/" << cfg_path.zstr();
 				path = buf.zstr();
@@ -560,20 +577,28 @@ void Run::config_init(str_ptr bootstrap)
 
 				if (file_exists(path))
 				{
-					val_rc data = cmgr->readCache(path, Run_i.file_cache);
-					if (data.isArray())
+					val_return data = cmgr->readCache(path, Run_i.file_cache);
+					if (data.has_errors())
 					{
-						htab_rc tfer = data.zarray();
+						result = data.move_error();
+						return result;
+					}
+					val_ptr vp(data.value_);
+
+					if (vp.isArray())
+					{
+						htab_rc tfer = vp.zarray();
 						//showarray("config data", tfer);
 						cfg->addArray(tfer);
 					}
 					else {
-						//showmem("invalid data", data);
+						result.error() << "Array data expected";
+						return result;
 					}
 				}
 				else {
-					zend_throw_error(zend_ce_error, "File not found: %s", path.data());
-					return;
+					result.error() << "File not found: " << path;
+					return result;
 				}
 			}
 
@@ -601,13 +626,15 @@ void Run::config_init(str_ptr bootstrap)
 
 			if (is_dir(modules_dir))
 			{
-				value = Finder::dirList_dir(modules_dir);
-				self.property(Run_i.modules_str, value);
+				htab_rc flist = Finder::dirList_dir(modules_dir);
+				val_rc  flistarg(flist);
+				self.property(Run_i.modules_str, flistarg);
 			}
 
 		}
-		//zend_printf("End config!\n");
+		
 	}
+	return result;
 }
 
 }; // namespace wcc
@@ -639,7 +666,8 @@ ZEND_METHOD(Wcc_Run, execute)
 	if (!args.throw_errors())
 	{
 		Run* cobj = zval_toc<Run>(ZEND_THIS);
-		cobj->execute(bootstrap);
+		error_return result = cobj->execute(bootstrap);
+		result.throw_errors();
 	}
 }
 

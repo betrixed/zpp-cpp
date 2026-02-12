@@ -88,7 +88,7 @@ public:
 	void createCache(str_ptr svckey, str_ptr classname, htab_ptr options);
 	void deleteExpired();
 
-	static val_rc  callStatic(str_ptr method, htab_ptr params);
+	static val_return  callStatic(str_ptr method, htab_ptr params);
 
 	obj_ptr getCache(str_ptr svckey);
 
@@ -96,9 +96,9 @@ public:
 
 	htab_rc getCacheKeys();
 
-	val_rc readCache(str_ptr filename, str_ptr cachename);
+	val_return readCache(str_ptr filename, str_ptr cachename);
 
-	static val_rc readFile(str_ptr filename, str_ptr ext = str_ptr());
+	static val_return readFile(str_ptr filename, str_ptr ext = str_ptr());
 
 	void flush_caches();
 

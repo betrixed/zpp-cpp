@@ -85,7 +85,7 @@ void CacheMgr::construct(htab_ptr cfg)
 }
 
 
-val_rc //static
+val_return //static
 CacheMgr::callStatic(str_ptr name, htab_ptr args)
 {
 	str_rc cache_name = name.uncamel();
@@ -283,13 +283,13 @@ CacheMgr::getCacheKeys()
 	return htab_rc::getKeys(cache_obj_);
 }
 
-val_rc 
+val_return 
 CacheMgr::readCache(str_ptr filename, str_ptr cachename)
 {
-	val_rc result;
+	val_return result;
 
 	if (!file_exists(filename)) {
-		zend_throw_error(zend_ce_error, "File '%s' not found: ", filename.data());
+		result.error() << "File " << filename << " not found";
 		return result;
 	}
 
@@ -298,8 +298,8 @@ CacheMgr::readCache(str_ptr filename, str_ptr cachename)
 	{
 		cache = cache_obj_.get(default_cache_);
 		if (!cache.ok())
-		{
-			zend_throw_error(zend_ce_error, "ICache '%s' not found: ", default_cache_.data());
+		{	
+			result.error() << "ICache " << default_cache_ << " not found";
 			return result;
 		}
 	}
@@ -314,26 +314,22 @@ CacheMgr::readCache(str_ptr filename, str_ptr cachename)
 			cache.call(Cache_i.s_delete, key);
 		}
 		else {
-			return icd->getData();
-		}
-	}
-	// data missing or not current
-	val_rc data = readFile( filename );
-	//showmem("read data", data);
-
-	if (data.ok())
-	{
-		if (!cache.call(Cache_i.s_set, key, data))
-		{
-			zend_throw_error(zend_ce_error, "Failed to set data from %s", filename.data());
+			result.value_ = icd->getData();
 			return result;
 		}
 	}
-	else {
-		zend_throw_error(zend_ce_error, "Failed to read data from %s", filename.data());
-		return result;
+	// data missing or not current
+	result = readFile( filename );
+	//showmem("read data", data);
+
+	if (!result.has_errors())
+	{
+		if (!cache.call(Cache_i.s_set, key, result.value_))
+		{
+			result.error() << "Failed to set data from " << filename;
+			return result;
+		}
 	}
-	result = std::move(data);
 	return result;
 }
 
@@ -355,11 +351,11 @@ CacheMgr::flush_caches()
 }
 
 
-val_rc //static
+val_return //static
 CacheMgr::readFile(str_ptr filename, str_ptr ext)
 {
 	str_rc filetype;
-	val_rc result;
+	val_return result;
 
 	//showstr("readFile ", filename);
 
@@ -445,7 +441,7 @@ ZEND_METHOD(Wcc_CacheMgr, __callStatic)
 
 	str_ptr 	fname;
 	htab_ptr 	params;
-	val_rc      result;
+	val_return  result;
 
 	args.zstring(fname, args.need(0));
 	args.zarray(params, args.need(1));
@@ -453,8 +449,11 @@ ZEND_METHOD(Wcc_CacheMgr, __callStatic)
 	if (!args.throw_errors(__FUNCTION__))
 	{
 		result = CacheMgr::callStatic(fname, params);
+		if (!result.throw_errors())
+		{
+			result.value_.move_zv(return_value);
+		}
 	}
-	result.move_zv(return_value);
 }
 
 ZEND_METHOD(Wcc_CacheMgr, clearAll)
@@ -541,7 +540,7 @@ ZEND_METHOD(Wcc_CacheMgr, readCache)
 
 	str_ptr 	filename;
 	str_ptr     svckey;
-	val_rc      result;
+	val_return  result;
 
 	args.zstring(filename, args.need(0));
 	args.zstring(svckey, args.need(1));
@@ -550,8 +549,12 @@ ZEND_METHOD(Wcc_CacheMgr, readCache)
 	{
 		CacheMgr*  cobj = zval_toc<CacheMgr>(ZEND_THIS);
 		result = cobj->readCache(filename, svckey);
+		if (!result.throw_errors())
+		{
+			result.value_.move_zv(return_value);
+		}
 	}
-	result.move_zv(return_value);
+	
 }
 
 ZEND_METHOD(Wcc_CacheMgr, flush_caches)
@@ -568,7 +571,7 @@ ZEND_METHOD(Wcc_CacheMgr, readFile)
 
 	str_ptr filename;
 	str_ptr ext;
-	val_rc result;
+	val_return result;
 
 	args.zstring(filename, args.need(0));
 	args.zstring_null(ext, args.option(1));
@@ -576,8 +579,12 @@ ZEND_METHOD(Wcc_CacheMgr, readFile)
 	if (!args.throw_errors())
 	{
 		result = CacheMgr::readFile(filename, ext);
+		if (!result.throw_errors())
+		{
+			result.value_.move_zv(return_value);
+		}
 	}
-	result.move_zv(return_value);
+	
 }
 
 

@@ -10,22 +10,20 @@ namespace wcc {
 
 	class Run : public base_d {
 	protected:
-		void config_init(str_ptr bootstrap);
+		error_return  config_init(str_ptr bootstrap);
+		error_return setup_cryptic();
+		
 		void temp_folders();
 		obj_ptr setup_world();
-		void setup_cryptic();
+		
 		
 	public:
 
 		static base_obj_mgr<Run> omg;
 
-		bool class_load(str_ptr class_name, str_ptr php_root);
-
-		
-
 		void construct();
 		void destruct();
-		void execute(str_ptr bootstrap);
+		error_return execute(str_ptr bootstrap);
 		void shutdown();
 
 	};
