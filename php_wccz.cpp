@@ -6,18 +6,14 @@
 #include "zpp/base.cpp"
 #include "zpp/state_init.cpp"
 
-// for dump_info
 #include "zpp/show_zpp.cpp"
-
 
 #include "wcc/replace.cpp"
 #include "wcc/config.cpp"
 
-//#include "wcc/finder.cpp"
-//#include "wcc/hmap.cpp"
 #include "wcc/reflect_cache.cpp"
 #include "wcc/services.cpp"
-//#include "wcc/service_access.cpp"
+
 #include "wcc/strfns.cpp"
 
 
@@ -35,33 +31,20 @@ PHP_MINIT_FUNCTION(wccz)
 #ifdef DEBUG_EXTRA
 	dump_info::run_state_ = true;
 #endif
+
 	zpp::state_init::init_all();
-
-#ifdef WCC_LOADER_CPP
-	PHP_MINIT(wcc_loader_reg)(INIT_FUNC_ARGS_PASSTHRU);
-#endif
-
-#ifdef WCC_FINDER_CPP
-	PHP_MINIT(Wcc_Finder_reg)(INIT_FUNC_ARGS_PASSTHRU);
-#endif
 
 #ifdef WCC_CONFIG_CPP
 	PHP_MINIT(wcc_replace_reg)(INIT_FUNC_ARGS_PASSTHRU);
 	PHP_MINIT(Wcc_Config_reg)(INIT_FUNC_ARGS_PASSTHRU);
 #endif
 
-#ifdef WCC_HMAP_CPP
-	PHP_MINIT(Wcc_Hmap_reg)(INIT_FUNC_ARGS_PASSTHRU);
-#endif
 
 #ifdef WCC_SERVICES_CPP
 PHP_MINIT(wc_services_md)(INIT_FUNC_ARGS_PASSTHRU);
 PHP_MINIT(Wcc_ReflectCache)(INIT_FUNC_ARGS_PASSTHRU);
 #endif
 
-#ifdef SERVICE_ACCESS_CPP
-	PHP_MINIT(ServiceAccess_reg)(INIT_FUNC_ARGS_PASSTHRU);
-#endif
 
 #ifdef STRFNS_CPP
 	PHP_MINIT(Strfns_reg)(INIT_FUNC_ARGS_PASSTHRU);
@@ -123,7 +106,7 @@ zend_module_entry wccz_module_entry = {
 	nullptr,
 	wccz_deps,
 	"wccz",					/* Extension name */
-	ext_functions,			/* zend_function_entry */
+	ext_functions,				/* zend_function_entry */
 	PHP_MINIT(wccz),		/* PHP_MINIT - Module initialization */
 	PHP_MSHUTDOWN(wccz),	/* PHP_MSHUTDOWN - Module shutdown */
 	PHP_RINIT(wccz),		/* PHP_RINIT - Request initialization */
