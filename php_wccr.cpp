@@ -4,10 +4,6 @@
 # include <config.h>
 #endif
 
-#define ZPP_BUILD_ALL
-
-#define DIRECT_XML
-
 #include "php_wccr.h"
 
 #include "zpp/base.h"
@@ -45,12 +41,7 @@
 #include "wcc/route_set.cpp"
 #include "wcc/target.cpp"
 
-// CacheMgr wants one of these
-#ifdef DIRECT_XML
-#include "tinyxml/dxmlread.cpp"
-#else
-#include "wcc/xmlread.cpp"
-#endif
+
 
 PHP_MINIT_FUNCTION(wccr)
 {
@@ -117,14 +108,6 @@ PHP_MINIT(wcc_pair_d)(INIT_FUNC_ARGS_PASSTHRU);
 	PHP_MINIT(Wcc_CacheMgr_reg)(INIT_FUNC_ARGS_PASSTHRU);
 #endif
 
-
-#	ifdef DXMLREAD_CPP
-	PHP_MINIT(Wcc_XmlRead_reg)(INIT_FUNC_ARGS_PASSTHRU);
-#	endif
-
-#	ifdef XMLREAD_CPP
-	PHP_MINIT(Wcc_XmlRead_reg)(INIT_FUNC_ARGS_PASSTHRU);
-#	endif
 
 
 	return SUCCESS;
