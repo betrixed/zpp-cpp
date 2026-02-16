@@ -19,56 +19,119 @@
 #include "state_init.h"
 #endif
 
+//#define DEBUG_INIT_ORDER
+
+#ifdef DEBUG_INIT_ORDER
+#include <cxxabi.h>  // For abi::__cxa_demangle
+#endif
+
+#define STRINGIZE(s) XSTR(s)
+#define XSTR(s)  #s
+
 namespace zpp {
 
 // static and externals
-
-state_init* state_init::first_ = nullptr;
-state_init* state_init::last_ = nullptr;
-
-state_init::state_init() : next_((state_init*)nullptr)
+//** Just once per compilation unit == extension binary */
+ 
+state_list::state_list(const char* name)
+: first_(nullptr), last_(nullptr), name_(name) 
 {
-    //zend_printf("state_init\n");
-    if (first_ == nullptr)
+}
+
+void state_list::add_si(state_init *item)
+{
+    item->next_ = nullptr;
+    if (last_)
     {
-        first_ = this;
-        last_ = this;
+        last_->next_ = item;
     }
     else {
-        last_->next_ = this;
-        last_ = this;
+        first_ = item;
     }
+    last_ = item;
 }
 
-void //static
-state_init::init_all()
+void  
+state_list::call_mod_init()
 {
-    #ifdef DEBUG_EXTRA
-    //    zend_printf("init_all\n");
-    #endif
-    state_init* link = state_init::first_;
+    error_return bad;
 
+    #ifdef DEBUG_INIT_ORDER
+        char outputbuf[100];
+        size_t        iolen;
+        int           status;
+
+        zend_printf("List Init %s\n", name_);
+    #endif
+    state_init* link = first_;
     while(link)
     {
-        link->init();
-        link = link->next_;
+        state_init* si = link;
+
+        #ifdef DEBUG_INIT_ORDER 
+            iolen = 100;
+            abi::__cxa_demangle(typeid(*si).name(), outputbuf, &iolen, &status);
+            if (status==0)
+            {
+                //outputbuf[iolen] = 0x0;
+                zend_printf("typeid %s\n", outputbuf);
+            }
+        #endif
+        link = si->next_;
+        if (si->registered_) 
+        {
+            bad.error() << typeid(*si).name() 
+                        << " already registered\n";
+        }
+        else {
+            si->init();
+            si->registered_ = true;
+        }
+    }
+    bad.throw_errors();
+
+}
+
+void  state_list::call_mod_end()
+{
+    state_init* link = first_;
+    while(link)
+    {
+        state_init* si = link;
+        link = si->next_;
+        si->end();
     }
 }
 
-void //static
-state_init::end_all()
+void  state_list::call_req_init()
 {
-    #ifdef DEBUG_XTRA
-    //    zend_printf("end_all\n");
-    #endif
-    state_init* link = state_init::first_;
+    state_init* link = first_;
     while(link)
     {
-        state_init* temp = link;
-        link = link->next_;
-        temp->end();
+        state_init* si = link;
+        link = si->next_;
+        si->init_req();
     }
 }
+
+void  state_list::call_req_end()
+{
+    state_init* link = first_;
+    while(link)
+    {
+        state_init* si = link;
+        link = si->next_;
+        si->end_req();
+    }
+}
+
+state_init::state_init() 
+    : next_((state_init*)nullptr)
+    , registered_(false)
+{
+}
+
+
 
 void //virtual
 state_init::init()
@@ -83,36 +146,6 @@ state_init::end()
 }
 
 
-// request start -  end;
-void //static
-state_init::init_request()
-{
-    #ifdef DEBUG_EXTRA
-    //    zend_printf("init_request\n");
-    #endif
-
-    state_init* link = state_init::first_;
-    while(link)
-    {
-        link->init_req();
-        link = link->next_;
-    }
-}
-
-void //static
-state_init::end_request()
-{
-    #ifdef DEBUG_EXTRA
-    //    zend_printf("end_request\n");
-    #endif
-    state_init* link = state_init::first_;
-    while(link)
-    {
-        state_init* temp = link;
-        link = link->next_;
-        temp->end_req();
-    }
-}
 
 void //virtual
 state_init::init_req()
@@ -123,8 +156,6 @@ void //virtual
 state_init::end_req()
 {
 }
-
-/* not expecting any work here */
 
 state_init::~state_init()
 {

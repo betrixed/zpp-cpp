@@ -22,7 +22,8 @@ private:
 	size_t       total_;
 
 	static str_out dumper_d;
-
+	
+	
 	void object_property_dump(
 		zend_property_info *prop_info, 
 		zval *zv, 
@@ -35,7 +36,7 @@ private:
 	
 public:
 
-	static bool run_state_;
+	static 	bool run_state_;
 
 	static void msg_dump(const char* msg, val_ptr val);
 

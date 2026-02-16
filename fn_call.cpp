@@ -329,13 +329,14 @@ val_rc
 fopen(str_ptr path, str_ptr mode,
     bool use_include_path, val_ptr context)
 {
+    
     auto &fn = TLFNs.fopen;
     zval* pz = fn.argsptr();
-    ZVAL_STR(pz, (zend_string*) path);
+    ZVAL_STR(pz, (zend_string*) path); //1
     pz++;
-    ZVAL_STR(pz, (zend_string*) mode);
+    ZVAL_STR(pz, (zend_string*) mode);//2
     pz++;
-    ZVAL_BOOL(pz, use_include_path);
+    ZVAL_BOOL(pz, use_include_path);//2
     pz++;
     if (context.ok())
     {
@@ -343,9 +344,11 @@ fopen(str_ptr path, str_ptr mode,
     }
     else {
         ZVAL_NULL(pz);
-    }
+    }//4
 
-    return fn.call_fn();
+    val_rc result = fn.call_fn();
+
+    return result;
 }
 
 

@@ -34,6 +34,7 @@ extern "C" {
 namespace zpp {
 
 str_out dump_info::dumper_d;
+bool dump_info::run_state_ = false;
 
 
 void 
@@ -568,7 +569,6 @@ void showobj(const char* s, zend_object* obj)
 }
 
 
-bool dump_info::run_state_ = false;
 
 }; // namespace zpp
 

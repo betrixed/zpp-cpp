@@ -15,27 +15,42 @@ namespace zpp {
     * Module initialisation will call static init_all() for runtime 
     * initialize, in unknown link, prior to calling functions for class registration.
     */
+
+    class state_init;
+
+    // uniquely provided by extension module!
+    class  state_list {
+    public:
+        state_init* first_;
+        state_init* last_;
+        const char* name_;
+
+        state_list(const char* name);
+        void  add_si(state_init *item);
+
+        void  call_mod_init();
+        void  call_mod_end();
+
+        void  call_req_init();
+        void  call_req_end();
+    };
+
+
     class  state_init {
     protected:
-        static state_init* first_;
-        static state_init* last_;
-
+        
         state_init* next_;
+        bool        registered_;
+
+        friend class state_list;
+        
     public:
+        // just initialise
+        state_init();
         virtual ~state_init();
 
-        state_init();
+
         
-        
-        // At module start/end (Call in one extension only)
-        static void init_all();
-        static void end_all();
-
-        // At request start/end  (Call in one extension only)
-        static void  init_request();
-        static void  end_request();
-
-
         // module init/end calls
         virtual void init();
         virtual void end();
@@ -47,11 +62,12 @@ namespace zpp {
         // iterate links for request start/end
     };
 
+
     /** 
      * functions to use a zend_class_entry*
      */
 
-    
+
 };
 
 #endif
