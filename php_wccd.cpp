@@ -3,7 +3,6 @@
 
 #include "php_wccd.h"
 
-#include "zpp/base.h"
 #include "zpp/show_zpp.h"
 
 // compile 
@@ -32,6 +31,8 @@
 #include "wcd/update.cpp"
 #include "wcd/insert.cpp"
 #include "wcd/delete.cpp"
+
+zpp::state_list  STATE_LIST_NAME("wccd");
 
 // register
 PHP_MINIT_FUNCTION(wccd)
@@ -72,7 +73,16 @@ PHP_MINIT_FUNCTION(wccd)
 #ifdef WCD_IBUILD_CPP
 	PHP_MINIT(Wcd_IBuild_reg)(INIT_FUNC_ARGS_PASSTHRU);
 #endif
-	
+
+	STATE_MOD_INIT
+
+	return SUCCESS;
+}
+
+PHP_MSHUTDOWN_FUNCTION(wccd)
+{
+	STATE_MOD_END
+
 	return SUCCESS;
 }
 
@@ -83,8 +93,23 @@ PHP_RINIT_FUNCTION(wccd)
 	ZEND_TSRMLS_CACHE_UPDATE();
 #endif
 
+	STATE_REQ_INIT
+
 	return SUCCESS;
 }
+
+
+PHP_RSHUTDOWN_FUNCTION(wccd)
+{
+	STATE_REQ_END
+
+#ifdef BASE_DEBUG
+	zpp::mgr_link::report();
+#endif
+
+	return SUCCESS;
+}
+
 /* }}} */
 
 /* {{{ PHP_MINFO_FUNCTION */
@@ -109,9 +134,9 @@ zend_module_entry wccd_module_entry = {
 	"wccd",					/* Extension name */
 	nullptr,					/* zend_function_entry */
 	PHP_MINIT(wccd),							/* PHP_MINIT - Module initialization */
-	NULL,							/* PHP_MSHUTDOWN - Module shutdown */
+	PHP_MSHUTDOWN(wccd),							/* PHP_MSHUTDOWN - Module shutdown */
 	PHP_RINIT(wccd),			/* PHP_RINIT - Request initialization */
-	NULL,							/* PHP_RSHUTDOWN - Request shutdown */
+	PHP_RSHUTDOWN(wccd),							/* PHP_RSHUTDOWN - Request shutdown */
 	PHP_MINFO(wccd),			/* PHP_MINFO - Module info */
 	PHP_WCCD_VERSION,		/* Version */
 	STANDARD_MODULE_PROPERTIES
