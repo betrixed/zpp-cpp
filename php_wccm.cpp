@@ -2,8 +2,6 @@
 #define ZPP_BUILD_ALL
 
 #include "php_wccm.h"
-
-#include "zpp/base.h"
 #include "zpp/show_zpp.h"
 
 #include "md4c/markhtml.cpp"
@@ -12,8 +10,11 @@
 // CacheMgr wants one of these
 #include "tinyxml/dxmlread.cpp"
 
+zpp::state_list  STATE_LIST_NAME("wccm");
+
 PHP_MINIT_FUNCTION(wccm)
 {	
+
 #ifdef DAYTIME_CPP
 	PHP_MINIT(Wcc_Day24_reg)(INIT_FUNC_ARGS_PASSTHRU);
 #endif
@@ -31,6 +32,14 @@ PHP_MINIT_FUNCTION(wccm)
 	PHP_MINIT(Wcc_XmlRead_reg)(INIT_FUNC_ARGS_PASSTHRU);
 #	endif
 
+	STATE_MOD_INIT
+
+	return SUCCESS;
+}
+
+PHP_MSHUTDOWN_FUNCTION(wccm)
+{
+	STATE_MOD_END
 
 	return SUCCESS;
 }
@@ -41,9 +50,18 @@ PHP_RINIT_FUNCTION(wccm)
 #if defined(ZTS) && defined(COMPILE_DL_WCCM)
 	ZEND_TSRMLS_CACHE_UPDATE();
 #endif
+	STATE_REQ_INIT
 	return SUCCESS;
 }
-/* }}} */
+
+PHP_RSHUTDOWN_FUNCTION(wccm)
+{
+	STATE_REQ_END
+
+	
+	return SUCCESS;
+}
+
 
 /* {{{ PHP_MINFO_FUNCTION */
 PHP_MINFO_FUNCTION(wccm)
@@ -67,9 +85,9 @@ zend_module_entry wccm_module_entry = {
 	"wccm",						/* Extension name */
 	nullptr,					/* zend_function_entry */
 	PHP_MINIT(wccm),							/* PHP_MINIT - Module initialization */
-	NULL,							/* PHP_MSHUTDOWN - Module shutdown */
+	PHP_MSHUTDOWN(wccm),							/* PHP_MSHUTDOWN - Module shutdown */
 	PHP_RINIT(wccm),			/* PHP_RINIT - Request initialization */
-	NULL,							/* PHP_RSHUTDOWN - Request shutdown */
+	PHP_RSHUTDOWN(wccm),							/* PHP_RSHUTDOWN - Request shutdown */
 	PHP_MINFO(wccm),			/* PHP_MINFO - Module info */
 	PHP_WCCM_VERSION,		/* Version */
 	STANDARD_MODULE_PROPERTIES
