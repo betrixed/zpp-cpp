@@ -1,12 +1,16 @@
 /* wccz extension for PHP */
 
+
+
+
 /* include zpp classes, dump info support, and the state_init auto initialize */
 #include "php_wccz.h"
 
 #include "zpp/base.cpp"
-#include "zpp/state_init.cpp"
 
 #include "zpp/show_zpp.cpp"
+
+#include "zpp/state_init.cpp"
 
 #include "wcc/replace.cpp"
 #include "wcc/config.cpp"
@@ -16,8 +20,7 @@
 
 #include "wcc/strfns.cpp"
 
-
-
+zpp::state_list  STATE_LIST_NAME("wccz");
 
 /* For compatibility with older PHP versions */
 #ifndef ZEND_PARSE_PARAMETERS_NONE
@@ -32,7 +35,6 @@ PHP_MINIT_FUNCTION(wccz)
 	dump_info::run_state_ = true;
 #endif
 
-	zpp::state_init::init_all();
 
 #ifdef WCC_CONFIG_CPP
 	PHP_MINIT(wcc_replace_reg)(INIT_FUNC_ARGS_PASSTHRU);
@@ -50,13 +52,14 @@ PHP_MINIT(Wcc_ReflectCache)(INIT_FUNC_ARGS_PASSTHRU);
 	PHP_MINIT(Strfns_reg)(INIT_FUNC_ARGS_PASSTHRU);
 #endif
 
+	STATE_MOD_INIT
+
 	return SUCCESS;
 }
 
 PHP_MSHUTDOWN_FUNCTION(wccz)
 {
-
-	zpp::state_init::end_all();
+	STATE_MOD_END
 
 #ifdef DEBUG_EXTRA
 	dump_info::run_state_ = false;
@@ -70,13 +73,14 @@ PHP_RINIT_FUNCTION(wccz)
 #if defined(ZTS) && defined(COMPILE_DL_WCCZ)
 	ZEND_TSRMLS_CACHE_UPDATE();
 #endif
-	zpp::state_init::init_request();
+	STATE_REQ_INIT
+
 	return SUCCESS;
 }
 
 PHP_RSHUTDOWN_FUNCTION(wccz)
 {
-	zpp::state_init::end_request();
+	STATE_REQ_END
 
 #ifdef BASE_DEBUG
 	zpp::mgr_link::report();
