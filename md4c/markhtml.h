@@ -7,8 +7,6 @@
 #include "zpp/base.h"
 #endif
 
-
-
 namespace wcc {
 
 using namespace zpp;
@@ -24,15 +22,7 @@ public:
     str_intern  blockquote;
     str_intern  is_info;
 
-    void init() override  {
-    	pflags_s = "pflags";
-        rflags_s = "rflags";
-    	cb_link_s = "cblink";
-    	title_attr = "title";
-    	href_attr = "href";
-    	blockquote = "blockquote";
-    	is_info = "is-info";
-    }
+    void init() override;
 };
 
 extern MTHInit  MTH;

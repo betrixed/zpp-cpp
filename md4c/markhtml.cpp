@@ -24,65 +24,25 @@ extern "C" {
 
 namespace wcc {
 
+    using namespace zpp;
+
 base_obj_mgr<MarkToHtml> MarkToHtml::omg;
 
-/*
-struct membuffer {
-    char* data_;
-    size_t cap_;
-    size_t size_;
-
-    membuffer(size_t nsize)
-    {
-    	size_ = 0;
-    	cap_ = 0;
-    	data_ = nullptr;
-    }
-
-    ~membuffer()
-    {
-    	if (data_) {
-    		efree(data_);
-    		data_ = nullptr;
-    	}
-    }
-
-    error_return
-    capacity(size_t nsize)
-    {
-    	error_return result;
-
-    	data_ = erealloc(data_, nsize);
-    	if (data_ == nullptr)
-    	{
-    		result.error() << "resize(" << nsize << ") failed";
-    	}
-    	else {
-    		cap_ = nsize;
-    	}
-    	return result;
-    }
-
-    error_return
-    append(const char* data, size_t dlen)
-    {
-    	error_return result;
-    	if (cap_ < size_ + dlen){
-    		size_t ncap = size_ + size_/ 2 + dlen;
-    		result = this->capacity(ncap);
-    		if (result.has_errors())
-    		{
-    			return result;
-    		}
-    	}
-    	memcpy(data_ + size_, data, dlen);
-    	size_ += dlen;
-    	return result;
-    }
-};
-*/
 
 MTHInit  MTH;
+
+void MTHInit::init()  
+{
+    //zend_printf("MTHInit\n");
+
+    pflags_s = "pflags";
+    rflags_s = "rflags";
+    cb_link_s = "cblink";
+    title_attr = "title";
+    href_attr = "href";
+    blockquote = "blockquote";
+    is_info = "is-info";
+}
 
 void 
 MarkToHtml::debug_info(htab_rw info)
@@ -254,8 +214,9 @@ ZEND_METHOD(Wcc_MarkToHtml, cblink)
 
 PHP_MINIT_FUNCTION(Wcc_MarkToHtml_reg)
 {
-    //zend_printf("register\n");
-    MarkToHtml::omg.classEntry(register_class_Wcc_MarkToHtml());
+    zend_class_entry* ce = register_class_Wcc_MarkToHtml();
+    
+    MarkToHtml::omg.classEntry(ce);
 
     STATE_INIT_ADD(MTH)
     

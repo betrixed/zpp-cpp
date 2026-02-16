@@ -35,12 +35,12 @@ xml_fns XML_FNS;
 
 void xml_fns::init()
 {
+	//zend_printf("Init xml_fns\n");
 	makeclass_s = "makeclass";
 	k_c = "c";
 	k_k = "k";
 	root = "root";	
 	tags = "tags";	
-	
 }
 
 base_obj_mgr<Wcc_XmlRead> Wcc_XmlRead::omg;
@@ -414,7 +414,7 @@ val_rc //static
 Wcc_XmlRead::fromFile(str_ptr filename)
 {
 	obj_rc xmlr = Wcc_XmlRead::omg.new_zobj();
-	//showobj("new_zobj", xmlr);
+
 	Wcc_XmlRead* cobj = zobj_toc<Wcc_XmlRead>(xmlr);
 	
 	return cobj->parseFile(filename);
