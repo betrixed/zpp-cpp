@@ -140,24 +140,6 @@ namespace wcd {
 		void init() override;
 	};
 
-
-	/*
-	enum {
-		OP_ERROR = -1,
-	    OP_EQ = 0,
-	    OP_NEQ = 1,
-	    OP_GT = 2,
-	    OP_LT = 3,
-	    OP_GE = 4,
-	    OP_LE = 5,
-	    OP_LIKE = 6,
-	    OP_AND = 7,
-	    OP_OR = 8,
-	    OP_ISNULL = 9,
-	    OP_NOTNULL = 10,
-	    OP_NOP = 11
-	};
-	*/
 	
 	class SqlPartId : public base_d
 	{

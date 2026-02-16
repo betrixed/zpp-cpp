@@ -2,7 +2,7 @@
 set -e
 sudo make clean
 clear
-
+rm -f ./stub/*_arginfo.h
 FILES=./stub/*.stub.php
 for f in $FILES
 do

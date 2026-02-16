@@ -22,8 +22,6 @@ using namespace zpp;
 	
 base_obj_mgr<FileUpload> FileUpload::omg;
 
-
-
 void FileUpload::debug_info(htab_rw di)
 {
 	di.set(RQit.error_key, error_);

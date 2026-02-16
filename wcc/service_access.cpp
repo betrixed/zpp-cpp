@@ -357,6 +357,8 @@ PHP_MINIT_FUNCTION(ServiceAccess_reg)
 
 	ServiceAccess::omg.classEntry(ce);
 
+	STATE_INIT_ADD(SAdata)
+	
 	return SUCCESS;
 }
 #endif

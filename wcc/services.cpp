@@ -618,6 +618,8 @@ PHP_MINIT_FUNCTION(wc_services_md)
 
 	Services::omg.classEntry(ce);
 
+	STATE_INIT_ADD(SVC_data);
+	
 	return SUCCESS;
 }
 

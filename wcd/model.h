@@ -148,9 +148,46 @@ public:
 
 	htab_rc stampTime(str_ptr str_datetime, int flags=ALL_TS);
 	
-	
-
 };
+
+	class Model_init : public state_init {
+	public:
+
+		str_intern find_first;
+		str_intern find_all;
+		str_intern by_str;
+
+		str_intern eq_str;
+		str_intern u_model;
+		str_intern r_arg;
+		str_intern escape_key;
+		str_intern escape_str;
+		str_intern get_tables;
+		str_intern columns_str;
+		str_intern m_updated_at;
+		str_intern m_created_at;
+		str_intern m_datetime_type;
+		str_intern type_str;
+		str_intern name_str;
+		str_intern returns_key;
+		str_intern get_primary_key;
+		str_intern fn_getseqcols;
+		str_intern k_created_at;
+		str_intern k_updated_at;
+
+		str_intern k_pkey_options;
+		str_intern k_seq_defs;
+		str_intern k_col_defs;
+		str_intern k_pkey;
+		str_intern k_tdef;
+		str_intern k_buildme;
+		str_intern k_driver;
+
+		void init() override;
+
+	};
+
+	extern Model_init MIS;
 
 };
 

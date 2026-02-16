@@ -931,17 +931,13 @@ ZEND_METHOD(Wcc_Hmap, __wakeup)
 
 PHP_MINIT_FUNCTION(Wcc_Hmap_reg)
 {
-	//auto ce = register_class_Wcc_Hmap(zend_ce_arrayaccess, zend_ce_countable);
-	//zend_standard_class_def
-	auto ce = register_class_Wcc_Hmap(
-		//zend_ce_iterator
-		//zend_ce_arrayaccess, 
-		//zend_ce_countable
-		);
+
+	auto ce = register_class_Wcc_Hmap();
 
 	Hmap::omg.classEntry(ce);
 
-	//zend_printf("registered hmap\n");
+	STATE_INIT_ADD(HMAPit)
+	
 	return SUCCESS;
 }
 

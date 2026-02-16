@@ -881,6 +881,8 @@ PHP_MINIT_FUNCTION(wcc_route_d)
 	zend_class_entry *ce = register_class_Wcc_Route();
 	Route::omg.classEntry(ce);
 	
+	STATE_INIT_ADD(route_data)
+	
 	return SUCCESS;
 
 }

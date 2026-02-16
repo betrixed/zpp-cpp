@@ -840,7 +840,8 @@ PHP_MINIT_FUNCTION(wcc_routeset_d)
 	cval.add_constant("ROUTES", "routes");
 	cval.add_constant("NO_PREFIX", "noprefix");
 	
-
+	STATE_INIT_ADD(radata)
+	
 	return SUCCESS;
 
 }

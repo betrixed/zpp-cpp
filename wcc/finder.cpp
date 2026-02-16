@@ -590,6 +590,8 @@ PHP_MINIT_FUNCTION(Wcc_Finder_reg)
 
 	Finder::omg.classEntry(ce);
 
+	STATE_INIT_ADD(FDit)
+	
 	return SUCCESS;
 }
 

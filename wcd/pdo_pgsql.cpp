@@ -13,24 +13,18 @@ using namespace zpp;
 
 base_obj_mgr<Pdo_pgsql> Pdo_pgsql::omg;
 
-class PGInit : state_init 
-{
-public:
-	str_intern pgsql_s;
-	str_intern tablenames_qry;
-
-	void init() override
-	{
-		pgsql_s = "pgsql";
-		tablenames_qry =  
-		    "select tablename "
-			" from pg_tables" 
-  			" where schemaname not in ('information_schema','pg_catalog')"
-  			" order by tablename";
-	}
-};
-
 PGInit PGIs;
+
+void PGInit::init()
+{
+	pgsql_s = "pgsql";
+	tablenames_qry =  
+	    "select tablename"
+		" from pg_tables" 
+			" where schemaname"
+			" not in ('information_schema','pg_catalog')"
+			" order by tablename";
+}
 
 str_rc 
 Pdo_pgsql::getSqlType() 
@@ -79,6 +73,9 @@ Pdo_pgsql::register_class(zend_class_entry* pclass)
 {
 	zend_class_entry* me = register_class_Wcd_PdoPgsql(pclass);
 	Pdo_pgsql::omg.classEntry(me);
+
+	STATE_INIT_ADD(PGIs)
+	
 	return me;
 }
 

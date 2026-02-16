@@ -568,6 +568,9 @@ ZEND_METHOD(Wcc_Loader, unregLoader)
 PHP_MINIT_FUNCTION(wcc_loader_reg)
 {
 	Loader::omg.classEntry(register_class_Wcc_Loader());
+
+	STATE_INIT_ADD(LDRi)
+	
 	return SUCCESS;
 }
 

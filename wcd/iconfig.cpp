@@ -38,8 +38,6 @@ CfgInit ICS;
 base_obj_mgr<IConfig> IConfig::omg;
 
 
-CfgInit::CfgInit() : state_init() {}
-
 void 
 CfgInit::init()
 {
@@ -670,6 +668,8 @@ PHP_MINIT_FUNCTION(Wcd_IConfig_reg)
 {
 	IConfig::omg.classEntry(register_class_Wcd_IConfig());
 
+	STATE_INIT_ADD(ICS)
+	
 	return SUCCESS;
 }
 

@@ -88,11 +88,7 @@ namespace wcd {
 
 		obj_return select(Bindings& bind);
 
-		
-
 		obj_return update(Bindings& bind);
-
-		
 
 		str_return emit(val_ptr sp, Bindings* bind, str_ptr lalias, str_ptr ralias);
 

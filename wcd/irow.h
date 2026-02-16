@@ -49,6 +49,8 @@ namespace wcd {
 
     	static IRow_mgr omg;
 
+    	static void register_class();
+
     	IRow();
     	virtual ~IRow();
     	
@@ -95,7 +97,23 @@ namespace wcd {
 
 	};
 
+	class IRInit : public state_init {
+	public:
 
+		void init() override;
+
+		str_intern  model;
+		str_intern  data_str;
+		str_intern  original_data;
+		str_intern  save_key;
+		str_intern  read_key;
+		str_intern  delete_key;
+		str_intern  getcoldefs;
+		str_intern  stamptime;
+
+	};
+
+	extern IRInit  IRSTR;
 
 };
 

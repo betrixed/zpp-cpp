@@ -1999,6 +1999,8 @@ PHP_MINIT_FUNCTION(RequestGlobals_reg)
 
 	RequestGlobals::omg.classEntry(ce);
 
+	STATE_INIT_ADD(RQit)
+	
 	return SUCCESS;
 }
 

@@ -169,6 +169,51 @@ namespace wcd {
 
 	};
 
-};
+
+	class DBSInit : public state_init {
+	public:
+
+		str_intern  query_str;
+		str_intern  fetch_str;
+		str_intern  close_cursor;
+		str_intern  pdo_prefix;
+		str_intern  pdo_class;
+		str_intern  begin_trans;
+		str_intern  bind_value;
+		str_intern  commit_fn;
+
+		str_intern  quote_fn;
+		str_intern  regex_quoted;
+		str_intern  rx_cap1;
+		str_intern  execute_fn;
+		str_intern  fetchall_fn;
+		str_intern  rowcount_fn;
+
+
+		str_intern  getattribute_fn;
+		str_intern  mysql_str;
+		str_intern  intransaction_fn;
+		str_intern  lastinsertid_fn;
+		str_intern  place_holder;
+
+		str_intern  prepare_fn;
+		str_intern  error_str;
+		str_intern  readschema_fn;
+		str_intern  rollback_fn;
+		str_intern  setattribute_fn;
+
+		str_intern  cfg_name;
+		str_intern  db_name;
+		str_intern  tbl_models;
+		str_intern  iconfig_key;
+		str_intern  schema_def;
+		str_intern  sqlgen_s;
+			
+
+		void init() override;
+	};
+
+	extern DBSInit DBS;
+}//wcd namespace
 
 #endif

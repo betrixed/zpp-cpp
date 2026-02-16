@@ -593,6 +593,8 @@ PHP_MINIT_FUNCTION(Wcc_CacheMgr_reg)
 {
 	CacheMgr::omg.classEntry(register_class_Wcc_CacheMgr());
 
+	STATE_INIT_ADD(Cache_i)
+	
 	return SUCCESS;
 }
 

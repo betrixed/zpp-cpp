@@ -35,47 +35,15 @@ extern "C" {
 #include <filesystem>
 
 namespace wcd {
+	using namespace zpp;
 
 	base_obj_mgr<Model> Model::omg;
 	
 	zend_class_entry* zintf_ce_IfCrud;
 
-	class Model_init : public state_init {
-	public:
+	Model_init MIS;
 
-		str_intern find_first;
-		str_intern find_all;
-		str_intern by_str;
-
-		str_intern eq_str;
-		str_intern u_model;
-		str_intern r_arg;
-		str_intern escape_key;
-		str_intern escape_str;
-		str_intern get_tables;
-		str_intern columns_str;
-		str_intern m_updated_at;
-		str_intern m_created_at;
-		str_intern m_datetime_type;
-		str_intern type_str;
-		str_intern name_str;
-		str_intern returns_key;
-		str_intern get_primary_key;
-		str_intern fn_getseqcols;
-		str_intern k_created_at;
-		str_intern k_updated_at;
-
-		str_intern k_pkey_options;
-		str_intern k_seq_defs;
-		str_intern k_col_defs;
-		str_intern k_pkey;
-		str_intern k_tdef;
-		str_intern k_buildme;
-		str_intern k_driver;
-
-
-
-		void init() override {
+	void Model_init::init() {
 			find_first = "findfirst";
 			find_all = "findall";
 			by_str = "by";
@@ -106,13 +74,7 @@ namespace wcd {
 			k_tdef = "table_def";
 			k_buildme = "build_me";
 			k_driver = "driver";
-
-
 		}
-	};
-
-	Model_init MIS;
-
 	Model::Model() : base_d()
 	{
 		timestamps_ = NO_TS;
@@ -242,9 +204,12 @@ namespace wcd {
 	Model::getConnect()
 	{
 		obj_return result;
+
 		if (dbref_.ok())
 		{
 			result = dbref_.get();
+
+			showobj("getConnect", result.value_);
 			return result;
 		}
 
@@ -257,7 +222,7 @@ namespace wcd {
 			result.value_ = dbref_.get();
 		}
 		else {
-			result = std::move(wref);
+			result = wref.move_error();
 		}
 		return result;
 	}
@@ -911,14 +876,16 @@ namespace wcd {
 		str_rc name = getName();
 		//showstr("name", name);
 
-		obj_return driver_ret = getConnect();
-		if (driver_ret.has_errors())
+		obj_return db_ret = getConnect();
+		if (db_ret.has_errors())
 		{
-			result = std::move(driver_ret);
+			result = db_ret.move_error();
 			return result;
 		}
 
-		IDriver* db = zobj_toc<IDriver>(driver_ret.value_);
+		showobj("db_ret", db_ret.value_);
+
+		IDriver* db = zobj_toc<IDriver>(db_ret.value_);
 
 		obj_rc schema = db->getSchema();
 
@@ -2026,16 +1993,14 @@ ZEND_METHOD(Wcd_Model, stampTime){}
 
 PHP_MINIT_FUNCTION(Wcd_Model_reg)
 {
-	auto ce = register_class_Wcd_IRow(
-		Hmap::omg.classEntry()
-	);
-
-	IRow::omg.classEntry(ce);
+	IRow::register_class();
 
 	zintf_ce_IfCrud = register_class_Wcd_IfCrud();
 
 	Model::omg.classEntry(register_class_Wcd_Model(zintf_ce_IfCrud));
 
+	STATE_INIT_ADD(MIS)
+	
 	return SUCCESS;
 }
 

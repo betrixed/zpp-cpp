@@ -112,6 +112,8 @@ PHP_MINIT_FUNCTION(wcc_pair_d)
 
 	Pair::omg.classEntry(ce);
 
+	STATE_INIT_ADD(PairSI)
+	
 	return SUCCESS;
 }
 

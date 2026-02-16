@@ -752,6 +752,8 @@ PHP_MINIT_FUNCTION(Wcc_Plate_reg)
 
 	Plate::omg.classEntry(ce);
 
+	STATE_INIT_ADD(PLD)
+	
 	return SUCCESS;
 }
 

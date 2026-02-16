@@ -1010,6 +1010,8 @@ PHP_MINIT_FUNCTION(wcc_assets_reg)
 
 	Assets::omg.classEntry(register_class_Wcc_Assets());
 
+	STATE_INIT_ADD(ASI)
+	
 	return SUCCESS;
 
 }

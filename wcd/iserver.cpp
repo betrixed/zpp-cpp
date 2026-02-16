@@ -22,86 +22,50 @@ extern "C" {
 
 namespace wcd {
 
+using namespace zpp;
+
 base_obj_mgr<IServer> IServer::omg;
 
-class ISVinit : public state_init {
-public:
-
-	str_intern  wcd_sql_mysql;
-	str_intern  wcd_sql_postgres;
-	str_intern  wcd_sql_sqlite;
-	str_intern  wcd_sql_firebird;
-
-	str_intern  wcd_ext_mysql;
-	str_intern  wcd_ext_postgres;
-	str_intern  wcd_ext_sqlite;
-	str_intern  wcd_ext_firebird;
-
-	str_intern  pdo_mysql;
-	str_intern  pdo_pgsql;
-	str_intern  pdo_sqlite;
-	str_intern  pdo_firebird;
-
-	str_intern  default_name;
-
-	str_intern  sqls_key;
-	str_intern  drivers_key;
-	str_intern  db_config;
-	str_intern  cache_mgr;
-	str_intern  sql_cache;
-	str_intern  get_cache;
-
-	str_intern  svckey_str;
-	str_intern  active_str;
-	str_intern  config_str;
-		
-	str_intern  active_cfg;
-
-	str_intern  alias_str;
-	str_intern  dbcache_str;
-
-	str_intern  sql_classes;
-	str_intern  ext_classes;
-
-	void init() override {
-
-		pdo_mysql = "pdo_mysql";
-		pdo_pgsql = "pdo_pgsql";
-		pdo_sqlite = "pdo_sqlite";
-		pdo_firebird = "pdo_firebird";
-
-		wcd_sql_mysql = R"(Wcd\Sql\Mysql)";
-		wcd_sql_postgres = R"(Wcd\Sql\Postgres)";
-		wcd_sql_sqlite = R"(Wcd\Sql\Sqlite)";
-		wcd_sql_firebird = R"(Wcd\Sql\Firebird)";
-
-		wcd_ext_mysql = R"(Wcd\Ext\PdoMysql)";
-		wcd_ext_postgres = R"(Wcd\Ext\PdoPgsql)";
-		wcd_ext_sqlite = R"(Wcd\Ext\PdoSqlite)";
-		wcd_ext_firebird = R"(Wcd\Ext\PdoFirebird)";
-
-		default_name = "default";
-
-		sqls_key = "sqls";
-		drivers_key = "drivers";
-		db_config = "db-config";
-		cache_mgr = "cache_mgr";
-		sql_cache = "sql_cache";
-		get_cache = "getcache";
-
-		svckey_str = "activekey";
-		active_str = "connect";
-		config_str = "configure";
-		active_cfg = "activecfg";
-
-		alias_str = "alias";
-		dbcache_str = "dbcache";
-		sql_classes = "sqlClasses";
-		ext_classes = "driverClasses";
-	}
-};
-
 ISVinit ISV;
+
+void ISVinit::init() {
+	pdo_mysql = "pdo_mysql";
+	pdo_pgsql = "pdo_pgsql";
+	pdo_sqlite = "pdo_sqlite";
+	pdo_firebird = "pdo_firebird";
+
+	wcd_sql_mysql = R"(Wcd\Sql\Mysql)";
+	wcd_sql_postgres = R"(Wcd\Sql\Postgres)";
+	wcd_sql_sqlite = R"(Wcd\Sql\Sqlite)";
+	wcd_sql_firebird = R"(Wcd\Sql\Firebird)";
+
+	wcd_ext_mysql = R"(Wcd\Ext\PdoMysql)";
+	wcd_ext_postgres = R"(Wcd\Ext\PdoPgsql)";
+	wcd_ext_sqlite = R"(Wcd\Ext\PdoSqlite)";
+	wcd_ext_firebird = R"(Wcd\Ext\PdoFirebird)";
+
+	default_name = "default";
+
+	sqls_key = "sqls";
+	drivers_key = "drivers";
+	db_config = "db-config";
+	cache_mgr = "cache_mgr";
+	sql_cache = "sql_cache";
+	get_cache = "getcache";
+
+	svckey_str = "activekey";
+	active_str = "connect";
+	config_str = "configure";
+	active_cfg = "activecfg";
+
+	alias_str =   "alias";
+	dbcache_str = "dbcache";
+	sql_classes = "sqlClasses";
+	ext_classes = "driverClasses";
+}
+
+
+
 
 void 
 IServer::debug_info(htab_rw di)
@@ -131,12 +95,20 @@ IServer::construct(str_ptr svckey)
 {
 	svc_key_ = svckey;
 
-	htab_rw sw(sqlClasses_);
+	
 
+	htab_rw sw(sqlClasses_);
+	showarray("sqlClasses_", sqlClasses_);
 	sw.set(ISV.pdo_mysql, ISV.wcd_sql_mysql);
+	showarray("sqlClasses_", sqlClasses_);
 	sw.set(ISV.pdo_pgsql, ISV.wcd_sql_postgres);
+	showarray("sqlClasses_", sqlClasses_);
 	sw.set(ISV.pdo_sqlite, ISV.wcd_sql_sqlite);
+	showarray("sqlClasses_", sqlClasses_);
 	sw.set(ISV.pdo_firebird, ISV.wcd_sql_firebird);
+	showarray("sqlClasses_", sqlClasses_);
+
+	
 
 	htab_rw dw(driverClasses_);
 
@@ -465,14 +437,20 @@ ZEND_METHOD(Wcd_IServer, Connect)
 //void construct(str_ptr svckey);
 ZEND_METHOD(Wcd_IServer, __construct)
 {
-	zend_string* name;
+	zarg_rd args(execute_data);
 
-	ZEND_PARSE_PARAMETERS_START(1,1)
-	Z_PARAM_STR_OR_NULL(name)
-	ZEND_PARSE_PARAMETERS_END();
+	str_ptr key;
 
-	IServer* cobj = zval_toc<IServer>(ZEND_THIS);
-	cobj->construct(name);	
+	key = args.str(args.need(0));
+
+	showstr("IServer construct", key);
+
+	if (!args.throw_errors())
+	{
+		showmem("THIS", ZEND_THIS);
+		IServer* cobj = zval_toc<IServer>(ZEND_THIS);
+		cobj->construct(key);
+	}
 }
 
 //void construct(str_ptr svckey);
@@ -675,7 +653,8 @@ PHP_MINIT_FUNCTION(Wcd_IServer_reg)
 
 	cdata.add_constant("DEFAULT_NAME", ISV.default_name );
 	*/
-
+	STATE_INIT_ADD(ISV)
+	
 	return SUCCESS;
 }
 

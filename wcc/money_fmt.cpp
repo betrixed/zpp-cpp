@@ -202,6 +202,8 @@ PHP_MINIT_FUNCTION(Wcc_Money_reg)
 
 	MoneyFmt::omg.classEntry(ce);
 
+	STATE_INIT_ADD(MFI)
+	
 	return SUCCESS;
 }
 #endif

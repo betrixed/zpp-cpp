@@ -19,22 +19,6 @@ using namespace zpp;
 
 IRow_mgr IRow::omg;
 
-class IRInit : public state_init {
-public:
-
-	void init() override;
-
-	str_intern  model;
-	str_intern  data_str;
-	str_intern  original_data;
-	str_intern  save_key;
-	str_intern  read_key;
-	str_intern  delete_key;
-	str_intern  getcoldefs;
-	str_intern  stamptime;
-
-};
-
 IRInit  IRSTR;
 
 zend_class_entry* ce_iface_crud;
@@ -314,6 +298,17 @@ IRow::stampTime(str_ptr value, int dtflags)
 	return result;
 }
 
+void
+IRow::register_class()
+{
+	auto ce = register_class_Wcd_IRow(
+		Hmap::omg.classEntry()
+	);
+
+	IRow::omg.classEntry(ce);
+
+	STATE_INIT_ADD(IRSTR)
+}
 
 }; // namespace wcd
 

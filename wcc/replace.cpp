@@ -173,6 +173,8 @@ PHP_MINIT_FUNCTION(wcc_replace_reg)
 {
 	Replace::omg.classEntry(register_class_Wcc_Replace());
 
+	STATE_INIT_ADD(REPi)
+	
 	return SUCCESS;
 
 }

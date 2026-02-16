@@ -273,6 +273,8 @@ PHP_MINIT_FUNCTION(SearchList_reg)
 
 	SearchList::omg.classEntry(ce);
 
+	STATE_INIT_ADD(SLdata)
+	
 	return SUCCESS;
 }
 

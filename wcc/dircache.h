@@ -93,6 +93,8 @@ public:
 	void init() override;
 };
 
+extern SFData SFDi;
+
 }; // namespace
 
 //icache.h

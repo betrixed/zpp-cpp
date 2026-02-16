@@ -565,6 +565,8 @@ PHP_MINIT_FUNCTION(Wcc_PlateEngine_reg)
 
 	PlateEngine::omg.classEntry(ce);
 
+	STATE_INIT_ADD(PEI)
+	
 	return SUCCESS;
 }
 

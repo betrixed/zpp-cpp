@@ -32,9 +32,10 @@
 
 #include <vector>
 
+#include "php_wcc.h"
+
 extern "C" {
 
-#include "php_wcc.h"
 
 /* For compatibility with older PHP versions */
 #ifndef ZEND_PARSE_PARAMETERS_NONE
@@ -46,7 +47,7 @@ extern "C" {
 };
 
 //core wcc
-#include "zpp/base.h"
+
 #include "zpp/show_zpp.h"
 
 #include "wcc/reflect_cache.h"
@@ -121,8 +122,11 @@ extern "C" {
 #include "wcd/insert.cpp"
 #include "wcd/delete.cpp"
 
+zpp::state_list  STATE_LIST_NAME("wcc");
+
 PHP_MSHUTDOWN_FUNCTION(wcc)
-{
+{  
+	STATE_MOD_END
 	return (zend_result) SUCCESS;
 }
 
@@ -265,6 +269,8 @@ PHP_MINIT(wcc_assets_reg)(INIT_FUNC_ARGS_PASSTHRU);
 	PHP_MINIT(wcc_run_reg)(INIT_FUNC_ARGS_PASSTHRU);
 #endif
 
+	STATE_MOD_INIT
+
 	return SUCCESS;
 }
 
@@ -274,11 +280,14 @@ PHP_RINIT_FUNCTION(wcc)
 #if defined(ZTS) && defined(COMPILE_DL_WCC)
 	ZEND_TSRMLS_CACHE_UPDATE();
 #endif
+
+	STATE_REQ_INIT
 	return SUCCESS;
 }
 
 PHP_RSHUTDOWN_FUNCTION(wcc)
 {
+	STATE_REQ_END
 	return SUCCESS;
 }
 /* }}} */

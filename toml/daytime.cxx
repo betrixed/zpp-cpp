@@ -385,6 +385,8 @@ PHP_MINIT_FUNCTION(Day24_reg)
 
 	Day24::omg.classEntry(ce);
 
+	STATE_INIT_ADD(D24Init)
+
 	return SUCCESS;
 
 }

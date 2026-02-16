@@ -54,10 +54,6 @@ namespace wcc
 {
 	base_obj_mgr<RouteMatch> RouteMatch::omg;
 
-};
-
-using namespace wcc;
-
 class RouteMatch_init : public state_init {
 public:
 	str_intern cc_route_obj;
@@ -648,6 +644,10 @@ RouteMatch::setCallInfo(str_ptr obclass, str_ptr obmethod, val_ptr args)
 	ob_args_ = args.zarray();
 }
 
+}// wcc namespace
+
+using namespace wcc;
+
 PHP_METHOD(Wcc_RouteMatch, __construct)
 {
 	zend_string* uri;
@@ -875,6 +875,8 @@ PHP_MINIT_FUNCTION(route_match_d)
 
 	RouteMatch::omg.classEntry(ce);
 
+	STATE_INIT_ADD(RM_data)
+	
 	return SUCCESS;
 }
 

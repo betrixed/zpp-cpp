@@ -21,5 +21,16 @@ namespace wcd {
 		val_return  lastSeqValue(str_ptr name) override;
 	};
 
-};
+	class PGInit : public state_init 
+	{
+	public:
+		str_intern pgsql_s;
+		str_intern tablenames_qry;
+
+		void init() override;
+	};
+
+	extern PGInit PGIs;
+} // wcd namespace
+
 #endif

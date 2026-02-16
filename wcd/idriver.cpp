@@ -40,53 +40,15 @@ extern "C" {
 #include "pdo_pgsql.h"
 #endif
 
+#ifndef DIR_CACHE_H
+#include "wcc/dircache.h"
+#endif
+
 namespace wcd {
 
 base_obj_mgr<IDriver> IDriver::omg;
 
-class DBSInit : public state_init {
-public:
-
-	str_intern  query_str;
-	str_intern  fetch_str;
-	str_intern  close_cursor;
-	str_intern  pdo_prefix;
-	str_intern  pdo_class;
-	str_intern  begin_trans;
-	str_intern  bind_value;
-	str_intern  commit_fn;
-
-	str_intern  quote_fn;
-	str_intern  regex_quoted;
-	str_intern  rx_cap1;
-	str_intern  execute_fn;
-	str_intern  fetchall_fn;
-	str_intern  rowcount_fn;
-
-
-	str_intern  getattribute_fn;
-	str_intern  mysql_str;
-	str_intern  intransaction_fn;
-	str_intern  lastinsertid_fn;
-	str_intern  place_holder;
-
-	str_intern  prepare_fn;
-	str_intern  error_str;
-	str_intern  readschema_fn;
-	str_intern  rollback_fn;
-	str_intern  setattribute_fn;
-
-	str_intern  cfg_name;
-	str_intern  db_name;
-	str_intern  tbl_models;
-	str_intern  iconfig_key;
-	str_intern  schema_def;
-	str_intern  sqlgen_s;
-		
-
-	void init() override;
-};
-
+DBSInit DBS;
 
 void DBSInit::init() {	
 		query_str = "query";
@@ -127,14 +89,13 @@ void DBSInit::init() {
 
 	}
 
-DBSInit DBS;
+
 
 
 void 
 IDriver::construct(obj_ptr icfgobj, str_ptr name)
 {
-	//showobj("cfg obj", icfgobj);
-	//showstr("cfg name", name);
+
 	ifetch_ = PDO_FETCH_ASSOC;
 
 	icfg_ = icfgobj;
@@ -190,25 +151,16 @@ IDriver::destruct()
 	{
 		close();
 	}
-	//will this fix shutdown errors?
-	//showobj("self_", self_);
-	//showobj("wkself_", wkself_);
+
 	wkself_.init(); 
 
-	//showobj("schema_def", schema_def_);
 	schema_def_.init();
 
-	//showarray("table_models", table_models_);
 	table_models_.init();
 
-	//showobj("isql", isql_);
 	isql_.init();
 
-	//showobj("icfg", icfg_);
 	icfg_.init();
-
-	//showobj("IDriver destruct ", vobj());
-	//zend_printf("IDriver destruct\n");
 }
 
 str_return 
@@ -230,7 +182,6 @@ IDriver::getDSN()
 	IConfig* cfg = icfg_c();
 	str_rc host = cfg->getHost();
 	str_rc dbname = cfg->getDatabase();
-	//showstr("database", dname);
 
 	str_buf buf;
 
@@ -379,9 +330,9 @@ IDriver::closeStmt(val_ptr stmt)
 
 void IDriver::bind(val_ptr stmt, htab_ptr params)
 {
-	//showdata("bind ", params);
+
 	obj_ptr spdo(stmt);
-	//showobj("stmt", spdo);
+
 	if (params.size())
 	{
 		htab_walk wk;
@@ -483,15 +434,11 @@ check_results(val_ptr test)
 val_return
 IDriver::execute(val_ptr stmt, bool close, bool fetch)
 {
-	//zend_printf("execute: bool(%d)\n", fetch);
+
 	obj_ptr sobj(stmt);
-	//showobj("Execute ", sobj);
+
 	val_rc pdo_result = sobj.call(DBS.execute_fn);
 	val_return result;
-
-
-	//showmem("pdo_result", pdo_result);
-	//showstr("lastsql", lastsql_);
 
 	bool good_result = pdo_result.isTrue();
 
@@ -503,7 +450,6 @@ IDriver::execute(val_ptr stmt, bool close, bool fetch)
 		}
 		else {
 			result.value_ = sobj.call(DBS.rowcount_fn);
-			//showmem("RowCount", result);
 		}
 	}
 	if (close || !good_result)
@@ -604,6 +550,7 @@ IDriver::getSchema()
 	
 	ICache*  cache = nullptr;
 	str_rc name;
+	
 
 	if (schema_def_.ok())
 	{
@@ -612,16 +559,23 @@ IDriver::getSchema()
 	obj_ptr server_mgr = Services::getOne(IServer::omg.class_name());
 	IServer* isv = zobj_toc<IServer>(server_mgr);
 
-	
-	obj_rc cache_mgr = isv->getDataCache();
-	if (cache_mgr.ok())
+	obj_rc cacheobj = isv->getDataCache();
+	if (cacheobj.ok())
 	{
-		cache = zobj_toc<ICache>(cache_mgr);
+
+		cache = zobj_toc<ICache>(cacheobj);
+		str_rc cdir = cache->getOption(SFDi.opt_cachedir);
+
 		name = icfg_c()->getDatabase();
-		schema_def_ = cache->get(name); 
+
+		val_rc nullval;
+		schema_def_ = cache->get(name, nullval); 
+
+
 	}
 	if (!schema_def_.ok())
 	{
+		zend_printf("readSchema\n");
 		schema_def_ = readSchema();
 		if (cache)
 		{
@@ -639,8 +593,11 @@ IDriver::readSchema()
 {
 	if (!schema_def_.ok())
 	{
-		obj_rc sdef = ReflectCache::staticInstance(getSchemaClass());
+		str_rc sclass = getSchemaClass();
+
+		obj_rc sdef = ReflectCache::staticInstance(sclass);
 		val_rc self(vobj());
+
 		sdef.call(DBS.readschema_fn, self);
 		schema_def_ = sdef;
 	}
@@ -1695,7 +1652,6 @@ ZEND_METHOD(Wcd_IDriver, getWeakRef)
 
 	weak_ref result = db->selfRef();
 
-	//showobj("getWeakRef", result);
 	result.move_zv(return_value);
 }
 
@@ -1714,6 +1670,7 @@ PHP_MINIT_FUNCTION(Wcd_IDriver_reg)
 	cval.add_constant("FETCH_ASSOC", PDO_FETCH_ASSOC);
 	cval.add_constant("FETCH_NUM", PDO_FETCH_NUM);
 
+	STATE_INIT_ADD(DBS)
 
 	return SUCCESS;
 }

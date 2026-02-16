@@ -1214,6 +1214,8 @@ PHP_MINIT_FUNCTION(Wcc_Response_reg)
 
 	Response::omg.classEntry(ce);
 
+	STATE_INIT_ADD(RSPD)
+	
 	return SUCCESS;
 }
 

@@ -11,7 +11,7 @@ use Wcd\Sql\Select;
 
 use function Wcc\debug_zpp_dump;
 
-use Wcc\Cache\SFile;
+use Wcc\Cache\DirCache;
 
 use Wcd\IServer;
 
@@ -22,6 +22,14 @@ echo "Working directory: " . $basedir . PHP_EOL;
 echo "Php " . phpversion() . PHP_EOL;
 echo "Wcc " .  phpversion("wcc") . PHP_EOL;
 echo "XDebug " . phpversion("xdebug") . PHP_EOL;
+
+if ($argc > 1)
+{
+    $dbalias = $argv[1];
+}
+else {
+    $dbalias = "db1";
+}
 
 function bootstrap()
 {
@@ -63,9 +71,11 @@ function bootstrap()
 
         function(Services $svc) use($dbconfig) 
         {
+            global $dbalias;
+            echo "Setup DB for " . $dbalias . PHP_EOL;
             $servers = new IServer('db');
             $servers->config($dbconfig);
-            $servers->setAlias("default", 'db1');
+            $servers->setAlias("default", $dbalias);
             $svc->setObject($servers);
             $svc->set('db', $servers);
             return $servers;
@@ -89,7 +99,7 @@ function bootstrap()
     $cache->createCache
     (    
         service_key:"file_cache", 
-        class_name:SFile::class, 
+        class_name:DirCache::class, 
         options: [
             'cache_dir' => $cfg->cache_dir . "/sfile",
             'dirtree' => false,
@@ -100,7 +110,7 @@ function bootstrap()
     $cache->createCache
     (    
         service_key:"sess_cache", 
-        class_name:SFile::class, 
+        class_name:DirCache::class, 
         options: [
             'cache_dir' => $cfg->cache_dir . "/session",
             'dirtree' => false,
@@ -147,7 +157,8 @@ $run->runObject(new SqlGenerateTest());
 
 
 Services::service('die');
-
+if(extension_loaded("wccd"))
+{
 $remains = Select::getAlive();
 /*
 if (!empty($remains)) {
@@ -155,3 +166,4 @@ if (!empty($remains)) {
 } */
 
 echo "\nremains = " . count($remains) . PHP_EOL;
+}

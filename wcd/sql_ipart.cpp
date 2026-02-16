@@ -1321,6 +1321,8 @@ PHP_MINIT_FUNCTION(SqlIPart_reg)
 
 	RunSql::omg.classEntry(register_class_Wcd_Sql_RunSql());
 	
+	STATE_INIT_ADD(SQSTR)
+	
 	if (init_isql_module())
 	{
 		return SUCCESS;

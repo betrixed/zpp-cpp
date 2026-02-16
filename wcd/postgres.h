@@ -14,15 +14,7 @@ namespace wcd {
 	using namespace zpp;
 	using namespace wcc;
 
-	class PGSInit : public state_init {
 
-	public:
-		str_intern  rex_pgname;
-		
-
-		void init() override;
-
-	};
 
 
 	class Postgres : public ISql {
@@ -45,6 +37,18 @@ namespace wcd {
 
 		
 	};
+
+	class PGSInit : public state_init {
+
+	public:
+		str_intern  rex_pgname;
+	
+
+		void init() override;
+
+	};
+
+	extern PGSInit PGSd;
 
 };
 #endif

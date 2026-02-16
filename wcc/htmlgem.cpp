@@ -2038,6 +2038,8 @@ PHP_MINIT_FUNCTION(Wcc_HtmlGem_reg)
 
 	HtmlGem::omg.classEntry(ce);
 
+	STATE_INIT_ADD(HTG)
+	
 	return SUCCESS;
 }
 

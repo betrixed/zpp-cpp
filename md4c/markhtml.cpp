@@ -257,6 +257,8 @@ PHP_MINIT_FUNCTION(Wcc_MarkToHtml_reg)
     //zend_printf("register\n");
     MarkToHtml::omg.classEntry(register_class_Wcc_MarkToHtml());
 
+    STATE_INIT_ADD(MTH)
+    
     return SUCCESS;
 }
 

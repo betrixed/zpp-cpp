@@ -389,6 +389,8 @@ PHP_MINIT_FUNCTION(wcc_target)
 	zend_class_entry *ce = register_class_Wcc_Target();
 	Target::omg.classEntry(ce);
 	
+	STATE_INIT_ADD(target_data)
+	
 	return SUCCESS;
 
 }

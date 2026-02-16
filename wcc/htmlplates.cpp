@@ -306,6 +306,8 @@ PHP_MINIT_FUNCTION(Wcc_HtmlPlates_reg)
 
 	HtmlPlates::omg.classEntry(ce);
 
+	STATE_INIT_ADD(HPit)
+	
 	return SUCCESS;
 }
 

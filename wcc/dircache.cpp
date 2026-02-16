@@ -5,6 +5,10 @@
 #include "dircache.h"
 #endif
 
+#ifndef FN_CALL_H
+#include "zpp/fn_call.h"
+#endif
+
 
 #ifndef DIR_CACHE_ARGINFO
 #define DIR_CACHE_ARGINFO
@@ -354,7 +358,7 @@ val_rc
 DirCache::getCached(str_ptr key)
 {
 	val_rc result;
-
+	
 	if (keep_local_)
 	{
 		result = ICache::getCached(key);
@@ -462,6 +466,8 @@ DirCache::get(str_ptr key, val_ptr noval)
 {
 	val_rc result;
 
+	showstr("get key", key);
+
 	val_rc dataobj = this->getCached(key);
 
 	if (dataobj.isObject())
@@ -511,7 +517,7 @@ bool DirCache::writePkg(obj_ptr pkg)
 
 	size_t plen = sbin.size();
 
-	val_rc fout = fopen(file_name, SFDi.fmode_w);
+	val_rc fout = zpp::fopen(file_name, SFDi.fmode_w);
 
 	str_buf buf;
 	buf << expiry << endl;

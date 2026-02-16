@@ -84,31 +84,32 @@ return [
         ],
         
         /*
-         * Postgresql install on debian. (now version 14)
+         * Postgresql install on debian. (now version 18)
          * sudo su - postgres
          * createuser testuser
-         * createdb  testzo
+         * createdb  dbtestuser
          * psql
-         * GRANT ALL PRIVILEGES ON DATABASE testzo to testuser;
+         * GRANT ALL PRIVILEGES ON DATABASE dbtestuser TO testuser;
          * ALTER ROLE testuser WITH PASSWORD 'y0ghurt+';
          * \q
          * 
          */
         'pg1' => [
-            'password' => '',
             'driver' => 'pdo_pgsql',
-            'database' => 'database-testuser',
-            'username' => 'testuser',
             'host' => 'localhost',
-            'charset' => 'UTF8'
+            'charset' => 'UTF8',
+             'database' => 'phpunit',
+            'username' => 'phpunit',
+            'password' => 'whatsUpDoc'
         ],
         'pgfo' => [
             'password' => '',
             'driver' => 'pgfo',
-            'database' => 'database-testuser',
-            'username' => 'testuser',
             'host' => 'localhost',
-            'charset' => 'UTF8'
+            'charset' => 'UTF8',
+            'database' => 'phpunit',
+            'username' => 'phpunit',
+            'password' => 'whatsUpDoc'
         ],
         
         /*

@@ -151,6 +151,8 @@ Postgres::register_class(zend_class_entry* isql_class)
 {
 	zend_class_entry* me =  register_class_Wcd_Sql_Postgres(isql_class);
 	Postgres::omg.classEntry(me);
+
+	STATE_INIT_ADD(PGSd)
 	return me;
 }
 

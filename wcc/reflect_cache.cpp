@@ -349,6 +349,8 @@ PHP_MINIT_FUNCTION(Wcc_ReflectCache)
 
 	ReflectCache::omg.classEntry(ce);
 
+	STATE_INIT_ADD(RFC_data)
+	
 	return SUCCESS;
 }
 

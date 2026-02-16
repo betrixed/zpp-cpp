@@ -52,6 +52,9 @@ using namespace zpp;
 
 base_obj_mgr<Run> Run::omg;
 
+Run_init Run_i;
+
+
 
 void Run_init::init()
 {
@@ -130,12 +133,8 @@ void Run_init::init()
 
 	user_session = "user_session";
 	is_ended = "isended";
-
-	//state_init::init();
 }
 
-
-Run_init Run_i;
 
 
 void Run::construct()
@@ -681,6 +680,8 @@ ZEND_METHOD(Wcc_Run, shutdown)
 PHP_MINIT_FUNCTION(wcc_run_reg)
 {
 	Run::omg.classEntry(register_class_Wcc_Run());
+
+	STATE_INIT_ADD(Run_i)
 	return SUCCESS;
 }
 

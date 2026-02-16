@@ -777,9 +777,13 @@ PHP_MINIT_FUNCTION(Wcc_ICache_reg)
 
 	ICache::omg.classEntry(ce);
 
+	STATE_INIT_ADD(IC_STR)
+	
 #ifdef DIR_CACHE_CPP
 	DirCache::register_class(ce);
+	STATE_INIT_ADD(SFDi)
 #endif
+
 	return SUCCESS;
 }
 

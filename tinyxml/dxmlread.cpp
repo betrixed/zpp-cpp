@@ -1095,13 +1095,11 @@ PHP_MINIT_FUNCTION(Wcc_XmlRead_reg)
 
 	Wcc_XmlRead::omg.classEntry(ce);
 
+	STATE_INIT_ADD(XML_FNS)
+	
 	return SUCCESS;
 }
 
-PHP_MSHUTDOWN_FUNCTION(Wcc_XmlRead_d)
-{
 
-	return SUCCESS;
-}
 //xmlread.cpp
 #endif

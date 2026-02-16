@@ -66,13 +66,13 @@ protected:
 	htab_rc cfg_;
 	str_rc mykey_;
 
-
 };
 
-class CfgInit : public state_init {
+class CfgInit : public zpp::state_init {
 public:
-	CfgInit();
 
+	CfgInit() : zpp::state_init() {}
+	
 	str_intern msg_or;
 	str_intern k_driver;
 	str_intern k_host;
