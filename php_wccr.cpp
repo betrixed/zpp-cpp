@@ -6,30 +6,24 @@
 
 #include "php_wccr.h"
 
-#include "zpp/base.h"
 #include "zpp/show_zpp.h"
+
+zpp::state_list  STATE_LIST_NAME("wccr");
 
 // compile in binary
 
 #include "wcc/finder.cpp"
 #include "wcc/loader.cpp"
 
-//#include "wcc/reflect_cache.cpp"
-//#include "wcc/services.cpp"
 #include "wcc/service_access.cpp"
 
 #include "wcc/hmap.cpp"
-//#include "wcc/replace.cpp"
-
 
 #include "wcc/icachedata.cpp"
 #include "wcc/dircache.cpp"
-// ICache handles registration
+
 #include "wcc/icache.cpp"
-
-
 #include "wcc/cachemgr.cpp"
-
 
 #include "wcc/file_upload.cpp"
 #include "wcc/global_response.cpp"
@@ -107,8 +101,15 @@ PHP_MINIT(wcc_pair_d)(INIT_FUNC_ARGS_PASSTHRU);
 #ifdef WCC_CACHEMGR_CPP
 	PHP_MINIT(Wcc_CacheMgr_reg)(INIT_FUNC_ARGS_PASSTHRU);
 #endif
+	STATE_MOD_INIT
+
+	return SUCCESS;
+}
 
 
+PHP_MSHUTDOWN_FUNCTION(wccr)
+{
+	STATE_MOD_END
 
 	return SUCCESS;
 }
@@ -116,13 +117,24 @@ PHP_MINIT(wcc_pair_d)(INIT_FUNC_ARGS_PASSTHRU);
 /* {{{ PHP_RINIT_FUNCTION */
 PHP_RINIT_FUNCTION(wccr)
 {
+
 #if defined(ZTS) && defined(COMPILE_DL_WCCR)
 	ZEND_TSRMLS_CACHE_UPDATE();
 #endif
 
+	STATE_REQ_INIT
+
 	return SUCCESS;
 }
-/* }}} */
+
+
+PHP_RSHUTDOWN_FUNCTION(wccr)
+{
+	STATE_REQ_END
+
+	return SUCCESS;
+}
+
 
 /* {{{ PHP_MINFO_FUNCTION */
 PHP_MINFO_FUNCTION(wccr)
@@ -147,9 +159,9 @@ zend_module_entry wccr_module_entry = {
 	"wccr",						/* Extension name */
 	nullptr,					/* zend_function_entry */
 	PHP_MINIT(wccr),			/* PHP_MINIT - Module initialization */
-	nullptr,					/* PHP_MSHUTDOWN - Module shutdown */
+	PHP_MSHUTDOWN(wccr),					/* PHP_MSHUTDOWN - Module shutdown */
 	PHP_RINIT(wccr),			/* PHP_RINIT - Request initialization */
-	nullptr,					/* PHP_RSHUTDOWN - Request shutdown */
+	PHP_RSHUTDOWN(wccr),					/* PHP_RSHUTDOWN - Request shutdown */
 	PHP_MINFO(wccr),			/* PHP_MINFO - Module info */
 	PHP_WCCR_VERSION,		/* Version */
 	STANDARD_MODULE_PROPERTIES
