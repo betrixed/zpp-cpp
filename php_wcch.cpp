@@ -8,7 +8,6 @@
 
 #include "php_wcch.h"
 
-#include "zpp/base.h"
 #include "zpp/show_zpp.h"
 
 // compile 
@@ -28,9 +27,11 @@
 	ZEND_PARSE_PARAMETERS_END()
 #endif
 
+zpp::state_list  STATE_LIST_NAME("wcch");
 
 PHP_MINIT_FUNCTION(wcch)
 {
+
 #ifdef WCC_ASSETS_CPP
 	PHP_MINIT(wcc_assets_reg)(INIT_FUNC_ARGS_PASSTHRU);
 #endif
@@ -54,6 +55,15 @@ PHP_MINIT_FUNCTION(wcch)
 	PHP_MINIT(Wcc_MarkToHtml_reg)(INIT_FUNC_ARGS_PASSTHRU);
 #  endif
 	
+	STATE_MOD_INIT
+
+	return SUCCESS;
+}
+
+PHP_MSHUTDOWN_FUNCTION(wcch)
+{
+	STATE_MOD_END
+
 	return SUCCESS;
 }
 
@@ -64,9 +74,18 @@ PHP_RINIT_FUNCTION(wcch)
 	ZEND_TSRMLS_CACHE_UPDATE();
 #endif
 
+	STATE_REQ_INIT
+
 	return SUCCESS;
 }
-/* }}} */
+
+PHP_RSHUTDOWN_FUNCTION(wcch)
+{
+	STATE_REQ_END
+
+	return SUCCESS;
+}
+
 
 /* {{{ PHP_MINFO_FUNCTION */
 PHP_MINFO_FUNCTION(wcch)
@@ -90,9 +109,9 @@ zend_module_entry wcch_module_entry = {
 	"wcch",					/* Extension name */
 	nullptr,					/* zend_function_entry */
 	PHP_MINIT(wcch),							/* PHP_MINIT - Module initialization */
-	NULL,							/* PHP_MSHUTDOWN - Module shutdown */
+	PHP_MSHUTDOWN(wcch),							/* PHP_MSHUTDOWN - Module shutdown */
 	PHP_RINIT(wcch),			/* PHP_RINIT - Request initialization */
-	NULL,							/* PHP_RSHUTDOWN - Request shutdown */
+	PHP_RSHUTDOWN(wcch),							/* PHP_RSHUTDOWN - Request shutdown */
 	PHP_MINFO(wcch),			/* PHP_MINFO - Module info */
 	PHP_WCCH_VERSION,		/* Version */
 	STANDARD_MODULE_PROPERTIES
