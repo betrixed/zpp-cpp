@@ -43,10 +43,15 @@ namespace zpp {
 		str_intern from_string;
 		str_intern date_string;
 		str_intern now_format;
+
+
+
 	};
 
 	extern Date_init DTData;
 
+	void   register_datetime();
+	
 	/** 
 	@class timezone_obj
 	@brief Wrapper for zend_object which is a DateTimeZone

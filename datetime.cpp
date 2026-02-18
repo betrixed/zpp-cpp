@@ -30,6 +30,11 @@ namespace zpp {
 
 Date_init DTData;
 
+void   register_datetime()
+{
+	STATE_INIT_ADD(DTData);
+}
+
 void Date_init::init()
 {
 	strtotime = "strtotime";

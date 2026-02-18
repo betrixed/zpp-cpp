@@ -92,6 +92,7 @@ namespace zpp {
         //! must call only once for each call setup.
         //! 
         zval* argsptr() { wipe(); return fci_.params; }
+        void debug_dump();
     };
 /**
     @class  fn_call_args
@@ -256,7 +257,8 @@ namespace zpp {
         val_rc call(zval* arg1, zval* arg2);
     };
 
-    
+    void register_fn_calls();
+
     /** 
      *  zend_string passed to set_fname
      *  MUST be defined prior to the fci_args
@@ -314,6 +316,8 @@ namespace zpp {
         
         void init() override;
         void init_req() override;
+
+
     };
 
     class strtable : public state_init {
@@ -452,6 +456,7 @@ namespace zpp {
     val_rc unserialize(str_ptr data, htab_ptr options = htab_ptr());
 
     str_rc sha1(str_ptr value, bool binary = false);
+
 
 
 }; // end namespace zpp

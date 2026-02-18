@@ -29,6 +29,12 @@ namespace zpp {
 fntable FTAB;
 strtable STAB;
 
+void register_fn_calls()
+{
+
+    STATE_INIT_ADD(FTAB);
+    STATE_INIT_ADD(STAB);
+}
 
 class fn_weakref_create : public fn_call_args<1>
 {
@@ -242,6 +248,25 @@ fn_call::set_fci(zend_object* obj, str_ptr method, HashTable* nargs)
     fci_.named_params = nargs; 
 }
 
+void fn_call::debug_dump()
+{
+    zend_printf("fci_.size %ld\n", fci_.size);
+    showobj("fci_.object", fci_.object);
+    showmem("fci_.function_name", &fci_.function_name);
+    zend_printf("param_count %d, params %lx\n", fci_.param_count, (unsigned long) fci_.params);
+
+    /*zend_function *function_handler;
+    zend_class_entry *calling_scope;
+    zend_class_entry *called_scope;
+    zend_object *object; // Instance of object for method calls 
+    zend_object *closure; // Closure reference, only if the callable *is* the object
+    */
+    zend_printf("function_handler %lx\n", (unsigned long)cache_.function_handler);
+    zend_printf("calling_scope %lx\n", (unsigned long)cache_.calling_scope);
+    zend_printf("called_scope %lx\n", (unsigned long)cache_.called_scope);
+    zend_printf("object %lx\n", (unsigned long)cache_.object);
+    zend_printf("closure %lx\n", (unsigned long)cache_.closure);
+}
 void 
 fn_call::set_obj(zend_object* obj)
 {

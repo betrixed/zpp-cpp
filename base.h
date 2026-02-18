@@ -63,6 +63,17 @@
 
 namespace zpp {
 
+	class base_init : public state_init {
+	public:
+
+		str_intern class_name;
+
+		void init() override;
+		
+	};
+
+	extern base_init BI_str;
+	void register_base_init();
 	/**
 	 * All base_d objects add a memory overhead - 3 x pointers 
 	 * There is

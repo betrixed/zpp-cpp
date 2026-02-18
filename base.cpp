@@ -46,19 +46,18 @@
 
 namespace zpp {
 
-class base_init : public state_init {
-public:
-
-	str_intern class_name;
-
-	void init() override
-	{
-		class_name = "class";
-	}
-};
-
 base_init BI_str;
 
+void 
+base_init::init()
+{
+	class_name = "class";
+}
+
+void register_base_init()
+{
+	STATE_INIT_ADD(BI_str);
+}
 	 void //virtual
 	 base_d::debug_info(htab_rw di)
 	 {
@@ -89,9 +88,6 @@ base_init BI_str;
 
 	 mgr_link* mgr_link::l_start_ = nullptr;
 	 mgr_link* mgr_link::l_end_ = nullptr;
-	
-
-
 
 };//namespace
 
