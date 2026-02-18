@@ -382,7 +382,11 @@ using namespace zpp;
 
 			for(wk.start(dirty); wk.ok(); wk.next())
 			{
-				bind.update(cvalue, rowobj->get(cvalue));
+				
+				val_rc uvalue = rowobj->get(cvalue);
+
+				bind.update(cvalue, uvalue);
+
 			}
 
 			htab_rc ts = rowobj->stampTime(now(), Model::UPDATE_TS);
@@ -406,11 +410,12 @@ using namespace zpp;
 
 			ParamList* plist = zobj_toc<ParamList>(plist_mgr.value_);
 
-			str_ptr sql(plist->getSql());
-			htab_ptr params(plist->getValues());
 			obj_return db = getDb();
 
-			result = RunSql::op(db.value_, sql, params);
+			result = RunSql::op(db.value_, plist->getSql(), plist->getValues());
+		}
+		else {
+			result.error() << "No field requires update";
 		}
 
 		return result;
@@ -624,6 +629,41 @@ using namespace zpp;
 		val_rc a2;
 
 		bind.limit(a1, a2);
+
+		val_rc order = bind.get(ISql::SQL_ORDER);
+
+		if (order.isNull())
+		{
+			htab_rc orderkeys;
+
+			if (model_.ok())
+			{
+				Model* m = zobj_toc<Model>(model_);
+
+				htab_return pkey = m->getPKey();
+				if (pkey.has_errors())
+				{
+					result = pkey.move_error();
+					return result;
+				}
+				orderkeys = pkey.value_;
+			}
+			else {
+				val_rc namelist = bind.get(ISql::NAME_LIST);
+				if (namelist.isArray())
+				{
+					orderkeys = namelist.zarray();
+				}
+			}
+			if (orderkeys.size())
+			{
+				for_key_value wk;
+				for(wk.start(orderkeys); wk.ok(); wk.next())
+				{
+					bind.orderBy(wk.value());
+				}
+			}
+		}
 		result = bind.select();
 
 		if (result.has_errors())
@@ -637,7 +677,7 @@ using namespace zpp;
 			htab_ptr rdata(data);
 			if (rdata.size())
 			{
-				result.value_ =rdata.get(int(0));
+				result.value_ = rdata.get(int(0));
 			}
 			else {
 				result.value_.set_null();

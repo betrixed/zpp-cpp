@@ -668,9 +668,6 @@ Bindings::select()
 	{
 		old_fetch = db.setFetch(fetch_as);
 	}
-
-	
-
 	val_return rows_ret = RunSql::op(obj_ptr(db.vobj()), pobj->getSql(), pobj->getValues(), true);
 
 	if (fetch_as != old_fetch)
@@ -678,14 +675,15 @@ Bindings::select()
 		db.setFetch(old_fetch);
 	}
 
-	
-
 	if (rows_ret.has_errors())
 	{
 		result = std::move(rows_ret);
 		return result;
 	}
+
 	val_rc& rows = rows_ret.value_;
+
+
 	str_rc mclass;
 
 	val_rc model_mgr = get(ISql::MODEL_OBJ);
@@ -715,6 +713,7 @@ Bindings::select()
 				model = ReflectCache::staticInstance(mclass);
 			}
 			//showobj("static model obj ", model);
+
 			Model* m = zobj_toc<Model>(model);
 			result.value_ = (zend_object*) m->newRow(hr.get((int)0), true);
 			return result;

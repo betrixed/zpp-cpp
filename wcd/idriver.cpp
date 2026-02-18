@@ -475,6 +475,7 @@ IDriver::execute(val_ptr stmt, bool close, bool fetch)
 		}
 	}
 	else {
+		result.error() << "PDO Execute failure";
 		result.value_.set_bool(false);
 	}
 

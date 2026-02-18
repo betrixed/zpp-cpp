@@ -1073,7 +1073,7 @@ namespace wcd {
 		obj_return build_ret = getBuilderForMe();
 		if (build_ret.has_errors())
 		{
-			result = std::move(build_ret);
+			result = build_ret.move_error();
 			return result;
 		}
 
@@ -1090,7 +1090,7 @@ namespace wcd {
 		htab_return pk_ret = getPKey();
 		if (pk_ret.has_errors())
 		{
-			result = std::move(pk_ret);
+			result = pk_ret.move_error();
 			return result;
 		}
 
@@ -1105,7 +1105,7 @@ namespace wcd {
 		if (wasRead) 
 		{
 			// update operation
-			//zend_printf("save-update\n");
+
 			if (pkey.size() == 0)
 			{
 				result.error() << "Update call has no primary key";
@@ -1126,13 +1126,14 @@ namespace wcd {
 
 			if (check.has_errors())
 			{
-				result = std::move(check);
+				result = check.move_error();
 				return result;
 			}
 			vret = ibuild->update(irow, dirty);
+			
 			if (vret.has_errors())
 			{
-				result = std::move(vret);
+				result = vret.move_error();
 				return result;
 			}
 		}
