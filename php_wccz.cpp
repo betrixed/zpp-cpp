@@ -52,7 +52,12 @@ PHP_MINIT(Wcc_ReflectCache)(INIT_FUNC_ARGS_PASSTHRU);
 	PHP_MINIT(Strfns_reg)(INIT_FUNC_ARGS_PASSTHRU);
 #endif
 
+	register_base_init();
+	register_fn_calls();
+	register_datetime();
+	
 	STATE_MOD_INIT
+
 
 	return SUCCESS;
 }
