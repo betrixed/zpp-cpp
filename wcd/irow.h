@@ -93,7 +93,8 @@ namespace wcd {
 
     	void setExists();
 
-    	htab_rc stampTime(str_ptr value, int dtflags = Model::ALL_TS);
+    	htab_rc stampTime(str_ptr value, 
+    		int dtflags = Model::ALL_TS);
 
 	};
 

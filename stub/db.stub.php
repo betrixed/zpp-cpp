@@ -15,7 +15,7 @@ class IDriver {
 
     public function begin(): bool {}
 
-    public function bind(mixed $stmt, array $params) : mixed {}
+    public function bind(mixed $stmt, array $params) : void {}
 
     public function close() : void {}
 

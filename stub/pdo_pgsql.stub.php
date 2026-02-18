@@ -3,10 +3,11 @@
  * @generate-class-entries
  * @undocumentable
  */
-namespace Wcd;
+namespace Wcd\Ext;
 
-class PdoPgsql extends IDriver {
-
+class PdoPgsql extends \Wcd\IDriver {
+	const string QUOTE_CHARACTER = "\"";
+    const int DEFAULT_PORT = 5432;
 	/** functions which are overrridden by C++ implementation. */
 
 	

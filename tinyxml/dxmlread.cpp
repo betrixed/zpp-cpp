@@ -613,6 +613,8 @@ Wcc_XmlRead::makeClass(str_ptr classname)
 {
 	obj_return result;
 
+	//showstr("in makeClass - ", classname);
+
 	str_rc cname;
 	if (class_replace_.size())
 	{
@@ -623,7 +625,7 @@ Wcc_XmlRead::makeClass(str_ptr classname)
 	{
 		cname = classname;
 	}
-
+	//showstr("makeClass", cname);
 	result.value_ = ReflectCache::staticInstance(cname);
 	if (!result.value_.ok())
 	{
@@ -646,6 +648,7 @@ Wcc_XmlRead::pushClass(str_ptr classname, str_ptr key)
 
 	auto& fn = mkclass_fn_;
 	ZVAL_STR(fn.argsptr(), classname); 
+	//fn.debug_dump();
 	val_rc newroot = fn.call_fn();
 	//showmem("newclass", newroot);
 
@@ -780,7 +783,9 @@ void Wcc_XmlRead::setValue(val_ptr value,  str_ptr key)
 	}
 	DStack *ds = top_;
 
-	//zend_printf("Stacked %d at %lx, kind %d\n", ix, ds, ds->kind_);
+	//showstr("setValue key", key);
+	//showmem("value", value);
+	//zend_printf("Stacked %d kind %d\n",  ix, ds->kind_);
 	val_ptr  ref(ds->ref_);
 	
 
@@ -792,9 +797,12 @@ void Wcc_XmlRead::setValue(val_ptr value,  str_ptr key)
 				throwNoKey();
 			}
 			obj_ptr obj(ref.zobject());
+			//showobj("object: ", obj);
 			// property style set
 
 			obj.property(key, value); 
+
+
 			// this is the last time this pvalue is seen, after being
 			// referenced in the property.
 			// dereference now?
@@ -810,7 +818,7 @@ void Wcc_XmlRead::setValue(val_ptr value,  str_ptr key)
 		break;
 	case XC_TABLE: // current anchor is  Array using associative keys
 		{
-			//showstr("set array key", key);
+
 			if (!key.ok()) 
 			{
 				throwNoKey();
@@ -818,7 +826,7 @@ void Wcc_XmlRead::setValue(val_ptr value,  str_ptr key)
 			
 			htab_rw hw(ref);
 			
-			//showmem("value", value);
+			
 
 			hw.set(key, value);
 			//showarray("set array ht", hw);
@@ -1064,6 +1072,8 @@ ZEND_METHOD(Wcc_XmlRead, makeClass)
 
 	str_ptr cname = args.str(args.need(0));
 	obj_return result;
+
+	//showstr("makeClass method", cname);
 	if (!args.throw_errors())
 	{
 		auto cobj = zval_toc<Wcc_XmlRead>(ZEND_THIS);

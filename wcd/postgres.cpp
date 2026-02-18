@@ -34,6 +34,31 @@ Postgres::Postgres()
 }
 
 str_rc 
+Postgres::quoteAlways(str_ptr name)
+{
+	str_rc result;
+	if (name.ok())
+	{
+		const char* z0 = name.data();
+
+		switch(*z0)
+		{
+		case '*':
+		case '"':
+			result = name;
+			break;
+		default:
+			{
+				str_buf buf;
+				buf << '"' << name << '"';
+				result = buf.zstr();
+			}
+		}
+	}
+	return result;
+}
+
+str_rc 
 Postgres::quoteName(str_ptr name)
 {
 	str_rc result;

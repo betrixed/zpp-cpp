@@ -20,6 +20,11 @@ zend_class_entry* 	zintf_ce_Sql_IfSql;
 zend_class_entry* 	zclass_isql;
 
 
+str_rc ISql::quoteAlways(str_ptr name)
+{
+	return quoteName(name);
+}
+
 str_rc
 ISql::quoteName(str_ptr name)
 {
@@ -1502,17 +1507,39 @@ ZEND_METHOD(Wcd_Sql_ISql, insert)
 }
 
 /* public function quoteName(string $name): string {} */
+ZEND_METHOD(Wcd_Sql_ISql, quoteAlways)
+{
+	str_ptr name;
+	str_rc  result;
+	zarg_rd args(execute_data);
+
+	name = args.str(args.need(0));
+
+	if (!args.throw_errors())
+	{
+		ISql* cobj = zval_toc<ISql>(ZEND_THIS);
+		result = cobj->quoteAlways(name);
+	}
+
+	result.move_zv(return_value);
+}
+
+/* public function quoteName(string $name): string {} */
 ZEND_METHOD(Wcd_Sql_ISql, quoteName)
 {
-	zend_string* name;
-	ZEND_PARSE_PARAMETERS_START(1,1)
-	Z_PARAM_STR(name)
-	ZEND_PARSE_PARAMETERS_END();
+	str_ptr name;
+	str_rc  result;
+	zarg_rd args(execute_data);
 
-	ISql* cobj = zval_toc<ISql>(ZEND_THIS);
+	name = args.str(args.need(0));
 
-	str_rc qname = cobj->quoteName(name);
-	qname.move_zv(return_value);
+	if (!args.throw_errors())
+	{
+		ISql* cobj = zval_toc<ISql>(ZEND_THIS);
+		result = cobj->quoteName(name);
+	}
+
+	result.move_zv(return_value);
 }
 
 /* public function select(Bindings $bind) : ParamList {} */

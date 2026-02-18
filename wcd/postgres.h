@@ -31,6 +31,7 @@ namespace wcd {
 		static base_obj_mgr<Postgres> omg;
 		static zend_class_entry* register_class(zend_class_entry* isql_class);
 
+		str_rc quoteAlways(str_ptr name) override;
 		str_rc quoteName(str_ptr name) override;
 		str_rc seqLastValue(str_ptr seqname) override;
 		str_return truncate(Bindings& bind)  override;

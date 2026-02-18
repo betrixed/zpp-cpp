@@ -247,11 +247,16 @@ using namespace zpp;
 
 			IRow* irow = zobj_toc<IRow>(row_mgr);
 			obj_ptr model_mgr = irow->getModel();
+			//showobj("model insert", model_mgr);
 
 			Model* model = zobj_toc<Model>(model_mgr);
 
+			//showobj("isql_", isql_);
+
 			if (model->hasTimeStamps()) {
-				timeStamps = irow->stampTime(now());
+				//zend_printf("stampTime\n");
+				str_rc ntime = now();
+				timeStamps = irow->stampTime(ntime);
 			}
 
 			if (is_multiple) {
@@ -273,9 +278,13 @@ using namespace zpp;
 			else {
 				// already stamped time.
 				temp = irow->getData();
+				//showmem("temp", temp);
 				bind.addarray(ISql::SQL_INSERT, temp);
 			}
+
+
 			obj_return plist_mgr = isql().insert(bind);
+
 			if (plist_mgr.has_errors())
 			{
 				result = std::move(plist_mgr);
@@ -777,14 +786,14 @@ using namespace zpp;
 
 		if (sql.has_errors())
 		{
-			result = std::move(sql);
+			result = sql.move_error();
 			return result;
 		}
 		obj_return db = getDb();
 
 		if (db.has_errors())
 		{
-			result = std::move(db);
+			result = sql.move_error();
 			return result;
 		}
 

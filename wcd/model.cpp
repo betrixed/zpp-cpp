@@ -74,6 +74,9 @@ namespace wcd {
 			k_tdef = "table_def";
 			k_buildme = "build_me";
 			k_driver = "driver";
+
+			k_table = "table";
+			k_field = "field";
 		}
 	Model::Model() : base_d()
 	{
@@ -237,6 +240,26 @@ namespace wcd {
 	Model::updatedAtName()
 	{
 		return MIS.k_updated_at;
+	}
+
+	obj_return
+	Model::getBuilder()
+	{
+		obj_return result;
+
+		if (!builder_.ok())
+		{
+			obj_return db_mgr = getConnect();
+			if (db_mgr.has_errors())
+			{
+				result = std::move(db_mgr);
+				return result;
+			}
+			IDriver* db = zobj_toc<IDriver>(db_mgr.value_);
+			builder_ = db->newDmlBuild();
+		}
+		result.value_ = builder_;
+		return result; 
 	}
 
 	obj_return
@@ -851,7 +874,12 @@ namespace wcd {
 
 			if (seq_defs.size())
 			{
-				m->sequenceMax();
+				error_return test = m->sequenceMax();
+				if (test.has_errors())
+				{
+					result = test.move_error();
+					return result;
+				}
 			}
 
 			driver->commit();
@@ -859,6 +887,72 @@ namespace wcd {
 
 		}
 		result.value_ = datarowct+1;
+		return result;
+	}
+
+	error_return 
+	Model::sequenceMax()
+	{
+		error_return result;
+
+		htab_return sdef_ret = getSeqDefs();
+		if (sdef_ret.has_errors())
+		{
+			result = sdef_ret.move_error();
+			return result;
+		}
+		obj_return builder = getBuilder();
+		if (builder.has_errors())
+		{
+			result = builder.move_error();
+			return result;
+		}
+		str_rc tname = getName();
+		IBuild* bd = zobj_toc<IBuild>(builder_);
+		bd->table(tname, true);
+		htab_walk wk;
+		auto skey = wk.key(); // val_ptr
+		auto sname = wk.value();
+
+		str_rc max_s("MAX");
+		for(wk.start(sdef_ret.value_); wk.ok(); wk.next())
+		{
+			str_ptr seqfield = skey.zstr();
+			htab_rc hcolumn;
+			htab_rw hcol(hcolumn);
+			hcol.push_back(seqfield);
+
+			val_return max = bd->aggregate(max_s,hcolumn);
+			if (max.has_errors())
+			{
+				result = max.move_error();
+				return result;
+			}
+			val_return sval  = bd->seqLastValue(sname);
+			if (sval.has_errors())
+			{
+				result = sval.move_error();
+				return result;
+			}
+
+			long maxseqval = max.value_.zlong();
+			long actualval = sval.value_.zlong();
+			if (maxseqval > actualval)
+			{
+				htab_return options = getKeyOptions();
+				if (options.has_errors())
+				{
+					result = options.move_error();
+					return result;
+				}
+				htab_rc data = options.value_.get(seqfield);
+				htab_rw seqdata(data);
+				
+				seqdata.set(MIS.k_field, seqfield);
+				seqdata.set(MIS.k_table, tname);
+				bd->setSeqValue(maxseqval, data);
+			}
+		}
 		return result;
 	}
 
@@ -883,7 +977,7 @@ namespace wcd {
 			return result;
 		}
 
-		showobj("db_ret", db_ret.value_);
+		//showobj("db_ret", db_ret.value_);
 
 		IDriver* db = zobj_toc<IDriver>(db_ret.value_);
 

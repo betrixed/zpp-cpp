@@ -297,7 +297,9 @@ IDriver::close()
 str_rc 
 IDriver::getSqlType()
 {
-	return DBS.mysql_str;
+	str_rc result;
+	result = DBS.mysql_str;
+	return result;
 }
 
 bool 
@@ -756,7 +758,11 @@ IDriver::setFetch(int mode)
 str_rc 
 IDriver::getSchemaClass()
 {
-	str_rc stype = getSqlType();
+	IDriver* vp = this;
+
+	str_rc stype = vp->getSqlType();
+	showstr("sql type is ", stype);
+
 	stype = stype.ucfirst();
 	str_buf buf;
 
@@ -1661,14 +1667,13 @@ PHP_MINIT_FUNCTION(Wcd_IDriver_reg)
 	zend_class_entry* dclass = register_class_Wcd_IDriver();
 
 	IDriver::omg.classEntry(dclass);
-	Pdo_pgsql::register_class(dclass);
-
-
 	class_data cval(IDriver::omg.class_entry_);
 
 	cval.add_constant("FETCH_OBJECT", PDO_FETCH_OBJ);
 	cval.add_constant("FETCH_ASSOC", PDO_FETCH_ASSOC);
 	cval.add_constant("FETCH_NUM", PDO_FETCH_NUM);
+	cval.add_constant("FETCH_COLUMN", PDO_FETCH_COLUMN);
+	Pdo_pgsql::register_class(dclass);
 
 	STATE_INIT_ADD(DBS)
 

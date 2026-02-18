@@ -28,6 +28,7 @@ namespace wcd {
 			FETCH_OBJECT = PDO_FETCH_OBJ,
 			FETCH_ASSOC = PDO_FETCH_ASSOC,
 			FETCH_NUM = PDO_FETCH_NUM,
+			FETCH_COLUMN = PDO_FETCH_COLUMN
 		};
 
 		static base_obj_mgr<IDriver> omg;
@@ -41,7 +42,8 @@ namespace wcd {
 		virtual htab_rc getConnectOptions();
 		virtual htab_return getTableNames();
 		virtual val_return lastSeqValue(str_ptr name);
-		
+		virtual str_rc getSchemaClass();
+
 		static int pdo_type(unsigned int ztype);
 		
 		bool begin();
@@ -79,7 +81,7 @@ namespace wcd {
 		int getFetch();
 
 		obj_rc getSchema();
-		str_rc getSchemaClass();
+		
 		htab_return getTableColumns(str_ptr tableName);
 		obj_rc getTableMode(str_ptr tableName);
 

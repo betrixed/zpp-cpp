@@ -29,7 +29,23 @@ void PGInit::init()
 str_rc 
 Pdo_pgsql::getSqlType() 
 {
-	return PGIs.pgsql_s;
+	str_rc result;
+	result = PGIs.pgsql_s;
+	return result;
+}
+
+str_rc 
+Pdo_pgsql::getSchemaClass()
+{
+	str_rc stype = getSqlType();
+	showstr("Pdo_pgsql sqltype is ", stype);
+
+	stype = stype.ucfirst();
+	str_buf buf;
+
+	buf << "Wcd\\Schema\\" << stype << "\\Dump";
+
+	return buf.zstr();
 }
 
 htab_return 
@@ -46,7 +62,7 @@ Pdo_pgsql::getTableNames()
 		result = std::move(pstmt);
 	}
 	else { 
-		result = IDriver::fetchAllRows(pstmt.value_, IDriver::FETCH_NUM);
+		result = fetchAllRows(pstmt.value_, IDriver::FETCH_COLUMN);
 	}
 	return result;
 }
@@ -71,7 +87,7 @@ Pdo_pgsql::lastSeqValue(str_ptr name)
 zend_class_entry* 
 Pdo_pgsql::register_class(zend_class_entry* pclass)
 {
-	zend_class_entry* me = register_class_Wcd_PdoPgsql(pclass);
+	zend_class_entry* me = register_class_Wcd_Ext_PdoPgsql(pclass);
 	Pdo_pgsql::omg.classEntry(me);
 
 	STATE_INIT_ADD(PGIs)

@@ -72,6 +72,8 @@ namespace wcd {
 
 		virtual str_rc quoteName(str_ptr name);
 
+		virtual str_rc quoteAlways(str_ptr name);
+		
 		virtual str_rc seqLastValue(str_ptr seq);
 
 		virtual str_return truncate(Bindings& bind);

@@ -466,7 +466,7 @@ DirCache::get(str_ptr key, val_ptr noval)
 {
 	val_rc result;
 
-	showstr("get key", key);
+	//showstr("get key", key);
 
 	val_rc dataobj = this->getCached(key);
 

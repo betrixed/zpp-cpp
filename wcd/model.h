@@ -116,7 +116,7 @@ public:
 
 	bool_return exists(obj_ptr rowobj);
 
-	void sequenceMax();
+	error_return sequenceMax();
 
 	bool_return saveRow(obj_ptr irow, bool reload = false);
 
@@ -183,6 +183,9 @@ public:
 		str_intern k_buildme;
 		str_intern k_driver;
 
+		str_intern k_table;
+		str_intern k_field;
+		
 		void init() override;
 
 	};

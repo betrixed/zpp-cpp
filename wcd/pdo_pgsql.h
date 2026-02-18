@@ -17,6 +17,7 @@ namespace wcd {
 		static zend_class_entry* register_class(zend_class_entry* pclass);
 		
 		str_rc getSqlType() override;
+		str_rc getSchemaClass() override;
 		htab_return getTableNames() override;
 		val_return  lastSeqValue(str_ptr name) override;
 	};

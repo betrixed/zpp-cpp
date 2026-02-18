@@ -98,17 +98,11 @@ IServer::construct(str_ptr svckey)
 	
 
 	htab_rw sw(sqlClasses_);
-	showarray("sqlClasses_", sqlClasses_);
-	sw.set(ISV.pdo_mysql, ISV.wcd_sql_mysql);
-	showarray("sqlClasses_", sqlClasses_);
-	sw.set(ISV.pdo_pgsql, ISV.wcd_sql_postgres);
-	showarray("sqlClasses_", sqlClasses_);
-	sw.set(ISV.pdo_sqlite, ISV.wcd_sql_sqlite);
-	showarray("sqlClasses_", sqlClasses_);
-	sw.set(ISV.pdo_firebird, ISV.wcd_sql_firebird);
-	showarray("sqlClasses_", sqlClasses_);
 
-	
+	sw.set(ISV.pdo_mysql, ISV.wcd_sql_mysql);
+	sw.set(ISV.pdo_pgsql, ISV.wcd_sql_postgres);
+	sw.set(ISV.pdo_sqlite, ISV.wcd_sql_sqlite);
+	sw.set(ISV.pdo_firebird, ISV.wcd_sql_firebird);
 
 	htab_rw dw(driverClasses_);
 
@@ -443,11 +437,10 @@ ZEND_METHOD(Wcd_IServer, __construct)
 
 	key = args.str(args.need(0));
 
-	showstr("IServer construct", key);
+	//showstr("IServer construct", key);
 
 	if (!args.throw_errors())
 	{
-		showmem("THIS", ZEND_THIS);
 		IServer* cobj = zval_toc<IServer>(ZEND_THIS);
 		cobj->construct(key);
 	}

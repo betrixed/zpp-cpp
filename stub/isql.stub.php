@@ -48,6 +48,8 @@ class ISql implements IfSql
 
     public function insert(Bindings $bind) : ParamList {}
 
+    public function quoteAlways(string $name): string {}
+
     public function quoteName(string $name): string {}
 
     public function select(Bindings $bind) : ParamList {}
