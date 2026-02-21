@@ -1,12 +1,8 @@
+#ifndef WCD_PDODRIVER_H
+#define WCD_PDODRIVER_H
+
 #ifndef WCD_IDRIVER_H
-#define WCD_IDRIVER_H
-
-#ifndef ZPP_BASE_H
-#include "zpp/base.h"
-#endif
-
-#ifndef WCD_ICONFIG_H
-#include "iconfig.h"
+#include "idriver.h"
 #endif
 
 #ifndef PHP_PDO_DRIVER_H
@@ -18,10 +14,7 @@ namespace wcd {
 	using namespace zpp;
 	using namespace wcc;
 
-	class IConfig;
-	class ISql;
-
-	class IDriver : public base_d {
+	class PdoDriver : public IDriver {
 	public:
 
 		enum {

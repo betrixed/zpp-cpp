@@ -74,6 +74,30 @@ public:
 			R"x(/\/?()x" R"x(:?[\w\d])x" R"x([_\-\.\w\d]*)x" 
 			R"x(|{\w)x" R"x([_\-\.\w\d]*)x" R"x(}|\s+$)x"
 			R"x()/mi)x";
+
+
+		if (!route_data.isRegistered())
+		{
+			route_data.doInit();
+		}
+		class_data cval(RouteSet::omg.classEntry());
+
+		cval.add_constant("ARG_S", route_data.ARG_S);
+		cval.add_constant("FUN_S", route_data.FUN_S);
+		cval.add_constant("FUNX_S", route_data.FUNX_S);
+		cval.add_constant("HITS_S", route_data.HITS_S);
+		cval.add_constant("MOD_S", route_data.MOD_S);
+		cval.add_constant("NSP_S", route_data.NSP_S);
+		cval.add_constant("OBJ_S", route_data.OBJ_S);
+		cval.add_constant("OBJX_S", route_data.OBJX_S);
+		cval.add_constant("ROLE_S", route_data.ROLE_S);
+
+		cval.add_constant("KEY", "@key");
+		cval.add_constant("ROUTES", "routes");
+		cval.add_constant("NO_PREFIX", "noprefix");
+
+
+	
 	}
 };
 
@@ -822,26 +846,9 @@ PHP_MINIT_FUNCTION(wcc_routeset_d)
 
 	RouteSet::omg.classEntry(ce);
 
-	class_data cval(ce);
+	/** This must be done BEFORE callfor add_constant */
 
-	cval.add_constant("ARG_S", route_data.ARG_S);
-
-
-	cval.add_constant("FUN_S", route_data.FUN_S);
-	cval.add_constant("FUNX_S", route_data.FUNX_S);
-	cval.add_constant("HITS_S", route_data.HITS_S);
-	cval.add_constant("MOD_S", route_data.MOD_S);
-	cval.add_constant("NSP_S", route_data.NSP_S);
-	cval.add_constant("OBJ_S", route_data.OBJ_S);
-	cval.add_constant("OBJX_S", route_data.OBJX_S);
-	cval.add_constant("ROLE_S", route_data.ROLE_S);
-
-	cval.add_constant("KEY", "@key");
-	cval.add_constant("ROUTES", "routes");
-	cval.add_constant("NO_PREFIX", "noprefix");
-	
 	STATE_INIT_ADD(radata)
-	
 	return SUCCESS;
 
 }

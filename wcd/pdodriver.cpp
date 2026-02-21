@@ -1,8 +1,8 @@
-#ifndef WCD_IDRIVER_CPP
-#define WCD_IDRIVER_CPP
+#ifndef WCD_PDODRIVER_CPP
+#define WCD_PDODRIVER_CPP
 
-#ifndef WCD_IDRIVER_H
-#include "idriver.h"
+#ifndef WCD_PDODRIVER_H
+#include "pdodriver.h"
 #endif
 
 #ifndef DB_ARGINFO_H

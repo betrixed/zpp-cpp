@@ -6,8 +6,17 @@
 namespace Wcd;
 
 class IDriver {
+    
 
     public readonly string $name;
+
+    public readonly IfConfig $cfg;
+
+    protected mixed $handle = null;
+
+    public bool $logging = false;
+
+    public ?string $lastsql = null;
 
     public function __construct(IConfig $cfg, string $name);
 
@@ -34,7 +43,7 @@ class IDriver {
                 int $mode ): array {}
 
     public function fetchRow(mixed $stmt,
-                int $mode ): array {}
+                int $mode ): mixed {}
 
     public function getAttribute(int $attkey) : mixed {}
 
