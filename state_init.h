@@ -50,7 +50,14 @@ namespace zpp {
         virtual ~state_init();
 
 
-        
+        bool isRegistered() { return registered_; }
+        void doInit() {
+            if (!registered_)
+            {
+                this->init();
+                registered_ = true;
+            }
+        }
         // module init/end calls
         virtual void init();
         virtual void end();

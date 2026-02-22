@@ -597,6 +597,7 @@ val_rc::try_decref(zval* p)
         if (rct <= 0)
         {
             //showmem("!!! RC emergency", p );
+            *p = {0};
             return;
         }
         auto ztype = Z_TYPE_P(p);
@@ -604,8 +605,7 @@ val_rc::try_decref(zval* p)
         {
         case IS_STRING:
             {
-                zend_string* s = Z_STR_P(p);
-                str_rc::try_decref(s);
+                zend_string_release(Z_STR_P(p));
             }
             break;
         case IS_REFERENCE:
@@ -617,10 +617,7 @@ val_rc::try_decref(zval* p)
 
                     try_decref(&zref->val);
                     efree_size(zref, sizeof(zend_reference));
-                    ZVAL_NULL(p);
                     //showmem("reference", p);
-
-                    return;
                 }
                 zref->gc.refcount--;
             }
@@ -638,9 +635,11 @@ val_rc::try_decref(zval* p)
                 obj_rc::try_decref(Z_OBJ_P(p));
             }
             break;
+        default:
+            return;
         }
+        *p = {0};
     }
-    return;
 }
 
 val_rc //static 

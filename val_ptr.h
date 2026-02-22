@@ -37,6 +37,10 @@ protected:
     friend class htab_ptr;
     friend class htab_rw;
 
+
+
+public:
+    /** bind_xxx calls best on already empty zval */
     void bind_string(zend_string* s);
 
     void bind_object(zend_object* obj);
@@ -44,8 +48,6 @@ protected:
     void bind_array(HashTable* ht);
 
     void bind_long(zend_long value);
-
-public:
 
     static void set_global(str_ptr key, val_ptr value);
     static val_ptr get_global(str_ptr key);

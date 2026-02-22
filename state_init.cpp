@@ -80,8 +80,8 @@ state_list::call_mod_init()
         link = si->next_;
         if (si->registered_) 
         {
-            bad.error() << typeid(*si).name() 
-                        << " already registered\n";
+            // this can happen with dependencies, eg routeset, requires route_data::init
+            //bad.error() << typeid(*si).name()  << " already registered\n";
         }
         else {
             si->init();
