@@ -13,7 +13,7 @@ namespace wcd {
 	class Bindings;
 	class IColumns;
 	class ParamList;
-
+	class JoinTables;
 
 	extern zend_class_entry* 	zclass_isql;
 	extern zend_class_entry* 	zintf_ce_Sql_IfSql;

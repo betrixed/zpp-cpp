@@ -40,15 +40,12 @@ PHP_RINIT_FUNCTION(wcc);
 
 
 #include "zpp/base.h"
-  
+
+#define EXTN_MODULE_NAME  "wcc"
 #define STATE_LIST_NAME    wcc_si_list
 
-#define STATE_INIT_ADD(si) STATE_LIST_NAME.add_si(&si);
-#define STATE_MOD_INIT     STATE_LIST_NAME.call_mod_init();
-#define STATE_MOD_END      STATE_LIST_NAME.call_mod_end();
-#define STATE_REQ_INIT     STATE_LIST_NAME.call_req_init();
-#define STATE_REQ_END      STATE_LIST_NAME.call_req_end();
+#include "zpp/state_module.h"
 
-extern zpp::state_list  STATE_LIST_NAME;
+DECLARE_STATE_LIST
 
 #endif	/* PHP_WCC_H */

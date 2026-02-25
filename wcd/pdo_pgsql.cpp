@@ -1,10 +1,14 @@
 #ifndef WCD_PDO_PGSQL_CPP
 #define WCD_PDO_PGSQL_CPP
 
+#ifndef WCD_PDO_PGSQL_H
+#include "pdo_pgsql.h"
+#endif
+
 #ifndef PDO_PGSQL_ARGINFO
 #define PDO_PGSQL_ARGINFO
 extern "C" {
-	#include "stub/pdo_pgsql_arginfo.h"
+	#include "stub/pdo_drivers_arginfo.h"
 }
 #endif
 
@@ -88,7 +92,6 @@ zend_class_entry*
 Pdo_pgsql::register_class(zend_class_entry* pclass)
 {
 	zend_class_entry* me = register_class_Wcd_Ext_PdoPgsql(pclass);
-	Pdo_pgsql::omg.classEntry(me);
 
 	STATE_INIT_ADD(PGIs)
 	

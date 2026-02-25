@@ -14,6 +14,7 @@ namespace wcd {
 	using namespace zpp;
 	using namespace wcc;
 
+
 	class PdoDriver : public IDriver {
 	public:
 
@@ -24,37 +25,34 @@ namespace wcd {
 			FETCH_COLUMN = PDO_FETCH_COLUMN
 		};
 
-		static base_obj_mgr<IDriver> omg;
-		
-		void construct(obj_ptr icfg, str_ptr name);
-		void destruct();
+		static base_obj_mgr<PdoDriver> omg;
+
+		static zend_class_entry* register_class(zend_class_entry* idriver_ce);
 
 		virtual void afterConnect();
-		virtual str_rc getSqlType();
-		virtual void debug_info(htab_rw di);
+
 		virtual htab_rc getConnectOptions();
-		virtual htab_return getTableNames();
-		virtual val_return lastSeqValue(str_ptr name);
-		virtual str_rc getSchemaClass();
 
-		static int pdo_type(unsigned int ztype);
+		static int pdoType(val_ptr val);
 		
-		bool begin();
-		
-		void bind(val_ptr stmt, htab_ptr params);
-		void close();
-		
-		bool commit();
-		
-		error_return connect();
+		 bool begin() override;
+		 bool commit() override;
+		 bool rollback() override;
 
-		bool closeStmt(val_ptr stmt);
+		htab_return fetchAllRows(val_ptr stmt, int mode) override;
+		val_rc fetchRow(val_ptr stmt, int mode) override;
+
+		 error_return transaction() override;
+
+		void bind(val_ptr stmt, htab_ptr params) override;
+		error_return connect() override;
+
+		bool closeStmt(val_ptr stmt) override;
 
 		str_rc escape(str_ptr value);
 		val_return execute(val_ptr stmt, bool close = true, bool fetch = false);
 
-		htab_rc fetchAllRows(val_ptr stmt, int mode);
-		val_rc fetchRow(val_ptr stmt, int mode);
+
 
 		val_rc getAttribute(int key);
 
@@ -96,8 +94,6 @@ namespace wcd {
 
 		void log(htab_ptr info);
 
-		str_rc modelClassName(str_ptr tableName);
-
 		obj_rc newBindings();
 		obj_rc newDmlBuild();
 		obj_rc newParamList();
@@ -105,13 +101,15 @@ namespace wcd {
 
 		val_return prepare(str_ptr query);
 
-		void   prepareExecute(str_ptr query, htab_ptr values, htab_ptr bindTypes);
+		error_return prepareExecute(str_ptr query, htab_ptr values, htab_ptr bindTypes);
 
 		val_return prepareQuery(str_ptr query, htab_ptr values, htab_ptr bindTypes);
 
 		val_return query(str_ptr query, htab_ptr params);
 
 		val_return querySingle(str_ptr query);
+
+		htab_return query_lcase(str_ptr sql, int fmode);
 
 		weak_ref selfRef() 
 		{
@@ -122,12 +120,12 @@ namespace wcd {
 
 		obj_rc readSchema();
 
-		bool rollback();
+
 
 		bool setAttribute(int key, val_ptr value);
 		int  setFetch(int mode);
 
-		error_return transaction();
+		
 
 		obj_rc getTableModel(str_ptr tableName);
 
@@ -140,85 +138,11 @@ namespace wcd {
 	protected:
 
 
-		weak_ref  wkself_; // hold own reference
 		
-		// POINTERS TO PROPERTY STORAGE for read
-		val_ptr   name_ptr_;
-		val_ptr   handle_ptr_;
-		val_ptr   cfg_ptr_;
-		val_ptr   logging_ptr_;
-		val_ptr   lastsql_ptr_;
-
-		/*
-		obj_rc    icfg_;
-		str_rc    name_;
-		*/
-
-		str_rc	  db_name_;
-		obj_rc    isql_;
-		int         ifetch_;
-
-
-		htab_rc    table_models_;
-		obj_rc     schema_def_;
-
-		
-
-
-
-		friend class IBuild;
 
 	};
 
 
-	class DBSInit : public state_init {
-	public:
-
-		str_intern  query_str;
-		str_intern  fetch_str;
-		str_intern  close_cursor;
-		str_intern  pdo_prefix;
-		str_intern  pdo_class;
-		str_intern  begin_trans;
-		str_intern  bind_value;
-		str_intern  commit_fn;
-
-		str_intern  quote_fn;
-		str_intern  regex_quoted;
-		str_intern  rx_cap1;
-		str_intern  execute_fn;
-		str_intern  fetchall_fn;
-		str_intern  rowcount_fn;
-
-
-		str_intern  getattribute_fn;
-		str_intern  mysql_str;
-		str_intern  intransaction_fn;
-		str_intern  lastinsertid_fn;
-		str_intern  place_holder;
-
-		str_intern  prepare_fn;
-		str_intern  error_str;
-		str_intern  readschema_fn;
-		str_intern  rollback_fn;
-		str_intern  setattribute_fn;
-
-		str_intern  cfg_name;
-		str_intern  db_name;
-		str_intern  tbl_models;
-		str_intern  iconfig_key;
-		str_intern  schema_def;
-		str_intern  sqlgen_s;
-		
-		str_intern  handle_s;
-		str_intern  logging_s;
-		str_intern  lastsql_s;
-
-
-		void init() override;
-	};
-
-	extern DBSInit DBS;
 }//wcd namespace
 
 #endif

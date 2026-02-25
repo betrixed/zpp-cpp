@@ -97,9 +97,12 @@ extern "C" {
 //Wcd classes, wccd
 #include "wcd/iconfig.cpp"
 #include "wcd/iserver.cpp"
-#include "wcd/idriver.cpp" 
-#include "wcd/pdo_pgsql.cpp"
 
+
+#include "wcd/pdo_pgsql.cpp"
+#include "wcd/pdo_mysql.cpp"
+#include "wcd/pdodriver.cpp"
+#include "wcd/idriver.cpp" 
 #include "wcd/ibuild.cpp"
 
 #include "wcd/raw.cpp"
@@ -122,7 +125,7 @@ extern "C" {
 #include "wcd/insert.cpp"
 #include "wcd/delete.cpp"
 
-zpp::state_list  STATE_LIST_NAME("wcc");
+DEFINE_STATE_LIST
 
 PHP_MSHUTDOWN_FUNCTION(wcc)
 {  

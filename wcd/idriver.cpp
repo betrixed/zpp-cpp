@@ -40,9 +40,15 @@ extern "C" {
 #include "pdo_pgsql.h"
 #endif
 
+#ifndef WCD_PDO_PGSQL_H
+#include "pdo_mysql.h"
+#endif
+
+
 #ifndef DIR_CACHE_H
 #include "wcc/dircache.h"
 #endif
+
 
 namespace wcd {
 
@@ -94,6 +100,11 @@ void DBSInit::init() {
 	}
 
 
+void //static 
+IDriver::notImplementedMsg(str_buf& buf, const char* fn)
+{
+	buf << "IDriver: virtual " << '\'' << fn << '\'' << " needs override";
+}
 
 
 void 
@@ -186,28 +197,7 @@ str_return
 IDriver::getDSN()
 {
 	str_return result;
-	str_rc dname = icfg_c()->getDriverName();
-	
-	dname.lowercase();
-
-	if (dname.starts_with(DBS.pdo_prefix)) {
-		dname = dname.substr(4);
-	}
-	else {
-		result.error() << "PDO Driver names need to begin with 'pdo_' : " << dname;
-		return result;
-	}
-
-	IConfig* cfg = icfg_c();
-	str_rc host = cfg->getHost();
-	str_rc dbname = cfg->getDatabase();
-
-	str_buf buf;
-
-	buf << dname << ':' << "host=" << host
-	    << ";dbname=" << dbname;
-	result.value_ = buf.zstr();
-
+	result.error() << "virtual getDSN not implemented";
 	return result;
 }
 
@@ -227,43 +217,7 @@ error_return
 IDriver::connect()
 {
 	error_return result;
-
-	obj_ptr h = handle_ptr_.zobject();
-
-	if (h.ok())
-	{
-		return result;
-	}
-
-	str_return test = getDSN();
-
-	if (test.has_errors())
-	{
-		result = std::move(test);
-		return result;
-	}
-
-	htab_rc options = getConnectOptions();
-
-	IConfig* cfg = icfg_c();
-
-	str_rc user = cfg->getUsername();
-	str_rc pw = cfg->getPassword();
-
-	htab_rc  args_mgr;
-	htab_rw args(args_mgr);
-
-	args.push_back(test.value_);
-	args.push_back(user);
-	args.push_back(pw);
-	args.push_back(options);
-
-	h = ReflectCache::staticInstanceArgs(DBS.pdo_class, args_mgr);
-
-	handle_ptr_.bind_object(h);
-
-	afterConnect();
-
+	notImplementedMsg(result.error(), __FUNCTION__);
 	return result;
 }
 
@@ -326,24 +280,24 @@ str_rc
 IDriver::getSqlType()
 {
 	str_rc result;
-	result = DBS.mysql_str;
 	return result;
+}
+
+bool
+IDriver::begin()
+{
+	return false;
 }
 
 bool 
 IDriver::commit()
 {
-	val_return pdo = handle();
+	return false;
+}
 
-	if (pdo.throw_errors())
-	{
-		return false;
-	}
-	obj_ptr h = pdo.value_.zobject();
-	{
-		val_rc result = h.call(DBS.commit_fn);
-		return result.isTrue();
-	}
+bool
+IDriver::rollback()
+{
 	return false;
 }
 
@@ -361,102 +315,20 @@ IDriver::closeStmt(val_ptr stmt)
 	return result.isTrue();
 }
 
-
-void IDriver::bind(val_ptr stmt, htab_ptr params)
-{
-
-	obj_ptr spdo(stmt);
-
-	if (params.size())
-	{
-		htab_walk wk;
-		auto val = wk.value();
-
-		fn_call_args<3> bvcall;
-
-		bvcall.set_fci(spdo, DBS.bind_value);
-		zval* args = bvcall.argsptr();
-
-		int ix = 0;
-
-		for(wk.start(params); wk.ok(); wk.next(), ix++)
-		{
-			if (val.isArray())
-			{
-				htab_walk wk2;
-				auto bname = wk2.key();
-				auto bval = wk2.value();
-
-				for(wk2.start(val.zarray()); wk2.ok(); wk2.next())
-				{
-	
-					ZVAL_COPY_VALUE(args, bname);
-					ZVAL_COPY_VALUE(args+1, bval);
-					ZVAL_LONG(args+2, pdo_type(bval.ztype()));
-					val_rc check = bvcall.call_fn();
-				}
-			}
-			else {
-				ZVAL_LONG(args, ix+1);
-				ZVAL_COPY_VALUE(args+1, val);
-
-				int ptype = pdo_type(val.ztype());
-				ZVAL_LONG(args+2, ptype);
-				val_rc check = bvcall.call_fn();
-				
-			}
-		}
-	}
-}
-
-val_rc 
-IDriver::getCaseAttribute()
-{
-	return getAttribute(PDO_ATTR_CASE);
-}
-
-void 
-IDriver::setCaseAttribute(int value)
-{
-	val_rc arg(value);
-
-	setAttribute(PDO_ATTR_CASE, arg);
-}
-
-bool 
-IDriver::begin()
-{
-	val_return pdo = handle();
-
-	if (pdo.throw_errors())
-	{
-		return false;
-	}
-	obj_ptr h = pdo.value_.zobject();
-	val_rc test = h.call(DBS.begin_trans);
-	return test.isTrue();
-}
-
 str_rc 
 IDriver::escape(str_ptr value)
 {
-	str_rc result;
-
-	val_return pdo = handle();
-
-	if (pdo.throw_errors())
-	{
-		return false;
-	}
-
-	obj_ptr h(pdo.value_.zobject());
-	val_rc  arg(value);
 	
-	result = h.call(DBS.quote_fn, arg);
-	result = preg_replace(DBS.regex_quoted, DBS.rx_cap1, result);
-	return result;
+	throw_not_implemented("escape");
+	return value;
 }
 
+void IDriver::bind(val_ptr stmt, htab_ptr params)
+{
+	throw_not_implemented("bind");
+}
+
+/* static */
 error_return 
 check_results(val_ptr test)
 {
@@ -476,6 +348,7 @@ check_results(val_ptr test)
 
 	return result;
 }
+
 val_return
 IDriver::execute(val_ptr stmt, bool close, bool fetch)
 {
@@ -518,28 +391,18 @@ IDriver::execute(val_ptr stmt, bool close, bool fetch)
 		}
 	}
 	else {
-		result.error() << "PDO Execute failure";
+		result.error() << "SQL Execute failure";
 		result.value_.set_bool(false);
 	}
 
 	return result;
 }
 
-htab_rc 
+htab_return
 IDriver::fetchAllRows(val_ptr stmt, int mode)
 {
-	obj_ptr sobj(stmt);
-	htab_rc result;
-
-	if (sobj.ok())
-	{
-		val_rc farg(mode);
-		result = sobj.call(DBS.fetchall_fn, farg);
-	}
-	if (!result.size())
-	{
-		result = htab_rc::empty_array();
-	}
+	htab_return result;
+	notImplementedMsg(result.error(), __FUNCTION__);
 	return result;
 }
 
@@ -621,7 +484,6 @@ IDriver::getSchema()
 	}
 	if (!schema_def_.ok())
 	{
-		zend_printf("readSchema\n");
 		schema_def_ = readSchema();
 		if (cache)
 		{
@@ -705,29 +567,6 @@ val_return
 IDriver::querySingle(str_ptr query)
 {
 	val_return result;
-
-	result = handle();
-
-	if (result.has_errors())
-	{
-		return result;
-	}
-
-	obj_ptr pdo = result.value_.zobject();
-
-	val_rc arg1(query);
-	obj_rc stmt = pdo.call(DBS.query_str, arg1);
-
-	if (!stmt.ok())
-	{
-		result.error() << "pdo call " << query;
-		return result;
-	}
-
-	arg1 = (zend_long) ifetch_;
-	result.value_ = stmt.call(DBS.fetch_str, arg1);
-
-	stmt.call(DBS.close_cursor);
 
 	return result;
 }
@@ -881,23 +720,16 @@ IDriver::lastInsertId()
 val_return 
 IDriver::lastSeqValue(str_ptr name)
 {
-	str_buf buf;
+	val_return result;
+	notImplementedMsg(result.error(), __FUNCTION__);
+	return result;
+}
 
-	buf << "select lastval(" << name << ")";
-	str_rc  sql = buf.zstr();
-	htab_ptr empty;
-
-	val_return result = query(sql, empty);
-
-	if (!result.has_errors())
-	{	
-		val_rc& test = result.value_;
-		if (test.isArray())
-		{
-			htab_ptr rows(test);
-			result.value_ = rows.get(int(0));
-		}
-	}
+error_return  
+IDriver::prepareExecute(str_ptr query, htab_ptr values, htab_ptr bindTypes)
+{
+	error_return result;
+	notImplementedMsg(result.error(), __FUNCTION__);
 	return result;
 }
 
@@ -1025,20 +857,6 @@ IDriver::query(str_ptr query, htab_ptr params)
 	return result;
 }
 
-bool 
-IDriver::rollback()
-{
-	val_return h = handle();
-
-	if (h.throw_errors())
-	{
-		return false;
-	}
-	obj_ptr pdo(h.value_.zobject());
-
-	val_rc result = pdo.call(DBS.rollback_fn);
-	return result.isTrue();
-}
 
 error_return 
 IDriver::transaction()
@@ -1220,9 +1038,9 @@ ZEND_METHOD(Wcd_IDriver, fetchAllRows)
 
 	IDriver* db = zval_toc<IDriver>(ZEND_THIS);	
 
-	htab_rc result = db->fetchAllRows(stmt, mode);
-
-	result.move_zv(return_value);
+	htab_return result = db->fetchAllRows(stmt, mode);
+	result.throw_errors();
+	result.value_.move_zv(return_value);
 }
 
 ZEND_METHOD(Wcd_IDriver, fetchRow)
@@ -1238,9 +1056,9 @@ ZEND_METHOD(Wcd_IDriver, fetchRow)
 
 	IDriver* db = zval_toc<IDriver>(ZEND_THIS);	
 
-	htab_rc result = db->fetchRow(stmt, mode);
-
-	result.move_zv(return_value);
+	val_return result = db->fetchRow(stmt, mode);
+	result.throw_errors();
+	result.value_.move_zv(return_value);
 }
 
 ZEND_METHOD(Wcd_IDriver, getAttribute)
@@ -1627,6 +1445,26 @@ ZEND_METHOD(Wcd_IDriver, prepareQuery)
 	}
 }
 
+ZEND_METHOD(Wcd_IDriver, prepareExecute)
+{
+	str_ptr sql;
+	htab_ptr        values;
+	htab_ptr        types;
+
+	zarg_rd args(execute_data);
+
+	args.zstring(sql, args.need(0));
+	args.zarray_null(values, args.option(1));
+	args.zarray_null(types, args.option(2));
+
+	if (!args.throw_errors())
+	{
+		IDriver* db = zval_toc<IDriver>(ZEND_THIS);	
+		error_return result = db->prepareExecute( sql, values, types);
+		result.throw_errors();
+	}
+}
+
 ZEND_METHOD(Wcd_IDriver, query)
 {
 	zend_string* sql;
@@ -1755,19 +1593,26 @@ ZEND_METHOD(Wcd_IDriver, getWeakRef)
 
 PHP_MINIT_FUNCTION(Wcd_IDriver_reg)
 {
+	STATE_INIT_ADD(DBS)
 
 	zend_class_entry* dclass = register_class_Wcd_IDriver();
 
 	IDriver::omg.classEntry(dclass);
+
 	class_data cval(IDriver::omg.class_entry_);
 
 	cval.add_constant("FETCH_OBJECT", PDO_FETCH_OBJ);
 	cval.add_constant("FETCH_ASSOC", PDO_FETCH_ASSOC);
 	cval.add_constant("FETCH_NUM", PDO_FETCH_NUM);
 	cval.add_constant("FETCH_COLUMN", PDO_FETCH_COLUMN);
-	Pdo_pgsql::register_class(dclass);
 
-	STATE_INIT_ADD(DBS)
+
+	zend_class_entry* pdo = PdoDriver::register_class(dclass);
+
+	Pdo_pgsql::register_class(pdo);
+	Pdo_mysql::register_class(pdo);
+
+
 
 	return SUCCESS;
 }

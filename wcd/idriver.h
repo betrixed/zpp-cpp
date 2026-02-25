@@ -23,7 +23,9 @@ namespace wcd {
 
 	class IDriver : public base_d {
 	public:
-
+		static void notImplementedMsg(str_buf& buf, const char* fn);
+		static void throw_not_implemented(const char* fn);
+		
 		enum {
 			FETCH_OBJECT = PDO_FETCH_OBJ,
 			FETCH_ASSOC = PDO_FETCH_ASSOC,
@@ -33,35 +35,46 @@ namespace wcd {
 
 		static base_obj_mgr<IDriver> omg;
 		
+		/** Check result set return expected types ?? */
+		static error_return check_results(val_ptr val);
+
 		void construct(obj_ptr icfg, str_ptr name);
 		void destruct();
 
 		virtual void afterConnect();
+
+		// functions which cannot be "pure" = 0
 		virtual str_rc getSqlType();
+		virtual htab_return getTableNames();
+		virtual str_return getDSN();
+
+
 		virtual void debug_info(htab_rw di);
 		virtual htab_rc getConnectOptions();
-		virtual htab_return getTableNames();
+		
 		virtual val_return lastSeqValue(str_ptr name);
 		virtual str_rc getSchemaClass();
 
 		static int pdo_type(unsigned int ztype);
 		
-		bool begin();
-		
-		void bind(val_ptr stmt, htab_ptr params);
-		void close();
-		
-		bool commit();
-		
-		error_return connect();
+		virtual bool begin();
+		virtual bool commit();
+		virtual bool rollback();
 
-		bool closeStmt(val_ptr stmt);
+		virtual void bind(val_ptr stmt, htab_ptr params);
 
-		str_rc escape(str_ptr value);
+		virtual void close();
+
+		virtual error_return connect();
+
+		virtual bool closeStmt(val_ptr stmt);
+
+		virtual str_rc escape(str_ptr value);
+
 		val_return execute(val_ptr stmt, bool close = true, bool fetch = false);
 
-		htab_rc fetchAllRows(val_ptr stmt, int mode);
-		val_rc fetchRow(val_ptr stmt, int mode);
+		virtual htab_return fetchAllRows(val_ptr stmt, int mode);
+		virtual val_rc fetchRow(val_ptr stmt, int mode);
 
 		val_rc getAttribute(int key);
 
@@ -71,11 +84,6 @@ namespace wcd {
 
 		htab_return getColumnNames(str_ptr tableName);
 		
-
-		str_return getDSN();
-
-		
-
 		str_rc getDatabaseName();
 
 		int getFetch();
@@ -112,7 +120,7 @@ namespace wcd {
 
 		val_return prepare(str_ptr query);
 
-		void   prepareExecute(str_ptr query, htab_ptr values, htab_ptr bindTypes);
+		error_return  prepareExecute(str_ptr query, htab_ptr values, htab_ptr bindTypes);
 
 		val_return prepareQuery(str_ptr query, htab_ptr values, htab_ptr bindTypes);
 
@@ -129,12 +137,12 @@ namespace wcd {
 
 		obj_rc readSchema();
 
-		bool rollback();
+		
 
 		bool setAttribute(int key, val_ptr value);
 		int  setFetch(int mode);
 
-		error_return transaction();
+		virtual error_return transaction();
 
 		obj_rc getTableModel(str_ptr tableName);
 

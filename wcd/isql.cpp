@@ -1,6 +1,18 @@
 #ifndef WCD_ISQL_CPP
 #define WCD_ISQL_CPP
 
+#ifndef WCD_ISQL_H
+#include "isql.h"
+#endif
+
+#ifndef SQL_ISQL_H
+#include "sql_isql.h"
+#endif
+
+#ifndef WCD_BINDINGS_H
+#include "bindings.h"
+#endif
+
 #ifndef WCD_ISQL_ARGINFO
 #define WCD_ISQL_ARGINFO
 

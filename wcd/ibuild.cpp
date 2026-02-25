@@ -13,6 +13,22 @@
 #include "sql_ipart.h"
 #endif
 
+#ifndef WCD_ISQL_H
+#include "isql.h"
+#endif
+
+#ifndef WCD_BINDINGS_H
+#include "bindings.h"
+#endif
+
+#ifndef WCD_PARAMLIST_H
+#include "paramlist.h"
+#endif
+
+#ifndef WCD_RUNSQL_H
+#include "runsql.h"
+#endif
+
 #ifndef WCD_IROW_H
 #include "irow.h"
 #endif
