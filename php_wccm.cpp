@@ -11,7 +11,7 @@
 // CacheMgr wants one of these
 #include "tinyxml/dxmlread.cpp"
 
-zpp::state_list  STATE_LIST_NAME("wccm");
+DEFINE_STATE_LIST
 
 PHP_MINIT_FUNCTION(wccm)
 {	
