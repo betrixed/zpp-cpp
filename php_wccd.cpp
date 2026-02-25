@@ -8,9 +8,12 @@
 // compile 
 #include "wcd/iconfig.cpp"
 #include "wcd/iserver.cpp"
-#include "wcd/idriver.cpp" 
+
 #include "wcd/ibuild.cpp"
 #include "wcd/pdo_pgsql.cpp"
+#include "wcd/pdo_mysql.cpp"
+#include "wcd/pdodriver.cpp"
+#include "wcd/idriver.cpp" 
 
 #include "wcd/raw.cpp"
 #include "wcd/model.cpp"
@@ -32,7 +35,7 @@
 #include "wcd/insert.cpp"
 #include "wcd/delete.cpp"
 
-zpp::state_list  STATE_LIST_NAME("wccd");
+DEFINE_STATE_LIST
 
 // register
 PHP_MINIT_FUNCTION(wccd)
