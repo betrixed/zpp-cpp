@@ -27,7 +27,7 @@
 	ZEND_PARSE_PARAMETERS_END()
 #endif
 
-zpp::state_list  STATE_LIST_NAME("wcch");
+DEFINE_STATE_LIST
 
 PHP_MINIT_FUNCTION(wcch)
 {
