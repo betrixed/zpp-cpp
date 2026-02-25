@@ -6,7 +6,8 @@
 
 #include "php_wccr.h"
 
-#include "zpp/base.h"
+
+
 #include "zpp/show_zpp.h"
 
 // compile in binary
@@ -41,7 +42,7 @@
 #include "wcc/route_set.cpp"
 #include "wcc/target.cpp"
 
-
+DEFINE_STATE_LIST
 
 PHP_MINIT_FUNCTION(wccr)
 {
