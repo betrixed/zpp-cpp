@@ -20,7 +20,7 @@
 
 #include "wcc/strfns.cpp"
 
-zpp::state_list  STATE_LIST_NAME("wccz");
+DEFINE_STATE_LIST
 
 /* For compatibility with older PHP versions */
 #ifndef ZEND_PARSE_PARAMETERS_NONE
