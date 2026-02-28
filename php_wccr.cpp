@@ -6,7 +6,7 @@
 
 #include "php_wccr.h"
 
-
+DEFINE_STATE_LIST
 
 #include "zpp/show_zpp.h"
 
@@ -42,7 +42,7 @@
 #include "wcc/route_set.cpp"
 #include "wcc/target.cpp"
 
-DEFINE_STATE_LIST
+
 
 PHP_MINIT_FUNCTION(wccr)
 {
@@ -110,9 +110,17 @@ PHP_MINIT(wcc_pair_d)(INIT_FUNC_ARGS_PASSTHRU);
 #endif
 
 
-
+	STATE_MOD_INIT
 	return SUCCESS;
 }
+
+
+PHP_MSHUTDOWN_FUNCTION(wccr)
+{
+	STATE_MOD_END
+	return SUCCESS;
+}
+
 
 /* {{{ PHP_RINIT_FUNCTION */
 PHP_RINIT_FUNCTION(wccr)
@@ -120,10 +128,18 @@ PHP_RINIT_FUNCTION(wccr)
 #if defined(ZTS) && defined(COMPILE_DL_WCCR)
 	ZEND_TSRMLS_CACHE_UPDATE();
 #endif
+	STATE_REQ_INIT
 
 	return SUCCESS;
 }
-/* }}} */
+
+
+PHP_RSHUTDOWN_FUNCTION(wccr)
+{
+	STATE_REQ_END
+
+	return SUCCESS;
+}
 
 /* {{{ PHP_MINFO_FUNCTION */
 PHP_MINFO_FUNCTION(wccr)
@@ -148,9 +164,9 @@ zend_module_entry wccr_module_entry = {
 	"wccr",						/* Extension name */
 	nullptr,					/* zend_function_entry */
 	PHP_MINIT(wccr),			/* PHP_MINIT - Module initialization */
-	nullptr,					/* PHP_MSHUTDOWN - Module shutdown */
+	PHP_MSHUTDOWN(wccr),					/* PHP_MSHUTDOWN - Module shutdown */
 	PHP_RINIT(wccr),			/* PHP_RINIT - Request initialization */
-	nullptr,					/* PHP_RSHUTDOWN - Request shutdown */
+	PHP_RSHUTDOWN(wccr),					/* PHP_RSHUTDOWN - Request shutdown */
 	PHP_MINFO(wccr),			/* PHP_MINFO - Module info */
 	PHP_WCCR_VERSION,		/* Version */
 	STANDARD_MODULE_PROPERTIES
