@@ -23,7 +23,7 @@ void
 MYS_Init::init()
 {
 	mysql_s = "mysql";
-	tablenames_qry = "SHOW_TABLES";
+	tablenames_qry = "SHOW TABLES";
 	schema_class = "Wcd\\Schema\\Mysql\\Dump";
 }
 
@@ -52,7 +52,8 @@ Pdo_mysql::getTableNames()
 zend_class_entry* Pdo_mysql::register_class(zend_class_entry* pclass)
 {
 	zend_class_entry* me = register_class_Wcd_Ext_PdoMysql(pclass);
-
+	Pdo_mysql::omg.classEntry(me);
+	
 	STATE_INIT_ADD(MYS)
 	
 	return me;

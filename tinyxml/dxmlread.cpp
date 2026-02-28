@@ -603,7 +603,7 @@ Wcc_XmlRead::pushRoot(str_ptr key)
 	else {
 		newroot = newRoot(cname);
 	}
-	showmem("pushRoot ", newroot);
+	//showmem("pushRoot ", newroot);
 	attach_ds(new DStack(key, newroot, XC_OBJECT));
 
 }

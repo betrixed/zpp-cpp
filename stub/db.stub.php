@@ -8,15 +8,16 @@ namespace Wcd;
 class IDriver {
     
 
-    public readonly string $name;
+    protected string $name;
 
-    public readonly IfConfig $cfg;
+    protected IfConfig $cfg;
 
     protected mixed $handle = null;
 
     public bool $logging = false;
 
     public ?string $lastsql = null;
+
 
     public function __construct(IConfig $cfg, string $name);
 
@@ -45,15 +46,7 @@ class IDriver {
     public function fetchRow(mixed $stmt,
                 int $mode ): mixed {}
 
-    public function getAttribute(int $attkey) : mixed {}
-
-    public function getCaseAttribute(): int {}
-
-    public function setCaseAttribute(int $value) : void {}
-
     public function getColumnNames(string $tableName) : array {}
-
-    public function getConnectOptions(): array {}
 
     public function getDSN() : string {}
 
@@ -119,8 +112,6 @@ class IDriver {
     public function rollback(): bool {}
 
     public function getWeakRef() : \WeakReference {}
-
-    public function setAttribute(int $attkey, mixed $value) : void {}
 
     public function setFetch(int $value): int {}
 

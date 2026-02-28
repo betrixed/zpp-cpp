@@ -145,6 +145,8 @@ IServer::getDataCache()
 obj_return 
 IServer::activate(str_ptr name)
 {
+	//showstr("Activate", name);
+	
 	obj_return cfg = needConfig(name);
 
 	obj_return result;
@@ -207,7 +209,7 @@ IServer::getConnect(str_ptr name)
 {
 	wref_return result;
 	
-
+	//showstr("getConnect", name);
 	if (svc_key_.ok())
 	{
 		str_rc key = svc_key_;
@@ -219,6 +221,7 @@ IServer::getConnect(str_ptr name)
 	}
 
 
+	
 	class_data cd(IServer::omg.class_entry_);
 
 	if (!name.ok())

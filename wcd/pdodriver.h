@@ -50,7 +50,7 @@ namespace wcd {
 		bool closeStmt(val_ptr stmt) override;
 
 		str_rc escape(str_ptr value);
-		val_return execute(val_ptr stmt, bool close = true, bool fetch = false);
+		val_return execute(val_ptr stmt, bool close = true, bool fetch = false) override;
 
 
 
@@ -69,52 +69,34 @@ namespace wcd {
 
 		str_rc getDatabaseName();
 
-		int getFetch();
-
 		obj_rc getSchema();
 		
 		htab_return getTableColumns(str_ptr tableName);
 		obj_rc getTableMode(str_ptr tableName);
 
 		
-
-		val_return handle();
-
-		obj_ptr isql();
-		obj_ptr iconfig();
-		
-
-		bool inTransaction();
-		bool isAutoCommit();
-		bool isConnected();
+		bool inTransaction() override;
+		//bool isAutoCommit() override;
+		bool isConnected() override;
 
 
-		val_rc lastInsertId();
+		val_return lastInsertId(str_ptr name) override;
 		
 
 		void log(htab_ptr info);
-
-		obj_rc newBindings();
-		obj_rc newDmlBuild();
-		obj_rc newParamList();
-		str_rc param(int pno);
 
 		val_return prepare(str_ptr query);
 
 		error_return prepareExecute(str_ptr query, htab_ptr values, htab_ptr bindTypes);
 
-		val_return prepareQuery(str_ptr query, htab_ptr values, htab_ptr bindTypes);
+		val_return prepareQuery(str_ptr query, htab_ptr values, htab_ptr bindTypes) override;
 
-		val_return query(str_ptr query, htab_ptr params);
+		val_return query(str_ptr query, htab_ptr params) override;
 
-		val_return querySingle(str_ptr query);
+		val_return querySingle(str_ptr query) override;
 
 		htab_return query_lcase(str_ptr sql, int fmode);
 
-		weak_ref selfRef() 
-		{
-			return wkself_;
-		}
 
 		str_rc quoteName(str_ptr name);
 
@@ -123,25 +105,27 @@ namespace wcd {
 
 
 		bool setAttribute(int key, val_ptr value);
-		int  setFetch(int mode);
 
 		
 
 		obj_rc getTableModel(str_ptr tableName);
-
-		str_rc lastSQL() const;
-		
-		IConfig* 	icfg_c();
-		ISql*       isql_c();
-
-		str_ptr getName() const;
-	protected:
 
 
 		
 
 	};
 
+	class PdoInit : public state_init 
+	{
+	public:
+		void init() override;
+
+		str_intern setattribute_fn;
+		str_intern getattribute_fn;
+
+	};
+
+	extern PdoInit PDOI;
 
 }//wcd namespace
 

@@ -77,12 +77,12 @@ Pdo_pgsql::lastSeqValue(str_ptr name)
 {
 	val_return result;
 
-	// weak, because no use of name
-	result.value_ =  this->lastInsertId();
+	// PDO can use this as name of sequence
+	result =  this->lastInsertId(name);
 
 	if (result.value_.isNull())
 	{
-		result.error() << "last insert id was NULL";
+		result.error() << " Last insert id was NULL";
 	}
 	return result;
 }

@@ -48,9 +48,7 @@ namespace wcd {
 		virtual htab_return getTableNames();
 		virtual str_return getDSN();
 
-
 		virtual void debug_info(htab_rw di);
-		virtual htab_rc getConnectOptions();
 		
 		virtual val_return lastSeqValue(str_ptr name);
 		virtual str_rc getSchemaClass();
@@ -71,16 +69,15 @@ namespace wcd {
 
 		virtual str_rc escape(str_ptr value);
 
-		val_return execute(val_ptr stmt, bool close = true, bool fetch = false);
+		virtual val_return execute(val_ptr stmt, bool close = true, bool fetch = false);
 
 		virtual htab_return fetchAllRows(val_ptr stmt, int mode);
 		virtual val_rc fetchRow(val_ptr stmt, int mode);
 
-		val_rc getAttribute(int key);
-
-		val_rc getCaseAttribute();
-
-		void setCaseAttribute(int value);
+		virtual bool inTransaction();
+		virtual bool isAutoCommit();
+		virtual bool isConnected();
+		virtual val_return lastInsertId(str_ptr name);
 
 		htab_return getColumnNames(str_ptr tableName);
 		
@@ -101,12 +98,10 @@ namespace wcd {
 		obj_ptr iconfig();
 		
 
-		bool inTransaction();
-		bool isAutoCommit();
-		bool isConnected();
 
 
-		val_rc lastInsertId();
+
+		
 		
 
 		void log(htab_ptr info);
@@ -122,11 +117,11 @@ namespace wcd {
 
 		error_return  prepareExecute(str_ptr query, htab_ptr values, htab_ptr bindTypes);
 
-		val_return prepareQuery(str_ptr query, htab_ptr values, htab_ptr bindTypes);
+		virtual val_return prepareQuery(str_ptr query, htab_ptr values, htab_ptr bindTypes);
 
-		val_return query(str_ptr query, htab_ptr params);
+		virtual val_return query(str_ptr query, htab_ptr params);
 
-		val_return querySingle(str_ptr query);
+		virtual val_return querySingle(str_ptr query);
 
 		weak_ref selfRef() 
 		{
@@ -137,9 +132,6 @@ namespace wcd {
 
 		obj_rc readSchema();
 
-		
-
-		bool setAttribute(int key, val_ptr value);
 		int  setFetch(int mode);
 
 		virtual error_return transaction();
@@ -205,8 +197,6 @@ namespace wcd {
 		str_intern  fetchall_fn;
 		str_intern  rowcount_fn;
 
-
-		str_intern  getattribute_fn;
 		str_intern  mysql_str;
 		str_intern  intransaction_fn;
 		str_intern  lastinsertid_fn;
@@ -216,7 +206,6 @@ namespace wcd {
 		str_intern  error_str;
 		str_intern  readschema_fn;
 		str_intern  rollback_fn;
-		str_intern  setattribute_fn;
 
 		str_intern  cfg_name;
 		str_intern  db_name;

@@ -328,11 +328,14 @@ IConfig::getCollation()
 obj_return 
 IConfig::newConnect(str_ptr name)
 {
+	//showstr("NewConnect", name);
 	str_rc dclass(getDriverClass());
 	htab_rc args_mgr;
 	htab_rw args(args_mgr);
 	args.push_back(vobj());
 	args.push_back(name);
+
+	//showstr("Driver class", dclass);
 
 	obj_return result;
 	result.value_ = ReflectCache::staticInstanceArgs(dclass, args_mgr);
