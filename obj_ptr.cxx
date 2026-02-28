@@ -448,8 +448,9 @@ obj_ptr::call(str_ptr method)
     fn_call fn;
 
     fn.set_fci(obj_, method);
+    val_rc result = fn.call_fn();
 
-    return fn.call_fn();
+    return result;
 }
 
 

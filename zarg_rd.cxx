@@ -157,6 +157,25 @@ zarg_rd::str(zval *arg)
 	return result;
 }
 
+str_ptr 
+zarg_rd::str_or_null(zval *arg)
+{
+	str_ptr result;
+
+	if (!arg && maybe_)
+	{
+		return result;
+	}
+	result = arg;
+	if (result.ok() || result.isNull())
+	{
+		return result;
+	}
+	error() << "# Not a string OR null ";
+	wrong(arg);
+	return result;
+}
+
 bool 
 zarg_rd::zstring_null(str_ptr& value, zval* arg)
 {

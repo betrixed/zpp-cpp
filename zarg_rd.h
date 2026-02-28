@@ -91,6 +91,7 @@ public:
 	obj_ptr obj_class(zval* arg, zend_class_entry* ce);
 
 	str_ptr  str(zval *arg);
+	str_ptr  str_or_null(zval *arg);
 	
 	bool weakref(weak_ref& value, zval* arg);
 	bool zarray_null(htab_ptr& value, zval* arg);

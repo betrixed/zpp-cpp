@@ -232,7 +232,10 @@ fn_call::set_fci(zend_object* obj, str_ptr method, HashTable* nargs)
 {
 
     //method_name_ = method;
-
+    zval *p = &fci_.function_name;
+    *p = {0};
+    // fci_.function_name is a COPY_VALUE
+    ZVAL_STR(p, method);  
     fci_.size = sizeof(fci_);
     fci_.object = obj;
 
@@ -240,10 +243,7 @@ fn_call::set_fci(zend_object* obj, str_ptr method, HashTable* nargs)
     //cache_.object = obj; 
     //showstr("method", method);
 
-    zval *p = &fci_.function_name;
-    *p = {0};
-    // fci_.function_name is a COPY_VALUE
-    ZVAL_STR(p, method);  
+
 
     fci_.named_params = nargs; 
 }
@@ -306,9 +306,14 @@ void fn_call::throw_failed()
     val_ptr fn(&fci_.function_name);
     str_ptr name(fn.zstr());
     if (name.ok())
+    {
+        zend_printf("fn_call_failed for %s\n", name.data());
         zend_throw_error(zend_ce_error, "fn_call_failed for %s", name.data());
-    else 
+    }
+    else {
+        zend_printf("fn_call_failed, no name\n");
         zend_throw_error(zend_ce_error, "fn_call_failed, no name");
+    }
 }
 
 bool fnexists::call(str_ptr arg)
@@ -568,8 +573,8 @@ fn_call::call_fn()
             throw_failed();
         }
     }
-
-    val_rc temp(std::move(result_));
+    // move clears result
+    val_rc temp(std::move(result_)); 
     return temp;
 }
 

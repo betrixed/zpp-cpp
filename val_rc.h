@@ -166,6 +166,10 @@ public:
         return Z_TYPE_P(&zv_);
     }
 
+    bool isUndefined() const {
+        return (Z_TYPE_P(&zv_) == IS_UNDEF);
+    }
+    
     bool isDouble() const
     {
         return (ref_type() == IS_DOUBLE);
