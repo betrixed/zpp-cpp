@@ -96,7 +96,7 @@ class IDriver {
     
     public function param(int $pno): string {}
 
-    public function prepare(string $sql) : mixed {}
+    public function prepare(string $sql, array $options=[]) : mixed {}
 
     public function prepareQuery(string $sql, 
         array $values = [], array $bindTypes = []): mixed {}

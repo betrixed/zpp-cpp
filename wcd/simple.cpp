@@ -28,6 +28,7 @@ Simple::construct(const weak_ref& db, int fetch)
 {
 	db_ = db.get();
 	fetch_ =  (fetch >= 0) ? fetch : IDriver::FETCH_ASSOC;
+
 	//showobj("\nSimple construct", vobj());
 
 }

@@ -57,10 +57,12 @@ base_obj_mgr<IDriver> IDriver::omg;
 DBSInit DBS;
 
 void DBSInit::init() {	
-		query_str = "query";
-		fetch_str = "fetch";
+		query_fn = "query";
+		fetch_fn = "fetch";
 		close_cursor = "closecursor";
 		pdo_prefix = "pdo_";
+
+		errorcode_fn = "errorcode";
 		pdo_class = "PDO";
 		begin_trans = "begintransaction";
 		bind_value = "bindvalue";
@@ -165,7 +167,7 @@ IDriver::debug_info(htab_rw di)
 	
 	di.set(DBS.tbl_models, table_models_);
 	di.set(DBS.schema_def, schema_def_);
-	di.set(DBS.fetch_str, ifetch_);
+	di.set(DBS.fetch_fn, ifetch_);
 	di.set(DBS.sqlgen_s, isql_);
 
 }
@@ -367,7 +369,7 @@ IDriver::fetchRow(val_ptr stmt, int mode)
 {
 	obj_ptr sobj(stmt);
 	val_rc farg(mode);
-	return sobj.call(DBS.fetch_str, farg);
+	return sobj.call(DBS.fetch_fn, farg);
 }
 
 
@@ -663,35 +665,12 @@ IDriver::param(int pno)
 }
 
 val_return
-IDriver::prepare(str_ptr query)
+IDriver::prepare(str_ptr query, htab_ptr options)
 {
 	//zend_printf("IDriver::prepare-- ");
 	val_return h;
-
-	h = handle();
-	if (h.has_errors())
-	{
-		return h;
-	}
-	obj_rc pdo(h.value_.zobject());
-
-	//showstr("Last SQL", lastsql_);
-	// Duplicate, to try and resolve 
-	// mystery interaction with PDO that can occur 
-	// with reference count error for sql string
-	val_rc::try_decref(lastsql_ptr_);
-	lastsql_ptr_.bind_string(query);
-
-	val_return stmt;
-
-	stmt.value_ = pdo.call(DBS.prepare_fn, lastsql_ptr_);
-
-	if (!stmt.value_.ok())
-	{
-		stmt.error() << "Prepare fail: " << query;
-	}
-
-	return stmt;
+	notImplementedMsg(h.error(), __FUNCTION__);
+	return h;
 }
 
 
@@ -822,7 +801,8 @@ ZEND_METHOD(Wcd_IDriver, connect)
 
 	IDriver* db = zval_toc<IDriver>(ZEND_THIS);
 
-	db->connect();
+	error_return val = db->connect();
+	val.throw_errors();
 }
 
 
@@ -1208,15 +1188,22 @@ ZEND_METHOD(Wcd_IDriver, param)
 ZEND_METHOD(Wcd_IDriver, prepare)
 {
 	str_ptr   sql;
+	htab_ptr  options;
 
 	zarg_rd args(execute_data);
 
-	args.zstring(sql, args.need(0));
+	sql = args.str(args.need(0));
+	
+	//zval* test = args.option(1);
+	//showmem("prepare teset", test);
+
+	options = args.htab(args.option(1));
 
 	if (!args.throw_errors())
 	{
 		IDriver* db = zval_toc<IDriver>(ZEND_THIS);	
-		val_return result = db->prepare(sql);
+		val_return result = db->prepare(sql, options);
+
 		result.throw_errors();
 		result.value_.move_zv(return_value);	
 	}

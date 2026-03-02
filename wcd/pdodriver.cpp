@@ -348,6 +348,7 @@ PdoDriver::execute(val_ptr stmt, bool close, bool fetch)
 	{
 		if (fetch) {
 			val_rc farg(ifetch_);
+
 			result.value_ = sobj.call(DBS.fetchall_fn, farg);
 		}
 		else {
@@ -412,7 +413,7 @@ PdoDriver::fetchRow(val_ptr stmt, int mode)
 {
 	obj_ptr sobj(stmt);
 	val_rc farg(mode);
-	return sobj.call(DBS.fetch_str, farg);
+	return sobj.call(DBS.fetch_fn, farg);
 }
 
 
@@ -450,22 +451,24 @@ PdoDriver::querySingle(str_ptr query)
 	obj_ptr pdo = result.value_.zobject();
 
 	val_rc arg1(query);
-	obj_rc stmt = pdo.call(DBS.query_str, arg1);
+	obj_rc stmt = pdo.call(DBS.query_fn, arg1);
 
-	if (!stmt.ok())
+	if (!stmt.ok()) // Not an object
 	{
-		result.error() << "pdo call " << query;
+		result.error() << "pdo query fail " << query;
 		return result;
 	}
-
 	arg1 = (zend_long) ifetch_;
-	result.value_ = stmt.call(DBS.fetch_str, arg1);
+	val_rc rows = stmt.call(DBS.fetchall_fn, arg1);
+	val_rc closed = stmt.call(DBS.close_cursor);
 
-	if (result.value_.isFalse())
+	if (!rows.isFalse())
 	{
-		zend_printf("Query failed: %s\n", query.data());
+		result.value_ = std::move(rows);
 	}
-	stmt.call(DBS.close_cursor);
+	else {
+		result.value_ = closed;
+	}
 
 	return result;
 } 
@@ -520,10 +523,14 @@ PdoDriver::lastInsertId(str_ptr name)
 
 
 val_return
-PdoDriver::prepare(str_ptr query)
+PdoDriver::prepare(str_ptr query, htab_ptr options)
 {
 	//zend_printf("PdoDriver::prepare-- ");
+	//showstr("query ", query);
+	//showarray("options", options);
+
 	val_return h;
+	
 
 	h = handle();
 	if (h.has_errors())
@@ -532,19 +539,30 @@ PdoDriver::prepare(str_ptr query)
 	}
 	obj_rc pdo(h.value_.zobject());
 
-	//showstr("Last SQL", lastsql_);
-	// Duplicate, to try and resolve 
-	// mystery interaction with PDO that can occur 
-	// with reference count error for sql string
+
 	val_rc::try_decref(lastsql_ptr_);
 	lastsql_ptr_.bind_string(query);
 
-	val_return stmt;
+	//showmem("lastsql", lastsql_ptr_);
 
-	stmt.value_ = pdo.call(DBS.prepare_fn, lastsql_ptr_);
+
+	val_return stmt;
+	if (!options.ok())
+	{
+		options = htab_ptr::empty_array();
+	}
+	val_rc     arg2(options);
+	//showarray("options arg", options);
+
+	stmt.value_ = pdo.call(DBS.prepare_fn, lastsql_ptr_, arg2);
 
 	if (!stmt.value_.isObject())
 	{
+		showobj("PDO is ", pdo);
+		showstr("call to ", DBS.prepare_fn);
+		showmem("prepare returned", stmt.value_);
+		str_rc code = pdo.call(DBS.errorcode_fn);
+		stmt.error() << "PDO errorcode: " << code << endl;
 		stmt.error() << "Prepare fail: " << query;
 	}
 

@@ -82,14 +82,17 @@ namespace wcd {
 
 		val_return lastInsertId(str_ptr name) override;
 		
+		val_return prepare(str_ptr query, htab_ptr options=htab_ptr()) override;
+
+		val_return prepareQuery(str_ptr query, htab_ptr values, htab_ptr bindTypes) override;
+
 
 		void log(htab_ptr info);
 
-		val_return prepare(str_ptr query);
+		
 
 		error_return prepareExecute(str_ptr query, htab_ptr values, htab_ptr bindTypes);
 
-		val_return prepareQuery(str_ptr query, htab_ptr values, htab_ptr bindTypes) override;
 
 		val_return query(str_ptr query, htab_ptr params) override;
 

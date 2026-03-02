@@ -208,7 +208,8 @@ wref_return
 IServer::getConnect(str_ptr name)
 {
 	wref_return result;
-	
+	IDriver* db;
+
 	//showstr("getConnect", name);
 	if (svc_key_.ok())
 	{
@@ -234,8 +235,7 @@ IServer::getConnect(str_ptr name)
 
 	if (conn.ok())
 	{
-		IDriver* db = zobj_toc<IDriver>(conn);
-		result.value_ = db->selfRef();
+		db = zobj_toc<IDriver>(conn);
 	}
 	else {
 
@@ -249,7 +249,7 @@ IServer::getConnect(str_ptr name)
 		if (conn.ok())
 		{
 
-			IDriver* db = zobj_toc<IDriver>(conn);
+			db = zobj_toc<IDriver>(conn);
 			result.value_ = db->selfRef();
 		}
 		else {
@@ -257,12 +257,24 @@ IServer::getConnect(str_ptr name)
 			dbresult = activate(alias);
 			if (dbresult.has_errors())
 			{
-				result = std::move(dbresult);
+				result = dbresult.move_error();
+				db = nullptr;
 			}
 			else {
-				IDriver* db = zobj_toc<IDriver>(dbresult.value_);
-				result.value_ = db->selfRef();
+				db = zobj_toc<IDriver>(dbresult.value_);
 			}
+		}
+
+	}
+	if (db)
+	{
+		error_return connected = db->connect();
+		if (connected.has_errors())
+		{
+			result = connected.move_error();
+		}
+		else {
+			result.value_ = db->selfRef();
 		}
 	}
 	/*

@@ -212,7 +212,7 @@ namespace wcd {
 		{
 			result = dbref_.get();
 
-			showobj("getConnect", result.value_);
+			//showobj("getConnect", result.value_);
 			return result;
 		}
 

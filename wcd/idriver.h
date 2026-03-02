@@ -113,7 +113,7 @@ namespace wcd {
 		obj_rc newParamList();
 		str_rc param(int pno);
 
-		val_return prepare(str_ptr query);
+		virtual val_return prepare(str_ptr query, htab_ptr options=htab_ptr());
 
 		error_return  prepareExecute(str_ptr query, htab_ptr values, htab_ptr bindTypes);
 
@@ -163,7 +163,7 @@ namespace wcd {
 
 		str_rc	  db_name_;
 		obj_rc    isql_;
-		int         ifetch_;
+		int       ifetch_;
 
 
 		htab_rc    table_models_;
@@ -181,11 +181,13 @@ namespace wcd {
 	class DBSInit : public state_init {
 	public:
 
-		str_intern  query_str;
-		str_intern  fetch_str;
+		str_intern  query_fn;
+		str_intern  fetch_fn;
 		str_intern  close_cursor;
 		str_intern  pdo_prefix;
 		str_intern  pdo_class;
+
+		str_intern  errorcode_fn;
 		str_intern  begin_trans;
 		str_intern  bind_value;
 		str_intern  commit_fn;

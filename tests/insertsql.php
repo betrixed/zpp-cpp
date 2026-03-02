@@ -147,6 +147,7 @@ require "php/SchemaTest.php";
 require "php/BaseModelTest.php";
 require "php/SqlGenerateTest.php";
 
+
 $run = new Runner();
 
 $run->runObject(new SchemaTest());
@@ -157,6 +158,8 @@ $run->runObject(new SqlGenerateTest());
 
 
 Services::service('die');
+
+
 if(extension_loaded("wccd"))
 {
 $remains = Select::getAlive();
