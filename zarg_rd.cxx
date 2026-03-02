@@ -157,6 +157,36 @@ zarg_rd::str(zval *arg)
 	return result;
 }
 
+htab_ptr 
+zarg_rd::htab(zval *arg)
+{
+	htab_ptr result;
+	if (!arg && maybe_)
+	{
+		result = htab_ptr::empty_array();
+		//showarray("arg", result);
+		return result;
+	}
+	val_ptr test(arg);
+
+	switch(test.ztype())
+	{
+	case IS_ARRAY:
+		result = test.zarray();
+		break;
+	default:
+		if (maybe_) {
+			result = htab_ptr::empty_array();
+		}
+		else {
+			error() << "Array value expected";
+		}
+		break;
+	}
+	//showarray("arg", result);
+	return result;
+}
+
 str_ptr 
 zarg_rd::str_or_null(zval *arg)
 {
@@ -393,19 +423,22 @@ zarg_rd::obj_ofclass(obj_ptr& value, zval* arg, zend_class_entry* ce)
 }
 
 bool 
-zarg_rd::zlong_null(zend_long& value, zval* arg)
+zarg_rd::zlong_null(zend_long& value, zval* arg, zend_long ifnull)
 {
 	val_ptr test(arg);
 	int itype = test.ref_type();
-	if (itype != IS_LONG && itype != IS_NULL) 
-	{
-		if (!maybe_) {
+
+	switch(itype) {
+		case IS_LONG:
+			value = test.zlong();
+			break;
+		case IS_NULL:
+			value = ifnull;
+			break;
+		default:
 			error() << "; Expected integer value or NULL";
-		}
-		
-		return false;
+			return false;
 	}
-	value = test.zlong();
 	return true;
 }
 

@@ -92,13 +92,15 @@ public:
 
 	str_ptr  str(zval *arg);
 	str_ptr  str_or_null(zval *arg);
+
+	htab_ptr htab(zval *arg);
 	
 	bool weakref(weak_ref& value, zval* arg);
 	bool zarray_null(htab_ptr& value, zval* arg);
 	bool zarray(htab_ptr& value, zval* arg);
 
 	bool zlong(zend_long& value, zval* arg);
-	bool zlong_null(zend_long& value, zval* arg);
+	bool zlong_null(zend_long& value, zval* arg, zend_long ifnull = -1);
 
 	bool zbool(bool& value, zval* arg);
 	
