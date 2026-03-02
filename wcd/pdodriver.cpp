@@ -115,8 +115,6 @@ PdoDriver::connect()
 
 	str_return dsn = getDSN();
 
-	
-
 	if (dsn.has_errors())
 	{
 		result = std::move(dsn);
@@ -142,7 +140,7 @@ PdoDriver::connect()
 
 	if (!h.ok())
 	{
-		result.error() << "PDO connect handle failed";
+		result.error() << "PDO connect handle failed for " << dsn.value_;
 	}
 	else {
 		val_rc::try_decref(handle_ptr_);

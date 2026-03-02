@@ -63,7 +63,7 @@ Pdo_pgsql::getTableNames()
 	
 	if (pstmt.has_errors())
 	{
-		result = std::move(pstmt);
+		result = pstmt.move_error();
 	}
 	else { 
 		result = fetchAllRows(pstmt.value_, IDriver::FETCH_COLUMN);
@@ -93,6 +93,8 @@ Pdo_pgsql::register_class(zend_class_entry* pclass)
 {
 	zend_class_entry* me = register_class_Wcd_Ext_PdoPgsql(pclass);
 
+	Pdo_pgsql::omg.classEntry(me);
+	
 	STATE_INIT_ADD(PGIs)
 	
 	return me;
