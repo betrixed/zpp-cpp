@@ -128,7 +128,7 @@ namespace wcd {
 			return wkself_;
 		}
 
-		str_rc quoteName(str_ptr name);
+		virtual str_rc quoteName(str_ptr name);
 
 		obj_rc readSchema();
 
