@@ -40,6 +40,8 @@ protected:
 
 
 public:
+    static val_ptr nullval();
+    
     /** bind_xxx calls best on already empty zval */
     void bind_string(zend_string* s);
 

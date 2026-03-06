@@ -27,6 +27,13 @@
 
 namespace zpp {
 	
+const val_rc val_null;
+
+val_ptr val_ptr::nullval()
+{
+	return val_ptr(val_null);
+}
+
 bool 
 val_ptr::same(const val_ptr& test) const
 {
