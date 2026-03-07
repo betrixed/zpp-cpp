@@ -93,3 +93,8 @@ class PdoPgsql extends PdoDriver {
     //public function getSqlType() : string {}
 
 };
+
+class Pgsqlfn extends \Wcc\IDriver  {
+    public function nextId() : int {}
+    public static function attribute(string $name, string $value): string {}
+};

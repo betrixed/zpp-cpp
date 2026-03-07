@@ -313,4 +313,125 @@ PgResult::objFetch()
 
 }//namespace wcd
 
+using namespace zpp;
+using namespace wcd;
+
+ZEND_METHOD(Wcd_Ext_Pgs_PgResource, __construct)
+{
+	zarg_rd args(execute_data);
+	obj_ptr handle = args.str(args.need(0));
+	if (!args.throw_errors())
+	{
+		PgResource* cobj = zobj_toc<PgResource>(ZEND_THIS);
+		cobj->construct(handle);
+	}
+
+}
+
+ZEND_METHOD(Wcd_Ext_Pgs_PgResource, __destruct)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+	PgResource* cobj = zobj_toc<PgResource>(ZEND_THIS);
+	cobj->destruct();
+
+}
+
+ZEND_METHOD(Wcd_Ext_Pgs_PgResource, close)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+	PgResource* cobj = zobj_toc<PgResource>(ZEND_THIS);
+	cobj->close();
+}
+
+ZEND_METHOD(Wcd_Ext_Pgs_PgQuery, __construct)
+{
+	zarg_rd args(execute_data);
+	obj_ptr pgconnect = args.obj(args.need(0));
+	str_ptr query = args.str(args.need(1));
+
+}
+
+ZEND_METHOD(Wcd_Ext_Pgs_PgQuery, __destruct)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+	PgQuery* cobj = zobj_toc<PgQuery>(ZEND_THIS);
+	cobj->destruct();
+}
+
+ZEND_METHOD(Wcd_Ext_Pgs_PgQuery, setParams)
+{
+	zarg_rd args(execute_data);
+	htab_ptr params = args.htab(args.need(0));
+	if (!args.throw_errors())
+	{
+		PgQuery* cobj = zobj_toc<PgQuery>(ZEND_THIS);
+		cobj->setParams(params);
+	}
+}
+
+ZEND_METHOD(Wcd_Ext_Pgs_PgQuery, execute)
+{
+	zarg_rd args(execute_data);
+	bool    usePgResult = true;
+	args.zbool(usePgResult, args.option(0));
+	if (!args.throw_errors())
+	{
+		PgQuery* cobj = zobj_toc<PgQuery>(ZEND_THIS);
+		cobj->execute(usePgResult);
+	}
+}
+
+ZEND_METHOD(Wcd_Ext_Pgs_PgResult, rowFetch)
+{
+	zarg_rd args(execute_data);
+	zend_long    fmode;
+	val_rc       result;
+
+	args.zlong(fmode, args.need(0));
+	if (!args.throw_errors())
+	{
+		PgResult* cobj = zobj_toc<PgResult>(ZEND_THIS);
+		result = cobj->rowFetch(usePgResult);
+		result.move_zv(return_value);
+	}	
+}
+
+ZEND_METHOD(Wcd_Ext_Pgs_PgResult, allRows)
+{
+	zarg_rd args(execute_data);
+	htab_rc result;
+	zend_long rtype;
+
+	args.zlong_null(rtype, args.options(0), IDriver::FETCH_ASSOC);
+	if (!args.throw_errors())
+	{
+		PgResult* cobj = zobj_toc<PgResult>(ZEND_THIS);
+		result = cobj->allRows(rtype);
+		result.move_zv(return_value);
+	}
+}
+
+ZEND_METHOD(Wcd_Ext_Pgs_PgResult, allColumns)
+{
+	zarg_rd args(execute_data);
+	htab_rc result;
+	zend_long colNum = 0;
+	args.zlong(rtype, args.nested(0));
+	if (!args.throw_errors())
+	{
+		PgResult* cobj = zobj_toc<PgResult>(ZEND_THIS);
+		result = cobj->allColumns(colNum);
+		result.move_zv(return_value);
+	}
+}
+
+ZEND_METHOD(Wcd_Ext_Pgs_PgResult, objFetch)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+	PgResult* cobj = zobj_toc<PgResult>(ZEND_THIS);
+	obj_rc    result = cobj->objFetch();
+	result.move_zv(return_value);
+
+}
+
 #endif
