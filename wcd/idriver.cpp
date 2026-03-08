@@ -229,17 +229,17 @@ IDriver::afterConnect()
 val_return
 IDriver::handle()
 {
-	val_return result(handle_ptr_);
+	val_return result;
 
-	if (!result.value_.ok())
+	if (!handle_ptr_.ok())
 	{
 		error_return err = connect();
-
 		if (err.has_errors())
 		{
 			result = err.move_error();
 		}
 	}
+	result = handle_ptr_;
 	return result;
 }
 
