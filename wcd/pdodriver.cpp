@@ -205,13 +205,13 @@ PdoDriver::query_lcase(str_ptr sql, int fmode)
 bool 
 PdoDriver::commit()
 {
-	val_return pdo = handle();
+	obj_return pdo = handle();
 
 	if (pdo.throw_errors())
 	{
 		return false;
 	}
-	obj_ptr h = pdo.value_.zobject();
+	obj_ptr h = pdo.value_;
 	{
 		val_rc result = h.call(DBS.commit_fn);
 		return result.isTrue();
@@ -225,17 +225,20 @@ PdoDriver::quoteName(str_ptr name)
 	return isql_c()->quoteName(name);
 }	
 
-bool 
-PdoDriver::closeStmt(val_ptr stmt)
+error_return 
+PdoDriver::closeStmt(obj_ptr sobj)
 {
-	obj_ptr sobj(stmt);
-	val_rc result = sobj.call(DBS.close_cursor);
-	return result.isTrue();
+	error_return result;
+	val_rc test = sobj.call(DBS.close_cursor);
+	if (!test.isTrue()) {
+		result.error() << "error in " << DBS.close_cursor;
+	};
+	return result;
 }
 
 
 void 
-PdoDriver::bind(val_ptr stmt, htab_ptr params)
+PdoDriver::bind(obj_ptr stmt, htab_ptr params)
 {
 
 	obj_ptr spdo(stmt);
@@ -299,14 +302,14 @@ PdoDriver::setCaseAttribute(int value)
 bool 
 PdoDriver::begin()
 {
-	val_return pdo = handle();
+	obj_return pdo = handle();
 
 	if (pdo.throw_errors())
 	{
 		return false;
 	}
-	obj_ptr h = pdo.value_.zobject();
-	val_rc test = h.call(DBS.begin_trans);
+
+	val_rc test = pdo.value_.call(DBS.begin_trans);
 	return test.isTrue();
 }
 
@@ -315,14 +318,14 @@ PdoDriver::escape(str_ptr value)
 {
 	str_rc result;
 
-	val_return pdo = handle();
+	obj_return pdo = handle();
 
 	if (pdo.throw_errors())
 	{
 		return false;
 	}
 
-	obj_ptr h(pdo.value_.zobject());
+	obj_ptr h(pdo.value_);
 	val_rc  arg(value);
 	
 	result = h.call(DBS.quote_fn, arg);
@@ -331,7 +334,7 @@ PdoDriver::escape(str_ptr value)
 }
 
 val_return
-PdoDriver::execute(val_ptr stmt, bool close, bool fetch)
+PdoDriver::execute(obj_ptr stmt, bool close, bool fetch)
 {
 
 	obj_ptr sobj(stmt);
@@ -421,7 +424,7 @@ PdoDriver::getAttribute(int key)
 {
 	val_rc result;
 
-	val_return h = handle();
+	obj_return h = handle();
 
 	if (h.throw_errors())
 	{
@@ -429,7 +432,7 @@ PdoDriver::getAttribute(int key)
 	}
 
 	val_rc arg(key);
-	obj_ptr pdo = h.value_.zobject();
+	obj_ptr pdo(h.value_);
 	return pdo.call(PDOI.getattribute_fn, arg);
 
 }
@@ -475,14 +478,12 @@ PdoDriver::querySingle(str_ptr query)
 bool 
 PdoDriver::inTransaction()
 {
-	val_return h = handle();
+	obj_return h = handle();
 	if (h.throw_errors())
 	{
 		return false;
 	}
-	obj_rc pdo(h.value_.zobject());
-
-	val_rc result = pdo.call(DBS.intransaction_fn);
+	val_rc result = h.value_.call(DBS.intransaction_fn);
 	return result.isTrue();
 }
 
@@ -490,8 +491,8 @@ PdoDriver::inTransaction()
 bool 
 PdoDriver::isConnected()
 {
-	val_return h = handle();
-	return !h.has_errors() && h.value_.isObject();
+	obj_return h = handle();
+	return !h.has_errors() && h.value_.ok();
 }
 
 
@@ -520,14 +521,14 @@ PdoDriver::lastInsertId(str_ptr name)
 }
 
 
-val_return
+obj_return
 PdoDriver::prepare(str_ptr query, htab_ptr options)
 {
 	//zend_printf("PdoDriver::prepare-- ");
 	//showstr("query ", query);
 	//showarray("options", options);
 
-	val_return h;
+	obj_return h;
 	
 
 	h = handle();
@@ -535,7 +536,7 @@ PdoDriver::prepare(str_ptr query, htab_ptr options)
 	{
 		return h;
 	}
-	obj_rc pdo(h.value_.zobject());
+	obj_rc pdo(h.value_);
 
 
 	val_rc::try_decref(lastsql_ptr_);
@@ -544,7 +545,7 @@ PdoDriver::prepare(str_ptr query, htab_ptr options)
 	//showmem("lastsql", lastsql_ptr_);
 
 
-	val_return stmt;
+	obj_return stmt;
 	if (!options.ok())
 	{
 		options = htab_ptr::empty_array();
@@ -552,18 +553,18 @@ PdoDriver::prepare(str_ptr query, htab_ptr options)
 	val_rc     arg2(options);
 	//showarray("options arg", options);
 
-	stmt.value_ = pdo.call(DBS.prepare_fn, lastsql_ptr_, arg2);
-
-	if (!stmt.value_.isObject())
+	val_rc test = pdo.call(DBS.prepare_fn, lastsql_ptr_, arg2);
+	
+	if (!test.isObject())
 	{
-		showobj("PDO is ", pdo);
-		showstr("call to ", DBS.prepare_fn);
-		showmem("prepare returned", stmt.value_);
+		//showobj("PDO is ", pdo);
+		//showstr("call to ", DBS.prepare_fn);
+		//showmem("prepare returned", stmt.value_);
 		str_rc code = pdo.call(DBS.errorcode_fn);
 		stmt.error() << "PDO errorcode: " << code << endl;
 		stmt.error() << "Prepare fail: " << query;
 	}
-
+	stmt.value_ = test.zobject();
 	return stmt;
 }
 
@@ -657,15 +658,14 @@ PdoDriver::query(str_ptr query, htab_ptr params)
 bool 
 PdoDriver::rollback()
 {
-	val_return h = handle();
+	obj_return h = handle();
 
 	if (h.throw_errors())
 	{
 		return false;
 	}
-	obj_ptr pdo(h.value_.zobject());
 
-	val_rc result = pdo.call(DBS.rollback_fn);
+	val_rc result = h.value_.call(DBS.rollback_fn);
 	return result.isTrue();
 }
 
@@ -685,17 +685,15 @@ PdoDriver::transaction()
 bool 
 PdoDriver::setAttribute(int key, val_ptr value)
 {
-	val_return h = handle();
+	obj_return h = handle();
 
 	if (h.throw_errors())
 	{
 		return false;
 	}
 
-	obj_ptr pdo(h.value_.zobject());
-
 	val_rc arg1(key);
-	val_rc result = pdo.call(PDOI.setattribute_fn, arg1, value);
+	val_rc result = h.value_.call(PDOI.setattribute_fn, arg1, value);
 
 	return result.isTrue();
 }

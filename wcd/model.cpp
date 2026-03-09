@@ -749,7 +749,7 @@ namespace wcd {
 			fgetcsv.set_named_args(csv_args);
 
 			fn_stripslashes stripslashes;
-			val_rc stmt;
+			obj_rc stmt;
 
 			while(true)
 			{
@@ -836,7 +836,7 @@ namespace wcd {
 					//showstr("sql", sql);
 					//showdata("record", record);
 
-					val_return stmt_ret = driver->prepare(sql);
+					obj_return stmt_ret = driver->prepare(sql);
 					if (stmt_ret.has_errors())
 					{
 						result = std::move(stmt_ret);

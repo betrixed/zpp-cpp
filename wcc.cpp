@@ -103,6 +103,8 @@ extern "C" {
 #include "wcd/pdo_mysql.cpp"
 #include "wcd/pdodriver.cpp"
 #include "wcd/idriver.cpp" 
+#include "wcd/pgsqlfn.cpp"
+
 #include "wcd/ibuild.cpp"
 
 #include "wcd/raw.cpp"

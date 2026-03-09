@@ -18,13 +18,6 @@ namespace wcd {
 	class PdoDriver : public IDriver {
 	public:
 
-		enum {
-			FETCH_OBJECT = PDO_FETCH_OBJ,
-			FETCH_ASSOC = PDO_FETCH_ASSOC,
-			FETCH_NUM = PDO_FETCH_NUM,
-			FETCH_COLUMN = PDO_FETCH_COLUMN
-		};
-
 		static base_obj_mgr<PdoDriver> omg;
 
 		static zend_class_entry* register_class(zend_class_entry* idriver_ce);
@@ -44,13 +37,14 @@ namespace wcd {
 
 		 error_return transaction() override;
 
-		void bind(val_ptr stmt, htab_ptr params) override;
+		
 		error_return connect() override;
 
-		bool closeStmt(val_ptr stmt) override;
+		error_return closeStmt(obj_ptr stmt) override;
 
-		str_rc escape(str_ptr value);
-		val_return execute(val_ptr stmt, bool close = true, bool fetch = false) override;
+		str_rc escape(str_ptr value) override;
+		void bind(obj_ptr stmt, htab_ptr params) override;
+		val_return execute(obj_ptr stmt, bool close = true, bool fetch = false) override;
 
 
 
@@ -82,11 +76,11 @@ namespace wcd {
 
 		val_return lastInsertId(str_ptr name) override;
 		
-		val_return prepare(str_ptr query, htab_ptr options=htab_ptr()) override;
+		obj_return prepare(str_ptr query, htab_ptr options=htab_ptr()) override;
 
 		val_return prepareQuery(str_ptr query, htab_ptr values, htab_ptr bindTypes) override;
 
-
+		
 		void log(htab_ptr info);
 
 		

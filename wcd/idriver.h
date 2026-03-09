@@ -59,17 +59,17 @@ namespace wcd {
 		virtual bool commit();
 		virtual bool rollback();
 
-		virtual void bind(val_ptr stmt, htab_ptr params);
+		virtual void bind(obj_ptr stmt, htab_ptr params);
 
 		virtual void close();
 
 		virtual error_return connect();
 
-		virtual bool closeStmt(val_ptr stmt);
+		virtual error_return closeStmt(obj_ptr stmt);
 
 		virtual str_rc escape(str_ptr value);
 
-		virtual val_return execute(val_ptr stmt, bool close = true, bool fetch = false);
+		virtual val_return execute(obj_ptr stmt, bool close = true, bool fetch = false);
 
 		virtual htab_return fetchAllRows(val_ptr stmt, int mode);
 		virtual val_rc fetchRow(val_ptr stmt, int mode);
@@ -92,7 +92,7 @@ namespace wcd {
 
 		
 
-		val_return handle();
+		obj_return handle();
 
 		obj_ptr isql();
 		obj_ptr iconfig();
@@ -111,9 +111,10 @@ namespace wcd {
 		obj_rc newBindings();
 		obj_rc newDmlBuild();
 		obj_rc newParamList();
-		str_rc param(int pno);
+		
+		virtual str_rc param(unsigned pno);
 
-		virtual val_return prepare(str_ptr query, htab_ptr options=htab_ptr());
+		virtual obj_return prepare(str_ptr query, htab_ptr options=htab_ptr());
 
 		error_return  prepareExecute(str_ptr query, htab_ptr values, htab_ptr bindTypes);
 
@@ -149,9 +150,11 @@ namespace wcd {
 
 		weak_ref  wkself_; // hold own reference
 		
-		// POINTERS TO PROPERTY STORAGE for read
+		// POINTERS TO PROPERTY zval struct STORAGE for read
 		val_ptr   name_ptr_;
+
 		val_ptr   handle_ptr_;
+
 		val_ptr   cfg_ptr_;
 		val_ptr   logging_ptr_;
 		val_ptr   lastsql_ptr_;

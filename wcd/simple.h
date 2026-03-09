@@ -20,7 +20,7 @@ namespace wcd {
 
 class Simple : public base_d {
 protected:
-	val_rc stmt_;
+	obj_rc  stmt_;
 	htab_rc values_;
 	//str_rc sql_;
 	obj_rc db_;

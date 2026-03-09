@@ -41,7 +41,7 @@ Simple::destruct()
 	if (stmt_.ok())
 	{
 		//showmem("set_null stmt", stmt_);
-		stmt_.set_null();
+		stmt_.init();
 	}
 	//showstr("Simple destruct sql_", sql_);
 	//sql_.init();
@@ -124,7 +124,7 @@ Simple::arraySet(str_ptr sql, htab_ptr params)
 
 	IDriver* db = zobj_toc<IDriver>(db_);
 
-	val_return stmt_ret = db->prepare(sql);
+	obj_return stmt_ret = db->prepare(sql);
 	if (stmt_ret.has_errors())
 	{
 		result = std::move(stmt_ret);
@@ -138,7 +138,7 @@ Simple::arraySet(str_ptr sql, htab_ptr params)
 	}
 	val_return rows = this->send(true);
 	db->closeStmt(stmt_);
-	stmt_.set_null();
+	stmt_.init();
 
 	if (rows.has_errors())
 	{
@@ -219,10 +219,10 @@ Simple::prepare(str_ptr sql)
 	if (stmt_.ok())
 	{
 		db->closeStmt(stmt_);
-		stmt_.set_null();
+		stmt_.init();
 	}
 
-	val_return stmt_ret = db->prepare(sql);
+	obj_return stmt_ret = db->prepare(sql);
 	if (stmt_ret.has_errors())
 	{
 		result = std::move(stmt_ret);
@@ -299,7 +299,7 @@ Simple::send(bool retval)
 		{
 			obj_ptr sobj(stmt_);
 			val_rc qstr = sobj.property(SQSTR.queryString);
-			stmt_.set_null();
+			stmt_.init();
 		}
 	}
 	values_.reset();

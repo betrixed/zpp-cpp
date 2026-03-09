@@ -15,13 +15,17 @@ public:
 	str_intern pg_fetch_array_fn;
 	str_intern pg_fetch_object_fn;
 	str_intern pg_fetch_assoc_fn;
+
+	str_intern pg_affected_rows_fn;
 	str_intern pg_fetch_all_fn;
 	str_intern pg_fetch_all_columns_fn;
+
 	str_intern pg_connect_fn;
 	str_intern pg_close_fn;
 	str_intern pg_query_fn;
 	str_intern pg_escape_string_fn;
 
+	str_intern pg_prepare_fn;
 	str_intern pg_execute_fn;
 	str_intern pg_last_error_fn;
 
@@ -34,7 +38,7 @@ public:
 	str_intern  host_s;
 	str_intern  port_s;
 	str_intern  user_s;
-	str_intern  pwd_d;
+	str_intern  pwd_s;
 	str_intern  blank_s;
 
 	str_intern  pgsql;
@@ -47,11 +51,8 @@ public:
 
 extern PgInit   PGFN;
 
-void pg_free_result(val_handle h);
 
-
-class PgQuery : public bind_d 
-{
+class PgQuery : public base_d {
 protected:
 	obj_rc  pghandle_; 
 	str_rc  id_;
@@ -81,11 +82,20 @@ protected:
 	unsigned long idseq_;
 	bool          inTransaction_;
 public:
+
+	enum {
+		PGSQL_ASSOC       =    1<<0,
+		PGSQL_NUM         =   1<<1,
+		PGSQL_BOTH        =    (PGSQL_ASSOC|PGSQL_NUM)
+	};
+
 	static base_obj_mgr<Pgsqlfn> omg;
 
-	static val_rc rowFetch(obj_ptr pgresult, int fmode);
+	static void register_class(zend_class_entry* idriver_ce);
 
-	static htab_rc allRows(obj_ptr pgresult, int fmode);
+	static val_rc rowFetch(obj_ptr pgresult, zend_long fmode);
+
+	static htab_rc allRows(obj_ptr pgresult, zend_long fmode);
 
 	static str_rc attribute(str_ptr name, str_ptr value);
 
@@ -99,9 +109,9 @@ public:
 
 	void close() override;
 
-	val_return prepare(str_ptr query, htab_ptr options=htab_ptr()) override;
+	obj_return prepare(str_ptr query, htab_ptr options=htab_ptr()) override;
 
-	val_return execute(val_ptr stmt, bool close = true, bool fetch = false) override;
+	val_return execute(obj_ptr stmt, bool close = true, bool fetch = false) override;
 
 	val_return querySingle(str_ptr query) override;
 
@@ -121,13 +131,31 @@ public:
 	bool commit() override;
 	bool rollback() override;
 
-	void closeStmt(val_ptr stmt) override;
+	error_return closeStmt(obj_ptr stmt) override;
 
 	Pgsqlfn();
 
-
-
 };
+
+
+obj_rc pg_connect(str_ptr s, int flags = 0);
+
+val_rc pg_fetch_all(obj_ptr robj,int fmode = Pgsqlfn::PGSQL_ASSOC);
+val_rc pg_fetch_array(obj_ptr robj, val_ptr row, int fmode =  Pgsqlfn::PGSQL_BOTH);
+val_rc pg_fetch_assoc(obj_ptr robj);
+val_rc pg_fetch_object(obj_ptr robj, val_ptr row = val_ptr::nullval(), 
+			str_ptr cname = str_ptr(), htab_ptr args = htab_ptr::empty_array());
+
+htab_rc pg_fetch_all_columns(obj_ptr robj, int colnum = 0);
+
+val_rc pg_execute(obj_ptr connect, str_ptr sname, htab_ptr params);
+void   pg_close(obj_ptr connect);
+val_rc pg_query(obj_ptr connect, str_ptr query);
+obj_rc pg_last_error(obj_ptr connect);
+obj_rc pg_prepare(obj_ptr h, str_ptr id, str_ptr sql);
+void   pg_free_result(obj_ptr h);
+str_rc pg_escape_string(obj_ptr conn, str_ptr s);
+
 
 
 }//namespace wcd

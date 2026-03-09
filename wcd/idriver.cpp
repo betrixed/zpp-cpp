@@ -44,6 +44,9 @@ extern "C" {
 #include "pdo_mysql.h"
 #endif
 
+#ifndef PGSQLFN_WDC_H
+#include "pgsqlfn.h"
+#endif
 
 #ifndef DIR_CACHE_H
 #include "wcc/dircache.h"
@@ -97,10 +100,6 @@ void DBSInit::init() {
 		handle_s = "handle";
 		logging_s = "logging";
 		lastsql_s = "lastsql";
-
-
-
-
 	}
 
 
@@ -226,10 +225,10 @@ IDriver::afterConnect()
 
 }
 
-val_return
+obj_return
 IDriver::handle()
 {
-	val_return result;
+	obj_return result;
 
 	if (!handle_ptr_.ok())
 	{
@@ -239,7 +238,7 @@ IDriver::handle()
 			result = err.move_error();
 		}
 	}
-	result = handle_ptr_;
+	result.value_ = handle_ptr_.zobject();
 	return result;
 }
 
@@ -306,12 +305,12 @@ IDriver::quoteName(str_ptr name)
 	return isql_c()->quoteName(name);
 }	
 
-bool 
-IDriver::closeStmt(val_ptr stmt)
+error_return 
+IDriver::closeStmt(obj_ptr stmt)
 {
-	obj_ptr sobj(stmt);
-	val_rc result = sobj.call(DBS.close_cursor);
-	return result.isTrue();
+	error_return result;
+	notImplementedMsg(result.error(), __FUNCTION__);
+	return result;
 }
 
 str_rc 
@@ -322,7 +321,7 @@ IDriver::escape(str_ptr value)
 	return value;
 }
 
-void IDriver::bind(val_ptr stmt, htab_ptr params)
+void IDriver::bind(obj_ptr stmt, htab_ptr params)
 {
 	throw_not_implemented("bind");
 }
@@ -349,7 +348,7 @@ IDriver::check_results(val_ptr test)
 }
 
 val_return
-IDriver::execute(val_ptr stmt, bool close, bool fetch)
+IDriver::execute(obj_ptr stmt, bool close, bool fetch)
 {
 	val_return result;
 	notImplementedMsg(result.error(), __FUNCTION__);
@@ -659,16 +658,16 @@ IDriver::prepareExecute(str_ptr query, htab_ptr values, htab_ptr bindTypes)
 }
 
 str_rc 
-IDriver::param(int pno)
+IDriver::param(unsigned pno)
 {
 	return DBS.place_holder;		
 }
 
-val_return
+obj_return
 IDriver::prepare(str_ptr query, htab_ptr options)
 {
 	//zend_printf("IDriver::prepare-- ");
-	val_return h;
+	obj_return h;
 	notImplementedMsg(h.error(), __FUNCTION__);
 	return h;
 }
@@ -750,17 +749,22 @@ ZEND_METHOD(Wcd_IDriver, begin)
 
 ZEND_METHOD(Wcd_IDriver, bind)
 {
-	zval* stmt;
-	zval* params;
+	zarg_rd args(execute_data);
 
-	ZEND_PARSE_PARAMETERS_START(2,2)
-	Z_PARAM_OBJECT(stmt)
-	Z_PARAM_ARRAY(params)
-	ZEND_PARSE_PARAMETERS_END();
+	obj_ptr stmt;
+	htab_ptr params;
 
-	IDriver* db = zval_toc<IDriver>(ZEND_THIS);
+	stmt = args.obj(args.need(0));
+	params = args.htab(args.need(1));
 
-	db->bind(stmt, params);
+	if (!args.throw_errors())
+	{
+		IDriver* db = zval_toc<IDriver>(ZEND_THIS);
+
+		db->bind(stmt, params);
+	}
+
+	
 }
 
 ZEND_METHOD(Wcd_IDriver, close)
@@ -782,7 +786,8 @@ ZEND_METHOD(Wcd_IDriver, closeStmt)
 
 	IDriver* db = zval_toc<IDriver>(ZEND_THIS);
 
-	db->closeStmt(stmt);
+	error_return result = db->closeStmt(stmt);
+	result.throw_errors();
 }
 
 ZEND_METHOD(Wcd_IDriver, commit)
@@ -1005,10 +1010,13 @@ ZEND_METHOD(Wcd_IDriver, handle)
 
 	IDriver* db = zval_toc<IDriver>(ZEND_THIS);
 
-	val_return result = db->handle();
-	result.throw_errors();
+	obj_return result = db->handle();
+	if (!result.throw_errors())
+	{
+		result.value_.move_zv(return_value);
+	}
 
-	result.value_.move_zv(return_value);
+	
 }
 
 ZEND_METHOD(Wcd_IDriver, iConfig)
@@ -1202,7 +1210,7 @@ ZEND_METHOD(Wcd_IDriver, prepare)
 	if (!args.throw_errors())
 	{
 		IDriver* db = zval_toc<IDriver>(ZEND_THIS);	
-		val_return result = db->prepare(sql, options);
+		obj_return result = db->prepare(sql, options);
 
 		result.throw_errors();
 		result.value_.move_zv(return_value);	
@@ -1385,6 +1393,7 @@ PHP_MINIT_FUNCTION(Wcd_IDriver_reg)
 	Pdo_mysql::register_class(pdo);
 
 
+	Pgsqlfn::register_class(dclass);
 
 	return SUCCESS;
 }
