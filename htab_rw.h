@@ -86,19 +86,16 @@ namespace zpp {
         {
             push_back((zend_string*) si);
         }
-
-        void push_back(const str_rc& si)
-        {
-            push_back((zend_string*) si);
-        }
         
         val_rc pop();
         
+        /*
         void push_back(str_rc sm)
         {
             push_back((zend_string*)sm);
         }
-
+        */
+        
         void push_back(const char* s, std::size_t slen);
 
         void setnull(zend_string* key);
