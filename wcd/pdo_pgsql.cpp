@@ -59,14 +59,14 @@ Pdo_pgsql::getTableNames()
 	htab_ptr    empty;
 	htab_return result;
 
-	val_return pstmt = this->prepareQuery(PGIs.tablenames_qry, empty, empty);
+	obj_return test = this->prepareQuery(PGIs.tablenames_qry, empty, empty);
 	
-	if (pstmt.has_errors())
+	if (test.has_errors())
 	{
-		result = pstmt.move_error();
+		result = test.move_error();
 	}
 	else { 
-		result = fetchAllRows(pstmt.value_, IDriver::FETCH_COLUMN);
+		result = fetchAllRows(test.value_, IDriver::FETCH_COLUMN);
 	}
 	return result;
 }

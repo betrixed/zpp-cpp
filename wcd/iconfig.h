@@ -51,7 +51,7 @@ public:
 	str_rc getDriverName();
 	str_rc getPassword();
 	str_rc getUsername();
-	int      getPort();
+	int    getPort();
 	str_rc getHost();
 	str_rc getDatabase();
 

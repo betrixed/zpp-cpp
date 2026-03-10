@@ -24,26 +24,29 @@ namespace wcd {
 
 using namespace zpp;
 
+base_obj_mgr<PgQuery> PgQuery::omg;
+base_obj_mgr<Pgsqlfn> Pgsqlfn::omg;
+
 PgInit   Pgfi;
 
 class PgfnTable {
 public:
-	fn_call_args2 pg_connect;
 	fn_call_args1 free_result;
-	fn_call_args3 pg_prepare;
-	fn_call_args3 pg_execute;
-
-	fn_call_args1 pg_affected_rows;
 	fn_call_args3 pg_fetch_array;
 	fn_call_args4 pg_fetch_object;
-
 	fn_call_args1 pg_fetch_assoc;
+
+	fn_call_args1 pg_affected_rows;
 	fn_call_args2 pg_fetch_all;
 	fn_call_args2 pg_fetch_all_columns;
+	fn_call_args2 pg_connect;
 
 	fn_call_args1 pg_close;
 	fn_call_args2 pg_query;
 	fn_call_args2 pg_escape_string;
+	fn_call_args3 pg_prepare;
+
+	fn_call_args3 pg_execute;
 	fn_call_args1 pg_last_error;
 
 	zend_class_entry*  pgsql_result_ce;
@@ -51,24 +54,22 @@ public:
 	void init(const PgInit& pg)
 	{
 		free_result.set_fname(pg.pg_free_result_fn);
-		pg_prepare.set_fname(pg.pg_prepare_fn);
-		pg_last_error.set_fname(pg.pg_last_error_fn);
-		pg_execute.set_fname(pg.pg_execute_fn);
-		pg_affected_rows.set_fname(pg.pg_affected_rows_fn);
-
 		pg_fetch_array.set_fname(pg.pg_fetch_array_fn);
-		pg_last_error.set_fname(pg.pg_last_error_fn);
 		pg_fetch_object.set_fname(pg.pg_fetch_object_fn);
 		pg_fetch_assoc.set_fname(pg.pg_fetch_assoc_fn);
-		pg_fetch_all.set_fname(pg.pg_fetch_all_fn);
 
+		pg_affected_rows.set_fname(pg.pg_affected_rows_fn);
+		pg_fetch_all.set_fname(pg.pg_fetch_all_fn);
 		pg_fetch_all_columns.set_fname(pg.pg_fetch_all_columns_fn);
 		pg_connect.set_fname(pg.pg_connect_fn);
 
 		pg_close.set_fname(pg.pg_close_fn);
 		pg_query.set_fname(pg.pg_query_fn);
 		pg_escape_string.set_fname(pg.pg_escape_string_fn);
+		pg_prepare.set_fname(pg.pg_prepare_fn);
 
+		pg_execute.set_fname(pg.pg_execute_fn);
+		pg_last_error.set_fname(pg.pg_last_error_fn);
 
 		pgsql_result_ce = class_data::get_class(pg.pgsql_result_class);
 	}
@@ -85,18 +86,22 @@ void PgInit::init()
 	pg_fetch_assoc_fn = "pg_fetch_assoc";
 
 	pg_affected_rows_fn = "pg_affected_rows";
-
 	pg_fetch_all_fn = "pg_fetch_all";
 	pg_fetch_all_columns_fn = "pg_fetch_all_columns";
-
 	pg_connect_fn = "pg_connect";
+
 	pg_close_fn = "pg_close";
 	pg_query_fn = "pg_query";
+	pg_escape_string_fn = "pg_escape_string";
+	pg_prepare_fn = "pg_prepare";
+
 	pg_execute_fn = "pg_execute";
 	pg_last_error_fn = "pg_last_error";
-	pg_escape_string_fn = "pg_escape_string";
-
-	pgsql_result_class = "pgsql\\result";
+	
+	table_names_q = 
+		"select tablename from pg_tables" 
+		" where schemaname not in ('information_schema', 'pg_catalog')"
+		" order by tablename";
 
 	squote_char = "'";
 	esc_squote = "\\'";
@@ -109,11 +114,8 @@ void PgInit::init()
 	blank_s = " ";
 
 	pgsql = "pgsql";
-
-	table_names_q = "select tablename from pg_tables" 
-
-	" where schemaname not in ('information_schema', 'pg_catalog')"
-	" order by tablename";
+	pgsql_result_class = "pgsql\\result";
+	
 }
 
 void PgInit::init_req()
@@ -463,18 +465,29 @@ Pgsqlfn::connect()
 	str_rc dbname = cfg->getDatabase();
 	str_rc user = cfg->getUsername();
 	str_rc pwd = cfg->getPassword();
-	val_rc port = cfg->getPort();
-	port.toString();
+	val_rc portval = cfg->getPort();
 
 	htab_rc cparams;
 
 	htab_rw cp(cparams);
 
-	cp.push_back(Pgsqlfn::attribute(Pgfi.dbname_s, dbname));
-	cp.push_back(Pgsqlfn::attribute(Pgfi.host_s, host));
-	cp.push_back(Pgsqlfn::attribute(Pgfi.port_s, port.zstr()));
-	cp.push_back(Pgsqlfn::attribute(Pgfi.user_s, user));
-	cp.push_back(Pgsqlfn::attribute(Pgfi.pwd_s, pwd));
+	if (dbname.size())
+		cp.push_back(Pgsqlfn::attribute(Pgfi.dbname_s, dbname));
+
+	if (host.size())
+		cp.push_back(Pgsqlfn::attribute(Pgfi.host_s, host));
+
+	if (portval.zlong() != 0)
+	{
+		portval.toString();
+		cp.push_back(Pgsqlfn::attribute(Pgfi.port_s, portval.zstr()));
+	}
+
+	if (user.size())
+		cp.push_back(Pgsqlfn::attribute(Pgfi.user_s, user));
+
+	if (pwd.size())
+		cp.push_back(Pgsqlfn::attribute(Pgfi.pwd_s, pwd));
 
 	str_rc cstr = implode(Pgfi.blank_s, cparams);
 	obj_rc hconnect = pg_connect(cstr);
@@ -758,6 +771,8 @@ void
 Pgsqlfn::register_class(zend_class_entry* idriver_ce)
 {
 
+	STATE_INIT_ADD(Pgfi);
+
 	zend_class_entry* dclass = register_class_Wcd_Ext_Pgsqlfn(idriver_ce);
 
 	Pgsqlfn::omg.classEntry(dclass);
@@ -790,6 +805,13 @@ ZEND_METHOD(Wcd_Ext_Pgs_PgQuery, __destruct)
 	ZEND_PARSE_PARAMETERS_NONE();
 	PgQuery* cobj = zval_toc<PgQuery>(ZEND_THIS);
 	cobj->destruct();
+}
+
+ZEND_METHOD(Wcd_Ext_Pgs_PgQuery, close)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+	PgQuery* cobj = zval_toc<PgQuery>(ZEND_THIS);
+	cobj->close();
 }
 
 ZEND_METHOD(Wcd_Ext_Pgs_PgQuery, setParams)

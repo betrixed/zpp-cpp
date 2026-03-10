@@ -32,8 +32,8 @@ namespace wcd {
 		 bool commit() override;
 		 bool rollback() override;
 
-		htab_return fetchAllRows(val_ptr stmt, int mode) override;
-		val_rc fetchRow(val_ptr stmt, int mode) override;
+		htab_return fetchAllRows(obj_ptr stmt, int mode) override;
+		val_return fetchRow(obj_ptr stmt, int mode) override;
 
 		 error_return transaction() override;
 
@@ -78,7 +78,7 @@ namespace wcd {
 		
 		obj_return prepare(str_ptr query, htab_ptr options=htab_ptr()) override;
 
-		val_return prepareQuery(str_ptr query, htab_ptr values, htab_ptr bindTypes) override;
+		obj_return prepareQuery(str_ptr query, htab_ptr values, htab_ptr bindTypes) override;
 
 		
 		void log(htab_ptr info);

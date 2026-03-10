@@ -356,19 +356,19 @@ IDriver::execute(obj_ptr stmt, bool close, bool fetch)
 }
 
 htab_return
-IDriver::fetchAllRows(val_ptr stmt, int mode)
+IDriver::fetchAllRows(obj_ptr stmt, int mode)
 {
 	htab_return result;
 	notImplementedMsg(result.error(), __FUNCTION__);
 	return result;
 }
 
-val_rc 
-IDriver::fetchRow(val_ptr stmt, int mode)
+val_return 
+IDriver::fetchRow(obj_ptr stmt, int mode)
 {
-	obj_ptr sobj(stmt);
-	val_rc farg(mode);
-	return sobj.call(DBS.fetch_fn, farg);
+	val_return result;
+	notImplementedMsg(result.error(), __FUNCTION__);
+	return result;
 }
 
 
@@ -673,10 +673,10 @@ IDriver::prepare(str_ptr query, htab_ptr options)
 }
 
 
-val_return
+obj_return
 IDriver::prepareQuery(str_ptr query, htab_ptr values, htab_ptr bindTypes)
 {
-	val_return result;
+	obj_return result;
 	notImplementedMsg(result.error(), __FUNCTION__);
 	return result;
 }
@@ -849,38 +849,43 @@ ZEND_METHOD(Wcd_IDriver, execute)
 
 ZEND_METHOD(Wcd_IDriver, fetchAllRows)
 {
-	zval* stmt;
-	zend_long   mode = PDO_FETCH_ASSOC;
+	zarg_rd args(execute_data);
 
-	ZEND_PARSE_PARAMETERS_START(1,2)
-	Z_PARAM_OBJECT(stmt)
-	Z_PARAM_OPTIONAL
-	Z_PARAM_LONG(mode);
-	ZEND_PARSE_PARAMETERS_END();
+	obj_ptr stmt = args.obj(args.need(0));
+	zend_long fmode = PDO_FETCH_ASSOC;
 
-	IDriver* db = zval_toc<IDriver>(ZEND_THIS);	
+	args.zlong(fmode, args.option(1));
 
-	htab_return result = db->fetchAllRows(stmt, mode);
-	result.throw_errors();
-	result.value_.move_zv(return_value);
+	htab_return result;
+
+	if (!args.throw_errors())
+	{
+		IDriver* db = zval_toc<IDriver>(ZEND_THIS);	
+		htab_return result = db->fetchAllRows(stmt, fmode);
+		if (!result.throw_errors()) {
+			result.value_.move_zv(return_value);	
+		}
+	}	
 }
 
 ZEND_METHOD(Wcd_IDriver, fetchRow)
 {
-	zval* stmt;
-	zend_long   mode = PDO_FETCH_ASSOC;
+	zarg_rd args(execute_data);
 
-	ZEND_PARSE_PARAMETERS_START(1,2)
-	Z_PARAM_OBJECT(stmt)
-	Z_PARAM_OPTIONAL
-	Z_PARAM_LONG(mode);
-	ZEND_PARSE_PARAMETERS_END();
+	obj_ptr stmt = args.obj(args.need(0));
+	zend_long fmode = PDO_FETCH_ASSOC;
 
-	IDriver* db = zval_toc<IDriver>(ZEND_THIS);	
+	args.zlong(fmode, args.option(1));
+	if (!args.throw_errors())
+	{
+		IDriver* db = zval_toc<IDriver>(ZEND_THIS);	
 
-	val_return result = db->fetchRow(stmt, mode);
-	result.throw_errors();
-	result.value_.move_zv(return_value);
+		val_return result = db->fetchRow(stmt, fmode);
+		if (!result.throw_errors())
+		{
+			result.value_.move_zv(return_value);
+		}
+	}
 }
 
 ZEND_METHOD(Wcd_IDriver, getColumnNames)
@@ -1232,7 +1237,7 @@ ZEND_METHOD(Wcd_IDriver, prepareQuery)
 	if (!args.throw_errors())
 	{
 		IDriver* db = zval_toc<IDriver>(ZEND_THIS);	
-		val_return result = db->prepareQuery( sql, values, types);
+		obj_return result = db->prepareQuery( sql, values, types);
 		result.throw_errors();
 		result.value_.move_zv(return_value);
 	}
@@ -1375,6 +1380,7 @@ PHP_MINIT_FUNCTION(Wcd_IDriver_reg)
 {
 	STATE_INIT_ADD(DBS)
 
+
 	zend_class_entry* dclass = register_class_Wcd_IDriver();
 
 	IDriver::omg.classEntry(dclass);
@@ -1391,8 +1397,7 @@ PHP_MINIT_FUNCTION(Wcd_IDriver_reg)
 
 	Pdo_pgsql::register_class(pdo);
 	Pdo_mysql::register_class(pdo);
-
-
+	
 	Pgsqlfn::register_class(dclass);
 
 	return SUCCESS;

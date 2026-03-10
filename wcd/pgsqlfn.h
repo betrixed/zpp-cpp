@@ -19,13 +19,13 @@ public:
 	str_intern pg_affected_rows_fn;
 	str_intern pg_fetch_all_fn;
 	str_intern pg_fetch_all_columns_fn;
-
 	str_intern pg_connect_fn;
+	
 	str_intern pg_close_fn;
 	str_intern pg_query_fn;
 	str_intern pg_escape_string_fn;
-
 	str_intern pg_prepare_fn;
+	
 	str_intern pg_execute_fn;
 	str_intern pg_last_error_fn;
 

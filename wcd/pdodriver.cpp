@@ -187,7 +187,7 @@ PdoDriver::query_lcase(str_ptr sql, int fmode)
 	}	
 
 	htab_return result;
-	val_return stmt = prepareQuery(sql, htab_ptr(), htab_ptr());
+	obj_return stmt = prepareQuery(sql, htab_ptr(), htab_ptr());
 
 	if (stmt.has_errors())
 	{
@@ -385,9 +385,8 @@ PdoDriver::execute(obj_ptr stmt, bool close, bool fetch)
 }
 
 htab_return 
-PdoDriver::fetchAllRows(val_ptr stmt, int mode)
+PdoDriver::fetchAllRows(obj_ptr sobj, int mode)
 {
-	obj_ptr sobj(stmt);
 	htab_return result;
 
 	if (sobj.ok())
@@ -409,12 +408,13 @@ PdoDriver::fetchAllRows(val_ptr stmt, int mode)
 	return result;
 }
 
-val_rc 
-PdoDriver::fetchRow(val_ptr stmt, int mode)
+val_return 
+PdoDriver::fetchRow(obj_ptr sobj, int mode)
 {
-	obj_ptr sobj(stmt);
+	val_return result;
 	val_rc farg(mode);
-	return sobj.call(DBS.fetch_fn, farg);
+	result.value_ = sobj.call(DBS.fetch_fn, farg);
+	return result;
 }
 
 
@@ -442,14 +442,15 @@ PdoDriver::querySingle(str_ptr query)
 {
 	val_return result;
 
-	result = handle();
+	obj_return h = handle();
 
-	if (result.has_errors())
+	if (h.has_errors())
 	{
+		result = h.move_error();
 		return result;
 	}
 
-	obj_ptr pdo = result.value_.zobject();
+	obj_ptr pdo = h.value_;
 
 	val_rc arg1(query);
 	obj_rc stmt = pdo.call(DBS.query_fn, arg1);
@@ -569,10 +570,10 @@ PdoDriver::prepare(str_ptr query, htab_ptr options)
 }
 
 
-val_return
+obj_return
 PdoDriver::prepareQuery(str_ptr query, htab_ptr values, htab_ptr bindTypes)
 {
-	val_return result;
+	obj_return result;
 
 	result = prepare(query);
 	
@@ -581,7 +582,7 @@ PdoDriver::prepareQuery(str_ptr query, htab_ptr values, htab_ptr bindTypes)
 		return result;
 	}
 
-	obj_rc stmt((zval*)result.value_);
+	obj_ptr stmt(result.value_);
     //showobj("stmt ", stmt);
 	val_rc test;
 	val_rc temp;
@@ -627,15 +628,17 @@ val_return
 PdoDriver::query(str_ptr query, htab_ptr params)
 {
 	htab_ptr btypes;
+	val_return result;
 
-	val_return result = prepareQuery(query, params, btypes);
+	obj_return stmt_ret = prepareQuery(query, params, btypes);
 
-	if (result.has_errors())
+	if (stmt_ret.has_errors())
 	{
+		result = stmt_ret.move_error();
 		return result;
 	}
 
-	obj_rc stmt = result.value_.zobject();
+	obj_ptr stmt = stmt_ret.value_;
 
 	val_rc data = stmt.call(DBS.fetchall_fn);
 

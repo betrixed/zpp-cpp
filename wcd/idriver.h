@@ -71,8 +71,8 @@ namespace wcd {
 
 		virtual val_return execute(obj_ptr stmt, bool close = true, bool fetch = false);
 
-		virtual htab_return fetchAllRows(val_ptr stmt, int mode);
-		virtual val_rc fetchRow(val_ptr stmt, int mode);
+		virtual htab_return fetchAllRows(obj_ptr stmt, int mode);
+		virtual val_return fetchRow(obj_ptr stmt, int mode);
 
 		virtual bool inTransaction();
 		virtual bool isAutoCommit();
@@ -118,7 +118,7 @@ namespace wcd {
 
 		error_return  prepareExecute(str_ptr query, htab_ptr values, htab_ptr bindTypes);
 
-		virtual val_return prepareQuery(str_ptr query, htab_ptr values, htab_ptr bindTypes);
+		virtual obj_return prepareQuery(str_ptr query, htab_ptr values, htab_ptr bindTypes);
 
 		virtual val_return query(str_ptr query, htab_ptr params);
 
