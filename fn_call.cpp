@@ -230,12 +230,11 @@ fn_call::set_named_args(HashTable* nargs)
 void 
 fn_call::set_fci(zend_object* obj, str_ptr method, HashTable* nargs)
 {
-
     //method_name_ = method;
     zval *p = &fci_.function_name;
     *p = {0};
     // fci_.function_name is a COPY_VALUE
-    ZVAL_STR(p, method);  
+    val_ptr::string_bind(p, method);  
     fci_.size = sizeof(fci_);
     fci_.object = obj;
 
@@ -255,6 +254,10 @@ void fn_call::debug_dump()
     showmem("fci_.function_name", &fci_.function_name);
     zend_printf("param_count %d, params %lx\n", fci_.param_count, (unsigned long) fci_.params);
 
+    for(uint32_t i = 0; i < fci_.param_count; i++)
+    {
+        zend_printf("%d: ", i); showmem("zval ", fci_.params+i);
+    }
     /*zend_function *function_handler;
     zend_class_entry *calling_scope;
     zend_class_entry *called_scope;
@@ -318,14 +321,14 @@ void fn_call::throw_failed()
 
 bool fnexists::call(str_ptr arg)
 {
-    ZVAL_STR(argsptr(), arg);
+    val_ptr::string_bind(argsptr(), arg);
     val_rc result = call_fn();
     return val_ptr(result).zbool();
 }
 
 bool fn_class_exists::call(str_ptr arg)
 {
-    ZVAL_STR(argsptr(), arg);
+    val_ptr::string_bind(argsptr(), arg);
     val_rc result = call_fn();
     return val_ptr(result).zbool();
 }
@@ -335,7 +338,7 @@ fn_dirname::call(str_ptr name, int level)
 {
     zval* pz = argsptr();
 
-    ZVAL_STR(pz, name);
+    val_ptr::string_bind(pz, name);
     ZVAL_LONG(pz+1, level);
 
     str_rc result = call_fn();
@@ -347,8 +350,8 @@ pregquote::call(str_ptr str, str_ptr delimiter)
 {
     zval* pz = argsptr();
 
-    ZVAL_STR(pz,   (zend_string*) str);
-    ZVAL_STR(pz+1, (zend_string*) delimiter);
+    val_ptr::string_bind(pz,   (zend_string*) str);
+    val_ptr::string_bind(pz+1, (zend_string*) delimiter);
 
     val_rc result = call_fn();
     return str_rc(val_ptr(result).zstr());
@@ -362,9 +365,9 @@ fopen(str_ptr path, str_ptr mode,
     
     auto &fn = TLFNs.fopen;
     zval* pz = fn.argsptr();
-    ZVAL_STR(pz, (zend_string*) path); //1
+    val_ptr::string_bind(pz, (zend_string*) path); //1
     pz++;
-    ZVAL_STR(pz, (zend_string*) mode);//2
+    val_ptr::string_bind(pz, (zend_string*) mode);//2
     pz++;
     ZVAL_BOOL(pz, use_include_path);//2
     pz++;
@@ -414,7 +417,7 @@ sha1(str_ptr value, bool binary)
     auto& fn = TLFNs.sha1;
     zval* p = fn.argsptr();
 
-    ZVAL_STR(p, value);
+    val_ptr::string_bind(p, value);
     p++;
     ZVAL_BOOL(p, binary);
     str_rc result = fn.call_fn();
@@ -426,7 +429,7 @@ bool is_readable(str_ptr path)
     auto& fn = TLFNs.is_readable;
 
     zval* p = fn.argsptr();
-    ZVAL_STR(p, path);
+    val_ptr::string_bind(p, path);
     val_rc result= fn.call_fn();
     return result.isTrue();
 }
@@ -449,7 +452,7 @@ fn_stripslashes::fn_stripslashes() : fn_call_args<1>()
 str_rc 
 fn_stripslashes::call(str_ptr str)
 {
-    ZVAL_STR(argsptr(), str);
+    val_ptr::string_bind(argsptr(), str);
     return str_rc(call_fn());
 }
 
@@ -459,7 +462,7 @@ file_content::call(str_ptr path, int offset, size_t len)
     //showmem("fn_name", &fci_.function_name);
     zval* pz = argsptr();
 
-    ZVAL_STR(pz, (zend_string*) path);
+    val_ptr::string_bind(pz, (zend_string*) path);
     ZVAL_BOOL(pz+1, false);
     ZVAL_NULL(pz+2); // resource arg
     ZVAL_LONG(pz+3, offset);
@@ -477,7 +480,7 @@ val_rc
 PathInfo::call(str_ptr path, int flags)
 {
     zval* pz = argsptr();
-    ZVAL_STR(pz, path);
+    val_ptr::string_bind(pz, path);
     ZVAL_LONG(pz+1, flags);
     return call_fn();
 }
@@ -495,7 +498,7 @@ fn_simple_loader::call(str_ptr path)
 {
     val_rc result;
     showmem("fn name", &fci_.function_name);
-    ZVAL_STR(argsptr(), path);
+    val_ptr::string_bind(argsptr(), path);
     showstr("\nload path", path);
     result = call_fn();
     showmem("loader call", result);
@@ -532,7 +535,7 @@ array_splice(htab_rc& input, int offset, int length, htab_ptr replace)
     zval* args = fn.argsptr();
 
     htab_rw hw(input); // make writable
-    ZVAL_ARR(args, input);
+    val_ptr::array_bind(args, input);
     ZVAL_NEW_REF(args, args);
     args++;
     ZVAL_LONG(args,offset);
@@ -541,7 +544,7 @@ array_splice(htab_rc& input, int offset, int length, htab_ptr replace)
     args++;
     if (replace.size())
     {
-        ZVAL_ARR(args, replace);
+        val_ptr::array_bind(args, replace);
     }
     else {
         ZVAL_EMPTY_ARRAY(args);
@@ -584,8 +587,8 @@ addcslashes(str_ptr s, str_ptr escapes)
     fn_call_args<2>  fn;
     fn.set_fci(nullptr, STAB.addcslashes, nullptr);
     zval* pz = fn.argsptr();
-    ZVAL_STR(pz, (zend_string*) s);
-    ZVAL_STR(pz+1, (zend_string*) escapes);
+    val_ptr::string_bind(pz, (zend_string*) s);
+    val_ptr::string_bind(pz+1, (zend_string*) escapes);
     str_rc result = fn.call_fn();
     return result;
 }
@@ -631,7 +634,7 @@ fn_constant::call(str_ptr name)
 {
     //showstr("fn_constant call", name);
     //showmem("fn", &fci_.function_name);
-    ZVAL_STR(argsptr(), name);
+    val_ptr::string_bind(argsptr(), name);
     val_rc result;
     result = call_fn();
     //showmem("constant value", result);
@@ -641,7 +644,7 @@ fn_constant::call(str_ptr name)
 long 
 fn_filemtime::call(str_ptr path)
 {
-    ZVAL_STR(argsptr(), path);
+    val_ptr::string_bind(argsptr(), path);
     val_rc result = call_fn();
     return result.zlong();
 }
@@ -649,7 +652,7 @@ fn_filemtime::call(str_ptr path)
 bool 
 fn_defined::call(str_ptr name)
 {
-    ZVAL_STR(argsptr(), name);
+    val_ptr::string_bind(argsptr(), name);
     val_rc result = call_fn();
     return result.isTrue();
 }
@@ -658,8 +661,8 @@ bool
 fn_define::call(str_ptr constant_name, str_ptr value)
 {
     zval* args = argsptr();
-    ZVAL_STR(args, constant_name);
-    ZVAL_STR(args+1, value);
+    val_ptr::string_bind(args, constant_name);
+    val_ptr::string_bind(args+1, value);
     val_rc result = call_fn();
     return result.isTrue();
 }
@@ -668,7 +671,7 @@ bool
 fn_define::call(str_ptr constant_name, val_ptr value)
 {
     zval* args = argsptr();
-    ZVAL_STR(args, constant_name);
+    val_ptr::string_bind(args, constant_name);
     ZVAL_COPY_VALUE(args+1, value);
     val_rc result = call_fn();
     return result.isTrue();
@@ -686,7 +689,7 @@ fn_fgetcsv::call(val_ptr file_res)
 val_rc 
 fn_opendir::call(str_ptr path)
 {
-    ZVAL_STR(argsptr(), path);
+    val_ptr::string_bind(argsptr(), path);
     return call_fn();
 }
 
@@ -708,7 +711,7 @@ bool
 fn_mkdir::call(str_ptr path, int permissions, bool recurse)
 {
     zval* args = argsptr();
-    ZVAL_STR(args, path);
+    val_ptr::string_bind(args, path);
     ZVAL_LONG(args+1, permissions);
     ZVAL_BOOL(args+2, recurse);
 
@@ -718,7 +721,7 @@ fn_mkdir::call(str_ptr path, int permissions, bool recurse)
 
 bool extnloaded::call(str_ptr name)
 {
-    ZVAL_STR(argsptr(), (zend_string*) name);
+    val_ptr::string_bind(argsptr(), (zend_string*) name);
     val_rc result = call_fn();
     return val_ptr(result).isTrue();
 }
@@ -732,7 +735,7 @@ get_constant(str_ptr name)
 str_rc 
 fn_realpath::call(str_ptr path)
 {
-    ZVAL_STR(argsptr(), path);
+    val_ptr::string_bind(argsptr(), path);
     return call_fn();
 }
 
@@ -797,7 +800,7 @@ mb_detect_encoding(str_ptr str, const val_rc& encodings, bool strict)
     fn_call_args<3>  fn;
 
     zval* pz = fn.argsptr();
-    ZVAL_STR(pz, (zend_string*) str);
+    val_ptr::string_bind(pz, (zend_string*) str);
     ZVAL_COPY_VALUE(pz+1, encodings);
     ZVAL_BOOL(pz+2,strict);
 
@@ -809,7 +812,7 @@ str_rc
 rawurlencode(str_ptr s)
 {
     fn_call_args<1>  fn;
-    ZVAL_STR(fn.argsptr(), s);
+    val_ptr::string_bind(fn.argsptr(), s);
 
     fn.set_fci(nullptr, STAB.rawurlencode, nullptr);
     return fn.call_fn();
@@ -820,7 +823,7 @@ str_rc
 ucwords(str_ptr s)
 {
     fn_call_args<1>  fn;
-    ZVAL_STR(fn.argsptr(), s);
+    val_ptr::string_bind(fn.argsptr(), s);
     fn.set_fci(nullptr, STAB.ucwords, nullptr);
     return fn.call_fn();
 }
@@ -831,9 +834,9 @@ strtr(str_ptr s, str_ptr from, str_ptr to)
     fn_call_args<3>  fn;
     zval* ap = fn.argsptr();
 
-    ZVAL_STR(ap, s);
-    ZVAL_STR(ap+1, from);
-    ZVAL_STR(ap+2, to);
+    val_ptr::string_bind(ap, s);
+    val_ptr::string_bind(ap+1, from);
+    val_ptr::string_bind(ap+2, to);
 
     fn.set_fci(nullptr, STAB.strtr, nullptr);
     return fn.call_fn();
@@ -1040,7 +1043,7 @@ bool
 is_dir(str_ptr path)
 {
     auto& fn = TLFNs.is_dir;
-    ZVAL_STR(fn.argsptr(), path);
+    val_ptr::string_bind(fn.argsptr(), path);
     val_rc result = fn.call_fn();
     return result.isTrue();
 }
@@ -1049,7 +1052,7 @@ bool
 is_file(str_ptr path)
 {
     auto& fn = TLFNs.is_file;
-    ZVAL_STR(fn.argsptr(), path);
+    val_ptr::string_bind(fn.argsptr(), path);
     val_rc result = fn.call_fn();
     return result.isTrue();
 }
@@ -1081,7 +1084,7 @@ htab_rc
 fn_glob::call(str_ptr name, int flags)
 {
     zval* pz = argsptr();
-    ZVAL_STR(pz, name);
+    val_ptr::string_bind(pz, name);
     ZVAL_LONG(pz+1, flags);
 
     htab_rc result;
@@ -1141,7 +1144,7 @@ fwrite(val_ptr res, str_ptr data, zend_long len)
     zval *ap = fn.argsptr();
     ZVAL_COPY_VALUE(ap, res);
     ap++;
-    ZVAL_STR(ap, data);
+    val_ptr::string_bind(ap, data);
     ap++;
     if (len > 0)
     {
@@ -1160,7 +1163,7 @@ unlink(str_ptr path, val_ptr context)
 {
     auto& fn = TLFNs.unlink;
     zval* ap = fn.argsptr();
-    ZVAL_STR(ap, path);
+    val_ptr::string_bind(ap, path);
     ap++;
     if (context.ok())
     {
@@ -1220,11 +1223,11 @@ unserialize(str_ptr data, htab_ptr options)
 {
     auto& fn = TLFNs.unserialize;
     zval* ap = fn.argsptr();
-    ZVAL_STR(ap, data);
+    val_ptr::string_bind(ap, data);
     ap++;
     if (options.size())
     {
-        ZVAL_ARR(ap, options);
+        val_ptr::array_bind(ap, options);
     }
     else {
         ZVAL_EMPTY_ARRAY(ap);
