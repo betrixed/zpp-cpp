@@ -13,6 +13,7 @@
 #include "wcd/pdo_pgsql.cpp"
 #include "wcd/pdo_mysql.cpp"
 #include "wcd/pdodriver.cpp"
+#include "wcd/pgsqlfn.cpp"
 #include "wcd/idriver.cpp" 
 
 #include "wcd/raw.cpp"
