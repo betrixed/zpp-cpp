@@ -370,6 +370,7 @@ using namespace zpp;
 
 		if (val.isArray())
 		{
+
 			htab_ptr rows(val);
 			if (rows.size())
 			{

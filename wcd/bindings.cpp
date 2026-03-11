@@ -668,6 +668,7 @@ Bindings::select()
 	{
 		old_fetch = db.setFetch(fetch_as);
 	}
+
 	val_return rows_ret = RunSql::op(obj_ptr(db.vobj()), pobj->getSql(), pobj->getValues(), true);
 
 	if (fetch_as != old_fetch)

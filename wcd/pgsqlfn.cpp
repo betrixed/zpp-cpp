@@ -127,7 +127,7 @@ void pg_free_result(obj_ptr h)
 {
 	auto& fn = PGfn.free_result;
 	zval* args = fn.argsptr();
-	ZVAL_OBJ(args, h);
+	val_ptr::object_bind(args, h);
 	fn.call_fn();	
 }
 
@@ -135,9 +135,9 @@ str_rc pg_escape_string(obj_ptr conn, str_ptr s)
 {
 	auto& fn = PGfn.pg_escape_string;
 	zval* zv = fn.argsptr();
-	ZVAL_OBJ(zv, conn);
+	val_ptr::object_bind(zv, conn);
 	zv++;
-	ZVAL_STR(zv, s);
+	val_ptr::string_bind(zv, s);
 	str_rc es = fn.call_fn();
 	return es;
 }
@@ -146,7 +146,7 @@ long pg_affected_rows(obj_ptr result)
 {
 	auto& fn = PGfn.pg_affected_rows;
 	zval* args = fn.argsptr();
-	ZVAL_OBJ(args, result);
+	val_ptr::object_bind(args, result);
 	val_rc rows = fn.call_fn();
 	return rows.zlong();
 }
@@ -157,11 +157,11 @@ pg_prepare(obj_ptr h, str_ptr id, str_ptr sql)
 {
 	fn_call_args3& fn = PGfn.pg_prepare;
 	zval* zv = fn.argsptr();
-	ZVAL_OBJ(zv, h);
+	val_ptr::object_bind(zv, h);
 	zv++;
-	ZVAL_STR(zv, id);
+	val_ptr::string_bind(zv, id);
 	zv++;
-	ZVAL_STR(zv, sql);
+	val_ptr::string_bind(zv, sql);
 	obj_rc result = fn.call_fn();
 	return result;
 }
@@ -171,7 +171,7 @@ pg_last_error(obj_ptr connect)
 {
 	auto& fn  = PGfn.pg_last_error;
 	zval* zv = fn.argsptr();
-	ZVAL_OBJ(zv, connect);
+	val_ptr::object_bind(zv, connect);
 	obj_rc result = fn.call_fn();
 	return result;
 }
@@ -184,9 +184,9 @@ pg_query(obj_ptr connect, str_ptr query)
 {
 	auto& fn = PGfn.pg_query;
 	zval* zv = fn.argsptr();
-	ZVAL_OBJ(zv, connect);
+	val_ptr::object_bind(zv, connect);
 	zv++;
-	ZVAL_STR(zv, query);
+	val_ptr::string_bind(zv, query);
 	val_rc result = fn.call_fn();
 	return result;
 }
@@ -196,7 +196,7 @@ obj_rc pg_connect(str_ptr s, int flags)
 {
 	auto& fn = PGfn.pg_connect;
 	zval* zv = fn.argsptr();
-	ZVAL_STR(zv, s);
+	val_ptr::string_bind(zv, s);
 	zv++;
 	ZVAL_LONG(zv, flags);
 
@@ -209,7 +209,7 @@ void pg_close(obj_ptr connect)
 {
 	auto& fn = PGfn.pg_close;
 	zval* zv = fn.argsptr();
-	ZVAL_OBJ(zv, connect);
+	val_ptr::object_bind(zv, connect);
 	fn.call_fn();
 }
 
@@ -219,14 +219,16 @@ val_rc
 pg_execute(obj_ptr connect, str_ptr sname, htab_ptr params)
 {
 	auto& fn = PGfn.pg_execute;
+
 	zval* zv = fn.argsptr();
-	ZVAL_OBJ(zv, connect);
+	val_ptr::object_bind(zv, connect);
 	zv++;
-	ZVAL_STR(zv, sname);
+	val_ptr::string_bind(zv, sname);
 	zv++;
-	ZVAL_ARR(zv, params);
+	val_ptr::array_bind(zv, params);
 
 	val_rc result = fn.call_fn();
+
 	return result;
 }
 
@@ -240,7 +242,7 @@ pg_fetch_object(obj_ptr robj, val_ptr row,
 	str_rc    objclass;
 
 	zval* zv = fn.argsptr();
-	ZVAL_OBJ(zv,robj);
+	val_ptr::object_bind(zv,robj);
 	zv++;
 	if (row.ok()) {
 		ZVAL_COPY_VALUE(zv, row);
@@ -256,9 +258,9 @@ pg_fetch_object(obj_ptr robj, val_ptr row,
 	else {
 		objclass = cname;
 	}
-	ZVAL_STR(zv, objclass);
+	val_ptr::string_bind(zv, objclass);
 	zv++;
-	ZVAL_ARR(zv, args);
+	val_ptr::array_bind(zv, args);
 
 	val_rc result = fn.call_fn();
 	return result;
@@ -268,7 +270,7 @@ htab_rc pg_fetch_all_columns(obj_ptr robj, int colnum)
 {
 	auto& fn = PGfn.pg_fetch_all_columns;
 	zval* zv = fn.argsptr();
-	ZVAL_OBJ(zv,robj);
+	val_ptr::object_bind(zv,robj);
 	zv++;
 	ZVAL_LONG(zv, colnum);
 
@@ -280,7 +282,7 @@ pg_fetch_assoc(obj_ptr robj)
 {
 	auto& fn = PGfn.pg_fetch_assoc;
 	zval* zv = fn.argsptr();
-	ZVAL_OBJ(zv,robj);
+	val_ptr::object_bind(zv,robj);
 	val_rc result = fn.call_fn();
 	return result;
 }
@@ -290,7 +292,7 @@ pg_fetch_array(obj_ptr robj, val_ptr row, int fmode)
 {
 	auto& fn = PGfn.pg_fetch_array;
 	zval* zv = fn.argsptr();
-	ZVAL_OBJ(zv,robj);
+	val_ptr::object_bind(zv,robj);
 	zv++;
 	ZVAL_COPY_VALUE(zv, row);
 	zv++;
@@ -305,10 +307,9 @@ pg_fetch_all(obj_ptr robj, int fmode)
 {
 	auto& fn = PGfn.pg_fetch_all;
 	zval* zv = fn.argsptr();
-	ZVAL_OBJ(zv, robj);
+	val_ptr::object_bind(zv, robj);
 	zv++;
 	ZVAL_LONG(zv, fmode);
-
 	val_rc result = fn.call_fn();
 	return result;	
 }
@@ -327,12 +328,15 @@ PgQuery::close()
 	{
 		pg_free_result(rhandle_);
 		rhandle_.init();
+		sql_.init();
+		id_.init();
 	}
 }
 
 void 
 PgQuery::construct(obj_ptr connect, str_ptr query)
 {
+	params_ = htab_ptr::empty_array();
 	Pgsqlfn* pgc = zobj_toc<Pgsqlfn>(connect);
 	obj_return h = pgc->handle();
 
@@ -340,11 +344,21 @@ PgQuery::construct(obj_ptr connect, str_ptr query)
 	{
 		pghandle_ = h.value_;
 	}
+	else {
+		h.throw_errors();
+		return;
+	}
 	str_buf buf;
 	buf << "q" << pgc->nextId();
 	id_ = buf.zstr();
 	sql_ = query;
 	rhandle_ = pg_prepare(pghandle_, id_, query);
+
+	if (!rhandle_.ok())
+	{
+		h.error() << "pg_prepare fail";
+		h.throw_errors();
+	}
 }
 
 
@@ -359,6 +373,7 @@ val_return
 PgQuery::execute(bool asResult)
 {
 	val_return result;
+
 	val_rc test = pg_execute(pghandle_, id_, params_);
 	if (!test.isFalse())
 	{
@@ -397,7 +412,7 @@ Pgsqlfn::rowFetch(obj_ptr pgresult, zend_long fmode)
 }
 
 htab_rc 
-Pgsqlfn::allRows(obj_ptr pgresult, zend_long fmode = IDriver::FETCH_ASSOC)
+Pgsqlfn::allRows(obj_ptr pgresult, zend_long fmode)
 {
 	htab_rc result;
 	val_rc data;
@@ -408,9 +423,9 @@ Pgsqlfn::allRows(obj_ptr pgresult, zend_long fmode = IDriver::FETCH_ASSOC)
 			htab_rw rows(result);
 			while(true) {
 				data = pg_fetch_object(pgresult);
-				if (data.isArray())
+				if (data.isObject())
 				{
-					rows.push_back(data.zarray());
+					rows.push_back(data.zobject());
 				}
 				else {
 					break;
@@ -530,17 +545,22 @@ Pgsqlfn::close()
 obj_return //virtual
 Pgsqlfn::prepare(str_ptr query, htab_ptr options)
 {
-	obj_rc qobj = PgQuery::omg.new_zobj();
-	PgQuery* zobj = zobj_toc<PgQuery>(qobj);
-
 	val_rc::try_decref(lastsql_ptr_);
 	lastsql_ptr_.bind_string(query);
+	obj_rc qobj = PgQuery::omg.new_zobj();
 
+	PgQuery* zobj = zobj_toc<PgQuery>(qobj);
 	zobj->construct(self_, query);
 
 	obj_return result;
 	result.value_ = qobj;
 	return result;
+}
+
+void Pgsqlfn::bind(obj_ptr stmt, htab_ptr params)
+{
+	PgQuery* zobj = zobj_toc<PgQuery>(stmt);
+	zobj->setParams(params);
 }
 
 val_return //virtual
@@ -777,7 +797,9 @@ Pgsqlfn::register_class(zend_class_entry* idriver_ce)
 
 	Pgsqlfn::omg.classEntry(dclass);
 
-	register_class_Wcd_Ext_Pgs_PgQuery();
+	zend_class_entry* qclass = register_class_Wcd_Ext_Pgs_PgQuery();
+	PgQuery::omg.classEntry(qclass);
+
 
 }
 
@@ -859,16 +881,5 @@ ZEND_METHOD(Wcd_Ext_Pgsqlfn, attribute)
 	}
 }
 
-PHP_MINIT_FUNCTION(Wcd_Pgsqlfn_reg)
-{
-	STATE_INIT_ADD(Pgfi)
-
-
-	
-
-
-
-	return SUCCESS;
-}
 
 #endif

@@ -28,30 +28,21 @@ Simple::construct(const weak_ref& db, int fetch)
 {
 	db_ = db.get();
 	fetch_ =  (fetch >= 0) ? fetch : IDriver::FETCH_ASSOC;
-
-	//showobj("\nSimple construct", vobj());
-
 }
 
 void 
 Simple::destruct()
 {
-	//showobj("\nSimple destruct", vobj());
-
 	if (stmt_.ok())
 	{
-		//showmem("set_null stmt", stmt_);
 		stmt_.init();
 	}
-	//showstr("Simple destruct sql_", sql_);
-	//sql_.init();
 }
 
 void 
 Simple::debug_info(htab_rw di)
 {	
 	di.set(SQSTR.driver, db_);
-	//di.set(SQSTR.sql, sql_);
 	di.set(SQSTR.fetch_key, fetch_);
 	di.set(SQSTR.values_key, values_);
 	di.set(SQSTR.returns_str, retval_);
@@ -88,7 +79,6 @@ Simple::arrayMap(str_ptr keycol,
 	if (result.has_errors())
 	{
 		return result;
-
 	}
 	htab_rc& rows = result.value_;
 
@@ -127,7 +117,7 @@ Simple::arraySet(str_ptr sql, htab_ptr params)
 	obj_return stmt_ret = db->prepare(sql);
 	if (stmt_ret.has_errors())
 	{
-		result = std::move(stmt_ret);
+		result = stmt_ret.move_error();
 		return result;
 	}
 	stmt_ = stmt_ret.value_;

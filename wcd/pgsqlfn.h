@@ -93,9 +93,9 @@ public:
 
 	static void register_class(zend_class_entry* idriver_ce);
 
-	static val_rc rowFetch(obj_ptr pgresult, zend_long fmode);
+	static val_rc rowFetch(obj_ptr pgresult, zend_long fmode = IDriver::FETCH_ASSOC);
 
-	static htab_rc allRows(obj_ptr pgresult, zend_long fmode);
+	static htab_rc allRows(obj_ptr pgresult, zend_long fmode = IDriver::FETCH_ASSOC);
 
 	static str_rc attribute(str_ptr name, str_ptr value);
 
@@ -110,6 +110,8 @@ public:
 	void close() override;
 
 	obj_return prepare(str_ptr query, htab_ptr options=htab_ptr()) override;
+
+	void bind(obj_ptr stmt, htab_ptr params) override;
 
 	val_return execute(obj_ptr stmt, bool close = true, bool fetch = false) override;
 

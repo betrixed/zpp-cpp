@@ -103,6 +103,12 @@ void DBSInit::init() {
 	}
 
 
+void //static
+IDriver::throw_not_implemented(const char* msg)
+{
+	zend_throw_error(zend_ce_error, "IDriver: need override for %s", msg);
+}
+
 void //static 
 IDriver::notImplementedMsg(str_buf& buf, const char* fn)
 {
@@ -316,7 +322,6 @@ IDriver::closeStmt(obj_ptr stmt)
 str_rc 
 IDriver::escape(str_ptr value)
 {
-	
 	throw_not_implemented("escape");
 	return value;
 }
@@ -597,7 +602,6 @@ IDriver::getSchemaClass()
 	IDriver* vp = this;
 
 	str_rc stype = vp->getSqlType();
-	showstr("sql type is ", stype);
 
 	stype = stype.ucfirst();
 	str_buf buf;
