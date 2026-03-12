@@ -172,8 +172,9 @@ ReflectCache::newInstanceArgs(str_ptr class_name, htab_ptr args)
 		//showobj("RFC", rfc);
 
 		fn_call_args<1> fn;
-		ZVAL_ARR(fn.argsptr(), args);
-
+		//ZVAL_ARR(fn.argsptr(), args);
+		val_ptr::array_bind(fn.argsptr(), args);
+		
 		//showstr("fn name", RFC_data.new_instance_args);
 		
 		fn.set_fci(rfc, RFC_data.new_instance_args);
