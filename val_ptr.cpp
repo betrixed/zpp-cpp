@@ -483,18 +483,10 @@ val_ptr::bind_object(zend_object* obj)
 void // protected
 val_ptr::bind_array(HashTable* ht)
 {
-    if (ht) {
-        ZVAL_ARR(p_, ht);
-        if ( ! ( GC_FLAGS(ht) & GC_IMMUTABLE)) {
-            GC_ADDREF(ht);
-        }
-        else { // clear 
-        	Z_TYPE_FLAGS_P(p_) = 0; 
-        }
-    }
-    else {
-        ZVAL_NULL(p_);
-    }
+	if (val_ptr::array_bind(p_, ht))
+	{
+		GC_ADDREF(ht);
+	}
 }
 
 void val_ptr::setbool(bool value)
