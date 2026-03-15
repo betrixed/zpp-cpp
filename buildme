@@ -17,3 +17,6 @@ if [ $ARGC -eq $b ]; then
 fi
 
 sudo make install
+pushd /etc/php/8.4/cli/conf.d
+./on_wccz.sh
+popd

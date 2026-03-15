@@ -415,6 +415,28 @@ IDriver::newDmlBuild()
 	return ReflectCache::staticInstanceArgs(bclass,args);
 }
 
+
+
+bool
+IDriver::clearSchemaCache()
+{
+	ICache*  cache = nullptr;
+	str_rc name;
+
+	schema_def_.init();
+	obj_ptr server_mgr = Services::getOne(IServer::omg.class_name());
+	IServer* isv = zobj_toc<IServer>(server_mgr);
+	obj_rc cacheobj = isv->getDataCache();
+	if (cacheobj.ok())
+	{
+		cache = zobj_toc<ICache>(cacheobj);
+		str_rc cdir = cache->getOption(SFDi.opt_cachedir);
+		name = icfg_c()->getDatabase();
+		return cache->deleteKey(name); 
+	}
+	return false;
+}
+
 obj_rc 
 IDriver::getSchema()
 {
@@ -903,8 +925,10 @@ ZEND_METHOD(Wcd_IDriver, getColumnNames)
 	IDriver* db = zval_toc<IDriver>(ZEND_THIS);	
 
 	htab_return result = db->getColumnNames(table);
-	result.throw_errors();
-	result.value_.move_zv(return_value);
+	if (!result.throw_errors())
+	{
+		result.value_.move_zv(return_value);
+	}
 }
 
 ZEND_METHOD(Wcd_IDriver, getDSN)
@@ -1316,6 +1340,14 @@ ZEND_METHOD(Wcd_IDriver, quoteName)
 
 	str_rc result = db->quoteName( name );
 	result.move_zv(return_value);		
+}
+
+ZEND_METHOD(Wcd_IDriver, clearSchemaCache)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+	IDriver* db = zval_toc<IDriver>(ZEND_THIS);
+	bool result = db->clearSchemaCache();
+	RETURN_BOOL(result);
 }
 
 //obj_rc readSchema();

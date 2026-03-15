@@ -53,6 +53,8 @@ namespace wcd {
 		virtual val_return lastSeqValue(str_ptr name);
 		virtual str_rc getSchemaClass();
 
+		bool clearSchemaCache();
+		
 		static int pdo_type(unsigned int ztype);
 		
 		virtual bool begin();

@@ -27,6 +27,8 @@ class IDriver {
 
     public function bind(mixed $stmt, array $params) : void {}
 
+    public function clearSchemaCache() : void {}
+
     public function close() : void {}
 
     public function closeStmt(mixed $stmt) : void {}

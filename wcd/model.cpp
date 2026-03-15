@@ -628,11 +628,15 @@ namespace wcd {
 
 		obj_return tabledef_mgr = getTableDef();
 
-		if (!tabledef_mgr.has_errors())
+		if (tabledef_mgr.has_errors())
 		{
-			class_cdefs_ = tabledef_mgr.value_.property(MIS.columns_str);
-			result.value_ = class_cdefs_;
+			result = tabledef_mgr.move_error();
+			return result;
 		}
+
+		class_cdefs_ = tabledef_mgr.value_.property(MIS.columns_str);
+		result.value_ = class_cdefs_;
+
 		//showdata("getColDefs", class_cdefs_);
 		return result;
 	}
@@ -715,7 +719,7 @@ namespace wcd {
 		htab_return columns_ret = m->getColDefs();
 		if (columns_ret.has_errors())
 		{
-			result = std::move(columns_ret);
+			result = columns_ret.move_error();
 			return result;
 		}
 
@@ -988,9 +992,17 @@ namespace wcd {
 
 		 
 
-		class_tdef_ = tables.get(name);
+		obj_rc test = tables.get(name);
 
-		//showobj("TDEF", class_tdef_);
+		if (!test.ok())
+		{
+			result.error() << "No columns metadata for table " << name;
+			return result;
+		}
+
+		class_tdef_ = test;
+
+		//showobj("TDEF", class_tdef_);class_tdef_
 		htab_rc columns = class_tdef_.property(MIS.columns_str);
 
 		//showdata("columns", columns);
@@ -1415,7 +1427,7 @@ namespace wcd {
 		obj_return tdefret = getTableDef();
 		if (tdefret.has_errors())
 		{
-			result = std::move(tdefret);
+			result = tdefret.move_error();
 			return result;
 		}
 		obj_rc& tdef = tdefret.value_;
