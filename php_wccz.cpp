@@ -12,22 +12,10 @@
 
 #include "zpp/state_init.cpp"
 
-#include "wcc/replace.cpp"
-#include "wcc/config.cpp"
-
-#include "wcc/reflect_cache.cpp"
-#include "wcc/services.cpp"
-
-#include "wcc/strfns.cpp"
+#include "wcc/core_extn.cxx"
 
 DEFINE_STATE_LIST
 
-/* For compatibility with older PHP versions */
-#ifndef ZEND_PARSE_PARAMETERS_NONE
-#define ZEND_PARSE_PARAMETERS_NONE() \
-	ZEND_PARSE_PARAMETERS_START(0, 0) \
-	ZEND_PARSE_PARAMETERS_END()
-#endif
 
 PHP_MINIT_FUNCTION(wccz)
 {
@@ -35,29 +23,13 @@ PHP_MINIT_FUNCTION(wccz)
 	dump_info::run_state_ = true;
 #endif
 
-
-#ifdef WCC_CONFIG_CPP
-	PHP_MINIT(wcc_replace_reg)(INIT_FUNC_ARGS_PASSTHRU);
-	PHP_MINIT(Wcc_Config_reg)(INIT_FUNC_ARGS_PASSTHRU);
-#endif
-
-
-#ifdef WCC_SERVICES_CPP
-PHP_MINIT(wc_services_md)(INIT_FUNC_ARGS_PASSTHRU);
-PHP_MINIT(Wcc_ReflectCache)(INIT_FUNC_ARGS_PASSTHRU);
-#endif
-
-
-#ifdef STRFNS_CPP
-	PHP_MINIT(Strfns_reg)(INIT_FUNC_ARGS_PASSTHRU);
-#endif
-
 	register_base_init();
 	register_fn_calls();
 	register_datetime();
 	
-	STATE_MOD_INIT
+	register_core_extn(INIT_FUNC_ARGS_PASSTHRU);
 
+	STATE_MOD_INIT
 
 	return SUCCESS;
 }
