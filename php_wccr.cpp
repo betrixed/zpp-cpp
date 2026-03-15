@@ -5,102 +5,17 @@
 #endif
 
 #include "php_wccr.h"
-
 #include "zpp/show_zpp.h"
 
-zpp::state_list  STATE_LIST_NAME("wccr");
+#include "wcc/routes_extn.cxx"
 
-// compile in binary
-
-#include "wcc/finder.cpp"
-#include "wcc/loader.cpp"
-
-#include "wcc/service_access.cpp"
-
-#include "wcc/hmap.cpp"
-
-#include "wcc/icachedata.cpp"
-#include "wcc/dircache.cpp"
-
-#include "wcc/icache.cpp"
-#include "wcc/cachemgr.cpp"
-
-#include "wcc/file_upload.cpp"
-#include "wcc/global_response.cpp"
-#include "wcc/pair.cpp"
-#include "wcc/request_globals.cpp"
-
-#include "wcc/route.cpp"
-#include "wcc/route_match.cpp"
-#include "wcc/route_set.cpp"
-#include "wcc/target.cpp"
-
+DEFINE_STATE_LIST
 
 
 PHP_MINIT_FUNCTION(wccr)
 {
+	register_routes_extn(INIT_FUNC_ARGS_PASSTHRU);
 
-#ifdef WCC_LOADER_CPP
-	PHP_MINIT(wcc_loader_reg)(INIT_FUNC_ARGS_PASSTHRU);
-#endif
-
-#ifdef WCC_FINDER_CPP
-	PHP_MINIT(Wcc_Finder_reg)(INIT_FUNC_ARGS_PASSTHRU);
-#endif
-
-#ifdef WCC_CONFIG_CPP
-	PHP_MINIT(wcc_replace_reg)(INIT_FUNC_ARGS_PASSTHRU);
-	PHP_MINIT(Wcc_Config_reg)(INIT_FUNC_ARGS_PASSTHRU);
-#endif
-
-#ifdef WCC_HMAP_CPP
-	PHP_MINIT(Wcc_Hmap_reg)(INIT_FUNC_ARGS_PASSTHRU);
-#endif
-
-#ifdef WCC_SERVICES_CPP
-PHP_MINIT(wc_services_md)(INIT_FUNC_ARGS_PASSTHRU);
-PHP_MINIT(Wcc_ReflectCache)(INIT_FUNC_ARGS_PASSTHRU);
-#endif
-
-#ifdef SERVICE_ACCESS_CPP
-	PHP_MINIT(ServiceAccess_reg)(INIT_FUNC_ARGS_PASSTHRU);
-#endif
-
-#ifdef GLOBAL_RESPONSE_CPP
-	PHP_MINIT(Wcc_Response_reg)(INIT_FUNC_ARGS_PASSTHRU);
-#endif
-#ifdef REQUEST_GLOBALS_CPP
-	PHP_MINIT(RequestGlobals_reg)(INIT_FUNC_ARGS_PASSTHRU);
-	PHP_MINIT(FileUpload_reg)(INIT_FUNC_ARGS_PASSTHRU);
-#endif
-
-#ifdef WCC_PAIR_CPP
-PHP_MINIT(wcc_pair_d)(INIT_FUNC_ARGS_PASSTHRU);
-#endif
-
-#ifdef WCC_ROUTE_CPP
-	PHP_MINIT(wcc_route_d)(INIT_FUNC_ARGS_PASSTHRU);
-#endif
-
-#ifdef ROUTE_MATCH_CPP
-	PHP_MINIT(route_match_d)(INIT_FUNC_ARGS_PASSTHRU);
-#endif
-
-#ifdef WCC_ROUTESET_CPP
-	PHP_MINIT(wcc_routeset_d)(INIT_FUNC_ARGS_PASSTHRU);
-#endif
-
-#ifdef WCC_TARGET_CPP
-		PHP_MINIT(wcc_target)(INIT_FUNC_ARGS_PASSTHRU);
-#endif
-
-#ifdef ICACHE_CPP
-	PHP_MINIT(Wcc_ICache_reg)(INIT_FUNC_ARGS_PASSTHRU);
-#endif
-
-#ifdef WCC_CACHEMGR_CPP
-	PHP_MINIT(Wcc_CacheMgr_reg)(INIT_FUNC_ARGS_PASSTHRU);
-#endif
 	STATE_MOD_INIT
 
 	return SUCCESS;
@@ -110,9 +25,9 @@ PHP_MINIT(wcc_pair_d)(INIT_FUNC_ARGS_PASSTHRU);
 PHP_MSHUTDOWN_FUNCTION(wccr)
 {
 	STATE_MOD_END
-
 	return SUCCESS;
 }
+
 
 /* {{{ PHP_RINIT_FUNCTION */
 PHP_RINIT_FUNCTION(wccr)
@@ -121,7 +36,6 @@ PHP_RINIT_FUNCTION(wccr)
 #if defined(ZTS) && defined(COMPILE_DL_WCCR)
 	ZEND_TSRMLS_CACHE_UPDATE();
 #endif
-
 	STATE_REQ_INIT
 
 	return SUCCESS;
@@ -134,7 +48,6 @@ PHP_RSHUTDOWN_FUNCTION(wccr)
 
 	return SUCCESS;
 }
-
 
 /* {{{ PHP_MINFO_FUNCTION */
 PHP_MINFO_FUNCTION(wccr)
