@@ -10,51 +10,14 @@
 
 #include "zpp/show_zpp.h"
 
-// compile 
-#include "wcc/assets.cpp"
-#include "wcc/htmlgem.cpp"
-#include "wcc/htmlplates.cpp"
-#include "wcc/money_fmt.cpp"
-#include "wcc/plate.cpp"
-#include "wcc/plate_engine.cpp"
-#include "wcc/search_list.cpp"
-#include "md4c/markhtml.cpp"
-
-/* For compatibility with older PHP versions */
-#ifndef ZEND_PARSE_PARAMETERS_NONE
-#define ZEND_PARSE_PARAMETERS_NONE() \
-	ZEND_PARSE_PARAMETERS_START(0, 0) \
-	ZEND_PARSE_PARAMETERS_END()
-#endif
+#include "wcc/html_extn.cxx"
 
 DEFINE_STATE_LIST
 
 PHP_MINIT_FUNCTION(wcch)
 {
+	register_html_extn(INIT_FUNC_ARGS_PASSTHRU);
 
-#ifdef WCC_ASSETS_CPP
-	PHP_MINIT(wcc_assets_reg)(INIT_FUNC_ARGS_PASSTHRU);
-#endif
-
-#ifdef HTMLGEM_CPP
-	PHP_MINIT(Wcc_HtmlGem_reg)(INIT_FUNC_ARGS_PASSTHRU);
-#endif
-
-#ifdef MONEY_FMT_CPP
-	PHP_MINIT(Wcc_Money_reg)(INIT_FUNC_ARGS_PASSTHRU);
-#endif
-
-#ifdef PLATE_ENGINE_CPP
-	PHP_MINIT(SearchList_reg)(INIT_FUNC_ARGS_PASSTHRU);
-	PHP_MINIT(Wcc_PlateEngine_reg)(INIT_FUNC_ARGS_PASSTHRU);
-	PHP_MINIT(Wcc_Plate_reg)(INIT_FUNC_ARGS_PASSTHRU);
-	PHP_MINIT(Wcc_HtmlPlates_reg)(INIT_FUNC_ARGS_PASSTHRU);	
-#endif
-
-#  ifdef MARKHTML_CPP
-	PHP_MINIT(Wcc_MarkToHtml_reg)(INIT_FUNC_ARGS_PASSTHRU);
-#  endif
-	
 	STATE_MOD_INIT
 
 	return SUCCESS;
