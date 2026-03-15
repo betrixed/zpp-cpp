@@ -5,32 +5,13 @@
 #include "zpp/show_zpp.h"
 
 
-#include "toml/toml_php.cpp"
-
-
-// CacheMgr wants one of these
-#include "tinyxml/dxmlread.cpp"
+#include "wcc/more_extn.cxx"
 
 DEFINE_STATE_LIST
 
 PHP_MINIT_FUNCTION(wccm)
 {	
-
-
-#ifdef DAYTIME_CPP
-	PHP_MINIT(Wcc_Day24_reg)(INIT_FUNC_ARGS_PASSTHRU);
-#endif
-
-
-#ifdef TOML_PHP_CPP
-	PHP_MINIT(Wcc_Toml_reg)(INIT_FUNC_ARGS_PASSTHRU);
-#endif
-	
-
-
-#	ifdef DXMLREAD_CPP
-	PHP_MINIT(Wcc_XmlRead_reg)(INIT_FUNC_ARGS_PASSTHRU);
-#	endif
+	register_more_extn(INIT_FUNC_ARGS_PASSTHRU);
 
 	STATE_MOD_INIT
 
