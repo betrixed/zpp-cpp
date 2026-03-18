@@ -33,6 +33,7 @@ namespace zpp {
 
 val_rc val_rc::EmptyArray = val_rc((HashTable*) &zend_empty_array);
 
+/** This init does not de-reference anything, just wipes */
 void 
 val_rc::init()
 {
@@ -46,6 +47,7 @@ val_rc::ref_type() const
     return Z_TYPE_P((const zval*) val_ptr::real_zval(&zv_));
 }
 
+/** Get zval contained in reference zval */
 zval* 
 val_rc::dereference() const
 {

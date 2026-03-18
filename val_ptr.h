@@ -171,6 +171,8 @@ public:
 
     bool isResource() const;
 
+    bool isBoolean() const;
+    
 
     /** zend_object* methods */
 

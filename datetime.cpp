@@ -81,14 +81,16 @@ datetime_obj::make_obj()
 
 }
 
-val_rc
+val_rc //static
 datetime_obj::strtotime(zval* value)
 {
-	fn_call_args<1> strtotime;
+	fn_call fn(DTData.strtotime);
 
-	strtotime.set_fname(DTData.strtotime);
-	ZVAL_COPY_VALUE(strtotime.argsptr(), value);
-	return strtotime.call_fn();
+	fn_params<1> strtotime(fn);
+
+	ZVAL_COPY_VALUE(&strtotime.params[0], value);
+
+	return strtotime.mixed();
 }
 
 str_rc //static
@@ -100,12 +102,13 @@ datetime_obj::date(str_ptr fmt, zval* value)
 
 	if (val_ptr(timeval).isLong())
 	{
-		fn_call_args<2> datefmt;
-		datefmt.set_fname(DTData.date);
-		zval* pz = datefmt.argsptr();
-		ZVAL_STR(pz, fmt);
-		ZVAL_COPY_VALUE(pz+1, timeval);
-		return datefmt.call_fn();
+		fn_call 	   fnc(DTData.date);
+		fn_params<2>   datefmt(fnc);
+
+		val_ptr::string_bind(&datefmt.params[0], fmt);
+		ZVAL_COPY_VALUE(&datefmt.params[1], timeval);
+
+		return datefmt.str();
 	}
 	return result;
 }
@@ -169,29 +172,27 @@ datetime_obj::datetime_obj()
 void 
 datetime_obj::setDate(int year, int month, int day)
 {
-	fn_call_args<3> set_date;
+	fn_call      fnc(DTData.setdate, obj_);
 
-	zval* pz = set_date.argsptr();
-	ZVAL_LONG(pz, year);
-	ZVAL_LONG(pz+1, month);
-	ZVAL_LONG(pz+2, day);
+	fn_params<3> set_date(fnc);
 
-	set_date.set_fci(obj_, DTData.setdate);
-	//throw away return result
+	ZVAL_LONG(&set_date.params[0], year);
+	ZVAL_LONG(&set_date.params[1], month);
+	ZVAL_LONG(&set_date.params[2], day);
 	set_date.call_fn();
 }
 
 void 
 datetime_obj::setTime(int hour, int minute, int second, int millisec)
 {
-	fn_call_args<4> set_time;
-	zval* pz = set_time.argsptr();
-	ZVAL_LONG(pz, hour);
-	ZVAL_LONG(pz+1, minute);
-	ZVAL_LONG(pz+2, second);
-	ZVAL_LONG(pz+3, millisec);
+	fn_call  fnc(DTData.settime, obj_);
 
-	set_time.set_fci(obj_, DTData.settime);
+	fn_params<4> set_time(fnc);
+
+	ZVAL_LONG(&set_time.params[0], hour);
+	ZVAL_LONG(&set_time.params[1], minute);
+	ZVAL_LONG(&set_time.params[2], second);
+	ZVAL_LONG(&set_time.params[3], millisec);
 	set_time.call_fn();
 }
 
@@ -224,14 +225,21 @@ datetime_obj::datetime_obj(obj_rc fnret)
 dt_interval 
 datetime_obj::diff(datetime_obj& dtm)
 {
+	dt_interval result;
 
-	fn_call_args<1> diffobj;
+	fn_call fnc(DTData.diff, obj_);
+	fn_params<1> diffobj(fnc);
 
-	diffobj.set_fci(obj_, DTData.diff);
+	val_ptr::object_bind(&diffobj.params[0],(zend_object*) dtm);
 
-	ZVAL_OBJ(diffobj.argsptr(),(zend_object*) dtm);
-
-	return dt_interval(diffobj.call_fn());
+	if (diffobj.call_fn())
+	{
+		result = std::move(diffobj.result_);
+	}
+	else {
+		diffobj.throw_failed();
+	}
+	return result;
 
 }
 
@@ -264,6 +272,25 @@ timezone_obj::make_obj()
 	}
 	return false;
 
+}
+
+dt_interval::dt_interval() : obj_rc() {}
+
+dt_interval::dt_interval(zval&& m) : obj_rc() 
+{	
+	zval* p = (zval*) &m;
+	val_ptr grab(p);
+	obj_ptr test =  grab.zobject();
+
+	if (test.instanceof(php_date_get_interval_ce()))
+	{
+		obj_ = test;
+		*p = {0};
+	}
+	else {
+		zend_throw_error(zend_ce_error,"Object not a datetime_interval");
+	}
+	// ?? else m is unchanged
 }
 
 long 

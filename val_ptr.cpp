@@ -133,12 +133,20 @@ val_ptr::isObject() const
     return (p_ && (ref_type() == IS_OBJECT));
 }
 
-
-
 bool 
 val_ptr::isString() const
 {
     return (p_ && (ref_type() == IS_STRING));
+}
+
+bool 
+val_ptr::isBoolean() const
+{
+	if (!p_) {
+		return false;
+	}
+	auto ztype = ref_type();
+	return (ztype == IS_TRUE) || (ztype == IS_FALSE);
 }
 
 bool 

@@ -53,11 +53,8 @@ class fn_constant : public  fn_call_args<1>
 public:
     val_rc call(str_ptr name);
 };
-class fn_dirname : public fn_call_args<1>
-{
-public:
-    str_rc call(str_ptr name, int level=1);
-};
+
+
 
 class fn_realpath : public fn_call_args<1>
 {
@@ -95,16 +92,19 @@ public:
     TLfnTable() : configured_(false) {}
 
     bool  configured_;
-    extnloaded       extension_loaded;
-    fnexists         function_exists;
-    fn_class_exists  class_exists;
-    pregquote        preg_quote;
-    file_content     file_get_contents;
-    fn_call_args4    fopen;
+    fn_call          class_exists;
+    fn_call          dirname;
+    fn_call          extension_loaded;
+    fn_call          file_get_contents;
+    fn_call          fopen;
+    fn_call          function_exists;
+    fn_call          preg_quote;
+        
+    
     fn_call_args1    fclose;
 
     fn_constant   get_constant;
-    fn_dirname    get_dirname;
+    
     fn_define     define;
     fn_defined    defined;
     PathInfo      pathinfo;
@@ -145,48 +145,57 @@ public:
         }
 
         configured_ = true;
+
+        class_exists.set_fci(ftab.s_class_exists);
+        extension_loaded.set_fci(ftab.s_extension_loaded);
+        fclose.set_fci(ftab.s_fclose);
+        fopen.set_fci(ftab.s_fopen);
+
+        file_get_contents.set_fci(ftab.s_file_get_contents);
+        function_exists.set_fci(ftab.s_function_exists);
+        preg_quote.set_fci(ftab.s_preg_quote);
+
         
-        extension_loaded.set_fname(ftab.s_extension_loaded);
-        function_exists.set_fname(ftab.s_function_exists);
-        class_exists.set_fname(ftab.s_class_exists);
 
-        preg_quote.set_fname(ftab.s_preg_quote);
-        file_get_contents.set_fname(ftab.s_file_get_contents);
-        pathinfo.set_fname(ftab.s_pathinfo);
-        fopen.set_fname(ftab.s_fopen);
-        fclose.set_fname(ftab.s_fclose);
-
-        is_dir.set_fname(ftab.s_isdir);
-        is_file.set_fname(ftab.s_isfile);
-
-        opendir.set_fname(ftab.s_opendir);
-        readdir.set_fname(ftab.s_readdir);
-        closedir.set_fname(ftab.s_closedir);
-        mkdir.set_fname(ftab.s_mkdir);
-
-        realpath.set_fname(ftab.s_realpath);
-
-        weakref_create.set_fname(ftab.s_weakref_create);
-        weakref_get.set_fname(ftab.s_weakref_get);
-
-        defined.set_fname(ftab.s_defined);
-        define.set_fname(ftab.s_define);
-        get_constant.set_fname(ftab.s_constant);
-        get_dirname.set_fname(ftab.s_dirname);
         
-        call_user_func_array.set_fname(ftab.s_call_user_func_array);
-        php_sapi_name.set_fname(ftab.s_php_sapi_name);
-        filemtime.set_fname(ftab.s_filemtime);
-        glob.set_fname(ftab.s_glob);
-        unlink.set_fname(ftab.s_unlink);
-        fwrite.set_fname(ftab.s_fwrite);
-        fread.set_fname(ftab.s_fread);
+        
+        
+        pathinfo.set_fci(ftab.s_pathinfo);
+        
+        
 
-        fgets.set_fname(ftab.s_fgets);
-        serialize.set_fname(ftab.s_serialize);
-        unserialize.set_fname(ftab.s_unserialize);
-        sha1.set_fname(ftab.s_sha1);
-        is_readable.set_fname(ftab.s_isreadable);
+        is_dir.set_fci(ftab.s_isdir);
+        is_file.set_fci(ftab.s_isfile);
+        is_readable.set_fci(ftab.s_isreadable);
+
+        opendir.set_fci(ftab.s_opendir);
+        readdir.set_fci(ftab.s_readdir);
+        closedir.set_fci(ftab.s_closedir);
+        mkdir.set_fci(ftab.s_mkdir);
+
+        realpath.set_fci(ftab.s_realpath);
+
+        weakref_create.set_fci(ftab.s_weakref_create);
+        weakref_get.set_fci(ftab.s_weakref_get);
+
+        defined.set_fci(ftab.s_defined);
+        define.set_fci(ftab.s_define);
+        get_constant.set_fci(ftab.s_constant);
+        dirname.set_fci(ftab.s_dirname);
+        
+        call_user_func_array.set_fci(ftab.s_call_user_func_array);
+        php_sapi_name.set_fci(ftab.s_php_sapi_name);
+        filemtime.set_fci(ftab.s_filemtime);
+        glob.set_fci(ftab.s_glob);
+        unlink.set_fci(ftab.s_unlink);
+        fwrite.set_fci(ftab.s_fwrite);
+        fread.set_fci(ftab.s_fread);
+
+        fgets.set_fci(ftab.s_fgets);
+        serialize.set_fci(ftab.s_serialize);
+        unserialize.set_fci(ftab.s_unserialize);
+        sha1.set_fci(ftab.s_sha1);
+        
     }
 
 
@@ -196,56 +205,118 @@ public:
 thread_local TLfnTable TLFNs;
 
 
-fn_call::fn_call() 
-{
-    fci_ = {0};
-    cache_ = {0};  
-    result_ = {0};
 
-    fci_.retval = &result_;
+
+void 
+fn_result::throw_failed()
+{
+    val_ptr fn(&cfi_.fci_.function_name);
+    str_rc name(fn.zstr());
+    if (!name.ok())
+    {
+        name = "Name not set";
+    }
+    zend_throw_error(zend_ce_error, "fn_call fail %s", name.data());
+}
+
+bool
+fn_result::call_fn()
+{
+    if (cfi_.fci_.size==0)
+    {
+        throw_failed();
+    }
+    else if (zend_call_function(&cfi_.fci_,  &cfi_.cache_) == SUCCESS)
+    {
+        return true;
+    }
+    return false;
+}
+
+val_rc  
+fn_result::mixed()
+{
+    val_rc result;
+    if (call_fn())
+    {
+        // ZVAL_COPY_VALUE, 
+        result = std::move(result_);
+    }
+    return result;
+}
+
+str_rc  
+fn_result::str()
+{
+    str_rc result;
+    if (call_fn())
+    {
+        // ZVAL_COPY_VALUE, 
+        result = std::move(result_);
+    }
+    return result;
+}
+
+obj_rc  
+fn_result::obj()
+{
+    obj_rc result;
+    if (call_fn())
+    {
+        // ZVAL_COPY_VALUE, 
+        result = std::move(result_);
+    }
+    return result;
+}
+
+bool  
+fn_result::zbool()
+{
+    if (call_fn())
+    {
+        auto ztype = val_ptr(&result_).ref_type();
+        switch(ztype)
+        {
+        case IS_TRUE:
+            return true;
+        case IS_FALSE:
+            return false;
+        default:
+            throw_failed();
+        }
+    }
+    return false;
+}
+
+
+/** reset this from the constructor information */
+void 
+fn_call::set_fci(zend_string* method, zend_object* obj)
+{
+    // Not reference counted!   
+    zval *p = &fci_.function_name;
+    *p = {0};
+    val_ptr::string_bind(p, method);  
+    // mark as inited
+    fci_.size = sizeof(fci_); 
+    fci_.object = obj;
+    cache_.object = obj;
+}
+
+fn_call::fn_call() : fci_({0}), cache_({0})
+{
+
+}
+
+fn_call::fn_call(zend_string* method, zend_object* obj) : fci_({0}), cache_({0})
+{
+    set_fci(method, obj);
 }
 
 fn_call::~fn_call()
 {
 }
 
-void fn_call::wipe()
-{
-    zval* ptr = fci_.params;
-    auto ct =   fci_.param_count;
-    if (ptr && ct) {
-        memset(ptr, 0, ct*sizeof(zval));
-    }
-    // in case previous result was not cleared
-    result_ = {0};
-}
-
-
-void 
-fn_call::set_named_args(HashTable* nargs)
-{
-    fci_.named_params = nargs; 
-}
-/** reset this from the constructor information */
-void 
-fn_call::set_fci(zend_object* obj, str_ptr method, HashTable* nargs)
-{
-    //method_name_ = method;
-    zval *p = &fci_.function_name;
-    *p = {0};
-    // fci_.function_name is a COPY_VALUE
-    val_ptr::string_bind(p, method);  
-    fci_.size = sizeof(fci_);
-    fci_.object = obj;
-
-    // in case changing the object?
-    //cache_.object = obj; 
-    //showstr("method", method);
-
-
-
-    fci_.named_params = nargs; 
-}
 
 void fn_call::debug_dump()
 {
@@ -270,91 +341,29 @@ void fn_call::debug_dump()
     zend_printf("object %lx\n", (unsigned long)cache_.object);
     zend_printf("closure %lx\n", (unsigned long)cache_.closure);
 }
-void 
-fn_call::set_obj(zend_object* obj)
-{
-    //TODO: ?why this is required both? 
-    //Maybe first pass the cache_ value will be empty?
-    
-    fci_.object = obj;
-    cache_.object = obj;
-}
-
-/**
- * set_fname must convert the C string
- *  to a zend_string* with persistent flag set.
- * 
- * For use at module global PHP function adapters.
- * These are created in linked "state_init" structures call to init().
- * Unset flag will fail for this situation.
- * 
- * Recommend not used for throw away objects.
 
 void 
-fn_call::set_fname(const char* name)
+fn_call::set_obj(zend_object* zob)
 {
-
-    set_fci(nullptr, zend_string_init(name,strlen(name),1), nullptr);
-}
-*/
-
-void 
-fn_call::set_fname(str_ptr name)
-{
-    set_fci(nullptr, name, nullptr);
+    //? why is this required twice? 
+    // First time the cache_ value will be empty.
+    fci_.object = zob;
+    cache_.object = zob;
 }
 
-void fn_call::throw_failed()
+bool class_exists(str_ptr arg)
 {
-    val_ptr fn(&fci_.function_name);
-    str_ptr name(fn.zstr());
-    if (name.ok())
-    {
-        zend_printf("fn_call_failed for %s\n", name.data());
-        zend_throw_error(zend_ce_error, "fn_call_failed for %s", name.data());
-    }
-    else {
-        zend_printf("fn_call_failed, no name\n");
-        zend_throw_error(zend_ce_error, "fn_call_failed, no name");
-    }
+    fn_params<1> c_exists(TLFNs.class_exists);
+    val_ptr::string_bind(&c_exists.params[0], arg);
+    return c_exists.zbool();
 }
 
-bool fnexists::call(str_ptr arg)
+bool 
+function_exists(str_ptr name)
 {
-    val_ptr::string_bind(argsptr(), arg);
-    val_rc result = call_fn();
-    return val_ptr(result).zbool();
-}
-
-bool fn_class_exists::call(str_ptr arg)
-{
-    val_ptr::string_bind(argsptr(), arg);
-    val_rc result = call_fn();
-    return val_ptr(result).zbool();
-}
-
-str_rc 
-fn_dirname::call(str_ptr name, int level)
-{
-    zval* pz = argsptr();
-
-    val_ptr::string_bind(pz, name);
-    ZVAL_LONG(pz+1, level);
-
-    str_rc result = call_fn();
-    return result;
-}
-
-str_rc 
-pregquote::call(str_ptr str, str_ptr delimiter)
-{
-    zval* pz = argsptr();
-
-    val_ptr::string_bind(pz,   (zend_string*) str);
-    val_ptr::string_bind(pz+1, (zend_string*) delimiter);
-
-    val_rc result = call_fn();
-    return str_rc(val_ptr(result).zstr());
+    fn_params<1> fex(TLFNs.function_exists);
+    val_ptr::string_bind(&fex.params[0], name);
+    return fex.zbool();
 }
 
 
@@ -362,15 +371,16 @@ val_rc
 fopen(str_ptr path, str_ptr mode,
     bool use_include_path, val_ptr context)
 {
-    
-    auto &fn = TLFNs.fopen;
+    fn_params<4> fn(TLFNs.fopen);
     zval* pz = fn.argsptr();
-    val_ptr::string_bind(pz, (zend_string*) path); //1
+
+    val_ptr::string_bind(pz, path);
     pz++;
-    val_ptr::string_bind(pz, (zend_string*) mode);//2
+    val_ptr::string_bind(pz, mode);
     pz++;
-    ZVAL_BOOL(pz, use_include_path);//2
+    ZVAL_BOOL(pz, use_include_path);//3
     pz++;
+
     if (context.ok())
     {
         ZVAL_COPY_VALUE(pz, context);
@@ -379,9 +389,7 @@ fopen(str_ptr path, str_ptr mode,
         ZVAL_NULL(pz);
     }//4
 
-    val_rc result = fn.call_fn();
-
-    return result;
+    return fn.mixed();
 }
 
 
@@ -414,55 +422,49 @@ bool file_res::isopen()
 str_rc 
 sha1(str_ptr value, bool binary)
 {
-    auto& fn = TLFNs.sha1;
-    zval* p = fn.argsptr();
+    fn_params<1> fn(TLFNs.sha1);
+    zval* pz = fn.argsptr();
 
-    val_ptr::string_bind(p, value);
-    p++;
-    ZVAL_BOOL(p, binary);
-    str_rc result = fn.call_fn();
-    return result;
+    val_ptr::string_bind(pz, value);
+    pz++;
+    ZVAL_BOOL(pz, binary);
+
+    return fn.str();
 }
 
 bool is_readable(str_ptr path)
 {
-    auto& fn = TLFNs.is_readable;
-
-    zval* p = fn.argsptr();
-    val_ptr::string_bind(p, path);
-    val_rc result= fn.call_fn();
-    return result.isTrue();
+    fn_params<1> fn(TLFNs.is_readable);
+    val_ptr::string_bind(&fn.params[0], path);
+    return fn.zbool();
 }
 
 bool 
 fclose(val_ptr fres)
 {   
-    auto& fn = TLFNs.fclose;
-
+    fn_params<1>  fn(TLFNs.fclose);
     ZVAL_COPY_VALUE(fn.argsptr(), fres);
-    val_rc result = fn.call_fn();
-    return val_ptr(result).isTrue();
+    return fn.zbool();
 }
 
-fn_stripslashes::fn_stripslashes() : fn_call_args<1>()
-{
-    set_fname(STAB.stripslashes);
-}
 
 str_rc 
-fn_stripslashes::call(str_ptr str)
+stripslashes(str_ptr str)
 {
-    val_ptr::string_bind(argsptr(), str);
-    return str_rc(call_fn());
+    fn_call fc(STAB.stripslashes);
+    fn_params<1> fn(fc);
+    val_ptr::string_bind(fn.argsptr(), str);
+    return fn.str();
 }
 
-str_rc 
-file_content::call(str_ptr path, int offset, size_t len)
-{
-    //showmem("fn_name", &fci_.function_name);
-    zval* pz = argsptr();
+ str_rc 
+ file_content(str_ptr path, int offset, size_t len)
+ {
+    fn_params<3>   fn(TLFNs.file_get_contents);
+    
+    zval* pz = fn.argsptr();
 
-    val_ptr::string_bind(pz, (zend_string*) path);
+    val_ptr::string_bind(pz, path); 
     ZVAL_BOOL(pz+1, false);
     ZVAL_NULL(pz+2); // resource arg
     ZVAL_LONG(pz+3, offset);
@@ -473,21 +475,18 @@ file_content::call(str_ptr path, int offset, size_t len)
     else {
         ZVAL_NULL(pz+4);
     }
-    return str_rc(call_fn());
+    return fn.str();
 }
 
-val_rc
-PathInfo::call(str_ptr path, int flags)
+val_rc 
+pathinfo(str_ptr path, int flags)
 {
-    zval* pz = argsptr();
+    fn_params<2> fn(TLFNs.pathinfo);
+    zval* pz = fn.argsptr();
     val_ptr::string_bind(pz, path);
     ZVAL_LONG(pz+1, flags);
-    return call_fn();
-}
 
-val_rc pathinfo(str_ptr path, int flags)
-{
-    return TLFNs.pathinfo.call(path,flags);
+    return fn.mixed();
 }
 
 //bool callable_fn(val_rc& result, val_rc& callme, int argct = 0, zval* argv = nullptr);
@@ -557,29 +556,13 @@ array_splice(htab_rc& input, int offset, int length, htab_ptr replace)
 str_rc 
 preg_quote(str_ptr expr, str_ptr delimiter)
 {
-    return TLFNs.preg_quote.call(expr, delimiter);
+    fn_params<2> pqt(TLFNs.preg_quote);
+    val_ptr::string_bind(&pqt.params[0], expr);
+    val_ptr::string_bind(&pqt.params[1], delimiter);
+    return pqt.str();
 }
 
-// TODO: The throw_failed won't get through. A bireturn?
-val_rc
-fn_call::call_fn()
-{
-    if (fci_.size==0)
-    {
-        zend_throw_error(zend_ce_error,"call_fn() fci is not initialized");
-    }
-    else
-    {
-        zend_result ok =  zend_call_function(&fci_, &cache_);
-        if (ok != SUCCESS)
-        {
-            throw_failed();
-        }
-    }
-    // move clears result
-    val_rc temp(std::move(result_)); 
-    return temp;
-}
+
 
 str_rc 
 addcslashes(str_ptr s, str_ptr escapes)
@@ -593,16 +576,7 @@ addcslashes(str_ptr s, str_ptr escapes)
     return result;
 }
 
- str_rc 
- file_get_contents(str_ptr path, int offset, size_t len)
- {
-    //zend_printf("file get contents for %s\n", path.data());
 
-    str_rc result = TLFNs.file_get_contents.call(path, offset, len);
-
-    //showmem("contents", result);
-    return result;
- }
 
 bool 
 file_exists(str_ptr path)
@@ -613,7 +587,9 @@ file_exists(str_ptr path)
 bool 
 extension_loaded(str_ptr name)
 {
-    return TLFNs.extension_loaded.call(name);
+    fn_params<1> extloaded(TLFNs.extension_loaded);
+    val_ptr::string_bind(&extloaded.params[0], name);
+    return extloaded.zbool();
 }
 
 fn_fgetcsv::fn_fgetcsv() : fn_call_args<1>()
@@ -739,17 +715,9 @@ fn_realpath::call(str_ptr path)
     return call_fn();
 }
 
-bool 
-function_exists(str_ptr name)
-{
-    return TLFNs.function_exists.call(name);
-}
 
-bool 
-class_exists(str_ptr name)
-{
-    return TLFNs.class_exists.call(name);
-}
+
+
 
 str_rc
 realpath(str_ptr path)
@@ -760,7 +728,10 @@ realpath(str_ptr path)
 str_rc 
 dirname(str_ptr path, int level)
 {
-    return TLFNs.get_dirname.call(path, level);
+    fn_params<2>   dirname(TLFNs.get_dirname);
+    valptr::string_bind(&dirname.params[0], path);
+    ZVAL_LONG(&dirname.params[1], level);
+    return dirname.str();
 }
 
 bool 

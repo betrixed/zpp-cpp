@@ -421,63 +421,57 @@ val_rc
 obj_ptr::call(str_ptr method, zval* arg1)
 {
 
-    fn_call_args<1> caller;
+    fn_call fn(method, obj_);
 
-    caller.set_fci(obj_, method);
-    ZVAL_COPY_VALUE(caller.argsptr(), arg1);
-    return caller.call_fn();
+    fn_params<1> args(fn);
+    ZVAL_COPY_VALUE(&args.params[0], arg1);
+    return args.mixed();
 }
 
 val_rc
 obj_ptr::call(str_ptr method, 
             zval* arg1, zval* arg2)
 {
-    fn_call_args<2> caller;
-    caller.set_fci(obj_, method);
-    zval* pz = caller.argsptr();
+    fn_call fn(method, obj_);
+    fn_params<2> args(fn);
 
-    ZVAL_COPY_VALUE(pz, arg1);
-    ZVAL_COPY_VALUE(pz+1, arg2);
+    ZVAL_COPY_VALUE(&args.params[0], arg1);
+    ZVAL_COPY_VALUE(&args.params[1], arg2);
 
-    return caller.call_fn();
+    return args.mixed();
 }
 
 val_rc
 obj_ptr::call(str_ptr method)
 {
-    fn_call fn;
-
-    fn.set_fci(obj_, method);
-    val_rc result = fn.call_fn();
-
-    return result;
+    fn_call fn(method, obj_);
+    fn_result call(fn);
+    return call.mixed();
 }
 
 
 val_rc
 obj_ptr::call(str_ptr method, HashTable* args)
 {
-    fn_call fn;
-
-    fn.set_fci(obj_, method, args);
-
-    return fn.call_fn();
+    fn_call fn(method, obj_);
+    fn.named_args(args);
+    
+    fn_result call(fn);
+    return call.mixed();
 }
 
 val_rc
 obj_ptr::call(str_ptr method, 
             zval*  arg1, zval*  arg2, zval*  arg3)
 {
-    fn_call_args<3> caller;
+    fn_call fn(method, obj_);
+    fn_params<3> args(fn);
 
-    caller.set_fci(obj_, method);
-    zval* pz = caller.argsptr();
+    ZVAL_COPY_VALUE(&args.params[0], arg1);
+    ZVAL_COPY_VALUE(&args.params[1], arg2);
+    ZVAL_COPY_VALUE(&args.params[2], arg3);
 
-    ZVAL_COPY_VALUE(pz, arg1);
-    ZVAL_COPY_VALUE(pz+1, arg2);
-    ZVAL_COPY_VALUE(pz+2, arg3);
-
-    return caller.call_fn();
+    return args.mixed();
 }
 
 
@@ -486,17 +480,15 @@ obj_ptr::call(str_ptr method,
             zval*  arg1, zval*  arg2, 
             zval*  arg3, zval*  arg4)
 {
-    fn_call_args<4> caller;
+    fn_call fn(method, obj_);
+    fn_params<4> args(fn);
 
-    caller.set_fci(obj_, method);
-    zval* pz = caller.argsptr();
-
-    ZVAL_COPY_VALUE(pz, arg1);
-    ZVAL_COPY_VALUE(pz+1, arg2);
-    ZVAL_COPY_VALUE(pz+2, arg3);
-    ZVAL_COPY_VALUE(pz+3, arg4);
-
-    return caller.call_fn();
+    ZVAL_COPY_VALUE(&args.params[0], arg1);
+    ZVAL_COPY_VALUE(&args.params[1], arg2);
+    ZVAL_COPY_VALUE(&args.params[2], arg3);
+    ZVAL_COPY_VALUE(&args.params[3], arg4);
+    
+    return args.mixed();
 }
 
 obj_ptr::obj_ptr(const val_ptr& rc)

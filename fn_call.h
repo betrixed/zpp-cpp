@@ -26,7 +26,7 @@
 #include "val_rc.h"
 #endif
 
-
+#include <cstring>
 
 namespace zpp {
     /**
@@ -52,6 +52,8 @@ namespace zpp {
         
     };
 
+
+
     bool callable_fn(val_rc& result, val_rc& callme, int argct = 0, zval* argv = nullptr);
     bool call_spread_fn(val_rc& result, val_rc& callme, htab_ptr args);
 
@@ -68,30 +70,31 @@ namespace zpp {
         // PHP call cache info for multiple calls
         zend_fcall_info       fci_;
         zend_fcall_info_cache cache_;
-        zval                  result_;
+
+        friend class fn_result;
     public:
 
-        void throw_failed();
-
     	fn_call();
+        fn_call(zend_string* method);
+        fn_call(zend_string* method, zend_object* obj);
+
         ~fn_call();
         
-        void set_fci(zend_object* obj , str_ptr method, HashTable* nargs = nullptr);
-        void set_fname(str_ptr name);
+        void set_fci(zend_string* method, zend_object* obj = obj_ptr());
         void set_obj(zend_object* obj); // for method calls
         
-        void set_named_args(HashTable* nargs);
+        void named_args(htab_ptr nargs)
+        {
+            fci_.named_params = nargs;
+        }
 
-        void wipe();
+        void setParams(zval* p, size_t ct)
+        {
+            std::memset(p, 0, ct*sizeof(zval));
+            fci_.param_count = ct; 
+            fci_.params = p; 
+        }
 
-        // fetching result as move operator result also clears it.
-        // The result must be moved, from permanent, into request memory.
-        val_rc call_fn();
-
-        //! Since this calls wipe,
-        //! must call only once for each call setup.
-        //! 
-        zval* argsptr() { wipe(); return fci_.params; }
         void debug_dump();
     };
 /**
@@ -114,8 +117,38 @@ namespace zpp {
             fci_.param_count = ARGCT; 
             fci_.params = (zval*) &params; 
         }
+
     };
 
+    class fn_result {
+    protected:
+        fn_call&  cfi_;
+    public:
+        zval      result_;
+
+        fn_result(fn_call& fn) : cfi_(fn), result_({0})
+        {
+            cfi_.fci_.retval = &result_;
+        }
+        void    throw_failed();
+        bool    call_fn();
+        val_rc  mixed();
+        str_rc  str();
+        obj_rc  obj();
+        bool    zbool();
+
+    };
+
+    template <size_t ARGCT>
+    class fn_params : public fn_result {
+    public:
+        zval      params[ARGCT];
+        fn_params(fn_call& fn) : fn_result(fn)
+        {
+            cfi_.setParams(params, ARGCT);
+        }
+        zval* argsptr() { return &params; }
+    };
 
 // prepared function call table
     
@@ -129,23 +162,15 @@ namespace zpp {
          *  whether to use the include path, the third is a resource
          *  context, the fourth is an offset, and the fifth is a length.
          * 
-         *  This class provides a call method with only the path,
-         *  offset and length arguments. The other two are set to
-         *  false and null respectively.
-         *  This is a common use case for file_get_contents.
-         *  Note that the offset and length arguments are optional.
-         
-     * I have never before used more than 
-     * one argument with file_get_contents.
+         *  This function has only the path,
+         *  offset and length arguments. 
+         *  The other two file_get_contents args are set to
+         *  false and null respectively.  
      * 
-     * skip resource - context(null), and use_include path(false)
+     *      Skips resource - context(null), and use_include path(false)
      */ 
-    class file_content : public fn_call_args<5> {
-    public:
-        str_rc call(str_ptr path, 
-            int offset = 0, size_t len = 0);
-    };
 
+    str_rc file_content(str_ptr path, int offset = 0, size_t len = 0);
 
 /**
 * @class fn_fclose
@@ -172,13 +197,6 @@ namespace zpp {
         val_rc call(val_ptr file_res);
     };
 
-  
-
-    class fn_stripslashes : public fn_call_args<1> {
-    public:
-        fn_stripslashes();
-        str_rc call(str_ptr name);
-    };
 
     class fn_define : public fn_call_args<2> {
     public:
@@ -191,71 +209,17 @@ namespace zpp {
         bool call(str_ptr name);
     };
 
-
-    typedef fn_call_args<1> fn_call_args1;
-    typedef fn_call_args<2> fn_call_args2;
-    typedef fn_call_args<3> fn_call_args3;
-    typedef fn_call_args<4> fn_call_args4;
-    /*
-    class fn_simple_loader : public fn_call_args<1> {
-    public:
-        val_rc call(str_ptr path);
-    };
-    */
-
-    /**
-     * @class
-        *  PathInfo
-        *  @brief call pathinfo with 2 arguments.
-        *  @details
-        *  The PHP function pathinfo has 2 arguments.
-        *  The first is the path, the second is an optional flags argument.
-      */
-    class PathInfo : public fn_call_args<2> 
+    enum PathInfo 
     {
-    public:
-        enum {
-            DIRNAME = 1,
-            BASENAME = 2,
-            EXTENSION = 4,
-            FILENAME = 8,
-            ALL = DIRNAME + BASENAME + EXTENSION + FILENAME
-        };
-
-        // The result must be moved, into request memory.
-        val_rc call(str_ptr path, int flags = ALL);
+        DIRNAME = 1,
+        BASENAME = 2,
+        EXTENSION = 4,
+        FILENAME = 8,
+        ALL = DIRNAME + BASENAME + EXTENSION + FILENAME
     };
 
-    class fn_class_exists : public fn_call_args<1> {
-    public:
-        bool call(str_ptr name);
-    }; 
+    val_rc pathinfo(str_ptr path, int flags);
 
-    class fnexists : public fn_call_args<1> {
-    public:
-        bool call(str_ptr name);
-    }; 
-
-   
-
-    class extnloaded : public fn_call_args<1> {
-    public:
-        bool call(str_ptr name);
-    };
-
-    class pregquote : public fn_call_args<2> {
-    public:
-        str_rc call(str_ptr str, str_ptr delimiter);
-    };
-
-    class FCall2 : public fn_call_args<2>
-    {
-    public:
-        FCall2();
-
-        FCall2(str_ptr func);
-        val_rc call(zval* arg1, zval* arg2);
-    };
 
     void register_fn_calls();
 
@@ -375,6 +339,8 @@ namespace zpp {
     val_rc json_decode(str_ptr str, bool asArray, int flags = 0);
 
     int64_t strtotime(str_ptr datetime, int64_t base_timestamp = -1);
+
+    str_rc stripslashes(str_ptr str);
 
     // calls to direct function implementations
     bool file_exists(str_ptr fname);

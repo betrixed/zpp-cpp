@@ -70,6 +70,8 @@ namespace zpp {
 */
 	class dt_interval : public obj_rc {
 	public:
+		dt_interval();
+		dt_interval(zval &&);
 		long years();
 		long months();
 		long days();
