@@ -10,12 +10,16 @@ namespace wcd {
 
 using namespace zpp;
 
+class MsiWrap;
+
 class Mysqlfn : public IDriver {
 protected:
 	bool          inTransaction_;
+	MsiWrap*      wrap_;
+
 public:
 
-	static base_obj_mgr<Pgsqlfn> omg;
+	static base_obj_mgr<Mysqlfn> omg;
 
 	static void register_class(zend_class_entry* idriver_ce);
 
@@ -65,6 +69,22 @@ public:
 	bool rollback() override;
 
 	Mysqlfn();
+	virtual ~Mysqlfn();
+
+};
+
+
+class MsiWrap {
+protected:
+	obj_rc  		handle_;
+	fn_call_args1	set_charset_fn;
+	fn_call_args2	query_fn;
+public:
+
+	MsiWrap(obj_ptr h);
+
+	void set_charset(str_ptr cset);
+	val_rc query(str_ptr query, int result_mode = MSQLI_STORE_RESULT);
 
 };
 

@@ -132,17 +132,9 @@ ReflectCache::newInstance(str_ptr class_name)
 
 	if (rfc_obj.ok())
 	{
-		fn_call fn;
-
-		fn.set_fci(rfc_obj, RFC_data.new_instance);
-
-		val_rc nobj = fn.call_fn();
-		val_ptr temp(nobj);
-
-		if (temp.isObject())
-		{
-			result = temp.zobject();
-		}
+		fn_call fn(RFC_data.new_instance, rfc_obj);
+		fn_result newi(fn);
+		result = newi.obj();
 	}
 	return result;
 }
