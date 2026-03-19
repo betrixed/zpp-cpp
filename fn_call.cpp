@@ -224,7 +224,7 @@ fn_result::mixed()
     val_rc result;
     if (call_fn())
     {
-        // ZVAL_COPY_VALUE, 
+        // Does ZVAL_COPY_VALUE, 
         result = std::move(result_);
     }
     return result;
@@ -233,24 +233,21 @@ fn_result::mixed()
 str_rc  
 fn_result::str()
 {
-    str_rc result;
-    if (call_fn())
-    {
-        // ZVAL_COPY_VALUE, 
-        result = std::move(result_);
-    }
+    str_rc result(std::move(mixed()));
     return result;
 }
 
 obj_rc  
 fn_result::obj()
 {
-    obj_rc result;
-    if (call_fn())
-    {
-        // ZVAL_COPY_VALUE, 
-        result = std::move(result_);
-    }
+    obj_rc result(std::move(mixed()));
+    return result;
+}
+
+htab_rc  
+fn_result::array()
+{
+    htab_rc result(std::move(mixed()));
     return result;
 }
 
@@ -273,6 +270,16 @@ fn_result::zbool()
     return false;
 }
 
+zend_long  
+fn_result::zlong()
+{
+    if (call_fn())
+    {
+        return val_ptr(&result_).zlong();
+    }
+    return false;
+}
+
 
 /** reset this from the constructor information */
 void 
@@ -288,9 +295,13 @@ fn_call::set_fci(zend_string* method, zend_object* obj)
     cache_.object = obj;
 }
 
+fn_call::fn_call(zend_string* method) : fci_({0}), cache_({0})
+{
+    set_fci(method,nullptr);
+}
+
 fn_call::fn_call() : fci_({0}), cache_({0})
 {
-
 }
 
 fn_call::fn_call(zend_string* method, zend_object* obj) : fci_({0}), cache_({0})
@@ -610,6 +621,17 @@ define(str_ptr constant_name, str_ptr value)
     zval* pz = fn.argsptr();
     val_ptr::string_bind(pz, constant_name);
     val_ptr::string_bind(pz+1, value);
+    return fn.zbool();
+}
+
+
+bool 
+define(str_ptr constant_name, val_ptr value)
+{
+    fn_params<2>  fn(TLFNs.define);
+    zval* pz = fn.argsptr();
+    val_ptr::string_bind(pz, constant_name);
+    ZVAL_COPY_VALUE(pz+1, value);
     return fn.zbool();
 }
 

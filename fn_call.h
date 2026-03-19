@@ -114,6 +114,7 @@ namespace zpp {
             cfi_.set_obj(obj);
         }
 
+
     public:
         zval      result_;
 
@@ -382,7 +383,7 @@ namespace zpp {
     str_rc file_get_contents(str_ptr path, int offset=0, size_t len=0);
 
     // the "constant" is renamed as get_constant
-    val_rc get_constant(str_ptr name);
+    val_rc constant(str_ptr name);
 
     bool is_dir(str_ptr path);
 
@@ -391,6 +392,8 @@ namespace zpp {
     bool defined(str_ptr name);
 
     bool define(str_ptr name, val_ptr value);
+
+    bool define(str_ptr name, str_ptr value);
 
     val_rc pathinfo(str_ptr path, int flags = PathInfo::ALL);
 
