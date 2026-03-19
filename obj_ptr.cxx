@@ -444,34 +444,32 @@ obj_ptr::call(str_ptr method,
 val_rc
 obj_ptr::call(str_ptr method)
 {
-    fn_call fn(method, obj_);
-    fn_result call(fn);
-    return call.mixed();
+    fn_call call(method, obj_);
+    fn_noparams fn(call);
+    return fn.mixed();
 }
 
 
 val_rc
 obj_ptr::call(str_ptr method, HashTable* args)
 {
-    fn_call fn(method, obj_);
-    fn.named_args(args);
-    
-    fn_result call(fn);
-    return call.mixed();
+    fn_call call(method, obj_);
+    fn_noparams fn(call, args);
+    return fn.mixed();
 }
 
 val_rc
 obj_ptr::call(str_ptr method, 
             zval*  arg1, zval*  arg2, zval*  arg3)
 {
-    fn_call fn(method, obj_);
-    fn_params<3> args(fn);
+    fn_call call(method, obj_);
+    fn_params<3> fn(call);
 
-    ZVAL_COPY_VALUE(&args.params[0], arg1);
-    ZVAL_COPY_VALUE(&args.params[1], arg2);
-    ZVAL_COPY_VALUE(&args.params[2], arg3);
+    ZVAL_COPY_VALUE(&fn.params[0], arg1);
+    ZVAL_COPY_VALUE(&fn.params[1], arg2);
+    ZVAL_COPY_VALUE(&fn.params[2], arg3);
 
-    return args.mixed();
+    return fn.mixed();
 }
 
 
@@ -480,8 +478,8 @@ obj_ptr::call(str_ptr method,
             zval*  arg1, zval*  arg2, 
             zval*  arg3, zval*  arg4)
 {
-    fn_call fn(method, obj_);
-    fn_params<4> args(fn);
+    fn_call call(method, obj_);
+    fn_params<4> args(call);
 
     ZVAL_COPY_VALUE(&args.params[0], arg1);
     ZVAL_COPY_VALUE(&args.params[1], arg2);

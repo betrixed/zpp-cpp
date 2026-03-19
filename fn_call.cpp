@@ -35,7 +35,7 @@ void register_fn_calls()
     STATE_INIT_ADD(FTAB);
     STATE_INIT_ADD(STAB);
 }
-
+/*
 class fn_weakref_create : public fn_call_args<1>
 {
 public:
@@ -48,34 +48,6 @@ public:
     obj_rc call(obj_ptr wref);
 };
 
-class fn_constant : public  fn_call_args<1>
-{
-public:
-    val_rc call(str_ptr name);
-};
-
-
-
-class fn_realpath : public fn_call_args<1>
-{
-public:
-    str_rc call(str_ptr path);
-};
-
-class fn_opendir : public fn_call_args<1> {
-public:
-    val_rc call(str_ptr path);
-};
-
-class fn_readdir : public fn_call_args<1> {
-public:
-    val_rc call(val_ptr dh);
-};
-
-class fn_closedir : public fn_call_args<1> {
-public:
-    void call(val_ptr dh);
-};
 
 class fn_glob : public fn_call_args<2> {
 public:
@@ -86,56 +58,66 @@ class fn_mkdir : public fn_call_args<3> {
 public:
     bool call(str_ptr path, int permissions = 0755, bool recurse = false);
 };
-
+*/
 class TLfnTable {
 public:
     TLfnTable() : configured_(false) {}
 
     bool  configured_;
+
+
+
+
+
+
+
+
+
+    //fn_simple_loader simple_loader;
+    fn_call          addcslashes;
+    fn_call          array_pop;
+    fn_call          array_splice;
+    fn_call          call_user_func_array;
     fn_call          class_exists;
+    fn_call          closedir;
+    fn_call          constant;  
+    fn_call          define;
+    fn_call          defined;
     fn_call          dirname;
     fn_call          extension_loaded;
+    fn_call          fclose;
+    fn_call          fgetcsv;
+    fn_call          fgets;
     fn_call          file_get_contents;
+    fn_call          filemtime;
     fn_call          fopen;
+    fn_call          fread;
     fn_call          function_exists;
+    fn_call          fwrite;
+    fn_call          getcwd;
+    fn_call          glob;
+    fn_call          is_dir;
+    fn_call          is_file;
+    fn_call          is_readable;
+    fn_call          mb_detect_encoding;
+    fn_call          mb_detect_order;
+    fn_call          mkdir;
+    fn_call          opendir;
+    fn_call          pathinfo;
+    fn_call          php_sapi_name;
     fn_call          preg_quote;
-        
-    
-    fn_call_args1    fclose;
-
-    fn_constant   get_constant;
-    
-    fn_define     define;
-    fn_defined    defined;
-    PathInfo      pathinfo;
-    FCall2        call_user_func_array;
-    fn_call       php_sapi_name;
-    fn_filemtime  filemtime;
-    //fn_simple_loader simple_loader;
-
-    fn_call_args1 is_dir;
-    fn_call_args1 is_file;
-
-    fn_opendir    opendir;
-    fn_readdir    readdir;
-    fn_closedir   closedir;
-    fn_mkdir      mkdir;
-    fn_realpath   realpath; 
-    fn_glob       glob;
-
-    fn_call_args2     unlink;
-    fn_call_args2     fgets;
-    fn_call_args3     fwrite;
-    fn_call_args2     fread;
-    fn_call_args2     sha1;
-
-    fn_call_args2     unserialize;
-    fn_call_args1     serialize;
-
-    fn_call_args1     is_readable;
-
-    fn_weakref_create weakref_create;
-    fn_weakref_get    weakref_get;
+    fn_call          rawurlencode;
+    fn_call          readdir;
+    fn_call          realpath; 
+    fn_call          serialize;
+    fn_call          sha1;
+    fn_call          stripslashes;
+    fn_call          strtr;
+    fn_call          ucwords;
+    fn_call          unlink;
+    fn_call          unserialize;
+    fn_call          weakref_create;
+    fn_call          weakref_get;
 
     void init(const fntable& ftab)
     {
@@ -146,55 +128,58 @@ public:
 
         configured_ = true;
 
+        addcslashes.set_fci(ftab.s_addcslashes);
+        array_pop.set_fci(ftab.s_array_pop);
+        array_splice.set_fci(ftab.s_array_splice);
+        call_user_func_array.set_fci(ftab.s_call_user_func_array);
         class_exists.set_fci(ftab.s_class_exists);
+
+        closedir.set_fci(ftab.s_closedir);
+        constant.set_fci(ftab.s_constant);
+        define.set_fci(ftab.s_define);
+        defined.set_fci(ftab.s_defined);
+        dirname.set_fci(ftab.s_dirname);
+
         extension_loaded.set_fci(ftab.s_extension_loaded);
         fclose.set_fci(ftab.s_fclose);
-        fopen.set_fci(ftab.s_fopen);
-
+        fgetcsv.set_fci(ftab.s_fgetcsv);
+        fgets.set_fci(ftab.s_fgets);
         file_get_contents.set_fci(ftab.s_file_get_contents);
+
+        filemtime.set_fci(ftab.s_filemtime);
+        fopen.set_fci(ftab.s_fopen);
+        fread.set_fci(ftab.s_fread);
         function_exists.set_fci(ftab.s_function_exists);
-        preg_quote.set_fci(ftab.s_preg_quote);
+        fwrite.set_fci(ftab.s_fwrite);
 
-        
-
-        
-        
-        
-        pathinfo.set_fci(ftab.s_pathinfo);
-        
-        
-
+        getcwd.set_fci(ftab.s_getcwd);
+        glob.set_fci(ftab.s_glob);
         is_dir.set_fci(ftab.s_isdir);
         is_file.set_fci(ftab.s_isfile);
         is_readable.set_fci(ftab.s_isreadable);
 
-        opendir.set_fci(ftab.s_opendir);
-        readdir.set_fci(ftab.s_readdir);
-        closedir.set_fci(ftab.s_closedir);
+        mb_detect_encoding.set_fci(ftab.s_mb_detect_encoding);
+        mb_detect_order.set_fci(ftab.s_mb_detect_order);
         mkdir.set_fci(ftab.s_mkdir);
+        opendir.set_fci(ftab.s_opendir);
+        pathinfo.set_fci(ftab.s_pathinfo);
 
+        php_sapi_name.set_fci(ftab.s_php_sapi_name);
+        preg_quote.set_fci(ftab.s_preg_quote);
+        rawurlencode.set_fci(ftab.s_rawurlencode);
+        readdir.set_fci(ftab.s_readdir);
         realpath.set_fci(ftab.s_realpath);
 
+        serialize.set_fci(ftab.s_serialize);
+        sha1.set_fci(ftab.s_sha1);
+        stripslashes.set_fci(ftab.s_stripslashes);
+        strtr.set_fci(ftab.s_strtr);
+        ucwords.set_fci(ftab.s_ucwords);
+
+        unlink.set_fci(ftab.s_unlink);
+        unserialize.set_fci(ftab.s_unserialize);
         weakref_create.set_fci(ftab.s_weakref_create);
         weakref_get.set_fci(ftab.s_weakref_get);
-
-        defined.set_fci(ftab.s_defined);
-        define.set_fci(ftab.s_define);
-        get_constant.set_fci(ftab.s_constant);
-        dirname.set_fci(ftab.s_dirname);
-        
-        call_user_func_array.set_fci(ftab.s_call_user_func_array);
-        php_sapi_name.set_fci(ftab.s_php_sapi_name);
-        filemtime.set_fci(ftab.s_filemtime);
-        glob.set_fci(ftab.s_glob);
-        unlink.set_fci(ftab.s_unlink);
-        fwrite.set_fci(ftab.s_fwrite);
-        fread.set_fci(ftab.s_fread);
-
-        fgets.set_fci(ftab.s_fgets);
-        serialize.set_fci(ftab.s_serialize);
-        unserialize.set_fci(ftab.s_unserialize);
-        sha1.set_fci(ftab.s_sha1);
         
     }
 
@@ -422,12 +407,11 @@ bool file_res::isopen()
 str_rc 
 sha1(str_ptr value, bool binary)
 {
-    fn_params<1> fn(TLFNs.sha1);
+    fn_params<2> fn(TLFNs.sha1);
     zval* pz = fn.argsptr();
 
     val_ptr::string_bind(pz, value);
-    pz++;
-    ZVAL_BOOL(pz, binary);
+    ZVAL_BOOL(pz+1, binary);
 
     return fn.str();
 }
@@ -451,8 +435,7 @@ fclose(val_ptr fres)
 str_rc 
 stripslashes(str_ptr str)
 {
-    fn_call fc(STAB.stripslashes);
-    fn_params<1> fn(fc);
+    fn_params<1> fn(TLFNs.stripslashes);
     val_ptr::string_bind(fn.argsptr(), str);
     return fn.str();
 }
@@ -460,7 +443,7 @@ stripslashes(str_ptr str)
  str_rc 
  file_content(str_ptr path, int offset, size_t len)
  {
-    fn_params<3>   fn(TLFNs.file_get_contents);
+    fn_params<5>   fn(TLFNs.file_get_contents);
     
     zval* pz = fn.argsptr();
 
@@ -508,48 +491,44 @@ fn_simple_loader::call(str_ptr path)
 val_rc
 array_pop(val_rc& array_ref)
 {
-    fn_call_args<1> fn;
+    fn_params<1> fn(TLFNs.array_pop);
 
-    fn.set_fname(STAB.array_pop);
-    
     //zend_printf("\nprepare array_pop\n");
     htab_rw hw(array_ref); // must be writable
-    
     array_ref.make_ref(); // must be reference
-
 
     //zend_printf("\nprepare 2 array_pop\n");
     ZVAL_COPY_VALUE(fn.argsptr(), array_ref);
-    return fn.call_fn();
+    return fn.mixed();
 }
 
 
 htab_rc
 array_splice(htab_rc& input, int offset, int length, htab_ptr replace)
 {
-    fn_call_args<4> fn;
-    htab_rc result;
-
-    fn.set_fname(STAB.array_splice);
-    zval* args = fn.argsptr();
+    fn_params<4> fn(TLFNs.array_splice);
+    zval* pz = fn.argsptr();
 
     htab_rw hw(input); // make writable
-    val_ptr::array_bind(args, input);
-    ZVAL_NEW_REF(args, args);
-    args++;
-    ZVAL_LONG(args,offset);
-    args++;
-    ZVAL_LONG(args, length);
-    args++;
+    val_ptr::array_bind(pz, input);
+    ZVAL_NEW_REF(pz, pz);
+
+    pz++;
+    ZVAL_LONG(pz,offset);
+
+    pz++;
+    ZVAL_LONG(pz, length);
+
+    pz++;
     if (replace.size())
     {
-        val_ptr::array_bind(args, replace);
+        val_ptr::array_bind(pz, replace);
     }
     else {
-        ZVAL_EMPTY_ARRAY(args);
+        ZVAL_EMPTY_ARRAY(pz);
     }
-    result = fn.call_fn();
-    return result;
+    
+    return fn.array();
 }
 
 
@@ -567,13 +546,13 @@ preg_quote(str_ptr expr, str_ptr delimiter)
 str_rc 
 addcslashes(str_ptr s, str_ptr escapes)
 {
-    fn_call_args<2>  fn;
-    fn.set_fci(nullptr, STAB.addcslashes, nullptr);
+    fn_params<2>  fn(TLFNs.addcslashes);
+
     zval* pz = fn.argsptr();
     val_ptr::string_bind(pz, (zend_string*) s);
     val_ptr::string_bind(pz+1, (zend_string*) escapes);
-    str_rc result = fn.call_fn();
-    return result;
+    
+    return fn.str();
 }
 
 
@@ -592,225 +571,159 @@ extension_loaded(str_ptr name)
     return extloaded.zbool();
 }
 
-fn_fgetcsv::fn_fgetcsv() : fn_call_args<1>()
-{
-    set_fname(FTAB.s_fgetcsv);
-}
-
 str_rc
 getcwd()
 {
-    fn_call fc;
-    fc.set_fname(FTAB.s_getcwd);
-    return fc.call_fn();
+    fn_noparams fn(TLFNs.getcwd);
+    return fn.str();
 }
 
 val_rc 
-fn_constant::call(str_ptr name)
+constant(str_ptr name)
 {
-    //showstr("fn_constant call", name);
-    //showmem("fn", &fci_.function_name);
-    val_ptr::string_bind(argsptr(), name);
-    val_rc result;
-    result = call_fn();
-    //showmem("constant value", result);
-    return result;
+    fn_params<1>  fn(TLFNs.constant);
+    val_ptr::string_bind(fn.argsptr(), name);
+    return fn.mixed();
 }
 
 long 
-fn_filemtime::call(str_ptr path)
+filemtime(str_ptr path)
 {
-    val_ptr::string_bind(argsptr(), path);
-    val_rc result = call_fn();
-    return result.zlong();
-}
+    fn_params<1> fn(TLFNs.filemtime);
 
-bool 
-fn_defined::call(str_ptr name)
-{
-    val_ptr::string_bind(argsptr(), name);
-    val_rc result = call_fn();
-    return result.isTrue();
-}
-
-bool 
-fn_define::call(str_ptr constant_name, str_ptr value)
-{
-    zval* args = argsptr();
-    val_ptr::string_bind(args, constant_name);
-    val_ptr::string_bind(args+1, value);
-    val_rc result = call_fn();
-    return result.isTrue();
-}
-
-bool 
-fn_define::call(str_ptr constant_name, val_ptr value)
-{
-    zval* args = argsptr();
-    val_ptr::string_bind(args, constant_name);
-    ZVAL_COPY_VALUE(args+1, value);
-    val_rc result = call_fn();
-    return result.isTrue();
-}
-
-val_rc 
-fn_fgetcsv::call(val_ptr file_res)
-{
-    ZVAL_COPY_VALUE(argsptr(), file_res);
-    return call_fn();
-}
-
-
-
-val_rc 
-fn_opendir::call(str_ptr path)
-{
-    val_ptr::string_bind(argsptr(), path);
-    return call_fn();
-}
-
-val_rc 
-fn_readdir::call(val_ptr dh)
-{
-    ZVAL_COPY_VALUE(argsptr(), dh);
-    return call_fn();
-}
-
-void 
-fn_closedir::call(val_ptr dh)
-{
-    ZVAL_COPY_VALUE(argsptr(), dh);
-    call_fn();
-}
-
-bool
-fn_mkdir::call(str_ptr path, int permissions, bool recurse)
-{
-    zval* args = argsptr();
-    val_ptr::string_bind(args, path);
-    ZVAL_LONG(args+1, permissions);
-    ZVAL_BOOL(args+2, recurse);
-
-    val_rc result = call_fn();
-    return result.isTrue();
-}
-
-bool extnloaded::call(str_ptr name)
-{
-    val_ptr::string_bind(argsptr(), (zend_string*) name);
-    val_rc result = call_fn();
-    return val_ptr(result).isTrue();
-}
-
-val_rc 
-get_constant(str_ptr name)
-{
-    return TLFNs.get_constant.call(name);
-}
-
-str_rc 
-fn_realpath::call(str_ptr path)
-{
-    val_ptr::string_bind(argsptr(), path);
-    return call_fn();
-}
-
-
-
-
-
-str_rc
-realpath(str_ptr path)
-{
-    return TLFNs.realpath.call(path);
-}
-
-str_rc 
-dirname(str_ptr path, int level)
-{
-    fn_params<2>   dirname(TLFNs.get_dirname);
-    valptr::string_bind(&dirname.params[0], path);
-    ZVAL_LONG(&dirname.params[1], level);
-    return dirname.str();
+    val_ptr::string_bind(fn.argsptr(), path);
+    return fn.zlong();
 }
 
 bool 
 defined(str_ptr name)
 {
-    return TLFNs.defined.call(name);
+    fn_params<1>  fn(TLFNs.defined);
+    val_ptr::string_bind(fn.argsptr(), name);
+    return fn.zbool();
 }
 
 bool 
-define(str_ptr name, val_ptr value)
+define(str_ptr constant_name, str_ptr value)
 {
-    return TLFNs.define.call(name, value);
+    fn_params<2>  fn(TLFNs.define);
+    zval* pz = fn.argsptr();
+    val_ptr::string_bind(pz, constant_name);
+    val_ptr::string_bind(pz+1, value);
+    return fn.zbool();
 }
 
-bool 
-define(str_ptr name, str_ptr value)
+val_rc 
+fgetcsv(val_ptr file_res, htab_ptr named_args)
 {
-    //showstr("define ", name);
-    //showstr(" = ", value);
-    return TLFNs.define.call(name, value);
+    fn_params<1>  fn(TLFNs.fgetcsv, named_args);
+    fn.named_args(named_args);
+    ZVAL_COPY_VALUE(fn.argsptr(), file_res);
+    return fn.mixed();
+}
+
+
+
+val_rc 
+opendir(str_ptr path)
+{
+    fn_params<1>  fn(TLFNs.opendir);
+    val_ptr::string_bind(fn.argsptr(), path);
+    return fn.mixed();
+}
+
+val_rc 
+readdir(val_ptr dh)
+{
+    fn_params<1> fn(TLFNs.readdir);
+
+    ZVAL_COPY_VALUE(fn.argsptr(), dh);
+    return fn.mixed();
+}
+
+void 
+closedir(val_ptr dh)
+{
+    fn_params<1> fn(TLFNs.closedir);
+    ZVAL_COPY_VALUE(fn.argsptr(), dh);
+    fn.call_fn();
+}
+
+bool
+mkdir(str_ptr path, int permissions, bool recurse)
+{
+    fn_params<3> fn(TLFNs.mkdir);
+    zval* pz = fn.argsptr();
+    val_ptr::string_bind(pz, path);
+    ZVAL_LONG(pz+1, permissions);
+    ZVAL_BOOL(pz+2, recurse);
+    return fn.zbool();
+}
+
+str_rc 
+realpath(str_ptr path)
+{
+    fn_params<1> fn(TLFNs.realpath);
+    val_ptr::string_bind(fn.argsptr(), path);
+    return fn.str();
+}
+
+
+str_rc 
+dirname(str_ptr path, int level)
+{
+    fn_params<2>   dirname(TLFNs.dirname);
+    val_ptr::string_bind(&dirname.params[0], path);
+    ZVAL_LONG(&dirname.params[1], level);
+    return dirname.str();
 }
 
 str_rc 
 mb_detect_order(const val_rc& encoding)
 {
-    fn_call_args<1>  fn;
-
-    fn.set_fci(nullptr, STAB.mb_detect_order, nullptr);
+    fn_params<1>  fn(TLFNs.mb_detect_order);
     ZVAL_COPY_VALUE(fn.argsptr(), encoding);
-
-    return fn.call_fn();
+    return fn.str();
 }
     
 str_rc 
 mb_detect_encoding(str_ptr str, const val_rc& encodings, bool strict)
 {
-    fn_call_args<3>  fn;
+    fn_params<3>  fn(TLFNs.mb_detect_encoding);
 
     zval* pz = fn.argsptr();
     val_ptr::string_bind(pz, (zend_string*) str);
     ZVAL_COPY_VALUE(pz+1, encodings);
     ZVAL_BOOL(pz+2,strict);
-
-    fn.set_fci(nullptr, STAB.mb_detect_encoding, nullptr);
-    return fn.call_fn();
+    return fn.str();
 }
 
 str_rc 
 rawurlencode(str_ptr s)
 {
-    fn_call_args<1>  fn;
+    fn_params<1>  fn(TLFNs.rawurlencode);
     val_ptr::string_bind(fn.argsptr(), s);
-
-    fn.set_fci(nullptr, STAB.rawurlencode, nullptr);
-    return fn.call_fn();
-
+    return fn.str();
 }
 
 str_rc 
 ucwords(str_ptr s)
 {
-    fn_call_args<1>  fn;
+    fn_params<1>  fn(TLFNs.ucwords);
     val_ptr::string_bind(fn.argsptr(), s);
-    fn.set_fci(nullptr, STAB.ucwords, nullptr);
-    return fn.call_fn();
+    return fn.str();
 }
 
 str_rc
 strtr(str_ptr s, str_ptr from, str_ptr to)
 {
-    fn_call_args<3>  fn;
+    fn_params<3>  fn(TLFNs.strtr);
     zval* ap = fn.argsptr();
 
     val_ptr::string_bind(ap, s);
     val_ptr::string_bind(ap+1, from);
     val_ptr::string_bind(ap+2, to);
-
-    fn.set_fci(nullptr, STAB.strtr, nullptr);
-    return fn.call_fn();
+    return fn.str();
 }
 
 val_rc 
@@ -839,73 +752,77 @@ void fntable::init_req()
 void  // virtual
 fntable::init()
 {        
-    s_extension_loaded = "extension_loaded";
-    s_function_exists = "function_exists";
-    s_class_exists = "class_exists";
-
-    s_weakref_create = "weakreference::create";
-    s_weakref_get = "get";
-
-    s_preg_quote = "preg_quote";
-    s_file_get_contents = "file_get_contents";
-    s_pathinfo = "pathinfo";
+    s_addcslashes = "addcslashes";
+    s_array_pop = "array_pop";
+    s_array_splice = "array_splice";
     s_call_user_func_array = "call_user_func_array";
-    s_fgetcsv = "fgetcsv";
-    s_fopen = "fopen";
-    s_fclose = "fclose";
+    s_class_exists = "class_exists";
+    
+    s_closedir = "closedir";
     s_constant = "constant";
+    s_define = "define";
+    s_defined = "defined";
     s_dirname = "dirname";
 
+    s_extension_loaded = "extension_loaded";
+    s_fclose = "fclose";
+    s_fgetcsv = "fgetcsv";
+    s_fgets = "fgets";
+    s_file_get_contents = "file_get_contents";
+    
+    s_filemtime = "filemtime";
+    s_fopen = "fopen";
+    s_fread = "fread";
+    s_function_exists = "function_exists";
+    s_fwrite = "fwrite";
+    
+    s_getcwd = "getcwd";
+    s_glob = "glob";
     s_isdir = "is_dir";
     s_isfile = "is_file";
-
-    s_opendir = "opendir";
-    s_closedir = "closedir";
-    s_readdir = "readdir";
-    s_mkdir = "mkdir";
-
-    s_getcwd = "getcwd";
-    s_defined = "defined";
-    s_define = "define";
-    s_php_sapi_name = "php_sapi_name";
-    s_filemtime = "filemtime";
-    s_realpath = "realpath";
-    s_glob = "glob";
-    s_unlink = "unlink";
-
-    s_fwrite = "fwrite";
-    s_fread = "fread";
-
-    s_fgets = "fgets";
-    s_serialize = "serialize";
-    s_unserialize = "unserialize";
-    s_sha1 = "sha1";
     s_isreadable = "is_readable";
+    
+    s_mb_detect_encoding = "mb_detect_encoding";
+    s_mb_detect_order = "mb_detect_order";
+    s_mkdir = "mkdir";
+    s_opendir = "opendir";
+    s_pathinfo = "pathinfo";
+    
+    s_php_sapi_name = "php_sapi_name";
+    s_preg_quote = "preg_quote";
+    s_rawurlencode = "rawurlencode";
+    s_readdir = "readdir";
+    s_realpath = "realpath";
+
+    s_serialize = "serialize";
+    s_sha1 = "sha1";
+    s_stripslashes = "stripslashes";
+    s_strtr = "strtr";
+    s_ucwords = "ucwords";
+
+    s_unlink = "unlink";
+    s_unserialize = "unserialize";
+    s_weakref_create = "weakreference::create";
+    s_weakref_get = "get";
 }
 
 void  // virtual
 strtable::init()
 {
     construct_key = "__construct";
-    mb_detect_order = "mb_detect_order";
-    mb_detect_encoding = "mb_detect_encoding";
     setdate = "setdate";
     settime = "settime";
     diff = "diff";
     date = "date";
     strtotime = "strtotime";
-    addcslashes = "addcslashes";
-    rawurlencode = "rawurlencode";
-    strtr = "strtr";
-    ucwords = "ucwords";
-    stripslashes = "stripslashes"; 
-    array_pop = "array_pop";
-    array_splice = "array_splice";
 }
+
 
 /**
  * Dyanmic args setup, array values only
  */
+
+
 args_spread::args_spread(htab_ptr args, int prefixct)
 {
     argct_ = args.size() + prefixct;
@@ -937,6 +854,17 @@ args_spread::~args_spread()
 }
 
 
+bool 
+call_spread_fn(
+    val_rc& result, 
+    val_rc& callme, 
+    htab_ptr args)
+{
+    args_spread spread(args);
+    return callable_fn(result, callme, spread.arg_ct(), spread.arg_v());
+}
+
+
 /** result is reference */
 bool callable_fn(
     val_rc& result, 
@@ -965,117 +893,56 @@ bool callable_fn(
 
 
 
-bool 
-call_spread_fn(
-    val_rc& result, 
-    val_rc& callme, 
-    htab_ptr args)
-{
-    args_spread spread(args);
-    return callable_fn(result, callme, spread.arg_ct(), spread.arg_v());
-}
-
-FCall2::FCall2()
-{  
-}
-
-FCall2::FCall2(str_ptr func)
-{
-    set_fname(func);
-}
-
-val_rc  
-FCall2::call(zval* arg1, zval* arg2)
-{
-    ZVAL_COPY_VALUE(&params[0], arg1);
-    ZVAL_COPY_VALUE(&params[1], arg2);
-    return call_fn();
-}
 
 
 val_rc 
 call_user_func_array(zval* arg1, zval* arg2)
 {
-    return TLFNs.call_user_func_array.call(arg1,arg2);
+    fn_params<2> fn(TLFNs.call_user_func_array);
+    zval* pz = fn.argsptr();
+    ZVAL_COPY_VALUE(pz, arg1);
+    ZVAL_COPY_VALUE(pz+1, arg2);
+    return fn.mixed();
 }
 
 str_rc php_sapi_name()
 {
-    return TLFNs.php_sapi_name.call_fn();
-}
-
-long 
-filemtime(str_ptr path)
-{
-    return TLFNs.filemtime.call(path);
+    fn_noparams  fn(TLFNs.php_sapi_name);
+    return fn.str();
 }
 
 bool 
 is_dir(str_ptr path)
 {
-    auto& fn = TLFNs.is_dir;
+    fn_params<1> fn(TLFNs.is_dir);
+
     val_ptr::string_bind(fn.argsptr(), path);
-    val_rc result = fn.call_fn();
-    return result.isTrue();
+    return fn.zbool();
 }
 
 bool 
 is_file(str_ptr path)
 {
-    auto& fn = TLFNs.is_file;
+    fn_params<1> fn(TLFNs.is_file);
     val_ptr::string_bind(fn.argsptr(), path);
-    val_rc result = fn.call_fn();
-    return result.isTrue();
-}
-
-
-val_rc 
-opendir(str_ptr path)
-{
-    return TLFNs.opendir.call(path);
-}
-
-val_rc readdir(val_ptr dh)
-{
-    return TLFNs.readdir.call(dh);
-}
-
-void closedir(val_ptr dh)
-{
-    TLFNs.closedir.call(dh);
-}
-
-
-bool mkdir(str_ptr path, int permissions, bool recurse)
-{
-    return TLFNs.mkdir.call(path, permissions, recurse);
-}
-
-htab_rc 
-fn_glob::call(str_ptr name, int flags)
-{
-    zval* pz = argsptr();
-    val_ptr::string_bind(pz, name);
-    ZVAL_LONG(pz+1, flags);
-
-    htab_rc result;
-    result = call_fn();
-    return result;
+    return fn.zbool();
 }
 
 htab_rc 
 glob(str_ptr wcard, int flags)
 {
-    htab_rc result;
-    result = TLFNs.glob.call(wcard, flags);
-    return result;
+    fn_params<2> fn(TLFNs.glob);
+    zval* pz = fn.argsptr();
+    val_ptr::string_bind(pz, wcard);
+    ZVAL_LONG(pz+1, flags);
+
+    return fn.array();
 }
 
 str_rc 
 fgets(val_ptr res, zend_long limit)
 {
-    auto& fn = TLFNs.fgets;
-
+    fn_params<2> fn(TLFNs.fgets);
     zval *ap = fn.argsptr();
     ZVAL_COPY_VALUE(ap, res);
     ap++;
@@ -1087,22 +954,19 @@ fgets(val_ptr res, zend_long limit)
     {
         ZVAL_NULL(ap);
     }
-    str_rc result = fn.call_fn();
-    return result;
+    return fn.str();
 }
 
 str_rc fread(val_ptr fres, int length)
 {
-    auto& fn = TLFNs.fread;
+    fn_params<2> fn(TLFNs.fread);
 
     zval *ap = fn.argsptr();
 
     ZVAL_COPY_VALUE(ap, fres);
     ap++;
     ZVAL_LONG(ap, length);
-
-    str_rc result = fn.call_fn();
-    return result;
+    return fn.str();
 }
 
 val_rc 
@@ -1110,7 +974,7 @@ fwrite(val_ptr res, str_ptr data, zend_long len)
 {
     val_rc result;
 
-    auto& fn = TLFNs.fwrite;
+    fn_params<3> fn(TLFNs.fwrite);
 
     zval *ap = fn.argsptr();
     ZVAL_COPY_VALUE(ap, res);
@@ -1125,14 +989,14 @@ fwrite(val_ptr res, str_ptr data, zend_long len)
     {
         ZVAL_NULL(ap);
     }
-    result = fn.call_fn();
-    return result; 
+    return fn.mixed();
 }
 
 bool
 unlink(str_ptr path, val_ptr context)
 {
-    auto& fn = TLFNs.unlink;
+    fn_params<2> fn(TLFNs.unlink);
+
     zval* ap = fn.argsptr();
     val_ptr::string_bind(ap, path);
     ap++;
@@ -1143,59 +1007,43 @@ unlink(str_ptr path, val_ptr context)
     else {
         ZVAL_NULL(ap);
     }
-    val_rc result = fn.call_fn();
-    return result.isTrue();
+    return fn.zbool();
 }
 
 obj_rc 
-fn_weakref_create::call(obj_ptr wref)
+weakref_create(obj_ptr wref)
 {
-    //showobj("weakref arg", wref);
-    //showmem("fn_name", &fci_.function_name);
-    ZVAL_OBJ(argsptr(), wref);
-    val_rc result = call_fn();
-    //showmem("fn_weakref_create", result);
-    return result.zobject();
-}
-
-obj_rc 
-weakref_create(obj_ptr obj)
-{
-    return TLFNs.weakref_create.call(obj);
-}
-
-obj_rc
-fn_weakref_get::call(obj_ptr wref)
-{
-    set_obj(wref);
-    val_rc result = call_fn();
-    return result.zobject();
+    fn_params<1> fn(TLFNs.weakref_create);
+    ZVAL_OBJ(fn.argsptr(), wref);
+    return fn.obj();
 }
 
 obj_rc 
 weakref_get(obj_ptr wref)
 {
-    return TLFNs.weakref_get.call(wref);
+    fn_noparams fn(TLFNs.weakref_get);
+    fn.set_obj(wref);
+    return fn.obj();
 }
 
 str_rc 
 serialize(val_ptr value)
 {
-    auto& fn = TLFNs.serialize;
-    zval* ap = fn.argsptr();
-    ZVAL_COPY_VALUE(ap, value);
-    str_rc result = fn.call_fn();
-    return result;
+    fn_params<1> fn(TLFNs.serialize);
+    ZVAL_COPY_VALUE(fn.argsptr(), value);
+    return fn.str();
 }
 
 
 val_rc 
 unserialize(str_ptr data, htab_ptr options)
 {
-    auto& fn = TLFNs.unserialize;
+    fn_params<2> fn(TLFNs.unserialize);
+
     zval* ap = fn.argsptr();
     val_ptr::string_bind(ap, data);
     ap++;
+
     if (options.size())
     {
         val_ptr::array_bind(ap, options);
@@ -1203,8 +1051,7 @@ unserialize(str_ptr data, htab_ptr options)
     else {
         ZVAL_EMPTY_ARRAY(ap);
     }
-    val_rc result = fn.call_fn();
-    return result;
+    return fn.mixed();
 }
 
 } // end namespace zpp

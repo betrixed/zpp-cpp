@@ -29,16 +29,7 @@
 #include <cstring>
 
 namespace zpp {
-    /**
-     *  callable_fn, for PHP "Callable"
-     *  Is PHP wrap for call_user_function
-     */
-    /**
-     * Create parameter space dynamically.
-     *  and copy array values starting at prefix index.
-     */ 
 
-    /* somehow this hasn't found a use */
     class args_spread  {
         size_t              argct_;
         zval*               argv_;
@@ -52,10 +43,8 @@ namespace zpp {
         
     };
 
-
-
-    bool callable_fn(val_rc& result, val_rc& callme, int argct = 0, zval* argv = nullptr);
     bool call_spread_fn(val_rc& result, val_rc& callme, htab_ptr args);
+    bool callable_fn(val_rc& result, val_rc& callme, int argct = 0, zval* argv = nullptr);
 
     /**
      * @class fn_call
@@ -82,19 +71,7 @@ namespace zpp {
         
         void set_fci(zend_string* method, zend_object* obj = obj_ptr());
         void set_obj(zend_object* obj); // for method calls
-        
-        void named_args(htab_ptr nargs)
-        {
-            fci_.named_params = nargs;
-        }
-
-        void setParams(zval* p, size_t ct)
-        {
-            std::memset(p, 0, ct*sizeof(zval));
-            fci_.param_count = ct; 
-            fci_.params = p; 
-        }
-
+    
         void debug_dump();
     };
 /**
@@ -108,6 +85,7 @@ namespace zpp {
     the argument array separately.
     template
  */
+    /*
     template <size_t ARGCT>
     class fn_call_args : public fn_call {
     public:
@@ -119,23 +97,73 @@ namespace zpp {
         }
 
     };
+    */
 
     class fn_result {
     protected:
         fn_call&  cfi_;
-    public:
-        zval      result_;
 
         fn_result(fn_call& fn) : cfi_(fn), result_({0})
         {
             cfi_.fci_.retval = &result_;
+
         }
-        void    throw_failed();
+        fn_result(fn_call& fn, zend_object* obj) : cfi_(fn), result_({0})
+        {
+            cfi_.fci_.retval = &result_;
+            cfi_.set_obj(obj);
+        }
+
+    public:
+        zval      result_;
+
+        
+
+        void named_args(HashTable* ht)
+        {
+            cfi_.fci_.named_params = ht;
+        }
+
+        void set_obj(zend_object* c)
+        {
+            cfi_.set_obj(c);
+        }
+        void setParams(zval* p, size_t ct, HashTable* nargs = nullptr)
+        {
+            auto& ci = cfi_.fci_;
+
+            ci.param_count = ct; 
+            ci.params = p; 
+            ci.named_params = nargs;
+            if (ct) {
+                 std::memset(p, 0, ct*sizeof(zval));
+            }
+        }
+
         bool    call_fn();
+
+        void    throw_failed();
+        
+        /** Call for various return types */
         val_rc  mixed();
         str_rc  str();
         obj_rc  obj();
         bool    zbool();
+        htab_rc array();
+        zend_long zlong();
+
+    };
+
+    class fn_noparams : public fn_result {
+    public:
+        fn_noparams(fn_call& fn) : fn_result(fn) {
+             setParams(nullptr, 0);
+        }
+
+        fn_noparams(fn_call& fn, HashTable* nargs) : fn_result(fn)
+        {
+            setParams(nullptr, 0, nargs);
+        }
 
     };
 
@@ -145,9 +173,16 @@ namespace zpp {
         zval      params[ARGCT];
         fn_params(fn_call& fn) : fn_result(fn)
         {
-            cfi_.setParams(params, ARGCT);
+            setParams(params, ARGCT);
         }
-        zval* argsptr() { return &params; }
+        fn_params(fn_call& fn, HashTable* nargs) : fn_result(fn)
+        {
+            setParams(params, ARGCT, nargs);
+        }
+
+
+
+        zval* argsptr() { return &params[0]; }
     };
 
 // prepared function call table
@@ -179,35 +214,6 @@ namespace zpp {
 * The PHP function fclose has 1 argument, the resource to close.
 * @returns true on success, or false on failure.    
 */
-    class fn_fclose : public fn_call_args<1> {
-    public:
-        bool call(val_ptr fres);
-    };
-
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 
-
-    class fn_filemtime : public fn_call_args<1> {
-    public:
-        long call(str_ptr path);
-    };
-
-    class fn_fgetcsv : public fn_call_args<1> {
-    public:
-        fn_fgetcsv();
-        val_rc call(val_ptr file_res);
-    };
-
-
-    class fn_define : public fn_call_args<2> {
-    public:
-        bool call(str_ptr constant_name, val_ptr value);
-        bool call(str_ptr constant_name, str_ptr value);
-    };
-
-    class fn_defined : public fn_call_args<1> {
-    public:
-        bool call(str_ptr name);
-    };
 
     enum PathInfo 
     {
@@ -233,49 +239,59 @@ namespace zpp {
      */
     class fntable : public state_init {
     public:
-        str_intern  s_function_exists;
-        str_intern  s_class_exists;
-        str_intern  s_file_get_contents;
-        str_intern  s_extension_loaded;
-        str_intern  s_preg_quote;
-        str_intern  s_pathinfo;
+
+        str_intern  s_addcslashes;
+        str_intern  s_array_pop;
+        str_intern  s_array_splice;
         str_intern  s_call_user_func_array;
-        str_intern  s_fgetcsv;
-        str_intern  s_fopen;
-
-
-        str_intern  s_fclose;
+        str_intern  s_class_exists;
+        
+        str_intern  s_closedir;
         str_intern  s_constant;
-        str_intern  s_dirname;
-        str_intern  s_defined;
         str_intern  s_define;
-        str_intern  s_getcwd;
-        str_intern  s_weakref_create;
-        str_intern  s_weakref_get;
+        str_intern  s_defined;
+        str_intern  s_dirname;
 
+        str_intern  s_extension_loaded;
+        str_intern  s_fclose;
+        str_intern  s_fgetcsv;
+        str_intern  s_fgets;
+        str_intern  s_file_get_contents;
+        
+        str_intern  s_filemtime;
+        str_intern  s_fopen;
+        str_intern  s_fread;
+        str_intern  s_function_exists;
+        str_intern  s_fwrite;
+        
+        str_intern  s_getcwd;
+        str_intern  s_glob;
         str_intern  s_isdir;
         str_intern  s_isfile;
         str_intern  s_isreadable;
 
-        str_intern  s_readdir;
-        str_intern  s_opendir;
-        str_intern  s_closedir;
+        str_intern  s_mb_detect_encoding;
+        str_intern  s_mb_detect_order;
         str_intern  s_mkdir;
+        str_intern  s_opendir;
+        str_intern  s_pathinfo;
 
         str_intern  s_php_sapi_name;
-        str_intern  s_filemtime;
+        str_intern  s_preg_quote;
+        str_intern  s_rawurlencode;
+        str_intern  s_readdir;
         str_intern  s_realpath;
-        str_intern  s_glob;
-        str_intern  s_unlink;
-
-        str_intern  s_fwrite;
-        str_intern  s_fread;
-
-        str_intern  s_fgets;
 
         str_intern  s_serialize;
-        str_intern  s_unserialize;
         str_intern  s_sha1;
+        str_intern  s_stripslashes;
+        str_intern  s_strtr;
+        str_intern  s_ucwords;
+
+        str_intern  s_unlink;
+        str_intern  s_unserialize;
+        str_intern  s_weakref_create;
+        str_intern  s_weakref_get;
         
         
         void init() override;
@@ -288,19 +304,12 @@ namespace zpp {
     public:
         str_intern  construct_key;
         str_intern  mb_detect_order;
-        str_intern  mb_detect_encoding;
+        
         str_intern  setdate;
         str_intern  settime;
         str_intern  diff;
         str_intern  date;
         str_intern  strtotime;
-        str_intern  addcslashes;
-        str_intern  rawurlencode;
-        str_intern  strtr;
-        str_intern  ucwords;
-        str_intern  stripslashes;
-        str_intern  array_pop;
-        str_intern  array_splice;
 
         
         void init() override;
@@ -359,6 +368,8 @@ namespace zpp {
                 bool use_include_path=false, val_ptr context=val_ptr());
 
     str_rc fgets(val_ptr fres, zend_long limit = -1);
+
+    val_rc fgetcsv(val_ptr file_res, htab_ptr named_args = htab_ptr());
 
     bool fclose(val_ptr fres);
 
