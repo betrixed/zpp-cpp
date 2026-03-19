@@ -178,17 +178,17 @@ void Run::construct()
 	str_rc root_dir = dirname(php_root);
 	self.property(Run_i.wc_leaf, root_dir);
 
-	temp = get_constant(Run_i.target_const);
+	temp = constant(Run_i.target_const);
 	//showmem("target", temp);
 
 	self.property(Run_i.target, temp);
 
 	self.property(Run_i.vendor_leaf, Run_i.vendor_str);
 
-	str_rc site_leaf = get_constant(Run_i.site_leaf_const);
+	str_rc site_leaf = constant(Run_i.site_leaf_const);
 	self.property(Run_i.site_leaf, site_leaf);
 
-	str_rc tstr = get_constant(Run_i.site_const);
+	str_rc tstr = constant(Run_i.site_const);
 	self.property(Run_i.site_dir, tstr);
 
 
