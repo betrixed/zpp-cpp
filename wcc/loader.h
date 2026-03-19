@@ -23,7 +23,7 @@ namespace wcc {
 		/** required files */
 		htab_rc required_;
 
-		fn_call_args<1> fdr_find_;
+		fn_call  	fdr_find_;
 
 		void call_spl(str_ptr fname);
 	public:

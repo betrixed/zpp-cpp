@@ -318,7 +318,7 @@ Wcc_XmlRead::init()
 void Wcc_XmlRead::construct(obj_ptr obj)
 {
 	addRoot_ = obj;
-	mkclass_fn_.set_fci(self_, XML_FNS.makeclass_s);
+	mkclass_fn_.set_fci(XML_FNS.makeclass_s, self_);
 }
 
 void
@@ -642,15 +642,10 @@ void Wcc_XmlRead::classReplace(htab_ptr cnames)
 void
 Wcc_XmlRead::pushClass(str_ptr classname, str_ptr key)
 {
-	// call through PHP to allow external override
+	fn_params<1> fn(mkclass_fn_);
+	val_ptr::string_bind(fn.argsptr(), classname); 
 
-	//showstr("pushClass", classname);
-
-	auto& fn = mkclass_fn_;
-	ZVAL_STR(fn.argsptr(), classname); 
-	//fn.debug_dump();
-	val_rc newroot = fn.call_fn();
-	//showmem("newclass", newroot);
+	val_rc newroot = fn.mixed();
 
 	attach_ds(new DStack(key, newroot, XC_OBJECT));
 }

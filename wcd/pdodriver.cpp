@@ -248,9 +248,9 @@ PdoDriver::bind(obj_ptr stmt, htab_ptr params)
 		htab_walk wk;
 		auto val = wk.value();
 
-		fn_call_args<3> bvcall;
+		fn_call bind_call(DBS.bind_value, spdo);
+		fn_params<3> bvcall(bind_call);
 
-		bvcall.set_fci(spdo, DBS.bind_value);
 		zval* args = bvcall.argsptr();
 
 		int ix = 0;
@@ -269,7 +269,7 @@ PdoDriver::bind(obj_ptr stmt, htab_ptr params)
 					ZVAL_COPY_VALUE(args, bname);
 					ZVAL_COPY_VALUE(args+1, bval);
 					ZVAL_LONG(args+2, pdoType(bval));
-					val_rc check = bvcall.call_fn();
+					val_rc check = bvcall.mixed();
 				}
 			}
 			else {
@@ -278,7 +278,7 @@ PdoDriver::bind(obj_ptr stmt, htab_ptr params)
 
 				int ptype = pdoType(val);
 				ZVAL_LONG(args+2, ptype);
-				val_rc check = bvcall.call_fn();
+				val_rc check = bvcall.mixed();
 				
 			}
 		}

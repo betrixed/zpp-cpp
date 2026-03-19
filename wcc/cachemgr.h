@@ -68,7 +68,7 @@ protected:
 	int     delete_expired_;
 
 	obj_rc  loader_;
-	fn_call_args1 xml_call_;
+	fn_call xml_call_;
 
 	Loader* getLoader();
 

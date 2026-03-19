@@ -102,11 +102,14 @@ ReflectCache::getReflectClass(str_ptr class_name)
 	if (RFC_data.rfc_cdata.new_object(result))
 	{
 		//showobj("new_object",result);
-		fn_call_args<1> fn;
-		ZVAL_STR(fn.argsptr(), class_name);
-		fn.set_fci(result, RFC_data.construct_key);
+		fn_call   fcall(RFC_data.construct_key,result);
+
+		fn_params<1> fn(fcall);
+
+		val_ptr::string_bind(fn.argsptr(), class_name);
 		
-		val_rc crc = fn.call_fn();
+		val_rc crc = fn.mixed();
+
 		val_ptr temp(crc);
 
 		if (temp.isObject())
@@ -133,7 +136,7 @@ ReflectCache::newInstance(str_ptr class_name)
 	if (rfc_obj.ok())
 	{
 		fn_call fn(RFC_data.new_instance, rfc_obj);
-		fn_result newi(fn);
+		fn_noparams newi(fn);
 		result = newi.obj();
 	}
 	return result;
@@ -161,16 +164,12 @@ ReflectCache::newInstanceArgs(str_ptr class_name, htab_ptr args)
 	obj_rc rfc = getReflectClass(class_name);
 	if (rfc.ok())
 	{
-		//showobj("RFC", rfc);
+		fn_call  rfn(RFC_data.new_instance_args, rfc);
+		fn_params<1> fn(rfn);
 
-		fn_call_args<1> fn;
-		//ZVAL_ARR(fn.argsptr(), args);
 		val_ptr::array_bind(fn.argsptr(), args);
-		
-		//showstr("fn name", RFC_data.new_instance_args);
-		
-		fn.set_fci(rfc, RFC_data.new_instance_args);
-		val_rc recall = fn.call_fn();
+
+		val_rc recall = fn.mixed();
 		val_ptr test(recall);
 
 		if (test.isObject())

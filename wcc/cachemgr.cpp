@@ -80,7 +80,7 @@ void CacheMgr_init::init()
 
 void CacheMgr::construct(htab_ptr cfg)
 {
-	xml_call_.set_fname(Cache_i.xmlread_c);
+	xml_call_.set_fci(Cache_i.xmlread_c);
 	this->init(cfg);
 }
 
@@ -163,16 +163,16 @@ void CacheMgr::clearAll()
 {
 	htab_walk wk;
 
-	fn_call fnclear;
-
-	fnclear.set_fname(Cache_i.s_clear_str);
+	fn_call fnclear(Cache_i.s_clear_str);
 
 	auto cache = wk.value();
 	for(wk.start(cache_obj_); wk.ok(); wk.next())
 	{
 		obj_ptr obj = cache.zobject();
 		fnclear.set_obj(obj);
-		fnclear.call_fn();
+
+		fn_noparams fn(fnclear);
+		fn.call_fn();
 	}
 }
 
@@ -228,17 +228,15 @@ void CacheMgr::deleteExpired()
 			{
 				htab_walk wk;
 
-				fn_call delete_expired;
-
-				delete_expired.set_fname(Cache_i.s_delete_expired);
+				fn_call delete_expired(Cache_i.s_delete_expired);
 
 				auto cache = wk.value();
 
 				for(wk.start(cache_obj_); wk.ok(); wk.next())
 				{
-					obj_ptr obj = cache.zobject();
-					delete_expired.set_obj(obj);
-					delete_expired.call_fn();
+					delete_expired.set_obj(cache.zobject());
+					fn_noparams fn(delete_expired);
+					fn.call_fn();
 				}
 
 				val_rc ttl(delete_expired_);
@@ -382,12 +380,10 @@ CacheMgr::readFile(str_ptr filename, str_ptr ext)
 
 		obj_rc cache_mgr = Services::service(Cache_i.cache_mgr);
 		CacheMgr* cm = zobj_toc<CacheMgr>(cache_mgr);
-		auto& fn = cm->xml_call_;
 
-		zval* p = fn.argsptr();
-		ZVAL_STR(p, filename);
-		result = fn.call_fn();
-
+		fn_params<1>  fn(cm->xml_call_);
+		val_ptr::string_bind(fn.argsptr(), filename);
+		result.value_ = fn.mixed();
 	}
 	else if (zs_cmp_ci(filetype, Cache_i.php_ext)==0)
 	{
@@ -399,7 +395,7 @@ CacheMgr::readFile(str_ptr filename, str_ptr ext)
 		result = val_rc(Toml::decodeFile(filename));
 	}
 	else {
-		zend_throw_error(zend_ce_error,"Unmatched file extension %s", filetype.data());
+		result.error() << "Unmatched file extension " << filetype;
 	}
 	
 	return result;

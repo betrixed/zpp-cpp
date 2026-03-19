@@ -121,7 +121,7 @@ namespace wcc {
 			XC_TABLE, // indexed array
 			XC_ARRAY // packed array
 		};
-		fn_call_args1	mkclass_fn_;
+		fn_call	mkclass_fn_;
 	public:
 
 		static base_obj_mgr<Wcc_XmlRead> omg;

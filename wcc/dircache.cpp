@@ -180,14 +180,14 @@ protected:
 public:
 	ExpiredCollect()
 	{
-		dit_valid.set_fname(SFDi.valid_s);
-		dit_current.set_fname(SFDi.current_s);
-		dit_gettype.set_fname(SFDi.gettype_s);	
-		dit_key.set_fname(SFDi.key_s);
-		dit_getpath.set_fname(SFDi.getpath_s);
-		dit_getchildren.set_fname(SFDi.getchildren_s);
-		dit_next.set_fname(SFDi.next_s);
-		cur_getExt.set_fname(SFDi.getextension_s);
+		dit_valid.set_fci(SFDi.valid_s);
+		dit_current.set_fci(SFDi.current_s);
+		dit_gettype.set_fci(SFDi.gettype_s);	
+		dit_key.set_fci(SFDi.key_s);
+		dit_getpath.set_fci(SFDi.getpath_s);
+		dit_getchildren.set_fci(SFDi.getchildren_s);
+		dit_next.set_fci(SFDi.next_s);
+		cur_getExt.set_fci(SFDi.getextension_s);
 
 	}
 
@@ -231,23 +231,29 @@ public:
 
 		htab_rw files(expired_);
 	
-		val_rc is_valid = dit_valid.call_fn();
-		bool more = is_valid.isTrue();
+		fn_noparams fvalid(dit_valid);
+		bool more = fvalid.zbool();
 
 		while(more)
 		{
-			str_rc dtype = dit_gettype.call_fn();
+			fn_noparams fgettype(dit_gettype);
+			str_rc dtype = fgettype.str();
 
 			if (zs_cmp_ci(dtype,SFDi.file_s)==0)
 			{
-				obj_rc cur = dit_current.call_fn();
+				fn_noparams fcurr(dit_current);
+				obj_rc cur = fcurr.obj();
+
 				cur_getExt.set_obj(cur);
 
-				str_rc ext = cur_getExt.call_fn();
+				fn_noparams fext(cur_getExt);
+				str_rc ext = fext.str();
 
 				if (zs_cmp_ci(ext, extn_)==0)
 				{
-					str_rc path = dit_key.call_fn();
+					fn_noparams fkey(dit_key);
+					str_rc path = fkey.str();
+
 					if (is_expired(path))
 					{
 						files.push_back(path);
@@ -257,14 +263,18 @@ public:
 			}
 			else if (recurse_ && (zs_cmp_ci(dtype, SFDi.dir_s)==0))
 			{
-				obj_rc chdit = dit_getchildren.call_fn(); 
+				fn_noparams fchildren(dit_getchildren);
+
+				obj_rc chdit = fchildren.obj(); 
+
 				result += recurseDir(chdit);
 				//!! Recursion changes the dit object
 				setdirit(dit); 
 			}
-			dit_next.call_fn();
-			is_valid = dit_valid.call_fn();
-			more = is_valid.isTrue();
+			fn_noparams  fnext(dit_next);
+			fnext.call_fn();
+
+			more = fvalid.zbool();
 		} 
 		return result;
 	}

@@ -67,15 +67,16 @@ MoneyFmt::construct(str_ptr slang)
 {
 	lang_str_ = slang;
 
-	val_rc lang(slang);
+	fn_call call_create(MFI.numfmt_create);
+	fn_params<2>  fn(call_create);
+	zval* pz = fn.argsptr();
+	val_ptr::string_bind(pz, slang);
+	ZVAL_LONG(pz+1, UNUM_CURRENCY);
+
+	money_fmt_ = fn.obj();
 	
-	val_rc currency_flag(UNUM_CURRENCY); 
-
-	val_rc symbol_flag(UNUM_INTL_CURRENCY_SYMBOL);  
-
-	money_fmt_ = FCall2(MFI.numfmt_create).call(lang, currency_flag);
-
-	money_sym_ = obj_ptr(money_fmt_).call(MFI.getsymbol, symbol_flag);
+	val_rc symbol_flag(UNUM_INTL_CURRENCY_SYMBOL);
+	money_sym_ = money_fmt_.call(MFI.getsymbol, symbol_flag);
 }
 
 str_rc 

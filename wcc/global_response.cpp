@@ -191,7 +191,7 @@ Response::construct(
 		}
 	}
 
-	header_fn.set_fname(RSPD.headerfn_key);
+	header_fn.set_fci(RSPD.headerfn_key);
 
 }
 
@@ -204,14 +204,17 @@ Response::send_header(str_ptr header, bool replace,
 	{
 		return;
 	}
-	zval* args = header_fn.argsptr();
 
-	ZVAL_STR(args, header);
-	ZVAL_BOOL(args+1, replace);
-	ZVAL_LONG(args+2, response_code);
+	fn_params<3> fn(header_fn);
+
+	zval* pz = fn.argsptr();
+
+	val_ptr::string_bind(pz, header);
+	ZVAL_BOOL(pz+1, replace);
+	ZVAL_LONG(pz+2, response_code);
 
 	// no result expected
-	header_fn.call_fn();
+	fn.call_fn();
 }
 
 htab_rw 
@@ -353,12 +356,11 @@ Response::send()
  val_rc //static
  Response::readfile(str_ptr name)
  {
- 	fn_call_args<1> call;
+ 	fn_call call(RSPD.readfile);
+ 	fn_params<1> fn(call);
 
- 	call.set_fname(RSPD.readfile);
- 	zval* arg = call.argsptr();
- 	ZVAL_STR(arg, name);
- 	return call.call_fn();
+ 	val_ptr::string_bind(fn.argsptr(), name);
+ 	return fn.mixed();
  }
 
 void 
@@ -642,13 +644,13 @@ Response::fireEvent(str_ptr eventType)
 
 	if (mgr.ok())
 	{
-		fn_call_args<2> fire;
-		fire.set_fci(mgr, RSPD.fire_key);
+		fn_call fire(RSPD.fire_key);
+		fn_params<2> fn(fire);
 
-		zval* args = fire.argsptr();
-		ZVAL_STR(args, eventType);
-		ZVAL_OBJ(args+1, this->vobj());
-		result = fire.call_fn();
+		zval* args = fn.argsptr();
+		val_ptr::string_bind(args, eventType);
+		val_ptr::object_bind(args+1, this->vobj());
+		result = fn.mixed();
 	}
 	else {
 		// pretend it happened
@@ -753,11 +755,9 @@ Response::headers_sent()
 	{
 		return sent_;
 	}
-	fn_call hsfn;
-
-	hsfn.set_fname(RSPD.headers_sent);
-	val_rc result = hsfn.call_fn();
-	sent_ = val_ptr(result).isTrue();
+	fn_call hsfn(RSPD.headers_sent);
+	fn_noparams fn(hsfn);
+	sent_ = fn.zbool();
 	return sent_;
 }
 

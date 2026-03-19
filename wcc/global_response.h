@@ -32,7 +32,7 @@ namespace wcc {
 			return hmap_;
 		}
 
-		fn_call_args<3>  header_fn;
+		fn_call  	header_fn;
 
 
 		str_rc attach_name(str_ptr uri, str_ptr suffix);

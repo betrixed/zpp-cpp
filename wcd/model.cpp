@@ -749,15 +749,11 @@ namespace wcd {
 			htab_rw csv(csv_args);
 			csv.set(MIS.escape_key, MIS.escape_str);
 
-			fn_fgetcsv fgetcsv;
-			fgetcsv.set_named_args(csv_args);
-
-			fn_stripslashes stripslashes;
 			obj_rc stmt;
 
 			while(true)
 			{
-				val_rc line_mgr = fgetcsv.call(import);
+				val_rc line_mgr = fgetcsv(import,csv_args);
 				val_ptr line(line_mgr); 
 				str_rc  cellstr;
 
@@ -776,7 +772,7 @@ namespace wcd {
 
 				for(sw.start(line.zarray()); sw.ok(); sw.next())
 				{
-					cellstr = stripslashes.call(item);
+					cellstr = stripslashes(item);
 					values.push_back(cellstr);
 				}
 				//showdata("line values", values);

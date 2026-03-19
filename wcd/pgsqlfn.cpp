@@ -31,45 +31,45 @@ PgInit   Pgfi;
 
 class PgfnTable {
 public:
-	fn_call_args1 free_result;
-	fn_call_args3 pg_fetch_array;
-	fn_call_args4 pg_fetch_object;
-	fn_call_args1 pg_fetch_assoc;
+	fn_call free_result;
+	fn_call pg_fetch_array;
+	fn_call pg_fetch_object;
+	fn_call pg_fetch_assoc;
 
-	fn_call_args1 pg_affected_rows;
-	fn_call_args2 pg_fetch_all;
-	fn_call_args2 pg_fetch_all_columns;
-	fn_call_args2 pg_connect;
+	fn_call pg_affected_rows;
+	fn_call pg_fetch_all;
+	fn_call pg_fetch_all_columns;
+	fn_call pg_connect;
 
-	fn_call_args1 pg_close;
-	fn_call_args2 pg_query;
-	fn_call_args2 pg_escape_string;
-	fn_call_args3 pg_prepare;
+	fn_call pg_close;
+	fn_call pg_query;
+	fn_call pg_escape_string;
+	fn_call pg_prepare;
 
-	fn_call_args3 pg_execute;
-	fn_call_args1 pg_last_error;
+	fn_call pg_execute;
+	fn_call pg_last_error;
 
 	zend_class_entry*  pgsql_result_ce;
 
 	void init(const PgInit& pg)
 	{
-		free_result.set_fname(pg.pg_free_result_fn);
-		pg_fetch_array.set_fname(pg.pg_fetch_array_fn);
-		pg_fetch_object.set_fname(pg.pg_fetch_object_fn);
-		pg_fetch_assoc.set_fname(pg.pg_fetch_assoc_fn);
+		free_result.set_fci(pg.pg_free_result_fn);
+		pg_fetch_array.set_fci(pg.pg_fetch_array_fn);
+		pg_fetch_object.set_fci(pg.pg_fetch_object_fn);
+		pg_fetch_assoc.set_fci(pg.pg_fetch_assoc_fn);
 
-		pg_affected_rows.set_fname(pg.pg_affected_rows_fn);
-		pg_fetch_all.set_fname(pg.pg_fetch_all_fn);
-		pg_fetch_all_columns.set_fname(pg.pg_fetch_all_columns_fn);
-		pg_connect.set_fname(pg.pg_connect_fn);
+		pg_affected_rows.set_fci(pg.pg_affected_rows_fn);
+		pg_fetch_all.set_fci(pg.pg_fetch_all_fn);
+		pg_fetch_all_columns.set_fci(pg.pg_fetch_all_columns_fn);
+		pg_connect.set_fci(pg.pg_connect_fn);
 
-		pg_close.set_fname(pg.pg_close_fn);
-		pg_query.set_fname(pg.pg_query_fn);
-		pg_escape_string.set_fname(pg.pg_escape_string_fn);
-		pg_prepare.set_fname(pg.pg_prepare_fn);
+		pg_close.set_fci(pg.pg_close_fn);
+		pg_query.set_fci(pg.pg_query_fn);
+		pg_escape_string.set_fci(pg.pg_escape_string_fn);
+		pg_prepare.set_fci(pg.pg_prepare_fn);
 
-		pg_execute.set_fname(pg.pg_execute_fn);
-		pg_last_error.set_fname(pg.pg_last_error_fn);
+		pg_execute.set_fci(pg.pg_execute_fn);
+		pg_last_error.set_fci(pg.pg_last_error_fn);
 
 		pgsql_result_ce = class_data::get_class(pg.pgsql_result_class);
 	}
@@ -125,7 +125,7 @@ void PgInit::init_req()
 
 void pg_free_result(obj_ptr h)
 {
-	auto& fn = PGfn.free_result;
+	fn_params<1> fn(PGfn.free_result);
 	zval* args = fn.argsptr();
 	val_ptr::object_bind(args, h);
 	fn.call_fn();	
@@ -133,47 +133,44 @@ void pg_free_result(obj_ptr h)
 
 str_rc pg_escape_string(obj_ptr conn, str_ptr s)
 {
-	auto& fn = PGfn.pg_escape_string;
+	fn_params<2> fn(PGfn.pg_escape_string);
 	zval* zv = fn.argsptr();
 	val_ptr::object_bind(zv, conn);
 	zv++;
 	val_ptr::string_bind(zv, s);
-	str_rc es = fn.call_fn();
-	return es;
+	return fn.str();
 }
 
 long pg_affected_rows(obj_ptr result)
 {
-	auto& fn = PGfn.pg_affected_rows;
+	fn_params<1> fn(PGfn.pg_affected_rows);
+
 	zval* args = fn.argsptr();
 	val_ptr::object_bind(args, result);
-	val_rc rows = fn.call_fn();
-	return rows.zlong();
+	return fn.zlong();
 }
 
 
 obj_rc 
 pg_prepare(obj_ptr h, str_ptr id, str_ptr sql)
 {
-	fn_call_args3& fn = PGfn.pg_prepare;
+
+	fn_params<3> fn(PGfn.pg_prepare);
 	zval* zv = fn.argsptr();
 	val_ptr::object_bind(zv, h);
 	zv++;
 	val_ptr::string_bind(zv, id);
 	zv++;
 	val_ptr::string_bind(zv, sql);
-	obj_rc result = fn.call_fn();
-	return result;
+	return fn.obj();
 }
 
 obj_rc 
 pg_last_error(obj_ptr connect)
 {
-	auto& fn  = PGfn.pg_last_error;
-	zval* zv = fn.argsptr();
-	val_ptr::object_bind(zv, connect);
-	obj_rc result = fn.call_fn();
-	return result;
+	fn_params<1> fn(PGfn.pg_last_error);
+	val_ptr::object_bind(fn.argsptr(), connect);
+	return fn.obj();
 }
 
 
@@ -182,34 +179,31 @@ pg_last_error(obj_ptr connect)
 val_rc 
 pg_query(obj_ptr connect, str_ptr query)
 {
-	auto& fn = PGfn.pg_query;
+	fn_params<2> fn(PGfn.pg_query);
 	zval* zv = fn.argsptr();
 	val_ptr::object_bind(zv, connect);
 	zv++;
 	val_ptr::string_bind(zv, query);
-	val_rc result = fn.call_fn();
-	return result;
+	return fn.mixed();
 }
 
 
 obj_rc pg_connect(str_ptr s, int flags)
 {
-	auto& fn = PGfn.pg_connect;
+	fn_params<2> fn(PGfn.pg_connect);
 	zval* zv = fn.argsptr();
 	val_ptr::string_bind(zv, s);
 	zv++;
 	ZVAL_LONG(zv, flags);
 
-	obj_rc result = fn.call_fn();
-	return result;
+	return fn.obj();
 
 }
 
 void pg_close(obj_ptr connect)
 {
-	auto& fn = PGfn.pg_close;
-	zval* zv = fn.argsptr();
-	val_ptr::object_bind(zv, connect);
+	fn_params<1> fn(PGfn.pg_close);
+	val_ptr::object_bind(fn.argsptr(), connect);
 	fn.call_fn();
 }
 
@@ -218,7 +212,7 @@ void pg_close(obj_ptr connect)
 val_rc
 pg_execute(obj_ptr connect, str_ptr sname, htab_ptr params)
 {
-	auto& fn = PGfn.pg_execute;
+	fn_params<3> fn(PGfn.pg_execute);
 
 	zval* zv = fn.argsptr();
 	val_ptr::object_bind(zv, connect);
@@ -226,10 +220,7 @@ pg_execute(obj_ptr connect, str_ptr sname, htab_ptr params)
 	val_ptr::string_bind(zv, sname);
 	zv++;
 	val_ptr::array_bind(zv, params);
-
-	val_rc result = fn.call_fn();
-
-	return result;
+	return fn.mixed();
 }
 
 
@@ -238,7 +229,7 @@ val_rc
 pg_fetch_object(obj_ptr robj, val_ptr row, 
 			str_ptr cname, htab_ptr args)
 {
-	auto& fn = PGfn.pg_fetch_object;
+	fn_params<4> fn(PGfn.pg_fetch_object);
 	str_rc    objclass;
 
 	zval* zv = fn.argsptr();
@@ -262,56 +253,49 @@ pg_fetch_object(obj_ptr robj, val_ptr row,
 	zv++;
 	val_ptr::array_bind(zv, args);
 
-	val_rc result = fn.call_fn();
-	return result;
+	return fn.mixed();
 }
 
 htab_rc pg_fetch_all_columns(obj_ptr robj, int colnum)
 {
-	auto& fn = PGfn.pg_fetch_all_columns;
+	fn_params<2> fn(PGfn.pg_fetch_all_columns);
 	zval* zv = fn.argsptr();
 	val_ptr::object_bind(zv,robj);
 	zv++;
 	ZVAL_LONG(zv, colnum);
 
-	htab_rc result = fn.call_fn();
-	return result;
+	return fn.array();
 }
 val_rc 
 pg_fetch_assoc(obj_ptr robj)
 {
-	auto& fn = PGfn.pg_fetch_assoc;
-	zval* zv = fn.argsptr();
-	val_ptr::object_bind(zv,robj);
-	val_rc result = fn.call_fn();
-	return result;
+	fn_params<1> fn(PGfn.pg_fetch_assoc);
+	val_ptr::object_bind(fn.argsptr(),robj);
+	return fn.mixed();
 }
 
 val_rc
 pg_fetch_array(obj_ptr robj, val_ptr row, int fmode)
 {
-	auto& fn = PGfn.pg_fetch_array;
+	fn_params<3> fn(PGfn.pg_fetch_array);
 	zval* zv = fn.argsptr();
 	val_ptr::object_bind(zv,robj);
 	zv++;
 	ZVAL_COPY_VALUE(zv, row);
 	zv++;
 	ZVAL_LONG(zv, fmode);
-
-	val_rc result = fn.call_fn();
-	return result;
+	return fn.mixed();
 }
 
 val_rc
 pg_fetch_all(obj_ptr robj, int fmode)
 {
-	auto& fn = PGfn.pg_fetch_all;
+	fn_params<2> fn(PGfn.pg_fetch_all);
 	zval* zv = fn.argsptr();
 	val_ptr::object_bind(zv, robj);
 	zv++;
 	ZVAL_LONG(zv, fmode);
-	val_rc result = fn.call_fn();
-	return result;	
+	return fn.mixed();
 }
 
 

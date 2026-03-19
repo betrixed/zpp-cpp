@@ -99,11 +99,11 @@ PlateInit PLD;
 void
 OBtable::init()
 {
-	obstart.set_fname(PLD.obstart_fn);
-	obgetclean.set_fname(PLD.obgetclean_fn);
-	obgetlevel.set_fname(PLD.obgetlevel_fn);
-	obendclean.set_fname(PLD.obendclean_fn);
-	obgetcontents.set_fname(PLD.obgetcontents_fn);
+	obstart.set_fci(PLD.obstart_fn);
+	obgetclean.set_fci(PLD.obgetclean_fn);
+	obgetlevel.set_fci(PLD.obgetlevel_fn);
+	obendclean.set_fci(PLD.obendclean_fn);
+	obgetcontents.set_fci(PLD.obgetcontents_fn);
 }
 
 
@@ -385,7 +385,8 @@ void Plate::stop()
 		return;
 	}
 
-	str_rc newContent = OBfn.obgetclean.call_fn();
+	fn_noparams clean(OBfn.obgetclean);
+	str_rc newContent = clean.str();
 
 	htab_rw slabs(sections_);
 
@@ -425,17 +426,19 @@ void Plate::start(str_ptr name)
 	}
 	
 	sectionName_ = name;
-	OBfn.obstart.call_fn();
+	fn_noparams fn(OBfn.obstart);
+	fn.call_fn();
 }
 
 int Plate::getObLevel() {
-	val_rc level = OBfn.obgetlevel.call_fn();
-	return val_ptr(level).zlong();
+	fn_noparams getlevel(OBfn.obgetlevel);
+	return getlevel.zlong();
 }
 
 void Plate::styleBegin()
 {
-	OBfn.obstart.call_fn();
+	fn_noparams start(OBfn.obstart);
+	start.call_fn();
 	style_level_ = getObLevel();
 }
 
@@ -447,8 +450,11 @@ void Plate::styleEnd()
 		zend_throw_error(zend_ce_error,"StyleEnd ob_level() error");
 		return;
 	}
-	val_rc styles = OBfn.obgetcontents.call_fn();
-	OBfn.obendclean.call_fn();
+	fn_noparams fncontent(OBfn.obgetcontents);
+	val_rc styles = fncontent.mixed();
+
+	fn_noparams endclean(OBfn.obendclean);
+	endclean.call_fn();
 
 	auto services = Services::cpp_global();
 

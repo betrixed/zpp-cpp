@@ -227,21 +227,21 @@ PlateEngine::newPlate(str_ptr name, bool store)
 	//zend_printf("newPlate fn\n");
 	result = Plate::omg.new_zobj();
 
-	obj_ptr plate(result);
 	//showobj("plate zobj", plate);
 
-	fn_call_args<2> cplate;
-	cplate.set_fci(plate, STAB.construct_key);
+	fn_call np(STAB.construct_key, result);
+	fn_params<2> cplate(np);
+
 	zval* args = cplate.argsptr();
-	ZVAL_STR(args, name);
-	ZVAL_OBJ(args+1, this->vobj());
+	val_ptr::string_bind(args, name);
+	val_ptr::object_bind(args+1, this->vobj());
 	
 	cplate.call_fn();
 
 	if (store)
 	{
 		htab_rw hw(stored_);
-		hw.set(name, plate);
+		hw.set(name, result);
 	}
 	return result;
 }

@@ -140,61 +140,62 @@ request_init::init() {
 str_rc 
 gethostbyname(str_ptr s)
 {
-    fn_call_args<1>  fn;
-    ZVAL_STR(fn.argsptr(), s);
-    fn.set_fname(RQit.gethostbyname);
-    return fn.call_fn();
+	fn_call call(RQit.gethostbyname);
+
+    fn_params<1>  fn(call);
+    val_ptr::string_bind(fn.argsptr(), s);
+    return fn.str();
+
 }
 
 val_rc 
 finfo_open(int infoflags)
 {
-    fn_call_args<1>  fn;
+	fn_call call(RQit.finfo_open);
+    fn_params<1>  fn(call);
     ZVAL_LONG(fn.argsptr(), infoflags);
-    fn.set_fname(RQit.finfo_open);
-    return fn.call_fn();
+    return fn.mixed();
 }
 
 val_rc 
 finfo_file(val_rc& finfo, str_ptr path)
 {
-    fn_call_args<2>  fn;
+	fn_call call(RQit.finfo_file);
+    fn_params<2>  fn(call);
     zval* pargs = fn.argsptr();
 
-    ZVAL_COPY(pargs, finfo);
-    ZVAL_STR(pargs+1, path);
-    fn.set_fname(RQit.finfo_file);
-    return fn.call_fn();
+    ZVAL_COPY_VALUE(pargs, finfo);
+    val_ptr::string_bind(pargs+1, path);
+    return fn.mixed();
 }
 
 val_rc 
 finfo_close(val_rc& finfo)
 {
-    fn_call_args<1>  fn;
-    ZVAL_COPY(fn.argsptr(), finfo);
-    fn.set_fname(RQit.finfo_close);
-    return fn.call_fn();
+	fn_call call(RQit.finfo_close);
+    fn_params<1>  fn(call);
+    ZVAL_COPY_VALUE(fn.argsptr(), finfo);
+    return fn.mixed();
 }
 
-bool is_uploaded_file(str_ptr path)
+bool 
+is_uploaded_file(str_ptr path)
 {
-    fn_call_args<1>  fn;
-    ZVAL_STR(fn.argsptr(), path);
-    fn.set_fname(RQit.is_uploaded_file);
-    val_rc result = fn.call_fn();
-    return val_ptr(result).isTrue();
+	fn_call call(RQit.is_uploaded_file);
+    fn_params<1>  fn(call);
+    val_ptr::string_bind(fn.argsptr(), path);
+    return fn.zbool();
 }
 
 bool
- move_uploaded_file(str_ptr from, str_ptr to)
+move_uploaded_file(str_ptr from, str_ptr to)
 {
-	fn_call_args<2>  fn;
+	fn_call call(RQit.move_uploaded_file);
+	fn_params<2>  fn(call);
 	zval* pargs = fn.argsptr();
-	ZVAL_STR(pargs, from);
-	ZVAL_STR(pargs+1, to);
-	fn.set_fname(RQit.move_uploaded_file);
-    val_rc result = fn.call_fn();
-    return val_ptr(result).isTrue();
+	val_ptr::string_bind(pargs, from);
+	val_ptr::string_bind(pargs+1, to);
+	return fn.zbool();
 }
 
 //protected

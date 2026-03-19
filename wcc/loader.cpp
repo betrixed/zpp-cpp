@@ -86,7 +86,7 @@ void Loader_init::end_req()
 void Loader::setFinder(obj_ptr finder) 
 {
 	finder_ = finder;
-	fdr_find_.set_fci(finder, LDRi.s_find);
+	fdr_find_.set_fci(LDRi.s_find, finder);
 }
 
 htab_ptr
@@ -112,10 +112,10 @@ Loader::call_spl(str_ptr fname)
 	hw.push_back(this->self());
 	hw.push_back(LDRi.s_mustload);
 
-	fn_call_args<1> fn;
-	fn.set_fname(fname);
+	fn_call  spl(fname);
+	fn_params<1> fn(spl);
 
-	ZVAL_ARR(fn.argsptr(), cfn);
+	val_ptr::array_bind(fn.argsptr(), cfn);
 	fn.call_fn();
 }
 
@@ -251,8 +251,12 @@ Loader::load(str_ptr class_name)
 
 	if (finder_.ok())
 	{
-		ZVAL_STR(fdr_find_.argsptr(), class_name);
-		path = fdr_find_.call_fn();
+		fn_params<1> fn(fdr_find_);
+
+		val_ptr::string_bind(fn.argsptr(), class_name);
+
+		path = fn.str();
+
 		if (!path.ok())
 		{
 			if (throwNotFound_)
