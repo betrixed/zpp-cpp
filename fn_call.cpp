@@ -451,9 +451,45 @@ stripslashes(str_ptr str)
     return fn.str();
 }
 
+
+str_rc file_get_contents(
+    str_ptr path, 
+    bool include_path, 
+    val_ptr context, 
+    int offset, 
+    size_t len
+    )
+{
+    fn_params<5>   fn(TLFNs.file_get_contents);
+    
+    zval* pz = fn.argsptr();
+
+    val_ptr::string_bind(pz, path); 
+
+    ZVAL_BOOL(pz+1, include_path);
+    if (context.isNull()) {
+        ZVAL_NULL(pz+2); // resource arg
+    }
+    else {
+        ZVAL_COPY_VALUE(pz+2, context);
+    }
+
+    ZVAL_LONG(pz+3, offset);
+    if (len > 0)
+    {
+        ZVAL_LONG(pz+4, len);
+    }
+    else {
+        ZVAL_NULL(pz+4);
+    }
+    return fn.str();
+}
  str_rc 
  file_content(str_ptr path, int offset, size_t len)
  {
+    //return file_get_contents(path, false, val_ptr(), offset, len);
+
+    
     fn_params<5>   fn(TLFNs.file_get_contents);
     
     zval* pz = fn.argsptr();

@@ -206,7 +206,7 @@ namespace zpp {
      *      Skips resource - context(null), and use_include path(false)
      */ 
 
-    str_rc file_content(str_ptr path, int offset = 0, size_t len = 0);
+    
 
 /**
 * @class fn_fclose
@@ -380,7 +380,17 @@ namespace zpp {
 
     str_rc preg_quote(str_ptr expr, str_ptr delimiter);
 
-    str_rc file_get_contents(str_ptr path, int offset=0, size_t len=0);
+
+    str_rc file_content(str_ptr path, int offset = 0, size_t len = 0);
+
+    // Ackward full version
+    str_rc file_get_contents(
+        str_ptr path, 
+        bool include_path = false, 
+        val_ptr context = val_ptr(), 
+        int offset=0, 
+        size_t len=0
+        );
 
     // the "constant" is renamed as get_constant
     val_rc constant(str_ptr name);
