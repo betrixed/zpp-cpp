@@ -178,7 +178,7 @@ Assets::jsInline()
 
 				if ( web_path(wpath) )
 				{
-					str_rc script =  file_get_contents(wpath);
+					str_rc script =  file_content(wpath);
 					if (script.size())
 					{
 						str_buf buf;
@@ -561,7 +561,7 @@ Assets::inline_css(str_ptr name)
 				css_path = pathnames.eval(css_path);
 				css_path = findSourceFile(css_path);
 
-				str_rc data = file_get_contents(css_path);
+				str_rc data = file_content(css_path);
 				buf << endl << ASI.style_tag << endl;
 				buf << data << endl << ASI.style_end << endl;
 			}

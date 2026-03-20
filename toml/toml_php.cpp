@@ -323,7 +323,7 @@ Toml::parseFile(str_ptr path)
 		return htab_empty();
 	}
 
-	str_rc toml = file_get_contents(path);
+	str_rc toml = file_content(path);
 	return parse(toml);
 }
 

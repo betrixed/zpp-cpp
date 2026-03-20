@@ -994,7 +994,7 @@ RequestGlobals::getRawBody()
 {
 	if (!body_.size())
 	{
-		body_ = file_get_contents(RQit.php_input);
+		body_ = file_content(RQit.php_input);
 	}
 	return body_;
 }
