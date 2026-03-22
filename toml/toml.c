@@ -27,7 +27,10 @@
   SOFTWARE.
 
 */
+#ifndef _POSIX_C_SOURCE
 #define _POSIX_C_SOURCE 200809L
+#endif
+
 #include "toml.h"
 #include <assert.h>
 #include <ctype.h>
