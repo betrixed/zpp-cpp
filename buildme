@@ -2,8 +2,9 @@
 ARGC=$#
 echo "ARGS = $ARGC"
 set -e
+. ./pvid.sh
 sudo make clean
-sudo rm -f /etc/php/8.4/cli/conf.d/25-wccz.ini
+sudo rm -f $pconf/zpp.ini
 clear
 b=0
 if [ $ARGC -eq $b ]; then
@@ -17,6 +18,4 @@ if [ $ARGC -eq $b ]; then
 fi
 
 sudo make install
-pushd /etc/php/8.4/cli/conf.d
-./on_wccz.sh
-popd
+sudo cp zpp.ini $pconf/zpp.ini
