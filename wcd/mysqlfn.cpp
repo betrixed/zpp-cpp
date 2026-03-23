@@ -41,18 +41,39 @@ public:
 
 class MsFnTable {
 public:
+	bool            configured_;
+
+	fn_call         commit_fn;
 	fn_call         fetch_array_fn;
 	fn_call			set_charset_fn;
 	fn_call			query_fn;
 	fn_call         report_fn;
+	fn_call         begin_transaction_fn;
+	fn_call         fetch_all_fn;
+	fn_call         fetch_assoc_fn;
 	
+	MsFnTable() : configured_(false) {}
 
-	initFn(MSFInit& ms)
+	void init()
 	{
+		if (configured_) {
+			return;
+		}
+		initFn(Msfi);
+	}
+
+	void initFn(MSFInit& ms)
+	{
+		begin_transaction_fn.set_fci(ms.begin_transaction_s);
+		commit_fn.set_fci(ms.commit_s);
+		fetch_all_fn.set_fci(ms.fetch_all_s);
+
 		fetch_array_fn.set_fci(ms.fetch_array_s);
+		fetch_assoc_fn.set_fci(ms.fetch_assoc_s);
 		query_fn.set_fci(ms.query_s);
 		report_fn.set_fci(ms.report_mode_s);
 		set_charset_fn.set_fci(ms.set_charset_s);
+
 	}
 };
 
@@ -69,15 +90,16 @@ MSFInit::init()
 
 	set_charset_s = "mysqli_set_charset";
 
-	fetch_array_s = "mysqli_fetch_array";
-	fetch_object_s = "fetch_object";
-	fetch_assoc_s = "fetch_assoc";
-	fetch_all_s = "fetch_all";
-	real_escape_string_s = "real_escape_string";
 	
+	commit_s = "mysqli_commit";
+	begin_transaction_s = "mysqli_begin_transaction";
+	fetch_all_s = "mysqli_fetch_all";
+
+	fetch_array_s = "mysqli_fetch_array";
+	fetch_assoc_s = "mysqli_fetch_assoc";
+	fetch_object_s = "fetch_object";
 	insert_id_s = "insert_id";
-	begin_transaction_s = "begin_transaction";
-	begin_commit_s = "begin_commit";
+	real_escape_string_s = "real_escape_string";
 	rollback_commit_s = "rollback_commit";
 }
 
@@ -97,6 +119,31 @@ Mysqlfn::~Mysqlfn()
 thread_local MsFnTable MSfn;
 
 
+
+
+bool 
+mysqli_begin_transaction(obj_ptr msi, int flags, str_ptr name)
+{
+	fn_params  fn(MSfn.set_charset_fn);
+	zval* pz = fn.argsptr();
+	val_ptr::object_bind(pz, msi);
+	pz++; ZVAL_LONG(pz, flags);
+	pz++; val_ptr::string_bind(pz, name);
+	return fn.zbool();
+}
+
+bool
+mysqli_commit(obj_ptr msi, int flags, str_ptr name)
+{
+	fn_params  fn(MSfn.commit_fn);
+	zval* pz = fn.argsptr();
+	val_ptr::object_bind(pz, msi);
+	pz++; ZVAL_LONG(pz, flags);
+	pz++; val_ptr::string_bind(pz, name);
+	return fn.zbool();
+}
+
+
 bool 
 mysqli_set_charset(obj_ptr msi, str_ptr cset)
 {
@@ -106,6 +153,7 @@ mysqli_set_charset(obj_ptr msi, str_ptr cset)
 	pz++; val_ptr::string_bind(pz, cset);
 	return fn.zbool();
 }
+
 
 obj_rc
 mysqli_query(obj_ptr msi, int rmode)
@@ -135,9 +183,40 @@ mysqli_fetch_array(obj_ptr robj, int mode)
 	val_ptr::object_bind(pz, robj);
 	pz++;
 	ZVAL_LONG(pz, mode);
-	return fn.zbool();
+	return fn.array();
 }
 
+htab_rc 
+mysqli_fetch_assoc(obj_ptr robj)
+{
+	fn_params  fn(MSfn.fetch_array_fn);
+	val_ptr::object_bind(fn.argsptr(), robj);
+	return fn.array();
+}
+
+obj_rc 
+mysqli_fetch_object(obj_ptr robj, str_ptr cname, htab_ptr args)
+{
+	fn_params  fn(MSfn.fetch_array_fn);
+	zval* pz = fn.argsptr();
+	val_ptr::object_bind(pz, robj);
+	str_rc class_name;
+	if (cname.ok())
+	{
+		class_name = cname;
+	}
+	else {
+		class_name = "stdClass";
+	}
+	pz++; val_ptr::string_bind(pz, cname);
+
+	if (!args.ok())
+	{
+		args = htab_ptr::empty_array();
+	}
+	pz++; val_ptr::array_bind(pz, args);
+	return fn.obj();
+}
 
 void 
 register_class(zend_class_entry* idriver_ce)
@@ -330,7 +409,7 @@ Mysqlfn::rollback()
 
 Mysqlfn::Mysqlfn()
 {
-
+	MSfn.init();
 }
 
 

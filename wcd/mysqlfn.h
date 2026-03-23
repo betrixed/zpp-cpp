@@ -12,6 +12,24 @@ using namespace zpp;
 
 class MsiWrap;
 
+//C++ MSI procedural function prototypes
+bool mysqli_begin_transaction(obj_ptr msi, 
+		int flags=0, str_ptr name=str_ptr());
+bool mysqli_commit(obj_ptr msi, int flags=0, str_ptr name=str_ptr());
+
+bool mysqli_set_charset(obj_ptr msi, str_ptr cset);
+
+obj_rc mysqli_query(obj_ptr msi, int rmode=MYSQLI_STORE_RESULT);
+
+bool mysqli_report(int flags);
+
+htab_rc mysqli_fetch_all(obj_ptr msi, int rmode=MYSQLI_NUM);
+
+htab_rc mysqli_fetch_array(obj_ptr robj, int mode=MYSQLI_NUM);
+
+htab_rc mysqli_fetch_assoc(obj_ptr robj);
+//--------------------------------------------------
+
 class Mysqlfn : public IDriver {
 protected:
 	bool          inTransaction_;
