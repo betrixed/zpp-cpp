@@ -9,9 +9,9 @@
 #include "wcc/services.cpp"
 
 #include "wcc/strfns.cpp"
-#include "wcc/persistent.cpp"
+//#include "wcc/persistent.cpp"
 
-void register_core_extn(INIT_FUNC_ARGS)
+void register_zero_extn(INIT_FUNC_ARGS)
 {
 
 #ifdef WCC_CONFIG_CPP
@@ -25,11 +25,12 @@ void register_core_extn(INIT_FUNC_ARGS)
 	PHP_MINIT(Wcc_ReflectCache)(INIT_FUNC_ARGS_PASSTHRU);
 #endif
 
-
+/*
 #ifdef PERSISTENT_WCC_CPP
 	PHP_MINIT(wcc_persistent_md);
 #endif
-
+*/
+	
 #ifdef STRFNS_CPP
 	PHP_MINIT(Strfns_reg)(INIT_FUNC_ARGS_PASSTHRU);
 #endif

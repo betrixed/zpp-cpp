@@ -6,10 +6,8 @@
 namespace Wcc;
 
 class ICache {
-	static public function 
-		make_cache(array $options, ?Services $svc = null) : ICache {}
 	
-	public function __construct(array $options = [], ?Services $svc = null);
+	public function __construct(array $options = []);
 
 	public function addLocal(ICacheData $pkg): void {}
 
@@ -43,14 +41,11 @@ class ICache {
 
 	public function set(string $key, mixed $value, int $ttl = 0): bool {}
 
-	public function 
-		setCached(string $key, mixed $value, int $ttl = 0): ICacheData|null {}
+	public function setCached(string $key, mixed $value, int $ttl = 0): ICacheData|null {}
 
 	public function setMultiple(array $values, int $ttl = 0): bool {}
 
 	public function setOption(string $key, mixed $value) : void {}
-
-	public function setServices(Services $svc) : void {}
 
 	public function setTTL(int $val): void {}
 

@@ -94,9 +94,9 @@ void SFData::init()
 
 
 void 
-DirCache::construct(val_ptr options, val_ptr services)
+DirCache::construct(val_ptr options)
 {
-	ICache::construct(options, services);
+	ICache::construct(options);
 
 	val_rc test;
 

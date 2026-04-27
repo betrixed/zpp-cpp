@@ -202,7 +202,7 @@ void CacheMgr::createCache(str_ptr svckey, str_ptr classname, htab_ptr options)
 	htab_rw acwrite(args_cache);
 
 	acwrite.push_back(config_args);
-	acwrite.push_back(svc->self());
+	//acwrite.push_back(svc->self());
 
 	//showdata("args_cache", args_cache);
 

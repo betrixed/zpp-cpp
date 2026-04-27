@@ -35,8 +35,7 @@ using namespace zpp;
 
 	base_obj_mgr<ICache> ICache::omg;
 
-
-
+/*
 obj_rc 
 ICache::make_cache( val_ptr options, val_ptr services)
 {
@@ -72,16 +71,10 @@ ICache::make_cache( val_ptr options, val_ptr services)
     }
     return result;
 }
+*/
 
-void ICache::construct(val_ptr options, val_ptr services)
+void ICache::construct(val_ptr options)
 {
-	if (services.isNull())
-	{
-		services_ = Services::instance();
-	}
-	else {
-		services_ = services.zobject();
-	}
 
 	options_ = options.zarray();
 
@@ -119,10 +112,8 @@ void ICache::debug_info(htab_rw s)
 {
 	base_d::debug_info(s);
 	s.set(IC_STR.cached, cached_);
-	s.set(IC_STR.svc_cache, svc_cache_);
 	s.set(IC_STR.prefix_key, prefix_);
 	s.set(IC_STR.options, options_);
-	s.set(IC_STR.services, services_);
 	s.set(IC_STR.ttl_key, (int)ttl_);
 }
 
@@ -313,25 +304,21 @@ ICache::getMultiple(htab_ptr keys, val_ptr noval)
 val_rc 
 ICache::getService(str_ptr key)
 {
-	val_rc result;
-	val_ptr test;
 
-	htab_rw svc(svc_cache_);
-
-	if (svc.try_fetch(key,test))
+	val_rc svc = htab_ptr(options_).get(key);
+	
+	if (svc.ok())
 	{
-		result = test;
-		return result;
+		return svc;
 	}
 
-	Services* sobj = zobj_toc<Services>(services_);
-	result = sobj->get(key);
-	test = result;
-	if (test.ok())
+	svc = Services::service(key);
+	if (svc.ok())
 	{
-		svc.set(key, result);
+		htab_rw  owr(options_);
+		owr.set(key, svc);
 	}
-	return result;
+	return svc;
 }
 
 
@@ -380,6 +367,7 @@ ICache::set(str_ptr key, val_ptr data, zend_long ttl)
 }
 
 
+
 // returns the ICacheData object
 obj_rc
 ICache::setCached(str_ptr key, val_ptr data, zend_long ttl)
@@ -416,11 +404,6 @@ ICache::setMultiple(val_ptr values, zend_long ttl)
 }
 
 
-void ICache::setServices(val_ptr svc)
-{
-	services_ = svc.zobject();
-}
-
 }; //namespace wcc
 
 
@@ -430,19 +413,14 @@ using namespace zpp;
 ZEND_METHOD(Wcc_ICache, __construct)
 {
 	zval* options = nullptr;
-	zval* services_obj = nullptr;
 
-	zend_class_entry* services_ce = Services::omg.classEntry();
-
-
-	ZEND_PARSE_PARAMETERS_START(0, 2)
+	ZEND_PARSE_PARAMETERS_START(0, 1)
 	Z_PARAM_OPTIONAL
 	Z_PARAM_ARRAY(options)
-	Z_PARAM_OBJECT_OF_CLASS(services_obj, services_ce)
 	ZEND_PARSE_PARAMETERS_END();
 
 	val_rc options_z;
-	val_rc services_z;
+
 
 	if (!options)
 	{
@@ -450,15 +428,11 @@ ZEND_METHOD(Wcc_ICache, __construct)
 		options = options_z;
 	}
 
-	if (!services_obj) {
-		services_z = Services::instance();
-		services_obj = services_z;
-	}
-
 	auto cobj = zval_toc<ICache>(ZEND_THIS);
-	cobj->construct(options,services_obj);
+	cobj->construct(options);
 }
 
+/*
 ZEND_METHOD(Wcc_ICache, make_cache)
 {
     zval* options = nullptr;
@@ -474,7 +448,7 @@ ZEND_METHOD(Wcc_ICache, make_cache)
     obj_rc cache = ICache::make_cache(options, services_obj);
     cache.move_zv(return_value);
 }
-
+*/
 
 ZEND_METHOD(Wcc_ICache, addLocal)
 {
@@ -738,19 +712,6 @@ ZEND_METHOD(Wcc_ICache, setOption)
 	cobj->setOption(key, value);
 }
 
-ZEND_METHOD(Wcc_ICache, setServices)
-{
-	zend_class_entry* svc_ce = Services::omg.classEntry();
-	zval*     svc;
-
-	ZEND_PARSE_PARAMETERS_START(1, 1)
-	Z_PARAM_OBJECT_OF_CLASS(svc, svc_ce)
-	ZEND_PARSE_PARAMETERS_END();
-
-	auto cobj = zval_toc<ICache>(ZEND_THIS);
-	val_rc data(svc);
-	cobj->setServices(data);	
-}
 
 ZEND_METHOD(Wcc_ICache, setTTL)
 {

@@ -17,19 +17,17 @@ namespace wcc {
 	
 class  ICache : public base_d {
 protected:
-	htab_rc  cached_;
-	htab_rc  svc_cache_;
-	htab_rc  options_;
-	str_rc  prefix_;
-	obj_rc  services_;
-	zend_long ttl_;
+	htab_rc    cached_;
+	htab_rc    options_;
+	str_rc     prefix_;
+	zend_long  ttl_;
 public:
 
 	static base_obj_mgr<ICache> omg;
 
 	static obj_rc make_cache( val_ptr options, val_ptr services);
 
-	virtual void construct(val_ptr options, val_ptr services);
+	virtual void construct(val_ptr options);
 
 	virtual bool clear();
 
@@ -46,6 +44,7 @@ public:
 	virtual int  deleteExpired();
 
 	virtual error_return flushCached();
+
 
 	void addLocal(obj_ptr pkg);
 
@@ -83,8 +82,6 @@ public:
 	obj_rc setCached(str_ptr key, val_ptr data, zend_long ttl = 0);
 
 	bool setMultiple(val_ptr values, zend_long ttl = 0);
-
-	void setServices(val_ptr svc);
 
 	void setTTL(zend_long ttl)
 	{
