@@ -1,4 +1,4 @@
- /*  
+	 /*  
   *  @file str_rc.cxx
   *  @author Michael Rynn <michael.rynn.500@gmail.com>
   *  @copyright 2025 Michael Rynn
@@ -402,6 +402,7 @@ str_intern::str_intern(const char* c, size_t slen)
 		slen = strlen(c);
 	}
 	s = zend_string_init(c, slen, 1);
+	//GC_ADDREF(s);
 	//showstr("init s",s);
 	s = zend_new_interned_string(s);
 	//showstr("interned s",p);

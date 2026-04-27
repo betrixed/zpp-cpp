@@ -29,6 +29,8 @@ namespace zpp {
      * to ensure that modifications do not affect other references. 
      */
 
+    
+    
     class htab_rw : public htab_ptr 
     {
     protected:
@@ -124,6 +126,7 @@ namespace zpp {
         void set(zend_long idx, zval* value);
         void set(zend_long idx, HashTable* value);
         void set(zend_long idx, zend_object* value);
+        void set(zend_long idx, zend_string* value);
 
         bool unset(zend_long idx);
         bool unset(zend_string* key);
@@ -139,6 +142,28 @@ namespace zpp {
         void removal(htab_ptr exkeys);
     };
 
+    class htab_persist {
+            HashTable* htab_;
+        public:
+            operator HashTable* () { return htab_; }
+
+            static void val_destroy(zval* val);
+            static void freehtmemory(HashTable* ht);
+
+            htab_persist();
+            ~htab_persist();
+            
+            htab_persist(size_t slots);
+
+            void init(size_t slots);
+            void wipe();
+
+            void set(val_ptr key, val_ptr value);
+            void set(str_ptr skey, val_ptr value);
+            void set(zend_long ikey, val_ptr value);
+            zval* get(str_ptr skey);
+
+        };
 };
 
 //htab_rw.h

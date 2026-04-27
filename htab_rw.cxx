@@ -40,6 +40,8 @@
 
 namespace zpp {
 
+
+
 void 
 htab_rw::giveback(zval* mgr, size_t init)
 {
@@ -351,6 +353,14 @@ void htab_rw::set(zend_long idx, zend_object* value)
 	}
 }
 
+void htab_rw::set(zend_long idx, zend_string* value)
+{
+	zval temp = {0};
+	val_ptr::string_bind(&temp, value);
+	zend_hash_index_update(ht_, idx, &temp);
+}
+
+
 bool htab_rw::unset(zend_string* skey)
 {
 	return (zend_hash_del(ht_, skey) == SUCCESS);
@@ -507,6 +517,160 @@ void htab_rw::push_back(str_ptr su)
     push_back((zend_string*) su);
 }
 
-}; // namespace zpp
+//- *@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@*
 
+void 
+htab_persist::val_destroy(zval* val)
+{
+	//showmem("val_destroy", val);
+	val_rc::try_decref(val);
+
+}
+
+void 
+htab_persist::init(size_t slots)
+{
+	htab_ = (HashTable*) malloc(sizeof(HashTable));
+
+	_zend_hash_init(htab_, slots, htab_persist::val_destroy, 1);
+}
+
+void
+htab_persist::wipe()
+{
+	htab_ = nullptr;
+}
+
+htab_persist::htab_persist()
+{
+	htab_ = nullptr;
+}
+
+htab_persist::htab_persist(size_t slots)
+{
+	htab_ = nullptr;
+	init(slots);
+}
+
+htab_persist::~htab_persist()
+{
+	if (htab_)
+	{
+		//htab_persist::freehtmemory(htab_);
+		zend_hash_graceful_destroy(htab_);
+		free(htab_);
+	}
+}
+
+void  
+htab_persist::set(val_ptr key, val_ptr value)
+{
+	if (key.isLong())
+	{
+		set(key.zlong(), value);
+	}
+	else {
+		set(key.zstr(), value);
+	}
+}
+
+ void 
+ htab_persist::set(zend_long ix, val_ptr value)
+ {
+ 	htab_rw rw(htab_);
+
+	int ztype = value.ref_type();
+	switch(ztype)
+	{
+	case IS_TRUE:
+	case IS_FALSE:
+	case IS_LONG:
+	case IS_DOUBLE:
+		rw.set(ix, value);
+		break;
+	case IS_STRING:
+		{
+			str_ptr s = value.zstr();
+			str_perm sp (s.data(), s.size());
+			rw.set(ix, sp);
+		}
+	case IS_ARRAY:
+		{
+			htab_ptr h (value.zarray());
+
+			htab_persist  hp(h.size());
+
+			htab_walk wk;
+
+			auto subkey = wk.key();
+			auto subval = wk.value();
+			for(wk.start(h); wk.ok(); wk.next())
+			{
+				hp.set(subkey, subval);
+			}
+			rw.set(ix, (HashTable*) hp);
+			hp.wipe();
+		}
+	}
+ }
+
+ void 
+ htab_persist::set(str_ptr key, val_ptr value)
+ {
+	htab_rw rw(htab_);
+
+	str_perm skey(key.data(), key.size());
+
+	int ztype = value.ref_type();
+	switch(ztype)
+	{
+	case IS_TRUE:
+	case IS_FALSE:
+	case IS_LONG:
+	case IS_DOUBLE:
+		rw.set(skey, value);
+		break;
+	case IS_STRING:
+		{
+			str_ptr s = value.zstr();
+			str_perm sp (s.data(), s.size());
+			rw.set(skey, sp);
+		}
+	case IS_ARRAY:
+		{
+			htab_ptr h (value.zarray());
+
+			htab_persist  hp(h.size());
+
+			htab_walk wk;
+
+			auto subkey = wk.key();
+			auto subval = wk.value();
+			for(wk.start(h); wk.ok(); wk.next())
+			{
+				if (subkey.isString())
+					hp.set(subkey.zstr(), subval);
+				else {
+					hp.set(subkey.zlong(), subval);
+				}
+			}
+			rw.set(skey, (HashTable*) hp);
+			hp.wipe();
+		}
+	}
+
+ }
+
+
+ void 
+ htab_persist::freehtmemory(HashTable* ht)
+{
+	bool persistent = GC_FLAGS(ht) & IS_ARRAY_PERSISTENT;
+	void* ptr = HT_GET_DATA_ADDR(ht);
+	//zend_printf("Free HashTable Data %lx, persistent=%d\n", ptr, persistent);
+
+	pefree(ptr, persistent);
+}
+
+}; // namespace zpp
 #endif
