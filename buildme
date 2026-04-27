@@ -18,4 +18,4 @@ if [ $ARGC -eq $b ]; then
 fi
 
 sudo make install
-sudo cp zpp.ini $pconf/zpp.ini
+#sudo cp zpp.ini $pconf/zpp.ini

@@ -27,47 +27,20 @@ Route::RouteMgr Route::omg;
 Route_init route_data;
 
 /* This helps for a clean valgrind report */
-void freehtmemory(HashTable* ht)
-{
-	bool persistent = GC_FLAGS(ht) & IS_ARRAY_PERSISTENT;
-	void* ptr = HT_GET_DATA_ADDR(ht);
-	//zend_printf("Free HashTable Data %lx, persistent=%d\n", ptr, persistent);
 
-	pefree(ptr, persistent);
-}
 
 void Route_init::end() 
 {
-
-	freehtmemory(&verb_names);
-	freehtmemory(&route_verbs);
-	
-
-	//showarray("route_verbs", &route_verbs);
-	//showarray("verb_names", &verb_names);
-
-	/*
-	showarray("route_verbs", route_verbs);
-	route_verbs.lose();
-	showarray("route_verbs", route_verbs);
-
-	showarray("route_verbs", verb_names);
-	verb_names.lose();
-	showarray("route_verbs", verb_names);
-	*/
+	//zend_printf("Route_init end\n");
 }
 
-void Route_init::nodestroy(zval* val)
-{
-	// Allow zend to clean up str_intern
-}
 void Route_init::init() 
 {
 
 	//10 items, 16 slots is enough?
+	route_verbs.init(16);
+	verb_names.init(16);
 
-	zend_hash_init(&route_verbs, 16, NULL, nodestroy,1);
-	zend_hash_init(&verb_names, 16, NULL, nodestroy,1);
 	GET_S = "GET";
 	POST_S = "POST";
 	PUT_S = "PUT";
@@ -98,7 +71,7 @@ void Route_init::init()
 	ROLE_S = "_rol";
 
 
-	htab_rw rv(&route_verbs);
+	htab_rw rv(route_verbs);
 
 	rv.set(GET_S, (int)html::V_GET);
 	rv.set(POST_S, (int)html::V_POST);
@@ -114,7 +87,7 @@ void Route_init::init()
 	//zend_printf("route_verbs table size %d, used %d\n", route_verbs.nTableSize, route_verbs.nNumUsed);
 	//verb_names.reset();
 
-	htab_rw p2(&verb_names);
+	htab_rw p2(verb_names);
 
 	// Push in ascending order (powers of 2)
 	p2.push_back(GET_S); 
@@ -127,6 +100,10 @@ void Route_init::init()
 	p2.push_back(CONNECT_S);
 	p2.push_back(TRACE_S);
 	p2.push_back(PURGE_S);	
+
+	//zend_printf("Route_init init\n");
+	//showarray("rv", route_verbs);
+	//showarray("vnames", verb_names);
 	
 	//showarray("verbs",rv);
 	//showarray("names", p2);
@@ -334,7 +311,7 @@ Route::getVerbInt(str_ptr sverb)
 	str_rc verbstr(sverb);
 	verbstr.uppercase();
 	
-	htab_ptr hr(&route_data.route_verbs);
+	htab_ptr hr(route_data.route_verbs);
 
 	val_ptr test;
 
@@ -435,7 +412,7 @@ Route::getVerbNames( zend_long flags )
 
 	htab_rw rval(result);
 
-	htab_ptr names(&route_data.verb_names);
+	htab_ptr names(route_data.verb_names);
 
 	size_t nct = names.size();
 	for( size_t mix = 0; mix < nct; mix++) {
@@ -457,7 +434,7 @@ Route::getVerbNames( zend_long flags )
 str_rc 
 Route::getVerb(zend_long verb)
 {
-	htab_ptr names(&route_data.verb_names);
+	htab_ptr names(route_data.verb_names);
 	str_rc rval;
 
 	for( zend_long mix = 0; mix < 9; mix++) {

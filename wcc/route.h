@@ -132,42 +132,50 @@ public:
 };
 
 
+using  permstr = str_perm;
 
 //typedef std::vector<str_perm> HttpVerbNames;
 //typedef std::map<str_perm, int, MapComparator > HttpVerbBits;
 
 class Route_init : public zpp::state_init {
 public:
-	str_intern GET_S;
-	str_intern POST_S;
-	str_intern PUT_S;
-	str_intern PATCH_S;
-	str_intern OPTIONS_S;
-	str_intern DELETE_S;
-	str_intern HEAD_S;
-	str_intern CONNECT_S;
-	str_intern TRACE_S;
-	str_intern PURGE_S;
+
+	// str_perm rather than str_intern.
+	// str_intern stored in Array risks double destructor.
+	// PHP also does free of interned strings.
+	// If using str_intern,  htab_persist must only use freehtmemory.
+	// if using str_perm,    htab_persist can use zend_hash_graceful_destroy 
+
+	permstr GET_S;
+	permstr POST_S;
+	permstr PUT_S;
+	permstr PATCH_S;
+	permstr OPTIONS_S;
+	permstr DELETE_S;
+	permstr HEAD_S;
+	permstr CONNECT_S;
+	permstr TRACE_S;
+	permstr PURGE_S;
 
 			// route
-	str_intern cc_verbs;
-	str_intern cc_ajax;
-	str_intern cc_params;
-	str_intern cc_compiled;
-	str_intern cc_pattern;
-	str_intern cc_target;
-	str_intern cc_id;
+	permstr cc_verbs;
+	permstr cc_ajax;
+	permstr cc_params;
+	permstr cc_compiled;
+	permstr cc_pattern;
+	permstr cc_target;
+	permstr cc_id;
 
 	// values for RouteSet
-	str_intern ARG_S;
-	str_intern FUN_S;
-	str_intern FUNX_S;
-	str_intern HITS_S;
-	str_intern MOD_S;
-	str_intern NSP_S;
-	str_intern OBJ_S;
-	str_intern OBJX_S;
-	str_intern ROLE_S;
+	permstr ARG_S;
+	permstr FUN_S;
+	permstr FUNX_S;
+	permstr HITS_S;
+	permstr MOD_S;
+	permstr NSP_S;
+	permstr OBJ_S;
+	permstr OBJX_S;
+	permstr ROLE_S;
 	
 
 
@@ -175,10 +183,9 @@ public:
 	 and cannot be dynamically deallocated during Module Shutdown.
 	 This static storage seems to work.
 	*/
-	HashTable  route_verbs;
-	HashTable  verb_names;
+	htab_persist  route_verbs;
+	htab_persist  verb_names;
 
-	static void nodestroy(zval* val);
 
 	//Route_init() : route_verbs((HashTable*)nullptr), verb_names((HashTable*)nullptr) {}
 

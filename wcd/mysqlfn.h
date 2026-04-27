@@ -10,7 +10,6 @@ namespace wcd {
 
 using namespace zpp;
 
-class MsiWrap;
 
 //C++ MSI procedural function prototypes
 bool mysqli_begin_transaction(obj_ptr msi, 
@@ -28,12 +27,30 @@ htab_rc mysqli_fetch_all(obj_ptr msi, int rmode=MYSQLI_NUM);
 htab_rc mysqli_fetch_array(obj_ptr robj, int mode=MYSQLI_NUM);
 
 htab_rc mysqli_fetch_assoc(obj_ptr robj);
+
+obj_rc mysqli_fetch_object(obj_ptr robj, str_ptr class=str_ptr(),
+		htab_ptr args=htab_ptr());
+
+str_rc mysqli_real_escape_string(obj_ptr msi, str_ptr str);
+
+val_rc mysqli_insert_id(obj_ptr msi);
+
+bool mysqli_stmt_bind_param(obj_ptr stmt, str_ptr types, htab_ptr params);
+
+bool mysqli_stmt_execute(obj_ptr stmt, htab_ptr params = htab_ptr());
+
+obj_rc mysqli_stmt_get_result(obj_ptr stmt);
+
+val_rc mysqli_stmt_affected_rows(obj_ptr stmt);
+
+bool mysqli_stmt_close(obj_ptr stmt);
+
+
 //--------------------------------------------------
 
 class Mysqlfn : public IDriver {
 protected:
 	bool          inTransaction_;
-	MsiWrap*      wrap_;
 
 public:
 
@@ -43,11 +60,11 @@ public:
 
 	static htab_rc allRows(obj_ptr result, zend_long fmode = IDriver::FETCH_ASSOC);
 	
-	static htab_rc resultObjects(obj_ptr result);
+	static htab_rc resultObjects(obj_ptr robj);
 
 	static htab_rc resultNum(obj_ptr result);
 
-	static val_rc  getResults(obj_ptr result);
+	static val_return  getResults(obj_ptr result);
 	
 
 	static str_rc attribute(str_ptr name, str_ptr value);
