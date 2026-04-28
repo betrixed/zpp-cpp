@@ -12,7 +12,7 @@
 
 #include "zpp/state_init.cpp"
 
-#include "wcc/core_extn.cxx"
+#include "wcc/zero_extn.cxx"
 
 DEFINE_STATE_LIST
 
@@ -27,7 +27,7 @@ PHP_MINIT_FUNCTION(wccz)
 	register_fn_calls();
 	register_datetime();
 	
-	register_core_extn(INIT_FUNC_ARGS_PASSTHRU);
+	register_zero_extn(INIT_FUNC_ARGS_PASSTHRU);
 
 	STATE_MOD_INIT
 

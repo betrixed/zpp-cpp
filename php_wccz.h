@@ -4,13 +4,13 @@
 #define PHP_WCCZ_H
 
 extern "C" {
-#ifdef HAVE_CONFIG_H
-# include <config.h>
-#endif
+	#ifdef HAVE_CONFIG_H
+	# include <config.h>
+	#endif
 
-#include "php.h"
-#include "ext/standard/info.h"
-};
+	#include "php.h"
+	#include "ext/standard/info.h"
+}
 
 extern zend_module_entry wccz_module_entry;
 # define phpext_wccz_ptr &wccz_module_entry
