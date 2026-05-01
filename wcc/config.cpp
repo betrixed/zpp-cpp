@@ -22,7 +22,7 @@ namespace wcc {
 	using namespace zpp;
 
 
-	Config::Config_Mgr Config::omg;
+	Config_Mgr<Config> Config::omg;
 
 	using namespace zpp;
 
@@ -156,6 +156,7 @@ Config::set(str_ptr  name, val_ptr value)
 	obj_ptr(this->vobj()).property(name, value);
 }
 
+/*
 #ifdef CONFIG_DIMENSIONS
 
 bool      
@@ -201,7 +202,7 @@ Config::unset(val_ptr  key)
 	obj_ptr(this->vobj()).unset_property(skey);
 }
 #endif
-
+*/
 
 htab_rc  
 Config::subsetkey(str_ptr key)

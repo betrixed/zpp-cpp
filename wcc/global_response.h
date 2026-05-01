@@ -91,7 +91,7 @@ namespace wcc {
 		bool isSent();
 
 		void send_header(str_ptr header, bool replace = true,
-			int response_code = 0);
+		int response_code = 0);
 
 		bool headers_sent();
 

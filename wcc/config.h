@@ -13,16 +13,19 @@ using namespace zpp;
 
 class  Config : public base_d {
 public:
-	class Config_Mgr : public base_obj_mgr<Config>
+	template <typename T> class Config_Mgr : public base_obj_mgr<T>
 	{
-	
+	protected:
+		typedef base_obj_mgr<T>::mydef    basedef;
 
-		virtual void init_class_fn() {
+	public:
+		virtual void init_class_fn() 
+		{
 		// base class
-			mydef::init_class_fn();
+			basedef::init_class_fn();
 
 #ifdef CONFIG_HANDLERS
-			zend_object_handlers& hand = mydef::handlers_;
+			zend_object_handlers& hand = basedef::handlers_;
 
 			hand.read_dimension = Config::read_dimension;
 			hand.write_dimension = Config::write_dimension;
@@ -50,7 +53,7 @@ public:
 
 	}; // end Config_Mgr
 
-	static Config_Mgr omg;
+	static Config_Mgr<Config> omg;
 	
 	static obj_rc make(htab_ptr initdata);
 
@@ -66,13 +69,6 @@ public:
 	void      set(str_ptr name, val_ptr value);
 
 	void      unset(str_ptr name);
-	
-#ifdef CONFIG_DIMENSIONS
-	val_rc    get(val_ptr name);
-	void      set(val_ptr  key,  val_ptr value);
-	void 	  unset(val_ptr  key);
-	bool      has(val_ptr   key);
-#endif
 
 	// for ArrayAccess interface, dimensions interface
 
@@ -95,15 +91,6 @@ public:
 	    static void  write_dimension(zend_object* obj, zval* offset,  zval* set_value);
 	    static void  unset_dimension(zend_object *object, zval *unset);
 		static int   has_dimension(zend_object *object, zval *offset, int check_empty);
-
-		/*
-		static  zval* read_property(zend_object *object, zend_string *name, int type, void **cache_slot, zval *rv);
-		static  zval* write_property(zend_object *object, zend_string *name, zval *value, void **cache_slot);
-		static  int   has_property(zend_object *object, zend_string *name, int has_set_exists, void **cache_slot);
-		static void   unset_property(zend_object *object, zend_string *name, void **cache_slot);
-		static zval*  get_property_ptr_ptr(zend_object *object, zend_string *name, int type, void **cache_slot);
-		static zval*  get_count(zend_object *object, zend_long *count);
-		*/
 
 		static HashTable* get_gc(zend_object *obj, zval **gc_data, int *gc_data_count);
 

@@ -132,7 +132,7 @@ public:
 };
 
 
-using  permstr = str_perm;
+using  permstr = str_intern;
 
 //typedef std::vector<str_perm> HttpVerbNames;
 //typedef std::map<str_perm, int, MapComparator > HttpVerbBits;

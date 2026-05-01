@@ -560,6 +560,7 @@ bool RouteMatch::prepare_call()
 			//zend_printf("prepare_call 4\n");
 			return true;
 		}
+		return false;
 	}
 
 	htab_ptr tg(route_target.zarray());
