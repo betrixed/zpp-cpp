@@ -33,16 +33,18 @@ namespace zpp {
  */
 class for_key_value : public htab_rc {
 protected:
-	bool       		isPacked_;
-	int        		count_; // countdown, and ok condition
-	size_t     		idx_;   
-	int             h_;
+	bool       			isPacked_;
+	int        			count_; // countdown, and ok condition
+	size_t     			idx_;   // count of zval slots checked (packed only)
+	int             h_;     // current offset of packed array, or value of numeric key
 	zend_string*  	key_;
-	zval*			zptr_;
-	zval*			next_;
+	zval*						zptr_;
+	zval*						next_;
 public:
 	zval* 				  value() const { return zptr_; }
 	zend_long       index() const { return h_; }
+
+	// if not packed and key() is null need to use h_ as numeric key
 	zend_string*		key() const { return key_; }
 
 	bool start(HashTable* ht);

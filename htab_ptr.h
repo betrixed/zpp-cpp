@@ -104,10 +104,12 @@ namespace zpp {
 
         bool  has_key(val_ptr skey) const;
 
-        // array value search for packed array; -1 for not found
+        //! array value search for packed array; -1 for not found
         int   value_index(str_ptr fvalue) const;
 
-
+        //! All keys must be integer from 0 and in sequence
+        bool is_list() const;
+        
         bool try_fetch(zend_string* key, val_ptr&  store) const;
         bool try_fetch(zend_long key, val_ptr& store) const;
 

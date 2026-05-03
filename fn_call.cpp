@@ -19,6 +19,13 @@
 
 #include <filesystem>
 
+ 
+#ifndef ZEND_API_H
+extern "C" {
+    #include <zend_API.h>
+}
+#endif
+
 #ifndef DIRECTORY_SEPARATOR
 #define DIRECTORY_SEPARATOR '/'
 #endif
@@ -215,6 +222,7 @@ fn_result::call_fn()
     {
         return true;
     }
+    throw_failed();
     return false;
 }
 
@@ -517,6 +525,13 @@ pathinfo(str_ptr path, int flags)
     ZVAL_LONG(pz+1, flags);
 
     return fn.mixed();
+}
+
+str_rc 
+file_extension(str_ptr path)
+{
+    val_rc result = pathinfo(path, PathInfo::EXTENSION);
+    return result.zstr();
 }
 
 //bool callable_fn(val_rc& result, val_rc& callme, int argct = 0, zval* argv = nullptr);
@@ -873,6 +888,7 @@ strtable::init()
     diff = "diff";
     date = "date";
     strtotime = "strtotime";
+    invoke_fn = "__invoke";
 }
 
 
@@ -925,22 +941,25 @@ call_spread_fn(
 
 /** result is reference */
 bool callable_fn(
-    val_rc& result, 
+    val_rc& result,
     val_rc& callme, 
     int argct, 
     zval* argv)
 {
 
-    //showmem("argv", argv);
-    //showmem("result", result);
+//zend_result _call_user_function_impl(zval *object, zval *function_name, 
+    //zval *retval_ptr, uint32_t param_count, zval params[], HashTable *named_params) /* {{{ */
+    zval fname = {0};
+    ZVAL_STR(&fname, STAB.invoke_fn);
 
-    if (call_user_function( 
-        CG(function_table), 
-        (zval*) nullptr, 
-        (zval*) callme, 
-        (zval*) result, 
+    if (_call_user_function_impl( 
+        callme, //object
+        &fname,
+        result,  // result storage
         argct, 
-        argv) != SUCCESS)
+        argv,
+        (HashTable*) nullptr // 
+        ) != SUCCESS)
     {
         // TODO: exception message callme toString ??
         zend_throw_error(zend_ce_error, "Invalid callable");

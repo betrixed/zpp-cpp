@@ -65,10 +65,12 @@ obj_ptr::obj_ptr(const obj_rc& rc) : obj_(rc.obj_)
 {
 }
 
+/*
 obj_ptr::obj_ptr(const val_rc& rc) 
 {
     obj_ = val_ptr(rc).zobject();
 }
+*/
 
 const obj_ptr& 
 obj_ptr::operator=(zend_object* rc)
@@ -168,6 +170,7 @@ obj_ptr::property_list(htab_rc& list)
         return false;
     }
 
+    // presume this can be hijacked
     list = std::move(temp);
 
     return true;
@@ -226,8 +229,9 @@ obj_ptr::callable()
     val_rc result;
 
     //callable is method of no object
-    val_rc callme (obj_); 
 
+    val_rc callme (obj_); 
+    showmem("callme 0", callme);
     if (!callable_fn(result, callme))
     {
         callable_failed();
@@ -240,15 +244,15 @@ obj_ptr::callable(zval* arg1)
 {
     val_rc callme (obj_);
 
-    val_rc   result;
-    zval   argv = {0};
-
-    ZVAL_COPY_VALUE(&argv, arg1);
-
-    //showmem("callable arg1", argv);
+    val_rc result;
     
-    if (!callable_fn(result, callme, 1, &argv))
+
+    if (!callable_fn(result, callme, 1, arg1))
+    {
         callable_failed();
+    }
+
+    //showmem("result", result);
     return result;
 }
 
@@ -280,6 +284,15 @@ obj_ptr::property(str_ptr key, obj_ptr value)
 {
     zval temp = {0};
     val_ptr::object_bind(&temp, value);
+    property(key, val_ptr(&temp));
+}
+
+
+void 
+obj_ptr::property(str_ptr key, htab_ptr value)
+{
+    zval temp = {0};
+    val_ptr::array_bind(&temp, value);
     property(key, val_ptr(&temp));
 }
 
@@ -371,6 +384,7 @@ obj_ptr::property_get(str_ptr key, zval* ret)
 }
 
 
+
 /**
  * Get a dynamic property by name 
  *  Relies on return value optimisation.
@@ -410,6 +424,30 @@ obj_ptr::property(str_ptr key)
     }
 
     return result;
+}
+
+/**
+ * Forced extraction of HashTable* return type from a val_rc
+ */
+htab_rc
+obj_ptr::array_property(str_ptr name)
+{
+    val_rc copy = property(name);
+    return htab_rc(copy);
+}
+
+str_rc
+obj_ptr::str_property(str_ptr name)
+{
+    val_rc copy = property(name);
+    return str_rc(copy.zstr());
+}
+
+obj_rc    
+obj_ptr::obj_property(str_ptr name)
+{
+    val_rc copy = property(name);
+    return obj_rc(copy.zobject());
 }
 
 void obj_ptr::unset_property(str_ptr name)
@@ -489,7 +527,7 @@ obj_ptr::call(str_ptr method,
     return args.mixed();
 }
 
-obj_ptr::obj_ptr(const val_ptr& rc)
+obj_ptr::obj_ptr(val_ptr rc)
 {
     obj_ = rc.zobject();
 }

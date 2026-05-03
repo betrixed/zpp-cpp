@@ -19,8 +19,8 @@ for_key_value::start(HashTable* ht)
 {
 	lose();
 	ht_ = ht;
-	own();
-	count_ = ht_->nNumOfElements;
+	own(); // lock out write during iteration
+	count_ = ht_->nNumOfElements; // remaining iterations
 	isPacked_ = (HT_FLAGS(ht_) & HASH_FLAG_PACKED);
 	int elemSize = ZEND_HASH_ELEMENT_SIZE(ht_); //16 + {0|1}*(4) 16:Packed, 20:Not packed
 	idx_ = 0;
@@ -52,15 +52,30 @@ for_key_value::next()
 	}
 	if (isPacked_)
 	{
-		zptr_ = next_;
-		++next_;
-		h_ = idx_;
-		idx_++;
+		while(1)
+		{
+			zptr_ = next_;
+			++next_;
+			h_ = idx_; // real index offset to be returned
+			idx_++;    // next offset to check
+			if (zptr_->u1.v.type == IS_UNDEF)
+			{
+				 // try next one?
+				  count_--;
+				  if (!count_) {
+				  	 lose();
+				  	 return false;
+				  }
+				  continue;
+			}
+			break;
+		}
+
 	}
 	else {
 		zptr_ = next_;
 		Bucket* bkt = (Bucket*) next_;
-		h_ = bkt->h;
+		h_ = bkt->h; //numeric key, if no string?
 		key_ = bkt->key;
 		next_ = &((bkt+1)->val);
 		//* No indirect yet for zptr_ in for this usage 

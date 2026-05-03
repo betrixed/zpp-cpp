@@ -43,9 +43,7 @@ namespace zpp {
 
 		obj_ptr(const obj_rc& rc);
 
-		obj_ptr(const val_rc& rc);
-
-		obj_ptr(const val_ptr& rc);
+		obj_ptr(val_ptr rc);
 		
 		obj_ptr(zval* zp);
 #ifndef OMIT_BASE_D
@@ -73,15 +71,23 @@ namespace zpp {
 
 		//! get a property value
 		val_rc    property(str_ptr key);
+		htab_rc   array_property(str_ptr key);
+		str_rc    str_property(str_ptr key);
+		obj_rc    obj_property(str_ptr key);
+		
+
+
 		zval* 	  property_get(str_ptr key, zval* ret);
 
 		zval*     property_ptr(str_ptr key);
 		
-		//! set a property value
+		//! set a property value, various "shim" functions
 		void      property(str_ptr key, val_ptr value);
 		void      property(str_ptr key, str_ptr value);
 		void      property(str_ptr key, obj_ptr value);
 		void      property(str_ptr key, val_rc& value);
+		void      property(str_ptr key, htab_ptr value);
+
 		
 		bool      has_property(str_ptr name);
 		void      unset_property(str_ptr name);

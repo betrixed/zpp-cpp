@@ -172,6 +172,7 @@ namespace zpp {
     class fn_params : public fn_result {
     public:
         zval      params[ARGCT];
+        
         fn_params(fn_call& fn) : fn_result(fn)
         {
             setParams(params, ARGCT);
@@ -183,7 +184,7 @@ namespace zpp {
 
 
 
-        zval* argsptr() { return &params[0]; }
+        zval* argsptr() { return params; /*&params[0];*/ }
     };
 
 // prepared function call table
@@ -311,6 +312,7 @@ namespace zpp {
         str_intern  diff;
         str_intern  date;
         str_intern  strtotime;
+        str_intern  invoke_fn;
 
         
         void init() override;
@@ -446,6 +448,8 @@ namespace zpp {
     val_rc unserialize(str_ptr data, htab_ptr options = htab_ptr());
 
     str_rc sha1(str_ptr value, bool binary = false);
+
+    str_rc file_extension(str_ptr path);
 
 
 

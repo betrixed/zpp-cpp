@@ -434,6 +434,52 @@ void htab_ptr::copy_zv(zval* return_value) const
 	 val_ptr(return_value).bind_array(ht_);
 }
 
+
+// logic is from zend code for array_is_list
+// All keys must be integer from 0 and in sequence
+bool
+htab_ptr::is_list() const
+{
+	zend_long expected_idx = 0;
+
+	/* Empty arrays are lists regardless of pack status*/
+	if (size()==0) {
+		return true;
+	}
+	
+	if (HT_IS_PACKED(ht_)) {
+		if (HT_IS_WITHOUT_HOLES(ht_)) {
+			return true;
+		}
+		for_key_value ikv;
+
+		for(ikv.start(ht_); ikv.ok(); ikv.next())
+		{
+			if (expected_idx != ikv.index())
+			{
+				// found a hole!
+				return false;
+			}
+			expected_idx++;
+		}
+	}
+	else {
+
+		for_key_value ikv;
+
+		for(ikv.start(ht_); ikv.ok(); ikv.next())
+		{
+			if ((ikv.key() != nullptr) || (expected_idx != ikv.index()))
+			{
+				// found a sequence error or string key!
+				return false;
+			}
+			expected_idx++;
+		}
+	}
+	return true;
+}
+
 int
 htab_ptr::value_index(str_ptr fvalue) const
 {
