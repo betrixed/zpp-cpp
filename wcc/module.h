@@ -10,7 +10,8 @@ namespace wcc {
 
 using namespace zpp;
 
-	class  Module : public Config {
+	class  Module : public Config 
+	{
 	protected:
 		
 		htab_rc requires_;
@@ -20,9 +21,11 @@ using namespace zpp;
 
 	public:
 
-		virtual void debug_info(htab_rw hw);
+		void debug_info(htab_rw hw) override;
 		
-		static ConfigMgr<Module> omg;
+		template <typename T> class Module_Mgr : public Config::Config_Mgr<T>{};
+
+		static Module::Module_Mgr<Module> omg;
 
 		void  construct();
 
@@ -36,9 +39,13 @@ using namespace zpp;
 
 		str_rc getName();
 
+		htab_rc getViewPaths();
+
+		htab_rc getRequires();
+
+
 		htab_rc getValueList(str_ptr key);
 
-		htab_rc getViewPaths();
 
 		void setConfigPath(str_ptr path);
 
@@ -46,5 +53,6 @@ using namespace zpp;
 
 	};
 
-}; // namespace wcc
-#endif
+} // namespace wcc
+
+#endif // MODULE_WCC_H

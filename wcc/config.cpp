@@ -22,7 +22,7 @@ namespace wcc {
 	using namespace zpp;
 
 
-	Config_Mgr<Config> Config::omg;
+	Config::Config_Mgr<Config> Config::omg;
 
 	using namespace zpp;
 

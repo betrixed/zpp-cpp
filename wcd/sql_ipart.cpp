@@ -665,7 +665,7 @@ TColumns::debug_info(htab_rw di)
 void 
 TColumns::construct(str_ptr tname,  str_ptr talias,  val_ptr tcol)
 {
-	val_rc null_owner;
+	obj_rc null_owner; // NULL
 
 	this->IColumns::construct(null_owner);
 

@@ -288,8 +288,7 @@ Bindings::addJoinData(htab_ptr data)
 		obj_rc jiobj = JoinInfo::omg.new_zobj();
 		JoinInfo* ji = zobj_toc<JoinInfo>(jiobj);
 
-		val_rc temp(tcol_obj);
-		ji->construct(temp, prime, jenum.value_);
+		ji->construct(tcol_obj, prime, jenum.value_);
 
 		joins->addJoin(jiobj);
 

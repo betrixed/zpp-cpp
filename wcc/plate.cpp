@@ -459,7 +459,7 @@ void Plate::styleEnd()
 	auto services = Services::cpp_global();
 
 	val_rc assets_z = services->get(PLD.assets_key);
-	obj_ptr assets(assets_z);
+	obj_ptr assets(assets_z.zobject());
 	if (assets.ok()) {
 		obj_ptr(assets).call(PLD.addstyle_fn,  styles);
 	}

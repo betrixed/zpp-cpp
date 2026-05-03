@@ -188,17 +188,16 @@ void Run::construct()
 	str_rc site_leaf = constant(Run_i.site_leaf_const);
 	self.property(Run_i.site_leaf, site_leaf);
 
-	str_rc tstr = constant(Run_i.site_const);
-	self.property(Run_i.site_dir, tstr);
+	temp = constant(Run_i.site_const);
+	self.property(Run_i.site_dir, temp);
 
+	str_rc site_str = temp.zstr();
 
 	str_buf buf;
+	buf << '/' << site_str << "/gallery";
 
-	buf << '/' << tstr << "/gallery";
-	tstr = buf.zstr();
-
-	self.property(Run_i.gallery_str, tstr);
-	buf << tstr << "/site";
+	self.property(Run_i.gallery_str, buf.zstr());
+	buf << site_str << "/site"; // gallery site theme sub-folder
 
 	self.property(Run_i.theme_str, buf.zstr());
 
@@ -236,6 +235,7 @@ void Run::construct()
 	args.push_back(stime);
 
 	obj_rc stats = ReflectCache::staticInstanceArgs(Run_i.phpstats_class, start_args);
+
 	sobj->set(Run_i.phpstats_str, stats);
 
 	temp = stats;
@@ -313,10 +313,11 @@ Run::setup_cryptic()
 
 	obj_ptr self (this->self());
 
-	obj_ptr config = self.property(Run_i.config_str);
-	str_rc  config_dir = self.property(Run_i.config_dir);
+	obj_ptr config = self.obj_property(Run_i.config_str);
 
-	str_rc cryptic_data = config.property(Run_i.cryptic_str);
+	str_rc  config_dir = self.str_property(Run_i.config_dir);
+
+	str_rc cryptic_data = config.str_property(Run_i.cryptic_str);
 
 	if (!cryptic_data.ok())
 	{

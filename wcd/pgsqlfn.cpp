@@ -361,13 +361,15 @@ PgQuery::execute(bool asResult)
 	val_rc test = pg_execute(pghandle_, id_, params_);
 	if (!test.isFalse())
 	{
+		obj_ptr pgo(test.zobject());
+
 		if (asResult) 
 		{
-			result.value_ = test;
+			result.value_ = pgo;
 		}
 		else {
-			result.value_ = pg_affected_rows(test);
-			pg_free_result(test);
+			result.value_ = pg_affected_rows(pgo);
+			pg_free_result(pgo);
 		}
 	}
 	else {
@@ -521,8 +523,9 @@ Pgsqlfn::close()
 {
 	if (handle_ptr_.ok())
 	{
-		val_rc h(handle_ptr_);
-		pg_close(h);
+		obj_ptr pgo(handle_ptr_.zobject());
+		val_rc h(pgo);
+		pg_close(pgo);
 	}
 }
 
@@ -561,7 +564,7 @@ Pgsqlfn::execute(obj_ptr stmt, bool close,  bool fetch)
 		return result;
 	}
 
-
+	
 	if (fetch && test.value_.isObject())
 	{
 		result.value_ = Pgsqlfn::allRows(test.value_.zobject(), ifetch_);

@@ -165,20 +165,18 @@ ReflectCache::newInstanceArgs(str_ptr class_name, htab_ptr args)
 	if (rfc.ok())
 	{
 		fn_call  rfn(RFC_data.new_instance_args, rfc);
-		fn_params<1> fn(rfn);
+		fn_params<1> fnew(rfn);
 
-		val_ptr::array_bind(fn.argsptr(), args);
+		val_ptr::array_bind(fnew.argsptr(), args);
 
-		val_rc recall = fn.mixed();
+		val_rc recall = fnew.mixed();
 		val_ptr test(recall);
 
 		if (test.isObject())
 		{
 			result = test.zobject();
-			//showmem("test", test);
 		}
 		else {
-			//showmem("recall", recall);
 			zend_throw_error(zend_ce_error, "newInstanceArgs fail for %s", class_name.data());
 		}
 	}

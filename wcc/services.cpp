@@ -36,6 +36,7 @@ namespace wcc
 		str_intern instances;
 		str_intern throw_fail;
 		str_intern defer_ct;
+		str_intern call_str;
 
 	 	void init() override 
 		{
@@ -49,6 +50,8 @@ namespace wcc
 			 throw_fail = "throw_fail";
 			
 			 defer_ct = "defer_ct";
+
+			 call_str = "call";
 		}
 
 		void init_req() override
@@ -70,8 +73,10 @@ namespace wcc
 val_rc 
 Services::call_value(obj_ptr callme)
 {
-	val_rc self(this);
-	return callme.callable(self);
+	//"call" method on closure obj
+	val_rc arg(self_);
+
+	return callme.callable(arg);
 }
 
 Services::~Services()
@@ -102,7 +107,7 @@ Services::activate(str_ptr key)
 {
 
 	val_rc result;
-	//zend_printf("activate %s\n", ZSTR_VAL(key));
+	//zend_printf("Services::activate(\"%s\")\n", key.data());
 
 	htab_ptr defer(defer_);
 
@@ -115,6 +120,7 @@ Services::activate(str_ptr key)
 		}
 		return result;
 	}
+	//showmem("defer value", test);
 
 	if (defer_ct_ > 3)
 	{
@@ -129,7 +135,11 @@ Services::activate(str_ptr key)
 	{	
 		obj_ptr callme = test.zobject();
 
+		//zend_printf("Callable object \n");
+
 		val_rc result2 = call_value(callme);
+
+		//showmem("callme return", result2);
 
 		htab_rw(active_).set(key, result2);
 
@@ -149,7 +159,7 @@ Services*
 Services::cpp_global()
 {
 	obj_ptr sv = g_services;
-
+	//showobj("get g_services", sv);
 	//showmem("instance", sv);
 	return zobj_toc<Services>(sv);
 }
@@ -211,6 +221,7 @@ val_rc
 Services::service(str_ptr key)
 {
 	Services* self = Services::cpp_global();
+
 	return self->get(key);
 }
 
@@ -339,7 +350,7 @@ Services::get(str_ptr name)
 	if (value.isCallable())
 	{
 		obj_ptr callme = value.zobject();
-
+		
 		result = call_value(callme);
 	}
 	else {
