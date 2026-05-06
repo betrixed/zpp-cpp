@@ -270,8 +270,8 @@ Loader::require(str_ptr file)
 	result.value_ = fn.call(str_ptr(LDRi.invoke_fn), &path);
 
 	//bool ok = extload_fn(result.value_, extloader_, 1, &path);
-	zend_printf("Loader::require %s ", file.data());
-	showmem("by Extloader", result.value_);
+	//zend_printf("Loader::require %s ", file.data());
+	//showmem("by Extloader", result.value_);
 
 	if (!result.value_.ok() && throwNotFound_)
 	{	// Load function may throw anyway.
