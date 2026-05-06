@@ -107,6 +107,7 @@ namespace zpp {
 		*/
 		val_rc call(str_ptr method);
 
+		// Function name  changed from call, to avoid mistake of passing htab_rc/htab_ptr to call
 		val_rc call_hargs(str_ptr method, HashTable* args);
 
 		val_rc call(str_ptr method, zval* arg1);
