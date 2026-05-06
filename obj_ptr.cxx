@@ -432,22 +432,33 @@ obj_ptr::property(str_ptr key)
 htab_rc
 obj_ptr::array_property(str_ptr name)
 {
+    htab_rc result;
     val_rc copy = property(name);
-    return htab_rc(copy);
+    result = copy.zarray();
+
+    return result;
 }
 
 str_rc
 obj_ptr::str_property(str_ptr name)
 {
+    str_rc result;
     val_rc copy = property(name);
-    return str_rc(copy.zstr());
+
+    result = copy.zstr();
+
+    return result;
 }
 
 obj_rc    
 obj_ptr::obj_property(str_ptr name)
 {
+    obj_rc result;
     val_rc copy = property(name);
-    return obj_rc(copy.zobject());
+
+    result = copy.zobject();
+
+    return result;
 }
 
 void obj_ptr::unset_property(str_ptr name)
@@ -489,7 +500,7 @@ obj_ptr::call(str_ptr method)
 
 
 val_rc
-obj_ptr::call(str_ptr method, HashTable* args)
+obj_ptr::call_hargs(str_ptr method, HashTable* args)
 {
     fn_call call(method, obj_);
     fn_noparams fn(call, args);

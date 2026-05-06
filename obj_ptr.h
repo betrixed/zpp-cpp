@@ -107,7 +107,7 @@ namespace zpp {
 		*/
 		val_rc call(str_ptr method);
 
-		val_rc call(str_ptr method, HashTable* args);
+		val_rc call_hargs(str_ptr method, HashTable* args);
 
 		val_rc call(str_ptr method, zval* arg1);
 
