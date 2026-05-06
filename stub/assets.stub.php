@@ -41,6 +41,8 @@ class Assets {
 
  	public function loadAssetFile(string $file) : array {}
 
+ 	public function setRun(object $env) : void {}
+ 	
  	public function reset() : void {}
 
  	public function styleHeader() : string {}

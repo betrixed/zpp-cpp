@@ -444,15 +444,17 @@ ZEND_METHOD(Wcc_Finder, addPath)
 
 ZEND_METHOD(Wcc_Finder, addPathArray)
 {
-	zval* paths;
+	
+	zarg_rd args(execute_data);
 
-	ZEND_PARSE_PARAMETERS_START(1,1)
-	Z_PARAM_ARRAY(paths)
-	ZEND_PARSE_PARAMETERS_END();
+	htab_ptr  data = args.htab(args.need(0));
 
-	auto cobj = zval_toc<Finder>(ZEND_THIS);
+	if (!args.throw_errors())
+	{
+		auto cobj = zval_toc<Finder>(ZEND_THIS);
 
-	cobj->addPathArray(paths);
+		cobj->addPathArray(data);
+	}
 }
 
 ZEND_METHOD(Wcc_Finder, addClass)

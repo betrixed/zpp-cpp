@@ -16,7 +16,7 @@ using namespace zpp;
 		
 		htab_rc requires_;
 		bool    active_;
-		str_rc  cfg_path_;
+		//str_rc  cfg_path_;
 		str_rc  name_;
 
 	public:
@@ -41,13 +41,20 @@ using namespace zpp;
 
 		htab_rc getViewPaths();
 
+		void setRequires(htab_ptr rlist);
+
 		htab_rc getRequires();
 
+		str_rc getAssetsFile();
 
 		htab_rc getValueList(str_ptr key);
 
+		bool getActive();
+
+		void setActive(bool value);
 
 		void setConfigPath(str_ptr path);
+		
 
 		VIRTUAL_ZOBJPTR
 

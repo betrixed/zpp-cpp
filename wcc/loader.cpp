@@ -36,6 +36,7 @@ public:
 
 	str_intern finder_str;
 	str_intern loader_str;
+	str_intern invoke_fn;
 
 	str_intern extloader_str;
 	str_intern basedir_str;
@@ -64,6 +65,7 @@ void Loader_init::init()
 	php_ext = "php";
 	finder_str = "finder";
 	loader_str = "loader";
+	invoke_fn = "__invoke";
 
 	extloader_str = "extloader";
 	basedir_str = "basedir";
@@ -213,6 +215,38 @@ Loader::destruct()
 	extloader_.set_null();
 }
 
+/*
+bool extload_fn(
+    val_rc& result,
+    val_rc& callme, 
+    int argct, 
+    zval* argv)
+{
+val_rc fname = {0};
+val_ptr::string_bind(&fname, LDRi.invoke_fn);
+
+
+//zend_result _call_user_function_impl(zval *object, zval *function_name, 
+    //zval *retval_ptr, uint32_t param_count, zval params[], HashTable *named_params)
+    zval fname = {0};
+    val_ptr::string_bind(&fname, LDRi.invoke_fn);
+
+    if (_call_user_function_impl( 
+        callme, //object
+        &fname,
+        result,  // result storage
+        argct, 
+        argv,
+        (HashTable*) nullptr // 
+        ) != SUCCESS)
+    {
+        // TODO: exception message callme toString ??
+        zend_throw_error(zend_ce_error, "Invalid callable");
+        return false;
+    }
+    return true;
+}
+	*/
 val_return 
 Loader::require(str_ptr file)
 {
@@ -224,19 +258,31 @@ Loader::require(str_ptr file)
 		return result;
 	}
 
-	val_rc path(file);
+	if (!file_exists(file))
+	{
+		result.error() << "Loader::require " << file << " not found";
+		return result;
+	}
+	zval path = {0};
+	val_ptr::string_bind(&path, file);
+	obj_ptr fn = extloader_.zobject();
 
+	result.value_ = fn.call(str_ptr(LDRi.invoke_fn), &path);
 
-	bool ok = callable_fn(result.value_, extloader_, 1, path);
-	if (!ok && throwNotFound_)
+	//bool ok = extload_fn(result.value_, extloader_, 1, &path);
+	zend_printf("Loader::require %s ", file.data());
+	showmem("by Extloader", result.value_);
+
+	if (!result.value_.ok() && throwNotFound_)
 	{	// Load function may throw anyway.
 		result.error() << "Loader callable failed for " << file;
 		return result;
 	}
-	else if (record_) 
+	
+	if (record_) 
 	{
 		htab_rw wr(this->required_);
-		wr.push_back(path);
+		wr.push_back(&path);
 	}
 	return result;
 }

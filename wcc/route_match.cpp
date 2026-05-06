@@ -229,7 +229,7 @@ RouteMatch::call_method(obj_ptr obj, str_ptr method, htab_ptr args)
 {
 	if (args.size())
 	{
-		return obj.call(method, args);
+		return obj.call_hargs(method, args);
 	}
 	else {
 		return obj.call(method);

@@ -57,7 +57,7 @@ public:
 	str_intern  assetfile_str;
 	str_intern  dispatch_str;
 
-	str_intern  view_str;
+	str_intern  views_str;
 	str_intern  addpatharray_fn;
 	str_intern  addclasses_fn;
 	str_intern  loadassetfile_fn;
@@ -90,7 +90,7 @@ Mod_init::init()
 	assetfile_str = "asset_file";
 	dispatch_str = "dispatch";
 
-	view_str = "view";
+	views_str = "views";
 	addpatharray_fn = "addpatharray";
 	addclasses_fn = "addclasses";
 	loadassetfile_fn = "loadassetfile";
@@ -111,7 +111,7 @@ void Module::debug_info(htab_rw hw)
 	hw.set(MODi.name_str, name_);
 	hw.set(MODi.requires_str, requires_);
 	hw.set(MODi.active_str, active_);
-	hw.set(MODi.cfg_path_str, cfg_path_);
+	//hw.set(MODi.cfg_path_str, cfg_path_);
 	
 	Config::debug_info(hw);
 }
@@ -125,11 +125,7 @@ Module::construct(str_ptr name, htab_ptr data)
 	Config::construct(data);
 }
 
-htab_rc
-Module::getRequires()
-{
-	return requires_;
-}
+
 
 str_rc
 Module::getName()
@@ -140,14 +136,16 @@ Module::getName()
 void Module::activate(obj_ptr finder)
 {
 	obj_ptr self = self_;
-	str_rc base = self.str_property(MODi.base_str);
+	
+	
 	str_rc def_name = self.str_property(MODi.default_str);
 	obj_rc dispatch;
 	val_rc temp_arg;
+	htab_rc plist;
 
 	if (def_name.size() && (zs_cmp(def_name, MODi.default_str)!=0))
 	{
-		//showstr("def_name", def_name);
+		showstr("def_name", def_name);
 	
 		val_rc val_dispatch = Services::service(MODi.dispatch_str);
 		if (val_dispatch.isObject())
@@ -160,6 +158,7 @@ void Module::activate(obj_ptr finder)
 		
 	}
 
+	str_rc base = self.str_property(MODi.base_str);
 	if (base.size())
 	{
 		str_buf buf;
@@ -169,94 +168,102 @@ void Module::activate(obj_ptr finder)
 		if (!rval.size())
 		{
 			buf << base << '/' << MODi.routes_str;
-
-			self.property(MODi.routes_str, buf.zstr());
+			rval = buf.zstr();
+			self.property(MODi.routes_str, rval);
 		}
 
-		rval = self.str_property(MODi.viewpaths_str);
+		temp_arg = self.property(MODi.viewpaths_str);
 
-		if (!rval.size())
+		if (temp_arg.isNull())
 		{
-			buf << base << '/' << MODi.view_str;
-			self.property(MODi.viewpaths_str, buf.zstr());
+			buf << base << '/' << MODi.views_str;
+			rval = buf.zstr();
+			self.property(MODi.viewpaths_str, rval);
 		}
 	}
-
-	htab_rc plist = self.array_property(MODi.namespaces_str);
+	
+	plist = self.array_property(MODi.namespaces_str);
 
 	if (plist.size())
 	{
-		//showarray("namespaces", plist);
-		finder.call(MODi.addpatharray_fn, plist);
-	}
 
+		temp_arg = plist;
+		finder.call(MODi.addpatharray_fn, temp_arg);
+	}
+	
 	plist = self.array_property(MODi.classfiles_str);
 
 	if (plist.size())
 	{
-		//showarray("classfiles", plist);
-		finder.call(MODi.addclasses_fn, plist);
+
+		temp_arg = plist;
+		finder.call(MODi.addclasses_fn, temp_arg);
 	}
 
 	temp_arg  = self.property(MODi.requires_str);
 
 // TODO: Should this be array merge instead of assign?
 	//showmem("requires", temp_arg);
+
+	// transfer from property to hidden property
 	if (temp_arg.isArray())
 	{
 		requires_ = temp_arg.zarray();
 	}
 	else if (temp_arg.isString())
 	{
+		// add to array
 		htab_rw req(requires_);
 		req.clear();
 		req.push_back(temp_arg);
 	}
 
-	plist = self.array_property(MODi.assets_str);
-	if (!plist.size())
+	htab_rc asset_keyslist = self.array_property(MODi.assets_str);
+	if (!asset_keyslist.size())
 	{
-		plist = htab_ptr::empty_array();
+		asset_keyslist = htab_ptr::empty_array();
 	}
 
-	htab_rw asset_keys(plist);
+	htab_rw asset_keys(asset_keyslist);
+
 
 	str_rc asset_file = self.str_property(MODi.assetfile_str);
 
 	if (asset_file.size())
 	{
-		//showstr("asset file", asset_file);
+		
 		str_rc dir = dirname(asset_file);
 
 		if (!dir.size() || (zs_cmp(dir, MODi.dot_str)==0))
 		{
+			// absolute path
 			str_buf buf;
 
-			buf << cfg_path_ << '/' << asset_file;
+			str_rc cfg_path = self.str_property(MODi.cfg_path_str);
+
+			buf << cfg_path << '/' << asset_file;
 
 			asset_file = buf.zstr();
 
 			self.property(MODi.assetfile_str, asset_file);
-		}
+			// read in more assets data
 
-		obj_rc asset_mgr_obj = Services::service(MODi.assets_str);
-		//showobj("Assets Mgr", asset_mgr_obj);
+			obj_rc asset_mgr = Services::service(MODi.assets_str);
 
-		if (asset_mgr_obj.ok())
-		{
-			Assets* aobj = zobj_toc<Assets>(asset_mgr_obj);
-
-			htab_rc added = aobj->loadAssetFile(asset_file);
-
-			if (added.size())
+			if (asset_mgr.ok())
 			{
-				//showarray("assets added", added);
+				htab_rc added;
+				Assets* asmgr = zobj_toc<Assets>(asset_mgr);
+				added = asmgr->loadAssetFile(asset_file);
 				asset_keys.merge(added);
 				self.property(MODi.assets_str, asset_keys);
 			}
+			
 		}
 	}
+	
 	active_ = true;
+
 }
 
 void
@@ -307,9 +314,29 @@ Module::getViewPaths()
 
 void Module::setConfigPath(str_ptr path)
 {
-	cfg_path_ = path;
+	obj_ptr(self_).property(MODi.cfg_path_str, path);
 }
 
+void Module::setActive(bool val)
+{
+	active_ = val;
+}
+
+bool Module::getActive()
+{
+	return active_;
+}
+
+htab_rc
+Module::getRequires()
+{
+	return requires_;
+}
+
+void Module::setRequires(htab_ptr rlist)
+{
+	requires_ = rlist;
+}
 }//end wcc
 
 
@@ -388,7 +415,46 @@ ZEND_METHOD(Wcc_Module, getRequires)
 	htab_rc result = cobj->getRequires();
 	result.move_zv(return_value);
 }
-	
+
+
+ZEND_METHOD(Wcc_Module, setRequires)
+{
+	zarg_rd args(execute_data);
+
+	htab_ptr rlist = args.htab(args.need(0));
+
+	if (!args.throw_errors())
+	{
+		Module* cobj = zval_toc<Module>(ZEND_THIS);
+		cobj->setRequires(rlist);		
+	}
+}
+
+
+ZEND_METHOD(Wcc_Module, getActive)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+	Module* cobj = zval_toc<Module>(ZEND_THIS);
+	bool result = cobj->getActive();
+	RETURN_BOOL(result);
+}
+
+
+ZEND_METHOD(Wcc_Module, setActive)
+{
+	zarg_rd args(execute_data);
+
+	bool val = true;
+
+	args.zbool(val, args.need(0));
+
+	if (!args.throw_errors())
+	{
+		Module* cobj = zval_toc<Module>(ZEND_THIS);
+		cobj->setActive(val);
+	}
+}
+
 ZEND_METHOD(Wcc_Module, getViewPaths)
 {
 	ZEND_PARSE_PARAMETERS_NONE();

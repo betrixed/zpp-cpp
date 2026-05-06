@@ -91,6 +91,7 @@ ReflectCache::getReflectClass(str_ptr class_name)
 
 	if (result.ok())
 	{
+		//showobj("ReflectClass cache", result);
 		return result;
 	}
 
@@ -101,7 +102,7 @@ ReflectCache::getReflectClass(str_ptr class_name)
 
 	if (RFC_data.rfc_cdata.new_object(result))
 	{
-		//showobj("new_object",result);
+		//showobj("new_rc_object",result);
 		fn_call   fcall(RFC_data.construct_key,result);
 
 		fn_params<1> fn(fcall);

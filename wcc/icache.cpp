@@ -245,8 +245,7 @@ bool ICache::deleteMultiple(htab_ptr keys)
 val_rc 
 ICache::get(str_ptr key, val_ptr noval)
 {
-	htab_ptr cache(cached_);
-	val_ptr result = cache.get(key);
+	val_ptr result = cached_.get(key);
 	if (result.isObject())
 	{
 		ICacheData* icd = zval_toc<ICacheData>(result);
@@ -255,13 +254,11 @@ ICache::get(str_ptr key, val_ptr noval)
 	return noval;
 }
 
-
+// return ICacheData package
 val_rc 
 ICache::getCached(str_ptr key)
 {
-	htab_ptr cache(cached_);
-
-	return cache.get(key);
+	return cached_.get(key);
 }
 
 

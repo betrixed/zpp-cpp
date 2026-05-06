@@ -61,7 +61,7 @@ protected:
 
 	obj_rc   assets_;
 	obj_rc   src_paths_;
-	obj_rc   run_;
+	obj_rc   run_; // a properties holding object
 
 	htab_rc  mark_;
 	htab_rc  order_;
@@ -138,6 +138,8 @@ public:
  	str_rc styleHeader();
 
  	void unmark(str_ptr item);
+
+ 	void setRun(obj_ptr obj);
 };
 
 }; //namespace wcc

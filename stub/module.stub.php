@@ -35,4 +35,11 @@ class Module extends Config {
 	public function getViewPaths() : array {}
 
 	public function setConfigPath(string $path) : void {}
+
+    public function getActive() : bool {}
+
+    public function setActive(bool $val) : void {}
+
+    public function setRequires(array $rlist) : void {}
+    
 };

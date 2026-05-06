@@ -61,6 +61,7 @@ Replace::property(obj_ptr obj, str_ptr data)
 str_rc 
 Replace::eval(str_ptr subj)
 {
+	showstr("Replace::eval", subj);
 	int ct = expr_.matches(subj);
 	if (ct > 0) {
 		htab_ptr m = expr_.results();

@@ -285,7 +285,7 @@ val_return
 CacheMgr::readCache(str_ptr filename, str_ptr cachename)
 {
 	val_return result;
-
+	showstr("cachename", cachename);
 	if (!file_exists(filename)) {
 		result.error() << "File " << filename << " not found";
 		return result;
@@ -301,15 +301,29 @@ CacheMgr::readCache(str_ptr filename, str_ptr cachename)
 			return result;
 		}
 	}
+
+	ICache* ic = zobj_toc<ICache>(cache);
+	obj_rc pkg = ic->getCached(filename); //virtual call
+
+	showstr("key", filename);
+	
+	/*
 	val_rc key = filename;
+		
 	obj_rc pkg = cache.call(Cache_i.s_getcached, key);
+	*/
 	if (pkg.ok())
 	{
+		
+		showobj("pkg", pkg);
 		long mtime = filemtime(filename);
 		ICacheData* icd = zobj_toc<ICacheData>(pkg);
+
+
 		if (mtime > icd->getStored() + 3) 
 		{
-			cache.call(Cache_i.s_delete, key);
+			ic->deleteKey(filename);
+			//cache.call(Cache_i.s_delete, key);
 		}
 		else {
 			result.value_ = icd->getData();
@@ -317,12 +331,15 @@ CacheMgr::readCache(str_ptr filename, str_ptr cachename)
 		}
 	}
 	// data missing or not current
+	zend_printf("readFile direct %s\n", filename.data());
 	result = readFile( filename );
 	//showmem("read data", data);
 
 	if (!result.has_errors())
 	{
-		if (!cache.call(Cache_i.s_set, key, result.value_))
+
+		//cache.call(Cache_i.s_set, key, result.value_))
+		if (!ic->set(filename, result.value_))
 		{
 			result.error() << "Failed to set data from " << filename;
 			return result;

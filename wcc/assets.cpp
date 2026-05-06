@@ -25,6 +25,10 @@
 #include "zpp/fn_call.h"
 #endif
 
+#ifndef WCC_CACHEMGR_H
+#include "cachemgr.h"
+#endif
+
 #ifndef ASSETS_ARGINFO_H
 #define ASSETS_ARGINFO_H
 
@@ -74,8 +78,6 @@ void ASinit::init()
 		style_end = "</style>";
 		style_tag = "<style>";
 		web_dir = "web_dir";
-		
-
 	}
 
 ASinit  ASI;
@@ -114,7 +116,7 @@ Assets::getWebList(str_ptr selector,
 	for(w1.start(order); w1.ok(); w1.next())
 	{
 		str_ptr name = w1.value();
-		htab_rc asset = assets_.property(name);
+		htab_rc asset = assets_.array_property(name);
 		if (asset.size())
 		{
 			htab_rc items = asset.get(selector);
@@ -136,6 +138,21 @@ Assets::getWebList(str_ptr selector,
 		}
 	}
 	return result;
+}
+
+void 
+Assets::setRun(obj_ptr obj)
+{
+	run_ = obj;
+	obj_ptr run = run_;
+	web_ = run.str_property(ASI.web_dir);
+
+	str_rc assets_file = run.str_property(ASI.assets_cfg);
+
+	if (assets_file.size())
+	{
+		this->loadAssetFile(assets_file);
+	}
 }
 
 str_rc 
@@ -166,7 +183,6 @@ Assets::jsInline()
 	for_key_value w1;
 	for(w1.start(ipaths); w1.ok(); w1.next())
 	{
-		
 		htab_rc jsline = w1.value();
 		htab_rc slist = jsline.get(ASI.source);
 		if (slist.size())
@@ -205,25 +221,27 @@ Assets::Assets() : base_d(), render_lock_(false)
 void 
 Assets::construct()
 {
+	//zend_printf("Assets::construct\n");
+	
 	val_rc nullval; // null value
+
 
 	src_paths_ = SearchList::omg.new_zobj();
 	SearchList* slist = zobj_toc<SearchList>(src_paths_);
 	slist->construct(nullval);
 
-
-	run_ = Services::service(ASI.run_str);
-	obj_ptr run = run_;
-
-	web_ = run.property(ASI.web_dir);
-
-	str_rc assets_file = run.property(ASI.assets_cfg);
 	assets_ = Config::omg.new_zobj();
 
-	if (assets_file.size())
+	obj_rc values = Services::service(ASI.run_str);
+
+	if (values.ok())
 	{
-		this->loadAssetFile(assets_file);
+		setRun(values);
 	}
+	else {
+		run_ = Config::omg.new_zobj();
+	}
+
 }
 
 void 
@@ -619,6 +637,8 @@ Assets::filterPaths(htab_ptr paths)
 		for(kv1.start(paths); kv1.ok(); kv1.next())
 		{
 			str_rc sp = kv1.value();
+			showstr("path name: ", sp);
+
 			sp = pathnames.eval(sp);
 			hw.push_back(sp);
 		}
@@ -629,6 +649,9 @@ Assets::filterPaths(htab_ptr paths)
 htab_rc 
 Assets::loadAssetFile(str_ptr file)
 {
+	//printf("Assets::loadAssetFile %s\n", file.data());
+	showstr("loadAssetFile", file);
+
 	htab_rc result = htab_ptr::empty_array();
 
 	if (! file_exists(file))
@@ -639,9 +662,36 @@ Assets::loadAssetFile(str_ptr file)
 
 	obj_rc cache_mgr = Services::service(ASI.cache_mgr);
 
+	if(!cache_mgr.ok())
+	{
+		zend_throw_error(zend_ce_error,"No Cache Mgr service");
+		return result;
+	}
+
+
+	
+
+	printf("call read_cache for %s, %s\n", ASI.file_cache.data(),  file.data());
+	showobj("cache_mgr", cache_mgr);
+
+	/*
 	val_rc filename(file);
 	val_rc cachename(ASI.file_cache);
 	htab_rc data = cache_mgr.call(ASI.read_cache, filename, cachename);
+	*/
+	CacheMgr* cmgr = zobj_toc<CacheMgr>(cache_mgr);
+
+	val_return vdata = cmgr->readCache(file, ASI.file_cache);
+
+	if (vdata.throw_errors())
+	{
+		return htab_ptr::empty_array();
+	}
+	htab_rc data = vdata.value_.zarray();
+
+
+	//showdata("cached data:  ", data);
+
 	htab_rc paths;
 
 	val_ptr paths_v = data.get(ASI.src_paths);
@@ -977,6 +1027,21 @@ ZEND_METHOD(Wcc_Assets, reset)
 	Assets* cobj = zval_toc<Assets>(ZEND_THIS);
 
 	cobj->reset();
+}
+
+ZEND_METHOD(Wcc_Assets, setRun)
+{
+	zarg_rd args(execute_data);
+
+	obj_ptr env;
+
+	env = args.obj(args.need(0));
+
+	if (!args.throw_errors())
+	{
+		Assets* cobj = zval_toc<Assets>(ZEND_THIS);
+		cobj->setRun(env);
+	}
 }
 
 ZEND_METHOD(Wcc_Assets, styleHeader)
