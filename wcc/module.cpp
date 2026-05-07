@@ -40,54 +40,24 @@ using namespace zpp;
 
 Module::Module_Mgr<Module> Module::omg;
 
-class Mod_init : public state_init {
-public:
-	str_intern  default_str;
-	str_intern  base_str;
-	str_intern  alias_str;
-	str_intern  routes_str;
-
-	str_intern  viewpaths_str;
-	str_intern  namespaces_str;
-	str_intern  requires_str;
-	str_intern  classfiles_str;
-
-	str_intern  database_str;
-	str_intern  assets_str;
-	str_intern  assetfile_str;
-	str_intern  dispatch_str;
-
-	str_intern  views_str;
-	str_intern  addpatharray_fn;
-	str_intern  addclasses_fn;
-	str_intern  loadassetfile_fn;
-
-	str_intern  setmodule_fn;
-	str_intern  dot_str;
-	str_intern  active_str;
-	str_intern  cfg_path_str;
-
-	str_intern  name_str;
-
-	void init() override;
-};
 
 void 
-Mod_init::init()
+Module_init::init()
 {
-	default_str = "default";
-	base_str = "base";
-	alias_str = "alias";
-	routes_str = "routes";
+	DEFAULT_MOD = "default";
+	BASE = "base";
+	ALIAS = "alias";
+	ROUTES = "routes";
 
-	viewpaths_str = "view_paths";
-	namespaces_str = "namespaces";
-	requires_str = "requires";
-	classfiles_str = "classfiles";
+	VIEWPATHS = "view_paths";
+	NAMESPACES = "namespaces";
+	REQUIRES = "requires";
+	CLASSFILES = "classfiles";
 
-	database_str = "database";
-	assets_str = "assets";
-	assetfile_str = "asset_file";
+	DATABASE = "database";
+	ASSETS = "assets";
+	ASSET_FILE = "asset_file";
+
 	dispatch_str = "dispatch";
 
 	views_str = "views";
@@ -104,12 +74,12 @@ Mod_init::init()
 
 }
 
-Mod_init MODi;
+Module_init MODi;
 
 void Module::debug_info(htab_rw hw)
 {
 	hw.set(MODi.name_str, name_);
-	hw.set(MODi.requires_str, requires_);
+	hw.set(MODi.REQUIRES, requires_);
 	hw.set(MODi.active_str, active_);
 	//hw.set(MODi.cfg_path_str, cfg_path_);
 	
@@ -138,12 +108,12 @@ void Module::activate(obj_ptr finder)
 	obj_ptr self = self_;
 	
 	
-	str_rc def_name = self.str_property(MODi.default_str);
+	str_rc def_name = self.str_property(MODi.DEFAULT_MOD);
 	obj_rc dispatch;
 	val_rc temp_arg;
 	htab_rc plist;
 
-	if (def_name.size() && (zs_cmp(def_name, MODi.default_str)!=0))
+	if (def_name.size() && (zs_cmp(def_name, MODi.DEFAULT_MOD)!=0))
 	{
 		showstr("def_name", def_name);
 	
@@ -158,31 +128,31 @@ void Module::activate(obj_ptr finder)
 		
 	}
 
-	str_rc base = self.str_property(MODi.base_str);
+	str_rc base = self.str_property(MODi.BASE);
 	if (base.size())
 	{
 		str_buf buf;
 
-		str_rc rval = self.str_property(MODi.routes_str);
+		str_rc rval = self.str_property(MODi.ROUTES);
 
 		if (!rval.size())
 		{
-			buf << base << '/' << MODi.routes_str;
+			buf << base << '/' << MODi.ROUTES;
 			rval = buf.zstr();
-			self.property(MODi.routes_str, rval);
+			self.property(MODi.ROUTES, rval);
 		}
 
-		temp_arg = self.property(MODi.viewpaths_str);
+		temp_arg = self.property(MODi.VIEWPATHS);
 
 		if (temp_arg.isNull())
 		{
 			buf << base << '/' << MODi.views_str;
 			rval = buf.zstr();
-			self.property(MODi.viewpaths_str, rval);
+			self.property(MODi.VIEWPATHS, rval);
 		}
 	}
 	
-	plist = self.array_property(MODi.namespaces_str);
+	plist = self.array_property(MODi.NAMESPACES);
 
 	if (plist.size())
 	{
@@ -191,7 +161,7 @@ void Module::activate(obj_ptr finder)
 		finder.call(MODi.addpatharray_fn, temp_arg);
 	}
 	
-	plist = self.array_property(MODi.classfiles_str);
+	plist = self.array_property(MODi.CLASSFILES);
 
 	if (plist.size())
 	{
@@ -200,7 +170,7 @@ void Module::activate(obj_ptr finder)
 		finder.call(MODi.addclasses_fn, temp_arg);
 	}
 
-	temp_arg  = self.property(MODi.requires_str);
+	temp_arg  = self.property(MODi.REQUIRES);
 
 // TODO: Should this be array merge instead of assign?
 	//showmem("requires", temp_arg);
@@ -218,16 +188,10 @@ void Module::activate(obj_ptr finder)
 		req.push_back(temp_arg);
 	}
 
-	htab_rc asset_keyslist = self.array_property(MODi.assets_str);
-	if (!asset_keyslist.size())
-	{
-		asset_keyslist = htab_ptr::empty_array();
-	}
-
-	htab_rw asset_keys(asset_keyslist);
 
 
-	str_rc asset_file = self.str_property(MODi.assetfile_str);
+
+	str_rc asset_file = self.str_property(MODi.ASSET_FILE);
 
 	if (asset_file.size())
 	{
@@ -239,26 +203,31 @@ void Module::activate(obj_ptr finder)
 			// absolute path
 			str_buf buf;
 
-			str_rc cfg_path = self.str_property(MODi.cfg_path_str);
-
-			buf << cfg_path << '/' << asset_file;
+			buf << cfg_path_ << '/' << asset_file;
 
 			asset_file = buf.zstr();
 
-			self.property(MODi.assetfile_str, asset_file);
-			// read in more assets data
+			self.property(MODi.ASSET_FILE, asset_file);
+		}
 
-			obj_rc asset_mgr = Services::service(MODi.assets_str);
+		obj_rc asset_mgr = Services::service(MODi.ASSETS);
 
-			if (asset_mgr.ok())
-			{
-				htab_rc added;
-				Assets* asmgr = zobj_toc<Assets>(asset_mgr);
-				added = asmgr->loadAssetFile(asset_file);
-				asset_keys.merge(added);
-				self.property(MODi.assets_str, asset_keys);
-			}
+		if (asset_mgr.ok())
+		{
 			
+			Assets* asmgr = zobj_toc<Assets>(asset_mgr);
+			htab_rc added = asmgr->loadAssetFile(asset_file);
+
+			htab_rc asset_keyslist = self.array_property(MODi.ASSETS);
+			if (!asset_keyslist.size())
+			{
+				asset_keyslist = htab_ptr::empty_array();
+			}
+
+			htab_rw asset_keys(asset_keyslist);
+
+			asset_keys.merge(added);
+			self.property(MODi.ASSETS, asset_keyslist);
 		}
 	}
 	
@@ -303,18 +272,25 @@ Module::getValueList(str_ptr key)
 htab_rc 
 Module::getAssets()
 {
-	return getValueList(MODi.assets_str);
+	return getValueList(MODi.ASSETS);
 }
 
 htab_rc 
 Module::getViewPaths()
 {
-	return getValueList(MODi.viewpaths_str);
+	return getValueList(MODi.VIEWPATHS);
+}
+
+
+str_rc Module::getConfigPath()
+{
+	return cfg_path_;
 }
 
 void Module::setConfigPath(str_ptr path)
 {
-	obj_ptr(self_).property(MODi.cfg_path_str, path);
+	cfg_path_ = path;
+	//obj_ptr(self_).property(MODi.cfg_path_str, path);
 }
 
 void Module::setActive(bool val)
@@ -463,6 +439,14 @@ ZEND_METHOD(Wcc_Module, getViewPaths)
 	result.move_zv(return_value);
 }
 	
+ZEND_METHOD(Wcc_Module, getConfigPath)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+	Module* cobj = zval_toc<Module>(ZEND_THIS);
+	str_rc result = cobj->getConfigPath();
+	result.move_zv(return_value);
+}
+
 ZEND_METHOD(Wcc_Module, setConfigPath)
 {
 	str_ptr  path;

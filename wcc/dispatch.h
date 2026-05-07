@@ -23,7 +23,7 @@ using namespace zpp;
 
 		int  dcount_;
 
-		str_rc  loadedFile_;
+		str_rc   loadedFile_;
 		htab_rc  modules_;
 		htab_rc  loaded_;
 		obj_rc   active_;
@@ -39,10 +39,12 @@ using namespace zpp;
 		Run*      run_ptr();
 		RouteMatch* rm_ptr();		
 
+
 		void call_module_activate(obj_ptr module);
 		htab_rc   call__module_requires(obj_ptr module);
 
 		htab_rc   module_viewpaths(obj_ptr module);
+		 
 
 	public:
 
@@ -54,7 +56,7 @@ using namespace zpp;
 
 		void action(htab_rc to);
 
-		obj_rc addModule(str_ptr name, val_ptr modspec);
+		obj_return addModule(str_ptr name, val_ptr modspec);
 
 		bool clearRouteCache(str_ptr file, str_ptr cache_name);
 
@@ -70,15 +72,13 @@ using namespace zpp;
 
 		obj_rc getCache(str_ptr cache_name);
 
-		obj_rc getDefaultModule();
+		obj_return getDefaultModule();
 
 		str_rc getMethodName();
 
 		obj_rc getModule(str_ptr name);
 
 		str_rc getModuleName();
-
-		htab_rc loadRoutes(str_ptr file, str_ptr cache_name);
 
 		htab_rc getRoles();
 
@@ -88,19 +88,19 @@ using namespace zpp;
 
 		str_rc getUri();
 
-		htab_rc loadRoutes(str_ptr file, str_ptr cache_name);
+		htab_return loadRoutes(str_ptr file, str_ptr cache_name);
 
 		val_rc  obcall(obj_ptr rmatch);
 
 		val_rc  obcallEx(str_ptr obclass, str_ptr obmethod, htab_ptr obargs);
 
-		htab_rc parseRaw(htab_ptr input);
+		htab_return parseRaw(htab_ptr input);
 
 		void respond(val_ptr content);
 
 		void setLog(bool val);
 
-		obj_rc setModule(str_ptr name);
+		obj_return setModule(str_ptr name);
 
 
 		VIRTUAL_ZOBJPTR

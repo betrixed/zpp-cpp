@@ -28,6 +28,8 @@ class Module extends Config {
 
     public function getAssets() : array {}
 
+    public function getConfigPath() : string {}
+
     public function getName() : string {}
 
     public function getRequires() : array {}

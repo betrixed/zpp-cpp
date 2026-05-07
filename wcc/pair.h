@@ -50,8 +50,8 @@ using namespace zpp;
 		static zval* get_second(zend_object* pair, zval* ret);
 		*/
 
-		val_ptr one_;
-		val_ptr two_;
+		val_rc one_;
+		val_rc two_;
 
 		void construct(val_ptr p1, val_ptr p2);
 		

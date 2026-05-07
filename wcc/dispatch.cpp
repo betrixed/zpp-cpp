@@ -18,6 +18,18 @@
 #include "finder.h"
 #endif
 
+#ifndef WCC_LOADER_H
+#include "loader.h"
+#endif
+
+#ifndef ROUTE_MATCH_H
+#include "route_match.h"
+#endif
+
+#ifndef WCC_ROUTESET_H
+#include "route_set.h"
+#endif
+
 
 #ifndef WCC_RUN_H
 #include "fun.h"
@@ -57,6 +69,12 @@ public:
 	str_intern  redirect_str;
 	str_intern  response_str;
 
+	str_intern  classname_str;
+	str_intern  php_extn;
+	str_intern  route_parser;
+	str_intern  parseraw_str;
+
+
 	virtual void init()
 	{
 		finder_str = "finder";
@@ -79,6 +97,11 @@ public:
 		sharewithall_fn = "sharewithall";
 		redirect_str = "redirect";
 		response_str = "response";
+
+		classname_str = "classname";
+		php_extn = ".php";
+		route_parser = "route_parser";
+		parseraw_str = "parseraw";
 	}
 }
 
@@ -223,12 +246,31 @@ Dispatch::call_module_activate(obj_ptr module)
 	afn_result.call_fn(); // void result
 }
 
-
-// assumes not already loaded
 obj_rc
-Dispatch::addModule(str_ptr name, val_ptr modspec)
+Dispatch::createModule(str_ptr name, htab_ptr mcfg)
 {
 	obj_rc result;
+	str_rc cname = mcfg.get(DSPi.classname_str);
+	if (!cname.ok())
+	{
+		cname = Module::omg.classname();
+	}
+	htab_rc args;
+	htab_rw margs(args);
+
+	margs.push_back(name);
+	margs.push_back(mcfg);
+
+	result = ReflectCache::staticInstanceArgs(cname, margs);
+
+	return result;
+}
+
+// assumes not already loaded
+obj_return
+Dispatch::addModule(str_ptr name, val_ptr modspec)
+{
+	obj_return result;
 	Module* modo = nullptr;
 
 	str_rc  dir;
@@ -252,9 +294,9 @@ Dispatch::addModule(str_ptr name, val_ptr modspec)
 
 	if (mcfg.isArray())
 	{
-		result = createModule(name, mcfg);
+		result.value_ = createModule(name, mcfg);
 
-		modo = zobj_toc<Module>(result);
+		modo = zobj_toc<Module>(result.value_);
 
 		modo->setConfigPath(dir);
 
@@ -266,7 +308,7 @@ Dispatch::addModule(str_ptr name, val_ptr modspec)
 
 	if (modo)
 	{
-		htab_rc reqlist = call__module_requires(result);
+		htab_rc reqlist = modo->getRequires();
 
 		htab_walk wk;
 
@@ -275,9 +317,16 @@ Dispatch::addModule(str_ptr name, val_ptr modspec)
 		{
 			if (value.isString())
 			{
-				setModule(value.zstr());
+				obj_return test = setModule(value.zstr());
+				if (test.has_errors())
+				{
+					 result.error() << test.get_errors();
+				}
 			}
 		}
+	}
+	else {
+		result.error() << "Failed to create module " << name;
 	}
 
 	return result;
@@ -309,7 +358,7 @@ Dispatch::clearRouteCache(str_ptr file, str_ptr cache_name)
 		ic->deleteKey(path);
 	}
 
-	return file_exists(path);
+	return !file_exists(path);
 }
 
 
@@ -424,52 +473,181 @@ Dispatch::getCache(str_ptr cache_name)
 }
 
 
-obj_rc
+obj_return
 Dispatch::getDefaultModule()
 {
-	obj_rc mdef = modules_.get()
+	obj_return result;
+
+	obj_rc mdef = modules_.get(MODi.DEFAULT_MOD);
+
+	if (mdef.ok())
+	{
+	    result.value_ = mdef;
+		return result;
+	}
+	val_rc defaults = modcfg_[MODi.DEFAULT_MOD];
+
+	if (defaults.isNull())
+	{
+		result.error() << "Default module '" < MODi.DEFAULT_MOD << "' must exist";
+		return result;
+	}
+	htab_ptr va = defaults.zarray();
+	if (va.size())
+	{
+		va.has_key(MODi.ALIAS) {
+			result.error() << "Default module '" << MODi.DEFAULT_MOD << "' must not have " << MODi.ALIAS;
+			return result;
+		}
+	}
+	else {
+		str_ptr sd = defaults.zstr();
+		if (!sd.size())
+		{
+			result.error() << "Default module '" < MODi.DEFAULT_MOD << "' must be array or string value";
+			return result;
+		}
+	}
+	return addModule(MODi.DEFAULT_MOD, defaults);
 }
 
 
 str_rc
 Dispatch::getMethodName()
 {
-	
+	str_rc result;
+
+	if (route_match_.ok())
+	{
+		RouteMatch* rm = zobj_toc<RouteMatch>(route_match_);
+		result = rm->getObjMethod();
+	}
 }
 
 
 obj_rc
 Dispatch::getModule(str_ptr name)
 {
-	
+	obj_rc result = modules_.get(name);
+	return result;
 }
 
 
 str_rc
 Dispatch::getModuleName()
 {
-	
+	str_rc result;
+
+	if (active_.ok())
+	{
+		Module* modo = zobj_toc<Module>(active_);
+		result = modo->getName();
+	}
+	return result;
 }
 
 
-htab_rc
+htab_return
 Dispatch::loadRoutes(str_ptr file, str_ptr cache_name)
 {
-	
+	htab_return result;
+
+	str_rc rfile;
+	str_rc extn = file_extension(file);
+	if (!ext.size())
+	{
+		rfile = file + DSPi.php_extn;
+	}
+	else {
+		rfile = file;
+	}
+
+	if (!file_exists(rfile))
+	{
+		result.error() << "Routes file " << rfile << " not found";
+		return result;
+	}
+
+	obj_rc cache_obj = getRoutesCache(cache_name);
+
+	modified_time = filemtime(rfile);
+
+	val_rc rdata;
+
+	if (cache_obj.ok())
+	{
+		ICache* cobj = zobj_toc<ICache>(cache_obj);
+
+		obj_rc cdata = cobj->getCached(rfile);
+
+		if (cdata.ok())
+		{
+			ICacheData* data = zobj_toc<ICacheData>(cdata);
+			if (data->getStored() < modified_time) {
+				cobj->delete(rfile);
+			}
+			else {
+				rdata = data->getData();
+			}
+		}
+	}
+	if (!rdata.isNull())
+	{
+		loadedFile_ = rfile;
+		result.value_ = rdata;
+		return result;
+	}
+
+	val_return raw = Loader::readPHP(rfile);
+
+	if (raw.has_errors())
+	{
+		result.move_error(raw);
+		return result;
+	}
+	val_ptr test(raw.value_);
+	if (test.isObject())
+	{
+		if (!test.instanceof(RouteSet::omg.classEntry()))
+		{
+			result.error() << RouteSet::omg.classname() << " expected from " << rfile;
+			return result;
+		}
+		obj_rc rawobj = test.zobject();
+		htab_rw wr(rdata);
+		wr.set(DSP.set_str, rawobj);
+	}
+	else if (test.isArray())
+	{
+		result = parseRaw(test.zarray());
+	}
+	if (!result.has_errors())
+	{
+		loadedFile_ = rfile;
+	}
+	return result;
 }
 
 
 htab_rc
 Dispatch::getRoles()
 {
-	
+	return roles_;
 }
 
 
 obj_rc
 Dispatch::getRoute()
 {
-	
+	obj_rc result;
+
+	obj_rc rmobj = getRouteMatch();
+	if (rmobj.ok())
+	{
+		RouteMatch* rm = zobj_toc<RouteMatch>(rmobj);
+		result rm->getMatch();
+	}
+	return result;
 }
 
 
@@ -487,20 +665,47 @@ Dispatch::getRouteMatch()
 str_rc
 Dispatch::getUri()
 {
-	
-}
+	str_rc result;
 
-
-htab_rc
-Dispatch::loadRoutes(str_ptr file, str_ptr cache_name)
-{
-	
+	obj_rc rmobj = getRouteMatch();
+	if (rmobj.ok())
+	{
+		RouteMatch* rm = zobj_toc<RouteMatch>(rmobj);
+		result rm->getUri();
+	}
+	return result;
 }
 
 val_rc
 Dispatch::obcall(obj_ptr rmatch)
 {
-	
+	RouteMatch* rm = zobj_toc<RouteMatch>(rmatch);
+	obj_rc robj = rm->getMatch();
+
+	Route* r = zobj_toc<Route>(robj);
+
+	val_rc target = r->getTarget();
+
+	if (target.isArray())
+	{
+		htab_ptr tac(target);
+		roles_ = tac.get(route_data.ROLE_S);
+		if (roles_..isNull())
+		{
+			roles_ = htab_ptr::empty_array();
+		}
+
+		htab_rc disval;
+		htab_rw arg(disval);
+
+		arg.push_back(self_);
+
+		obj_rc pbefore = Pair::omg.new_zobj();
+		Pair* p = zobj_toc<Pair>(pbefore);
+		p->one_ = DSPi.beforecall_str;
+		p->two_ = disval;
+	}
+
 }
 
 val_rc 
@@ -509,10 +714,20 @@ Dispatch::obcallEx(str_ptr obclass, str_ptr obmethod, htab_ptr obargs)
 	
 }
 
-htab_rc 
+htab_return 
 Dispatch::parseRaw(htab_ptr input)
 {
-	
+	htab_return result;
+
+	obj_rc parser = Services::service(DSPi.route_parser);
+	if (!parser.ok())
+	{
+		result.error() << "Service " << DSPi.route_parser << " not found";
+		return result;
+	}
+	val_rc temparg(input);
+	result.value_ = parser.call(DSPi.parseraw_str, temparg);
+	return result;
 }
 
 void 
@@ -529,7 +744,7 @@ Dispatch::setLog(bool val)
 }
 
 
-obj_rc 
+obj_return 
 Dispatch::setModule(str_ptr name)
 {
 	
