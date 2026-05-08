@@ -46,15 +46,18 @@ using namespace zpp;
 		htab_rc   module_viewpaths(obj_ptr module);
 		 
 
+	protected:
+		obj_rc createModule(str_ptr name, htab_ptr mcfg);
+
 	public:
 
-		virtual void debug_info(htab_rw hw);
+		void debug_info(htab_rw hw) override;
 		
 		static base_obj_mgr<Dispatch> omg;
 
 		void  construct();
 
-		void action(htab_rc to);
+		void action(htab_ptr to);
 
 		obj_return addModule(str_ptr name, val_ptr modspec);
 
@@ -68,9 +71,9 @@ using namespace zpp;
 
 		obj_rc getActiveModule();
 
-		htab_rc getArgs();
+		htab_ptr getArgs();
 
-		obj_rc getCache(str_ptr cache_name);
+		obj_rc getRoutesCache(str_ptr cache_name);
 
 		obj_return getDefaultModule();
 
@@ -96,12 +99,13 @@ using namespace zpp;
 
 		htab_return parseRaw(htab_ptr input);
 
-		void respond(val_ptr content);
+		error_return respond(val_ptr content);
 
 		void setLog(bool val);
 
 		obj_return setModule(str_ptr name);
 
+		void  setModuleCfg(htab_ptr cfg);
 
 		VIRTUAL_ZOBJPTR
 

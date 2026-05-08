@@ -23,7 +23,7 @@
 #include "wcc/route_match.cpp"
 #include "wcc/route_set.cpp"
 #include "wcc/target.cpp"
-
+#include "wcc/dispatch.cpp"
 #include "wcc/module.cpp"
 
 
@@ -89,6 +89,10 @@ PHP_MINIT(wcc_pair_d)(INIT_FUNC_ARGS_PASSTHRU);
 
 #ifdef WCC_MODULE_CPP
 	PHP_MINIT(Wcc_Module_reg)(INIT_FUNC_ARGS_PASSTHRU);
+#endif
+
+#ifdef WCC_DISPATCH_CPP
+	PHP_MINIT(Wcc_Dispatch_reg)(INIT_FUNC_ARGS_PASSTHRU);
 #endif
 }
 #endif

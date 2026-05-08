@@ -637,7 +637,6 @@ Assets::filterPaths(htab_ptr paths)
 		for(kv1.start(paths); kv1.ok(); kv1.next())
 		{
 			str_rc sp = kv1.value();
-			showstr("path name: ", sp);
 
 			sp = pathnames.eval(sp);
 			hw.push_back(sp);
@@ -650,7 +649,6 @@ htab_rc
 Assets::loadAssetFile(str_ptr file)
 {
 	//printf("Assets::loadAssetFile %s\n", file.data());
-	showstr("loadAssetFile", file);
 
 	htab_rc result = htab_ptr::empty_array();
 
@@ -667,12 +665,6 @@ Assets::loadAssetFile(str_ptr file)
 		zend_throw_error(zend_ce_error,"No Cache Mgr service");
 		return result;
 	}
-
-
-	
-
-	printf("call read_cache for %s, %s\n", ASI.file_cache.data(),  file.data());
-	showobj("cache_mgr", cache_mgr);
 
 	/*
 	val_rc filename(file);

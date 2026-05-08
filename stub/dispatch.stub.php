@@ -17,7 +17,7 @@ class Dispatch {
 	public function dispatch(RouteMatch $rm): void {}
 
 	public function dispatchError(RouteMatch $rm, 
-            string $errorClass, string $errorMethod, ?array $errArgs) : void {}
+            string $errorClass, string $errorMethod, ?array $errArgs = null) : void {}
 
 	public function forward( array | string $to) : void {}
 
@@ -25,7 +25,7 @@ class Dispatch {
 
 	public function getArgs() : ?array {}
 
-	public function getCache(string $cache_name) : object | null {}
+	public function getRoutesCache(string $cache_name) : object | null {}
 
 	public function getDefaultModule(): Module {}
 
@@ -34,8 +34,6 @@ class Dispatch {
 	public function getModule(string $name): ?Module {}
 
 	public function getModuleName(): ?string {}
-
-	public function loadRoutes(string $file, string $cache_name) : ?array {}
 
 	public function getRoles() : array {} 
 
@@ -58,5 +56,7 @@ class Dispatch {
 	public function setLog(bool $val): void {}
 
 	public function setModule(string $name): Module|null {}
+
+	public function setModuleCfg(array $modcfg) : void {}
 
 };

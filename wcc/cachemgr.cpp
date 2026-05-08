@@ -285,7 +285,7 @@ val_return
 CacheMgr::readCache(str_ptr filename, str_ptr cachename)
 {
 	val_return result;
-	showstr("cachename", cachename);
+	 
 	if (!file_exists(filename)) {
 		result.error() << "File " << filename << " not found";
 		return result;
@@ -305,7 +305,7 @@ CacheMgr::readCache(str_ptr filename, str_ptr cachename)
 	ICache* ic = zobj_toc<ICache>(cache);
 	obj_rc pkg = ic->getCached(filename); //virtual call
 
-	showstr("key", filename);
+	 
 	
 	/*
 	val_rc key = filename;
@@ -315,7 +315,7 @@ CacheMgr::readCache(str_ptr filename, str_ptr cachename)
 	if (pkg.ok())
 	{
 		
-		showobj("pkg", pkg);
+		 
 		long mtime = filemtime(filename);
 		ICacheData* icd = zobj_toc<ICacheData>(pkg);
 
@@ -331,7 +331,7 @@ CacheMgr::readCache(str_ptr filename, str_ptr cachename)
 		}
 	}
 	// data missing or not current
-	zend_printf("readFile direct %s\n", filename.data());
+ 
 	result = readFile( filename );
 	//showmem("read data", data);
 
