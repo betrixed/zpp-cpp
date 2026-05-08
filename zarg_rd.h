@@ -94,6 +94,7 @@ public:
 	str_ptr  str_or_null(zval *arg);
 
 	htab_ptr htab(zval *arg);
+	val_ptr  string_or_array(zval* arg);
 	
 	bool weakref(weak_ref& value, zval* arg);
 	bool zarray_null(htab_ptr& value, zval* arg);
@@ -109,6 +110,7 @@ public:
 	bool     has_errors() const { return (errors_); }
 	str_rc   get_errors();
 	bool     throw_errors(const char* fncstr = nullptr);
+	
 
 	size_t size() const {
 		return nargs_;

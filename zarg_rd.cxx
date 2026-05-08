@@ -274,6 +274,26 @@ zarg_rd::obj_ofclass_null(obj_ptr& value, zval* arg, zend_class_entry* ce)
 	return false;
 }
 
+val_ptr
+zarg_rd::string_or_array(zval* arg)
+{
+	val_ptr result(arg);
+
+	if (result.isString())
+	{
+		return result;
+	}
+	if (result.isArray())
+	{
+		return result;
+	}
+	if (!maybe_)
+	{
+		error() << "String or Array required";
+	}
+	return result;
+}
+
 obj_ptr 
 zarg_rd::obj(zval* arg)
 {
