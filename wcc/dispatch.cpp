@@ -287,10 +287,14 @@ Dispatch::action(htab_ptr to)
 	rm->setCallInfo(classname, method, temp);
 	rm->setModuleName(module);
 
-	val_rc content = obcall(rm);
-
-	respond(content);
-
+	val_return content = obcall(rm);
+	if (!content.throw_errors())
+	{
+		respond(content.value_);
+	}
+	else {
+		//TODO: Catch and return respond with error messages
+	}
 }
 
 htab_rc   
@@ -455,11 +459,13 @@ Dispatch::dispatch(obj_ptr rmatch)
 	}
 
 	str_rc mod_name = rm->getModuleName();
+
 	if (!mod_name.size())
 	{
 		result.error() << "Need a module name";
 		return result;
 	}
+	
 
 	obj_return module_err = setModule(mod_name);
 
@@ -497,12 +503,16 @@ Dispatch::dispatch(obj_ptr rmatch)
 		engine.call(DSPi.sharewithall_fn, temparg);
 	}
 
-	val_rc content = obcall(route_match_);
+	val_return content = obcall(route_match_);
 
-	svc->unset(DSPi.engine_str);
-
-	result = respond(content);
-
+	if (!content.has_errors())
+	{
+		result = respond(content.value_);
+	}
+	else {
+		result = content.move_error();
+	}
+	
 	return result;
 }
 
@@ -511,8 +521,14 @@ void
 Dispatch::dispatchError(obj_ptr rmatch, str_ptr err_class, str_ptr method, htab_ptr errArgs)
 {
 	route_match_ = rmatch;
-	val_rc content = obcallEx(err_class, method, errArgs);
-	respond(content);
+	val_return content = obcallEx(err_class, method, errArgs);
+	if (!content.has_errors())
+	{
+		respond(content.value_);
+	}
+	else {
+		//GIVE UP!
+	}
 }
 
 
@@ -699,6 +715,8 @@ Dispatch::loadRoutes(str_ptr file, str_ptr cache_name)
 		return result;
 	}
 	val_ptr test(raw.value_);
+	//showmem("readPHP returned", test);
+
 	if (test.isObject())
 	{
 		obj_rc rawobj = test.zobject();
@@ -710,6 +728,8 @@ Dispatch::loadRoutes(str_ptr file, str_ptr cache_name)
 
 		htab_rw wr(rdata);
 		wr.set(DSPi.set_str, rawobj);
+		result.value_ = rdata;
+		//showarray("return rdata array", result.value_);
 	}
 	else if (test.isArray())
 	{
@@ -770,19 +790,26 @@ Dispatch::getUri()
 	return result;
 }
 
-val_rc
+val_return
 Dispatch::obcall(obj_ptr rmatch)
 {
 
-	val_rc   result;
+	val_return   result;
 
 	RouteMatch* rm = zobj_toc<RouteMatch>(rmatch);
 	obj_rc robj = rm->getMatch();
+	val_rc target;
 
-	Route* r = zobj_toc<Route>(robj);
-
-	val_rc target = r->getTarget();
-
+	if (robj.ok())
+	{
+		Route* r = zobj_toc<Route>(robj);
+		target = r->getTarget();
+	}
+	else {
+		result.error() << "RouteMatch has no route object";
+		return result;
+	}
+	
 	if (target.isArray())
 	{
 		htab_ptr tac(target);
@@ -791,30 +818,30 @@ Dispatch::obcall(obj_ptr rmatch)
 		{
 			roles_ = htab_ptr::empty_array();
 		}
-
-		htab_rc disval;
-		htab_rw arg(disval);
-
-		arg.push_back(self_);
-
-
-		obj_rc pbefore = Pair::omg.new_zobj();
-		Pair* p = zobj_toc<Pair>(pbefore);
-		//method name, arguments
-		p->one_ = DSPi.beforecall_str;
-		p->two_ = disval;
-
-		val_rc null_value;
-		obj_rc null_obj;
-
-		result = rm->call(null_value, pbefore, null_obj);
 	}
+
+	htab_rc disval;
+	htab_rw arg(disval);
+
+	arg.push_back(self_);
+
+	obj_rc pbefore = Pair::omg.new_zobj();
+	Pair* p = zobj_toc<Pair>(pbefore);
+		//method name, arguments
+	p->one_ = DSPi.beforecall_str; // method name
+	p->two_ = disval; // dispatch object in array as args.
+
+	// 
+	htab_rc extra_args;
+	obj_rc  after_obj;
+
+	result.value_ = rm->call(extra_args, pbefore, after_obj);
 
 	return result;
 
 }
 
-val_rc 
+val_return 
 Dispatch::obcallEx(str_ptr obclass, str_ptr obmethod, htab_ptr obargs)
 {
 	RouteMatch* rm = zobj_toc<RouteMatch>(route_match_);
@@ -1033,7 +1060,8 @@ ZEND_METHOD(Wcc_Dispatch, dispatch)
 	if (!args.throw_errors())
 	{
 		Dispatch* cobj = zval_toc<Dispatch>(ZEND_THIS);
-		cobj->dispatch(rm);
+		error_return result = cobj->dispatch(rm);
+		result.throw_errors();
 	}	
 }
 
@@ -1196,8 +1224,11 @@ ZEND_METHOD(Wcc_Dispatch, obcall)
 	if (!args.throw_errors())
 	{
 		Dispatch* cobj = zval_toc<Dispatch>(ZEND_THIS);
-		val_rc result = cobj->obcall(rm);
-		result.move_zv(return_value);
+		val_return result = cobj->obcall(rm);
+		if (!result.throw_errors())
+		{
+			result.value_.move_zv(return_value);
+		}
 	}
 }
 
@@ -1212,8 +1243,11 @@ ZEND_METHOD(Wcc_Dispatch, obcallEx)
 	if (!args.throw_errors())
 	{
 		Dispatch* cobj = zval_toc<Dispatch>(ZEND_THIS);
-		val_rc result = cobj->obcallEx(obclass, obmethod, obargs);
-		result.move_zv(return_value);
+		val_return result = cobj->obcallEx(obclass, obmethod, obargs);
+		if (!result.throw_errors())
+		{
+			result.value_.move_zv(return_value);
+		}
 	}
 }
 

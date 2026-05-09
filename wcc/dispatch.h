@@ -93,9 +93,9 @@ using namespace zpp;
 
 		htab_return loadRoutes(str_ptr file, str_ptr cache_name);
 
-		val_rc  obcall(obj_ptr rmatch);
+		val_return  obcall(obj_ptr rmatch);
 
-		val_rc  obcallEx(str_ptr obclass, str_ptr obmethod, htab_ptr obargs);
+		val_return  obcallEx(str_ptr obclass, str_ptr obmethod, htab_ptr obargs);
 
 		htab_return parseRaw(htab_ptr input);
 

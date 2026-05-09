@@ -114,14 +114,12 @@ void ICacheData::debug_info(htab_rw hw)
 void 
 ICacheData::unserialize(htab_ptr s)
 {
-
-	//s.show_data("unserialize");
-
 	key_ = s.get(IC_STR.key_key);
 	data_ = s.get(IC_STR.data_key);
 	ttl_ = val_ptr(s.get(IC_STR.ttl_key)).zlong();
 	stored_ = val_ptr(s.get(IC_STR.stored_key)).zlong();
 	saved_ = true;
+
 }
 
 

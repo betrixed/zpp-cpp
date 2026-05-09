@@ -259,7 +259,7 @@ RouteMatch::call(htab_ptr extra, obj_ptr before, obj_ptr after)
 		zobj = target_;
 	}
 	
-
+	// appended extra arguments?
 	if (extra.size())
 	{
 		htab_ptr hr(ob_args_);
@@ -511,33 +511,30 @@ bool RouteMatch::prepare_call()
 	val_ptr test;
 
 	errors_.init();
-	//zend_printf("prepare_call 1\n");
 
 	Route* route = zobj_toc<Route>(route_);
 
 	val_ptr route_target(route->target_);
 
 	obj_rc tg_obj(route_target.zobject());
-	//zend_printf("prepare_call 2\n");
+
 	if (tg_obj.ok())
 	{
 		this->target_ = tg_obj;
 
 		if( tg_obj.instanceof(Target::omg.classEntry())) 
 		{	
-			//zend_printf("prepare_call 3\n");
 			Target* cobj = zobj_toc<Target>(tg_obj);
 			module_name_ = cobj->getModule();
 		 	ob_class_ = cobj->getClass();
 		 	ob_method_ = cobj->getFunc();
 		 	ob_args_ = this->fetchArgs();
 
+
 		 	htab_ptr defaults = cobj->getParams();
 
 		 	if (defaults.size())
-		 	{
-		 		//showdata("defaults", defaults);
-		 		
+		 	{	
 		 		obj_rc request = Services::service(RM_data.request_obj);
 		 		RequestGlobals* rg = zobj_toc<RequestGlobals>(request);
 		 		obj_ptr  qry = rg->query();
@@ -557,7 +554,6 @@ bool RouteMatch::prepare_call()
 		}
 		else if (route_target.isCallable())
 		{
-			//zend_printf("prepare_call 4\n");
 			return true;
 		}
 		return false;
