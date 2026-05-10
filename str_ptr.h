@@ -119,6 +119,10 @@ namespace zpp {
 		static str_rc json_encode(val_ptr value, int flags);
 
 		static str_ptr empty_str();
+
+		bool interned() const {
+			return (s && (GC_FLAGS(s) & IS_STR_INTERNED));
+		}
 	};
 
 	int zs_cmp(zend_string* a, zend_string* b);

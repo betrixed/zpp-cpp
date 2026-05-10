@@ -433,8 +433,7 @@ val_rc::move_zv(zval* return_value)
 void 
 val_rc::copy_zv(zval* return_value)
 {
-    ZVAL_COPY_VALUE(return_value, &zv_);
-    zv_ = {0};
+    ZVAL_COPY(return_value, &zv_);
 }
 
 
@@ -607,7 +606,9 @@ val_rc::try_decref(zval* p)
         {
         case IS_STRING:
             {
-                zend_string_release(Z_STR_P(p));
+                zend_string* s = Z_STR_P(p);
+                //showstr("val_rc decref", s);
+                zend_string_release(s);
             }
             break;
         case IS_REFERENCE:

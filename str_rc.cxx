@@ -105,6 +105,7 @@ str_rc::str_rc(const char* cp, int slen) : str_ptr()
 		slen = strlen(cp);
 	}
 	s = zend_string_init(cp, slen, 0);
+	//showstr("str_rc(): ", s);
 }
 
 str_rc& 
@@ -405,7 +406,7 @@ str_intern::str_intern(const char* c, size_t slen)
 	//GC_ADDREF(s);
 	//showstr("init s",s);
 	s = zend_new_interned_string(s);
-	//showstr("interned s",p);
+	//showstr("interned s",s);
 
 }
 
@@ -413,11 +414,19 @@ str_intern::str_intern(const char* c, size_t slen)
 const str_intern& 
 str_intern::operator=(const char* cp)
 {
+	
+	//lose(); //don't need this
 	auto slen = strlen(cp);
 	if (slen)
 	{
-		s = zend_string_init(cp, slen, 1);
-		s = zend_new_interned_string(s);
+		zend_string* p = zend_string_init(cp, slen, 1);
+		if ((GC_FLAGS(p) & IS_STR_INTERNED))
+		{
+			s = p;
+		}
+		else {
+			s = zend_new_interned_string(p);
+		}
 	}
 	return *this;
 }

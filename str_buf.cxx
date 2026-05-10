@@ -38,11 +38,13 @@ str_buf::str_buf()
 	initbuf();
 }
 
+/*
 zend_string* //static
 str_buf::init_zs(const char* c, size_t slen)
 {
 	return zend_string_init(c, slen, 0);
 }
+*/
 
 void
 str_buf::lose()

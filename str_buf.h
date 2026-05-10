@@ -40,7 +40,7 @@ namespace zpp {
 		str_rc 		 final_; 
 		smart_str    buf;
 
-		static zend_string* init_zs(const char* c, size_t slen);
+		//static zend_string* init_zs(const char* c, size_t slen);
 
 		friend class str_rc;
 

@@ -522,9 +522,23 @@ void htab_rw::push_back(str_ptr su)
 void 
 htab_persist::val_destroy(zval* val)
 {
-	//showmem("val_destroy", val);
-	val_rc::try_decref(val);
+	/*showmem("val_destroy", val);
+	if (!val_ptr(val).isString())
+	{
+		val_rc::try_decref(val);
+	}*/
+}
 
+htab_persist::~htab_persist()
+{
+	if (htab_)
+	{
+		zend_hash_graceful_destroy(htab_);
+		//htab_persist::freehtmemory(htab_);
+		
+		free(htab_);
+		htab_ = nullptr;
+	}
 }
 
 void 
@@ -552,15 +566,7 @@ htab_persist::htab_persist(size_t slots)
 	init(slots);
 }
 
-htab_persist::~htab_persist()
-{
-	if (htab_)
-	{
-		//htab_persist::freehtmemory(htab_);
-		zend_hash_graceful_destroy(htab_);
-		free(htab_);
-	}
-}
+
 
 void  
 htab_persist::set(val_ptr key, val_ptr value)
@@ -619,7 +625,12 @@ htab_persist::set(val_ptr key, val_ptr value)
  {
 	htab_rw rw(htab_);
 
-	str_perm skey(key.data(), key.size());
+	if (!key.interned())
+	{
+		str_intern skey(key.data(), key.size());
+		key = skey;
+	}
+	
 
 	int ztype = value.ref_type();
 	switch(ztype)
@@ -628,13 +639,17 @@ htab_persist::set(val_ptr key, val_ptr value)
 	case IS_FALSE:
 	case IS_LONG:
 	case IS_DOUBLE:
-		rw.set(skey, value);
+		rw.set(key, value);
 		break;
 	case IS_STRING:
 		{
 			str_ptr s = value.zstr();
-			str_perm sp (s.data(), s.size());
-			rw.set(skey, sp);
+			if (!s.interned())
+			{
+				str_intern sp (s.data(), s.size());
+				s = sp;
+			}
+			rw.set(key, s);
 		}
 	case IS_ARRAY:
 		{
@@ -654,7 +669,7 @@ htab_persist::set(val_ptr key, val_ptr value)
 					hp.set(subkey.zlong(), subval);
 				}
 			}
-			rw.set(skey, (HashTable*) hp);
+			rw.set(key, (HashTable*) hp);
 			hp.wipe();
 		}
 	}
