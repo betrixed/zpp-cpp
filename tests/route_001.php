@@ -1,7 +1,5 @@
-php<?php
+<?php
 namespace Wcc;
-
-use ReflectionClass;
 
 function boolstr(bool $v) : string
 {

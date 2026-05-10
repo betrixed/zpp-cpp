@@ -10,7 +10,9 @@ echo "route_002.php" . PHP_EOL;
 
 
 
-$testfile = "$wcc_root" . DIRECTORY_SEPARATOR . "test" . DIRECTORY_SEPARATOR . "routes.php";
+$testfile =  "tests/routes.php";
+
+echo "testfile $testfile\n";
 
 $rparser = new RouteParser($testfile, false);
 

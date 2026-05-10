@@ -33,7 +33,7 @@ PairInit PairSI;
 
 void Pair::construct(val_ptr p1, val_ptr p2)
 {
-	 obj_ptr self(vobj());
+	 obj_ptr self(self_);
 
 	 self.property(PairSI.one, p1);
 	 self.property(PairSI.two, p2);

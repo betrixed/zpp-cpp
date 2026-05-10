@@ -57,22 +57,22 @@ using namespace zpp;
 		
 		val_ptr first()
 		{
-			return one_;
+			return val_ptr(one_);
 		}
 
 		val_ptr second()
 		{
-			return two_;
+			return val_ptr(two_);
 		}
 
 		val_ptr key()
 		{
-			return one_;
+			return val_ptr(one_);
 		}
 
 		val_ptr value()
 		{
-			return two_;
+			return val_ptr(two_);
 		}
 		
 		double test_calc() const 

@@ -257,15 +257,27 @@ Module::addDefaults(obj_ptr defmod)
 	}
 }
 
+// convert string value into list[value]
 htab_rc 
 Module::getValueList(str_ptr key)
 {
+	htab_rc list;
+
 	obj_ptr self = self_;
-	htab_rc list = self.array_property(key);
-	if (!list.size())
+	val_rc  value = self.property(key);
+	if (value.isString())
 	{
-		list = htab_ptr::empty_array();
+		htab_rw item(list);
+		item.push_back(value.zstr());
+		return list;
 	}
+	if (value.isArray())
+	{
+		list = value.zarray();
+		return list;
+	}
+
+	list = htab_ptr::empty_array();
 	return list;
 }
 

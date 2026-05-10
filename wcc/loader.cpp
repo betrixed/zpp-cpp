@@ -337,6 +337,7 @@ Loader::load(str_ptr class_name)
 bool_return
 Loader::must_load(str_ptr class_name)
 {
+	//showstr("must_load: ", class_name);
 	return load(class_name);
 }
 

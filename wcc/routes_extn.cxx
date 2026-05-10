@@ -23,7 +23,7 @@
 #include "wcc/route_match.cpp"
 #include "wcc/route_set.cpp"
 #include "wcc/target.cpp"
-#include "wcc/dispatch.cpp"
+//#include "wcc/dispatch.cpp"
 #include "wcc/module.cpp"
 
 

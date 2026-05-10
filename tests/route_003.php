@@ -6,7 +6,7 @@ use Wc\Valid;
 
 require "bootstrap.php";
 
-$testfile = "$wcc_root" . DIRECTORY_SEPARATOR . "test" . DIRECTORY_SEPARATOR . "routes.php";
+$testfile = "tests/routes.php";
 
 $rparser = new RouteParser($testfile, false);
 

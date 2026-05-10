@@ -55,6 +55,8 @@ $loader->setExtLoader($extloader);
 $loader->setBaseDir($wcc_root);
 
 
+$finder = $loader->getFinder();
+$finder->addPath('voku\helper', "$wcc_root/voku/helper");
 
 echo "BaseDir is " . $loader->getBaseDir() . PHP_EOL;
 

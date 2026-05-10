@@ -8,6 +8,8 @@ require "bootstrap.php";
 
 $gResults = [];
 
+$dos = new Dos();
+
 function chop(float $x)
 {
 	return number_format($x,4);
