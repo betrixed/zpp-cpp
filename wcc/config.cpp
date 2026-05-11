@@ -24,10 +24,6 @@ namespace wcc {
 
 	Config::Config_Mgr<Config> Config::omg;
 
-	using namespace zpp;
-
-/** type must be good for something? */
-
 #ifdef CONFIG_HANDLERS
 zval* 
 Config::read_dimension(zend_object* obj, zval* offset, int type,  zval* return_value)

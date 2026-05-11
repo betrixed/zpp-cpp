@@ -32,12 +32,12 @@ using namespace zpp;
 		obj_rc   services_;
 		obj_rc   finder_;
 		obj_rc   route_match_;
-		obj_rc   run_;
+		obj_rc   config_;
 
 	private:
-		Services* svc_ptr();
-		Run*      run_ptr();
-		RouteMatch* rm_ptr();		
+		Services*    svc_ptr();
+		Config*      config_ptr();
+		RouteMatch*  rm_ptr();		
 
 
 		void call_module_activate(obj_ptr module);
@@ -111,5 +111,47 @@ using namespace zpp;
 
 	};
 
+
+class Disp_init : public state_init {
+public:
+	str_intern  finder_str;
+	str_intern  default_str;
+	str_intern  route_match_str;
+	str_intern  run_str;
+
+	str_intern  config_str;
+	str_intern  config_dir;
+	str_intern  activate_fn;
+	str_intern  cache_routes_str;
+
+	str_intern  getassets_fn;
+	str_intern  getviewpaths_fn;
+	str_intern  engine_str;
+	str_intern  getfinder_fn;
+	str_intern  addpaths_fn;
+
+	str_intern  viewdata_str;
+	str_intern  sharewithall_fn;
+	str_intern  redirect_str;
+	str_intern  response_str;
+
+	str_intern  classname_str;
+	str_intern  php_extn;
+	str_intern  route_parser;
+	str_intern  parseraw_str;
+
+	str_intern  beforecall_str;
+	str_intern  set_str;
+	str_intern  modcfg_str;
+	str_intern  services_str;
+
+	str_intern  roles_str;
+	str_intern  active_str;
+	str_intern  modules_str;
+
+	void init() override;
+};
+
+extern Disp_init DSPi;
 }; // namespace wcc
 #endif

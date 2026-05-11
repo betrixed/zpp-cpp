@@ -1,6 +1,11 @@
 <?php
 namespace Wcc;
+echo __DIR__ . PHP_EOL;
 
+echo phpversion() . PHP_EOL;
+echo phpinfo();
+
+/*
 function boolstr(bool $v) : string
 {
 	return $v ? "True" : "False";
@@ -14,6 +19,7 @@ $target = ["_obj" => "TestIndex", "_mth" => "IndexGet"];
 
 $r = new Route(
 	Route::GET_I | Route::POST_I, 
+ * 
 	$pattern, 
 	["_obj" => "TestIndex", "_mth" => "IndexGet"]
 );
@@ -52,6 +58,7 @@ echo "Verb put " . Route::GetVerbInt("put") . PHP_EOL;
 
 
 
+
 $names = Route::GetVerbNames(Route::PUT_I | ROUTE::POST_I);
 
 $myverbs = $r->GetVerbs();
@@ -61,7 +68,6 @@ echo "PUT = $hasput, POST = $haspost" . PHP_EOL;
 
 echo "Got names" . PHP_EOL;
 echo "Verbs " . print_r($names,true) . PHP_EOL;
-
 
 
 //echo "Params4 " . print_r($r->GetParams(),true) . PHP_EOL;
@@ -79,9 +85,9 @@ $run = unserialize($data);
 
 //echo "Unserialize run 2 = " . print_r($run, true) . PHP_EOL;
 
+
 debug_zpp_dump($run);
 echo "Params " . print_r($run->GetParams(),true) . PHP_EOL;
-
 
 
 $set = [];
@@ -98,7 +104,7 @@ echo "Set count = " . count($set) . PHP_EOL;
 foreach($set as $ix => $rset) {
 	echo "Route $ix " . print_r($rset,true) . PHP_EOL;
 }
-
+*/
 
 
 

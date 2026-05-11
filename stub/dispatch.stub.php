@@ -16,16 +16,15 @@ class Dispatch {
 
 	public function dispatch(RouteMatch $rm): void {}
 
-	public function dispatchError(RouteMatch $rm, 
+	public function dispatchError(
+		    RouteMatch $rm, 
             string $errorClass, string $errorMethod, ?array $errArgs = null) : void {}
 
-	public function forward( array | string $to) : void {}
+	public function forward( array|string $to) : void {}
 
 	public function getActiveModule(): ?Module {}
 
 	public function getArgs() : ?array {}
-
-	public function getRoutesCache(string $cache_name) : object | null {}
 
 	public function getDefaultModule(): Module {}
 
@@ -33,11 +32,11 @@ class Dispatch {
 
 	public function getModule(string $name): ?Module {}
 
-	public function getModuleName(): ?string {}
-
 	public function getRoles() : array {} 
 
 	public function getRoute() : ?Route {}
+
+	public function getRoutesCache(string $cache_name) : ?object {}
 
 	public function getRouteMatch() : ?RouteMatch {}
 
@@ -47,7 +46,8 @@ class Dispatch {
 
 	public function obcall(RouteMatch $rm) : mixed {}
 
-	public function obcallEx(string $obclass, string $obmethod, ?array $obargs) : mixed {}
+	public function obcallEx(string $obclass, string $obmethod, 
+						?array $obargs = null) : mixed {}
 
 	public function parseRaw(array $input) : array {}
 
@@ -55,7 +55,7 @@ class Dispatch {
 
 	public function setLog(bool $val): void {}
 
-	public function setModule(string $name): Module|null {}
+	public function setModule(string $name): ?Module {}
 
 	public function setModuleCfg(array $modcfg) : void {}
 

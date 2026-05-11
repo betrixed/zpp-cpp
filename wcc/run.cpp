@@ -29,9 +29,11 @@
 #include "wcc/loader.h"
 #endif
 
+
 #ifndef REQUEST_GLOBALS_H
 #include "wcc/request_globals.h"
 #endif
+
 
 #ifndef RUN_ARGINFO_H
 #define RUN_ARGINFO_H
@@ -202,7 +204,9 @@ void Run::construct()
 	self.property(Run_i.theme_str, buf.zstr());
 
 	buf << site_leaf << "/config";
-	self.property(Run_i.config_dir, buf.zstr());
+	str_rc config_dir = buf.zstr();
+
+	self.property(Run_i.config_dir, config_dir);
 
 	buf << site_leaf << "/tmp";
 	self.property(Run_i.temp_dir, buf.zstr());
@@ -225,6 +229,9 @@ void Run::construct()
 	
 	//showobj("config", config);
 	//config.property(Run_i.services, services);
+
+	config.property(Run_i.config_dir, config_dir);
+	
 	self.property(Run_i.config_str, config);
 	sobj->set(Run_i.config_str, config);
 

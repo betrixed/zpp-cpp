@@ -5,6 +5,12 @@
 #include "search_list.h"
 #endif
 
+#ifndef SEARCH_LIST_ARGINFO_H
+extern "C" {
+	#include "stub/searchlist_arginfo.h"
+}
+#endif
+
 namespace wcc {
 zend_class_entry* gIfFindLeafCE;
 

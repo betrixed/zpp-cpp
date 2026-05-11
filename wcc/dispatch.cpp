@@ -35,11 +35,6 @@ extern "C" {
 #include "route_set.h"
 #endif
 
-
-#ifndef WCC_RUN_H
-#include "run.h"
-#endif
-
 #ifndef WCC_CONFIG_H
 #include "config.h"
 #endif
@@ -58,46 +53,6 @@ using namespace zpp;
 
 base_obj_mgr<Dispatch> Dispatch::omg;
 
-class Disp_init : public state_init {
-public:
-	str_intern  finder_str;
-	str_intern  default_str;
-	str_intern  route_match_str;
-	str_intern  run_str;
-
-	str_intern  config_str;
-	str_intern  config_dir;
-	str_intern  activate_fn;
-	str_intern  cache_routes_str;
-
-	str_intern  getassets_fn;
-	str_intern  getviewpaths_fn;
-	str_intern  engine_str;
-	str_intern  getfinder_fn;
-	str_intern  addpaths_fn;
-
-	str_intern  viewdata_str;
-	str_intern  sharewithall_fn;
-	str_intern  redirect_str;
-	str_intern  response_str;
-
-	str_intern  classname_str;
-	str_intern  php_extn;
-	str_intern  route_parser;
-	str_intern  parseraw_str;
-
-	str_intern  beforecall_str;
-	str_intern  set_str;
-	str_intern  modcfg_str;
-	str_intern  services_str;
-
-	str_intern  roles_str;
-	str_intern  active_str;
-	str_intern  modules_str;
-
-	void init() override;
-};
-
 Disp_init DSPi;
 
 void 
@@ -106,7 +61,6 @@ Disp_init::init()
 	finder_str = "finder";
 	default_str = "default";
 	route_match_str = "route_match";
-	run_str = "run";
 
 	config_str = "config";
 	config_dir = "config_dir";
@@ -142,30 +96,13 @@ Disp_init::init()
 
 void Dispatch::debug_info(htab_rw hw)
 {
-/*
-int url_time_id_;
-		bool doLog_;
 
-		htab_rc roles_;
-
-		int  dcount_;
-
-		str_rc   loadedFile_;
-		htab_rc  modules_;
-		htab_rc  loaded_;
-		obj_rc   active_;
-		htab_rc  modcfg_;
-
-		obj_rc   services_;
-		obj_rc   finder_;
-		obj_rc   route_match_;
-		obj_rc   run_;*/
 	hw.set(DSPi.route_match_str, route_match_);
 	hw.set(DSPi.finder_str, finder_);
 	hw.set(DSPi.roles_str, roles_);
 	hw.set(DSPi.active_str, active_);
 	hw.set(DSPi.services_str, services_);
-	hw.set(DSPi.run_str, run_);
+	hw.set(DSPi.config_str, config_);
 	hw.set(DSPi.modules_str, modules_);
 	hw.set(DSPi.modcfg_str, modcfg_);
 }
@@ -176,10 +113,10 @@ Dispatch::svc_ptr()
 	return zobj_toc<Services>(services_);
 }
 
-Run*
-Dispatch::run_ptr()
+Config*
+Dispatch::config_ptr()
 {
-	return zobj_toc<Run>(run_);
+	return zobj_toc<Config>(config_);
 }
 
 RouteMatch*
@@ -195,7 +132,7 @@ Dispatch::construct()
 
 	Services* svc = svc_ptr();
 	finder_ = svc->get(DSPi.finder_str);
-	run_ = svc->get(DSPi.run_str);
+	config_ = svc->get(DSPi.config_str);
 
 }
 
@@ -369,7 +306,7 @@ Dispatch::addModule(str_ptr name, val_ptr modspec)
 		mcfg = test.value_;
 	}
 	else {
-		dir = run_.property(DSPi.config_dir);
+		dir = config_.property(DSPi.config_dir);
 	}
 
 	if (mcfg.isArray())
@@ -566,8 +503,7 @@ Dispatch::getRoutesCache(str_ptr cache_name)
 {
 	obj_rc result;
 
-	obj_rc cfg = svc_ptr()->get(DSPi.config_str);
-	Config* cf = zobj_toc<Config>(cfg);
+	Config* cf = config_ptr();
 
 	val_rc temparg;
 
@@ -996,8 +932,6 @@ Dispatch::setModuleCfg(htab_ptr cfg)
 	modcfg_ = cfg;
 }
 
-
-
 }//end wcc
 
 
@@ -1321,8 +1255,6 @@ ZEND_METHOD(Wcc_Dispatch, setModuleCfg)
 
 PHP_MINIT_FUNCTION(Wcc_Dispatch_reg)
 {
-	//auto ce = register_class_Wcc_Config(zend_ce_arrayaccess, zend_ce_countable);
-	//zend_standard_class_def
 	auto ce = register_class_Wcc_Dispatch();
 	Dispatch::omg.classEntry(ce);
 

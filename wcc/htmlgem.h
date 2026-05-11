@@ -9,7 +9,8 @@
 namespace wcc {
 
 	//using str_rc = str_rc;
-
+	using namespace zpp;
+	
 	class HtmlGem : public base_d {
 	protected:
 		uint64_t id_add_;

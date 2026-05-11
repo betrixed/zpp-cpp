@@ -23,8 +23,10 @@
 #include "wcc/route_match.cpp"
 #include "wcc/route_set.cpp"
 #include "wcc/target.cpp"
-//#include "wcc/dispatch.cpp"
+
 #include "wcc/module.cpp"
+
+#include "wcc/dispatch.cpp"
 
 
 void register_routes_extn(INIT_FUNC_ARGS)
@@ -54,6 +56,7 @@ void register_routes_extn(INIT_FUNC_ARGS)
 #ifdef GLOBAL_RESPONSE_CPP
 	PHP_MINIT(Wcc_Response_reg)(INIT_FUNC_ARGS_PASSTHRU);
 #endif
+	
 #ifdef REQUEST_GLOBALS_CPP
 	PHP_MINIT(RequestGlobals_reg)(INIT_FUNC_ARGS_PASSTHRU);
 	PHP_MINIT(FileUpload_reg)(INIT_FUNC_ARGS_PASSTHRU);

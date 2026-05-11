@@ -13,6 +13,10 @@
 #include "plate.h"
 #endif
 
+#ifndef WCC_CONFIG_H
+#include "config.h"
+#endif
+
 namespace wcc {
 
 using namespace zpp;

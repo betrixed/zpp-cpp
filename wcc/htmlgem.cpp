@@ -1603,6 +1603,9 @@ HtmlGem::multiline(val_ptr pset)
 }; //namespace wcc;
 //&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&@@@@@@@@@@@@@@@@@@@@&&&&&&&&&&&&&&&&&&&&&
 
+using namespace wcc;
+using namespace zpp;
+
 ZEND_METHOD(Wcc_HtmlGem, button)
 {
 	zval* pset;
