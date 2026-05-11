@@ -51,7 +51,7 @@ base_init BI_str;
 void 
 base_init::init()
 {
-	class_name = "class";
+	//class_name = "class";
 }
 
 void register_base_init()

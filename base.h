@@ -66,7 +66,7 @@ namespace zpp {
 	class base_init : public state_init {
 	public:
 
-		str_intern class_name;
+		//str_intern class_name;
 
 		void init() override;
 		
@@ -578,7 +578,10 @@ Link all instances of a class T, by optionally mixing in this template.
 			mydef::class_entry_ = zce;
 
 			mydef::self_->init_class_fn();
+			/* str_ptr cname = mydef::self_->class_name();
 
+			zend_printf("classEntry %lx %s\n", (uintptr_t)zce, cname.data()); */
+			
 			return zce;
 			
 		}
