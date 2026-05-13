@@ -533,10 +533,12 @@ htab_persist::~htab_persist()
 {
 	if (htab_)
 	{
+		/* 
 		zend_hash_graceful_destroy(htab_);
-		//htab_persist::freehtmemory(htab_);
 		
+		htab_persist::freehtmemory(htab_);
 		free(htab_);
+		*/
 		htab_ = nullptr;
 	}
 }
@@ -544,7 +546,6 @@ htab_persist::~htab_persist()
 void 
 htab_persist::init(size_t slots)
 {
-	htab_ = (HashTable*) malloc(sizeof(HashTable));
 
 	_zend_hash_init(htab_, slots, htab_persist::val_destroy, 1);
 }
@@ -557,17 +558,17 @@ htab_persist::wipe()
 
 htab_persist::htab_persist()
 {
-	htab_ = nullptr;
+	htab_ = &data_;
 }
 
 htab_persist::htab_persist(size_t slots)
 {
-	htab_ = nullptr;
+	htab_ = &data_;
 	init(slots);
 }
 
 
-
+/*
 void  
 htab_persist::set(val_ptr key, val_ptr value)
 {
@@ -619,7 +620,7 @@ htab_persist::set(val_ptr key, val_ptr value)
 		}
 	}
  }
-
+ 
  void 
  htab_persist::set(str_ptr key, val_ptr value)
  {
@@ -686,6 +687,6 @@ htab_persist::set(val_ptr key, val_ptr value)
 
 	pefree(ptr, persistent);
 }
-
+*/
 }; // namespace zpp
 #endif

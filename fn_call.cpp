@@ -214,6 +214,7 @@ fn_result::throw_failed()
 bool
 fn_result::call_fn()
 {
+    result_ = {0};
     if (cfi_.fci_.size==0)
     {
         throw_failed();
@@ -289,6 +290,12 @@ fn_result::zlong()
 }
 
 
+void fn_call::init_f()
+{
+    fci_ = {0};
+    cache_ = {0}; 
+}
+
 /** reset this from the constructor information */
 void 
 fn_call::set_fci(zend_string* method, zend_object* obj)
@@ -303,17 +310,21 @@ fn_call::set_fci(zend_string* method, zend_object* obj)
     cache_.object = obj;
 }
 
-fn_call::fn_call(zend_string* method) : fci_({0}), cache_({0})
-{
+
+fn_call::fn_call(zend_string* method) 
+{   
+    init_f();
     set_fci(method,nullptr);
 }
 
-fn_call::fn_call() : fci_({0}), cache_({0})
+fn_call::fn_call()
 {
+   init_f();
 }
 
-fn_call::fn_call(zend_string* method, zend_object* obj) : fci_({0}), cache_({0})
+fn_call::fn_call(zend_string* method, zend_object* obj)
 {
+    init_f();
     set_fci(method, obj);
 }
 

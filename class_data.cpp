@@ -65,7 +65,7 @@ bool class_data::check(const char* msg)
     } 
     return true;  
 }
- class_data::class_data(str_ptr classname)
+ class_data::class_data(str_ptr classname) : class_entry_(nullptr)
  {
     set(classname);
  }

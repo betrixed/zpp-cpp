@@ -444,7 +444,6 @@ obj_ptr::str_property(str_ptr name)
 {
     str_rc result;
     val_rc copy = property(name);
-
     result = copy.zstr();
 
     return result;

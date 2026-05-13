@@ -403,9 +403,14 @@ str_intern::str_intern(const char* c, size_t slen)
 		slen = strlen(c);
 	}
 	s = zend_string_init(c, slen, 1);
-	//GC_ADDREF(s);
+	
 	//showstr("init s",s);
-	s = zend_new_interned_string(s);
+	if (!interned())
+	{	
+		GC_ADDREF(s);
+		s = zend_new_interned_string(s);
+	}
+	
 	//showstr("interned s",s);
 
 }
@@ -425,6 +430,7 @@ str_intern::operator=(const char* cp)
 			s = p;
 		}
 		else {
+			GC_ADDREF(p);
 			s = zend_new_interned_string(p);
 		}
 	}

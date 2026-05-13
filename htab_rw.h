@@ -143,12 +143,13 @@ namespace zpp {
     };
 
     class htab_persist {
-            HashTable* htab_;
+        HashTable  data_;
+        HashTable* htab_;
         public:
             operator HashTable* () { return htab_; }
 
             static void val_destroy(zval* val);
-            static void freehtmemory(HashTable* ht);
+            //static void freehtmemory(HashTable* ht);
 
             htab_persist();
             ~htab_persist();
@@ -158,9 +159,11 @@ namespace zpp {
             void init(size_t slots);
             void wipe();
 
+            /*
             void set(val_ptr key, val_ptr value);
             void set(str_ptr skey, val_ptr value);
             void set(zend_long ikey, val_ptr value);
+            */
             zval* get(str_ptr skey);
 
         };

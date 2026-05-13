@@ -60,6 +60,8 @@ namespace zpp {
         zend_fcall_info       fci_;
         zend_fcall_info_cache cache_;
 
+        void init_f();
+        
         friend class fn_result;
     public:
 
@@ -69,7 +71,7 @@ namespace zpp {
 
         ~fn_call();
         
-        void set_fci(zend_string* method, zend_object* obj = obj_ptr());
+        void set_fci(zend_string* method, zend_object* obj = nullptr);
         void set_obj(zend_object* obj); // for method calls
     
         void debug_dump();
@@ -115,7 +117,7 @@ namespace zpp {
         }
 
 
-    public:
+    public:                  
         zval      result_;
 
         
@@ -175,11 +177,11 @@ namespace zpp {
         
         fn_params(fn_call& fn) : fn_result(fn)
         {
-            setParams(params, ARGCT);
+            setParams(&params[0], ARGCT);
         }
         fn_params(fn_call& fn, HashTable* nargs) : fn_result(fn)
         {
-            setParams(params, ARGCT, nargs);
+            setParams(&params[0], ARGCT, nargs);
         }
 
 
