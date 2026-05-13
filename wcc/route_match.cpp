@@ -227,6 +227,7 @@ RouteMatch::find_route(RouteSet* routeset)
 val_rc //static
 RouteMatch::call_method(obj_ptr obj, str_ptr method, htab_ptr args)
 {
+	
 	if (args.size())
 	{
 		return obj.call_hargs(method, args);
@@ -236,12 +237,14 @@ RouteMatch::call_method(obj_ptr obj, str_ptr method, htab_ptr args)
 	}
 }
 
-val_rc 
+val_return
 RouteMatch::call(htab_ptr extra, obj_ptr before, obj_ptr after)
 {
-	val_rc  result;
+	val_return  result;
+
 	val_rc  zobj;
 	obj_ptr obj;
+
 
 	if (!ob_class_.size() || !ob_method_.size()) 
 	{
@@ -253,12 +256,18 @@ RouteMatch::call(htab_ptr extra, obj_ptr before, obj_ptr after)
 	{
 		// only works for objects with zero arguments constructor
 		zobj = ReflectCache::staticInstance(ob_class_);
+		if (!zobj.isObject())
+		{
+			result.error() << "Failed to create object of class " << ob_class_;
+			return result;
+		}
 	}
 	else
 	{
 		zobj = target_;
 	}
 	
+
 	// appended extra arguments?
 	if (extra.size())
 	{
@@ -274,18 +283,20 @@ RouteMatch::call(htab_ptr extra, obj_ptr before, obj_ptr after)
 	}
 
 	val_ptr test(zobj);
+
 	if (!test.isObject())
 	{
-		zend_throw_exception(zend_ce_error, "RouteMatch::Invoke with no object",0);
+		result.error() << "RouteMatch has no target object";
 		return result;
 	}
 	obj = test.zobject();
+
 	if (obj.instanceof(zend_ce_closure))
 	{
 		// doesn't actually have methods.
-		if (!call_spread_fn(result, zobj, ob_args_))
+		if (!call_spread_fn(result.value_, zobj, ob_args_))
 		{
-			return false;
+			result.error() << "RouteMatch closure call failed";
 		}
 		return result;
 	}
@@ -296,31 +307,28 @@ RouteMatch::call(htab_ptr extra, obj_ptr before, obj_ptr after)
 		{
 			Pair* ppair = zobj_toc<Pair>(before);
 
-			val_ptr first(ppair->first());
-			val_ptr second(ppair->second());
-
-			//zend_printf("Before ");
-			//showmem(" second", second);
+			val_ptr first(ppair->first()); // method name
+			val_ptr second(ppair->second()); // any arguments
 
 			method_name = first.zstr();
 			
 			if (method_name.size() && obj.method_exists(method_name))
 			{
-				result = this->call_method(obj, method_name, second);
-				test = result;
+				result_ = this->call_method(obj, method_name, second);
+				test = result_;
 				if (test.isFalse()  || test.isObject())
 				{
+					result.value_ = result_;
 					return result;
+					// abort by beforeCall
 				}
+
 			}
 		}
 
 		if (obj.method_exists(ob_method_))
 		{
-			// store this here in route_match object,
-			// in case an after hook needs and wants to change final returned value
-			result = this->call_method(obj, ob_method_, ob_args_);
-			result_ = result;
+			result.value_ = this->call_method(obj, ob_method_, ob_args_);
 		}
 		
 		if (after.ok())
@@ -333,11 +341,11 @@ RouteMatch::call(htab_ptr extra, obj_ptr before, obj_ptr after)
 			method_name = second.zstr();
 			if (method_name.size() && obj.method_exists(method_name))
 			{
-				result = this->call_method(obj, method_name, second);
-				test = result;
+				result_ = this->call_method(obj, method_name, second);
+				test = result_;
 				if (!test.isNull())
 				{
-					result_ = result;
+					result.value_ = result_;
 				}
 			}	
 		}	
@@ -841,8 +849,11 @@ ZEND_METHOD(Wcc_RouteMatch, call)
 	ZEND_PARSE_PARAMETERS_END();
 
 	RouteMatch* prm = zval_toc<RouteMatch>(ZEND_THIS);
-	val_rc result = prm->call(extra_args, before_pair, after_pair);
-	result.move_zv(return_value);
+	val_return result = prm->call(extra_args, before_pair, after_pair);
+	if (!result.throw_errors())
+	{
+		result.value_.move_zv(return_value);
+	}
 }
 
 ZEND_METHOD(Wcc_RouteMatch, callMethod)
@@ -859,8 +870,12 @@ ZEND_METHOD(Wcc_RouteMatch, callMethod)
 	ZEND_PARSE_PARAMETERS_END();
 
 	RouteMatch* prm = zval_toc<RouteMatch>(ZEND_THIS);
-	val_rc result = prm->call_method(obj,method,args);
-	result.move_zv(return_value);
+	val_return result = prm->call_method(obj,method,args);
+	if (!result.throw_errors())
+	{
+		result.value_.move_zv(return_value);
+	}
+	
 
 }
 

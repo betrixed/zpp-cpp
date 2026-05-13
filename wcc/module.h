@@ -10,24 +10,21 @@ namespace wcc {
 
 using namespace zpp;
 
-	class  Module : public Config 
+	class  Module : public base_d 
 	{
 	protected:
-		
+		obj_ptr data_;
 		htab_rc requires_;
 		bool    active_;
 		str_rc  cfg_path_;
 		str_rc  name_;
-
+		
+		
 	public:
 
 		void debug_info(htab_rw hw) override;
 		
-		template <typename T> class Module_Mgr : public Config::Config_Mgr<T>{};
-
-		static Module::Module_Mgr<Module> omg;
-
-		void  construct();
+		static base_obj_mgr<Module> omg;
 
 		void construct(str_ptr name, htab_ptr data);
 
@@ -79,6 +76,7 @@ using namespace zpp;
 		str_intern  ASSET_FILE;
 
 		str_intern  dispatch_str;
+		str_intern  data_str;
 
 		str_intern  views_str;
 		str_intern  addpatharray_fn;

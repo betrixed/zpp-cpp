@@ -58,6 +58,17 @@ $loader->setBaseDir($wcc_root);
 $finder = $loader->getFinder();
 $finder->addPath('voku\helper', "$wcc_root/voku/helper");
 
+$svc = Services::instance();
+
+
+$cfg = $svc->getOne(Config::class);
+
+$svc->set('config', $cfg);
+
+$cfg->config_dir = 'tests/modules';
+
+$svc->set('response', new Response());
+
 echo "BaseDir is " . $loader->getBaseDir() . PHP_EOL;
 
 function shutdown()

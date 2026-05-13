@@ -1,14 +1,9 @@
 <?php
 namespace Wcc;
 
-use ReflectionClass;
-
 require "bootstrap.php";
 
 echo "route_002.php" . PHP_EOL;
-
-
-
 
 $testfile =  "tests/routes.php";
 
@@ -44,6 +39,15 @@ $uritable = [
 
 echo "Ready" . PHP_EOL;
 
+$mdata = [
+	'default' => 'tests/modules/default'
+];
+
+
+$dispatch = new Dispatch();
+
+
+$dispatch->setModuleCfg($mdata);
 
 foreach($uritable as $uri)
 {
@@ -55,14 +59,19 @@ foreach($uritable as $uri)
 	}
 	else {
 		echo "Found route" . PHP_EOL;
+                $dispatch->dispatch($request);
 		//$request->prepare_call();
 		/*$params = $request->getObjArgs();
 		if (count($params) > 0)
 		{
 			echo "args = " . print_r($params, true) . PHP_EOL;
 		}*/
+
 	}
+
+
 }
+
 
 
 

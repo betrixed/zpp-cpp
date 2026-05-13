@@ -57,6 +57,8 @@ public:
 	
 	static obj_rc make(htab_ptr initdata);
 
+	void debug_info(htab_rw hw) override;
+
 	void construct(htab_ptr values);
 
 	/** Avoid warning for missing property */
@@ -101,7 +103,7 @@ public:
 
 
 
-	virtual   void debug_info(htab_rw hw);
+	  
 	
 };
 

@@ -32,6 +32,8 @@ class Dispatch {
 
 	public function getModule(string $name): ?Module {}
 
+	public function getModuleName() : ?string {}
+
 	public function getRoles() : array {} 
 
 	public function getRoute() : ?Route {}

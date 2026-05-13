@@ -2,10 +2,9 @@
 namespace Wcc;
 echo __DIR__ . PHP_EOL;
 
-echo phpversion() . PHP_EOL;
-echo phpinfo();
+//echo phpversion() . PHP_EOL;
 
-/*
+
 function boolstr(bool $v) : string
 {
 	return $v ? "True" : "False";
@@ -19,7 +18,6 @@ $target = ["_obj" => "TestIndex", "_mth" => "IndexGet"];
 
 $r = new Route(
 	Route::GET_I | Route::POST_I, 
- * 
 	$pattern, 
 	["_obj" => "TestIndex", "_mth" => "IndexGet"]
 );
@@ -104,7 +102,7 @@ echo "Set count = " . count($set) . PHP_EOL;
 foreach($set as $ix => $rset) {
 	echo "Route $ix " . print_r($rset,true) . PHP_EOL;
 }
-*/
+
 
 
 

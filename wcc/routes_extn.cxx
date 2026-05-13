@@ -27,6 +27,7 @@
 #include "wcc/module.cpp"
 
 #include "wcc/dispatch.cpp"
+#include "wcc/run.cpp"
 
 
 void register_routes_extn(INIT_FUNC_ARGS)
@@ -96,6 +97,11 @@ PHP_MINIT(wcc_pair_d)(INIT_FUNC_ARGS_PASSTHRU);
 
 #ifdef WCC_DISPATCH_CPP
 	PHP_MINIT(Wcc_Dispatch_reg)(INIT_FUNC_ARGS_PASSTHRU);
+#endif
+
+
+#ifdef WCC_RUN_CPP
+	PHP_MINIT(wcc_run_reg)(INIT_FUNC_ARGS_PASSTHRU);
 #endif
 }
 #endif

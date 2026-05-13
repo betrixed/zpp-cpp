@@ -306,12 +306,14 @@ Dispatch::addModule(str_ptr name, val_ptr modspec)
 		mcfg = test.value_;
 	}
 	else {
-		dir = config_.property(DSPi.config_dir);
+		dir = config_.str_property(DSPi.config_dir);
 	}
 
 	if (mcfg.isArray())
 	{
-		modo = createModule(name, mcfg);
+		htab_ptr data = mcfg.zarray();
+		modo = createModule(name, data);
+		
 
 		m = zobj_toc<Module>(modo);
 		m->setConfigPath(dir);
@@ -412,34 +414,39 @@ Dispatch::dispatch(obj_ptr rmatch)
 		return result;
 	}
 
-
-	htab_rc paths = module_viewpaths(active_);
-
-	if (zs_cmp_ci(mod_name,DSPi.default_str)!=0)
-	{
-		obj_rc defmod = getModule(DSPi.default_str);
-		htab_rc defpaths = module_viewpaths(defmod);
-		htab_rw allpaths(paths);
-		allpaths.merge(defpaths);
-	}
-
 	Services* svc = svc_ptr();
 
 	obj_rc engine = svc->get(DSPi.engine_str);
-	if (paths.size())
-	{	
-		obj_rc search = engine.call(DSPi.getfinder_fn);
-		temparg = paths;
-		search.call(DSPi.addpaths_fn, temparg);
-	}
 
-	htab_rc view_data = svc->get(DSPi.viewdata_str);
-	if (view_data.size())
+	if (engine.ok())
 	{
-		temparg = view_data;
-		engine.call(DSPi.sharewithall_fn, temparg);
-	}
+		htab_rc paths = module_viewpaths(active_);
 
+		if (zs_cmp_ci(mod_name,DSPi.default_str)!=0)
+		{
+			obj_rc defmod = getModule(DSPi.default_str);
+			htab_rc defpaths = module_viewpaths(defmod);
+			htab_rw allpaths(paths);
+			allpaths.merge(defpaths);
+		}
+
+		if (paths.size())
+		{	
+			val_rc search = engine.call(DSPi.getfinder_fn);
+			if (search.isObject())
+			{
+				obj_ptr sop = search.zobject();
+				val_rc temparg(paths);
+				sop.call(DSPi.addpaths_fn, temparg);
+			}
+		}
+
+		val_rc view_data = svc->get(DSPi.viewdata_str);
+		if (view_data.isArray())
+		{
+			engine.call(DSPi.sharewithall_fn, view_data);
+		}
+	}
 	val_return content = obcall(route_match_);
 
 	if (!content.has_errors())
@@ -729,12 +736,12 @@ Dispatch::getUri()
 val_return
 Dispatch::obcall(obj_ptr rmatch)
 {
-
 	val_return   result;
 
 	RouteMatch* rm = zobj_toc<RouteMatch>(rmatch);
 	obj_rc robj = rm->getMatch();
 	val_rc target;
+
 
 	if (robj.ok())
 	{
@@ -768,11 +775,11 @@ Dispatch::obcall(obj_ptr rmatch)
 	p->two_ = disval; // dispatch object in array as args.
 
 	// 
+
 	htab_rc extra_args;
 	obj_rc  after_obj;
 
-	result.value_ = rm->call(extra_args, pbefore, after_obj);
-
+	result = rm->call(extra_args, pbefore, after_obj);
 	return result;
 
 }
@@ -814,13 +821,18 @@ Dispatch::respond(val_ptr content)
 		result.error() = "No response service";
 		return result;
 	}
-	Response* rp = zobj_toc<Response>(rpobj);
 
+	Response* rp = zobj_toc<Response>(rpobj);
+	if (rp->isSent())
+	{
+		return result;
+	}
 
 	if (content.isNull())
 	{
 		if (rp->hasContent() || rp->getStatusCode())
 		{
+			showobj("rp", rpobj);
 			rp->send();
 			return result;
 		}

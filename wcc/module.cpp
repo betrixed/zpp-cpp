@@ -38,7 +38,7 @@ namespace wcc {
 
 using namespace zpp;
 
-Module::Module_Mgr<Module> Module::omg;
+base_obj_mgr<Module> Module::omg;
 
 
 void 
@@ -59,6 +59,7 @@ Module_init::init()
 	ASSET_FILE = "asset_file";
 
 	dispatch_str = "dispatch";
+	data_str = "data";
 
 	views_str = "views";
 	addpatharray_fn = "addpatharray";
@@ -78,12 +79,13 @@ Module_init MODi;
 
 void Module::debug_info(htab_rw hw)
 {
+	base_d::debug_info(hw);
+
 	hw.set(MODi.name_str, name_);
 	hw.set(MODi.REQUIRES, requires_);
 	hw.set(MODi.active_str, active_);
+
 	//hw.set(MODi.cfg_path_str, cfg_path_);
-	
-	Config::debug_info(hw);
 }
 
 
@@ -92,7 +94,13 @@ Module::construct(str_ptr name, htab_ptr data)
 {
 	active_ = false;
 	name_ = name;
-	Config::construct(data);
+	obj_rc  config = Config::omg.new_zobj();
+	Config* cfg = zobj_toc<Config>(config);
+	cfg->construct(data);
+
+	obj_ptr self(self_);
+	self.property(MODi.data_str, config);
+	this->data_ = config;
 }
 
 
@@ -105,17 +113,18 @@ Module::getName()
 
 void Module::activate(obj_ptr finder)
 {
-	obj_ptr self = self_;
 	
-	
-	str_rc def_name = self.str_property(MODi.DEFAULT_MOD);
+	obj_ptr  data = data_;
+
+	//zend_printf("activate\n");
+
+	str_rc def_name = data.str_property(MODi.DEFAULT_MOD);
 	obj_rc dispatch;
 	val_rc temp_arg;
 	htab_rc plist;
 
 	if (def_name.size() && (zs_cmp(def_name, MODi.DEFAULT_MOD)!=0))
 	{
-		showstr("def_name", def_name);
 	
 		val_rc val_dispatch = Services::service(MODi.dispatch_str);
 		if (val_dispatch.isObject())
@@ -128,32 +137,33 @@ void Module::activate(obj_ptr finder)
 		
 	}
 
-	str_rc base = self.str_property(MODi.BASE);
+	str_rc base = data.str_property(MODi.BASE);
+
 	if (base.size())
 	{
 		str_buf buf;
 
-		str_rc rval = self.str_property(MODi.ROUTES);
+		str_rc rval = data.str_property(MODi.ROUTES);
 
 		if (!rval.size())
 		{
 			buf << base << '/' << MODi.ROUTES;
 			rval = buf.zstr();
-			self.property(MODi.ROUTES, rval);
+
+			data.property(MODi.ROUTES, rval);
 		}
 
-		temp_arg = self.property(MODi.VIEWPATHS);
+		temp_arg = data.property(MODi.VIEWPATHS);
 
 		if (temp_arg.isNull())
 		{
 			buf << base << '/' << MODi.views_str;
 			rval = buf.zstr();
-			self.property(MODi.VIEWPATHS, rval);
+			data.property(MODi.VIEWPATHS, rval);
 		}
 	}
 	
-	plist = self.array_property(MODi.NAMESPACES);
-
+	plist = data.array_property(MODi.NAMESPACES);
 	if (plist.size())
 	{
 
@@ -161,7 +171,7 @@ void Module::activate(obj_ptr finder)
 		finder.call(MODi.addpatharray_fn, temp_arg);
 	}
 	
-	plist = self.array_property(MODi.CLASSFILES);
+	plist = data.array_property(MODi.CLASSFILES);
 
 	if (plist.size())
 	{
@@ -170,7 +180,7 @@ void Module::activate(obj_ptr finder)
 		finder.call(MODi.addclasses_fn, temp_arg);
 	}
 
-	temp_arg  = self.property(MODi.REQUIRES);
+	temp_arg  = data.property(MODi.REQUIRES);
 
 // TODO: Should this be array merge instead of assign?
 	//showmem("requires", temp_arg);
@@ -191,7 +201,7 @@ void Module::activate(obj_ptr finder)
 
 
 
-	str_rc asset_file = self.str_property(MODi.ASSET_FILE);
+	str_rc asset_file = data.str_property(MODi.ASSET_FILE);
 
 	if (asset_file.size())
 	{
@@ -207,7 +217,7 @@ void Module::activate(obj_ptr finder)
 
 			asset_file = buf.zstr();
 
-			self.property(MODi.ASSET_FILE, asset_file);
+			data.property(MODi.ASSET_FILE, asset_file);
 		}
 
 		obj_rc asset_mgr = Services::service(MODi.ASSETS);
@@ -218,7 +228,7 @@ void Module::activate(obj_ptr finder)
 			Assets* asmgr = zobj_toc<Assets>(asset_mgr);
 			htab_rc added = asmgr->loadAssetFile(asset_file);
 
-			htab_rc asset_keyslist = self.array_property(MODi.ASSETS);
+			htab_rc asset_keyslist = data.array_property(MODi.ASSETS);
 			if (!asset_keyslist.size())
 			{
 				asset_keyslist = htab_ptr::empty_array();
@@ -227,7 +237,7 @@ void Module::activate(obj_ptr finder)
 			htab_rw asset_keys(asset_keyslist);
 
 			asset_keys.merge(added);
-			self.property(MODi.ASSETS, asset_keyslist);
+			data.property(MODi.ASSETS, asset_keyslist);
 		}
 	}
 	
@@ -238,21 +248,24 @@ void Module::activate(obj_ptr finder)
 void
 Module::addDefaults(obj_ptr defmod)
 {
-	Module* def = zobj_toc<Module>(defmod);
+	
+	obj_rc  cfgdata =  defmod.obj_property(MODi.data_str);
 
-	htab_rc list = def->toArray();
+	Config* cfg = zobj_toc<Config>(cfgdata);
+	htab_rc list = cfg->toArray();
 
 	htab_walk  wk;
 
 	obj_ptr self = self_;
+	obj_rc  data = self.obj_property(MODi.data_str);
 
 	auto key = wk.key();
 	auto value = wk.value();
 	for(wk.start(list); wk.ok(); wk.next())
 	{
-		if (!self.has_property(key))
+		if (!data.has_property(key))
 		{
-			self.property(key, value);
+			data.property(key, value);
 		}
 	}
 }
@@ -264,7 +277,9 @@ Module::getValueList(str_ptr key)
 	htab_rc list;
 
 	obj_ptr self = self_;
-	val_rc  value = self.property(key);
+	obj_rc  data = self.obj_property(MODi.data_str);
+
+	val_rc  value = data.property(key);
 	if (value.isString())
 	{
 		htab_rw item(list);

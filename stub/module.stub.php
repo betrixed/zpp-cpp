@@ -20,6 +20,8 @@ class Module extends Config {
     const string ASSETS = "assets";
     const string ASSET_FILE = "asset_file";
 
+    public readonly Config $data;
+
     public function __construct(string $name, array $mod);
 
     public function activate(Finder $finder) : void {}

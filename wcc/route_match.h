@@ -113,7 +113,7 @@ public:
 
 	bool prepare_call();
 
-	val_rc call(htab_ptr extra, obj_ptr before, obj_ptr after);
+	val_return call(htab_ptr extra, obj_ptr before, obj_ptr after);
 
 #ifndef BASE_ZOBJPTR
 	VIRTUAL_ZOBJPTR
