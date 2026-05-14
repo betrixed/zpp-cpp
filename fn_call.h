@@ -10,6 +10,18 @@
 #ifndef FN_CALL_H
 #define FN_CALL_H
 
+#ifndef FLOCK_COMPAT_H
+extern "C" {
+    #include <ext/standard/flock_compat.h>
+}
+#endif
+
+#ifndef FILE_H
+extern "C" {
+    #include <ext/standard/file.h>
+}
+#endif
+
 #ifndef STR_RC_H
 #include "str_rc.h"
 #endif
@@ -29,6 +41,11 @@
 #include <cstring>
 
 namespace zpp {
+
+    enum PHP_FILE {
+        APPEND = PHP_FILE_APPEND,
+        EXC_LOCK = PHP_LOCK_EX
+    };
 
     class args_spread  {
         size_t              argct_;
@@ -395,6 +412,9 @@ namespace zpp {
         int offset=0, 
         size_t len=0
         );
+
+    int file_put_contents(str_ptr filename, val_ptr data,
+        int flags = 0, val_ptr context = nullptr);
 
     // the "constant" is renamed as get_constant
     val_rc constant(str_ptr name);

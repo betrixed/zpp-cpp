@@ -96,6 +96,7 @@ public:
     fn_call          fgetcsv;
     fn_call          fgets;
     fn_call          file_get_contents;
+    fn_call          file_put_contents;
     fn_call          filemtime;
     fn_call          fopen;
     fn_call          fread;
@@ -152,6 +153,7 @@ public:
         fgetcsv.set_fci(ftab.s_fgetcsv);
         fgets.set_fci(ftab.s_fgets);
         file_get_contents.set_fci(ftab.s_file_get_contents);
+        file_put_contents.set_fci(ftab.s_file_put_contents);
 
         filemtime.set_fci(ftab.s_filemtime);
         fopen.set_fci(ftab.s_fopen);
@@ -470,6 +472,25 @@ stripslashes(str_ptr str)
     return fn.str();
 }
 
+
+int file_put_contents(str_ptr filename, val_ptr data,
+    int flags, val_ptr context) 
+{
+    fn_params<4> fn(TLFNs.file_put_contents);
+
+    zval* pz = fn.argsptr();
+
+    val_ptr::string_bind(pz, filename);
+    ZVAL_COPY_VALUE(pz+1, data);
+    ZVAL_LONG(pz+2, flags);
+    if (context)
+        ZVAL_COPY_VALUE(pz+3, context);
+    else 
+        ZVAL_NULL(pz+3);
+
+    val_rc result = fn.mixed();
+    return result.zlong();
+}
 
 str_rc file_get_contents(
     str_ptr path, 
@@ -853,7 +874,8 @@ fntable::init()
     s_fgetcsv = "fgetcsv";
     s_fgets = "fgets";
     s_file_get_contents = "file_get_contents";
-    
+    s_file_put_contents = "file_put_contents";
+
     s_filemtime = "filemtime";
     s_fopen = "fopen";
     s_fread = "fread";
