@@ -183,6 +183,7 @@ void Run::construct()
 	temp = constant(Run_i.target_const);
 	//showmem("target", temp);
 
+	obj_rc config = Config::omg.new_zobj();
 	self.property(Run_i.target, temp);
 
 	self.property(Run_i.vendor_leaf, Run_i.vendor_str);
@@ -204,12 +205,13 @@ void Run::construct()
 	self.property(Run_i.theme_str, buf.zstr());
 
 	buf << site_leaf << "/config";
-	str_rc config_dir = buf.zstr();
 
-	self.property(Run_i.config_dir, config_dir);
+	self.property(Run_i.config_dir, buf.zstr());
+	config.property(Run_i.config_dir, buf.zstr());
 
 	buf << site_leaf << "/tmp";
 	self.property(Run_i.temp_dir, buf.zstr());
+	config.property(Run_i.temp_dir, buf.zstr());
 
 	temp = getcwd();
 	self.property(Run_i.init_cwd, getcwd());
@@ -222,15 +224,12 @@ void Run::construct()
 
 	Services* sobj = Services::cpp_global();
 	sobj->set(Run_i.run_str, self);
-
-	obj_rc config = Config::omg.new_zobj();
-
 	sobj->setObject(config);
 	
 	//showobj("config", config);
 	//config.property(Run_i.services, services);
 
-	config.property(Run_i.config_dir, config_dir);
+	
 	
 	self.property(Run_i.config_str, config);
 	sobj->set(Run_i.config_str, config);
