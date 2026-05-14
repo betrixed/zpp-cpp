@@ -97,7 +97,6 @@ Module::construct(str_ptr name, htab_ptr data)
 	obj_rc  config = Config::omg.new_zobj();
 	Config* cfg = zobj_toc<Config>(config);
 	cfg->construct(data);
-
 	obj_ptr self(self_);
 	self.property(MODi.data_str, config);
 	this->data_ = config;
