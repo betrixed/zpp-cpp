@@ -24,11 +24,11 @@
 #include "wcc/route_set.cpp"
 #include "wcc/target.cpp"
 
-#include "wcc/module.cpp"
+//#include "wcc/module.cpp"
 
-#include "wcc/dispatch.cpp"
+//#include "wcc/dispatch.cpp"
 #include "wcc/run.cpp"
-#include "wcc/debug.cpp"
+#include "wcc/debuglog.cpp"
 
 
 void register_routes_extn(INIT_FUNC_ARGS)
@@ -105,8 +105,8 @@ PHP_MINIT(wcc_pair_d)(INIT_FUNC_ARGS_PASSTHRU);
 	PHP_MINIT(wcc_run_reg)(INIT_FUNC_ARGS_PASSTHRU);
 #endif
 
-#ifdef WCC_DEBUG_CPP
-	PHP_MINIT(wcc_debug_reg)(INIT_FUNC_ARGS_PASSTHRU);
+#ifdef WCC_DEBUGLOG_CPP
+	PHP_MINIT(wcc_debuglog_reg)(INIT_FUNC_ARGS_PASSTHRU);
 #endif
 }
 #endif

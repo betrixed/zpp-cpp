@@ -57,7 +57,7 @@ public:
 
 	void setCallInfo(str_ptr obclass, str_ptr obmethod, val_ptr args);
 
-	virtual void debug_info(htab_rw di);
+	void debug_info(htab_rw di) override;
 
 	obj_ptr getMatch() const
 	{
@@ -111,6 +111,8 @@ public:
 		return ob_method_;
 	}
 
+	str_rc debug_str() const;
+	
 	bool prepare_call();
 
 	val_return call(htab_ptr extra, obj_ptr before, obj_ptr after);

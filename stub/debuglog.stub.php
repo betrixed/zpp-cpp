@@ -25,11 +25,11 @@ class DebugLog {
 
 	public static function start(?string $msg = null) : ?Debug {}
 
-	public function __construct(string $path, int $destflags = TO_FILE);
+	public function __construct(string $path, int $destflags = DebugLog::TO_FILE);
 
-	public function line(string $s, int $addflags = FILE_APPEND) : void {}
+	public function line(string $s, int $addflags = DebugLog::FILE_APPEND) : void {}
 
-	public function setOutputs(?int $destflags = TO_FILE);
+	public function setOutputs(int $destflags = DebugLog::TO_FILE) : void {}
 
 
 };

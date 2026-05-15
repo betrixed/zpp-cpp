@@ -11,6 +11,9 @@ extern "C" {
 #include <Zend/zend_closures.h>
 };
 
+#ifndef WCC_DEBUGLOG_H
+#include "debuglog.h"
+#endif
 
 #ifndef ROUTE_MATCH_H
 #include "route_match.h"
@@ -140,7 +143,7 @@ obj_ptr
 RouteMatch::firstMatch(val_ptr wrap)
 {
 	obj_ptr result;
-
+	
 	if (wrap.isObject())
 	{
 		result = testRoute(wrap.zobject());
@@ -153,16 +156,36 @@ RouteMatch::firstMatch(val_ptr wrap)
 		{
 			result = testRoute(obj.zobject());
 			if (result.ok()) {
-				return result;
+				break;
 			}
 		}
 	}
+
+
+	DebugLog* debug = DebugLog::cpp_global();
+
+	if (debug)
+	{
+		zend_printf("DebugLog* %lx\n", (unsigned long) debug);
+		str_rc dstr = debug_str();
+		debug->line(dstr); 
+	}
 	return result;
 }
-/** what was this doing ?
-#define PRE_EXP	"/\\G"
-#define POST_EXP "/u"
-*/
+
+
+str_rc
+RouteMatch::debug_str() const
+{	
+	str_buf data;
+	dump_info di(data);
+
+	val_rc self(self_);
+
+	di.di_dump(self);
+
+	return data.zstr();
+}
 
 
 bool 
@@ -174,6 +197,14 @@ RouteMatch::find_route(RouteSet* routeset)
 
 	val_rc	mreturn;
 
+	DebugLog* debug = DebugLog::cpp_global();
+	if (debug)
+	{
+		debug->line("find route");
+	}
+	else {
+		zend_printf("No debug instance\n");
+	}
 	htab_ptr 	list(routeset->fixed_);
 
 	route_.init();

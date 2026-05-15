@@ -12,7 +12,7 @@ using namespace zpp;
 
 class DebugLogStatic : public state_init {
 public:
-	obj_rc  gInstance_;
+    obj_rc  	gInstance_;
 	str_intern filename_str;
 
 	str_intern config_str;
@@ -36,24 +36,26 @@ public:
 
 	enum {
 	 	 TO_FILE = 1,
-	     TO_CONSOLE = 2
+	     TO_CONSOLE = 2,
+	     FILE_APPEND = PHP_FILE::APPEND,
+		 FILE_LOCK = PHP_FILE::EXCL_LOCK
 	};
 
-	enum {
-		FILE_APPEND = PHP_FILE::APPEND,
-		FILE_LOCK = PHP_FILE::EXCL_LOCK
-	}
 
-	void debug_info(htab_rw hw) override;
+	
 
 	static base_obj_mgr<DebugLog> omg;
+
+	static DebugLog* cpp_global();
 
 	static obj_rc instance();
 	static obj_rc start(str_ptr msg, int flags=TO_FILE);
 
-
+	void debug_info(htab_rw hw) override;
 	void construct(str_ptr logpath, int flags=TO_FILE);
 	void line(str_ptr msg, int flags = PHP_FILE::APPEND);
+	void line(const char* s);
+
 	void setOutputs(int flags = TO_CONSOLE);
 };
 
