@@ -390,6 +390,7 @@ obj_ptr::property_get(str_ptr key, zval* ret)
  *  Relies on return value optimisation.
  *  Also result is expected to dec reference
  * */
+/**
 val_rc
 obj_ptr::property(str_ptr key)
 {
@@ -399,21 +400,21 @@ obj_ptr::property(str_ptr key)
     
     const zend_class_entry* scope = EG(fake_scope) ? EG(fake_scope) : zend_get_executed_scope();
     
-    /**
-     *  phpinternals book php7, probably outdated.
-     *  says function can return pointer to zval  owned by object, and
-     *  this hasn't been modified by read_property.
-     * 
-     *  But the the indirect value is for temporary zvals, like returned by call to __get
-     *  and will have its reference count , which needs decrementing.
-     * 
-     *  Both work at same time, and then contain data with same reference count!!
-     *  
-     *  Not clear.
-     *  This call only wants to return one value!
-     *  Execution of direct & indirect indicates one may be same as the other!
-     *  
-     */ 
+    //
+    //  phpinternals book php7, probably outdated.
+    //  says function can return pointer to zval  owned by object, and
+    //  this hasn't been modified by read_property.
+    // 
+    //  But the the indirect value is for temporary zvals, like returned by call to __get
+    //  and will have its reference count , which needs decrementing.
+    // 
+    //  Both work at same time, and then contain data with same reference count!!
+    //  
+    //  Not clear.
+    //  This call only wants to return one value!
+    //  Execution of direct & indirect indicates one may be same as the other!
+    //  
+    //
     //showstr("obj_ptr property get", key);
 
     zval* direct = zend_read_property_ex((zend_class_entry*) scope, obj_, key, 1, result);
@@ -425,6 +426,35 @@ obj_ptr::property(str_ptr key)
 
     return result;
 }
+*/
+
+val_rc
+obj_ptr::property(str_ptr key)
+{
+    val_rc result;
+
+    zval rv ={0};
+
+    const zend_class_entry *old_scope = EG(fake_scope);
+
+    //always put in objects class scope, 
+    EG(fake_scope) = obj_->ce; 
+    
+    //  always assume "silent" get, as from code in zend_read_property_ex
+    zval* value = obj_->handlers->read_property(obj_, key, BP_VAR_IS, nullptr, &rv);
+
+    if (value != &rv)
+    {
+        result = value;
+    }
+    else {
+        // Using temporary, assume has incremented refcount, so a COPY_VALUE
+        result.adopt(&rv);
+    }
+    EG(fake_scope) = old_scope;
+    return result;
+
+}
 
 /**
  * Forced extraction of HashTable* return type from a val_rc
@@ -434,8 +464,7 @@ obj_ptr::array_property(str_ptr name)
 {
     htab_rc result;
     val_rc copy = property(name);
-    result = copy.zarray();
-
+    result = std::move(copy);
     return result;
 }
 
@@ -444,7 +473,7 @@ obj_ptr::str_property(str_ptr name)
 {
     str_rc result;
     val_rc copy = property(name);
-    result = copy.zstr();
+    result = std::move(copy);
 
     return result;
 }
@@ -455,7 +484,7 @@ obj_ptr::obj_property(str_ptr name)
     obj_rc result;
     val_rc copy = property(name);
 
-    result = copy.zobject();
+    result = std::move(copy);
 
     return result;
 }

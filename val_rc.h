@@ -103,6 +103,7 @@ public:
 
     val_rc(const char* s);
 
+
     //! mutate in place to suggested type if necessary
     void     toLong();
     void     toDouble();
@@ -160,7 +161,7 @@ public:
      bool ok() const;
     // inlines
 
-   
+    void adopt(zval* move);
     
     int   ztype() const {
         return Z_TYPE_P(&zv_);

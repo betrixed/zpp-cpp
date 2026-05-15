@@ -44,7 +44,7 @@ namespace zpp {
 
     enum PHP_FILE {
         APPEND = PHP_FILE_APPEND,
-        EXC_LOCK = PHP_LOCK_EX
+        EXCL_LOCK = PHP_LOCK_EX
     };
 
     class args_spread  {
@@ -278,6 +278,7 @@ namespace zpp {
         str_intern  s_fgetcsv;
         str_intern  s_fgets;
         str_intern  s_file_get_contents;
+        str_intern  s_file_put_contents;
         
         str_intern  s_filemtime;
         str_intern  s_fopen;

@@ -336,7 +336,14 @@ val_rc::val_rc(val_rc&& m)
     m.init();
 }
 
-
+// copy and already incremented rc value,
+// like a move. Argument is wiped
+void val_rc::adopt(zval* from)
+{
+    lose();
+    ZVAL_COPY_VALUE(&zv_, from);
+    *from = {0};
+}
 
 /** copy with careful addref */
 void
