@@ -118,7 +118,12 @@ RouteMatch::debug_info(htab_rw hw)
 obj_ptr   
 RouteMatch::testRoute(obj_ptr ro)
 {
-	//showobj("testRoute ro", ro);
+	DebugLog* debug = DebugLog::cpp_global();
+
+	if (debug)
+	{
+		debug->dump("testRoute", ro);
+	}
 	obj_ptr result;
 
 	if (!Route::omg.myType(ro)) 
@@ -144,6 +149,13 @@ RouteMatch::firstMatch(val_ptr wrap)
 {
 	obj_ptr result;
 	
+	DebugLog* debug = DebugLog::cpp_global();
+
+	if (debug)
+	{
+		debug->dump("wrap", wrap);
+	}
+
 	if (wrap.isObject())
 	{
 		result = testRoute(wrap.zobject());
@@ -160,9 +172,6 @@ RouteMatch::firstMatch(val_ptr wrap)
 			}
 		}
 	}
-
-
-	DebugLog* debug = DebugLog::cpp_global();
 
 	if (debug)
 	{
@@ -201,16 +210,23 @@ RouteMatch::find_route(RouteSet* routeset)
 	if (debug)
 	{
 		debug->line("find route");
+		debug->dump("uri", uri_);
 	}
-	else {
-		zend_printf("No debug instance\n");
-	}
+
 	htab_ptr 	list(routeset->fixed_);
+
+	if (debug)
+	{
+		debug->dump("fixed_", list);
+	}
 
 	route_.init();
 	if (list.try_fetch(uri_, match)) 
 	{
-		//showmem("fetched", match);
+		if (debug)
+		{
+			debug->dump("match?", match);
+		}
 
 		robj = firstMatch(match);
 

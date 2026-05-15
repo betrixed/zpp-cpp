@@ -31,5 +31,6 @@ class DebugLog {
 
 	public function setOutputs(int $destflags = DebugLog::TO_FILE) : void {}
 
+	public function dump(string $label, mixed $value) : void {}
 
 };

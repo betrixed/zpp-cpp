@@ -60,6 +60,55 @@ DebugLog::cpp_global()
 					: (DebugLog*) nullptr;
 }
 
+void 
+DebugLog::dump(str_ptr label, val_ptr anyval)
+{
+	dump(label.data(), anyval);
+}
+
+void 
+DebugLog::dump(const char* label, val_ptr anyval)
+{
+	str_buf dump;
+
+	dump_info di(dump);
+
+	dump << label << ":" << endl;
+
+	di.di_dump(anyval);
+
+	str_rc out = dump.zstr();
+
+	line(out);
+}
+
+
+void 
+DebugLog::dump(const char* label, htab_ptr arrayval)
+{
+	val_rc value(arrayval);
+
+	dump(label, val_ptr(value));
+}
+
+void 
+DebugLog::dump(const char* label, str_ptr strval)
+{
+	val_rc value(strval);
+
+	dump(label, val_ptr(value));
+}
+
+void 
+DebugLog::dump(const char* label, obj_ptr objval)
+{
+	val_rc value(objval);
+
+	dump(label, val_ptr(value));
+}
+
+
+
 obj_rc //static 
 DebugLog::start(str_ptr msg, int destflags)
 {
@@ -241,7 +290,6 @@ ZEND_METHOD(Wcc_DebugLog, line)
 	}
 }
 
-
 ZEND_METHOD(Wcc_DebugLog, setOutputs)
 {
 	zarg_rd args(execute_data);
@@ -255,6 +303,21 @@ ZEND_METHOD(Wcc_DebugLog, setOutputs)
 		DebugLog* cobj = zval_toc<DebugLog>(ZEND_THIS);
 		cobj->setOutputs(flags);	
 	}
+}
+
+ZEND_METHOD(Wcc_DebugLog, dump)
+{
+	zarg_rd args(execute_data);
+
+	str_ptr label = args.str(args.need(0));
+	zval* value = args.need(1);
+
+	if (!args.throw_errors())
+	{
+		DebugLog* cobj = zval_toc<DebugLog>(ZEND_THIS);
+		cobj->dump(label, value);
+	}
+	
 }
 
 

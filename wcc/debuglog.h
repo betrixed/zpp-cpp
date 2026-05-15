@@ -56,6 +56,12 @@ public:
 	void line(str_ptr msg, int flags = PHP_FILE::APPEND);
 	void line(const char* s);
 
+	void dump(str_ptr label, val_ptr anyval);
+	void dump(const char* label, val_ptr anyval);
+	void dump(const char* label, htab_ptr arrayval);
+	void dump(const char* label, str_ptr strval);
+	void dump(const char* label, obj_ptr objval);
+
 	void setOutputs(int flags = TO_CONSOLE);
 };
 
