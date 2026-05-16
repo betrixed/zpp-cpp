@@ -24,9 +24,9 @@
 #include "wcc/route_set.cpp"
 #include "wcc/target.cpp"
 
-//#include "wcc/module.cpp"
+#include "wcc/module.cpp"
 
-//#include "wcc/dispatch.cpp"
+#include "wcc/dispatch.cpp"
 #include "wcc/run.cpp"
 #include "wcc/debuglog.cpp"
 

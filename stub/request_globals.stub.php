@@ -5,10 +5,9 @@
  */
 namespace Wcc;
 
-final class RequestGlobals  
+class RequestGlobals  
 {
     public function __construct();
-
 
     public function getHeader(string $header): mixed {}
 

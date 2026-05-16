@@ -72,7 +72,8 @@ DebugLog::dump(const char* label, val_ptr anyval)
 	str_buf dump;
 
 	dump_info di(dump);
-
+	di.setMaxLevel(5);
+	
 	dump << label << ":" << endl;
 
 	di.di_dump(anyval);

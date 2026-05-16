@@ -31,6 +31,8 @@ namespace wcc {
 		obj_rc request_;
 		obj_rc post_;
 
+		obj_rc globals_;
+
 		str_rc host_;
 		str_rc body_;
 
@@ -225,6 +227,7 @@ namespace wcc {
 		str_intern    G_POST;
 		str_intern    G_FILES;
 		str_intern    G_SESSION;
+		str_intern    G_GLOBALS;
 
 		str_intern    HTTP_ACCEPT;
 		str_intern    HTTP_X_FORWARDED_FOR;

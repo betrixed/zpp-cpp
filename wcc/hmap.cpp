@@ -5,6 +5,10 @@
 #include "hmap.h"
 #endif
 
+#ifndef WCC_DEBUGLOG_H
+#include "debuglog.h"
+#endif
+
 extern "C" {
   #include <Zend/zend_attributes.h>
   #include <Zend/zend_interfaces.h>

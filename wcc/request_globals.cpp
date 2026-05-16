@@ -13,6 +13,10 @@
 #include "file_upload.h"
 #endif
 
+#ifndef WCC_DEBUGLOG_H
+#include "debuglog.h"
+#endif
+
 #ifndef REQUEST_GLOBALS_ARGINFO
 #define REQUEST_GLOBALS_ARGINFO
 extern "C" {
@@ -87,6 +91,7 @@ request_init::init() {
 	G_POST = "_POST";
 	G_FILES = "_FILES";
 	G_SESSION = "_SESSION";
+	G_GLOBALS = "_GLOBALS";
 	
 	HTTP_ACCEPT = "HTTP_ACCEPT";
 	HTTP_X_FORWARDED_FOR = "HTTP_X_FORWARDED_FOR";
@@ -551,24 +556,69 @@ void RequestGlobals::debug_info(htab_rw di)
 	di.set(RQit.method_override, methodOverride_);
 }	
 
+
 void RequestGlobals::construct()
 {
-	server_ = Hmap::newFromArray(htab_rc::get_global(RQit.G_SERVER));
-	get_ = Hmap::newFromArray(htab_rc::get_global(RQit.G_GET));
+	DebugLog* debug = DebugLog::cpp_global();
 
-	// Using G_REQUEST isn't recommended.
-	val_ptr gval = htab_rc::get_global(RQit.G_REQUEST);
-	if (gval.isArray())
-	{ 
-		request_ = Hmap::newFromArray(gval);
+	if (debug)
+	{
+		debug->line("RequestGlobals construct");
+	}
+
+	val_ptr test = htab_rc::get_global(RQit.G_SERVER);
+
+	if (test.isArray())
+	{
+		server_ = Hmap::newFromArray(test);
 	}
 	else {
+		//debug->line("No SERVER superglobal");
+		server_= Hmap::new_hmap();
+	}
+	
+	test = htab_rc::get_global(RQit.G_GET);
+	if (test.isArray())
+	{
+		get_ = Hmap::newFromArray(test);
+	}
+	else {
+		//debug->line("No GET superglobal");
+		get_ = Hmap::new_hmap();
+	}
+
+	test = htab_rc::get_global(RQit.G_REQUEST);
+	if (test.isArray())
+	{
+		request_ = Hmap::newFromArray(test);
+	}
+	else {
+		//debug->line("No REQUEST superglobal");
 		request_ = get_;
 	}
 
-	post_ = Hmap::newFromArray(htab_rc::get_global(RQit.G_POST));
-	files_ = Hmap::newFromArray(htab_rc::get_global(RQit.G_FILES));
 
+	test = htab_rc::get_global(RQit.G_POST);
+	if (test.isArray())
+	{ 
+		post_ = Hmap::newFromArray(test);
+	}
+	else {
+		//debug->line("No POST superglobal");
+		post_ = Hmap::new_hmap();
+	}
+
+	test = htab_rc::get_global(RQit.G_FILES);
+	if (test.isArray())
+	{
+		files_ = Hmap::newFromArray(test);
+	}
+	else {
+		//debug->line("No FILES superglobal");
+		files_ = Hmap::new_hmap();
+	}
+	
+	
 	verb_ = 0;
 	strictHost_ = true;
 	spoof_ = false;

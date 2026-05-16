@@ -118,12 +118,6 @@ RouteMatch::debug_info(htab_rw hw)
 obj_ptr   
 RouteMatch::testRoute(obj_ptr ro)
 {
-	DebugLog* debug = DebugLog::cpp_global();
-
-	if (debug)
-	{
-		debug->dump("testRoute", ro);
-	}
 	obj_ptr result;
 
 	if (!Route::omg.myType(ro)) 
@@ -149,13 +143,6 @@ RouteMatch::firstMatch(val_ptr wrap)
 {
 	obj_ptr result;
 	
-	DebugLog* debug = DebugLog::cpp_global();
-
-	if (debug)
-	{
-		debug->dump("wrap", wrap);
-	}
-
 	if (wrap.isObject())
 	{
 		result = testRoute(wrap.zobject());
@@ -172,13 +159,7 @@ RouteMatch::firstMatch(val_ptr wrap)
 			}
 		}
 	}
-
-	if (debug)
-	{
-		zend_printf("DebugLog* %lx\n", (unsigned long) debug);
-		str_rc dstr = debug_str();
-		debug->line(dstr); 
-	}
+	
 	return result;
 }
 
@@ -206,27 +187,12 @@ RouteMatch::find_route(RouteSet* routeset)
 
 	val_rc	mreturn;
 
-	DebugLog* debug = DebugLog::cpp_global();
-	if (debug)
-	{
-		debug->line("find route");
-		debug->dump("uri", uri_);
-	}
-
 	htab_ptr 	list(routeset->fixed_);
 
-	if (debug)
-	{
-		debug->dump("fixed_", list);
-	}
 
 	route_.init();
 	if (list.try_fetch(uri_, match)) 
 	{
-		if (debug)
-		{
-			debug->dump("match?", match);
-		}
 
 		robj = firstMatch(match);
 
@@ -274,14 +240,24 @@ RouteMatch::find_route(RouteSet* routeset)
 val_rc //static
 RouteMatch::call_method(obj_ptr obj, str_ptr method, htab_ptr args)
 {
-	
+
+	val_rc result;
+
+	DebugLog* log = DebugLog::cpp_global();
+
 	if (args.size())
 	{
-		return obj.call_hargs(method, args);
+		result = obj.call_hargs(method, args);
 	}
 	else {
-		return obj.call(method);
+		result = obj.call(method);
 	}
+
+	if (log)
+	{
+		log->dump("call method return:", val_ptr(result));
+	}
+	return result;
 }
 
 val_return
@@ -314,6 +290,7 @@ RouteMatch::call(htab_ptr extra, obj_ptr before, obj_ptr after)
 		zobj = target_;
 	}
 	
+	DebugLog* debug = DebugLog::cpp_global();
 
 	// appended extra arguments?
 	if (extra.size())
@@ -336,6 +313,8 @@ RouteMatch::call(htab_ptr extra, obj_ptr before, obj_ptr after)
 		result.error() << "RouteMatch has no target object";
 		return result;
 	}
+
+
 	obj = test.zobject();
 
 	if (obj.instanceof(zend_ce_closure))
@@ -363,19 +342,28 @@ RouteMatch::call(htab_ptr extra, obj_ptr before, obj_ptr after)
 			{
 				result_ = this->call_method(obj, method_name, second);
 				test = result_;
-				if (test.isFalse()  || test.isObject())
+				if (test.isFalse() ||test.isObject())
 				{
 					result.value_ = result_;
 					return result;
 					// abort by beforeCall
 				}
-
+			}
+			else {
+				debug->dump("Method not found", method_name);
 			}
 		}
 
 		if (obj.method_exists(ob_method_))
 		{
 			result.value_ = this->call_method(obj, ob_method_, ob_args_);
+			if (debug)
+			{
+				debug->line("</pre>");
+			}
+		}
+		else {
+			debug->dump("Method not found", ob_method_);
 		}
 		
 		if (after.ok())
@@ -394,7 +382,10 @@ RouteMatch::call(htab_ptr extra, obj_ptr before, obj_ptr after)
 				{
 					result.value_ = result_;
 				}
-			}	
+			}
+			else {
+				debug->dump("Method not found", method_name);
+			}
 		}	
 	}
 
