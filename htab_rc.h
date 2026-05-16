@@ -79,8 +79,7 @@ namespace zpp {
             }
         }
 
-        static void set_global(str_ptr key, val_ptr value);
-        static val_ptr get_global(str_ptr key);
+        
         
         ~htab_rc();
         htab_rc() : htab_ptr() {}
@@ -151,8 +150,6 @@ namespace zpp {
 
         // extract values list using keylist. Missing values as null
         static htab_rc sublist(htab_ptr exkeys, htab_ptr hfrom);
-
-        
  
     };
 

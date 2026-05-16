@@ -521,6 +521,33 @@ htab_ptr::empty_array()
 	return (HashTable*) &zend_empty_array;
 }
 
+
+htab_ptr 
+htab_ptr::globals()
+{
+	return htab_ptr(&EG(symbol_table));
+}
+
+//! static, get (or not) from _GLOBALS table
+val_ptr  
+htab_ptr::get_global(str_ptr key)
+{
+
+	val_ptr result = val_ptr(zend_hash_find_ind(&EG(symbol_table), key));
+	return result;
+}
+
+void 
+htab_ptr::set_global(str_ptr key, val_ptr value)
+{
+	// pre-emptive try reference count boost
+	val_rc::try_addref(value); 
+    str_rc::try_addref(key);    
+    
+    // make it exist in $GLOBALS
+    zend_symtable_update_ind(&EG(symbol_table), key, value);
+}
+
 };
 
 #endif

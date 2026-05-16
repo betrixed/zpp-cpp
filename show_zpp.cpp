@@ -33,9 +33,16 @@ extern "C" {
 
 namespace zpp {
 
+
 str_out dump_info::dumper_d;
 bool dump_info::run_state_ = false;
 
+void dump_info::atMaxLevel()
+{
+	ss << " ..." ;
+	endl();
+}
+	
 
 void 
 dump_info::object_property_dump(
@@ -45,6 +52,9 @@ dump_info::object_property_dump(
 	zend_string *key, 
 	int level, int refadj) 
 {
+	bool maxout = (level > max_level_);
+
+
 	const char *prop_name, *class_name;
 	indent(level);
 
@@ -76,7 +86,13 @@ dump_info::object_property_dump(
 		ss << "uninitialized(" << type_str << ")";
 		zend_string_release(type_str);
 	} else {
-		di_dump(zv, level + 1, refadj);
+		if (!maxout)
+		{
+			di_dump(zv, level + 1, refadj);
+	    }
+	    else {
+	    	atMaxLevel();
+	    }
 	}
 }
 
@@ -125,7 +141,7 @@ dump_info::msg_dump(const char* msg, val_ptr val)
 	di.di_dump(val);
 }
 
-dump_info::dump_info(const char* s) : ss(dumper_d), total_(0)
+dump_info::dump_info(const char* s) : ss(dumper_d), total_(0), max_level_(4)
 {
 	ss << s << ' ';
 }
@@ -133,6 +149,7 @@ dump_info::dump_info(const char* s) : ss(dumper_d), total_(0)
 void 
 dump_info::show_properties(zend_object* zobj, HashTable* myht, int level, int refadj)
 {
+	bool maxout = (level > max_level_);
 
 	zend_string *key;
 	zval *val;
@@ -157,8 +174,13 @@ dump_info::show_properties(zend_object* zobj, HashTable* myht, int level, int re
 			}
 		}
 
-		if (!Z_ISUNDEF_P(val) || prop_info) {
-			object_property_dump(prop_info, val, fkv.index(), key, level+1, refadj);
+		if (!maxout) {
+			if (!Z_ISUNDEF_P(val) || prop_info) {
+				object_property_dump(prop_info, val, fkv.index(), key, level+1, refadj);
+			}
+		}
+		else {
+			atMaxLevel();
 		}
 	}
 	indent(level);
@@ -169,6 +191,9 @@ dump_info::show_properties(zend_object* zobj, HashTable* myht, int level, int re
 
 void dump_info::array_sub(HashTable* myht, int level)
 {
+	bool maxout = (level > max_level_);
+
+
 	int refadjust;
 	bool imflag;
 	const char *packed;
@@ -214,7 +239,13 @@ void dump_info::array_sub(HashTable* myht, int level)
 			ss << '[' << index << ']';
 		}
 		ss << " => ";
-		di_dump(val, level+1);
+		if (!maxout)
+		{
+			di_dump(val, level+1);
+		}
+		else {
+			atMaxLevel();
+		}
 	}
 	
 	if (!imflag) {
@@ -229,6 +260,9 @@ void dump_info::array_sub(HashTable* myht, int level)
 void 
 dump_info::di_dump(val_ptr zu, int level, int refadj)
 {
+	bool maxout = (level > max_level_);
+
+
 	HashTable *myht = NULL;
 	//zend_string *class_name;
 	// for each values
@@ -303,7 +337,13 @@ dump_info::di_dump(val_ptr zu, int level, int refadj)
 	case IS_REFERENCE:
 		indent(level);
 		di_showref(Z_REF_P(zu));
-		di_dump(Z_REFVAL_P(zu), level + 1);
+		if (!maxout)
+		{
+			di_dump(Z_REFVAL_P(zu), level + 1);
+		}
+		else {
+			atMaxLevel();
+		}
 		break;
 	default:
 		indent(level);
@@ -314,8 +354,13 @@ dump_info::di_dump(val_ptr zu, int level, int refadj)
 
 	if (level==0)
 	{
-		ss << iform(Numf::DEC) << "Total = " << (int) total_ << " items\n";
+		ss << iform(Numf::DEC) << "Traversed = " << (int) total_ << " items\n";
 	}
+}
+
+void dump_info::setMaxLevel(int value)
+{
+	max_level_ = value;
 }
 
 void dump_info::indent(int ct)

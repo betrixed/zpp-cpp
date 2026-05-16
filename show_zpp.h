@@ -22,7 +22,7 @@ private:
 	size_t       total_;
 
 	static str_out dumper_d;
-	
+	int   max_level_;
 	
 	void object_property_dump(
 		zend_property_info *prop_info, 
@@ -33,7 +33,8 @@ private:
 		int refadj = 0);
 
 	void array_sub(HashTable* ht, int level);
-	
+	void atMaxLevel();
+
 public:
 
 	static 	bool run_state_;
@@ -53,16 +54,18 @@ public:
 	void di_show_resource(zval *r);
 	void output(const char* msg);
 
+	void setMaxLevel(int value);
+
 	void di_show_slice(zval* p0, size_t ct);
 	void endl();
 	
 	void show_properties(zend_object* zobj, HashTable* h, int level, int refadj=0);
 
-	dump_info() : ss(dumper_d), total_(0) {}
+	dump_info() : ss(dumper_d), total_(0), max_level_(4) {}
 	
 	dump_info(const char* s);
 
-	dump_info(str_buf& buf) : ss(buf), total_(0) {}
+	dump_info(str_buf& buf) : ss(buf), total_(0), max_level_(4) {}
 };
 
 	extern void  showstr(const char* s, zend_string* p);

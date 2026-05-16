@@ -131,6 +131,12 @@ namespace zpp {
 
         static HashTable* empty_array();
 
+        static val_ptr get_global(str_ptr key);
+
+        static void set_global(str_ptr key, val_ptr value);
+
+        static htab_ptr globals();
+
     };
 
 }; // namespace zpp
