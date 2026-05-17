@@ -21,9 +21,11 @@ class DebugLog {
 
 	protected int $outputs;
 
-	public static function instance() : ?Debug {}
+	public static function instance() : ?DebugLog {}
 
-	public static function start(?string $msg = null) : ?Debug {}
+	public static function setInstance(?DebugLog $obj) : void {}
+
+	public static function start(?string $msg = null) : ?DebugLog {}
 
 	public function __construct(string $path, int $destflags = DebugLog::TO_FILE);
 

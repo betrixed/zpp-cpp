@@ -52,6 +52,12 @@ DebugLog::instance()
 	return DLSi.gInstance_;
 }
 
+void //static 
+DebugLog::setInstance(obj_ptr obj)
+{
+	DLSi.gInstance_ = obj;
+}
+
 DebugLog* //static 
 DebugLog::cpp_global()
 {
@@ -237,8 +243,7 @@ ZEND_METHOD(Wcc_DebugLog, instance)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
-	DebugLog* cobj = zval_toc<DebugLog>(ZEND_THIS);
-	obj_rc result = cobj->instance();
+	obj_rc result = DebugLog::instance();
 	result.move_zv(return_value);
 }
 
@@ -253,8 +258,7 @@ ZEND_METHOD(Wcc_DebugLog, start)
 
 	if (!args.throw_errors())
 	{
-		DebugLog* cobj = zval_toc<DebugLog>(ZEND_THIS);
-		obj_rc result = cobj->start(msg, flags);
+		obj_rc result = DebugLog::start(msg, flags);
 		result.move_zv(return_value);	
 	}
 }
@@ -303,6 +307,20 @@ ZEND_METHOD(Wcc_DebugLog, setOutputs)
 	{
 		DebugLog* cobj = zval_toc<DebugLog>(ZEND_THIS);
 		cobj->setOutputs(flags);	
+	}
+}
+
+ZEND_METHOD(Wcc_DebugLog, setInstance)
+{
+	zarg_rd args(execute_data);
+
+	obj_ptr obj;
+
+	args.obj_ofclass(obj, args.need(0), DebugLog::omg.classEntry());
+
+	if (!args.throw_errors())
+	{
+		DebugLog::setInstance(obj);	
 	}
 }
 

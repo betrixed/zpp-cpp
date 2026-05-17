@@ -49,6 +49,8 @@ public:
 	static DebugLog* cpp_global();
 
 	static obj_rc instance();
+	static void setInstance(obj_ptr obj);
+	
 	static obj_rc start(str_ptr msg, int flags=TO_FILE);
 
 	void debug_info(htab_rw hw) override;
