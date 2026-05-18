@@ -72,14 +72,6 @@ public:
 
     bool  configured_;
 
-
-
-
-
-
-
-
-
     //fn_simple_loader simple_loader;
     fn_call          addcslashes;
     fn_call          array_pop;
@@ -244,21 +236,33 @@ fn_result::mixed()
 str_rc  
 fn_result::str()
 {
-    str_rc result(std::move(mixed()));
+    str_rc result;
+    if (call_fn())
+    {
+        result.adopt(val_ptr(&result_).zstr());
+    }
     return result;
 }
 
 obj_rc  
 fn_result::obj()
 {
-    obj_rc result(std::move(mixed()));
+    obj_rc result;
+    if (call_fn())
+    {
+        result.adopt(val_ptr(&result_).zobject());
+    }
     return result;
 }
 
 htab_rc  
 fn_result::array()
 {
-    htab_rc result(std::move(mixed()));
+    htab_rc result;
+    if (call_fn())
+    {
+        result.adopt(val_ptr(&result_).zarray());
+    }
     return result;
 }
 
@@ -606,20 +610,14 @@ array_splice(htab_rc& input, int offset, int length, htab_ptr replace)
     htab_rw hw(input); // make writable
     val_ptr::array_bind(pz, input);
     ZVAL_NEW_REF(pz, pz);
-
-    pz++;
-    ZVAL_LONG(pz,offset);
-
-    pz++;
-    ZVAL_LONG(pz, length);
-
-    pz++;
+    ZVAL_LONG(pz+1,offset);
+    ZVAL_LONG(pz+2, length);
     if (replace.size())
     {
-        val_ptr::array_bind(pz, replace);
+        val_ptr::array_bind(pz+3, replace);
     }
     else {
-        ZVAL_EMPTY_ARRAY(pz);
+        ZVAL_EMPTY_ARRAY(pz+3);
     }
     
     return fn.array();
@@ -1088,16 +1086,14 @@ fwrite(val_ptr res, str_ptr data, zend_long len)
 
     zval *ap = fn.argsptr();
     ZVAL_COPY_VALUE(ap, res);
-    ap++;
-    val_ptr::string_bind(ap, data);
-    ap++;
+    val_ptr::string_bind(ap+1, data);
     if (len > 0)
     {
-        ZVAL_LONG(ap, len);
+        ZVAL_LONG(ap+2, len);
     }
     else 
     {
-        ZVAL_NULL(ap);
+        ZVAL_NULL(ap+2);
     }
     return fn.mixed();
 }

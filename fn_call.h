@@ -71,10 +71,10 @@ namespace zpp {
      */
     class fn_call {
     protected:
-        // C-array of zvals arguments to call_user_fn
-        //zstr_own        method_name_; // real owner of method name
-        // PHP call cache info for multiple calls
+        // call arguments
         zend_fcall_info       fci_;
+
+        // PHP call cache info for repeated calls
         zend_fcall_info_cache cache_;
 
         void init_f();
@@ -93,30 +93,9 @@ namespace zpp {
     
         void debug_dump();
     };
-/**
-    @class  fn_call_args
-    @brief  Template class to create fn_call with fixed number of arguments.
-    @tparam ARGCT Number of arguments for function call.
-    @details
-    This class creates a fn_call with a fixed number of arguments.
-    The argument array is created as a member of the class.
-    This is more efficient than creating a fn_call and then allocating
-    the argument array separately.
-    template
- */
-    /*
-    template <size_t ARGCT>
-    class fn_call_args : public fn_call {
-    public:
-        zval  params[ARGCT];
-        fn_call_args() : fn_call()
-        {
-            fci_.param_count = ARGCT; 
-            fci_.params = (zval*) &params; 
-        }
-
-    };
-    */
+/* The fn_result class , has space for a function result, 
+   and is initialised with a reference to a fn_call 
+*/
 
     class fn_result {
     protected:
@@ -136,8 +115,6 @@ namespace zpp {
 
     public:                  
         zval      result_;
-
-        
 
         void named_args(HashTable* ht)
         {
@@ -173,7 +150,11 @@ namespace zpp {
         zend_long zlong();
 
     };
-
+    /*
+    Actual calls should be done from these classes, 
+    according to the number of parameters to be passed,
+    from none, to ARGCT
+    */
     class fn_noparams : public fn_result {
     public:
         fn_noparams(fn_call& fn) : fn_result(fn) {
