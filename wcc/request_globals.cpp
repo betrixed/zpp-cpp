@@ -559,12 +559,6 @@ void RequestGlobals::debug_info(htab_rw di)
 
 void RequestGlobals::construct()
 {
-	DebugLog* debug = DebugLog::cpp_global();
-
-	if (debug)
-	{
-		debug->line("RequestGlobals construct");
-	}
 
 	val_ptr test = htab_rc::get_global(RQit.G_SERVER);
 
@@ -623,20 +617,6 @@ void RequestGlobals::construct()
 	strictHost_ = true;
 	spoof_ = false;
 	methodOverride_ = false;
-	
-	/*
-	Hmap* rmap = zobj_toc<Hmap>(request_);
-
-	if (rmap->count()==0)
-	{
-		htab_ptr gmap = Hmap::map_htab(get_);
-
-		if (gmap.size() > 0)
-		{
-			rmap->addArray(gmap);
-		}
-	}
-	*/
 	
 }
 
