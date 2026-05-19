@@ -252,7 +252,8 @@ val_ptr::zobject() const
 	return Z_OBJ_P(zv);
 }
 
-size_t val_ptr::size() const
+size_t 
+val_ptr::size() const
 {
 	if (!p_) 
 	{
