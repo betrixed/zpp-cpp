@@ -143,7 +143,7 @@ PdoDriver::connect()
 		result.error() << "PDO connect handle failed for " << dsn.value_;
 	}
 	else {
-		val_rc::try_decref(handle_ptr_);
+		val_ptr::try_decref(handle_ptr_);
 		handle_ptr_.bind_object(h);
 
 		afterConnect();
@@ -540,7 +540,7 @@ PdoDriver::prepare(str_ptr query, htab_ptr options)
 	obj_rc pdo(h.value_);
 
 
-	val_rc::try_decref(lastsql_ptr_);
+	val_ptr::try_decref(lastsql_ptr_);
 	lastsql_ptr_.bind_string(query);
 
 	//showmem("lastsql", lastsql_ptr_);

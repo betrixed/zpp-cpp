@@ -223,7 +223,7 @@ Hmap_php::write_property(zend_object* object, zend_string* name, zval* value, vo
 		zval* result = zend_hash_update(hw, name, value);
 		if (Z_TYPE_FLAGS_P(result) != 0)
 		{
-			val_rc::try_addref(result);
+			val_ptr::try_addref(result);
 		}
 		return result;
 	//}

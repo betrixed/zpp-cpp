@@ -496,7 +496,7 @@ Pgsqlfn::connect()
 
 	if (hconnect.ok())
 	{
-		val_rc::try_decref(handle_ptr_);
+		val_ptr::try_decref(handle_ptr_);
 		handle_ptr_.bind_object(hconnect);
 	}
 	else {
@@ -532,7 +532,7 @@ Pgsqlfn::close()
 obj_return //virtual
 Pgsqlfn::prepare(str_ptr query, htab_ptr options)
 {
-	val_rc::try_decref(lastsql_ptr_);
+	val_ptr::try_decref(lastsql_ptr_);
 	lastsql_ptr_.bind_string(query);
 	obj_rc qobj = PgQuery::omg.new_zobj();
 
@@ -591,7 +591,7 @@ Pgsqlfn::querySingle(str_ptr query)
 		return result;
 	}
 
-	val_rc::try_decref(lastsql_ptr_);
+	val_ptr::try_decref(lastsql_ptr_);
 	lastsql_ptr_.bind_string(query);
 
 	obj_rc robj = pg_query(h.value_, query);

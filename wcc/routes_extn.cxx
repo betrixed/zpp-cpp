@@ -29,6 +29,7 @@
 #include "wcc/dispatch.cpp"
 #include "wcc/run.cpp"
 #include "wcc/debuglog.cpp"
+#include "wcc/flash.cpp"
 
 
 void register_routes_extn(INIT_FUNC_ARGS)
@@ -108,5 +109,10 @@ PHP_MINIT(wcc_pair_d)(INIT_FUNC_ARGS_PASSTHRU);
 #ifdef WCC_DEBUGLOG_CPP
 	PHP_MINIT(wcc_debuglog_reg)(INIT_FUNC_ARGS_PASSTHRU);
 #endif
+
+#ifdef SESSION_USERDATA_CPP
+PHP_MINIT_FUNCTION(Session_UserData_reg)(INIT_FUNC_ARGS_PASSTHRU);
+#endif
 }
+
 #endif

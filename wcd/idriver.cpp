@@ -129,7 +129,7 @@ IDriver::construct(obj_ptr icfgobj, str_ptr name)
 	//showmem(DBS.cfg_name.data(), name_ptr_);
 	//zend_printf("name_ptr_%s %lx\n", DBS.cfg_name.data(), (long unsigned int)((zval*) name_ptr_) );
 	
-	val_rc::try_decref(name_ptr_); 
+	val_ptr::try_decref(name_ptr_); 
 	name_ptr_.bind_string(name);
 
 	handle_ptr_ = self.property_ptr(DBS.handle_s);
@@ -137,7 +137,7 @@ IDriver::construct(obj_ptr icfgobj, str_ptr name)
 	cfg_ptr_ = self.property_ptr(DBS.iconfig_key);
 	//showobj("config obj", icfgobj);
 	
-	val_rc::try_decref(cfg_ptr_); 
+	val_ptr::try_decref(cfg_ptr_); 
 	cfg_ptr_.bind_object(icfgobj);
 	//showmem(DBS.iconfig_key.data(), cfg_ptr_);
 
@@ -205,7 +205,7 @@ IDriver::destruct()
 
 	isql_.init();
 
-	val_rc::try_decref(cfg_ptr_);
+	val_ptr::try_decref(cfg_ptr_);
 
 }
 
@@ -277,7 +277,7 @@ IDriver::getTableNames()
 void 
 IDriver::close()
 {
-	val_rc::try_decref(handle_ptr_);
+	val_ptr::try_decref(handle_ptr_);
 }
 
 str_rc 

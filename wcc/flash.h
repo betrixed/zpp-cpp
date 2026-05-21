@@ -8,20 +8,30 @@
 namespace wcc {
 
 
-	class FlashInit : public state_init {
-	public:
-		void init() override;
-		str_intern lines_str;
-		str_intern text_str;
-		str_intern status_str;
-	};
+class UserDataInit : public state_init {
+public:
+	void init() override;
+	str_intern lines_str;
+	str_intern text_str;
+	str_intern status_str;
 
-extern FlashInit FLi;
+	str_intern userName_p;
+	str_intern roles_p;
+	str_intern email_p;
+	str_intern id_p;
+	str_intern memberid_p;
+	str_intern status_p;
+	str_intern keys_p;
+};
+
+extern UserDataInit UDi;
 
 	class Flash : public base_d {
 	protected:
 		val_ptr lines_;
 	public:
+
+		static base_obj_mgr<Flash> omg;
 		void construct(htab_ptr data);
 
 		bool hasData();
@@ -32,7 +42,7 @@ extern FlashInit FLi;
 
 		void clear();
 
-	}
+	};
 };
 
 
