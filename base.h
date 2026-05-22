@@ -24,20 +24,15 @@
 
 
 #include "phpalloc.h"
+#include "all_ptr.h"
 
-#include "str_ptr.h"
 #include "str_rc.h"
 
-#include "htab_ptr.h"
 #include "htab_rc.h"
 #include "htab_rw.h"
 
 #include "obj_rc.h"
-#include "obj_ptr.h"
-
 #include "val_rc.h"
-#include "val_ptr.h"
-
 #include "htab_walk.h"
 #include "for_key_value.h"
 #include "state_init.h"

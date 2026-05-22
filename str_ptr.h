@@ -58,9 +58,6 @@ namespace zpp {
 	        s = rc.s;
 	    }
 
-	    //! Can't declare inline here
-	    str_ptr(const val_ptr& rc);
-
 	    str_ptr(const str_rc& mgr);
 
 	    str_ptr(const str_intern& zs);
@@ -116,7 +113,7 @@ namespace zpp {
 		
 		const str_ptr& operator=(zval* rc);
 
-		static str_rc json_encode(val_ptr value, int flags);
+		static str_rc json_encode(zval* value, int flags);
 
 		static str_ptr empty_str();
 

@@ -166,7 +166,7 @@ ref_rc::operator=(val_rc &&m)
 {
 	zval* vp = &rh_->val;
 
-	val_rc::try_decref(vp);
+	val_ptr::try_decref(vp);
 
 	//TODO: Not sure about why this
 	ZVAL_COPY_VALUE(vp, m);
@@ -184,7 +184,7 @@ ref_rc::operator=(obj_rc &&m)
 	// ownership by theft
 	m.obj_ = nullptr;
 
-	val_rc::try_decref(vp);
+	val_ptr::try_decref(vp);
 
 	if (obj) {
 		val_ptr::object_bind(vp, obj);

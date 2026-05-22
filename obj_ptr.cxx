@@ -34,6 +34,35 @@ extern "C" {
 namespace zpp {
 
 
+
+void //static
+obj_ptr::try_addref(zend_object* ob)
+{
+    if (!ob || (GC_FLAGS(ob) & GC_IMMUTABLE))
+    {
+        return;
+    }
+    ob->gc.refcount++;
+}
+
+
+
+void //static
+obj_ptr::try_decref(zend_object* ob)
+{
+    if (!ob || (GC_FLAGS(ob) & GC_IMMUTABLE))
+    {
+        return;
+    }
+    auto& rct = ob->gc.refcount;
+    if (rct==1) 
+    {
+        zend_object_release(ob);
+        return;
+    }
+    rct--;  
+}
+
 const obj_ptr& 
 obj_ptr::operator=(zval* rc)
 {
@@ -487,6 +516,13 @@ obj_ptr::obj_property(str_ptr name)
     result = std::move(copy);
 
     return result;
+}
+
+zend_long    
+obj_ptr::int_property(str_ptr name)
+{
+    val_rc copy = property(name);
+    return copy.zlong();
 }
 
 void obj_ptr::unset_property(str_ptr name)

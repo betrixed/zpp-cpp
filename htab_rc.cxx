@@ -78,7 +78,7 @@ void htab_rc::lose()
 {
 	if (ht_) 
 	{
-		try_decref(ht_);
+		htab_ptr::try_decref(ht_);
 		ht_ = (HashTable*) nullptr;
 	}
 }
@@ -326,7 +326,7 @@ htab_rc::cowop(HashTable*& inout, size_t init)
 		zend_printf("ARRAY DUPLICATE %lx of ", inout);
 		showarray("used", used);
 		#endif	
-		htab_rc::try_decref(used);
+		htab_ptr::try_decref(used);
 	    return true;
 	}
 	return false;

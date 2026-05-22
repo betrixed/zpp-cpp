@@ -77,7 +77,7 @@ val_rc::make_ref()
 
 val_rc::~val_rc()
 {
-    val_rc::try_decref(&zv_);
+    val_ptr::try_decref(&zv_);
 }
 
 
@@ -151,14 +151,7 @@ val_rc::empty_array()
 void
 val_rc::addref()
 {
-    try_decref(&zv_);
-    /*
-    if (Z_REFCOUNTED_P(&zv_))
-    {
-        zv_.value.counted->gc.refcount++;
-    }
-    */
-    
+    val_ptr::try_addref(&zv_);
 }
 
 bool 
@@ -170,15 +163,15 @@ val_rc::zbool() const
 void // protected
 val_rc::lose()
 {
-    try_decref(&zv_);
+    val_ptr::try_decref(&zv_);
     zv_ = {0};
-    ZVAL_NULL(&zv_);
+    //ZVAL_NULL(&zv_);
 }
 
 const val_rc& 
 val_rc::operator=(zend_long value)
 {
-    try_decref(&zv_);
+    val_ptr::try_decref(&zv_);
     zv_ = {0};
     ZVAL_LONG(&zv_, value);
     return *this;
@@ -187,7 +180,7 @@ val_rc::operator=(zend_long value)
 const val_rc& 
 val_rc::operator=(const char* s)
 {
-    try_decref(&zv_);
+    val_ptr::try_decref(&zv_);
     zv_ = {0};
     ZVAL_STRING(&zv_, s);
     return *this;
@@ -196,7 +189,7 @@ val_rc::operator=(const char* s)
 const val_rc& 
 val_rc::operator=(double value)
 {
-    try_decref(&zv_);
+    val_ptr::try_decref(&zv_);
     zv_ = {0};
     ZVAL_DOUBLE(&zv_, value);
     return *this;
@@ -210,14 +203,14 @@ val_rc::val_rc()
 
 void val_rc::set_null()
 {
-    try_decref(&zv_);
+    val_ptr::try_decref(&zv_);
     zv_ = {0};
     ZVAL_NULL(&zv_);
 }
 
 void val_rc::set_bool(bool value)
 {
-    try_decref(&zv_);
+    val_ptr::try_decref(&zv_);
     zv_ = {0};
     ZVAL_BOOL(&zv_, value);
 }
@@ -425,7 +418,7 @@ val_rc::operator=(const obj_ptr &rc)
 const val_rc& 
 val_rc::operator=(const val_rc &rc)
 {
-    try_decref(&zv_); 
+    val_ptr::try_decref(&zv_); 
     ZVAL_COPY(&zv_ , &rc.zv_);
     return *this;
 }
@@ -538,119 +531,12 @@ val_rc::operator=(zend_string* rc)
     return *this;
 }
 
-void 
-val_rc::try_addref(zval* p)
-{
-    HashTable*      ht;
-    zend_object*    ob;
-
-    if (Z_REFCOUNTED_P(p))
-    {
-        auto ztype = Z_TYPE_P(p);
-        switch(ztype) {
-        case IS_STRING:
-            {
-                zend_string* s = Z_STR_P(p);;
-                if (GC_FLAGS(s) & IS_STR_INTERNED)
-                {
-                    break;
-                }
-                s->gc.refcount++;
-            }
-            break;
-        case IS_REFERENCE:
-            {   
-                zend_reference*   zref = p->value.ref;
-                zref->gc.refcount++;
-                
-            }
-            break;
-            
-        case IS_ARRAY:
-            {
-                ht = Z_ARR_P(p);
-                if (ht->gc.u.type_info & GC_IMMUTABLE)
-                {
-                    break;
-                }
-                ht->gc.refcount++;
-            }
-            break;
-        case IS_OBJECT:
-            {
-                ob = Z_OBJ_P(p);
-                ob->gc.refcount++;
-            }
-            break;
-        default:
-            {
-                GC_ADDREF(p->value.counted);
-            }
-            break;
-        }
-    }
-}
 
 void val_rc::decref()
 {
-    try_decref(&zv_);
+    val_ptr::try_decref(&zv_);
 }
 
-void //static.
-val_rc::try_decref(zval* p)
-{
-    if (Z_REFCOUNTED_P(p))
-    {
-        auto rct = zval_refcount_p(p);
-        if (rct <= 0)
-        {
-            //showmem("!!! RC emergency", p );
-            *p = {0};
-            return;
-        }
-        auto ztype = Z_TYPE_P(p);
-        switch(ztype) 
-        {
-        case IS_STRING:
-            {
-                zend_string* s = Z_STR_P(p);
-                //showstr("val_rc decref", s);
-                zend_string_release(s);
-            }
-            break;
-        case IS_REFERENCE:
-            {
-                auto zref = Z_REF_P(p);
-                //showmem("reference", p);
-                if (rct == 1) 
-                {
-
-                    try_decref(&zref->val);
-                    efree_size(zref, sizeof(zend_reference));
-                    //showmem("reference", p);
-                }
-                zref->gc.refcount--;
-            }
-            break;
-        case IS_ARRAY:
-            {
-
-                HashTable* ht = Z_ARR_P(p);
-                htab_rc::try_decref(ht);
-            }
-            break;
-
-        case IS_OBJECT:
-            {
-                obj_rc::try_decref(Z_OBJ_P(p));
-            }
-            break;
-        default:
-            return;
-        }
-        *p = {0};
-    }
-}
 
 val_rc //static 
 val_rc::empty_str()
@@ -658,6 +544,8 @@ val_rc::empty_str()
     return val_rc(zend_empty_string);
 }
 
+
+    
 }; // namespace Php
 
 #endif

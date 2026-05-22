@@ -27,39 +27,14 @@
 
 namespace zpp {
 
-void //static
-obj_rc::try_decref(zend_object* ob)
-{
-	if (!ob || (GC_FLAGS(ob) & GC_IMMUTABLE))
-    {
-        return;
-    }
-	auto& rct = ob->gc.refcount;
-	if (rct==1) 
-	{
-		zend_object_release(ob);
-		return;
-	}
-	rct--;	
-}
-
-void //static
-obj_rc::try_addref(zend_object* ob)
-{
-	if (!ob || (GC_FLAGS(ob) & GC_IMMUTABLE))
-    {
-        return;
-    }
-    ob->gc.refcount++;
-}
 
 void obj_rc::own()
 {
-	if (!obj_)
-	{
-		return;
-	}
-	try_addref(obj_);
+    if (!obj_)
+    {
+        return;
+    }
+    obj_ptr::try_addref(obj_);
 }
 
 void //protected
@@ -68,7 +43,7 @@ obj_rc::lose()
 	if (!obj_) {
 		return;
 	}
-	try_decref(obj_);
+	obj_ptr::try_decref(obj_);
 	obj_ = nullptr;
 }
 

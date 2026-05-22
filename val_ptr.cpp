@@ -63,6 +63,116 @@ val_ptr::same(const val_ptr& test) const
     
 }
 
+
+void //static
+val_ptr::try_addref(zval* p)
+{
+    HashTable*      ht;
+    zend_object*    ob;
+
+    if (Z_REFCOUNTED_P(p))
+    {
+        auto ztype = Z_TYPE_P(p);
+        switch(ztype) {
+        case IS_STRING:
+            {
+                zend_string* s = Z_STR_P(p);;
+                if (GC_FLAGS(s) & IS_STR_INTERNED)
+                {
+                    break;
+                }
+                s->gc.refcount++;
+            }
+            break;
+        case IS_REFERENCE:
+            {   
+                zend_reference*   zref = p->value.ref;
+                zref->gc.refcount++;
+                
+            }
+            break;
+            
+        case IS_ARRAY:
+            {
+                ht = Z_ARR_P(p);
+                if (ht->gc.u.type_info & GC_IMMUTABLE)
+                {
+                    break;
+                }
+                ht->gc.refcount++;
+            }
+            break;
+        case IS_OBJECT:
+            {
+                ob = Z_OBJ_P(p);
+                ob->gc.refcount++;
+            }
+            break;
+        default:
+            {
+                GC_ADDREF(p->value.counted);
+            }
+            break;
+        }
+    }
+}
+void //static.
+val_ptr::try_decref(zval* p)
+{
+    if (Z_REFCOUNTED_P(p))
+    {
+        auto rct = zval_refcount_p(p);
+        if (rct <= 0)
+        {
+            //showmem("!!! RC emergency", p );
+            *p = {0};
+            return;
+        }
+        auto ztype = Z_TYPE_P(p);
+        switch(ztype) 
+        {
+        case IS_STRING:
+            {
+                zend_string* s = Z_STR_P(p);
+                //showstr("val_rc decref", s);
+                zend_string_release(s);
+            }
+            break;
+        case IS_REFERENCE:
+            {
+                auto zref = Z_REF_P(p);
+                //showmem("reference", p);
+                if (rct == 1) 
+                {
+
+                    val_ptr::try_decref(&zref->val);
+                    efree_size(zref, sizeof(zend_reference));
+                    //showmem("reference", p);
+                }
+                zref->gc.refcount--;
+            }
+            break;
+        case IS_ARRAY:
+            {
+
+                HashTable* ht = Z_ARR_P(p);
+                htab_ptr::try_decref(ht);
+            }
+            break;
+
+        case IS_OBJECT:
+            {
+                obj_ptr::try_decref(Z_OBJ_P(p));
+            }
+            break;
+        default:
+            return;
+        }
+        *p = {0};
+    }
+}
+
+
 zval* //static 
 val_ptr::real_zval(const zval* zv)
 {
@@ -513,13 +623,48 @@ val_ptr::refcount() const
 		return 0;
 }
 
-val_ptr 
+zval* 
 val_ptr::php_constant(str_ptr name)
 {
-	return val_ptr(zend_get_constant(name));
+	return zend_get_constant(name);
 }
 
+void  
+val_ptr::set_zlong(zend_long val)
+{
+	val_ptr::try_decref(p_);
+	ZVAL_LONG(p_, val);
+}
 
+void  
+val_ptr::set_zstr(str_ptr val)
+{
+	val_ptr::try_decref(p_);
+	if (val_ptr::string_bind(p_, val))
+	{
+		GC_ADDREF((zend_string*)val);
+	};
+}
+
+void  
+val_ptr::set_htab(htab_ptr val)
+{
+	val_ptr::try_decref(p_);
+	if (val_ptr::array_bind(p_, val))
+	{
+		GC_ADDREF((HashTable*)val);
+	}
+}
+
+void  
+val_ptr::set_zobj(obj_ptr val)
+{
+	val_ptr::try_decref(p_);
+	if (val_ptr::object_bind(p_, val))
+	{
+		GC_ADDREF((zend_object*)val);
+	}
+}
 
 }; //namespace
 //val_ptr.cpp

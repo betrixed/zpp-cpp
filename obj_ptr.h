@@ -35,6 +35,10 @@ namespace zpp {
 		friend class weak_ref;
 		
 	public:
+
+		static void try_decref(zend_object* ob);
+		static void try_addref(zend_object* ob);
+
 		obj_ptr() : obj_(nullptr) {}
 
 		obj_ptr(zend_object* rc) : obj_(rc) {}
@@ -74,7 +78,7 @@ namespace zpp {
 		htab_rc   array_property(str_ptr key);
 		str_rc    str_property(str_ptr key);
 		obj_rc    obj_property(str_ptr key);
-		
+		zend_long int_property(str_ptr key);
 
 
 		zval* 	  property_get(str_ptr key, zval* ret);

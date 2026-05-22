@@ -350,7 +350,7 @@ preg::replace(const char* rp, str_ptr subject)
 		size_t ct = replace.size();
 		for(size_t i = 0; i < ct; i++)
 		{
-			val_ptr vh2 = replace.get(i);
+			zval* vh2 = replace.get(i);
 			htab_ptr h2(vh2);
 
 			val_ptr slen2 = h2.get(zend_long(0));

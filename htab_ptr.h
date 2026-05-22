@@ -8,9 +8,6 @@
  * @copyright Copyright (c) 2025
  * @license BSD 3-Clause License
  */
-#ifndef VAL_PTR_H
-#include "val_ptr.h"
-#endif
 
 #ifndef STR_PTR_H
 #include "str_ptr.h"
@@ -21,7 +18,7 @@ typedef int fn_zval(zval*);
 namespace zpp {
     
     class  val_rc;
-
+    class  val_ptr;
     class  htab_rc;
 
     /** 
@@ -42,6 +39,44 @@ namespace zpp {
     public:
         static HashTable* make_own(HashTable* ht);
 
+
+        static void try_addref(HashTable *ht)
+        {
+            if (!ht || (GC_FLAGS(ht) & GC_IMMUTABLE))
+            {
+                return;
+            }
+            GC_ADDREF(ht);
+        }
+
+
+        static void array_bind(zval* zt, HashTable* ht)
+        {
+            if (ht)
+            {
+                Z_ARR_P(zt)=ht;
+                Z_TYPE_INFO_P(zt) = (GC_FLAGS(ht) & GC_IMMUTABLE) ? IS_ARRAY : IS_ARRAY_EX;       
+            }
+            else
+            {   
+                ZVAL_NULL(zt);
+            }
+        }
+        
+        static void try_decref(HashTable* ht)
+        {
+            if (!ht || (GC_FLAGS(ht) & GC_IMMUTABLE))
+            {
+                return;
+            }
+            auto& rct =  ht->gc.refcount;
+            if (rct==1) {
+                zend_array_destroy(ht);
+                return;
+            }
+            rct--;
+        }
+
         htab_ptr() : ht_(nullptr) {}
 
         htab_ptr(const htab_ptr& rc) : ht_(rc.ht_) {}
@@ -53,8 +88,6 @@ namespace zpp {
         HashTable* ptr() const { return ht_; }
 
         htab_ptr(const val_rc& zw);
-
-        htab_ptr(val_ptr zu);
         
         htab_ptr(const zval* p);
 
@@ -77,7 +110,7 @@ namespace zpp {
         bool ok() const { return (ht_); }
 
         zval* get(zend_long idx) const;
-        //zval* get(val_ptr key) const;
+        
         zval* get(zend_string* zkey) const;
 
         zval* get(const char* key) const;
@@ -102,7 +135,7 @@ namespace zpp {
 
         bool  has_key(zend_string* skey) const;
 
-        bool  has_key(val_ptr skey) const;
+        bool  has_key(zval* skey) const;
 
         //! array value search for packed array; -1 for not found
         int   value_index(str_ptr fvalue) const;
@@ -113,7 +146,7 @@ namespace zpp {
         bool try_fetch(zend_string* key, val_ptr&  store) const;
         bool try_fetch(zend_long key, val_ptr& store) const;
 
-        bool try_fetch(val_ptr key, val_ptr& store) const;
+        bool try_fetch(zval* key, val_ptr& store) const;
         
         void copy_zv(zval* return_value) const;
 
@@ -131,9 +164,9 @@ namespace zpp {
 
         static HashTable* empty_array();
 
-        static val_ptr get_global(str_ptr key);
+        static zval* get_global(str_ptr key);
 
-        static void set_global(str_ptr key, val_ptr value);
+        static void set_global(str_ptr key, zval* value);
 
         static htab_ptr globals();
 

@@ -186,24 +186,6 @@ htab_ptr::unhive(str_ptr subj)
 	}
 }
 
-htab_ptr::htab_ptr(val_ptr zptr) 
-{
-	if (zptr.isArray())
-	{
-		ht_ = zptr.zarray();
-	}
-	if (ht_)
-	{
-		return;
-	}
-	ht_ = nullptr;
-	/*
-	if (!ht_)
-	{
-		throw std::logic_error("Expected zval_ptr with HashTable");
-	}
-	*/
-}
 
 uint32_t 
 htab_ptr::size() const {
@@ -326,17 +308,18 @@ bool htab_ptr::has_index(zend_long key) const
 	return (zend_hash_index_find(ht_, key) != nullptr);
 }
 
-bool htab_ptr::try_fetch(val_ptr key, val_ptr& store) const
+bool htab_ptr::try_fetch(zval* key, val_ptr& store) const
 {
 	if (!ht_)
 		return false;
-	if (key.isString())
+	val_ptr test(key);
+	if (test.isString())
 	{
-		return try_fetch(key.zstr(), store);
+		return try_fetch(test.zstr(), store);
 	}
-	else if (key.isLong())
+	else if (test.isLong())
 	{
-		return try_fetch(key.zlong(), store);
+		return try_fetch(test.zlong(), store);
 	}
 	store.init();
 	return false;
@@ -529,19 +512,19 @@ htab_ptr::globals()
 }
 
 //! static, get (or not) from _GLOBALS table
-val_ptr  
+zval*  
 htab_ptr::get_global(str_ptr key)
 {
 
-	val_ptr result = val_ptr(zend_hash_find_ind(&EG(symbol_table), key));
-	return result;
+	return (zend_hash_find_ind(&EG(symbol_table), key));
+
 }
 
 void 
-htab_ptr::set_global(str_ptr key, val_ptr value)
+htab_ptr::set_global(str_ptr key, zval* value)
 {
 	// pre-emptive try reference count boost
-	val_rc::try_addref(value); 
+    val_ptr::try_addref(value); 
     str_rc::try_addref(key);    
     
     // make it exist in $GLOBALS

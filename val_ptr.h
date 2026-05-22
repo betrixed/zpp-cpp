@@ -41,6 +41,10 @@ protected:
 
 public:
     static val_ptr nullval();
+
+    static void try_decref(zval* p);
+
+    static void try_addref(zval* p);
     
     /** bind_xxx calls best on already empty zval */
     void bind_string(zend_string* s);
@@ -243,8 +247,12 @@ public:
      */
     const val_ptr& operator=(const val_rc& rc);
 
-    static val_ptr php_constant(str_ptr name);
+    static zval* php_constant(str_ptr name);
 
+    void  set_zlong(zend_long val);
+    void  set_zstr(str_ptr val);
+    void  set_htab(htab_ptr val);
+    void  set_zobj(obj_ptr val);
 };
 
 inline bool operator!=(const val_ptr& a, const val_ptr& b) 

@@ -53,9 +53,7 @@ protected:
 public:
     
     
-    static void try_decref(zval* p);
 
-    static void try_addref(zval* p);
 
 	operator zval*() const  { return (zval*) &zv_; }
 

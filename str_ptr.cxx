@@ -109,10 +109,6 @@ str_ptr::strtr(const char* from, const char* to)
 	return zpp::strtr(s, fstr, tstr);
 }
 
-str_ptr::str_ptr(const val_ptr& rc)
-{
-    s = rc.zstr();
-}
 
 str_ptr::str_ptr(zval* p)
 {
@@ -446,7 +442,7 @@ str_ptr::operator=(zval* rc)
 
 
 str_rc //static
-str_ptr::json_encode(val_ptr value, int flags)
+str_ptr::json_encode(zval* value, int flags)
 {
 	//(smart_str *buf, zval *val, int options);
 	// TODO: consider options flags

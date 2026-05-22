@@ -52,7 +52,7 @@ htab_rw::giveback(zval* mgr, size_t init)
 	if (!h)
 	{
 		// try to clean whatever
-		val_rc::try_decref(mgr);
+		val_ptr::try_decref(mgr);
 		*mgr = {0};
 
 		h = zend_new_array(init);
@@ -153,7 +153,7 @@ void htab_rw::push_back(zval* zv)
 	if (zend_hash_next_index_insert(ht_, zv))
 	{
 		if (Z_TYPE_FLAGS_P(zv) != 0)
-			val_rc::try_addref(zv);
+			val_ptr::try_addref(zv);
 	}
 }
 
@@ -183,7 +183,7 @@ htab_rw::set(zval* key, zval* value)
 	 }
 	 if (result)
 	 {
-	 	val_rc::try_addref(value);
+	 	val_ptr::try_addref(value);
 	 }
 }
 void htab_rw::set(zval* key, zend_string* value)
@@ -262,7 +262,7 @@ void htab_rw::set(zend_string* key, zval* val)
 	if (zend_hash_update(ht_, key, val))
 	{
 		if (Z_TYPE_FLAGS_P(val) != 0) {
-			val_rc::try_addref(val);
+			val_ptr::try_addref(val);
 			//showmem("try_addref zval*", val);
 		}
 	}	
@@ -377,7 +377,7 @@ void htab_rw::set(zend_long idx, zval* value)
 	{
 		if (Z_TYPE_FLAGS_P(value) != 0)
 		{
-			val_rc::try_addref(value);
+			val_ptr::try_addref(value);
 		}
 	}
 }

@@ -43,41 +43,6 @@ namespace zpp {
         
         static HashTable* new_array(size_t init = HT_MIN_SIZE);
 
-        static void try_addref(HashTable *ht)
-        {
-            if (!ht || (GC_FLAGS(ht) & GC_IMMUTABLE))
-            {
-                return;
-            }
-            GC_ADDREF(ht);
-        }
-
-        static void try_decref(HashTable* ht)
-        {
-            if (!ht || (GC_FLAGS(ht) & GC_IMMUTABLE))
-            {
-                return;
-            }
-            auto& rct =  ht->gc.refcount;
-            if (rct==1) {
-                zend_array_destroy(ht);
-                return;
-            }
-            rct--;
-        }
-
-        static void array_bind(zval* zt, HashTable* ht)
-        {
-            if (ht)
-            {
-                Z_ARR_P(zt)=ht;
-                Z_TYPE_INFO_P(zt) = (GC_FLAGS(ht) & GC_IMMUTABLE) ? IS_ARRAY : IS_ARRAY_EX;       
-            }
-            else
-            {   
-                ZVAL_NULL(zt);
-            }
-        }
 
         
         
