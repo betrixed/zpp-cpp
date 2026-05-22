@@ -374,8 +374,8 @@ IServer::config(htab_ptr data)
 			IConfig* dbc = zobj_toc<IConfig>(dbc_mgr);
 			//showmem("Name", name);
 			//showmem("Values-", cfg);
-			dbc->assign(cfg);
-			addConfig(dbc_mgr, name);
+			dbc->assign(cfg.zarray());
+			addConfig(dbc_mgr, name.zstr());
 		}
 	}
 

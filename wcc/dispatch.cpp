@@ -481,12 +481,14 @@ Dispatch::forward( val_ptr fto)
 {
 	if (fto.isArray())
 	{
-		action(fto);
+		action(fto.zarray());
 	}
 	else if(fto.isString())
 	{
 		obj_rc response = svc_ptr()->get(DSPi.response_str);
-		response.call(DSPi.redirect_str, fto);
+		Response* robj = zobj_toc<Response>(response);
+
+		robj->redirect(fto.zstr());
 	}
 }
 

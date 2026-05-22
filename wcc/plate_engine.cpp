@@ -476,18 +476,23 @@ ZEND_METHOD(Wcc_PlateEngine, mergePlateData)
 
 ZEND_METHOD(Wcc_PlateEngine, render)
 {
-	zend_string* name;
-	zval*        data;
+	zarg_rd args(execute_data);
 
-	ZEND_PARSE_PARAMETERS_START(2, 2)
-	Z_PARAM_STR(name)
-	Z_PARAM_ARRAY(data)
-	ZEND_PARSE_PARAMETERS_END();
+	str_ptr name = args.str(args.need(0));
+	htab_ptr data;
 
-	auto cobj = zval_toc<PlateEngine>(ZEND_THIS);
+	if (!args.zarray_null(data, args.option(1)))
+	{
+		data = htab_ptr::empty_array();
+	}
 
-	str_rc ret = cobj->render(name,val_ptr(data));
-	ret.move_zv(return_value);
+	if (!args.throw_errors())
+	{
+		auto cobj = zval_toc<PlateEngine>(ZEND_THIS);
+
+		str_rc ret = cobj->render(name,data);
+		ret.move_zv(return_value);
+	}
 }
 
 

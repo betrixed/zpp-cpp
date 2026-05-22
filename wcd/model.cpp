@@ -110,7 +110,7 @@ namespace wcd {
 
 		for(wk.start(results); wk.ok(); wk.next())
 		{
-			r.push_back(m->newRow(result, true));
+			r.push_back(m->newRow(result.zarray(), true));
 		}
 
 		return rmgr;
@@ -772,7 +772,7 @@ namespace wcd {
 
 				for(sw.start(line.zarray()); sw.ok(); sw.next())
 				{
-					cellstr = stripslashes(item);
+					cellstr = stripslashes(item.zstr());
 					values.push_back(cellstr);
 				}
 				//showdata("line values", values);
@@ -928,7 +928,7 @@ namespace wcd {
 				result = max.move_error();
 				return result;
 			}
-			val_return sval  = bd->seqLastValue(sname);
+			val_return sval  = bd->seqLastValue(sname.zstr());
 			if (sval.has_errors())
 			{
 				result = sval.move_error();
@@ -1235,7 +1235,7 @@ namespace wcd {
 										val_ptr vtemp = values.get(name);
 
 										//showmem("vtemp", vtemp);
-										irow->set(name, vtemp);
+										irow->set(name.zstr(), vtemp);
 									}	
 								}
 								break;						

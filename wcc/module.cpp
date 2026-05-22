@@ -262,9 +262,11 @@ Module::addDefaults(obj_ptr defmod)
 	auto value = wk.value();
 	for(wk.start(list); wk.ok(); wk.next())
 	{
-		if (!data.has_property(key))
+		str_ptr pname = key.zstr();
+
+		if (!data.has_property(pname))
 		{
-			data.property(key, value);
+			data.property(pname, value);
 		}
 	}
 }

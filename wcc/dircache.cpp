@@ -356,7 +356,7 @@ DirCache::deleteExpired()
 	auto path = wk.value();
 	for(wk.start(expired); wk.ok(); wk.next())
 	{
-		unlink(path);
+		unlink(path.zstr());
 	}
 
 	return result;
@@ -547,13 +547,9 @@ bool DirCache::writePkg(obj_ptr pkg)
 zend_class_entry* 
 DirCache::register_class(zend_class_entry* ce)
 {
-	
-
 	zend_class_entry *sf = register_class_Wcc_Cache_DirCache(ce);
 
 	DirCache::omg.classEntry(sf);
-
-	
 
 	return sf;
 }
@@ -569,6 +565,12 @@ DirCache::debug_info(htab_rw s)
 	s.set(SFDi.opt_deferwrite, defer_write_);
 }
 
+PHP_MINIT_FUNCTION(Wcc_DirCache_reg)
+{
+	DirCache::register_class(ICache::omg.classEntry());
+	STATE_INIT_ADD(SFDi);
+	return SUCCESS;
+}
 
 }//namespace wcd
 

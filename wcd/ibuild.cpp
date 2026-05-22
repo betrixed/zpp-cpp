@@ -402,7 +402,7 @@ using namespace zpp;
 				
 				val_rc uvalue = rowobj->get(cvalue);
 
-				bind.update(cvalue, uvalue);
+				bind.update(cvalue.zstr(), uvalue);
 
 			}
 
@@ -414,7 +414,7 @@ using namespace zpp;
 
 				for(wk.start(ts); wk.ok(); wk.next())
 				{
-					bind.update(column, cvalue);
+					bind.update(column.zstr(), cvalue);
 				}
 			}
 
@@ -580,7 +580,7 @@ using namespace zpp;
 		{
 			obj_rc raw = column.zobject();
 			if (raw.instanceof(Raw::omg.classEntry())) {
-				result = whereRaw(raw, value, bval);
+				result = whereRaw(raw, value.zarray(), bval);
 			} 
 			else {
 				result.error() << "Expecting Raw sql object";

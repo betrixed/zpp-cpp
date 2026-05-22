@@ -12,6 +12,7 @@ namespace wcc {
 using namespace zpp;
 
 class  UserData : public base_d {
+protected:
 	val_ptr  userName_v;
 	val_ptr  roles_v;
 	val_ptr  email_v;
@@ -21,10 +22,14 @@ class  UserData : public base_d {
 	val_ptr  keys_v;
 
 public:
+
+	static base_obj_mgr<UserData> omg;
+	
 	void construct();
 
 	obj_rc addFlash(str_ptr msg, str_ptr status);
-	void   auth(str_ptr role);
+	bool   auth(val_ptr role); // array or string
+	
 	val_rc getKey(str_ptr key, val_ptr defval);
 	bool   hasAnyRole(htab_ptr rolelist);
 	bool   hasRole(str_ptr role);
@@ -32,7 +37,7 @@ public:
 	void   init();
 	bool   isGuest();
 	void   setGuest();
-	void   setKey(str_ptr key, mixed value);
+	void   setKey(str_ptr key, val_ptr value);
 	void   setValidUser(str_ptr name, htab_ptr roles);
 	void   unsetKey(str_ptr key);
 	void   wipekeys();

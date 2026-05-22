@@ -22,13 +22,15 @@ public:
 	str_intern memberid_p;
 	str_intern status_p;
 	str_intern keys_p;
+
+	str_intern guest_str;
+	str_intern flash_str;
+	str_intern OK_str;
 };
 
 extern UserDataInit UDi;
 
 	class Flash : public base_d {
-	protected:
-		val_ptr lines_;
 	public:
 
 		static base_obj_mgr<Flash> omg;

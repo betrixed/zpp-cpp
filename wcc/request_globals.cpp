@@ -222,7 +222,7 @@ RequestGlobals::fileCounter(htab_ptr data, bool onlySuccessful)
 		val_ptr value(wk.value());
 		if (value.isArray())
 		{
-			htab_ptr fsub(value);
+			htab_ptr fsub(value.zarray());
 
 			result += fileCounter(fsub,onlySuccessful);
 			continue; 
@@ -262,7 +262,7 @@ RequestGlobals::getBestQuality(htab_ptr parts, str_ptr name)
 
 		if (!value.isArray()) continue;
 
-		htab_ptr accept(value);
+		htab_ptr accept(value.zarray());
 
 		val_ptr dval( accept.get(RQit.quality) );
 		val_ptr sval( accept.get(name) );
@@ -417,7 +417,7 @@ RequestGlobals::resolveAuthorizationHeaders()
 
 				if (parts.isArray())
 				{
-					htab_ptr parts2(parts);
+					htab_ptr parts2(parts.zarray());
 					headers.set(RQit.Php_Auth_User, parts2.get((int)0));
 					headers.set(RQit.Php_Auth_Pw, parts2.get((int)1));
 				}
@@ -1141,7 +1141,7 @@ RequestGlobals::getUploadedFiles(bool onlySuccess, bool namekeys)
 
 		for(wk.start(files); wk.ok(); wk.next())
 		{
-			htab_ptr input(value);
+			htab_ptr input(value.zarray());
 
 			val_ptr nv = input.get(namekey);
 
@@ -1379,12 +1379,12 @@ RequestGlobals::numFiles(bool onlySuccess)
 	{
 		if (value.isArray())
 		{
-			htab_ptr file(value);
+			htab_ptr file(value.zarray());
 
 			val_ptr error = file.get(RQit.error_key);
 
 			if (error.isArray()) {
-				count += fileCounter(error, onlySuccess);
+				count += fileCounter(error.zarray(), onlySuccess);
 				continue;
 			}
 

@@ -286,13 +286,11 @@ IRow::stampTime(str_ptr value, int dtflags)
 
 	val_rc ta_array = table_model_.call(IRSTR.stamptime, arg1, arg2);
 	
+	result = ta_array.zarray();
 
-	val_ptr test(ta_array);
-
-	if (test.size())
+	if (result.size())
 	{
-		mergeData(test);
-		result = test.zarray();
+		mergeData(result);
 	}
 	
 	return result;

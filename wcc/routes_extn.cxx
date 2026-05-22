@@ -9,9 +9,8 @@
 #include "wcc/hmap.cpp"
 
 #include "wcc/icachedata.cpp"
-#include "wcc/dircache.cpp"
-
 #include "wcc/icache.cpp"
+#include "wcc/dircache.cpp"
 #include "wcc/cachemgr.cpp"
 
 #include "wcc/file_upload.cpp"
@@ -30,6 +29,7 @@
 #include "wcc/run.cpp"
 #include "wcc/debuglog.cpp"
 #include "wcc/flash.cpp"
+#include "wcc/userdata.cpp"
 
 
 void register_routes_extn(INIT_FUNC_ARGS)
@@ -89,6 +89,10 @@ PHP_MINIT(wcc_pair_d)(INIT_FUNC_ARGS_PASSTHRU);
 	PHP_MINIT(Wcc_ICache_reg)(INIT_FUNC_ARGS_PASSTHRU);
 #endif
 
+#ifdef DIR_CACHE_CPP
+	PHP_MINIT(Wcc_DirCache_reg)(INIT_FUNC_ARGS_PASSTHRU);
+#endif
+
 #ifdef WCC_CACHEMGR_CPP
 	PHP_MINIT(Wcc_CacheMgr_reg)(INIT_FUNC_ARGS_PASSTHRU);
 #endif	
@@ -110,8 +114,12 @@ PHP_MINIT(wcc_pair_d)(INIT_FUNC_ARGS_PASSTHRU);
 	PHP_MINIT(wcc_debuglog_reg)(INIT_FUNC_ARGS_PASSTHRU);
 #endif
 
+#ifdef SESSION_FLASH_CPP
+	PHP_MINIT(Session_Flash_reg)(INIT_FUNC_ARGS_PASSTHRU);
+#endif
+
 #ifdef SESSION_USERDATA_CPP
-PHP_MINIT_FUNCTION(Session_UserData_reg)(INIT_FUNC_ARGS_PASSTHRU);
+	PHP_MINIT(Session_UserData_reg)(INIT_FUNC_ARGS_PASSTHRU);
 #endif
 }
 

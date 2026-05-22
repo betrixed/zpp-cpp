@@ -211,7 +211,7 @@ RouteMatch::find_route(RouteSet* routeset)
 
 	for( walk.start(routeset->vary_); walk.ok(); walk.next())
 	{
-		str_ptr pattern(key);
+		str_ptr pattern(key.zstr());
 		preg rexpmatch(pattern);
 
 		//showmem("key", key);
@@ -340,7 +340,7 @@ RouteMatch::call(htab_ptr extra, obj_ptr before, obj_ptr after)
 			
 			if (method_name.size() && obj.method_exists(method_name))
 			{
-				result_ = this->call_method(obj, method_name, second);
+				result_ = this->call_method(obj, method_name, second.zarray());
 				test = result_;
 				if (test.isFalse() ||test.isObject())
 				{
@@ -376,7 +376,7 @@ RouteMatch::call(htab_ptr extra, obj_ptr before, obj_ptr after)
 			method_name = second.zstr();
 			if (method_name.size() && obj.method_exists(method_name))
 			{
-				result_ = this->call_method(obj, method_name, second);
+				result_ = this->call_method(obj, method_name, second.zarray());
 				test = result_;
 				if (!test.isNull())
 				{
@@ -532,7 +532,7 @@ htab_rc RouteMatch::fetchArgs()
 			{
 				htab_rw args(result);
 				if (test.isString()) {
-					str_rc decoded = call_url_decode(test);
+					str_rc decoded = call_url_decode(test.zstr());
 					args.set(name,decoded);
 				}
 				else {

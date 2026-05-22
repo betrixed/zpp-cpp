@@ -288,7 +288,7 @@ ISql::deleteSql(Bindings& bind)
 
 	if (order.isArray())
 	{
-		buf << " ORDER BY" << this->orderBy(order);
+		buf << " ORDER BY" << this->orderBy(order.zarray());
 	}
 
 	
@@ -1350,7 +1350,7 @@ ISql::where(Bindings &bind, htab_ptr wtab)
 				result.error() << "IN needs values array";
 				return result;
 			}
-			buf << " ("  << params->addParamList(value) << ')';
+			buf << " ("  << params->addParamList(value.zarray()) << ')';
 		}
 		else if (wtype =="raw")
 		{
@@ -1373,11 +1373,9 @@ ISql::where(Bindings &bind, htab_ptr wtab)
 			Expr* exp = static_cast<Expr*>(sqlpart);
 			buf << exp->toString();
 			value = where_tab[SQSTR.values_key]; // if associated parameters
-			if (value.isArray()) {
-				htab_ptr vlist(value);
-
+			htab_ptr vlist(value.zarray());
+			if (vlist.ok()) {
 				htab_rw plist(params->getParams());
-
 				plist.merge(vlist);
 				params->setParams(plist);
 			}

@@ -233,7 +233,7 @@ bool ICache::deleteMultiple(htab_ptr keys)
 	auto key = htw.key();
 	for(htw.start(keys); htw.ok(); htw.next())
 	{
-		if (!deleteKey(key))
+		if (!deleteKey(key.zstr()))
 		{
 			result = false;
 		}
@@ -380,17 +380,15 @@ ICache::setCached(str_ptr key, val_ptr data, zend_long ttl)
 
 
 bool 
-ICache::setMultiple(val_ptr values, zend_long ttl)
+ICache::setMultiple(htab_ptr values, zend_long ttl)
 {
 	bool result = true;
-
-	htab_ptr list_w(values);
 
 	htab_walk walk;
 	auto k=walk.key();
 	auto v=walk.value();
 
-	for(walk.start(list_w) ; walk.ok(); walk.next())
+	for(walk.start(values) ; walk.ok(); walk.next())
 	{
 		if (!set(k.zstr(), v, ttl))
 		{
@@ -679,20 +677,19 @@ ZEND_METHOD(Wcc_ICache, setCached)
 
 ZEND_METHOD(Wcc_ICache, setMultiple)
 {
-	zval*        values;
-	zend_long     ttl = 0;
+	zarg_rd args(execute_data);
 
-	ZEND_PARSE_PARAMETERS_START(2, 3)
-	Z_PARAM_ZVAL(values)
-	Z_PARAM_OPTIONAL
-	Z_PARAM_LONG(ttl)
-	ZEND_PARSE_PARAMETERS_END();
+	htab_ptr list = args.htab(args.need(0));
+	zend_long ttl = 0;
 
-	val_rc w_values(values);
+	args.zlong_null(ttl, args.option(1), 0);
 
-	auto cobj = zval_toc<ICache>(ZEND_THIS);
-	bool result = cobj->setMultiple(w_values, ttl);
-	RETURN_BOOL(result);
+	if (!args.throw_errors())
+	{
+		auto cobj = zval_toc<ICache>(ZEND_THIS);
+		bool result = cobj->setMultiple(list, ttl);
+		RETURN_BOOL(result);
+	}	
 }
 
 ZEND_METHOD(Wcc_ICache, setOption)
@@ -736,11 +733,6 @@ PHP_MINIT_FUNCTION(Wcc_ICache_reg)
 	ICache::omg.classEntry(ce);
 
 	STATE_INIT_ADD(IC_STR)
-	
-#ifdef DIR_CACHE_CPP
-	DirCache::register_class(ce);
-	STATE_INIT_ADD(SFDi)
-#endif
 
 	return SUCCESS;
 }

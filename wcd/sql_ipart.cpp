@@ -176,7 +176,7 @@ void sql_strtab::init()
 void 
 Literal::construct(val_ptr val)
 {
-	obj_ptr self(vobj());
+	obj_ptr self(self_);
 	self.property(SQSTR.value, val);
 }
 
@@ -196,7 +196,8 @@ Literal::toString() const
 	if (temp.isString())
 	{
 		str_buf buf;
-		buf << k_sqt << str_replace(StrView("'"), StrView("''"), temp) << k_sqt;
+		str_rc  rstr = str_replace(StrView("'"), StrView("''"), temp.zstr());
+		buf << k_sqt << rstr << k_sqt;
 		return buf.zstr();
 	}
 	else {
@@ -678,7 +679,7 @@ TColumns::construct(str_ptr tname,  str_ptr talias,  val_ptr tcol)
 
 	if (tcol.isArray())
 	{
-		this->add(tcol);
+		this->add(tcol.zarray());
 	}
 	else if (tcol.isString())
 	{

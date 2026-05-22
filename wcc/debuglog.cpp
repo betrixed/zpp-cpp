@@ -72,6 +72,20 @@ DebugLog::dump(str_ptr label, val_ptr anyval)
 	dump(label.data(), anyval);
 }
 
+void DebugLog::showmem(const char* label, zval* mem)
+{
+	str_buf dump;
+	dump_info di(dump);
+
+	dump << label << ' ';
+	di.setMaxLevel(5);
+	di.di_showmem(mem);
+	di.di_dump(mem);
+	str_rc out = dump.zstr();
+
+	line(out);
+
+}
 void 
 DebugLog::dump(const char* label, val_ptr anyval)
 {
@@ -81,7 +95,7 @@ DebugLog::dump(const char* label, val_ptr anyval)
 	di.setMaxLevel(5);
 	
 	dump << label << ":" << endl;
-
+	di.di_showmem(anyval);
 	di.di_dump(anyval);
 
 	str_rc out = dump.zstr();

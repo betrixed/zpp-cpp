@@ -187,7 +187,7 @@ str_rc HtmlPlates::render(htab_ptr options)
 			inner_ptr = zobj_toc<Plate>(inner_obj);
 			if (raw.size())
 			{
-				inner_ptr->setRaw(raw);
+				inner_ptr->setRaw(raw.zstr());
 			}
 			prev_ptr = inner_ptr;
 		}

@@ -446,7 +446,7 @@ Assets::add(val_ptr nlist)
 	}
 	else if (nlist.isString())
 	{
-		this->markAdd(nlist);
+		this->markAdd(nlist.zstr());
 	}
 }
 
@@ -463,7 +463,7 @@ Assets::addAssets(htab_ptr data)
 	for(wk.start(data); wk.ok(); wk.next())
 	{
 		hw.push_back(key);
-		assets_.property(key, value);
+		assets_.property(key.zstr(), value);
 	}
 	//showdata("keys_added", keys_added);
 	return keys_added;

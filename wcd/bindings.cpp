@@ -625,13 +625,13 @@ Bindings::select()
 	val_ptr columns = get(ISql::NAME_LIST);
 	//showmem("select columns", columns);
 
-	if (columns.ok())
+	if (columns.isArray())
 	{
 		JoinTables* jt = zobj_toc<JoinTables>(from);
 		obj_rc prime = jt->getPrime();
 		IColumns* pc = zobj_toc<IColumns>(prime);
 		pc->clear();
-		pc->add(columns);
+		pc->add(columns.zarray());
 	}
 
 	if (from.ok())
@@ -766,7 +766,7 @@ Bindings::select()
 		{
 			if (zs_cmp(table_name, alias_key.zstr()) != 0)
 			{
-				str_rc a_key = alias_str_key(alias_key);
+				str_rc a_key = alias_str_key(alias_key.zstr());
 				alias_list.push_back(a_key);
 			}
 		}
@@ -776,7 +776,7 @@ Bindings::select()
 
 		for(w1.start(hr); w1.ok(); w1.next())
 		{
-			obj_rc obj = JoinTables::rowSplit(r_row, relist);
+			obj_rc obj = JoinTables::rowSplit(r_row.zarray(), relist);
 			val_rc recset = obj.property(mb_id);
 			htab_walk w2;
 			auto ai_value = w2.value();
@@ -807,7 +807,7 @@ Bindings::orderBy(val_ptr colspec, bool descend, bool nullslast)
 
 	if (colspec.isString())
 	{
-		val_rc ta_mgr = TableAttr::splitDot(colspec);
+		val_rc ta_mgr = TableAttr::splitDot(colspec.zstr());
 
 		hw.set(SQSTR.column, ta_mgr);
 	}

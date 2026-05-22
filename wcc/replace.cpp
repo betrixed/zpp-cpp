@@ -76,7 +76,7 @@ Replace::eval(str_ptr subj)
 		for(int i = 0; i < ct; i++)
 		{
 			htab_ptr  k1 = keys_list.get(i);
-			val_ptr fkey = k1.get((int)0);
+			zval* fkey = k1.get((int)0);
 			//showmem("get key", fkey);
 			
 			val_rc rval = src_.property(fkey);

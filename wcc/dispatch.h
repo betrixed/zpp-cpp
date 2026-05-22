@@ -5,7 +5,6 @@
 #include "zpp/base.h"
 #endif
 
-
 namespace wcc {
 
 using namespace zpp;

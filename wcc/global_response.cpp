@@ -599,12 +599,12 @@ str_rc // protected
 Response::attach_name(str_ptr uri, str_ptr suffix)
 {
 	val_ptr DIR_SEP = val_ptr::php_constant(RSPD.DIR_SEP); 
-	str_ptr sDIR_SEP(DIR_SEP);
+	str_ptr sDIR_SEP(DIR_SEP.zstr());
 	str_rc t_uri(uri);
 
 	t_uri.trim_self(sDIR_SEP.data(), str_rc::RTRIM);
 
-	str_rc QREGEX = preg_quote(DIR_SEP, RSPD.AT_CHAR);
+	str_rc QREGEX = preg_quote(sDIR_SEP, RSPD.AT_CHAR);
 
 	str_buf buf;
 	buf << "@[^" << QREGEX << "]+$@";

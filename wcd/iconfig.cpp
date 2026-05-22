@@ -208,24 +208,25 @@ IConfig::getValue(val_ptr keys, bool required, val_ptr ifnot)
 {
 	val_return result;
 
-	bool asString = keys.isString();
+	str_ptr   asString = keys.zstr();
+	htab_ptr  asArray = keys.zarray();
 	val_ptr test;
 
-	if (asString)
+	if (asString.ok())
 	{
-		test = cfg_.get(keys.zstr());
+		test = cfg_.get(asString);
 		if (!test.isNull())
 		{
 			result.value_ = test;
 			return result;
 		}
 	}
-	else if (keys.isArray())
+	else if (asArray.ok())
 	{
 		htab_walk wk;
 
 		auto keyval = wk.value();
-		for(wk.start(keys.zarray()); wk.ok(); wk.next())
+		for(wk.start(asArray); wk.ok(); wk.next())
 		{
 			test = cfg_.get(keyval.zstr());
 			if (!test.isNull())
@@ -238,6 +239,9 @@ IConfig::getValue(val_ptr keys, bool required, val_ptr ifnot)
 	else {
 		return result;
 	}
+
+	
+
 	if (!required)
 	{
 		result.value_ = ifnot;
@@ -245,14 +249,14 @@ IConfig::getValue(val_ptr keys, bool required, val_ptr ifnot)
 	}
 
 	result.error() << "Db IConfig needs : ";
-
-	if (!asString)
+	// more error
+	if (asArray.ok())
 	{
-		val_rc cat = implode(ICS.msg_or, keys);
+		val_rc cat = implode(ICS.msg_or, asArray);
 		result.error() << val_ptr(cat).zstr();
 	}
 	else {
-		result.error() << keys.zstr();
+		result.error() << asString;
 	}
 
 	return result;

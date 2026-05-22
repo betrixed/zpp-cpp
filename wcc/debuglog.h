@@ -63,7 +63,8 @@ public:
 	void dump(const char* label, htab_ptr arrayval);
 	void dump(const char* label, str_ptr strval);
 	void dump(const char* label, obj_ptr objval);
-
+	void showmem(const char* label, zval* mem);
+	
 	void setOutputs(int flags = TO_CONSOLE);
 };
 

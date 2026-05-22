@@ -81,7 +81,7 @@ public:
 
 	obj_rc setCached(str_ptr key, val_ptr data, zend_long ttl = 0);
 
-	bool setMultiple(val_ptr values, zend_long ttl = 0);
+	bool setMultiple(htab_ptr values, zend_long ttl = 0);
 
 	void setTTL(zend_long ttl)
 	{

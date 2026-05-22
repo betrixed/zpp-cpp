@@ -42,6 +42,8 @@ class UserData {
 
 	public function init() : void {}
 
+	public function getKey(string $key, mixed $adef=null) : mixed;
+	
 	public function isGuest() : bool {}
 
 	public function setGuest() : void {}
@@ -50,7 +52,7 @@ class UserData {
 
 	public function setValidUser(string $name, array $roles) : void {}
 
-	public function unset(string $key) : bool {}
+	public function unsetKey(string $key) : bool {}
 
 	public function wipekeys() : void {}
 

@@ -6,6 +6,7 @@
 #endif
 
 #ifndef USERDATA_ARGINFO_H
+#define USERDATA_ARGINFO_H
 extern "C" {
 	#include "stub/userdata_arginfo.h"
 }
@@ -31,19 +32,25 @@ void UserDataInit::init()
 	memberid_p = "memberid";
 	status_p = "status";
 	keys_p = "keys";
+
+	guest_str = "Guest";
+	flash_str = "flash";
+	OK_str = "OK";
 }
 
 void 
 Flash::construct(htab_ptr data)
 {
 	obj_ptr self(self_);
-	lines_ = self.property_ptr(UDi.lines_str);
+	
 }
 
 
 bool 
 Flash::hasData()
 {
+	obj_ptr self(self_);
+	val_ptr lines_ = self.property_ptr(UDi.lines_str);
 	return (lines_.size() == 0);
 }
 
@@ -57,8 +64,9 @@ Flash::add(str_ptr text, str_ptr status)
 	writer.set(UDi.text_str, text);
 	writer.set(UDi.status_str, status);
 
+	obj_ptr self(self_);
+	val_ptr lines_ = self.property_ptr(UDi.lines_str);
 	htab_rw lines(lines_);
-
 	lines.push_back(line);
 }
 
@@ -66,6 +74,8 @@ Flash::add(str_ptr text, str_ptr status)
 htab_rc 
 Flash::getData()
 {
+	obj_ptr self(self_);
+	val_ptr lines_ = self.property_ptr(UDi.lines_str);
 	return htab_rc(lines_.zarray());
 }
 
@@ -73,7 +83,9 @@ Flash::getData()
 void 
 Flash::clear()
 {
-	lines_.init();
+	obj_ptr self(self_);
+	val_ptr lines_ = self.property_ptr(UDi.lines_str);
+	lines_.set_htab(htab_ptr::empty_array());
 }
 
 
@@ -124,7 +136,7 @@ ZEND_METHOD(Wcc_Session_Flash, getData)
 	if (!args.throw_errors())
 	{
 		Flash* cobj = zval_toc<Flash>(ZEND_THIS);
-
+		
 		htab_rc result = cobj->getData();
 		result.move_zv(return_value);
 	}
@@ -139,14 +151,14 @@ ZEND_METHOD(Wcc_Session_Flash, clear)
 	cobj->clear();
 }
 
-PHP_MINIT_FUNCTION(Session_UserData_reg)
+PHP_MINIT_FUNCTION(Session_Flash_reg)
 {
 	auto ce = register_class_Wcc_Session_Flash();
 
 	Flash::omg.classEntry(ce);
 
 	STATE_INIT_ADD(UDi)
-	
+
 	return SUCCESS;
 }
 #endif

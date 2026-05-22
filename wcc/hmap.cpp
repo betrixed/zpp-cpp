@@ -849,7 +849,7 @@ ZEND_METHOD(Wcc_Hmap, offsetSet)
 
 	auto cobj = zval_toc<Hmap>(ZEND_THIS);
 		zend_printf("offsetSet called\n");
-	cobj->set(val_ptr(key), val_ptr(value));
+	cobj->set(key, val_ptr(value));
 }
 
 ZEND_METHOD(Wcc_Hmap, offsetExists)
