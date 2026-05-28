@@ -1332,7 +1332,7 @@ ZEND_METHOD(Wcd_IBuild, update)
 }
 
 /* public function where(mixed $column, ?string $operator = null, 
-                        mixed $value = null, string $bval = "AND") : void */
+                        mixed $value = null, string $bval = "AND") : IBuild */
 ZEND_METHOD(Wcd_IBuild, where)
 {
 	zval* column;
@@ -1351,6 +1351,10 @@ ZEND_METHOD(Wcd_IBuild, where)
 	IBuild* cobj = zval_toc<IBuild>(ZEND_THIS);
 
 	cobj->where(column, opstr, value, bval);
+
+	obj_ptr self(ZEND_THIS);
+
+	self.copy_zv(return_value);
 }
 
 ZEND_METHOD(Wcd_IBuild, wipe)

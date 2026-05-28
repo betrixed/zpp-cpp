@@ -13,7 +13,7 @@ using namespace zpp;
 	class  Module : public base_d 
 	{
 	protected:
-		obj_ptr data_;
+		obj_ptr data_; // A Config object
 		htab_rc requires_;
 		bool    active_;
 		str_rc  cfg_path_;

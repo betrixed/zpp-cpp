@@ -183,7 +183,7 @@ class IBuild {
     public function update(IRow $row, array $dirty = []) : mixed {}
 
     public function where(mixed $column, ?string $operator = null, 
-                        mixed $value = null, string $bval = "AND") : void {}
+                        mixed $value = null, string $bval = "AND") : IBuild {}
 
     public function wipe(): void {}
 };

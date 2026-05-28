@@ -50,29 +50,29 @@ using namespace zpp;
 		static zval* get_second(zend_object* pair, zval* ret);
 		*/
 
-		val_rc one_;
-		val_rc two_;
+		val_ptr one_;
+		val_ptr two_;
 
 		void construct(val_ptr p1, val_ptr p2);
 		
 		val_ptr first()
 		{
-			return val_ptr(one_);
+			return one_;
 		}
 
 		val_ptr second()
 		{
-			return val_ptr(two_);
+			return two_;
 		}
 
 		val_ptr key()
 		{
-			return val_ptr(one_);
+			return one_;
 		}
 
 		val_ptr value()
 		{
-			return val_ptr(two_);
+			return two_;
 		}
 		
 		double test_calc() const 
