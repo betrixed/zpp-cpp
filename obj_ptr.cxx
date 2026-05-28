@@ -363,10 +363,11 @@ obj_ptr::has_property(str_ptr name)
     zend_class_entry *ce;
     zend_property_info *property_info;
 
-    if (!obj_)
+    if (!obj_ || !name.ok())
     {
         return false;
     }
+    //TODO: don't care about breaking private access?
     ce = obj_->ce;
     property_info = (zend_property_info *) zend_hash_find_ptr(&ce->properties_info, name);
     if (property_info != nullptr && (
