@@ -22,6 +22,7 @@ protected:
 	obj_rc data_;
 	
 	obj_rc getSession();
+	UserData* ud_cpp();
 
 public:
 

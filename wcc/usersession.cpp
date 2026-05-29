@@ -11,32 +11,86 @@ using namespace zpp;
 
 base_obj_mgr<UserSession> UserSession::omg;
 
-void UserSession::construct()
+
+UserData* 
+UserSession::ud_cpp()
+{
+	return zobj_toc<UserData>(data_);
+}
+
+
+void 
+UserSession::construct()
 {
 	
-}
-
-obj_rc  UserSession::activate()
-{
-
-}
-
-
-void UserSession::addFlash(str_ptr text, str_ptr status)
-{
+	doWrite_ = false;
+	wasread_ = false;
+	ended_ = false;
+	//session_ = null;
+	data_ = UserData::omg.new_zobj();
 
 }
 
-
-void UserSession::addUserRoles(htab_ptr roles)
+obj_rc  
+UserSession::activate()
 {
-
+	doWrite_  = true;
+	this->write();
+	return obj_rc(self_);
 }
 
 
-int  UserSession::adjustExpiry()
+void 
+UserSession::addFlash(str_ptr text, str_ptr status)
 {
+	zval* flash = data_.property_ptr(UDi.flash_str);
+	htab_rw w(flash);  
 
+	htab_rc line;
+	htab_rw wline(line);
+
+	wline.push_back(text);
+	wline.push_back(status);
+
+	w.push_back(line);
+}
+
+
+void 
+UserSession::addUserRoles(htab_ptr roles)
+{
+	getUserRoles();  
+
+	zval* roles = data_.property_ptr(UDi.roles_p);
+	htab_rw myroles(roles);
+
+	auto before_ct = myroles.size();
+	myroles.merge(roles);
+	auto after_ct =  myroles.size();
+
+	if (after_ct > before_ct)
+	{
+		doWrite_ = true;
+	}
+}
+
+
+int  
+UserSession::adjustExpiry()
+{
+	int result = 0;
+
+	if (session_.ok())
+	{
+		if (data_.ok())
+		{
+			UserData* ud = ud_cpp();
+			if (ud->hasRole(UDi.Admin_str) || ud->hasRole(UDi.Editor_str) )
+			{
+				
+			}
+		}
+	}
 }
 
 
@@ -64,10 +118,10 @@ str_rc UserSession::getEndTime()
 
 }
 
-
-obj_rc UserSession::getFlash()
+htab_rc
+UserSession::getFlash()
 {
-
+	return data_.array_property(UDi.flash_str);
 }
 
 

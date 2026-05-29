@@ -11,36 +11,44 @@ namespace wcc {
 
 using namespace zpp;
 
-class  UserData : public base_d {
-protected:
-	val_ptr  userName_v;
-	val_ptr  roles_v;
-	val_ptr  email_v;
-	val_ptr  id_v;
-	val_ptr  memberid_v;
-	val_ptr  status_v;
-	val_ptr  keys_v;
 
+
+class UserDataInit : public state_init {
 public:
+	void init() override;
+	str_intern lines_str;
+	str_intern text_str;
+	str_intern status_str;
+
+	str_intern user_p;
+	str_intern userName_p;
+	str_intern roles_p;
+	str_intern email_p;
+
+	str_intern id_p;
+	str_intern memberid_p;
+	str_intern status_p;
+	str_intern keys_p;
+
+	str_intern guest_str;
+	str_intern flash_str;
+	str_intern OK_str;
+
+	str_intern Admin_str;
+	str_intern Editor_str;
+};
+
+class  UserData : public base_d {
+public:
+
 
 	static base_obj_mgr<UserData> omg;
 	
 	void construct();
 
-	obj_rc addFlash(str_ptr msg, str_ptr status);
-	bool   auth(val_ptr role); // array or string
-	
-	val_rc getKey(str_ptr key, val_ptr defval);
 	bool   hasAnyRole(htab_ptr rolelist);
 	bool   hasRole(str_ptr role);
 	bool   hasUser();
-	void   init();
-	bool   isGuest();
-	void   setGuest();
-	void   setKey(str_ptr key, val_ptr value);
-	void   setValidUser(str_ptr name, htab_ptr roles);
-	void   unsetKey(str_ptr key);
-	void   wipekeys();
 };
 
 }//namespace wcc
