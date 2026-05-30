@@ -1,10 +1,6 @@
 #ifndef WCC_USERSESSION_H
 #define WCC_USERSESSION_H
 
-#ifndef SESSION_FLASH_H
-#include "flash.h"
-#endif
-
 #ifndef SESSION_USERDATA_H
 #include "userdata.h"
 #endif
@@ -39,10 +35,10 @@ public:
 	bool auth(val_ptr role);
 	void clearFlash();
 	void delayWrite();
-	
+
 	void flash(str_ptr msg, htab_ptr exlines, str_ptr status);
 	str_rc getEndTime();
-	obj_rc getFlash();
+	htab_rc getFlash();
 	val_rc getKey(str_ptr key, val_ptr adefault);
 	obj_rc getUser();
 
@@ -59,7 +55,7 @@ public:
 	obj_rc read();
 	str_rc roles();
 	void   save();
-	void saveUser(val_ptr user, htab_ptr roles);
+	void saveUser(obj_ptr user, htab_ptr roles);
 
 	str_rc sessionName();
 	void  setAdmin();

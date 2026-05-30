@@ -6,7 +6,7 @@
 namespace Wcc;
 
 class UserSession {
-public:
+
 	public function __construct();
 
 	public function activate() : UserSession {}

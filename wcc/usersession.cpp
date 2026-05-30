@@ -36,7 +36,7 @@ UserSession::construct()
 {
 	
 	doWrite_ = false;
-	wasread_ = false;
+	wasRead_ = false;
 	ended_ = false;
 	//session_ = null;
 	data_ = UserData::omg.new_zobj();
@@ -73,8 +73,8 @@ UserSession::addUserRoles(htab_ptr roles)
 {
 	getUserRoles();  
 
-	zval* roles = data_.property_ptr(UDi.roles_p);
-	htab_rw myroles(roles);
+	val_ptr rlist = data_.property_ptr(UDi.roles_p);
+	htab_rw myroles(rlist);
 
 	auto before_ct = myroles.size();
 	myroles.merge(roles);
@@ -128,7 +128,7 @@ UserSession::auth(val_ptr role)
 
 	if (role.isString())
 	{
-		return ud->hasRole(role.zstring());
+		return ud->hasRole(role.zstr());
 	}
 	if (role.isArray())
 	{
@@ -140,9 +140,7 @@ UserSession::auth(val_ptr role)
 
 void UserSession::clearFlash()
 {
-	zval* fptr = data_.property_ptr(UDi.flash_str);
-	htab_hw flash(fptr);
-	flash.clear();
+	data_.property(UDi.flash_str, htab_ptr::empty_array());
 }
 
 void UserSession::delayWrite()
@@ -162,7 +160,7 @@ void UserSession::flash(str_ptr msg, htab_ptr exlines, str_ptr status)
 		auto line = wk.value();
 		for(wk.start(exlines); wk.ok(); wk.next())
 		{
-			buf << "<br>\n" << line.zstring();
+			buf << "<br>\n" << line.zstr();
 		}
 	}
 	zval* fptr = data_.property_ptr(UDi.flash_str);
@@ -189,7 +187,7 @@ UserSession::getEndTime()
 			val_rc expires = adapter.call(UDi.getexpires_str);
 			if (expires.isLong())
 			{
-				result = datetime_obj::date(UDi.expire_fmt, expires.zlong());
+				result = datetime_obj::date(UDi.expires_fmt, expires.zlong());
 			}
 		}
 	}
@@ -277,7 +275,7 @@ UserSession::hasKey(str_ptr key)
 {
 	zval* keys = data_.property_ptr(UDi.keys_p);
 	htab_ptr values(keys);
-	return values.has_key(key)
+	return values.has_key(key);
 }
 
 
@@ -295,7 +293,13 @@ bool
 UserSession::isEmpty()
 {
 	obj_rc user = getUser();
-	return (!user.ok() || 
+	bool result = true;
+	if (user.ok())
+	{
+		val_ptr id = user.property_ptr(UDi.id_p);
+		result = id.is_nullptr() || (id.zlong() == 0);
+	}
+	return result;
 }
 
 
@@ -338,7 +342,7 @@ UserSession::nullify()
 	{
 		session_.call(UDi.destroy_fn);
 	}
-	if (session_status() === PHP_SESSION_ACTIVE)
+	if (session_status() == php_session_status::php_session_active)
 	{
 		session_write_close();
 	}
@@ -356,7 +360,7 @@ UserSession::read()
 	if (!wasRead_ && !ended_)
 	{
 		doWrite_ = false;
-		objrc session = getSession();
+		obj_rc session = getSession();
 		if (session.ok())
 		{
 			data_.init();
@@ -396,13 +400,13 @@ UserSession::roles()
 	str_buf buf;
 	str_rc result;
 	
-	zval* pr = data_.property_ptr(UDi.roles_p);
+	val_ptr pr = data_.property_ptr(UDi.roles_p);
 	if (pr.isArray())
 	{
 		htab_walk wk;
 		auto value = wk.value();
 		int ct = 0;
-		for(wk.start(); wk.ok(); ct++, wk.next())
+		for(wk.start(pr.zarray()); wk.ok(); ct++, wk.next())
 		{
 			if (ct) {
 				buf << ", "; 
@@ -579,7 +583,7 @@ void UserSession::wipe()
 
 
 void 
-UserSession::UserSession::write(bool force=false)
+UserSession::UserSession::write(bool force)
 {
 	if (force || doWrite_)
 	{

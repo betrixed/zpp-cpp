@@ -11,7 +11,7 @@ final class Pair {
 	public mixed $one;
 	public mixed $two;
 
-	public function __construct(mixed $first, mixed $second);
+	public function __construct(mixed $first = null, mixed $second = null);
 
 	public function first() : mixed {}
 

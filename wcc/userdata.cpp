@@ -1,10 +1,6 @@
 #ifndef SESSION_USERDATA_CPP
 #define SESSION_USERDATA_CPP
 
-#ifndef SESSION_FLASH_H
-#include "flash.h"
-#endif
-
 #ifndef SESSION_USERDATA_H
 #include "userdata.h"
 #endif
@@ -124,7 +120,7 @@ UserData::hasUser()
 {
 
 	obj_ptr self(self_);
-	zend_long id = self.int_property(UDi._p);
+	zend_long id = self.int_property(UDi.id_p);
 
 	return (id!=0);
 }

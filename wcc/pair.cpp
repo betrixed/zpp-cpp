@@ -37,9 +37,30 @@ void Pair::construct(val_ptr p1, val_ptr p2)
 
 	 self.property(PairSI.one, p1);
 	 self.property(PairSI.two, p2);
+}
 
-	 one_ = self.property_ptr(PairSI.one); 
-	 two_ = self.property_ptr(PairSI.two);
+val_ptr 
+Pair::first() const
+{
+	return obj_ptr(self_).property_ptr(PairSI.one);
+}
+
+val_ptr 
+Pair::second() const
+{
+	return obj_ptr(self_).property_ptr(PairSI.two);
+}
+
+val_ptr 
+Pair::key() const
+{
+	return obj_ptr(self_).property_ptr(PairSI.one);
+}
+
+val_ptr 
+Pair::value() const
+{
+	return obj_ptr(self_).property_ptr(PairSI.two);
 }
 
 }; // namespace wcc
@@ -48,18 +69,28 @@ using namespace wcc;
 
 ZEND_METHOD(Wcc_Pair, __construct)
 {
-	zval* p1 = nullptr;
-	zval* p2 = nullptr;
+	zarg_rd args(execute_data);
 
-	ZEND_PARSE_PARAMETERS_START(0,2)
-	Z_PARAM_OPTIONAL
-	Z_PARAM_ZVAL(p1)
-	Z_PARAM_ZVAL(p2)
-	ZEND_PARSE_PARAMETERS_END();
+	val_ptr a1 = args.option(0);
+	val_ptr a2 = args.option(1);
 
-	Pair* cobj = zval_toc<Pair>(ZEND_THIS);
+	if (a1.is_nullptr())
+	{
+		a1 = val_rc::null_value_ptr();
+	}
+	if (a2.is_nullptr())
+	{
+		a2 = val_rc::null_value_ptr();
+	}
 
-	cobj->construct(p1,p2);
+	if (!args.throw_errors())
+	{
+		Pair* cobj = zval_toc<Pair>(ZEND_THIS);
+
+		cobj->construct(a1,a2);
+	}
+
+	
 }
 
 ZEND_METHOD(Wcc_Pair, first)
@@ -67,7 +98,8 @@ ZEND_METHOD(Wcc_Pair, first)
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	Pair* cobj = zval_toc<Pair>(ZEND_THIS);
-	cobj->one_.copy_zv(return_value);
+	val_ptr result = cobj->first();
+	result.copy_zv(return_value);
 
 }
 
@@ -76,7 +108,8 @@ ZEND_METHOD(Wcc_Pair, second)
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	Pair* cobj = zval_toc<Pair>(ZEND_THIS);
-	cobj->two_.copy_zv(return_value);
+	val_ptr result = cobj->second();
+	result.copy_zv(return_value);
 }
 
 ZEND_METHOD(Wcc_Pair, key)
@@ -84,7 +117,9 @@ ZEND_METHOD(Wcc_Pair, key)
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	Pair* cobj = zval_toc<Pair>(ZEND_THIS);
-	cobj->one_.copy_zv(return_value);
+
+	val_ptr result = cobj->first();
+	result.copy_zv(return_value);
 
 }
 
@@ -93,7 +128,8 @@ ZEND_METHOD(Wcc_Pair, value)
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	Pair* cobj = zval_toc<Pair>(ZEND_THIS);
-	cobj->two_.copy_zv(return_value);
+	val_ptr result = cobj->second();
+	result.copy_zv(return_value);
 }
 
 ZEND_METHOD(Wcc_Pair, test_calc)

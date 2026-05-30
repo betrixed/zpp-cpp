@@ -28,7 +28,7 @@
 #include "wcc/dispatch.cpp"
 #include "wcc/run.cpp"
 #include "wcc/debuglog.cpp"
-#include "wcc/flash.cpp"
+#include "wcc/usersession.cpp"
 #include "wcc/userdata.cpp"
 
 

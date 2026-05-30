@@ -772,11 +772,12 @@ Dispatch::obcall(obj_ptr rmatch)
 
 	obj_rc pbefore = Pair::omg.new_zobj();
 	Pair* p = zobj_toc<Pair>(pbefore);
-		//method name, arguments
-	p->one_ = DSPi.beforecall_str; // method name
-	p->two_ = disval; // dispatch object in array as args.
 
-	// 
+	val_rc arg1(DSPi.beforecall_str);
+	val_rc arg2(disval);
+
+	p->construct(arg1,arg2);
+
 
 	htab_rc extra_args;
 	obj_rc  after_obj;

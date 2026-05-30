@@ -56,6 +56,9 @@ public:
 
 };
 
+extern UserDataInit UDi;
+
+
 class  UserData : public base_d {
 public:
 
