@@ -21,6 +21,7 @@ public:
 	str_intern status_str;
 
 	str_intern user_p;
+	str_intern name_p;
 	str_intern userName_p;
 	str_intern roles_p;
 	str_intern email_p;
@@ -30,12 +31,29 @@ public:
 	str_intern status_p;
 	str_intern keys_p;
 
-	str_intern guest_str;
 	str_intern flash_str;
 	str_intern OK_str;
+	str_intern destroy_fn;
+	str_intern start_fn;
+	str_intern userData_p;
 
+
+	str_intern admin_user;
 	str_intern Admin_str;
 	str_intern Editor_str;
+	str_intern Guest_str;
+	str_intern User_str;
+
+	str_intern getadapter_str;
+	str_intern gc_str;
+	str_intern session_str;
+
+	str_intern getexpires_str;
+	str_intern expires_fmt;
+	str_intern unknown_str;
+
+
+
 };
 
 class  UserData : public base_d {

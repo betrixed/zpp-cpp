@@ -36,6 +36,7 @@ void UserDataInit::init()
 
 	user_p = "user";
 	userName_p = "userName";
+	name_p = "name";
 	roles_p = "roles";
 	email_p = "email";
 	id_p = "id";
@@ -43,12 +44,25 @@ void UserDataInit::init()
 	status_p = "status";
 	keys_p = "keys";
 
-	guest_str = "Guest";
 	flash_str = "flash";
 	OK_str = "OK";
 
+	admin_user = "admin";
 	Admin_str = "Admin";
 	Editor_str = "Editor";
+	Guest_str = "Guest";
+	User_str = "User";
+
+	getadapter_str = "getadapter";
+	gc_str = "gc";
+	session_str = "session";
+	destroy_fn = "destroy";
+	start_fn = "start";
+	userData_p = "userData";
+
+	getexpires_str = "getexpires";
+	expires_fmt = "D H:i e";
+	unknown_str = "unknown";
 }
 
 void 

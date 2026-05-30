@@ -22,6 +22,8 @@ protected:
 	obj_rc data_;
 	
 	obj_rc getSession();
+	obj_rc getAdapter();
+
 	UserData* ud_cpp();
 
 public:
@@ -36,6 +38,8 @@ public:
 
 	bool auth(val_ptr role);
 	void clearFlash();
+	void delayWrite();
+	
 	void flash(str_ptr msg, htab_ptr exlines, str_ptr status);
 	str_rc getEndTime();
 	obj_rc getFlash();
