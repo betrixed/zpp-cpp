@@ -1175,14 +1175,14 @@ unserialize(str_ptr data, htab_ptr options)
 int 
 session_status()
 {
-    fn_noparams fn(TLFN.session_status);
+    fn_noparams fn(TLFNs.session_status);
     return fn.zlong();
 }
 
 bool 
 session_write_close()
 {
-    fn_noparams fn(TLFN.session_write_close);
+    fn_noparams fn(TLFNs.session_write_close);
     return fn.zbool();
 }
 

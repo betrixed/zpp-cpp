@@ -49,10 +49,12 @@ protected:
     friend class htab_walk;
 
     static val_rc EmptyArray;
+    static val_rc NullValue;
 
 public:
     
-    
+    static const val_ptr null_value_ptr();
+    static const val_ptr empty_array_ptr();
 
 
 	operator zval*() const  { return (zval*) &zv_; }

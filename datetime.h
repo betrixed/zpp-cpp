@@ -113,7 +113,7 @@ namespace zpp {
 
 		static val_rc  strtotime(zval* value);
 		static str_rc  date(str_ptr dfmt, zval* value);
-		static str_rc  date(str_ptr dfmt, zend_long timeval)
+		static str_rc  date(str_ptr dfmt, zend_long timeval);
 		static double  microtime();
 
 	};
