@@ -297,6 +297,9 @@ namespace zpp {
         str_intern  s_weakref_get;
         
         
+        str_intern  session_write_close_fn;
+        str_intern  session_status_fn;
+        
         void init() override;
         void init_req() override;
 
@@ -314,6 +317,7 @@ namespace zpp {
         str_intern  date;
         str_intern  strtotime;
         str_intern  invoke_fn;
+
 
         
         void init() override;
@@ -455,6 +459,9 @@ namespace zpp {
 
     str_rc file_extension(str_ptr path);
 
+    int session_status();
+
+    bool session_write_close();
 
 
 }; // end namespace zpp

@@ -110,6 +110,10 @@ public:
     fn_call          readdir;
     fn_call          realpath; 
     fn_call          serialize;
+
+    fn_call          session_status;
+    fn_call          session_write_close;
+
     fn_call          sha1;
     fn_call          stripslashes;
     fn_call          strtr;
@@ -171,6 +175,9 @@ public:
         readdir.set_fci(ftab.s_readdir);
         realpath.set_fci(ftab.s_realpath);
 
+        session_status.set_fci(ftab.session_status_fn);
+        session_write_close.set_fci(ftab.session_write_close_fn);
+        
         serialize.set_fci(ftab.s_serialize);
         sha1.set_fci(ftab.s_sha1);
         stripslashes.set_fci(ftab.s_stripslashes);
@@ -908,6 +915,9 @@ fntable::init()
     s_unserialize = "unserialize";
     s_weakref_create = "weakreference::create";
     s_weakref_get = "get";
+
+    session_status_fn = "session_status";
+    session_write_close_fn = "session_write_close";
 }
 
 void  // virtual
@@ -920,6 +930,8 @@ strtable::init()
     date = "date";
     strtotime = "strtotime";
     invoke_fn = "__invoke";
+
+
 }
 
 
@@ -1158,6 +1170,20 @@ unserialize(str_ptr data, htab_ptr options)
         ZVAL_EMPTY_ARRAY(ap);
     }
     return fn.mixed();
+}
+
+int 
+session_status()
+{
+    fn_noparams fn(TLFN.session_status);
+    return fn.zlong();
+}
+
+bool 
+session_write_close()
+{
+    fn_noparams fn(TLFN.session_write_close);
+    return fn.zbool();
 }
 
 } // end namespace zpp

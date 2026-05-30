@@ -336,6 +336,14 @@ obj_ptr::property(str_ptr key, val_rc& value)
     zend_update_property_ex((zend_class_entry*) scope, obj_, key, value);   
 }
 
+void obj_ptr::property(str_ptr key, int value)
+{
+    zval temp = {0};
+    // No rc++, because zval is thrown away on exit.
+    ZVAL_LONG(&temp, value);
+    property(key, val_ptr(&temp));
+}
+
 void obj_ptr::property(str_ptr key, str_ptr value)
 {
     zval temp = {0};
@@ -465,7 +473,7 @@ obj_ptr::property(str_ptr key)
 
     zval rv ={0};
 
-    const zend_class_entry *old_scope = EG(fake_scope);
+    auto old_scope = EG(fake_scope);
 
     //always put in objects class scope, 
     EG(fake_scope) = obj_->ce; 

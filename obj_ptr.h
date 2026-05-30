@@ -91,7 +91,7 @@ namespace zpp {
 		void      property(str_ptr key, obj_ptr value);
 		void      property(str_ptr key, val_rc& value);
 		void      property(str_ptr key, htab_ptr value);
-
+		void      property(str_ptr key, int value);
 		
 		bool      has_property(str_ptr name);
 		void      unset_property(str_ptr name);

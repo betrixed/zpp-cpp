@@ -93,8 +93,20 @@ datetime_obj::strtotime(zval* value)
 	return strtotime.mixed();
 }
 
+str_rc 
+datetime_obj::date(str_ptr dfmt, zend_long timeval)
+{
+	fn_call 	   fnc(DTData.date);
+	fn_params<2>   datefmt(fnc);
+
+	val_ptr::string_bind(&datefmt.params[0], dfmt);
+	ZVAL_LONG(&datefmt.params[1], timeval);
+
+	return datefmt.str();
+}
+
 str_rc //static
-datetime_obj::date(str_ptr fmt, zval* value)
+datetime_obj::date(str_ptr dfmt, zval* value)
 {
 	str_rc result;
 
@@ -102,13 +114,7 @@ datetime_obj::date(str_ptr fmt, zval* value)
 
 	if (val_ptr(timeval).isLong())
 	{
-		fn_call 	   fnc(DTData.date);
-		fn_params<2>   datefmt(fnc);
-
-		val_ptr::string_bind(&datefmt.params[0], fmt);
-		ZVAL_COPY_VALUE(&datefmt.params[1], timeval);
-
-		return datefmt.str();
+		result = datetime_obj::date(dfmt, timeval.zlong());
 	}
 	return result;
 }
