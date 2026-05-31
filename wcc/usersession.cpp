@@ -601,4 +601,312 @@ UserSession::UserSession::write(bool force)
 
 
 } // wcc namespace
+
+using namespace zpp;
+using namespace wcc;
+
+ZEND_METHOD(Wcc_UserSession, __construct)
+{
+	if (!zarg_rd::zero_args(execute_data, __FUNCTION__))
+	{
+		return;
+	}
+
+	UserSession* cobj = zval_toc<UserSession>(ZEND_THIS);
+	cobj->construct();
+}
+
+ZEND_METHOD(Wcc_UserSession, activate)
+{
+	if (!zarg_rd::zero_args(execute_data, __FUNCTION__))
+	{
+		return;
+	}
+	UserSession* cobj = zval_toc<UserSession>(ZEND_THIS);
+	obj_rc result = cobj->activate();
+	result.move_zv(return_value);
+
+}
+
+ZEND_METHOD(Wcc_UserSession, addFlash)
+{
+	zarg_rd args(execute_data);
+
+	str_ptr text = args.str(args.need(0));
+	str_ptr status = args.str(args.need(1));
+	if (!args.throw_errors())
+	{
+		UserSession* cobj = zval_toc<UserSession>(ZEND_THIS);
+		cobj->addFlash(text,status);
+	}
+}
+
+ZEND_METHOD(Wcc_UserSession, addUserRoles)
+{
+	zarg_rd args(execute_data);
+
+	htab_ptr roles = args.htab(args.need(0));
+	if (!args.throw_errors())
+	{
+		UserSession* cobj = zval_toc<UserSession>(ZEND_THIS);
+		cobj->addUserRoles(roles);
+	}
+}
+
+ZEND_METHOD(Wcc_UserSession, adjustExpiry)
+{
+	if (!zarg_rd::zero_args(execute_data, __FUNCTION__))
+	{
+		return;
+	}
+	UserSession* cobj = zval_toc<UserSession>(ZEND_THIS);
+	int result = cobj->adjustExpiry();
+	RETURN_LONG(result);
+}
+
+ZEND_METHOD(Wcc_UserSession, auth)
+{
+	zarg_rd args(execute_data);
+
+	val_ptr role = args.string_or_array(args.need(0));
+
+	if (!args.throw_errors())
+	{
+		UserSession* cobj = zval_toc<UserSession>(ZEND_THIS);
+		bool result = cobj->auth(role);
+		RETURN_BOOL(result);
+	}
+}
+
+ZEND_METHOD(Wcc_UserSession, clearFlash)
+{
+	if (!zarg_rd::zero_args(execute_data, __FUNCTION__))
+	{
+		return;
+	}
+	UserSession* cobj = zval_toc<UserSession>(ZEND_THIS);
+	cobj->clearFlash();
+}
+
+ZEND_METHOD(Wcc_UserSession, delayWrite)
+{
+	if (!zarg_rd::zero_args(execute_data, __FUNCTION__))
+	{
+		return;
+	}
+	UserSession* cobj = zval_toc<UserSession>(ZEND_THIS);
+	cobj->delayWrite();
+
+}
+
+ZEND_METHOD(Wcc_UserSession, flash)
+{
+	zarg_rd args(execute_data);
+
+	str_ptr text = args.str(args.need(0));
+	val_ptr extra = args.string_or_array(args.option(1));
+	str_ptr status = args.str(args.need(2));
+
+	if (!args.throw_errors())
+	{
+		UserSession* cobj = zval_toc<UserSession>(ZEND_THIS);
+		cobj->flash(text, extra, status);
+	}
+}
+
+ZEND_METHOD(Wcc_UserSession, getEndTime)
+{
+	if (!zarg_rd::zero_args(execute_data, __FUNCTION__))
+	{
+		return;
+	}
+	UserSession* cobj = zval_toc<UserSession>(ZEND_THIS);
+	str_rc result = cobj->getEndTime();
+	result.move_zv(result);
+}
+
+ZEND_METHOD(Wcc_UserSession, getFlash)
+{
+	if (!zarg_rd::zero_args(execute_data, __FUNCTION__))
+	{
+		return;
+	}
+	UserSession* cobj = zval_toc<UserSession>(ZEND_THIS);
+	htab_rc result = cobj->getFlash();
+	result.move_zv(result);
+}
+
+ZEND_METHOD(Wcc_UserSession, getKey)
+{
+	zarg_rd args(execute_data);
+
+	str_ptr key = args.str(args.need(0));
+	val_ptr def = args.option(1);
+
+	if (!args.throw_errors())
+	{
+		UserSession* cobj = zval_toc<UserSession>(ZEND_THIS);
+		val_rc result = cobj->getKey(key, def);
+		result.move_zv(return_value);
+	}
+}
+
+ZEND_METHOD(Wcc_UserSession, getUser)
+{
+	if (!zarg_rd::zero_args(execute_data, __FUNCTION__))
+	{
+		return;
+	}
+	UserSession* cobj = zval_toc<UserSession>(ZEND_THIS);
+	obj_rc result = cobj->getUser();
+	result.move_zv(result);
+}
+
+ZEND_METHOD(Wcc_UserSession, getUserRoles)
+{
+	if (!zarg_rd::zero_args(execute_data, __FUNCTION__))
+	{
+		return;
+	}
+	UserSession* cobj = zval_toc<UserSession>(ZEND_THIS);
+	htab_rc result = cobj->getUserRoles();
+	result.move_zv(result);
+}
+
+ZEND_METHOD(Wcc_UserSession, guestSession)
+{
+	if (!zarg_rd::zero_args(execute_data, __FUNCTION__))
+	{
+		return;
+	}
+	UserSession* cobj = zval_toc<UserSession>(ZEND_THIS);
+	obj_rc result = cobj->guestSession();
+	result.move_zv(result);
+}
+
+ZEND_METHOD(Wcc_UserSession, hasKey)
+{
+	zarg_rd args(execute_data);
+
+	str_ptr key = args.str(args.need(0));
+
+	if (!args.throw_errors())
+	{
+		UserSession* cobj = zval_toc<UserSession>(ZEND_THIS);
+		bool result = cobj->hasKey(key);
+		RETURN_BOOL(result);
+	}
+
+}
+
+ZEND_METHOD(Wcc_UserSession, hasValues)
+{
+	if (!zarg_rd::zero_args(execute_data, __FUNCTION__))
+	{
+		return;
+	}
+	UserSession* cobj = zval_toc<UserSession>(ZEND_THIS);
+	bool result = cobj->hasValues();
+	RETURN_BOOL(result);
+
+}
+
+ZEND_METHOD(Wcc_UserSession, isEmpty)
+{
+	if (!zarg_rd::zero_args(execute_data, __FUNCTION__))
+	{
+		return;
+	}
+	UserSession* cobj = zval_toc<UserSession>(ZEND_THIS);
+	bool result = cobj->isEmpty();
+	RETURN_BOOL(result);
+
+}
+
+ZEND_METHOD(Wcc_UserSession, isEnded)
+{
+	if (!zarg_rd::zero_args(execute_data, __FUNCTION__))
+	{
+		return;
+	}
+	UserSession* cobj = zval_toc<UserSession>(ZEND_THIS);
+	bool result = cobj->isEnded();
+	RETURN_BOOL(result);
+}
+
+ZEND_METHOD(Wcc_UserSession, isLoggedIn)
+{
+	zarg_rd args(execute_data);
+
+	val_ptr role = args.string_or_array(args.need(0));
+
+	if (!args.throw_errors())
+	{
+		UserSession* cobj = zval_toc<UserSession>(ZEND_THIS);
+		bool result = cobj->isLoggedIn(key);
+		RETURN_BOOL(result);
+	}
+
+}
+
+ZEND_METHOD(Wcc_UserSession, nullify)
+{
+}
+
+ZEND_METHOD(Wcc_UserSession, read)
+{
+}
+
+ZEND_METHOD(Wcc_UserSession, roles)
+{
+}
+
+ZEND_METHOD(Wcc_UserSession, save)
+{
+}
+
+ZEND_METHOD(Wcc_UserSession, saveUser)
+{
+}
+
+ZEND_METHOD(Wcc_UserSession, sessionName)
+{
+}
+
+ZEND_METHOD(Wcc_UserSession, setAdmin)
+{
+}
+
+ZEND_METHOD(Wcc_UserSession, setGuest)
+{
+}
+
+ZEND_METHOD(Wcc_UserSession, setKey)
+{
+}
+
+ZEND_METHOD(Wcc_UserSession, setValidUser)
+{
+}
+
+ZEND_METHOD(Wcc_UserSession, shutdown)
+{
+}
+
+ZEND_METHOD(Wcc_UserSession, unsetKey)
+{
+}
+
+ZEND_METHOD(Wcc_UserSession, updated)
+{
+}
+
+ZEND_METHOD(Wcc_UserSession, wipe)
+{
+}
+
+ZEND_METHOD(Wcc_UserSession, write)
+{
+}
+
 #endif
