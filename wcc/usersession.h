@@ -26,6 +26,8 @@ public:
 
 	static base_obj_mgr<UserSession> omg;
 	
+	void debug_info(htab_rw hw) override;
+
 	void construct();
 	obj_rc  activate();
 	void addFlash(str_ptr text, str_ptr status);
@@ -51,6 +53,7 @@ public:
 	bool isEmpty();
 	bool isEnded();
 	bool isLoggedIn(val_ptr roles);
+	
 	void nullify();
 	obj_rc read();
 	str_rc roles();
@@ -62,8 +65,6 @@ public:
 	void  setGuest();
 	void setKey(str_ptr key, val_ptr value);
 	void setValidUser(str_ptr uname, htab_ptr roles);
-	
-	
 
 	void shutdown();
 	void unsetKey(str_ptr key);
@@ -71,13 +72,8 @@ public:
 	void wipe();
 	void write(bool force=false);
 
-
-
-
-
-
-
 };
 
 }//wcc namespace
+
 #endif

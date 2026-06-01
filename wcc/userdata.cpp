@@ -64,6 +64,23 @@ void UserDataInit::init()
 void 
 UserData::construct()
 {
+	val_rc vnull;
+	obj_ptr self(self_);
+
+	htab_ptr ea = htab_ptr::empty_array();
+	self.property(UDi.user_p, vnull);
+	self.property(UDi.flash_str, ea);
+	self.property(UDi.keys_p, ea);
+	self.property(UDi.roles_p, ea);
+}
+
+obj_rc 
+UserData::newobj()
+{
+	obj_rc result = UserData::omg.new_zobj();
+	UserData* ud = zobj_toc<UserData>(result);
+	ud->construct();
+	return result;
 }
 
 bool   
@@ -182,6 +199,8 @@ PHP_MINIT_FUNCTION(Session_UserData_reg)
 
 	UserData::omg.classEntry(ce);
 
+	STATE_INIT_ADD(UDi)
+	
 	return SUCCESS;
 }
 

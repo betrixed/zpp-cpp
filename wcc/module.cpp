@@ -95,10 +95,18 @@ Module::construct(str_ptr name, htab_ptr data)
 	active_ = false;
 	name_ = name;
 	obj_rc  config = Config::omg.new_zobj();
+	
 	Config* cfg = zobj_toc<Config>(config);
 	cfg->construct(data);
 	obj_ptr self(self_);
 	self.property(MODi.data_str, config);
+
+	obj_rc test = self.obj_property(MODi.data_str);
+
+	if (!test.ok())
+	{
+		showobj("test property_ptr ", test);
+	}
 	this->data_ = config;
 }
 
@@ -249,7 +257,10 @@ Module::addDefaults(obj_ptr defmod)
 {
 	
 	obj_rc  cfgdata =  defmod.obj_property(MODi.data_str);
-
+	if (!cfgdata.ok())
+	{
+		return;
+	}
 	Config* cfg = zobj_toc<Config>(cfgdata);
 	htab_rc list = cfg->toArray();
 
@@ -280,6 +291,10 @@ Module::getValueList(str_ptr key)
 	obj_ptr self = self_;
 	obj_rc  data = self.obj_property(MODi.data_str);
 
+	if (!data.ok())
+	{
+		return list;
+	}
 	val_rc  value = data.property(key);
 	if (value.isString())
 	{
@@ -494,7 +509,7 @@ PHP_MINIT_FUNCTION(Wcc_Module_reg)
 {
 	//auto ce = register_class_Wcc_Config(zend_ce_arrayaccess, zend_ce_countable);
 	//zend_standard_class_def
-	auto ce = register_class_Wcc_Module(Config::omg.classEntry());
+	auto ce = register_class_Wcc_Module();
 	Module::omg.classEntry(ce);
 
 	STATE_INIT_ADD(MODi)

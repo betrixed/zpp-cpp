@@ -1,6 +1,10 @@
 #ifndef ROUTES_EXTN_CXX
 #define ROUTES_EXTN_CXX
 
+#include "wcc/userdata.cpp"
+
+#include "wcc/usersession.cpp"
+
 #include "wcc/finder.cpp"
 #include "wcc/loader.cpp"
 
@@ -25,11 +29,18 @@
 
 #include "wcc/module.cpp"
 
-#include "wcc/dispatch.cpp"
-#include "wcc/run.cpp"
+//#include "wcc/dispatch.cpp"
+
 #include "wcc/debuglog.cpp"
-#include "wcc/usersession.cpp"
+
+/*
 #include "wcc/userdata.cpp"
+
+#include "wcc/usersession.cpp"
+*/
+
+
+
 
 
 void register_routes_extn(INIT_FUNC_ARGS)
@@ -114,13 +125,14 @@ PHP_MINIT(wcc_pair_d)(INIT_FUNC_ARGS_PASSTHRU);
 	PHP_MINIT(wcc_debuglog_reg)(INIT_FUNC_ARGS_PASSTHRU);
 #endif
 
-#ifdef SESSION_FLASH_CPP
-	PHP_MINIT(Session_Flash_reg)(INIT_FUNC_ARGS_PASSTHRU);
-#endif
-
 #ifdef SESSION_USERDATA_CPP
 	PHP_MINIT(Session_UserData_reg)(INIT_FUNC_ARGS_PASSTHRU);
 #endif
+
+#ifdef WCC_USERSESSION_CPP
+	PHP_MINIT(Wcc_UserSession_reg)(INIT_FUNC_ARGS_PASSTHRU);
+#endif
+
 }
 
 #endif

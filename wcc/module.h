@@ -13,13 +13,11 @@ using namespace zpp;
 	class  Module : public base_d 
 	{
 	protected:
-		obj_ptr data_; // A Config object
+		obj_rc  data_; // A Config object
 		htab_rc requires_;
 		bool    active_;
 		str_rc  cfg_path_;
 		str_rc  name_;
-		
-		
 	public:
 
 		void debug_info(htab_rw hw) override;

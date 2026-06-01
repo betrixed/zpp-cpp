@@ -21,6 +21,8 @@ namespace wcc {
 
 		static base_obj_mgr<Run> omg;
 
+		void debug_info(htab_rw di) override;
+
 		void construct();
 		void destruct();
 		error_return execute(str_ptr bootstrap);
@@ -35,6 +37,7 @@ public:
 	str_intern target;
 	str_intern target_const;
 	str_intern site_leaf;
+	str_intern bootstrap;
 
 	str_intern site_leaf_const;
 	str_intern site_const;

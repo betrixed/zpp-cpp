@@ -5,8 +5,8 @@
  */
 namespace Wcc;
 
-#[\AllowDynamicProperties]
-class Module extends Config {
+
+class Module {
 
  	const string DEFAULT_MOD = "default";
     const string BASE = "base";
@@ -20,7 +20,7 @@ class Module extends Config {
     const string ASSETS = "assets";
     const string ASSET_FILE = "asset_file";
 
-    public readonly Config $data;
+    public Config $data;
 
     public function __construct(string $name, array $mod);
 

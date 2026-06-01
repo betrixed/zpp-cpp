@@ -27,7 +27,7 @@ class UserSession {
 
 	public function getEndTime() : string {}
 
-	public function getFlash() : ?Session\Flash {}
+	public function getFlash() : ?array {}
 
 	public function getKey(string $key, mixed $adef) : mixed {}
 

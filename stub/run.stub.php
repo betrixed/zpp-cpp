@@ -33,16 +33,21 @@ class Run {
     public string $web_dir;
     public string $theme;
     
-    public ?CacheMgr $cache_mgr;
+    public ?CacheMgr $cache_mgr = null;
 
     public string $module_name;
-    public ?Module $module_cfg;
+    public ?Module $module_cfg = null;
     public string $routes;
 
-    public ?object $site;
+    public ?object $site = null;
 
-    public bool   $page_hits;
-    public ?PhpStats $stats;
+
+    public ?PhpStats $stats = null;
+
+    public bool  $page_hits = false;
+
+    public array $bootstrap = [];
+    
 
     public function __construct() {}
 

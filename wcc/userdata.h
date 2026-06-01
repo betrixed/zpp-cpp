@@ -65,6 +65,8 @@ public:
 
 	static base_obj_mgr<UserData> omg;
 	
+	static obj_rc newobj();
+
 	void construct();
 
 	bool   hasAnyRole(htab_ptr rolelist);

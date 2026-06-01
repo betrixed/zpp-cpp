@@ -64,7 +64,10 @@ void Run_init::init()
 	target = "target";
 	target_const = "TARGET";
 
+
 	site_leaf = "site_leaf";
+	bootstrap = "bootstrap";
+
 	site_leaf_const = "SITE_LEAF";
 	site_const = "SITE";
 	
@@ -138,6 +141,10 @@ void Run_init::init()
 }
 
 
+void Run::debug_info(htab_rw di)
+{
+	base_d::debug_info(di);
+}
 
 void Run::construct()
 {
@@ -167,6 +174,9 @@ void Run::construct()
 		define(Run_i.br_eol_str, temp);
 	}
 
+	val_rc nullval;
+
+	self.property(Run_i.cache_mgr, nullval);
 	//showobj("Loader", loader);
 
 	//return;
@@ -180,10 +190,12 @@ void Run::construct()
 	str_rc root_dir = dirname(php_root);
 	self.property(Run_i.wc_leaf, root_dir);
 
-	temp = constant(Run_i.target_const);
-	//showmem("target", temp);
 
 	obj_rc config = Config::omg.new_zobj();
+	self.property(Run_i.config_str, config);
+
+	temp = constant(Run_i.target_const);
+	//showmem("target", temp);
 	self.property(Run_i.target, temp);
 
 	self.property(Run_i.vendor_leaf, Run_i.vendor_str);
@@ -231,7 +243,7 @@ void Run::construct()
 
 	
 	
-	self.property(Run_i.config_str, config);
+	
 	sobj->set(Run_i.config_str, config);
 
 	htab_rc start_args;
@@ -477,7 +489,7 @@ void Run::shutdown()
 }
 
 error_return
- Run::config_init(str_ptr bootstrap)
+Run::config_init(str_ptr bootstrap)
 {
 	error_return result;
 
@@ -490,7 +502,6 @@ error_return
 	str_rc path = buf.zstr();
 	val_return value;
 	val_rc tlist;
-	htab_rc bcfg;
 
 	if (file_exists(path))
 	{
@@ -508,11 +519,11 @@ error_return
 		result.error() << "No bootstrap file " << bootstrap;
 		return result;
 	}
-	val_ptr test(value.value_);
 
-	if (test.isArray())
+	htab_rc bcfg = self.array_property(Run_i.bootstrap);
+
+	if (bcfg.size())
 	{
-		bcfg = test.zarray();
 		str_rc target = self.property(Run_i.target);
 		target.lowercase();
 
@@ -525,17 +536,18 @@ error_return
 		}
 
 	}
-
-	if (!tlist.isArray()) {
-		result.error() << "No Array returned from bootstrap " << path;
+	else {
+		result.error() <<  "bootstrap property not set" << path;
 		return result;
 	}
+		
+
 	
 
 	bcfg = tlist.zarray();
 	//showdata("bcfg", bcfg);
 
-	test = bcfg.get(Run_i.assets_str);
+	val_ptr test = bcfg.get(Run_i.assets_str);
 
 	if (test.isArray())
 	{
