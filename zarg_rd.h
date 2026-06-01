@@ -63,6 +63,8 @@ public:
 	zarg_rd(zend_execute_data* ze);
 	~zarg_rd();
 
+	
+
 	str_buf& error();
 
 	void wrong(zval* arg);
@@ -117,6 +119,7 @@ public:
 	}
 
 	static bool more_args(zend_execute_data* ze, const char* fname=nullptr, size_t maxa=0);
+	static bool zero_args(zend_execute_data* ze, const char* fname=nullptr);
 };
 
 }; //namespace zpp

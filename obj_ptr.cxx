@@ -302,10 +302,26 @@ obj_ptr::callable(zval* arg1, zval* arg2)
     return result;
 }
 
-zval* 
+val_ptr 
 obj_ptr::property_ptr(str_ptr name)
 {
-    return zend_std_get_property_ptr_ptr(obj_, name, BP_VAR_IS, nullptr);
+    //return zend_std_get_property_ptr_ptr(obj_, name, BP_VAR_IS, nullptr);
+
+    val_ptr result;
+
+    auto old_scope = EG(fake_scope);
+
+    //always put in objects class scope, 
+    EG(fake_scope) = obj_->ce; 
+    
+//get_property_ptr_ptr(zend_object* object, zend_string* name, 
+//               int type, void** cache_slot)
+    //  always assume "silent" get, as from code in zend_read_property_ex
+    result = obj_->handlers->get_property_ptr_ptr(obj_, name, BP_VAR_IS, nullptr);
+    //showmem("property_ptr", result);
+
+    EG(fake_scope) = old_scope;
+    return result;
 }
 
 void 
@@ -520,10 +536,15 @@ obj_rc
 obj_ptr::obj_property(str_ptr name)
 {
     obj_rc result;
-    val_rc copy = property(name);
-
-    result = std::move(copy);
-
+    val_ptr test = property_ptr(name);
+    
+    if (test.isObject())
+    {
+        result = test.zobject();
+    }
+    else {
+        zend_printf("No object %s\n", name.data());
+    }
     return result;
 }
 

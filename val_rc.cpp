@@ -37,13 +37,13 @@ val_rc val_rc::NullValue = val_rc();
  
 const val_ptr //static
 val_rc::null_value_ptr(){
-    return &val_rc::NullValue;
+    return val_ptr(val_rc::NullValue);
 }
 
 const val_ptr
 val_rc::empty_array_ptr()
 {
-    return &val_rc::EmptyArray;
+    return val_ptr(val_rc::EmptyArray);
 }
 /** This init does not de-reference anything, just wipes */
 void 

@@ -113,6 +113,8 @@ namespace zpp {
         
         zval* get(zend_string* zkey) const;
 
+        zval* get(zend_string* zkey, val_ptr adef) const;
+
         zval* get(const char* key) const;
         zval* get(const std::string_view& key) const;
         zval* get(zval* key) const;

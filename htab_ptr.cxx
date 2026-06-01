@@ -233,9 +233,21 @@ htab_ptr::get(zend_long idx) const
 zval*  
 htab_ptr::get(zend_string* zkey) const
 {
-	if (!ht_)
-		return nullptr;
-	return zend_hash_find(ht_, zkey);
+	zval* result = nullptr;
+	if (ht_) {
+		result =  zend_hash_find(ht_, zkey);
+	}
+	return result;
+}
+
+zval* htab_ptr::get(zend_string* zkey, val_ptr adef) const
+{
+	zval* result = get(zkey);
+	if (!result)
+	{	
+		result = (zval*) adef;
+	}
+	return result;
 }
 
 zval*  

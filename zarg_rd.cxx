@@ -59,6 +59,13 @@ zarg_rd::more_args(zend_execute_data* ze, const char* fn, size_t maxa)
 	}
 	return true;
 }
+
+bool //static 
+zarg_rd::zero_args(zend_execute_data* ze, const char* fn)
+{
+	return zarg_rd::more_args(ze, fn, 0);
+}
+
 zarg_rd::zarg_rd(zend_execute_data* ze) : errors_(nullptr)
 {
 	zptr0_ = (zval*)(ZEND_CALL_VAR_NUM(ze, 0));
