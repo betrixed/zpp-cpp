@@ -542,9 +542,9 @@ obj_ptr::obj_property(str_ptr name)
     {
         result = test.zobject();
     }
-    else {
+   /* else {
         zend_printf("No object %s\n", name.data());
-    }
+    }*/
     return result;
 }
 

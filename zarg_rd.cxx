@@ -43,16 +43,23 @@ zarg_rd::~zarg_rd()
 	}
 }
 
+
+void //static 
+zarg_rd::list_args(str_buf& args, zval* p0, size_t ct)
+{
+	dump_info  din(args); // connect buffer
+	din.di_show_slice(p0, ct);
+}
+
 bool //static 
 zarg_rd::more_args(zend_execute_data* ze, const char* fn, size_t maxa)
 {
 	size_t  nargs = ZEND_CALL_NUM_ARGS(ze);
 	if (nargs > maxa) {
 		str_buf args;
-		zval*   p0 = (zval*)(ZEND_CALL_VAR_NUM(ze, 0));
 		args << fn << " More than " << maxa << " arguments: " << nargs << ':' << endl;
-		dump_info  din(args);
-		din.di_show_slice(p0, nargs);
+		zval* p0 = (zval*)(ZEND_CALL_VAR_NUM(ze, 0));
+		list_args(args, p0, nargs);
 		str_rc msg = args.zstr();
 		zend_throw_error(zend_ce_error,"%s", msg.data());
 		return false;
@@ -158,7 +165,7 @@ zarg_rd::str(zval *arg)
 	{
 		return result;
 	}
-	error() << "# Not a string ";
+	error() << " # Not a string ";
 	wrong(arg);
 
 	return result;
@@ -524,8 +531,12 @@ zarg_rd::throw_errors(const char* fncstr)
 {
 	if (errors_)
 	{
-		*errors_ << " : zard_rd::threw_errors in " << fncstr;
+		*errors_ << " : zard_rd::threw_errors in " << fncstr << "<br>\n";
+		list_args(*errors_, zptr0_, nargs_);
+
 		str_rc s = errors_->zstr();
+
+
 		zend_throw_error(zend_ce_error,"%s", s.data());
 		delete errors_;
 		errors_ = nullptr;

@@ -64,6 +64,7 @@ public:
 	~zarg_rd();
 
 	
+	static void list_args(str_buf& args, zval* p0, size_t ct);
 
 	str_buf& error();
 
