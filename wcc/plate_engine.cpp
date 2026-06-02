@@ -486,7 +486,7 @@ ZEND_METHOD(Wcc_PlateEngine, render)
 		data = htab_ptr::empty_array();
 	}
 
-	if (!args.throw_errors())
+	if (!args.throw_errors(__FUNCTION__))
 	{
 		auto cobj = zval_toc<PlateEngine>(ZEND_THIS);
 

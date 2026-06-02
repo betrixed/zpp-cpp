@@ -38,7 +38,7 @@ public:
 	void clearFlash();
 	void delayWrite();
 
-	void flash(str_ptr msg, htab_ptr exlines, str_ptr status);
+	void flash(str_ptr msg, str_ptr status, htab_ptr exlines);
 	str_rc getEndTime();
 	htab_rc getFlash();
 	val_rc getKey(str_ptr key, val_ptr adefault);

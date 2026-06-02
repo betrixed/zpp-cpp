@@ -535,7 +535,7 @@ ZEND_METHOD(Wcc_Services, set)
 	
 	pvalue = args.need(1);
 
-	if (!args.throw_errors())
+	if (!args.throw_errors(__FUNCTION__))
 	{
 		Services* svc = zval_toc<Services>(ZEND_THIS);
 		svc->set(skey, pvalue);
@@ -554,7 +554,7 @@ ZEND_METHOD(Wcc_Services, setObject)
 	args.obj(obj, args.need(0));
 	args.zstring_null(key, args.option(1));
 
-	if (!args.throw_errors())
+	if (!args.throw_errors(__FUNCTION__))
 	{
 		Services* svc = zval_toc<Services>(ZEND_THIS);
 		// result is now referenced in services

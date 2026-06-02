@@ -127,7 +127,7 @@ ZEND_METHOD(Wcc_Replace, __construct)
 
 	args.obj(obj, args.need(0));
 	args.zstring_null(rexpr, args.option(1));
-	if (!args.throw_errors())
+	if (!args.throw_errors(__FUNCTION__))
 	{
 		Replace* cobj = zval_toc<Replace>(ZEND_THIS);
 		cobj->construct(obj, rexpr);
@@ -143,7 +143,7 @@ ZEND_METHOD(Wcc_Replace, eval)
 	str_ptr subj;
 
 	args.zstring(subj, args.need(0));
-	if (!args.throw_errors())
+	if (!args.throw_errors(__FUNCTION__))
 	{
 		Replace* cobj = zval_toc<Replace>(ZEND_THIS);
 		str_rc value = cobj->eval(subj);
@@ -162,7 +162,7 @@ ZEND_METHOD(Wcc_Replace, property)
 	{
 		args.zstring(subj, args.need(1));
 	}
-	if (!args.throw_errors())
+	if (!args.throw_errors(__FUNCTION__))
 	{
 		str_rc value = Replace::property(obj, subj);
 		value.move_zv(return_value);

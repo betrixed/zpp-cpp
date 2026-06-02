@@ -38,6 +38,8 @@ void UserSession::debug_info(htab_rw hw)
 {
 	hw.set(UDi.session_str, session_);
 	hw.set(UDi.userData_p, data_);
+	hw.setbool(UDi.doWrite, doWrite_);
+	hw.setbool(UDi.wasRead, wasRead_);
 }
 
 
@@ -177,7 +179,7 @@ void UserSession::delayWrite()
 	doWrite_ = true;
 }
 
-void UserSession::flash(str_ptr msg, htab_ptr exlines, str_ptr status)
+void UserSession::flash(str_ptr msg, str_ptr status, htab_ptr exlines)
 {
 	str_buf buf;
 
@@ -197,6 +199,11 @@ void UserSession::flash(str_ptr msg, htab_ptr exlines, str_ptr status)
 	htab_rc line;
 	htab_rw flash(line);
 	flash.push_back(buf.zstr());
+
+	if (!status.ok())
+	{
+		status = UDi.status_info;
+	}
 	flash.push_back(status);
 	list.push_back(line);
 }
@@ -282,15 +289,15 @@ UserSession::getUser()
 
 	if (result.ok())
 	{	
-		showobj("getUser 1", result);
+		//showobj("getUser 1", result);
 		return result;
 	}
 	result = Config::omg.new_zobj();
 
-	showobj("getUser 2", result);
+	//showobj("getUser 2", result);
 	data_.property(UDi.user_p, result);
 	doWrite_ = true;
-	showobj("user", result);
+	//showobj("user", result);
 	return result;
 }
 
@@ -404,6 +411,8 @@ UserSession::read()
 	val_rc test;
 	bool exists = false;
 
+	DebugLog* log = DebugLog::cpp_global();
+
 	if (!wasRead_ && !ended_)
 	{
 		doWrite_ = false;
@@ -412,12 +421,22 @@ UserSession::read()
 		{
 			data_.init();
 			test = session.call(UDi.start_fn);
+
 			exists = test.isTrue();
 		}
 		if (exists)
 		{
-			zend_printf("Session exists\n");
-			val_ptr ud = session_.property_ptr(UDi.userData_p);
+			if (log) {
+				
+				log->dump("Session object:", session_);
+			}
+			// a virtual property?
+			val_rc ud = session_.property(UDi.userData_p);
+
+			if (log) {
+
+				log->dump("UserData object:", val_ptr(ud));
+			}
 			if (ud.isObject())
 			{
 				data_ = ud.zobject();
@@ -432,7 +451,7 @@ UserSession::read()
 				wasRead_ = true;
 			}
 			else {
-				zend_printf("Session new\n");
+				//zend_printf("Session new\n");
 				data_ = UserData::newobj();
 				doWrite_ = true;
 				wasRead_ = true;
@@ -471,7 +490,7 @@ UserSession::roles()
 void 
 UserSession::save()
 {
-	write();
+	write(true);
 }
 
 
@@ -553,6 +572,7 @@ UserSession::setKey(str_ptr key, val_ptr value)
 	zval* keys = data_.property_ptr(UDi.keys_p);
 	htab_rw kdata(keys);
 	kdata.set(key, value);
+	doWrite_ = true;
 }
 
 
@@ -580,7 +600,7 @@ UserSession::setValidUser(str_ptr uname, htab_ptr roles)
 void 
 UserSession::shutdown()
 {
-	write();
+	write(true);
 }
 
 
@@ -681,7 +701,7 @@ ZEND_METHOD(Wcc_UserSession, addFlash)
 
 	str_ptr text = args.str(args.need(0));
 	str_ptr status = args.str(args.need(1));
-	if (!args.throw_errors())
+	if (!args.throw_errors(__FUNCTION__))
 	{
 		UserSession* cobj = zval_toc<UserSession>(ZEND_THIS);
 		cobj->addFlash(text,status);
@@ -693,7 +713,7 @@ ZEND_METHOD(Wcc_UserSession, addUserRoles)
 	zarg_rd args(execute_data);
 
 	htab_ptr roles = args.htab(args.need(0));
-	if (!args.throw_errors())
+	if (!args.throw_errors(__FUNCTION__))
 	{
 		UserSession* cobj = zval_toc<UserSession>(ZEND_THIS);
 		cobj->addUserRoles(roles);
@@ -717,7 +737,7 @@ ZEND_METHOD(Wcc_UserSession, auth)
 
 	val_ptr role = args.string_or_array(args.need(0));
 
-	if (!args.throw_errors())
+	if (!args.throw_errors(__FUNCTION__))
 	{
 		UserSession* cobj = zval_toc<UserSession>(ZEND_THIS);
 		bool result = cobj->auth(role);
@@ -749,15 +769,17 @@ ZEND_METHOD(Wcc_UserSession, delayWrite)
 ZEND_METHOD(Wcc_UserSession, flash)
 {
 	zarg_rd args(execute_data);
+	str_ptr status;
+	htab_ptr extra;
 
 	str_ptr text = args.str(args.need(0));
-	htab_ptr extra = args.htab(args.option(1));
-	str_ptr status = args.str(args.need(2));
+	args.zstring_null(status, args.option(1));
+	args.zarray_null(extra, args.option(2));
 
-	if (!args.throw_errors())
+	if (!args.throw_errors(__FUNCTION__))
 	{
 		UserSession* cobj = zval_toc<UserSession>(ZEND_THIS);
-		cobj->flash(text, extra, status);
+		cobj->flash(text, status, extra);
 	}
 }
 
@@ -790,7 +812,7 @@ ZEND_METHOD(Wcc_UserSession, getKey)
 	str_ptr key = args.str(args.need(0));
 	val_ptr def = args.option(1);
 
-	if (!args.throw_errors())
+	if (!args.throw_errors(__FUNCTION__))
 	{
 		UserSession* cobj = zval_toc<UserSession>(ZEND_THIS);
 		val_rc result = cobj->getKey(key, def);
@@ -837,7 +859,7 @@ ZEND_METHOD(Wcc_UserSession, hasKey)
 
 	str_ptr key = args.str(args.need(0));
 
-	if (!args.throw_errors())
+	if (!args.throw_errors(__FUNCTION__))
 	{
 		UserSession* cobj = zval_toc<UserSession>(ZEND_THIS);
 		bool result = cobj->hasKey(key);
@@ -887,7 +909,7 @@ ZEND_METHOD(Wcc_UserSession, isLoggedIn)
 
 	val_ptr role = args.string_or_array(args.need(0));
 
-	if (!args.throw_errors())
+	if (!args.throw_errors(__FUNCTION__))
 	{
 		UserSession* cobj = zval_toc<UserSession>(ZEND_THIS);
 		bool result = cobj->isLoggedIn(role);
@@ -947,7 +969,7 @@ ZEND_METHOD(Wcc_UserSession, saveUser)
 	obj_ptr user = args.obj(args.need(0));
 	htab_ptr roles = args.htab(args.need(1));
 
-	if (!args.throw_errors())
+	if (!args.throw_errors(__FUNCTION__))
 	{
 		UserSession* cobj = zval_toc<UserSession>(ZEND_THIS);
 		cobj->saveUser(user, roles);
@@ -993,7 +1015,7 @@ ZEND_METHOD(Wcc_UserSession, setKey)
 	str_ptr key = args.str(args.need(0));
 	val_ptr value = args.need(1);
 
-	if (!args.throw_errors())
+	if (!args.throw_errors(__FUNCTION__))
 	{
 		UserSession* cobj = zval_toc<UserSession>(ZEND_THIS);
 		cobj->setKey(key, value);
@@ -1007,7 +1029,7 @@ ZEND_METHOD(Wcc_UserSession, setValidUser)
 	str_ptr name = args.str(args.need(0));
 	htab_ptr roles = args.htab(args.need(1));
 
-	if (!args.throw_errors())
+	if (!args.throw_errors(__FUNCTION__))
 	{
 		UserSession* cobj = zval_toc<UserSession>(ZEND_THIS);
 		cobj->setValidUser(name, roles);
@@ -1030,7 +1052,7 @@ ZEND_METHOD(Wcc_UserSession, unsetKey)
 
 	str_ptr key = args.str(args.need(0));
 
-	if (!args.throw_errors())
+	if (!args.throw_errors(__FUNCTION__))
 	{
 		UserSession* cobj = zval_toc<UserSession>(ZEND_THIS);
 		cobj->unsetKey(key);
@@ -1064,7 +1086,7 @@ ZEND_METHOD(Wcc_UserSession, write)
 	bool force = false; //default
 	args.zbool(force, args.option(0));
 
-	if (!args.throw_errors())
+	if (!args.throw_errors(__FUNCTION__))
 	{
 		UserSession* cobj = zval_toc<UserSession>(ZEND_THIS);
 		cobj->write(force);

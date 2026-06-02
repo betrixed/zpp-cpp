@@ -83,7 +83,7 @@ ZEND_METHOD(Wcc_Pair, __construct)
 		a2 = val_rc::null_value_ptr();
 	}
 
-	if (!args.throw_errors())
+	if (!args.throw_errors(__FUNCTION__))
 	{
 		Pair* cobj = zval_toc<Pair>(ZEND_THIS);
 

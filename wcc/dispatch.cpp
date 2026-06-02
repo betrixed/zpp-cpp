@@ -225,7 +225,7 @@ Dispatch::action(htab_ptr to)
 	rm->setModuleName(module);
 
 	val_return content = obcall(rm);
-	if (!content.throw_errors())
+	if (!content.throw_errors(__FUNCTION__))
 	{
 		respond(content.value_);
 	}
@@ -965,7 +965,7 @@ ZEND_METHOD(Wcc_Dispatch, action)
 {
 	zarg_rd args(execute_data);
 	htab_ptr data = args.htab(args.need(0));
-	if (!args.throw_errors())
+	if (!args.throw_errors(__FUNCTION__))
 	{
 		Dispatch* cobj = zval_toc<Dispatch>(ZEND_THIS);
 		cobj->action(data);
@@ -978,11 +978,11 @@ ZEND_METHOD(Wcc_Dispatch, addModule)
 	str_ptr name = args.str(args.need(0));
 	val_ptr mspec = args.string_or_array(args.need(1));
 
-	if (!args.throw_errors())
+	if (!args.throw_errors(__FUNCTION__))
 	{
 		Dispatch* cobj = zval_toc<Dispatch>(ZEND_THIS);
 		obj_return result = cobj->addModule(name, mspec);
-		if (!result.throw_errors())
+		if (!result.throw_errors(__FUNCTION__))
 		{
 			result.value_.move_zv(return_value);
 		}
@@ -994,7 +994,7 @@ ZEND_METHOD(Wcc_Dispatch, clearRouteCache)
 	zarg_rd args(execute_data);
 	str_ptr file = args.str(args.need(0));
 	str_ptr cache_name = args.str(args.need(1));
-	if (!args.throw_errors())
+	if (!args.throw_errors(__FUNCTION__))
 	{
 		Dispatch* cobj = zval_toc<Dispatch>(ZEND_THIS);
 		bool result = cobj->clearRouteCache(file,cache_name);
@@ -1006,11 +1006,11 @@ ZEND_METHOD(Wcc_Dispatch, dispatch)
 {
 	zarg_rd args(execute_data);
 	obj_ptr rm = args.obj_class(args.need(0), RouteMatch::omg.classEntry());
-	if (!args.throw_errors())
+	if (!args.throw_errors(__FUNCTION__))
 	{
 		Dispatch* cobj = zval_toc<Dispatch>(ZEND_THIS);
 		error_return result = cobj->dispatch(rm);
-		result.throw_errors();
+		result.throw_errors(__FUNCTION__);
 	}	
 }
 
@@ -1024,7 +1024,7 @@ ZEND_METHOD(Wcc_Dispatch, dispatchError)
 	
 	args.zarray_null(data, args.option(3));
 
-	if (!args.throw_errors())
+	if (!args.throw_errors(__FUNCTION__))
 	{
 		Dispatch* cobj = zval_toc<Dispatch>(ZEND_THIS);
 		cobj->dispatchError(rm, cname, method, data);
@@ -1034,7 +1034,7 @@ ZEND_METHOD(Wcc_Dispatch, forward)
 {
 	zarg_rd args(execute_data);
 	val_ptr data = args.string_or_array(args.need(0));
-	if (!args.throw_errors())
+	if (!args.throw_errors(__FUNCTION__))
 	{
 		Dispatch* cobj = zval_toc<Dispatch>(ZEND_THIS);
 		cobj->forward(data);
@@ -1063,7 +1063,7 @@ ZEND_METHOD(Wcc_Dispatch, getRoutesCache)
 {
 	zarg_rd args(execute_data);
 	str_ptr name = args.str(args.need(0));
-	if (!args.throw_errors())
+	if (!args.throw_errors(__FUNCTION__))
 	{
 		Dispatch* cobj = zval_toc<Dispatch>(ZEND_THIS);
 		obj_rc result = cobj->getRoutesCache(name);
@@ -1077,7 +1077,7 @@ ZEND_METHOD(Wcc_Dispatch, getDefaultModule)
 
 	Dispatch* cobj = zval_toc<Dispatch>(ZEND_THIS);
 	obj_return result = cobj->getDefaultModule();
-	if (!result.throw_errors())
+	if (!result.throw_errors(__FUNCTION__))
 	{
 		result.value_.move_zv(return_value);
 	}
@@ -1096,7 +1096,7 @@ ZEND_METHOD(Wcc_Dispatch, getModule)
 {
 	zarg_rd args(execute_data);
 	str_ptr name = args.str(args.need(0));
-	if (!args.throw_errors())
+	if (!args.throw_errors(__FUNCTION__))
 	{
 		Dispatch* cobj = zval_toc<Dispatch>(ZEND_THIS);
 		obj_rc result = cobj->getModule(name);
@@ -1119,11 +1119,11 @@ ZEND_METHOD(Wcc_Dispatch, loadRoutes)
 	zarg_rd args(execute_data);
 	str_ptr file = args.str(args.need(0));
 	str_ptr cache_name = args.str(args.need(1));
-	if (!args.throw_errors())
+	if (!args.throw_errors(__FUNCTION__))
 	{
 		Dispatch* cobj = zval_toc<Dispatch>(ZEND_THIS);
 		htab_return result = cobj->loadRoutes(file, cache_name);
-		if (!result.throw_errors())
+		if (!result.throw_errors(__FUNCTION__))
 		{
 			result.value_.move_zv(return_value);
 		}
@@ -1170,11 +1170,11 @@ ZEND_METHOD(Wcc_Dispatch, obcall)
 {
 	zarg_rd args(execute_data);
 	obj_ptr rm = args.obj_class(args.need(0), RouteMatch::omg.classEntry());
-	if (!args.throw_errors())
+	if (!args.throw_errors(__FUNCTION__))
 	{
 		Dispatch* cobj = zval_toc<Dispatch>(ZEND_THIS);
 		val_return result = cobj->obcall(rm);
-		if (!result.throw_errors())
+		if (!result.throw_errors(__FUNCTION__))
 		{
 			result.value_.move_zv(return_value);
 		}
@@ -1189,11 +1189,11 @@ ZEND_METHOD(Wcc_Dispatch, obcallEx)
 	str_ptr obmethod = args.str(args.need(1));
 	htab_ptr obargs = args.htab(args.option(2));
 
-	if (!args.throw_errors())
+	if (!args.throw_errors(__FUNCTION__))
 	{
 		Dispatch* cobj = zval_toc<Dispatch>(ZEND_THIS);
 		val_return result = cobj->obcallEx(obclass, obmethod, obargs);
-		if (!result.throw_errors())
+		if (!result.throw_errors(__FUNCTION__))
 		{
 			result.value_.move_zv(return_value);
 		}
@@ -1205,11 +1205,11 @@ ZEND_METHOD(Wcc_Dispatch, parseRaw)
 	zarg_rd args(execute_data);
 	htab_ptr input = args.htab(args.need(0));
 
-	if (!args.throw_errors())
+	if (!args.throw_errors(__FUNCTION__))
 	{
 		Dispatch* cobj = zval_toc<Dispatch>(ZEND_THIS);
 		htab_return result = cobj->parseRaw(input);
-		if (!result.throw_errors())
+		if (!result.throw_errors(__FUNCTION__))
 		{
 			result.value_.move_zv(return_value);
 		}
@@ -1221,11 +1221,11 @@ ZEND_METHOD(Wcc_Dispatch, respond)
 	zarg_rd args(execute_data);
 	val_ptr input = args.need(0);
 
-	if (!args.throw_errors())
+	if (!args.throw_errors(__FUNCTION__))
 	{
 		Dispatch* cobj = zval_toc<Dispatch>(ZEND_THIS);
 		error_return result = cobj->respond(input);
-		result.throw_errors();
+		result.throw_errors(__FUNCTION__);
 	}
 }
 
@@ -1236,7 +1236,7 @@ ZEND_METHOD(Wcc_Dispatch, setLog)
 
 	args.zbool(value, args.need(0));
 
-	if (!args.throw_errors())
+	if (!args.throw_errors(__FUNCTION__))
 	{
 		Dispatch* cobj = zval_toc<Dispatch>(ZEND_THIS);
 		cobj->setLog(value);
@@ -1248,7 +1248,7 @@ ZEND_METHOD(Wcc_Dispatch, setModule)
 	zarg_rd args(execute_data);
 	str_ptr    value  = args.need(0);
 
-	if (!args.throw_errors())
+	if (!args.throw_errors(__FUNCTION__))
 	{
 		Dispatch* cobj = zval_toc<Dispatch>(ZEND_THIS);
 		obj_return result = cobj->setModule(value);
@@ -1261,7 +1261,7 @@ ZEND_METHOD(Wcc_Dispatch, setModuleCfg)
 	zarg_rd args(execute_data);
 	htab_ptr    value  = args.htab(args.need(0));
 
-	if (!args.throw_errors())
+	if (!args.throw_errors(__FUNCTION__))
 	{
 		Dispatch* cobj = zval_toc<Dispatch>(ZEND_THIS);
 		cobj->setModuleCfg(value);

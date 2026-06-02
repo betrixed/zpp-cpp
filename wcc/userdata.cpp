@@ -5,6 +5,10 @@
 #include "userdata.h"
 #endif
 
+#ifndef WCC_CONFIG_H
+#include "config.h"
+#endif
+
 #ifndef WCC_DEBUG_LOG_H
 #include "debuglog.h"
 #endif
@@ -42,6 +46,7 @@ void UserDataInit::init()
 
 	flash_str = "flash";
 	OK_str = "OK";
+	status_info = "info";
 
 	admin_user = "admin";
 	Admin_str = "Admin";
@@ -59,19 +64,35 @@ void UserDataInit::init()
 	getexpires_str = "getexpires";
 	expires_fmt = "D H:i e";
 	unknown_str = "unknown";
+
+	doWrite = "doWrite";
+	wasRead = "wasRead";
+}
+
+void 
+UserData::init()
+{
+	obj_ptr self(self_);
+	
+	htab_ptr ea = htab_ptr::empty_array();
+	obj_rc user = Config::omg.new_zobj();
+
+	self.property(UDi.user_p, user);
+	self.property(UDi.flash_str, ea);
+	self.property(UDi.keys_p, ea);
+	self.property(UDi.roles_p, ea);
 }
 
 void 
 UserData::construct()
 {
-	val_rc vnull;
 	obj_ptr self(self_);
+	val_ptr user = self.property_ptr(UDi.user_p);
 
-	htab_ptr ea = htab_ptr::empty_array();
-	self.property(UDi.user_p, vnull);
-	self.property(UDi.flash_str, ea);
-	self.property(UDi.keys_p, ea);
-	self.property(UDi.roles_p, ea);
+	if (!user.isObject())
+	{
+		init();
+	}		
 }
 
 obj_rc 
@@ -137,11 +158,28 @@ UserData::hasUser()
 {
 
 	obj_ptr self(self_);
-	zend_long id = self.int_property(UDi.id_p);
+	val_ptr test = self.property_ptr(UDi.user_p);
 
-	return (id!=0);
+	return (test.isObject());
 }
 
+/*
+
+void
+UserData::__unserialize(htab_ptr htab)
+{
+	val_ptr temp;
+	DebugLog* log = DebugLog::instance();
+
+	if (log)
+	{
+		log->dump("UserData", htab);
+	}
+
+	//htab_own showme;
+	//debug_info(showme);
+	//showme.show_data("unserialized");
+}*/
 
 } //wcc namespace
 
@@ -161,7 +199,7 @@ ZEND_METHOD(Wcc_Session_UserData, hasAnyRole)
 {
 	zarg_rd args(execute_data);
 	htab_ptr rolelist = args.htab(args.need(0));
-	if (!args.throw_errors())
+	if (!args.throw_errors(__FUNCTION__))
 	{
 		UserData* cobj = zval_toc<UserData>(ZEND_THIS);
 		bool result = cobj->hasAnyRole(rolelist);
@@ -173,7 +211,7 @@ ZEND_METHOD(Wcc_Session_UserData, hasRole)
 {
 	zarg_rd args(execute_data);
 	str_ptr role = args.str(args.need(0));
-	if (!args.throw_errors())
+	if (!args.throw_errors(__FUNCTION__))
 	{
 		UserData* cobj = zval_toc<UserData>(ZEND_THIS);
 		bool result = cobj->hasRole(role);
@@ -184,7 +222,7 @@ ZEND_METHOD(Wcc_Session_UserData, hasRole)
 ZEND_METHOD(Wcc_Session_UserData, hasUser)
 {
 	zarg_rd args(execute_data);
-	if (!args.throw_errors())
+	if (!args.throw_errors(__FUNCTION__))
 	{
 		UserData* cobj = zval_toc<UserData>(ZEND_THIS);
 		bool result = cobj->hasUser();
@@ -192,6 +230,22 @@ ZEND_METHOD(Wcc_Session_UserData, hasUser)
 	}
 }
 
+/*
+PHP_METHOD(Wcc_Session_UserData, __unserialize)
+{
+	zval* data;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+	Z_PARAM_ARRAY(data)
+	ZEND_PARSE_PARAMETERS_END();
+
+	htab_ptr hr(data);
+
+	Route* cobj = zval_toc<Route>(ZEND_THIS);
+
+	cobj->__unserialize(hr);
+
+}*/
 
 PHP_MINIT_FUNCTION(Session_UserData_reg)
 {

@@ -380,10 +380,10 @@ ZEND_METHOD(Wcc_Loader, readPHP)
 
 	args.zstring(path, args.need(0));
 
-	if (!args.throw_errors())
+	if (!args.throw_errors(__FUNCTION__))
 	{
 		result = Loader::readPHP(path);
-		if (!result.throw_errors())
+		if (!result.throw_errors(__FUNCTION__))
 		{
 			result.value_.move_zv(return_value);
 		}
@@ -416,7 +416,7 @@ ZEND_METHOD(Wcc_Loader, setThrowNotFound)
 
 	args.zbool(bval, args.need(0));
 
-	if (!args.throw_errors())
+	if (!args.throw_errors(__FUNCTION__))
 	{
 		Loader* lob = zval_toc<Loader>(ZEND_THIS);
 
@@ -429,7 +429,7 @@ ZEND_METHOD(Wcc_Loader, setExtLoader)
 
 	val_ptr extfn = args.need(0);
 
-	if (!args.throw_errors())
+	if (!args.throw_errors(__FUNCTION__))
 	{
 		Loader* lob = zval_toc<Loader>(ZEND_THIS);
 
@@ -444,7 +444,7 @@ ZEND_METHOD(Wcc_Loader, setFinder)
 	obj_ptr finder;
 
 	args.obj_ofclass(finder, args.need(0), Finder::omg.classEntry());
-	if (!args.throw_errors())
+	if (!args.throw_errors(__FUNCTION__))
 	{
 		Loader* lob = zval_toc<Loader>(ZEND_THIS);
 
@@ -495,13 +495,13 @@ ZEND_METHOD(Wcc_Loader, require)
 
 	args.zstring(path, args.need(0));
 
-	if (!args.throw_errors())
+	if (!args.throw_errors(__FUNCTION__))
 	{
 		Loader* lob = zval_toc<Loader>(ZEND_THIS);
 
 		result = lob->require(path);
 
-		if (!result.throw_errors())
+		if (!result.throw_errors(__FUNCTION__))
 		{
 			result.value_.move_zv(return_value);
 		}	
@@ -519,13 +519,13 @@ ZEND_METHOD(Wcc_Loader, load)
 
 	args.zstring(path, args.need(0));
 
-	if (!args.throw_errors())
+	if (!args.throw_errors(__FUNCTION__))
 	{
 		Loader* lob = zval_toc<Loader>(ZEND_THIS);
 
 		result = lob->load(path);	
 
-		if (!result.throw_errors())
+		if (!result.throw_errors(__FUNCTION__))
 		{
 			RETVAL_BOOL(result.value_);
 		}
@@ -542,13 +542,13 @@ ZEND_METHOD(Wcc_Loader, mustload)
 
 	bool_return result;
 
-	if (!args.throw_errors())
+	if (!args.throw_errors(__FUNCTION__))
 	{
 		Loader* lob = zval_toc<Loader>(ZEND_THIS);
 
 		result = lob->must_load(path);	
 
-		if (result.throw_errors())
+		if (result.throw_errors(__FUNCTION__))
 		{
 			result.value_ = false;
 		}
@@ -564,7 +564,7 @@ ZEND_METHOD(Wcc_Loader, setRecord)
 
 	args.zbool(value, args.need(0));
 
-	if (!args.throw_errors())
+	if (!args.throw_errors(__FUNCTION__))
 	{
 		Loader* lob = zval_toc<Loader>(ZEND_THIS);
 		lob->setRecord(value);
@@ -579,7 +579,7 @@ ZEND_METHOD(Wcc_Loader, setBaseDir)
 
 	args.zstring(path, args.need(0));
 
-	if (!args.throw_errors())
+	if (!args.throw_errors(__FUNCTION__))
 	{
 		Loader* lob = zval_toc<Loader>(ZEND_THIS);
 

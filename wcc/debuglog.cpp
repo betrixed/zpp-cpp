@@ -270,7 +270,7 @@ ZEND_METHOD(Wcc_DebugLog, start)
 
 	args.zlong_null(flags, args.option(1), DebugLog::TO_FILE);
 
-	if (!args.throw_errors())
+	if (!args.throw_errors(__FUNCTION__))
 	{
 		obj_rc result = DebugLog::start(msg, flags);
 		result.move_zv(return_value);	
@@ -286,7 +286,7 @@ ZEND_METHOD(Wcc_DebugLog, __construct)
 
 	args.zlong_null(flags, args.option(1), DebugLog::TO_FILE);
 
-	if (!args.throw_errors())
+	if (!args.throw_errors(__FUNCTION__))
 	{
 		DebugLog* cobj = zval_toc<DebugLog>(ZEND_THIS);
 		cobj->construct(path);
@@ -302,7 +302,7 @@ ZEND_METHOD(Wcc_DebugLog, line)
 
 	args.zlong_null(flags, args.option(1),  DebugLog::FILE_APPEND);
 
-	if (!args.throw_errors())
+	if (!args.throw_errors(__FUNCTION__))
 	{
 		DebugLog* cobj = zval_toc<DebugLog>(ZEND_THIS);
 		cobj->line(msg, flags);	
@@ -317,7 +317,7 @@ ZEND_METHOD(Wcc_DebugLog, setOutputs)
 
 	args.zlong(flags, args.need(0));
 
-	if (!args.throw_errors())
+	if (!args.throw_errors(__FUNCTION__))
 	{
 		DebugLog* cobj = zval_toc<DebugLog>(ZEND_THIS);
 		cobj->setOutputs(flags);	
@@ -332,7 +332,7 @@ ZEND_METHOD(Wcc_DebugLog, setInstance)
 
 	args.obj_ofclass(obj, args.need(0), DebugLog::omg.classEntry());
 
-	if (!args.throw_errors())
+	if (!args.throw_errors(__FUNCTION__))
 	{
 		DebugLog::setInstance(obj);	
 	}
@@ -345,7 +345,7 @@ ZEND_METHOD(Wcc_DebugLog, dump)
 	str_ptr label = args.str(args.need(0));
 	zval* value = args.need(1);
 
-	if (!args.throw_errors())
+	if (!args.throw_errors(__FUNCTION__))
 	{
 		DebugLog* cobj = zval_toc<DebugLog>(ZEND_THIS);
 		cobj->dump(label, value);

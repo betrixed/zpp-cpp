@@ -681,11 +681,11 @@ ZEND_METHOD(Wcc_Run, execute)
 
 	args.zstring(bootstrap, args.need(0));
 
-	if (!args.throw_errors())
+	if (!args.throw_errors(__FUNCTION__))
 	{
 		Run* cobj = zval_toc<Run>(ZEND_THIS);
 		error_return result = cobj->execute(bootstrap);
-		result.throw_errors();
+		result.throw_errors(__FUNCTION__);
 	}
 }
 

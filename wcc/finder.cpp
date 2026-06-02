@@ -449,7 +449,7 @@ ZEND_METHOD(Wcc_Finder, addPathArray)
 
 	htab_ptr  data = args.htab(args.need(0));
 
-	if (!args.throw_errors())
+	if (!args.throw_errors(__FUNCTION__))
 	{
 		auto cobj = zval_toc<Finder>(ZEND_THIS);
 
@@ -541,7 +541,7 @@ ZEND_METHOD(Wcc_Finder, dirList_dir)
 
 	args.zstring(path, args.need(0));
 
-	if (!args.throw_errors())
+	if (!args.throw_errors(__FUNCTION__))
 	{
 		result = Finder::dirList_dir(path);
 	}
@@ -560,7 +560,7 @@ ZEND_METHOD(Wcc_Finder, dirList_fileExt)
 	args.zstring(path, args.need(0));
 	args.zarray_null(extlist, args.option(1));
 
-	if (!args.throw_errors())
+	if (!args.throw_errors(__FUNCTION__))
 	{
 		result = Finder::dirList_fileExt(path,extlist);
 	}
@@ -579,7 +579,7 @@ ZEND_METHOD(Wcc_Finder, find_extension)
 	args.zstring(path, args.need(0));
 	args.zarray(extlist, args.need(1));
 
-	if (!args.throw_errors())
+	if (!args.throw_errors(__FUNCTION__))
 	{
 		result = Finder::find_extension(path,extlist);
 	}

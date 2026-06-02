@@ -203,7 +203,7 @@ ZEND_METHOD(Wcc_Str8, __construct)
 
 	args.zstring(s, args.need(0));
 
-	if (!args.throw_errors())
+	if (!args.throw_errors(__FUNCTION__))
 	{
 		Str8* cobj = zval_toc<Str8>(ZEND_THIS);
 		cobj->construct(s);
@@ -239,7 +239,7 @@ ZEND_METHOD(Wcc_Str8, ucode8str)
 
 	args.zlong(value, args.need(0));
 
-	if (!args.throw_errors())
+	if (!args.throw_errors(__FUNCTION__))
 	{
 		str_rc zstr = Str8::ucode8str(value);
 		zstr.move_zv(return_value);

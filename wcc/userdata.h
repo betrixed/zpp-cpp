@@ -37,6 +37,8 @@ public:
 	str_intern start_fn;
 	str_intern userData_p;
 
+	str_intern status_info;
+
 
 	str_intern admin_user;
 	str_intern Admin_str;
@@ -52,6 +54,9 @@ public:
 	str_intern expires_fmt;
 	str_intern unknown_str;
 
+	str_intern doWrite;
+	str_intern wasRead;
+
 
 
 };
@@ -60,6 +65,8 @@ extern UserDataInit UDi;
 
 
 class  UserData : public base_d {
+protected:
+	void init();
 public:
 
 
@@ -72,6 +79,8 @@ public:
 	bool   hasAnyRole(htab_ptr rolelist);
 	bool   hasRole(str_ptr role);
 	bool   hasUser();
+
+	//void __unserialize(htab_ptr htab);
 };
 
 }//namespace wcc

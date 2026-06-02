@@ -372,7 +372,7 @@ ZEND_METHOD(Wcc_Module, __construct)
 	name = args.str(args.need(0));
 	data = args.htab(args.need(1));
 
-	if (!args.throw_errors())
+	if (!args.throw_errors(__FUNCTION__))
 	{
 		Module* cobj = zval_toc<Module>(ZEND_THIS);
 		cobj->construct(name, data);
@@ -388,7 +388,7 @@ ZEND_METHOD(Wcc_Module, activate)
 
 	args.obj_ofclass(finder,args.need(0), Finder::omg.classEntry());
 
-	if (!args.throw_errors())
+	if (!args.throw_errors(__FUNCTION__))
 	{
 		Module* cobj = zval_toc<Module>(ZEND_THIS);
 		cobj->activate(finder);
@@ -403,7 +403,7 @@ ZEND_METHOD(Wcc_Module, addDefaults)
 
 	args.obj_ofclass(defmod, args.need(0), Module::omg.classEntry());
 
-	if (!args.throw_errors())
+	if (!args.throw_errors(__FUNCTION__))
 	{
 		Module* cobj = zval_toc<Module>(ZEND_THIS);
 		cobj->addDefaults(defmod);
@@ -442,7 +442,7 @@ ZEND_METHOD(Wcc_Module, setRequires)
 
 	htab_ptr rlist = args.htab(args.need(0));
 
-	if (!args.throw_errors())
+	if (!args.throw_errors(__FUNCTION__))
 	{
 		Module* cobj = zval_toc<Module>(ZEND_THIS);
 		cobj->setRequires(rlist);		
@@ -467,7 +467,7 @@ ZEND_METHOD(Wcc_Module, setActive)
 
 	args.zbool(val, args.need(0));
 
-	if (!args.throw_errors())
+	if (!args.throw_errors(__FUNCTION__))
 	{
 		Module* cobj = zval_toc<Module>(ZEND_THIS);
 		cobj->setActive(val);
@@ -497,7 +497,7 @@ ZEND_METHOD(Wcc_Module, setConfigPath)
 
 	path = args.str(args.need(0));
 
-	if (!args.throw_errors())
+	if (!args.throw_errors(__FUNCTION__))
 	{
 		Module* cobj = zval_toc<Module>(ZEND_THIS);
 		cobj->setConfigPath(path);

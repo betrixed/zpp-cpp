@@ -1610,7 +1610,7 @@ ZEND_METHOD(Wcc_HtmlGem, button)
 
 	htab_ptr pset = args.htab(args.need(0));
 
-	if (!args.throw_errors())
+	if (!args.throw_errors(__FUNCTION__))
 	{
 		auto cobj = zval_toc<HtmlGem>(ZEND_THIS);
 		str_rc result = cobj->button(pset);
@@ -1624,7 +1624,7 @@ ZEND_METHOD(Wcc_HtmlGem, checkbox)
 
 	htab_ptr pset = args.htab(args.need(0));
 
-	if (!args.throw_errors())
+	if (!args.throw_errors(__FUNCTION__))
 	{
 		auto cobj = zval_toc<HtmlGem>(ZEND_THIS);
 		str_rc result = cobj->checkbox(pset);
@@ -1639,7 +1639,7 @@ ZEND_METHOD(Wcc_HtmlGem, datetime)
 
 	htab_ptr pset = args.htab(args.need(0));
 
-	if (!args.throw_errors())
+	if (!args.throw_errors(__FUNCTION__))
 	{
 		auto cobj = zval_toc<HtmlGem>(ZEND_THIS);
 
@@ -1668,7 +1668,7 @@ ZEND_METHOD(Wcc_HtmlGem, email)
 
 	htab_ptr pset = args.htab(args.need(0));
 
-	if (!args.throw_errors())
+	if (!args.throw_errors(__FUNCTION__))
 	{
 		auto cobj = zval_toc<HtmlGem>(ZEND_THIS);
 
@@ -1684,7 +1684,7 @@ ZEND_METHOD(Wcc_HtmlGem, figure)
 
 	htab_ptr pset = args.htab(args.need(0));
 
-	if (!args.throw_errors())
+	if (!args.throw_errors(__FUNCTION__))
 	{
 		auto cobj = zval_toc<HtmlGem>(ZEND_THIS);
 		str_rc result = cobj->figure(pset);
@@ -1698,7 +1698,7 @@ ZEND_METHOD(Wcc_HtmlGem, hidden)
 
 	htab_ptr pset = args.htab(args.need(0));
 
-	if (!args.throw_errors())
+	if (!args.throw_errors(__FUNCTION__))
 	{
 		auto cobj = zval_toc<HtmlGem>(ZEND_THIS);
 
@@ -1715,7 +1715,7 @@ ZEND_METHOD(Wcc_HtmlGem, linkto)
 
 	htab_ptr pset = args.htab(args.need(0));
 
-	if (!args.throw_errors())
+	if (!args.throw_errors(__FUNCTION__))
 	{
 		auto cobj = zval_toc<HtmlGem>(ZEND_THIS);
 
@@ -1731,7 +1731,7 @@ ZEND_METHOD(Wcc_HtmlGem, money)
 
 	htab_ptr pset = args.htab(args.need(0));
 
-	if (!args.throw_errors())
+	if (!args.throw_errors(__FUNCTION__))
 	{
 		auto cobj = zval_toc<HtmlGem>(ZEND_THIS);
 
@@ -1747,7 +1747,7 @@ ZEND_METHOD(Wcc_HtmlGem, multiline)
 
 	htab_ptr pset = args.htab(args.need(0));
 
-	if (!args.throw_errors())
+	if (!args.throw_errors(__FUNCTION__))
 	{
 		auto cobj = zval_toc<HtmlGem>(ZEND_THIS);
 
@@ -1763,7 +1763,7 @@ ZEND_METHOD(Wcc_HtmlGem, number)
 
 	htab_ptr pset = args.htab(args.need(0));
 
-	if (!args.throw_errors())
+	if (!args.throw_errors(__FUNCTION__))
 	{
 		auto cobj = zval_toc<HtmlGem>(ZEND_THIS);
 
@@ -1779,7 +1779,7 @@ ZEND_METHOD(Wcc_HtmlGem, phone)
 
 	htab_ptr pset = args.htab(args.need(0));
 
-	if (!args.throw_errors())
+	if (!args.throw_errors(__FUNCTION__))
 	{
 		auto cobj = zval_toc<HtmlGem>(ZEND_THIS);
 
@@ -1795,7 +1795,7 @@ ZEND_METHOD(Wcc_HtmlGem, password)
 
 	htab_ptr pset = args.htab(args.need(0));
 
-	if (!args.throw_errors())
+	if (!args.throw_errors(__FUNCTION__))
 	{
 		auto cobj = zval_toc<HtmlGem>(ZEND_THIS);
 
@@ -1811,7 +1811,7 @@ ZEND_METHOD(Wcc_HtmlGem, radio)
 
 	htab_ptr pset = args.htab(args.need(0));
 
-	if (!args.throw_errors())
+	if (!args.throw_errors(__FUNCTION__))
 	{
 		auto cobj = zval_toc<HtmlGem>(ZEND_THIS);
 
@@ -1827,7 +1827,7 @@ ZEND_METHOD(Wcc_HtmlGem, plaintext)
 
 	htab_ptr pset = args.htab(args.need(0));
 
-	if (!args.throw_errors())
+	if (!args.throw_errors(__FUNCTION__))
 	{
 		auto cobj = zval_toc<HtmlGem>(ZEND_THIS);
 
@@ -1844,7 +1844,7 @@ ZEND_METHOD(Wcc_HtmlGem, select)
 
 	htab_ptr pset = args.htab(args.need(0));
 
-	if (!args.throw_errors())
+	if (!args.throw_errors(__FUNCTION__))
 	{
 		auto cobj = zval_toc<HtmlGem>(ZEND_THIS);
 
@@ -1860,7 +1860,7 @@ ZEND_METHOD(Wcc_HtmlGem, select_list)
 
 	htab_ptr pset = args.htab(args.need(0));
 
-	if (!args.throw_errors())
+	if (!args.throw_errors(__FUNCTION__))
 	{
 		auto cobj = zval_toc<HtmlGem>(ZEND_THIS);
 
@@ -1891,7 +1891,7 @@ ZEND_METHOD(Wcc_HtmlGem, submit)
 
 	htab_ptr pset = args.htab(args.need(0));
 
-	if (!args.throw_errors())
+	if (!args.throw_errors(__FUNCTION__))
 	{
 		auto cobj = zval_toc<HtmlGem>(ZEND_THIS);
 		str_rc result = cobj->submit(pset);
@@ -1905,7 +1905,7 @@ ZEND_METHOD(Wcc_HtmlGem, datetime_value)
 
 	htab_ptr pset = args.htab(args.need(0));
 
-	if (!args.throw_errors())
+	if (!args.throw_errors(__FUNCTION__))
 	{
 		auto cobj = zval_toc<HtmlGem>(ZEND_THIS);
 
@@ -1921,7 +1921,7 @@ ZEND_METHOD(Wcc_HtmlGem, check_value)
 
 	htab_ptr pset = args.htab(args.need(0));
 
-	if (!args.throw_errors())
+	if (!args.throw_errors(__FUNCTION__))
 	{
 		auto cobj = zval_toc<HtmlGem>(ZEND_THIS);
 
@@ -1936,7 +1936,7 @@ ZEND_METHOD(Wcc_HtmlGem, text_value)
 	zarg_rd args(execute_data);
 
 	htab_ptr pset = args.htab(args.need(0));
-	if (!args.throw_errors())
+	if (!args.throw_errors(__FUNCTION__))
 	{
 		auto cobj = zval_toc<HtmlGem>(ZEND_THIS);
 
@@ -1951,7 +1951,7 @@ ZEND_METHOD(Wcc_HtmlGem, xcheck)
 	zarg_rd args(execute_data);
 
 	htab_ptr pset = args.htab(args.need(0));
-	if (!args.throw_errors())
+	if (!args.throw_errors(__FUNCTION__))
 	{
 		auto cobj = zval_toc<HtmlGem>(ZEND_THIS);
 		str_rc result = cobj->xcheck(pset);

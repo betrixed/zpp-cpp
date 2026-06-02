@@ -20,4 +20,6 @@ class UserData {
 	public function hasRole(string $role) : bool {}
 
 	public function hasUser() : bool {}
+
+	//public function __unserialize(array $data) : void {}
 };

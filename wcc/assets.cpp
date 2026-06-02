@@ -675,7 +675,7 @@ Assets::loadAssetFile(str_ptr file)
 
 	val_return vdata = cmgr->readCache(file, ASI.file_cache);
 
-	if (vdata.throw_errors())
+	if (vdata.throw_errors(__FUNCTION__))
 	{
 		return htab_ptr::empty_array();
 	}
@@ -826,7 +826,7 @@ ZEND_METHOD(Wcc_Assets, add)
 	{
 		args.error() << "; Expect String or Array";
 	}
-	if (!args.throw_errors())
+	if (!args.throw_errors(__FUNCTION__))
 	{
 		Assets* cobj = zval_toc<Assets>(ZEND_THIS);
 		cobj->add(list);
@@ -839,7 +839,7 @@ ZEND_METHOD(Wcc_Assets, addAssets)
 	htab_ptr data;
 	args.zarray(data, args.need(0));
 
-	if (!args.throw_errors())
+	if (!args.throw_errors(__FUNCTION__))
 	{
 		Assets* cobj = zval_toc<Assets>(ZEND_THIS);
 		htab_rc result = cobj->addAssets(data);
@@ -854,7 +854,7 @@ ZEND_METHOD(Wcc_Assets, addBlob)
 	bool    headblob = false;
 	args.zstring(blob, args.need(0));
 	args.zbool(headblob, args.option(1));
-	if (!args.throw_errors())
+	if (!args.throw_errors(__FUNCTION__))
 	{
 		Assets* cobj = zval_toc<Assets>(ZEND_THIS);
 		cobj->addBlob(blob, headblob);
@@ -866,7 +866,7 @@ ZEND_METHOD(Wcc_Assets, addSourcePath)
 	zarg_rd args(execute_data);
 	str_ptr path;
 	args.zstring(path, args.need(0));
-	if (!args.throw_errors())
+	if (!args.throw_errors(__FUNCTION__))
 	{
 		Assets* cobj = zval_toc<Assets>(ZEND_THIS);
 		cobj->addSourcePath(path);
@@ -878,7 +878,7 @@ ZEND_METHOD(Wcc_Assets, addStyle)
 	zarg_rd args(execute_data);
 	str_ptr style;
 	args.zstring(style, args.need(0));
-	if (!args.throw_errors())
+	if (!args.throw_errors(__FUNCTION__))
 	{
 		Assets* cobj = zval_toc<Assets>(ZEND_THIS);
 		cobj->addStyle(style);
@@ -935,7 +935,7 @@ ZEND_METHOD(Wcc_Assets, getWebList)
 	if (names.ok() && (names.isString() || names.isArray())) {
 		args.zbool(aslist, args.option(2));
 	}
-	if (!args.throw_errors())
+	if (!args.throw_errors(__FUNCTION__))
 	{
 		Assets* cobj = zval_toc<Assets>(ZEND_THIS);
 		result = cobj->getWebList(typekey, names, aslist);
@@ -949,7 +949,7 @@ ZEND_METHOD(Wcc_Assets, has)
 	str_rc  namekey;
 
 	args.zstring(namekey, args.need(0));
-	if (!args.throw_errors())
+	if (!args.throw_errors(__FUNCTION__))
 	{
 		Assets* cobj = zval_toc<Assets>(ZEND_THIS);
 		bool result = cobj->has(namekey);
@@ -975,7 +975,7 @@ ZEND_METHOD(Wcc_Assets, inline_css)
 	str_ptr name;
 
 	args.zstring(name, args.need(0));
-	if (!args.throw_errors())
+	if (!args.throw_errors(__FUNCTION__))
 	{
 		Assets* cobj = zval_toc<Assets>(ZEND_THIS);
 		str_rc text = cobj->inline_css(name);
@@ -1001,7 +1001,7 @@ ZEND_METHOD(Wcc_Assets, loadAssetFile)
 	args.zstring(file, args.need(0));
 	htab_rc result;
 
-	if (!args.throw_errors())
+	if (!args.throw_errors(__FUNCTION__))
 	{
 		Assets* cobj = zval_toc<Assets>(ZEND_THIS);
 		result = cobj->loadAssetFile(file);
@@ -1029,7 +1029,7 @@ ZEND_METHOD(Wcc_Assets, setRun)
 
 	env = args.obj(args.need(0));
 
-	if (!args.throw_errors())
+	if (!args.throw_errors(__FUNCTION__))
 	{
 		Assets* cobj = zval_toc<Assets>(ZEND_THIS);
 		cobj->setRun(env);
@@ -1055,7 +1055,7 @@ ZEND_METHOD(Wcc_Assets, unmark)
 
 	args.zstring(item, args.need(0));
 
-	if (!args.throw_errors())
+	if (!args.throw_errors(__FUNCTION__))
 	{
 		Assets* cobj = zval_toc<Assets>(ZEND_THIS);
 		cobj->unmark(item);

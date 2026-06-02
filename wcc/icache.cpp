@@ -452,7 +452,7 @@ ZEND_METHOD(Wcc_ICache, addLocal)
 
 	args.obj_ofclass(pkg, args.need(0), ICacheData::omg.classEntry());
 
-	if (!args.throw_errors())
+	if (!args.throw_errors(__FUNCTION__))
 	{
 		auto cobj = zval_toc<ICache>(ZEND_THIS);
 		cobj->addLocal(pkg);
@@ -547,7 +547,7 @@ ZEND_METHOD(Wcc_ICache, flushCached)
 	ZEND_PARSE_PARAMETERS_NONE();
 	auto cobj = zval_toc<ICache>(ZEND_THIS);
 	error_return result = cobj->flushCached();
-	result.throw_errors();
+	result.throw_errors(__FUNCTION__);
 }
 
 ZEND_METHOD(Wcc_ICache, getMultiple)
@@ -684,7 +684,7 @@ ZEND_METHOD(Wcc_ICache, setMultiple)
 
 	args.zlong_null(ttl, args.option(1), 0);
 
-	if (!args.throw_errors())
+	if (!args.throw_errors(__FUNCTION__))
 	{
 		auto cobj = zval_toc<ICache>(ZEND_THIS);
 		bool result = cobj->setMultiple(list, ttl);

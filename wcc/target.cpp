@@ -312,7 +312,7 @@ static void get_param(zend_execute_data* execute_data, zval* return_value)
 
 	args.zstring(key, args.need(0));
 
-	if (!args.throw_errors())
+	if (!args.throw_errors(__FUNCTION__))
 	{
 		Target* cobj = zval_toc<Target>(ZEND_THIS);
 		result = cobj->getParam(key);
@@ -336,7 +336,7 @@ static void set_param(zend_execute_data* execute_data)
 	args.zstring(key, args.need(0));
 	value = args.need(1);
 
-	if (!args.throw_errors())
+	if (!args.throw_errors(__FUNCTION__))
 	{
 		Target* cobj = zval_toc<Target>(ZEND_THIS);
 		cobj->setParam(key, value);
@@ -375,7 +375,7 @@ ZEND_METHOD(Wcc_Target, setParams)
 
 	args.zarray(data, args.need(0));
 
-	if (!args.throw_errors())
+	if (!args.throw_errors(__FUNCTION__))
 	{
 		Target* cobj = zval_toc<Target>(ZEND_THIS);
 		cobj->setParams(data);

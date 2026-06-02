@@ -243,8 +243,6 @@ RouteMatch::call_method(obj_ptr obj, str_ptr method, htab_ptr args)
 
 	val_rc result;
 
-	DebugLog* log = DebugLog::cpp_global();
-
 	if (args.size())
 	{
 		result = obj.call_hargs(method, args);
@@ -253,10 +251,7 @@ RouteMatch::call_method(obj_ptr obj, str_ptr method, htab_ptr args)
 		result = obj.call(method);
 	}
 
-	if (log)
-	{
-		log->dump("call method return:", val_ptr(result));
-	}
+	
 	return result;
 }
 
@@ -888,7 +883,7 @@ ZEND_METHOD(Wcc_RouteMatch, call)
 
 	RouteMatch* prm = zval_toc<RouteMatch>(ZEND_THIS);
 	val_return result = prm->call(extra_args, before_pair, after_pair);
-	if (!result.throw_errors())
+	if (!result.throw_errors(__FUNCTION__))
 	{
 		result.value_.move_zv(return_value);
 	}
@@ -909,7 +904,7 @@ ZEND_METHOD(Wcc_RouteMatch, callMethod)
 
 	RouteMatch* prm = zval_toc<RouteMatch>(ZEND_THIS);
 	val_return result = prm->call_method(obj,method,args);
-	if (!result.throw_errors())
+	if (!result.throw_errors(__FUNCTION__))
 	{
 		result.value_.move_zv(return_value);
 	}

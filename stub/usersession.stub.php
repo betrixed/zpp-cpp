@@ -23,7 +23,7 @@ class UserSession {
 
 	public function delayWrite() : void {}
 
-	public function flash(string $text, array $extra, string $status): void {}
+	public function flash(string $text, string $status = 'info', array $extra  = []): void {}
 
 	public function getEndTime() : string {}
 
