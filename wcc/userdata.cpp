@@ -33,6 +33,7 @@ void UserDataInit::init()
 	lines_str = "lines";
 	text_str = "text";
 	status_str = "status";
+	config_str = "config";
 
 	user_p = "user";
 	userName_p = "userName";
@@ -67,6 +68,9 @@ void UserDataInit::init()
 
 	doWrite = "doWrite";
 	wasRead = "wasRead";
+
+	TTLroles = "TTLBoostRoles";
+	TTLtime = "TTLBoostTime";
 }
 
 void 
@@ -153,14 +157,32 @@ UserData::hasRole(str_ptr role)
 	return false;
 }
 
-bool   
-UserData::hasUser()
+bool
+UserData::isLoggedIn(val_ptr role)
 {
+	if (role.isString())
+	{
+		return hasRole(role.zstr());
+	}
+	if (role.isArray())
+	{
+		return hasAnyRole(role.zarray());
+	}
+	return false;
+}
 
+obj_rc   
+UserData::getUser()
+{
+	obj_rc result;
 	obj_ptr self(self_);
-	val_ptr test = self.property_ptr(UDi.user_p);
-
-	return (test.isObject());
+	result = self.obj_property(UDi.user_p);
+	if (!result.ok())
+	{
+		result = Config::omg.new_zobj();
+		self.property(UDi.user_p, result);
+	}
+	return result;
 }
 
 /*
@@ -219,14 +241,28 @@ ZEND_METHOD(Wcc_Session_UserData, hasRole)
 	}
 }
 
-ZEND_METHOD(Wcc_Session_UserData, hasUser)
+
+ZEND_METHOD(Wcc_Session_UserData, isLoggedIn)
+{
+	zarg_rd args(execute_data);
+	val_ptr role = args.string_or_array(args.need(0));
+	if (!args.throw_errors(__FUNCTION__))
+	{
+		UserData* cobj = zval_toc<UserData>(ZEND_THIS);
+		bool result = cobj->isLoggedIn(role);
+		RETURN_BOOL(result);
+	}
+}
+
+
+ZEND_METHOD(Wcc_Session_UserData, getUser)
 {
 	zarg_rd args(execute_data);
 	if (!args.throw_errors(__FUNCTION__))
 	{
 		UserData* cobj = zval_toc<UserData>(ZEND_THIS);
-		bool result = cobj->hasUser();
-		RETURN_BOOL(result);
+		obj_rc result = cobj->getUser();
+		result.move_zv(return_value);
 	}
 }
 

@@ -19,6 +19,7 @@ public:
 	str_intern lines_str;
 	str_intern text_str;
 	str_intern status_str;
+	str_intern config_str;
 
 	str_intern user_p;
 	str_intern name_p;
@@ -57,6 +58,9 @@ public:
 	str_intern doWrite;
 	str_intern wasRead;
 
+	str_intern TTLroles;
+	str_intern TTLtime;
+
 
 
 };
@@ -76,9 +80,11 @@ public:
 
 	void construct();
 
-	bool   hasAnyRole(htab_ptr rolelist);
-	bool   hasRole(str_ptr role);
-	bool   hasUser();
+	bool     isLoggedIn(val_ptr role);
+	bool   	 hasAnyRole(htab_ptr rolelist);
+	bool   	 hasRole(str_ptr role);
+	
+	obj_rc   getUser();
 
 	//void __unserialize(htab_ptr htab);
 };

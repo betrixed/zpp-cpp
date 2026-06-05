@@ -32,6 +32,8 @@ public:
 extern DebugLogStatic DLSi;
 
 class  DebugLog : public base_d {
+protected: 
+		int outputs_;
 public:
 
 	enum {
@@ -52,20 +54,21 @@ public:
 	static void setInstance(obj_ptr obj);
 	
 	static obj_rc start(str_ptr msg, int flags=TO_FILE);
-
+	static obj_rc start(const char* msg, int flags=TO_FILE);
 	void debug_info(htab_rw hw) override;
 	void construct(str_ptr logpath, int flags=TO_FILE);
 	void line(str_ptr msg, int flags = PHP_FILE::APPEND);
 	void line(const char* s);
 
-	void dump(str_ptr label, val_ptr anyval);
-	void dump(const char* label, val_ptr anyval);
-	void dump(const char* label, htab_ptr arrayval);
-	void dump(const char* label, str_ptr strval);
-	void dump(const char* label, obj_ptr objval);
+	void dump(str_ptr label, zval* anyval);
+	void dump(const char* label, zval* anyval);
+	void dump(const char* label, HashTable* arrayval);
+	void dump(const char* label, zend_string* strval);
+	void dump(const char* label, zend_object*  objval);
 	void showmem(const char* label, zval* mem);
 	
 	void setOutputs(int flags = TO_CONSOLE);
+	int  getOutputs();
 };
 
 

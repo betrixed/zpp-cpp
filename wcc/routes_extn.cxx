@@ -6,7 +6,6 @@
 
 #include "wcc/usersession.cpp"
 
-
 #include "wcc/finder.cpp"
 #include "wcc/loader.cpp"
 
@@ -31,15 +30,11 @@
 
 #include "wcc/module.cpp"
 
-//#include "wcc/dispatch.cpp"
+#include "wcc/dispatch.cpp"
 
 #include "wcc/debuglog.cpp"
+#include "wcc/run.cpp"
 
-/*
-#include "wcc/userdata.cpp"
-
-#include "wcc/usersession.cpp"
-*/
 
 
 

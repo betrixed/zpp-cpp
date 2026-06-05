@@ -55,7 +55,7 @@ public:
 
 	static Config_Mgr<Config> omg;
 	
-	static obj_rc make(htab_ptr initdata);
+	static obj_rc make(htab_ptr initdata = htab_ptr());
 
 	void debug_info(htab_rw hw) override;
 

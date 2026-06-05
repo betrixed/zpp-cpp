@@ -15,11 +15,13 @@ class UserData {
 
 	public function __construct();
 
+	public function isLoggedIn(string|array $role) : bool {}
+
 	public function hasAnyRole(array $roles): bool {}
 
 	public function hasRole(string $role) : bool {}
 
-	public function hasUser() : bool {}
+	public function getUser() : \Wcc\Config {}
 
 	//public function __unserialize(array $data) : void {}
 };

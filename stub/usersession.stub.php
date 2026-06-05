@@ -25,15 +25,11 @@ class UserSession {
 
 	public function flash(string $text, string $status = 'info', array $extra  = []): void {}
 
-	public function getEndTime() : string {}
-
-	public function getFlash() : ?array {}
-
 	public function getKey(string $key, mixed $adef) : mixed {}
 
-	public function getUser() : ?Config {}
+	public function getSession() : ?Session\ISession {} 
 
-	public function getUserRoles() : array {}
+	public function getUserData() : Session\UserData {}
 
 	public function guestSession() : UserSession {}
 
@@ -43,13 +39,12 @@ class UserSession {
 
 	public function isEmpty() : bool {}
 	public function isEnded() : bool {}
-	public function isLoggedIn(string $role) : bool {}
+
 	public function nullify() : void {}
 	public function read() : UserSession {}
 	public function roles() : string {}
 	public function save() : void {}
-	public function saveUser(mixed $user, array $roles) : void {}
-	public function sessionName() : ?string {}
+
 	public function setAdmin() : void {}
 
 	public function setGuest() : void {}

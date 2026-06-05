@@ -150,7 +150,7 @@ public:
 	static obj_rc newFromArray(val_ptr init);
 	static obj_rc new_hmap();
 	
-	virtual void debug_info(htab_rw hw);
+	void debug_info(htab_rw hw) override;
 
 	void construct(htab_ptr values);
 

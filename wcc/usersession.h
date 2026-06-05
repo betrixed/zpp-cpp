@@ -17,7 +17,7 @@ protected:
 	obj_rc session_;
 	obj_rc data_;
 	
-	obj_rc getSession();
+	
 	obj_rc getAdapter();
 
 	UserData* ud_cpp();
@@ -39,16 +39,16 @@ public:
 	void delayWrite();
 
 	void flash(str_ptr msg, str_ptr status, htab_ptr exlines);
-	str_rc getEndTime();
-	htab_rc getFlash();
-	val_rc getKey(str_ptr key, val_ptr adefault);
-	obj_rc getUser();
-
-	htab_rc getUserRoles();
-
+	
+	obj_rc getSession();
+	obj_rc getUserData();
 	obj_rc guestSession();
 
+	val_rc getKey(str_ptr key, val_ptr adefault);
 	bool hasKey(str_ptr);
+	void setKey(str_ptr key, val_ptr value);	
+	void unsetKey(str_ptr key);
+	
 	bool hasValues();
 	bool isEmpty();
 	bool isEnded();
@@ -58,16 +58,14 @@ public:
 	obj_rc read();
 	str_rc roles();
 	void   save();
-	void saveUser(obj_ptr user, htab_ptr roles);
 
-	str_rc sessionName();
 	void  setAdmin();
 	void  setGuest();
-	void setKey(str_ptr key, val_ptr value);
+	
 	void setValidUser(str_ptr uname, htab_ptr roles);
 
 	void shutdown();
-	void unsetKey(str_ptr key);
+	
 	void updated();
 	void wipe();
 	void write(bool force=false);

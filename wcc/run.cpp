@@ -29,6 +29,9 @@
 #include "wcc/loader.h"
 #endif
 
+#ifndef WCC_DEBUGLOG_H
+#include "wcc/debuglog.h"
+#endif
 
 #ifndef REQUEST_GLOBALS_H
 #include "wcc/request_globals.h"
@@ -148,6 +151,7 @@ void Run::debug_info(htab_rw di)
 
 void Run::construct()
 {
+
 	obj_ptr self = this->self();
 
 	val_rc  temp = datetime_obj::microtime();
@@ -191,39 +195,38 @@ void Run::construct()
 	self.property(Run_i.wc_leaf, root_dir);
 
 
-	obj_rc config = Config::omg.new_zobj();
+	Services* sobj = Services::cpp_global();
+	obj_rc config = sobj->newInstance(Config::omg.class_name());
+	sobj->set(Run_i.config_str, config);
+
 	self.property(Run_i.config_str, config);
-
-	temp = constant(Run_i.target_const);
-	//showmem("target", temp);
-	self.property(Run_i.target, temp);
-
-	self.property(Run_i.vendor_leaf, Run_i.vendor_str);
 
 	str_rc site_leaf = constant(Run_i.site_leaf_const);
 	self.property(Run_i.site_leaf, site_leaf);
 
-	temp = constant(Run_i.site_const);
-	self.property(Run_i.site_dir, temp);
-
-	str_rc site_str = temp.zstr();
-
 	str_buf buf;
-	buf << '/' << site_str << "/gallery";
-
-	self.property(Run_i.gallery_str, buf.zstr());
-	buf << site_str << "/site"; // gallery site theme sub-folder
-
-	self.property(Run_i.theme_str, buf.zstr());
-
 	buf << site_leaf << "/config";
+	str_rc config_dir(buf.zstr());
 
-	self.property(Run_i.config_dir, buf.zstr());
-	config.property(Run_i.config_dir, buf.zstr());
+	config.property(Run_i.config_dir, config_dir);
+	self.property(Run_i.config_dir, config_dir);
 
 	buf << site_leaf << "/tmp";
-	self.property(Run_i.temp_dir, buf.zstr());
-	config.property(Run_i.temp_dir, buf.zstr());
+	str_rc temp_dir(buf.zstr());
+
+
+
+	config.property(Run_i.temp_dir, temp_dir);
+	self.property(Run_i.temp_dir, temp_dir);
+
+	buf << temp_dir << "/log/debuglog.txt";
+
+	obj_rc debug = DebugLog::omg.new_zobj();
+	DebugLog* log = zobj_toc<DebugLog>(debug);
+	log->construct(buf.zstr(), DebugLog::TO_FILE);
+	DebugLog::setInstance(debug);
+
+	log->line("<pre>Run start");
 
 	temp = getcwd();
 	self.property(Run_i.init_cwd, getcwd());
@@ -231,48 +234,72 @@ void Run::construct()
 	temp.set_bool(false);
 	self.property(Run_i.page_hits,temp);
 
-	//obj_rc services = Services::instance();
-	//self.property(Run_i.services, services);
-
-	Services* sobj = Services::cpp_global();
 	sobj->set(Run_i.run_str, self);
 	sobj->setObject(config);
-	
-	//showobj("config", config);
-	//config.property(Run_i.services, services);
+
+	temp = constant(Run_i.target_const);
+	//showmem("target", temp);
+	self.property(Run_i.target, temp);
+
+	self.property(Run_i.vendor_leaf, Run_i.vendor_str);
 
 	
-	
-	
-	sobj->set(Run_i.config_str, config);
 
+	temp = constant(Run_i.site_const);
+	self.property(Run_i.site_dir, temp);
+
+	str_rc site_str = temp.zstr();
+
+
+	buf << '/' << site_str << "/gallery";
+
+	self.property(Run_i.gallery_str, buf.zstr());
+	buf << site_str << "/site"; // gallery site theme sub-folder
+
+	self.property(Run_i.theme_str, buf.zstr());
+
+	
 	htab_rc start_args;
 	htab_rw args(start_args);
 
-	args.push_back(Run_i.begin_str);
-	args.push_back(stime);
-
-	obj_rc stats = ReflectCache::staticInstanceArgs(Run_i.phpstats_class, start_args);
+	obj_rc stats = ReflectCache::staticInstance(Run_i.phpstats_class);
 
 	sobj->set(Run_i.phpstats_str, stats);
 
 	temp = stats;
 	self.property(Run_i.stats_str, temp);
 
+
+
 	obj_rc dos = ReflectCache::staticInstance(Run_i.dos_class);
 	sobj->set(Run_i.dos_str, dos);
+
+
 }
 
 
 obj_ptr 
 Run::setup_world()
 {
+	DebugLog* log = DebugLog::cpp_global();
+
 	obj_rc config = Services::service(Run_i.config_str);
-	str_rc app_class = config.property(Run_i.app_class);
+
+	/*if (log)
+	{
+		log->dump("config", config);
+	}*/
+
+	str_rc app_class = config.str_property(Run_i.app_class);
+
+	if (log)
+	{
+		log->dump("app_class", app_class);
+	}
 
 	obj_rc site = ReflectCache::staticInstance(app_class);
 
-	obj_ptr self = this->self();
+	obj_ptr self(self_);
 
 	self.property(Run_i.site_str, site);
 	site.call(Run_i.s_prepare);
@@ -294,8 +321,10 @@ Run::execute(str_ptr bootstrap)
 
 	result = this->config_init(bootstrap);
 
+
 	if (result.has_errors())
 	{
+
 		return result;
 	}
 
@@ -346,7 +375,13 @@ Run::setup_cryptic()
 	buf << config_dir << '/' << cryptic_data;
 	str_rc path = buf.zstr();
 	
-
+	DebugLog* log = DebugLog::cpp_global();
+	/*
+	if (log)
+	{
+		log->dump("cryptic data", path);
+	}
+	*/
 	Services* sobj = Services::cpp_global();
 
 	val_return data;
@@ -355,6 +390,14 @@ Run::setup_cryptic()
 		obj_rc cache_mgr = sobj->get(Run_i.cache_mgr);
 		CacheMgr *cmgr = zobj_toc<CacheMgr>(cache_mgr);
 		data = cmgr->readCache(path, Run_i.file_cache);
+
+		/*
+		if (log)
+		{
+			log->dump("cryptic data", data.value_);
+		}
+		*/
+
 		if (data.has_errors())
 		{
 			result = data.move_error();
@@ -366,6 +409,11 @@ Run::setup_cryptic()
 	else {
 		result.error() << "File " << path << " not found";
 	}
+
+	if (log)
+		{
+			log->line("End setup_cryptic");
+		}
 	return result;
 	
 
@@ -374,11 +422,22 @@ Run::setup_cryptic()
 void Run::temp_folders()
 {
 
-	obj_ptr self = this->self();
+	DebugLog* log = DebugLog::cpp_global();
+	/*if (log)
+	{
+		log->line("temp_folders");
+	}
+	*/
+	obj_ptr self(self_);
 
-	obj_rc config = self.property(Run_i.config_str);
+	obj_rc config = self.obj_property(Run_i.config_str);
+	
+	/*if (log)
+	{
+		log->dump("config", config);
+	}*/
 
-	str_rc temp_dir = self.property(Run_i.temp_dir);
+	str_rc temp_dir = self.str_property(Run_i.temp_dir);
 
 	//showstr("temp folder", temp_dir);
 
@@ -388,7 +447,13 @@ void Run::temp_folders()
 
 	config.property(Run_i.error_log, buf.zstr());
 
-	htab_rc folder_names = config.property(Run_i.temp_folder_names);
+	htab_rc folder_names = config.array_property(Run_i.temp_folder_names);
+	/*
+	if (log)
+	{
+		log->dump("folder_names", folder_names);
+	}
+	*/
 
 	//showdata("folder_names", folder_names);
 
@@ -440,9 +505,12 @@ void Run::temp_folders()
 		str_rc msg = buf.zstr();
 
 		zend_throw_error(zend_ce_error, "Missing folders: %s", msg.data());
-		return;
+		
 	}
-
+	if (log)
+	{
+		log->line("End temp_folders");
+	}
 
 }
 
@@ -522,28 +590,48 @@ Run::config_init(str_ptr bootstrap)
 
 	htab_rc bcfg = self.array_property(Run_i.bootstrap);
 
+	DebugLog* log = DebugLog::cpp_global();
+
 	if (bcfg.size())
 	{
-		str_rc target = self.property(Run_i.target);
+		/*
+		if (log)
+		{
+			log->dump("bcfg", bcfg);
+		}*/
+
+		str_rc target = self.str_property(Run_i.target);
+		/*
+		if (log)
+		{
+			log->dump("target 1", target);
+		}
+		*/
 		target.lowercase();
 
-		//showstr("target", target);
+		/*
+		if (log)
+		{
+			log->dump("target 2", target);
+		}
+		*/
 
 		tlist = bcfg.get(target);
 		if (!tlist.ok())
 		{
 			tlist = bcfg.get(Run_i.default_str);
 		}
-
+		/*
+		if (log)
+		{
+			log->dump("tlist", tlist);
+		}*/
 	}
 	else {
 		result.error() <<  "bootstrap property not set" << path;
 		return result;
 	}
 		
-
-	
-
 	bcfg = tlist.zarray();
 	//showdata("bcfg", bcfg);
 
@@ -551,12 +639,18 @@ Run::config_init(str_ptr bootstrap)
 
 	if (test.isArray())
 	{
-		htab_ptr assets = test.zarray();
+		/*
+		if (log)
+		{
+			log->dump(Run_i.assets_str, test);
+		}
+		*/
+		htab_rc assets = test.zarray();
 		transfer_str(Run_i.web_dir, assets, self);
 		transfer_str(Run_i.theme_str, assets, self);
 	}
 	
-
+	
 	tlist = self.property(Run_i.is_web);
 	//showmem("is_web", value);
 
@@ -567,7 +661,13 @@ Run::config_init(str_ptr bootstrap)
 	else {
 		tlist = bcfg.get(Run_i.web_str);
 	}
-	
+	/*
+	if (log)
+		{
+			log->dump("config list", tlist);
+		}
+	*/
+
 	obj_rc config = self.property(Run_i.config_str);
 	//showobj("config", config);
 
@@ -601,6 +701,12 @@ Run::config_init(str_ptr bootstrap)
 						result = data.move_error();
 						return result;
 					}
+					/*
+						if (log)
+						{		
+							log->dump("Read data", val_ptr(data.value_));
+						}
+					*/
 					val_ptr vp(data.value_);
 
 					if (vp.isArray())
@@ -652,6 +758,12 @@ Run::config_init(str_ptr bootstrap)
 		}
 		
 	}
+
+	if (log)
+	{
+		log->line("End bootstrap");
+	}
+
 	return result;
 }
 

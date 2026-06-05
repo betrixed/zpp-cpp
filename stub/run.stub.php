@@ -9,7 +9,7 @@ namespace Wcc;
 class Run {
 
 
-    public readonly Config $config;
+    public Config $config;
 
     public readonly string $site_dir;
     public readonly string $gallery;

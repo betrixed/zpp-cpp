@@ -67,7 +67,7 @@ DebugLog::cpp_global()
 }
 
 void 
-DebugLog::dump(str_ptr label, val_ptr anyval)
+DebugLog::dump(str_ptr label, zval* anyval)
 {
 	dump(label.data(), anyval);
 }
@@ -87,7 +87,7 @@ void DebugLog::showmem(const char* label, zval* mem)
 
 }
 void 
-DebugLog::dump(const char* label, val_ptr anyval)
+DebugLog::dump(const char* label, zval* anyval)
 {
 	str_buf dump;
 
@@ -105,7 +105,7 @@ DebugLog::dump(const char* label, val_ptr anyval)
 
 
 void 
-DebugLog::dump(const char* label, htab_ptr arrayval)
+DebugLog::dump(const char* label, HashTable* arrayval)
 {
 	val_rc value(arrayval);
 
@@ -113,7 +113,7 @@ DebugLog::dump(const char* label, htab_ptr arrayval)
 }
 
 void 
-DebugLog::dump(const char* label, str_ptr strval)
+DebugLog::dump(const char* label, zend_string* strval)
 {
 	val_rc value(strval);
 
@@ -121,15 +121,20 @@ DebugLog::dump(const char* label, str_ptr strval)
 }
 
 void 
-DebugLog::dump(const char* label, obj_ptr objval)
+DebugLog::dump(const char* label, zend_object* objval)
 {
 	val_rc value(objval);
-
 	dump(label, val_ptr(value));
 }
 
 
+obj_rc //static
+DebugLog::start(const char* msg, int flags)
+{
+	str_rc temp(msg);
 
+	return DebugLog::start(temp, flags);
+}
 obj_rc //static 
 DebugLog::start(str_ptr msg, int destflags)
 {
@@ -176,18 +181,23 @@ DebugLog::start(str_ptr msg, int destflags)
 
 }
 
+int 
+DebugLog::getOutputs()
+{
+	return outputs_;
+}
+
 void
 DebugLog::setOutputs(int flags)
 {
-	val_rc outputs((zend_long) flags);
-
-	obj_ptr(self_).property(DLSi.outputs_str, outputs);
+	outputs_ = flags;
 }
 
 void 
 DebugLog::debug_info(htab_rw hw)
 {
 	base_d::debug_info(hw);
+	hw.set(DLSi.outputs_str, (int) outputs_);
 }
 
 void 
@@ -199,9 +209,7 @@ DebugLog::construct(str_ptr logpath, int destflags)
 
 	self.property(DLSi.filename_str, temparg);
 
-	temparg = (zend_long) destflags;
-
-	self.property(DLSi.outputs_str, temparg);
+	outputs_ = destflags;
 
 }
 
@@ -216,9 +224,7 @@ DebugLog::line(str_ptr msg, int flags)
 {
 	obj_ptr self(self_);
 
-	val_rc outputs = self.property(DLSi.outputs_str);
-
-	int outflags = outputs.zlong();
+	int outflags = outputs_;
 
 	bool trace = ((outflags & (TO_FILE|TO_CONSOLE)) != 0);
 	if (trace)
@@ -322,6 +328,16 @@ ZEND_METHOD(Wcc_DebugLog, setOutputs)
 		DebugLog* cobj = zval_toc<DebugLog>(ZEND_THIS);
 		cobj->setOutputs(flags);	
 	}
+}
+
+
+ZEND_METHOD(Wcc_DebugLog, getOutputs)
+{
+	if (zarg_rd::zero_args(execute_data, __FUNCTION__))
+		return;
+
+	DebugLog* cobj = zval_toc<DebugLog>(ZEND_THIS);
+	RETURN_LONG(cobj->getOutputs());	
 }
 
 ZEND_METHOD(Wcc_DebugLog, setInstance)

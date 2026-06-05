@@ -17,9 +17,7 @@ class DebugLog {
 	const int FILE_LOCK = 2;
 
 
-	public readonly string $filename;
-
-	protected int $outputs;
+	public string $filename;
 
 	public static function instance() : ?DebugLog {}
 
@@ -32,6 +30,8 @@ class DebugLog {
 	public function line(string $s, int $addflags = DebugLog::FILE_APPEND) : void {}
 
 	public function setOutputs(int $destflags = DebugLog::TO_FILE) : void {}
+
+	public function getOutputs() : int {}
 
 	public function dump(string $label, mixed $value) : void {}
 

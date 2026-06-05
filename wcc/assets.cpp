@@ -996,9 +996,7 @@ ZEND_METHOD(Wcc_Assets, loadAssetFile)
 {
 	zarg_rd args(execute_data);
 
-	str_ptr file;
-
-	args.zstring(file, args.need(0));
+	str_ptr file = args.str(args.need(0));
 	htab_rc result;
 
 	if (!args.throw_errors(__FUNCTION__))

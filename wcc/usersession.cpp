@@ -102,12 +102,13 @@ UserSession::addFlash(str_ptr text, str_ptr status)
 void 
 UserSession::addUserRoles(htab_ptr roles)
 {
-	getUserRoles();  
+	obj_rc data = getUserData();
 
-	val_ptr rlist = data_.property_ptr(UDi.roles_p);
+	val_ptr rlist = data.property_ptr(UDi.roles_p);
+
 	htab_rw myroles(rlist);
-
 	auto before_ct = myroles.size();
+
 	myroles.merge(roles);
 	auto after_ct =  myroles.size();
 
@@ -123,26 +124,31 @@ UserSession::adjustExpiry()
 {
 	int result = 0;
 
-	if (session_.ok())
+	if (data_.ok())
 	{
-		if (data_.ok())
+		UserData* ud = ud_cpp();
+
+		obj_rc gConfig = Services::service(UDi.config_str);
+
+		htab_rc ttl_roles = gConfig.array_property(UDi.TTLroles);
+
+		int ttl_time = gConfig.int_property(UDi.TTLtime);
+
+		if (ud->hasAnyRole(ttl_roles))
 		{
-			UserData* ud = ud_cpp();
-			if (ud->hasRole(UDi.Admin_str) || ud->hasRole(UDi.Editor_str) )
+
+			obj_rc adapter = getAdapter();
+			if (adapter.ok())
 			{
+				val_rc tsec(ttl_time);
 
-				obj_rc adapter = getAdapter();
-				if (adapter.ok())
-				{
-					val_rc tsec(24*60*60);
+				val_rc test = adapter.call(UDi.gc_str, tsec);
 
-					val_rc test = adapter.call(UDi.gc_str, tsec);
-
-					result = test.zlong();
-				}
+				result = test.zlong();
 			}
 		}
 	}
+
 	return result;
 }
 
@@ -209,37 +215,13 @@ void UserSession::flash(str_ptr msg, str_ptr status, htab_ptr exlines)
 }
 
 
-str_rc
-UserSession::getEndTime()
-{
-	str_rc result;
-
-	if (session_.ok())
-	{
-		obj_rc adapter = getAdapter();
-		if (adapter.ok() && adapter.method_exists(UDi.getexpires_str))
-		{
-			//timestamp int
-			val_rc expires = adapter.call(UDi.getexpires_str);
-			if (expires.isLong())
-			{
-				result = datetime_obj::date(UDi.expires_fmt, expires.zlong());
-			}
-		}
-	}
-	if (!result.ok())
-	{
-		result = UDi.unknown_str;
-	}
-	return result;
-}
-
+/*
 htab_rc
 UserSession::getFlash()
 {
 	return data_.array_property(UDi.flash_str);
 }
-
+*/
 
 val_rc 
 UserSession::getKey(str_ptr key, val_ptr adefault)
@@ -258,6 +240,33 @@ UserSession::getKey(str_ptr key, val_ptr adefault)
 	return result;
 }
 
+bool 
+UserSession::hasKey(str_ptr key)
+{
+	zval* keys = data_.property_ptr(UDi.keys_p);
+	htab_ptr values(keys);
+	return values.has_key(key);
+}
+
+void 
+UserSession::setKey(str_ptr key, val_ptr value)
+{
+	zval* keys = data_.property_ptr(UDi.keys_p);
+	htab_rw kdata(keys);
+	kdata.set(key, value);
+	doWrite_ = true;
+}
+
+void UserSession::unsetKey(str_ptr key)
+{
+	val_ptr keys = data_.property_ptr(UDi.keys_p);
+	htab_rw kdata(keys);
+	if (kdata.has_key(key))
+	{
+		kdata.unset(key);
+		doWrite_ = true;
+	}
+}
 
 obj_rc 
 UserSession::getSession()
@@ -277,7 +286,7 @@ UserSession::getSession()
 }
 
 obj_rc 
-UserSession::getUser()
+UserSession::getUserData()
 {
 	obj_rc result;
 	if (!wasRead_)
@@ -285,30 +294,12 @@ UserSession::getUser()
 		read();
 	}
 	
-	result = data_.obj_property(UDi.user_p);
-
-	if (result.ok())
-	{	
-		//showobj("getUser 1", result);
-		return result;
-	}
-	result = Config::omg.new_zobj();
-
-	//showobj("getUser 2", result);
-	data_.property(UDi.user_p, result);
-	doWrite_ = true;
-	//showobj("user", result);
-	return result;
-}
-
-
-htab_rc UserSession::getUserRoles()
-{
-	if (!wasRead_)
+	obj_rc user = data_.obj_property(UDi.user_p);
+	if (!user.ok())
 	{
-		read();
+		user = ud_cpp()->getUser();
 	}
-	return data_.array_property(UDi.roles_p);
+	return data_;
 }
 
 
@@ -320,40 +311,6 @@ UserSession::guestSession()
 	doWrite_ = true;
 	write();
 	return obj_rc(self_);
-}
-
-
-
-bool 
-UserSession::hasKey(str_ptr key)
-{
-	zval* keys = data_.property_ptr(UDi.keys_p);
-	htab_ptr values(keys);
-	return values.has_key(key);
-}
-
-
-bool 
-UserSession::hasValues()
-{
-	zval* keys = data_.property_ptr(UDi.keys_p);
-	htab_ptr values(keys);
-	return values.size() > 0;
-
-}
-
-
-bool 
-UserSession::isEmpty()
-{
-	obj_rc user = getUser();
-	bool result = true;
-	if (user.ok())
-	{
-		val_ptr id = user.property_ptr(UDi.id_p);
-		result = id.is_nullptr() || (id.zlong() == 0);
-	}
-	return result;
 }
 
 
@@ -494,52 +451,6 @@ UserSession::save()
 }
 
 
-void
-UserSession::saveUser(obj_ptr src, htab_ptr roles)
-{
-	error_return result;
-	val_rc test;
-
-	obj_rc user = getUser();
-	if (!user.ok())
-	{
-		user = Config::omg.new_zobj();
-	}
-
-	test = src.property(UDi.id_p);
-	user.property(UDi.id_p, test);
-
-	test = src.property(UDi.status_p);
-	user.property(UDi.status_p, test);
-
-	test = src.property(UDi.email_p);
-	user.property(UDi.email_p, test);
-
-
-	test = src.property(UDi.name_p);
-	user.property(UDi.userName_p, test);
-
-	test = src.property(UDi.memberid_p);
-	user.property(UDi.memberid_p, test);
-
-	data_.property(UDi.user_p, user);
-
-	data_.property(UDi.roles_p, roles);
-
-	wasRead_ = true;
-	doWrite_ = true;
-}
-
-
-
-str_rc 
-UserSession::sessionName()
-{
-	obj_rc user = getUser();
-	return user.str_property(UDi.userName_p); 
-}
-
-
 void  
 UserSession::setAdmin()
 {
@@ -566,14 +477,7 @@ UserSession::setGuest()
 }
 
 
-void 
-UserSession::setKey(str_ptr key, val_ptr value)
-{
-	zval* keys = data_.property_ptr(UDi.keys_p);
-	htab_rw kdata(keys);
-	kdata.set(key, value);
-	doWrite_ = true;
-}
+
 
 
 void 
@@ -583,7 +487,7 @@ UserSession::setValidUser(str_ptr uname, htab_ptr roles)
 
 	data_.property(UDi.roles_p, roles);
 
-	obj_rc user = getUser();
+	obj_rc user = data_.obj_property(UDi.user_p);
 
 	user.property(UDi.userName_p, uname);
 	user.property(UDi.status_p, UDi.OK_str);
@@ -604,16 +508,7 @@ UserSession::shutdown()
 }
 
 
-void UserSession::unsetKey(str_ptr key)
-{
-	val_ptr keys = data_.property_ptr(UDi.keys_p);
-	htab_rw kdata(keys);
-	if (kdata.has_key(key))
-	{
-		kdata.unset(key);
-		doWrite_ = true;
-	}
-}
+
 
 
 void 
@@ -634,7 +529,7 @@ void UserSession::wipe()
 	data_.property(UDi.keys_p, empty);
 	data_.property(UDi.roles_p, empty);
 
-	obj_rc user = getUser();
+	obj_rc user = data_.obj_property(UDi.user_p);
 
 	str_ptr estr = str_ptr::empty_str();
 
@@ -783,25 +678,40 @@ ZEND_METHOD(Wcc_UserSession, flash)
 	}
 }
 
-ZEND_METHOD(Wcc_UserSession, getEndTime)
+
+ZEND_METHOD(Wcc_UserSession, getSession)
 {
 	if (!zarg_rd::zero_args(execute_data, __FUNCTION__))
 	{
 		return;
 	}
 	UserSession* cobj = zval_toc<UserSession>(ZEND_THIS);
-	str_rc result = cobj->getEndTime();
+	obj_rc result = cobj->getSession();
 	result.move_zv(return_value);
 }
 
-ZEND_METHOD(Wcc_UserSession, getFlash)
+
+
+ZEND_METHOD(Wcc_UserSession, getUserData)
 {
 	if (!zarg_rd::zero_args(execute_data, __FUNCTION__))
 	{
 		return;
 	}
 	UserSession* cobj = zval_toc<UserSession>(ZEND_THIS);
-	htab_rc result = cobj->getFlash();
+	obj_rc result = cobj->getUserData();
+	result.move_zv(return_value);
+}
+
+
+ZEND_METHOD(Wcc_UserSession, guestSession)
+{
+	if (!zarg_rd::zero_args(execute_data, __FUNCTION__))
+	{
+		return;
+	}
+	UserSession* cobj = zval_toc<UserSession>(ZEND_THIS);
+	obj_rc result = cobj->guestSession();
 	result.move_zv(return_value);
 }
 
@@ -820,39 +730,6 @@ ZEND_METHOD(Wcc_UserSession, getKey)
 	}
 }
 
-ZEND_METHOD(Wcc_UserSession, getUser)
-{
-	if (!zarg_rd::zero_args(execute_data, __FUNCTION__))
-	{
-		return;
-	}
-	UserSession* cobj = zval_toc<UserSession>(ZEND_THIS);
-	obj_rc result = cobj->getUser();
-	result.move_zv(return_value);
-}
-
-ZEND_METHOD(Wcc_UserSession, getUserRoles)
-{
-	if (!zarg_rd::zero_args(execute_data, __FUNCTION__))
-	{
-		return;
-	}
-	UserSession* cobj = zval_toc<UserSession>(ZEND_THIS);
-	htab_rc result = cobj->getUserRoles();
-	result.move_zv(return_value);
-}
-
-ZEND_METHOD(Wcc_UserSession, guestSession)
-{
-	if (!zarg_rd::zero_args(execute_data, __FUNCTION__))
-	{
-		return;
-	}
-	UserSession* cobj = zval_toc<UserSession>(ZEND_THIS);
-	obj_rc result = cobj->guestSession();
-	result.move_zv(return_value);
-}
-
 ZEND_METHOD(Wcc_UserSession, hasKey)
 {
 	zarg_rd args(execute_data);
@@ -866,6 +743,35 @@ ZEND_METHOD(Wcc_UserSession, hasKey)
 		RETURN_BOOL(result);
 	}
 
+}
+
+
+ZEND_METHOD(Wcc_UserSession, setKey)
+{
+	zarg_rd args(execute_data);
+
+	str_ptr key = args.str(args.need(0));
+	val_ptr value = args.need(1);
+
+	if (!args.throw_errors(__FUNCTION__))
+	{
+		UserSession* cobj = zval_toc<UserSession>(ZEND_THIS);
+		cobj->setKey(key, value);
+	}
+}
+
+
+ZEND_METHOD(Wcc_UserSession, unsetKey)
+{
+	zarg_rd args(execute_data);
+
+	str_ptr key = args.str(args.need(0));
+
+	if (!args.throw_errors(__FUNCTION__))
+	{
+		UserSession* cobj = zval_toc<UserSession>(ZEND_THIS);
+		cobj->unsetKey(key);
+	}
 }
 
 ZEND_METHOD(Wcc_UserSession, hasValues)
@@ -962,31 +868,6 @@ ZEND_METHOD(Wcc_UserSession, save)
 	cobj->write();
 }
 
-ZEND_METHOD(Wcc_UserSession, saveUser)
-{
-	zarg_rd args(execute_data);
-
-	obj_ptr user = args.obj(args.need(0));
-	htab_ptr roles = args.htab(args.need(1));
-
-	if (!args.throw_errors(__FUNCTION__))
-	{
-		UserSession* cobj = zval_toc<UserSession>(ZEND_THIS);
-		cobj->saveUser(user, roles);
-	}
-}
-
-ZEND_METHOD(Wcc_UserSession, sessionName)
-{
-	if (!zarg_rd::zero_args(execute_data, __FUNCTION__))
-	{
-		return;
-	}
-	UserSession* cobj = zval_toc<UserSession>(ZEND_THIS);
-	str_rc result = cobj->sessionName();
-	result.move_zv(return_value);
-}
-
 ZEND_METHOD(Wcc_UserSession, setAdmin)
 {
 	if (!zarg_rd::zero_args(execute_data, __FUNCTION__))
@@ -1008,19 +889,6 @@ ZEND_METHOD(Wcc_UserSession, setGuest)
 
 }
 
-ZEND_METHOD(Wcc_UserSession, setKey)
-{
-	zarg_rd args(execute_data);
-
-	str_ptr key = args.str(args.need(0));
-	val_ptr value = args.need(1);
-
-	if (!args.throw_errors(__FUNCTION__))
-	{
-		UserSession* cobj = zval_toc<UserSession>(ZEND_THIS);
-		cobj->setKey(key, value);
-	}
-}
 
 ZEND_METHOD(Wcc_UserSession, setValidUser)
 {
@@ -1046,18 +914,6 @@ ZEND_METHOD(Wcc_UserSession, shutdown)
 	cobj->write(true);
 }
 
-ZEND_METHOD(Wcc_UserSession, unsetKey)
-{
-	zarg_rd args(execute_data);
-
-	str_ptr key = args.str(args.need(0));
-
-	if (!args.throw_errors(__FUNCTION__))
-	{
-		UserSession* cobj = zval_toc<UserSession>(ZEND_THIS);
-		cobj->unsetKey(key);
-	}
-}
 
 ZEND_METHOD(Wcc_UserSession, updated)
 {
