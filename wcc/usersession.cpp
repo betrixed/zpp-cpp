@@ -133,7 +133,15 @@ UserSession::adjustExpiry()
 		htab_rc ttl_roles = gConfig.array_property(UDi.TTLroles);
 
 		int ttl_time = gConfig.int_property(UDi.TTLtime);
+		/*
+		DebugLog* log = DebugLog::cpp_global();
 
+		if (log)
+		{
+			log->dump("adjust if", ttl_roles);
+			log->dump("adjust by", ttl_time);
+		}*/
+		
 		if (ud->hasAnyRole(ttl_roles))
 		{
 
