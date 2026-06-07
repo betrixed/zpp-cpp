@@ -113,10 +113,10 @@ protected:
 
 	virtual void init_class_fn() 
 	{
-	mydef::init_class_fn();
+		mydef::init_class_fn();
 
-	HmapIterator::setup_handlers(mydef::handlers_);
-	HmapIterator::setup_class(mydef::class_entry_);
+		HmapIterator::setup_handlers(mydef::handlers_);
+		HmapIterator::setup_class(mydef::class_entry_);
 	}
 };
 

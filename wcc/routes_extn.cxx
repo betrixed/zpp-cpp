@@ -28,6 +28,7 @@
 #include "wcc/route_set.cpp"
 #include "wcc/target.cpp"
 
+#include "wcc/isession.cpp"
 #include "wcc/module.cpp"
 
 #include "wcc/dispatch.cpp"

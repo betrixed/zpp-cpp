@@ -171,15 +171,7 @@ UserSession::auth(val_ptr role)
 	}
 	UserData* ud = ud_cpp();
 
-	if (role.isString())
-	{
-		return ud->hasRole(role.zstr());
-	}
-	if (role.isArray())
-	{
-		return ud->hasAnyRole(role.zarray());
-	}
-	return false;
+	return ud->isLoggedIn(role);
 }
 
 
@@ -328,6 +320,19 @@ UserSession::isEnded()
 	return ended_;
 }
 
+bool
+UserSession::isEmpty()
+{
+	if (!data_.ok())
+	{
+		return false;
+	}
+	obj_rc user = data_.obj_property(UDi.user_p);
+
+	htab_rc roles = data_.array_property(UDi.roles_p);
+
+	return (!user.ok() || (roles.size()==0));
+}
 
 bool 
 UserSession::isLoggedIn(val_ptr roles)
@@ -357,6 +362,7 @@ UserSession::nullify()
 	{
 		wipe();
 	}
+
 	if (session_.ok())
 	{
 		session_.call(UDi.destroy_fn);
@@ -491,11 +497,10 @@ UserSession::setGuest()
 void 
 UserSession::setValidUser(str_ptr uname, htab_ptr roles)
 {
+	obj_rc user = ud_cpp()->getUser();
+	
 	data_.property(UDi.keys_p, htab_ptr::empty_array());
-
 	data_.property(UDi.roles_p, roles);
-
-	obj_rc user = data_.obj_property(UDi.user_p);
 
 	user.property(UDi.userName_p, uname);
 	user.property(UDi.status_p, UDi.OK_str);
@@ -539,14 +544,7 @@ void UserSession::wipe()
 
 	obj_rc user = data_.obj_property(UDi.user_p);
 
-	str_ptr estr = str_ptr::empty_str();
-
-	user.property(UDi.userName_p, estr);
-	user.property(UDi.status_p, estr);
-	user.property(UDi.email_p, estr);
-
-	user.property(UDi.id_p, (int)0);
-	user.property(UDi.memberid_p, (int)0 );
+	data_.property(UDi.user_p, val_rc::null_value_ptr());
 
 	setGuest();
 	doWrite_ = true;

@@ -62,10 +62,6 @@ void UserDataInit::init()
 	start_fn = "start";
 	userData_p = "userData";
 
-	getexpires_str = "getexpires";
-	expires_fmt = "D H:i e";
-	unknown_str = "unknown";
-
 	doWrite = "doWrite";
 	wasRead = "wasRead";
 

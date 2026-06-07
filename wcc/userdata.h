@@ -51,9 +51,6 @@ public:
 	str_intern gc_str;
 	str_intern session_str;
 
-	str_intern getexpires_str;
-	str_intern expires_fmt;
-	str_intern unknown_str;
 
 	str_intern doWrite;
 	str_intern wasRead;
