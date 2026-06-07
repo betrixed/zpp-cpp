@@ -299,6 +299,13 @@ namespace zpp {
         
         str_intern  session_write_close_fn;
         str_intern  session_status_fn;
+        str_intern  session_id_fn;
+        str_intern  session_name_fn;
+        str_intern  session_regenerate_id_fn;
+        str_intern  session_start_fn;
+        str_intern  session_set_save_handler_fn;
+
+        str_intern  headers_sent_fn;
         
         void init() override;
         void init_req() override;
@@ -462,6 +469,19 @@ namespace zpp {
     int session_status();
 
     bool session_write_close();
+
+    str_rc session_id(str_ptr id = str_ptr());
+
+    str_rc session_name(str_ptr name = str_ptr());
+
+    bool session_regenerate_id(bool deleteOld = false);
+
+    bool session_start();
+
+    bool session_set_save_handler(obj_ptr adapter);
+
+    bool headers_sent(val_ptr filename = val_rc::null_value_ptr(), val_ptr lineNum = val_rc::null_value_ptr());
+
 
 
 }; // end namespace zpp

@@ -328,7 +328,13 @@ void
 obj_ptr::property(str_ptr key, obj_ptr value)
 {
     zval temp = {0};
-    val_ptr::object_bind(&temp, value);
+    if (value.ok())
+    {
+        val_ptr::object_bind(&temp, value);
+    }
+    else {
+        ZVAL_NULL(&temp);
+    }
     property(key, val_ptr(&temp));
 }
 
@@ -337,8 +343,14 @@ void
 obj_ptr::property(str_ptr key, htab_ptr value)
 {
     zval temp = {0};
+    if (!value.ok())
+    {
+        value = htab_ptr::empty_array();
+    }
     val_ptr::array_bind(&temp, value);
     property(key, val_ptr(&temp));
+
+    
 }
 
 void 
@@ -536,6 +548,12 @@ obj_rc
 obj_ptr::obj_property(str_ptr name)
 {
     obj_rc result;
+
+    if (!name.ok())
+    {
+        return result;
+    }
+
     val_ptr test = property_ptr(name);
     
     if (test.isObject())

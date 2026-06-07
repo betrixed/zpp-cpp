@@ -666,6 +666,28 @@ val_ptr::set_zobj(obj_ptr val)
 	}
 }
 
+void
+val_ptr::make_ref()
+{
+	if (p_)
+	{
+		int rtype = Z_TYPE_P(p_);
+		switch(rtype)
+		{
+		case IS_STRING:
+		case IS_ARRAY:
+		case IS_OBJECT:
+		case IS_LONG:
+	    case IS_DOUBLE:
+			ZVAL_NEW_REF(p_, p_);
+			break;
+		default:
+			//TODO: throw error?
+			break;
+		}
+	}
+}
+
 }; //namespace
 //val_ptr.cpp
 #endif

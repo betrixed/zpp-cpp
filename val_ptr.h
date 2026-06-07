@@ -253,6 +253,8 @@ public:
     void  set_zstr(str_ptr val);
     void  set_htab(htab_ptr val);
     void  set_zobj(obj_ptr val);
+
+    void  make_ref();
 };
 
 inline bool operator!=(const val_ptr& a, const val_ptr& b) 
