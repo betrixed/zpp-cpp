@@ -13,6 +13,10 @@
 #include "idriver.h"
 #endif
 
+#ifndef WCC_DEBUG_LOG_H
+#include "wcc/debuglog.h"
+#endif
+
 #ifndef ICONFIG_ARGINFO_H
 #define ICONFIG_ARGINFO_H
 extern "C" {
@@ -346,11 +350,12 @@ IServer::getDriverClasses()
 	return driverClasses_;
 }
 
-void 
+error_return 
 IServer::config(htab_ptr data)
 {
-	val_ptr clist = data.get(ISV.sqls_key);
+	error_return test;
 
+	val_rc clist = data.get(ISV.sqls_key);
 	if (clist.isArray())
 	{
 		htab_rw(sqlClasses_).merge(clist.zarray());
@@ -364,20 +369,39 @@ IServer::config(htab_ptr data)
 	clist = data.get(ISV.db_config);
 	if (clist.isArray())
 	{
+
+
 		htab_walk wk;
 		auto name = wk.key();
 		auto cfg = wk.value();
 
 		for(wk.start(clist.zarray()); wk.ok(); wk.next())
 		{
-			obj_rc dbc_mgr = IConfig::omg.new_zobj();
-			IConfig* dbc = zobj_toc<IConfig>(dbc_mgr);
-			//showmem("Name", name);
-			//showmem("Values-", cfg);
-			dbc->assign(cfg.zarray());
-			addConfig(dbc_mgr, name.zstr());
+			if (cfg.isArray())
+			{
+				str_rc cname(name);
+
+				obj_rc dbc_mgr = IConfig::omg.new_zobj();
+				IConfig* dbc = zobj_toc<IConfig>(dbc_mgr);
+				htab_rc data(cfg.zarray());
+
+				test = dbc->assign(data);
+
+				if (test.has_errors())
+				{
+					return test;
+				} 
+				
+				test = addConfig(dbc_mgr, cname);
+
+				if (test.has_errors())
+				{
+					return test;
+				} 				
+			}
 		}
 	}
+	return test;
 
 }
 
@@ -514,7 +538,9 @@ ZEND_METHOD(Wcd_IServer, config)
 
 	IServer* cobj = zval_toc<IServer>(ZEND_THIS);
 
-	cobj->config(data);
+	error_return result = cobj->config(data);
+	result.throw_errors();
+
 }
 
 //htab_ptr IServer::getAliases()

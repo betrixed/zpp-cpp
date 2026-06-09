@@ -13,6 +13,11 @@
 #include "wcc/services.h"
 #endif
 
+
+#ifndef WCC_DEBUG_LOG_H
+#include "wcc/debuglog.h"
+#endif
+
 #ifndef ICONFIG_ARGINFO_H
 #define ICONFIG_ARGINFO_H
 extern "C" {

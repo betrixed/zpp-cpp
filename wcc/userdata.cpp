@@ -67,6 +67,8 @@ void UserDataInit::init()
 
 	TTLroles = "TTLBoostRoles";
 	TTLtime = "TTLBoostTime";
+
+	get_str = "get";
 }
 
 void 

@@ -58,6 +58,7 @@ public:
 	str_intern TTLroles;
 	str_intern TTLtime;
 
+	str_intern get_str;
 
 
 };

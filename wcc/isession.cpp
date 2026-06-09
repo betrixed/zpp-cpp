@@ -5,6 +5,10 @@
 #include "isession.h"
 #endif
 
+#ifndef WCC_DEBUG_LOG_H
+#include "debuglog.h"
+#endif
+
 #ifndef  PHP_SESSION_H
 extern "C" {
 	#include <ext/session/php_session.h>
@@ -34,6 +38,7 @@ protected:
 */
 
 SessInit SIN;
+ISession_mgr ISession::omg;
 
 void 
 SessInit::init()
@@ -42,6 +47,13 @@ SessInit::init()
 	getexpires_fn = "getexpires";
 	expires_fmt = "D H:i e";
 	unknown_str = "unknown";
+
+	options_str = "options";
+	adapter_str = "adapter";
+	prefix_str = "prefix";
+	name_str = "name";
+
+	savePath_str = "savePath";
 }
 
 
@@ -58,7 +70,7 @@ void ISession_mgr::init_class_fn()
 {
 	mydef::init_class_fn();
 
-	setup_handlers(mydef::handlers_);
+	//setup_handlers(mydef::handlers_);
 }
 
 zval* 	  
@@ -96,7 +108,13 @@ ISession_mgr::unset_property(zend_object* object, zend_string* name, void **cach
 	return iobj->remove(name);
 }
 
-
+void ISession::debug_info(htab_rw di)
+{
+	di.set(SIN.options_str, options_);
+	di.set(SIN.adapter_str, adapter_);
+	di.set(SIN.name_str, name_);
+	di.set(SIN.prefix_str, prefix_);
+}
 
 void 
 ISession::construct(htab_ptr options)
@@ -107,7 +125,7 @@ ISession::construct(htab_ptr options)
 void 
 ISession::destroy()
 {
-	if (exists())
+	if (ISession::exists())
 	{
 		php_session_destroy();
 		htab_ptr::set_global(SIN.global_sess, val_rc::empty_array_ptr());
@@ -133,21 +151,27 @@ ISession::get(str_ptr key, val_ptr defval, bool remove)
 {
 	val_rc result;
 
-	if (!exists())
+	if (!ISession::exists())
 	{
 		return result;
 	}
 	str_rc ukey = getUniqueKey(key);
 
-	zval* gSession = htab_ptr::get_global(SIN.global_sess);
-	if (gSession)
+	zval* gsession = htab_ptr::get_global(SIN.global_sess);
+
+	if (gsession && (Z_TYPE_P(gsession) == IS_REFERENCE))
 	{
-		htab_rw array(Z_ARR_P(gSession));
-		zval* test = array.get(ukey);
-		result = (test) ? test : (zval*)defval;
-		if (remove && test)
+		htab_rw sess(gsession);
+		zval* test = sess.get(ukey);
+		if (test)
 		{
-			array.unset(ukey);
+			result = test;
+			if (remove) {
+				sess.unset(ukey);
+			}
+		}
+		else {
+			result = defval;
 		}
 	}
 	return result;
@@ -156,7 +180,7 @@ ISession::get(str_ptr key, val_ptr defval, bool remove)
 val_rc
 ISession::__get(str_ptr key)
 {
-	return this->get(key);
+	return this->get(key,val_rc::null_value_ptr(), false);
 }
 val_rc 
 ISession::__isset(str_ptr key)
@@ -208,22 +232,41 @@ ISession::getEndTime()
 bool 
 ISession::has(str_ptr key)
 {
-	if (!exists())
+	if (!ISession::exists())
 	{
 		return false;
 	}
 
 	str_rc ukey = getUniqueKey(key);
 
-	val_ptr gsession = htab_ptr::get_global(SIN.global_sess);
-	if (gsession.isArray())
+	zval* gsession = htab_ptr::get_global(SIN.global_sess);
+
+	if (gsession && (Z_TYPE_P(gsession)==IS_REFERENCE))
 	{
-		htab_ptr read(gsession.zarray());
-		return read.has_key(ukey);
+		htab_ptr sess(gsession);
+		return sess.has_key(ukey);
 	}
 	return false;
 }
 
+str_rc 
+ISession::getUniqueKey(str_ptr key)
+{
+	str_rc result;
+
+	if (prefix_.size())
+	{
+		str_buf buf;
+
+		buf << prefix_ << '#' << key;
+
+		result = buf.zstr();
+	}
+	else {
+		result = key;
+	}
+	return result;
+}
 
 str_rc //static
 ISession::id(str_ptr id)
@@ -240,7 +283,7 @@ ISession::name(str_ptr name)
 bool 
 ISession::regenerateId(bool deleteOld)
 {
-	if (!exists())
+	if (!ISession::exists())
 	{
 		return false;
 	}
@@ -250,34 +293,35 @@ ISession::regenerateId(bool deleteOld)
 void
 ISession::remove(str_ptr key)
 {
-	if (!exists()) {
+	if (!ISession::exists()) {
 		return;
 	}
 	str_rc ukey = getUniqueKey(key);
-	val_ptr gsession = htab_ptr::get_global(SIN.global_sess);
-	if (gsession.isArray())
+	zval* gsession = htab_ptr::get_global(SIN.global_sess);
+	if (gsession && (Z_TYPE_P(gsession)==IS_REFERENCE))
 	{
-		htab_rw erase(gsession.zarray());
-		erase.unset(ukey);
+		htab_rw sess(gsession);
+		sess.unset(ukey);
 	}
 }
 
 void 
 ISession::set(str_ptr key, val_ptr value)
 {
-	if (exists())
+	if (ISession::exists())
 	{
 		str_rc ukey = getUniqueKey(key);
-		val_ptr gsession = htab_ptr::get_global(SIN.global_sess);
-		if (gsession.isArray())
+		zval* gsession = htab_ptr::get_global(SIN.global_sess);
+
+		if (Z_TYPE_P(gsession) == IS_REFERENCE)
 		{
-			htab_rw 	write(gsession.zarray());
-			write.set(ukey, value);
+			htab_rw sess(gsession);
+			sess.set(ukey, value);
 		}
 	}
 }
 
-void 
+void
 ISession::setAdapter(obj_ptr itf)
 {
 	adapter_ = itf;
@@ -285,21 +329,32 @@ ISession::setAdapter(obj_ptr itf)
 
 void ISession::setOptions(htab_ptr opt)
 {
+	prefix_ =  opt.get(SIN.prefix_str);
+	if (!prefix_.ok())
+	{
+		prefix_ = str_ptr::empty_str();
+	}
 	options_ = opt;
 }
 
 bool
 ISession::start()
 {
-	if (exists() || headers_sent())
+	if (ISession::exists() || headers_sent())
 	{
 		return false; 
 	}
+
+	str_rc path = options_.get(SIN.savePath_str);
+
+	session_save_path(path);
+
+
 	bool result = true;
 
 	if (adapter_.ok())
 	{
-		result = session_set_save_handler(adapter_);
+		result = session_set_save_handler(adapter_, true);
 	}
 	if (result)
 	{
@@ -316,10 +371,14 @@ using namespace zpp;
 ZEND_METHOD(Wcc_Session_ISession, __construct)
 {
 	zarg_rd args(execute_data);
-	htab_ptr options = args.htab(args.need(0));
+	htab_ptr options = args.htab(args.option(0));
 
 	if (!args.throw_errors())
 	{
+		if (!options.ok())
+		{
+			options = htab_ptr::empty_array();
+		}
 		ISession* cobj = zval_toc<ISession>(ZEND_THIS);
 		cobj->construct(options);
 	}
@@ -506,8 +565,58 @@ ZEND_METHOD(Wcc_Session_ISession, start)
 		return;
 	}
 	ISession* cobj = zval_toc<ISession>(ZEND_THIS);
-	cobj->start();
+	bool result = cobj->start();
+	RETURN_BOOL(result);
 }
+
+ZEND_METHOD(Wcc_Session_ISession, __get)
+{	
+	zarg_rd args(execute_data);
+	str_ptr key = args.str(args.need(0));
+	if (!args.throw_errors())
+	{
+		ISession* cobj = zval_toc<ISession>(ZEND_THIS);
+		val_rc result = cobj->get(key, val_rc::null_value_ptr(), false);
+		result.move_zv(return_value);
+	}
+}
+
+ZEND_METHOD(Wcc_Session_ISession, __isset)
+{	
+	zarg_rd args(execute_data);
+	str_ptr key = args.str(args.need(0));
+	if (!args.throw_errors())
+	{
+		ISession* cobj = zval_toc<ISession>(ZEND_THIS);
+		bool result = cobj->has(key);
+		RETURN_BOOL(result);
+	}	
+}
+
+ZEND_METHOD(Wcc_Session_ISession, __set)
+{	
+	zarg_rd args(execute_data);
+	str_ptr key = args.str(args.need(0));
+	val_ptr value = args.need(1);
+
+	if (!args.throw_errors())
+	{
+		ISession* cobj = zval_toc<ISession>(ZEND_THIS);
+		cobj->set(key, value);
+	}	
+}
+
+ZEND_METHOD(Wcc_Session_ISession, __unset)
+{	
+	zarg_rd args(execute_data);
+	str_ptr key = args.str(args.need(0));
+	if (!args.throw_errors())
+	{
+		ISession* cobj = zval_toc<ISession>(ZEND_THIS);
+		cobj->remove(key);
+	}	
+}
+
 
 PHP_MINIT_FUNCTION(wcc_isession_reg)
 {

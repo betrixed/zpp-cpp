@@ -17,6 +17,14 @@ public:
 	str_intern  expires_fmt;
 	str_intern  unknown_str;
 
+	str_intern  options_str;
+	str_intern  adapter_str;
+	str_intern  prefix_str;
+	str_intern  name_str;
+
+	str_intern  savePath_str;
+	
+
 	void init() override;
 };
 
@@ -47,7 +55,7 @@ protected:
 
 	str_rc name_;
 
-	str_rc uniqueId_;
+	str_rc prefix_;
 
 	
 
@@ -62,6 +70,8 @@ public:
 	static int status();
 
 	static bool exists();
+
+	void debug_info(htab_rw) override;
 
 	val_rc __get(str_ptr key);
 	val_rc __isset(str_ptr key);

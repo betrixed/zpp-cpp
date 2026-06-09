@@ -21,6 +21,8 @@ protected:
 	htab_rc    options_;
 	str_rc     prefix_;
 	zend_long  ttl_;
+
+	ICache* cache_ptr();
 public:
 
 	static base_obj_mgr<ICache> omg;

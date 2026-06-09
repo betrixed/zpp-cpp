@@ -25,6 +25,11 @@ extern "C" {
 	#include "stub/usersession_arginfo.h"
 }
 #endif
+/*
+#ifndef WCC_SESSION_ISESSION_H
+#include "isession.h"
+#endif
+*/
 
 namespace wcc {
 
@@ -272,6 +277,7 @@ obj_rc
 UserSession::getSession()
 {
 	obj_rc result;
+	DebugLog* log = DebugLog::cpp_global();
 
 	if (ended_)
 	{
@@ -280,6 +286,11 @@ UserSession::getSession()
 	if (!session_.ok())
 	{
 		session_ = Services::service(UDi.session_str);
+		if (log)
+		{
+			log->dump("got session", session_);
+		}
+
 	}
 	result = session_;
 	return result;
@@ -399,18 +410,24 @@ UserSession::read()
 		{
 			if (log) {
 				
-				log->dump("Session object:", session_);
+				log->line("Session read");
 			}
 			// a virtual property?
-			val_rc ud = session_.property(UDi.userData_p);
+			val_rc ud;
+			val_ptr test(ud);
+
+			ud = session_.property(UDi.userData_p);
+
+			//val_rc arg1(UDi.userData_p);
+			//ud = session_.call(UDi.get_str, arg1);
 
 			if (log) {
 
-				log->dump("UserData object:", val_ptr(ud));
+				log->dump("UserData object:", test);
 			}
-			if (ud.isObject())
+			if (test.isObject())
 			{
-				data_ = ud.zobject();
+				data_ = test.zobject();
 				
 				int change = adjustExpiry();
 
@@ -424,6 +441,7 @@ UserSession::read()
 			else {
 				//zend_printf("Session new\n");
 				data_ = UserData::newobj();
+				session_.property(UDi.userData_p, data_);
 				doWrite_ = true;
 				wasRead_ = true;
 			}

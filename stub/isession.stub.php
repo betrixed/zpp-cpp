@@ -6,7 +6,16 @@
 namespace Wcc\Session;
 
 class ISession {
-	public function __construct(array $options);
+	public function __construct(array $options = []);
+
+	public function __get(string $name) : mixed {}
+
+	public function __isset(string $name) : bool {}
+
+	public function __set(string $name, mixed $value) : void {}
+
+	public function __unset(string $name) : void {}
+
 
 	public function destroy(): void {}
 
@@ -29,12 +38,12 @@ class ISession {
 
 	public function set(string $key, mixed $value): void {}
 
-	public function setAdapter(\SessionHandlerInterface $adapter): ISession {}
+	public function setAdapter(\SessionHandlerInterface $adapter): void {}
 
 	public function setOptions(array $options): void {}
 
 	public function start() : bool {}
 
-	
+
 };
 

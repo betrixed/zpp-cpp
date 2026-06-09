@@ -6,6 +6,8 @@
 
 #include "wcc/usersession.cpp"
 
+#include "wcc/isession.cpp"
+
 #include "wcc/finder.cpp"
 #include "wcc/loader.cpp"
 
@@ -28,7 +30,7 @@
 #include "wcc/route_set.cpp"
 #include "wcc/target.cpp"
 
-#include "wcc/isession.cpp"
+
 #include "wcc/module.cpp"
 
 #include "wcc/dispatch.cpp"
@@ -131,6 +133,9 @@ PHP_MINIT(wcc_pair_d)(INIT_FUNC_ARGS_PASSTHRU);
 	PHP_MINIT(Wcc_UserSession_reg)(INIT_FUNC_ARGS_PASSTHRU);
 #endif
 
+#ifdef WCC_SESSION_ISESSION_CPP
+	PHP_MINIT(wcc_isession_reg)(INIT_FUNC_ARGS_PASSTHRU);
+#endif
 }
 
 #endif

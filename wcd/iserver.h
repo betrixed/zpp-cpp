@@ -62,7 +62,7 @@ namespace wcd {
 		htab_ptr getSqlClasses();
 		htab_ptr getDriverClasses();
 
-		void config(htab_ptr data);
+		error_return config(htab_ptr data);
 
 		error_return addConfig(obj_rc iconfig, str_ptr name);
 
