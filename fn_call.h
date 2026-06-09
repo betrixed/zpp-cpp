@@ -304,6 +304,7 @@ namespace zpp {
         str_intern  session_regenerate_id_fn;
         str_intern  session_start_fn;
         str_intern  session_set_save_handler_fn;
+        str_intern  session_save_path_fn;
 
         str_intern  headers_sent_fn;
         
@@ -478,11 +479,15 @@ namespace zpp {
 
     bool session_start();
 
-    bool session_set_save_handler(obj_ptr adapter);
+    bool session_set_save_handler(obj_ptr adapter, bool reg_shutdown = true);
 
-    bool headers_sent(val_ptr filename = val_rc::null_value_ptr(), val_ptr lineNum = val_rc::null_value_ptr());
+    str_rc session_save_path();
 
+    str_rc session_save_path(str_ptr path);
 
+    bool headers_sent(str_rc& filename, val_rc& lineNum);
+
+    bool headers_sent();
 
 }; // end namespace zpp
 #endif

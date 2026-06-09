@@ -301,6 +301,7 @@ htab_rc::htab_rc(htab_rc&& m)
 	m.ht_ = nullptr;
 }
 
+// return true if array of inout arg was copied on write.
 bool //static
 htab_rc::cowop(HashTable*& inout, size_t init)
 {
@@ -309,6 +310,7 @@ htab_rc::cowop(HashTable*& inout, size_t init)
 	if ( (used == nullptr)
 	   ||(used == const_cast<HashTable*>(&zend_empty_array)))
 	{
+		// TODO:, should test for immutable array (which covers empty array)
 		//zend_printf("New Array\n");
 		HashTable* newht = zend_new_array(init);
 		#ifdef HTAB_SHOW_MEMORY
@@ -317,7 +319,7 @@ htab_rc::cowop(HashTable*& inout, size_t init)
 		inout = newht;
 		return true;
 	}
-	if (GC_REFCOUNT(used) > 1) 
+	if (GC_REFCOUNT(used) > 1) //?Covers all immutable arrays.
 	{
 		// updates not allowed, 
 		// make a copy with rc == 1

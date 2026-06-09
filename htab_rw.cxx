@@ -48,32 +48,50 @@ htab_rw::giveback(zval* mgr, size_t init)
 	//printf("htab_rw giveback\n");
 	val_ptr test(mgr);
 	//showmem("giveback zval", test);
-	HashTable* h = test.zarray();
-	if (!h)
-	{
-		// try to clean whatever
-		val_ptr::try_decref(mgr);
-		*mgr = {0};
 
-		h = zend_new_array(init);
-		/* #ifdef HTAB_SHOW_MEMORY
-		showarray("giveback", h);
-		#endif
-		*/
-		
-	}
-	else 
+	int ztype = test.ztype();
+	HashTable* h;
+
+	switch(ztype)
 	{
-		// Make it refcount==1
-		htab_rc::cowop(h, init);
-		/*
-		#ifdef HTAB_SHOW_MEMORY
-		zend_printf("cowop array %lx to zval %lx\n", h, mgr);	
-		#endif
-		*/
+	case IS_ARRAY:
+		{
+			h = test.zarray();
+			if (htab_rc::cowop(h, init))
+			{	// replace original with cow.
+				val_ptr::array_bind(mgr, h);
+			}
+			ht_ = h;
+		}
+		break;
+	case IS_REFERENCE:
+		{	
+			// yank copy referenced HashTable*
+			// assume by intention rc == 1 for writing
+			// No need to give back
+			ht_ = test.zarray();
+		}
+		break;
+	case IS_NULL:
+		{
+			ht_ = zend_new_array(init);//rc==1
+			val_ptr::array_bind(mgr, ht_); // keep rc==1
+		}
+		break;
+	default:
+		//* some value??
+		//* treat as if (array) $cast
+		{	
+
+			val_rc temp(std::move(*mgr)); //move value.
+			*mgr = {0};
+			ht_ = zend_new_array(init);//rc==1
+			htab_rw wt(ht_); //loan 
+			wt.push_back(temp);
+			val_ptr::array_bind(mgr, ht_); // keep rc==1
+		}
+		break;
 	}
-	ZVAL_ARR(mgr, h);
-	ht_ = h;
 }
 
 htab_rw::htab_rw(htab_rc& mgr, size_t init)

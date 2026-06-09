@@ -432,7 +432,7 @@ Link all instances of a class T, by optionally mixing in this template.
 		{
 			class_entry_->create_object = mydef::znew_ex;
 
-			// std_object_handlers is somewhere in PHP
+			// std_object_handlers are somewhere in PHP
 			memcpy(&handlers_, &std_object_handlers, sizeof(zend_object_handlers));
 
 			handlers_.offset = sizeof(T) + sizeof(base_d*);

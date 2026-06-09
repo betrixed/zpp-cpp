@@ -250,6 +250,11 @@ val_ptr::isString() const
 }
 
 bool 
+val_ptr::isReference() const {
+	return (p_ && (Z_TYPE_P(p_) == IS_REFERENCE));
+}
+
+bool 
 val_ptr::isBoolean() const
 {
 	if (!p_) {

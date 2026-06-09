@@ -426,26 +426,11 @@ obj_ptr::has_property(str_ptr name)
 zval*
 obj_ptr::property_get(str_ptr key, zval* ret)
 {
-    // I do not understand why or what scope is required, (?? private, public protected access?
-    // or what would be most permissive.
+    
  
     const zend_class_entry* scope = EG(fake_scope) ? EG(fake_scope) : zend_get_executed_scope();
     
-    /**
-     *  phpinternals book php7, probably outdated.
-     *  says function can return pointer to zval  owned by object, and
-     *  this hasn't been modified by read_property.
-     * 
-     *  But the the indirect value is for temporary zvals, like returned by call to __get
-     *  and will have its reference count , which needs decrementing.
-     * 
-     *  Both work at same time, and then contain data with same reference count!!
-     *  
-     *  Not clear.
-     *  This call only wants to return one value!
-     *  Execution of direct & indirect indicates one may be same as the other!
-     *  
-     */ 
+    
     return zend_read_property_ex( (zend_class_entry*) scope, obj_, key, 1, ret);
 }
 
@@ -515,6 +500,7 @@ obj_ptr::property(str_ptr key)
     }
     else {
         // Using temporary, assume has incremented refcount, so a COPY_VALUE
+        
         result.adopt(&rv);
     }
     EG(fake_scope) = old_scope;

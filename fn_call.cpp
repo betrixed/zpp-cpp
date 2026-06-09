@@ -118,6 +118,7 @@ public:
     fn_call          session_regenerate_id;
     fn_call          session_start;
     fn_call          session_set_save_handler;
+    fn_call          session_save_path;
 
     fn_call          headers_sent;
 
@@ -190,6 +191,7 @@ public:
 
         session_start.set_fci(ftab.session_start_fn);
         session_set_save_handler.set_fci(ftab.session_set_save_handler_fn);
+        session_save_path.set_fci(ftab.session_save_path_fn);
 
         headers_sent.set_fci(ftab.headers_sent_fn);
 
@@ -301,6 +303,7 @@ fn_result::zbool()
         case IS_FALSE:
             return false;
         default:
+            zend_printf("ztype: %d\n", ztype);
             throw_failed();
         }
     }
@@ -948,6 +951,7 @@ fntable::init()
     session_regenerate_id_fn = "session_regenerate_id";
     session_start_fn = "session_start";
     session_set_save_handler_fn = "session_set_save_handler";
+    session_save_path_fn = "session_save_path";
 
     headers_sent_fn = "headers_sent";
 }
@@ -1258,38 +1262,44 @@ session_name(str_ptr name)
  }
 
  bool 
- headers_sent(val_ptr filename, val_ptr lineNum)
+ headers_sent(str_rc& filename, zend_long& lineNum)
  {
+    // arguments are for return values only, 
     fn_params<2> fn(TLFNs.headers_sent);
-    zval* pz = fn.argsptr();
-    zval* pz2 = pz+1;
-    bool refvals;
+    zval* pz0 = fn.argsptr();
+    zval* pz1 = pz0+1;
 
-    if (filename.isString() && lineNum.isLong())
-    {
-        refvals = true;
-        ZVAL_COPY_VALUE(pz, filename);
-        ZVAL_NEW_REF(pz,pz);
-        ZVAL_COPY_VALUE(pz2, lineNum);
-        ZVAL_NEW_REF(pz2,pz2);    }
-    else {
-        refvals = false;
-        ZVAL_NULL(pz);
-        ZVAL_NULL(pz+1);
-    }
+    val_rc rfile(str_ptr::empty_str());
+    val_rc rline((zend_long)0);
+
+    ZVAL_NEW_REF(pz0,rfile);
+    ZVAL_NEW_REF(pz1,rline);
+     
     bool result = fn.zbool();
-    if (refvals)
-    {
-        zend_reference* ref = Z_REF_P(pz);
-        ZVAL_COPY_VALUE(filename, &ref->val);
-        efree(ref);
-        ref = Z_REF_P(pz2);
-        ZVAL_COPY_VALUE(lineNum, &ref->val);
-        efree(ref);
-    }
+
+    zend_reference* ref = Z_REF_P(pz0);
+    val_ptr         vfile = val_ptr(&ref->val);
+    filename = vfile.zstr();
+    val_ptr::try_decref(vfile);
+    efree(ref);
+
+    ref = Z_REF_P(pz1);
+    val_ptr         vline = val_ptr(&ref->val);
+    lineNum = vline.zlong();
+    val_ptr::try_decref(vline);
+    efree(ref);
+
     return result;
 }
 
+bool 
+headers_sent()
+ {
+    // no arguments 
+    fn_noparams fn(TLFNs.headers_sent);
+    bool result = fn.zbool();
+    return result;
+}
 bool 
 session_start()
 {
@@ -1297,13 +1307,31 @@ session_start()
     return fn.zbool();
 }
 
-bool 
-session_set_save_handler(obj_ptr adapter)
+str_rc 
+session_save_path()
 {
-    fn_params<1> fn(TLFNs.session_start);
+    fn_noparams fn(TLFNs.session_save_path);
+    return fn.str(); 
+}
+
+str_rc 
+session_save_path(str_ptr path)
+{
+    fn_params<1> fn(TLFNs.session_save_path);
+    zval* pz = fn.argsptr();
+    val_ptr::string_bind(pz, path);
+    return fn.str(); 
+}
+
+bool 
+session_set_save_handler(obj_ptr adapter, bool reg_shutdown)
+{
+    
+    fn_params<2> fn(TLFNs.session_set_save_handler);
     zval* pz = fn.argsptr();
     val_ptr::object_bind(pz, adapter);
-    return fn.zbool();
+    ZVAL_BOOL(pz+1, reg_shutdown);
+    return fn.zbool();;
 }
 } // end namespace zpp
 //fn_call.cpp
