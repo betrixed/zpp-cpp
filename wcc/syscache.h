@@ -7,6 +7,8 @@
 
 namespace wcc {
 
+	class ICache;
+	
 	class SysCache : public base_d {
 	protected: 
 		obj_rc  cache_;
@@ -18,9 +20,9 @@ namespace wcc {
 
 		void debug_info(htab_rw di) override;
 
-		void construct(htab_ptr options);
+		void construct(obj_rc cache);
 
-		int getExpires();
+		zend_long getExpires();
 
 		bool close();
 

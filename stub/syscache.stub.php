@@ -7,7 +7,7 @@ namespace Wcc\Session\Adapt;
 
 class SysCache implements SessionHandlerInterface {
 
-	public function __construct(array $options=[]);
+	public function __construct(\Wcc\ICache $cache);
 
 	public function close(): bool {}
 
@@ -15,9 +15,9 @@ class SysCache implements SessionHandlerInterface {
 
 	public function gc(int $max_lifetime): int|false {}
 
-	public function getExpires() : ?int{}
+	public function getExpires() : int{}
 
-	public function (string $path, string $name) : bool {}
+	public function open(string $path, string $name) : bool {}
 
 	public function read(string $id): string|false {}
 

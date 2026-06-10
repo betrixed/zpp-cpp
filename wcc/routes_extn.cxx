@@ -8,6 +8,8 @@
 
 #include "wcc/isession.cpp"
 
+#include "wcc/syscache.cpp"
+
 #include "wcc/finder.cpp"
 #include "wcc/loader.cpp"
 
@@ -116,7 +118,6 @@ PHP_MINIT(wcc_pair_d)(INIT_FUNC_ARGS_PASSTHRU);
 	PHP_MINIT(Wcc_Dispatch_reg)(INIT_FUNC_ARGS_PASSTHRU);
 #endif
 
-
 #ifdef WCC_RUN_CPP
 	PHP_MINIT(wcc_run_reg)(INIT_FUNC_ARGS_PASSTHRU);
 #endif
@@ -136,6 +137,11 @@ PHP_MINIT(wcc_pair_d)(INIT_FUNC_ARGS_PASSTHRU);
 #ifdef WCC_SESSION_ISESSION_CPP
 	PHP_MINIT(wcc_isession_reg)(INIT_FUNC_ARGS_PASSTHRU);
 #endif
+
+#ifdef WCC_SESSION_ADAPT_SYSCACHE_CPP
+	PHP_MINIT(wcc_syscache_reg)(INIT_FUNC_ARGS_PASSTHRU);
+#endif
+
 }
 
 #endif
