@@ -9,6 +9,9 @@
 #include "zpp/fn_call.h"
 #endif
 
+#ifndef WCC_DOS_H
+#include "dos.h"
+#endif
 
 #ifndef DIR_CACHE_ARGINFO
 #define DIR_CACHE_ARGINFO
@@ -66,7 +69,6 @@ void SFData::init()
 	user_session = "user_session";
 	run_str = "run";
 	dos_str = "dos";
-	rm_alldir = "rm_alldir";
 
 	skip_dots = "SKIP_DOTS";
 	key_as_pathname = "KEY_AS_PATHNAME";
@@ -310,15 +312,17 @@ DirCache::clear()
 {
 	bool result = false;
 
-	obj_rc dos = this->getService(SFDi.dos_str);
+
+	obj_rc dos_obj = this->getService(SFDi.dos_str);
 
 	obj_rc sess = this->getService(SFDi.user_session);
 
 	val_rc path(cache_dir_);
 	val_rc depth(int(0));
 
-	val_rc ctr = dos.call(SFDi.rm_alldir,  path, depth);
-	int ct = ctr.zlong();
+	Dos* DOS = zobj_toc<Dos>(dos_obj);
+	
+	int ct = DOS->rm_alldir(path.zstr());
 
 	result = (ct > 0);
 	str_buf buf;

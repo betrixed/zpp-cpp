@@ -63,8 +63,9 @@ public:
 
 	str_intern run_str;
 	str_intern dos_str;
+	
 	str_intern user_session;
-	str_intern rm_alldir;
+
 
 	str_intern skip_dots;
 	str_intern key_as_pathname;

@@ -9,6 +9,7 @@
 #include "wcc/search_list.cpp"
 #include "wcc/strfns.cpp"
 #include "wcc/assets.cpp"
+#include "wcc/dos.cpp"
 
 //#include "wcc/persistent.cpp"
 
@@ -33,6 +34,9 @@ void register_zero_extn(INIT_FUNC_ARGS)
 	PHP_MINIT(wcc_assets_reg)(INIT_FUNC_ARGS_PASSTHRU);
 #endif
 
+#ifdef WCC_DOS_CPP
+	PHP_MINIT(wcc_dos_reg)(INIT_FUNC_ARGS_PASSTHRU);
+#endif
 
 /*
 #ifdef PERSISTENT_WCC_CPP

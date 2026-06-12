@@ -194,6 +194,8 @@ ISession::__set(str_ptr key, val_ptr value)
 	return this->set(key, value);
 }
 
+
+
 void   
 ISession::__unset(str_ptr key)
 {
@@ -303,6 +305,14 @@ ISession::remove(str_ptr key)
 		htab_rw sess(gsession);
 		sess.unset(ukey);
 	}
+}
+
+//C++ only
+void 
+ISession::set(str_ptr key, obj_ptr value)
+{
+	val_rc temp(value);
+	set(key, temp);
 }
 
 void 

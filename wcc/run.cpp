@@ -17,6 +17,10 @@
 #include "wcc/cachemgr.h"
 #endif
 
+#ifndef WCC_DOS_H
+#include "dos.h"
+#endif
+
 #ifndef WCC_SERVICES_H
 #include "wcc/services.h"
 #endif
@@ -82,10 +86,9 @@ void Run_init::init()
 	config_dir = "config_dir";
 	temp_dir = "temp_dir";
 	init_cwd = "init_cwd";
-	dos_class = "Wcc\\Dos";
-	finder_class = "Wcc\\Finder";
-
 	dos_str = "dos";
+
+	finder_class = "Wcc\\Finder";
 
 	page_hits = "page_hits";
 	user_name = "user_name";
@@ -271,7 +274,10 @@ void Run::construct()
 
 
 
-	obj_rc dos = ReflectCache::staticInstance(Run_i.dos_class);
+	obj_rc dos = Dos::omg.new_zobj();
+	Dos* dptr = zobj_toc<Dos>(dos);
+	dptr->construct(str_ptr::empty_str());
+
 	sobj->set(Run_i.dos_str, dos);
 
 

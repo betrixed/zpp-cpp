@@ -5,6 +5,7 @@
 #include "usersession.h"
 #endif
 
+
 #ifndef WCC_SERVICES_H
 #include "services.h"
 #endif
@@ -52,6 +53,12 @@ UserData*
 UserSession::ud_cpp()
 {
 	return zobj_toc<UserData>(data_);
+}
+
+ISession* 
+UserSession::is_cpp()
+{
+	return zobj_toc<ISession>(session_);
 }
 
 obj_rc 
@@ -277,7 +284,7 @@ obj_rc
 UserSession::getSession()
 {
 	obj_rc result;
-	DebugLog* log = DebugLog::cpp_global();
+	//DebugLog* log = DebugLog::cpp_global();
 
 	if (ended_)
 	{
@@ -286,10 +293,11 @@ UserSession::getSession()
 	if (!session_.ok())
 	{
 		session_ = Services::service(UDi.session_str);
+		/*
 		if (log)
 		{
 			log->dump("got session", session_);
-		}
+		}*/
 
 	}
 	result = session_;
@@ -390,41 +398,45 @@ UserSession::nullify()
 obj_rc 
 UserSession::read()
 {
-	val_rc test;
+	obj_rc result;
+
 	bool exists = false;
 
-	DebugLog* log = DebugLog::cpp_global();
+	//DebugLog* log = DebugLog::cpp_global();
 
 	if (!wasRead_ && !ended_)
 	{
 		doWrite_ = false;
 		obj_rc session = getSession();
-		if (session.ok())
+		if (!session.ok())
 		{
-			data_.init();
-			test = session.call(UDi.start_fn);
-
-			exists = test.isTrue();
+			return result;
 		}
+		ISession* sesp = is_cpp();
+
+		data_.init();
+		exists = sesp->start();
+
+		//test = session.call(UDi.start_fn);
+		
 		if (exists)
 		{
-			if (log) {
+			/*if (log) {
 				
 				log->line("Session read");
-			}
-			// a virtual property?
-			val_rc ud;
-			val_ptr test(ud);
+			}*/
 
-			ud = session_.property(UDi.userData_p);
+			val_rc ud = sesp->get(UDi.userData_p);
+			val_ptr test(ud);
 
 			//val_rc arg1(UDi.userData_p);
 			//ud = session_.call(UDi.get_str, arg1);
 
-			if (log) {
+			/*if (log) {
 
 				log->dump("UserData object:", test);
-			}
+			}*/
+
 			if (test.isObject())
 			{
 				data_ = test.zobject();
@@ -441,7 +453,8 @@ UserSession::read()
 			else {
 				//zend_printf("Session new\n");
 				data_ = UserData::newobj();
-				session_.property(UDi.userData_p, data_);
+				
+				sesp->set(UDi.userData_p, data_);
 				doWrite_ = true;
 				wasRead_ = true;
 			}
@@ -548,7 +561,10 @@ UserSession::updated()
 	obj_rc session = getSession();
 	if (session.ok())
 	{
-		session.property(UDi.userData_p, data_);
+		ISession* sesp = is_cpp();
+		sesp->set(UDi.userData_p, data_);
+
+		//session.property(UDi.userData_p, data_);
 	}
 }
 
@@ -559,7 +575,6 @@ void UserSession::wipe()
 
 	data_.property(UDi.keys_p, empty);
 	data_.property(UDi.roles_p, empty);
-
 	obj_rc user = data_.obj_property(UDi.user_p);
 
 	data_.property(UDi.user_p, val_rc::null_value_ptr());
@@ -580,7 +595,10 @@ UserSession::UserSession::write(bool force)
 		if (session.ok())
 		{
 			adjustExpiry();
-			session.property(UDi.userData_p, data_);
+			ISession* sesp = is_cpp();
+			sesp->set(UDi.userData_p, data_);
+
+			//session.property(UDi.userData_p, data_);
 		}
 	}
 }

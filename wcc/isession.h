@@ -98,6 +98,8 @@ public:
 
 	void set(str_ptr key, val_ptr value);
 
+	void set(str_ptr key, obj_ptr value);
+
 	void setAdapter(obj_ptr itf);
 
 	void setOptions(htab_ptr opt);

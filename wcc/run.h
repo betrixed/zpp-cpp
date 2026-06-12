@@ -50,7 +50,6 @@ public:
 	str_intern config_dir;
 	str_intern temp_dir;
 	str_intern init_cwd;
-	str_intern dos_class;
 	str_intern dos_str;
 
 	str_intern page_hits;

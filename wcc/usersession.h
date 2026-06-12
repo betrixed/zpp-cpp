@@ -5,6 +5,11 @@
 #include "userdata.h"
 #endif
 
+
+#ifndef WCC_SESSION_ISESSION_H
+#include "isession.h"
+#endif
+
 namespace wcc {
 
 using namespace zpp;
@@ -21,6 +26,7 @@ protected:
 	obj_rc getAdapter();
 
 	UserData* ud_cpp();
+	ISession* is_cpp();
 
 public:
 
