@@ -89,6 +89,7 @@ public:
     fn_call          fgets;
     fn_call          file_get_contents;
     fn_call          file_put_contents;
+
     fn_call          filemtime;
     fn_call          fopen;
     fn_call          fread;
@@ -98,6 +99,7 @@ public:
     fn_call          glob;
     fn_call          is_dir;
     fn_call          is_file;
+    fn_call          is_link;
     fn_call          is_readable;
     fn_call          mb_detect_encoding;
     fn_call          mb_detect_order;
@@ -110,6 +112,10 @@ public:
     fn_call          readdir;
     fn_call          realpath; 
     fn_call          serialize;
+
+    fn_call          copy;
+    fn_call          rmdir;
+    fn_call          basename;
 
     fn_call          session_status;
     fn_call          session_write_close;
@@ -169,6 +175,7 @@ public:
         glob.set_fci(ftab.s_glob);
         is_dir.set_fci(ftab.s_isdir);
         is_file.set_fci(ftab.s_isfile);
+        is_link.set_fci(ftab.s_islink);
         is_readable.set_fci(ftab.s_isreadable);
 
         mb_detect_encoding.set_fci(ftab.s_mb_detect_encoding);
@@ -196,6 +203,11 @@ public:
         headers_sent.set_fci(ftab.headers_sent_fn);
 
         serialize.set_fci(ftab.s_serialize);
+
+        copy.set_fci(ftab.s_copy);
+        rmdir.set_fci(ftab.s_rmdir);
+        basename.set_fci(ftab.s_basename);
+
         sha1.set_fci(ftab.s_sha1);
         stripslashes.set_fci(ftab.s_stripslashes);
         strtr.set_fci(ftab.s_strtr);
@@ -578,7 +590,7 @@ str_rc file_get_contents(
 }
 
 val_rc 
-pathinfo(str_ptr path, int flags)
+pathinfo(str_ptr path, PathInfo flags)
 {
     fn_params<2> fn(TLFNs.pathinfo);
     zval* pz = fn.argsptr();
@@ -901,6 +913,7 @@ fntable::init()
     s_define = "define";
     s_defined = "defined";
     s_dirname = "dirname";
+    s_basename = "basename";
 
     s_extension_loaded = "extension_loaded";
     s_fclose = "fclose";
@@ -919,6 +932,7 @@ fntable::init()
     s_glob = "glob";
     s_isdir = "is_dir";
     s_isfile = "is_file";
+    s_islink = "is_link";
     s_isreadable = "is_readable";
     
     s_mb_detect_encoding = "mb_detect_encoding";
@@ -934,6 +948,9 @@ fntable::init()
     s_realpath = "realpath";
 
     s_serialize = "serialize";
+    s_copy = "copy";
+    s_rmdir = "rmdir";
+
     s_sha1 = "sha1";
     s_stripslashes = "stripslashes";
     s_strtr = "strtr";
@@ -1080,6 +1097,14 @@ bool
 is_file(str_ptr path)
 {
     fn_params<1> fn(TLFNs.is_file);
+    val_ptr::string_bind(fn.argsptr(), path);
+    return fn.zbool();
+}
+
+bool 
+is_link(str_ptr path)
+{
+    fn_params<1> fn(TLFNs.is_link);
     val_ptr::string_bind(fn.argsptr(), path);
     return fn.zbool();
 }
@@ -1333,7 +1358,42 @@ session_set_save_handler(obj_ptr adapter, bool reg_shutdown)
     ZVAL_BOOL(pz+1, reg_shutdown);
     return fn.zbool();;
 }
+
+bool 
+copy_file(str_ptr from, str_ptr to)
+{
+    fn_params<3> fn(TLFNs.copy);
+    zval* pz = fn.argsptr();
+    val_ptr::string_bind(pz, from);
+    val_ptr::string_bind(pz+1, to);
+    ZVAL_NULL(pz+2); //resource context not supported right now
+    return fn.zbool();
+}
+
+bool 
+rmdir(str_ptr dpath)
+{
+    fn_params<1> fn(TLFNs.rmdir);
+    zval* pz = fn.argsptr();
+    val_ptr::string_bind(pz, dpath);
+    return fn.zbool();
+}
+
+str_rc 
+basename(str_ptr path, str_ptr suffix)
+{
+    fn_params<2> fn(TLFNs.basename);
+    zval* pz = fn.argsptr();
+    val_ptr::string_bind(pz, path);
+    val_ptr::string_bind(pz+1, suffix);
+    return fn.str();
+}
+
 } // end namespace zpp
+
+
+
+
 //fn_call.cpp
 #endif
 

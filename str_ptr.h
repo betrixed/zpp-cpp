@@ -120,6 +120,7 @@ namespace zpp {
 		bool interned() const {
 			return (s && (GC_FLAGS(s) & IS_STR_INTERNED));
 		}
+
 	};
 
 	int zs_cmp(zend_string* a, zend_string* b);
@@ -132,6 +133,7 @@ namespace zpp {
 						 str_ptr subject);
 
 	str_rc operator+(str_ptr lhs, str_ptr rhs);
+	str_rc operator+(str_ptr lhs, const char* rhs);
 
 };
 

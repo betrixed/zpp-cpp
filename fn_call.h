@@ -217,7 +217,7 @@ namespace zpp {
 * @returns true on success, or false on failure.    
 */
 
-    enum PathInfo 
+    enum  PathInfo 
     {
         DIRNAME = 1,
         BASENAME = 2,
@@ -226,7 +226,7 @@ namespace zpp {
         ALL = DIRNAME + BASENAME + EXTENSION + FILENAME
     };
 
-    val_rc pathinfo(str_ptr path, int flags);
+    val_rc pathinfo(str_ptr path, PathInfo flags = PathInfo::ALL);
 
 
     void register_fn_calls();
@@ -253,6 +253,7 @@ namespace zpp {
         str_intern  s_define;
         str_intern  s_defined;
         str_intern  s_dirname;
+        str_intern  s_basename;
 
         str_intern  s_extension_loaded;
         str_intern  s_fclose;
@@ -271,6 +272,7 @@ namespace zpp {
         str_intern  s_glob;
         str_intern  s_isdir;
         str_intern  s_isfile;
+        str_intern  s_islink;
         str_intern  s_isreadable;
 
         str_intern  s_mb_detect_encoding;
@@ -286,6 +288,9 @@ namespace zpp {
         str_intern  s_realpath;
 
         str_intern  s_serialize;
+        str_intern  s_copy;
+        str_intern  s_rmdir;
+
         str_intern  s_sha1;
         str_intern  s_stripslashes;
         str_intern  s_strtr;
@@ -417,13 +422,15 @@ namespace zpp {
 
     str_rc dirname(str_ptr path, int level=1);
 
+    str_rc basename(str_ptr path, str_ptr sfx = str_ptr::empty_str());
+
     bool defined(str_ptr name);
 
     bool define(str_ptr name, val_ptr value);
 
     bool define(str_ptr name, str_ptr value);
 
-    val_rc pathinfo(str_ptr path, int flags = PathInfo::ALL);
+
 
     val_rc call_user_func_array(zval* arg1, zval* arg2);
 
@@ -434,6 +441,8 @@ namespace zpp {
     bool is_dir(str_ptr path);
 
     bool is_file(str_ptr path);
+
+    bool is_link(str_ptr path);
 
     bool is_readable(str_ptr path);
 
@@ -460,6 +469,10 @@ namespace zpp {
     htab_rc array_splice(htab_rc& input, int offset, int length = 0, htab_ptr replace = htab_ptr());
 
     str_rc serialize(val_ptr value);
+
+    bool copy_file(str_ptr from, str_ptr to);
+
+    bool rmdir(str_ptr dpath);
 
     val_rc unserialize(str_ptr data, htab_ptr options = htab_ptr());
 

@@ -115,6 +115,7 @@ str_ptr::str_ptr(zval* p)
 	s = val_ptr(p).zstr();
 }
 
+
 str_ptr::str_ptr(const str_rc& mgr)
 {
     s = mgr.s;
@@ -543,6 +544,16 @@ str_ptr::duplicate() const
 
 str_rc  
 operator+(str_ptr lhs, str_ptr rhs)
+{
+    str_buf buf;
+
+    buf << lhs << rhs;
+
+    return buf.zstr();
+}
+
+str_rc  
+operator+(str_ptr lhs, const char* rhs)
 {
     str_buf buf;
 
