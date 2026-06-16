@@ -107,7 +107,7 @@ namespace wcd {
 
 		obj_rc getTableModel(str_ptr tableName);
 
-
+		str_rc param(unsigned pno) override;
 		
 
 	};

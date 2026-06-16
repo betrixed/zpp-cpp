@@ -405,43 +405,53 @@ HtmlGem::generateTag(str_ptr tag, htab_ptr pset)
 str_rc 
 HtmlGem::getTag(htab_ptr ps, htab_rw ex, str_ptr tag)
 {
-	ex.merge(ps);
+	htab_rc pscopy(htab_ptr::empty_array());
+
+	htab_rw pset(pscopy);
+	// add defaults
+	pset.merge(ex);
+	pset.merge(ps);
+
+	// fix up any class lists
+	//any class list string in defaults?
 	val_ptr test = ex.get(HTG.classkey);
 
-	//showmem("get_tag", test);
+	// expect a string value 
 	if (!test.isNull())
 	{
-		val_rc cdef(test);
-		val_ptr cdef_use(cdef);
+		val_rc cdef(test); // localize string value
+		val_ptr cdef_use(cdef);  
 
-		val_rc cset = ex.get(HTG.classkey);
+		val_rc cset = ps.get(HTG.classkey); // also get value to mix with
 		val_ptr  cset_use(cset);
 
 		if (cset_use.isNull()) {
-			ex.set(HTG.classkey, cdef);
+			pset.set(HTG.classkey, cdef); // class list becomes default list
 		}
 		else {
 			zend_string* retstr = nullptr;
 
 			if (cset_use.getStringData(&retstr)) {
-				cset = explode(HTG.blank, retstr);
+				cset = explode(HTG.blank, retstr); // replace with array of strings
 			}
 			else {
-				cset.new_array();
+				cset = htab_ptr::empty_array();
 			}
 
 			if (cdef_use.getStringData(&retstr)) {
 				cdef = explode(HTG.blank, retstr);
 			}
 			else {
-				cdef.new_array();
+				cdef = htab_ptr::empty_array();
 			}
 
+			// should have 2 arrays of strings, from specified list and defaults.
 			htab_ptr cset_ht(cset);
 			htab_ptr cdef_ht(cdef);
 
 			if ((cdef_ht.size() > 0)  && (cset_ht.size() > 0))
 			{
+				// one of each value
 				cset = union_values(cset_ht, cdef_ht);
 			}
 			else if (cdef_ht.size() > 0) {
@@ -449,11 +459,12 @@ HtmlGem::getTag(htab_ptr ps, htab_rw ex, str_ptr tag)
 			}
 			cset_ht = cset_use.zarray();
 
-			cset = implode(HTG.blank, cset_ht);
-			ex.set(HTG.classkey, cset);
+			cset = implode(HTG.blank, cset_ht); //back to string
+			// replace class list with final merged array
+			pset.set(HTG.classkey, cset);
 		}
 	}
-	return HtmlGem::generateTag(tag, ex);
+	return HtmlGem::generateTag(tag, pset);
 }
 
 str_rc HtmlGem::label_front(htab_ptr ps)

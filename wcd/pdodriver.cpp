@@ -236,50 +236,59 @@ PdoDriver::closeStmt(obj_ptr sobj)
 	return result;
 }
 
+str_rc 
+PdoDriver::param(unsigned pno)
+{
+	str_buf buf;
+
+	buf << ":p" << Numf::Dec << pno;
+
+	return buf.zstr();
+}
+
+
 
 void 
 PdoDriver::bind(obj_ptr stmt, htab_ptr params)
 {
-
-	obj_ptr spdo(stmt);
-
 	if (params.size())
 	{
-		htab_walk wk;
-		auto val = wk.value();
-
-		fn_call bind_call(DBS.bind_value, spdo);
+		// construct a reused call to method "bindValue" for spdo statement object
+		fn_call bind_call(DBS.bind_value, stmt);
 		fn_params<3> bvcall(bind_call);
-
-		zval* args = bvcall.argsptr();
-
-		int ix = 0;
-
-		for(wk.start(params); wk.ok(); wk.next(), ix++)
+		
+		if (params.is_list())
 		{
-			if (val.isArray())
+			for_key_value wk;
+		
+			for(wk.start(params); wk.ok(); wk.next())
 			{
-				htab_walk wk2;
-				auto bname = wk2.key();
-				auto bval = wk2.value();
+				int pno = wk.index() + 1;
+				val_ptr value = wk.value();
+				// clear the buffers
+				zval* args = bvcall.argsptr(); 
+				ZVAL_LONG(args, pno);
+				ZVAL_COPY_VALUE(args+1, value);
 
-				for(wk2.start(val.zarray()); wk2.ok(); wk2.next())
-				{
-	
-					ZVAL_COPY_VALUE(args, bname);
-					ZVAL_COPY_VALUE(args+1, bval);
-					ZVAL_LONG(args+2, pdoType(bval));
-					val_rc check = bvcall.mixed();
-				}
-			}
-			else {
-				ZVAL_LONG(args, ix+1);
-				ZVAL_COPY_VALUE(args+1, val);
-
-				int ptype = pdoType(val);
+				int ptype = pdoType(value);
 				ZVAL_LONG(args+2, ptype);
-				val_rc check = bvcall.mixed();
 				
+				bool check = bvcall.zbool();
+			}
+		}
+		else {
+			htab_walk wk; 
+			auto name = wk.key();
+			auto val = wk.value();
+
+			for(wk.start(params); wk.ok(); wk.next(), ix++)
+			{
+				zval* args = bvcall.argsptr();
+
+				ZVAL_COPY_VALUE(args, bname);
+				ZVAL_COPY_VALUE(args+1, bval);
+				ZVAL_LONG(args+2, pdoType(bval));
+				bool check = bvcall.zbool();
 			}
 		}
 	}
