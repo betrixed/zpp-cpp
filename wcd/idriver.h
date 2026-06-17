@@ -61,7 +61,7 @@ namespace wcd {
 		virtual bool commit();
 		virtual bool rollback();
 
-		virtual void bind(obj_ptr stmt, htab_ptr params);
+		virtual error_return bind(obj_ptr stmt, htab_ptr params);
 
 		virtual void close();
 

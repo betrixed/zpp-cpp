@@ -346,10 +346,13 @@ PgQuery::construct(obj_ptr connect, str_ptr query)
 }
 
 
-void 
+error_return 
 PgQuery::setParams(htab_ptr params)
 {
+	error_return result;
+	// TODO: Check??
 	params_ = params;
+	return result;
 }
 
 
@@ -544,10 +547,11 @@ Pgsqlfn::prepare(str_ptr query, htab_ptr options)
 	return result;
 }
 
-void Pgsqlfn::bind(obj_ptr stmt, htab_ptr params)
+error_return
+Pgsqlfn::bind(obj_ptr stmt, htab_ptr params)
 {
 	PgQuery* zobj = zobj_toc<PgQuery>(stmt);
-	zobj->setParams(params);
+	return zobj->setParams(params);
 }
 
 val_return //virtual
@@ -830,7 +834,8 @@ ZEND_METHOD(Wcd_Ext_Pgs_PgQuery, setParams)
 	if (!args.throw_errors())
 	{
 		PgQuery* cobj = zval_toc<PgQuery>(ZEND_THIS);
-		cobj->setParams(params);
+		error_return result = cobj->setParams(params);
+		result.throw_errors();
 	}
 }
 

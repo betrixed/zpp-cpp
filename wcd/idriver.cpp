@@ -326,9 +326,12 @@ IDriver::escape(str_ptr value)
 	return value;
 }
 
-void IDriver::bind(obj_ptr stmt, htab_ptr params)
+error_return
+IDriver::bind(obj_ptr stmt, htab_ptr params)
 {
-	throw_not_implemented("bind");
+	error_return result;
+	result.error() << "virtual function bind not implemented";
+	return result;
 }
 
 /* static */
@@ -787,7 +790,8 @@ ZEND_METHOD(Wcd_IDriver, bind)
 	{
 		IDriver* db = zval_toc<IDriver>(ZEND_THIS);
 
-		db->bind(stmt, params);
+		error_return result = db->bind(stmt, params);
+		result.throw_errors();
 	}
 
 	

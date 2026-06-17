@@ -267,7 +267,12 @@ Simple::send(bool retval)
 	{
 		//zend_printf("Values \n");
 		//showdata("Values ", values_);
-		db->bind(stmt_, values_);
+		error_return msg = db->bind(stmt_, values_);
+		if (msg.has_errors())
+		{
+			result = msg.move_error();
+			return result;
+		}
 	}
 	if (retval)
 	{

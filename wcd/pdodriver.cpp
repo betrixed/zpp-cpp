@@ -241,16 +241,18 @@ PdoDriver::param(unsigned pno)
 {
 	str_buf buf;
 
-	buf << ":p" << Numf::Dec << pno;
+	buf << ":p" << Numf::DEC << pno;
 
 	return buf.zstr();
 }
 
 
 
-void 
+error_return 
 PdoDriver::bind(obj_ptr stmt, htab_ptr params)
 {
+	error_return result;
+
 	if (params.size())
 	{
 		// construct a reused call to method "bindValue" for spdo statement object
@@ -273,25 +275,32 @@ PdoDriver::bind(obj_ptr stmt, htab_ptr params)
 				int ptype = pdoType(value);
 				ZVAL_LONG(args+2, ptype);
 				
-				bool check = bvcall.zbool();
+				if (!bvcall.zbool())
+				{
+					result.error() << "Indexed value " << pno << " not bound\n";
+				}
 			}
 		}
 		else {
-			htab_walk wk; 
-			auto name = wk.key();
-			auto val = wk.value();
+			for_key_value wk;
 
-			for(wk.start(params); wk.ok(); wk.next(), ix++)
+			for(wk.start(params); wk.ok(); wk.next())
 			{
 				zval* args = bvcall.argsptr();
 
-				ZVAL_COPY_VALUE(args, bname);
-				ZVAL_COPY_VALUE(args+1, bval);
-				ZVAL_LONG(args+2, pdoType(bval));
-				bool check = bvcall.zbool();
+				str_rc key = wk.key();
+				val_ptr::string_bind(args, key);
+				val_ptr value = wk.value();
+				ZVAL_COPY_VALUE(args+1, value);
+				ZVAL_LONG(args+2, pdoType(value));
+				if (!bvcall.zbool())
+				{
+					result.error() << "Param " << key << " failed bind\n";
+				}
 			}
 		}
 	}
+	return result;
 }
 
 val_rc 

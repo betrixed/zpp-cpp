@@ -845,7 +845,12 @@ namespace wcd {
 
 					stmt = stmt_ret.value_;
 
-					driver->bind(stmt, record);
+					error_return msgerr = driver->bind(stmt, record);
+					if (msgerr.has_errors())
+					{
+						result = msgerr.move_error();
+						return result;
+					}
 					driver->execute(stmt, false, false);
 				}
 				else if (datarowct > 0) {

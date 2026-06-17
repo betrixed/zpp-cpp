@@ -6,10 +6,24 @@
 #include "idriver.h"
 #endif
 
+/*
+#ifndef MYSQLI_STUFF
+extern "C" {
+	#include <ext/mysqli/php_mysqli_structs.h>
+}
+#endif
+*/
+
 namespace wcd {
 
 using namespace zpp;
 
+enum {
+	MYSQLI_STORE_RESULT = 0,
+	MYSQLI_ASSOC = 1,
+	MYSQLI_NUM = 2,
+	MYSQLI_BOTH = 3
+};
 
 //C++ MSI procedural function prototypes
 bool mysqli_begin_transaction(obj_ptr msi, 
@@ -28,7 +42,7 @@ htab_rc mysqli_fetch_array(obj_ptr robj, int mode=MYSQLI_NUM);
 
 htab_rc mysqli_fetch_assoc(obj_ptr robj);
 
-obj_rc mysqli_fetch_object(obj_ptr robj, str_ptr class=str_ptr(),
+obj_rc mysqli_fetch_object(obj_ptr robj, str_ptr cname=str_ptr(),
 		htab_ptr args=htab_ptr());
 
 str_rc mysqli_real_escape_string(obj_ptr msi, str_ptr str);
@@ -52,6 +66,7 @@ class Mysqlfn : public IDriver {
 protected:
 	bool          inTransaction_;
 
+
 public:
 
 	static base_obj_mgr<Mysqlfn> omg;
@@ -62,18 +77,21 @@ public:
 	
 	static htab_rc resultObjects(obj_ptr robj);
 
+	static val_return  getResults(obj_ptr result, int mode);
+
 	static htab_rc resultNum(obj_ptr result);
 
-	static val_return  getResults(obj_ptr result);
-	
+
 
 	static str_rc attribute(str_ptr name, str_ptr value);
+
 	
-	val_rc rowFetch(obj_ptr stmt, zend_long fmode = IDriver::FETCH_ASSOC);
+	
+	val_rc fetchRow(obj_ptr stmt, zend_long fmode = IDriver::FETCH_ASSOC);
 
 	bool begin() override;
 
-	void bind(obj_ptr stmt, htab_ptr params) override;
+	error_return bind(obj_ptr stmt, htab_ptr params) override;
 
 	void close() override;
 
@@ -108,6 +126,6 @@ public:
 
 };
 
-
+}//wcc namespace
 
 #endif

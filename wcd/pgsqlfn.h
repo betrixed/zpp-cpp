@@ -68,7 +68,7 @@ public:
 
 	void destruct();
 
-	void setParams(htab_ptr params);
+	error_return setParams(htab_ptr params);
 
 	void close();
 
@@ -111,7 +111,7 @@ public:
 
 	obj_return prepare(str_ptr query, htab_ptr options=htab_ptr()) override;
 
-	void bind(obj_ptr stmt, htab_ptr params) override;
+	error_return bind(obj_ptr stmt, htab_ptr params) override;
 
 	val_return execute(obj_ptr stmt, bool close = true, bool fetch = false) override;
 

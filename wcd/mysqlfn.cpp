@@ -5,16 +5,11 @@
 #include "mysqlfn.h"
 #endif
 
-#ifndef MYSQLI_PRIV_H
-extern "C" {
-	#include <ext/mysqli/mysqli_priv.h>
-}
-#endif
-
 namespace wcd {
 
 using namespace zpp;
 
+base_obj_mgr<Mysqlfn> Mysqlfn::omg;
 
 class MSFInit : public state_init {
 public:
@@ -22,6 +17,8 @@ public:
 	str_intern report_mode_s;
 	str_intern query_s;
 	str_intern prepare_s;
+	str_intern commit_s;
+
 	str_intern set_charset_s;
 
 	str_intern fetch_array_s;
@@ -46,6 +43,8 @@ public:
 
 };
 
+MSFInit Msfi;
+
 class MsFnTable {
 public:
 	bool            configured_;
@@ -66,15 +65,26 @@ public:
 
 	MsFnTable() : configured_(false) {}
 
-	void init()
+	void init();
+
+	void initFn(MSFInit& ms);
+
+};
+
+
+
+
+
+void MsFnTable::init()
 	{
 		if (configured_) {
 			return;
 		}
+		configured_ = true;
 		initFn(Msfi);
 	}
 
-	void initFn(MSFInit& ms)
+void MsFnTable::initFn(MSFInit& ms)
 	{
 		begin_transaction_fn.set_fci(ms.begin_transaction_s);
 		commit_fn.set_fci(ms.commit_s);
@@ -94,10 +104,9 @@ public:
 		set_charset_fn.set_fci(ms.set_charset_s);
 
 	}
-};
 
-base_obj_mgr<Mysqlfn> Mysqlfn::omg;
-MFSInit Msfi;
+
+
 
 void
 MSFInit::init()
@@ -129,15 +138,12 @@ MSFInit::init()
 
 Mysqlfn::Mysqlfn()
 {
-	wrap_ = nullptr;
+
 }
 
 Mysqlfn::~Mysqlfn()
 {
-	if (wrap_)
-	{
-		delete wrap_;
-	}
+
 }
 
 thread_local MsFnTable MSfn;
@@ -148,7 +154,7 @@ thread_local MsFnTable MSfn;
 bool 
 mysqli_begin_transaction(obj_ptr msi, int flags, str_ptr name)
 {
-	fn_params  fn(MSfn.set_charset_fn);
+	fn_params<3> fn(MSfn.begin_transaction_fn);
 	zval* pz = fn.argsptr();
 	val_ptr::object_bind(pz, msi);
 	pz++; ZVAL_LONG(pz, flags);
@@ -158,22 +164,24 @@ mysqli_begin_transaction(obj_ptr msi, int flags, str_ptr name)
 
 bool mysqli_stmt_bind_param(obj_ptr stmt, str_ptr types, htab_ptr params)
 {
-	fn_params fn(MSfn.bind_param_fn);
+	fn_varparams fn(MSfn.bind_param_fn, params.size() + 2);
 	zval* pz = fn.argsptr();
+
 	val_ptr::object_bind(pz, stmt);
 	pz++; val_ptr::string_bind(pz, types);
-	for_key_value wkv;
-	for(wkv.start(params); wkv.ok(); wkv.next())
+
+	for_key_value wk;
+	for(wk.start(params); wk.ok(); wk.next())
 	{
-		pz++;  ZVAL_COPY_VALUE(pz, wkv.value());
+		pz++;  ZVAL_COPY_VALUE(pz, wk.value());
 	}
 	return fn.zbool();
 }
 
 bool 
-mysqli_stmt_execute(obj_ptr stmt, htab_ptr params = htab_ptr())
+mysqli_stmt_execute(obj_ptr stmt, htab_ptr params)
 {
-	fn_params(MSfn.stmt_execute_fn);
+	fn_params<2> fn(MSfn.stmt_execute_fn);
 	zval* pz = fn.argsptr();
 	val_ptr::object_bind(pz, stmt);
 	pz++;
@@ -190,7 +198,7 @@ mysqli_stmt_execute(obj_ptr stmt, htab_ptr params = htab_ptr())
 bool
 mysqli_commit(obj_ptr msi, int flags, str_ptr name)
 {
-	fn_params  fn(MSfn.commit_fn);
+	fn_params<3>  fn(MSfn.commit_fn);
 	zval* pz = fn.argsptr();
 	val_ptr::object_bind(pz, msi);
 	pz++; ZVAL_LONG(pz, flags);
@@ -202,7 +210,7 @@ mysqli_commit(obj_ptr msi, int flags, str_ptr name)
 bool 
 mysqli_set_charset(obj_ptr msi, str_ptr cset)
 {
-	fn_params  fn(MSfn.set_charset_fn);
+	fn_params<2>  fn(MSfn.set_charset_fn);
 	zval* pz = fn.argsptr();
 	val_ptr::object_bind(pz, msi);
 	pz++; val_ptr::string_bind(pz, cset);
@@ -213,7 +221,7 @@ mysqli_set_charset(obj_ptr msi, str_ptr cset)
 obj_rc
 mysqli_query(obj_ptr msi, int rmode)
 {
-	fn_params  fn(MSfn.query_fn);
+	fn_params<2>  fn(MSfn.query_fn);
 	zval* pz = fn.argsptr();
 	val_ptr::object_bind(pz, msi);
 	pz++; ZVAL_LONG(pz, rmode);
@@ -224,7 +232,7 @@ mysqli_query(obj_ptr msi, int rmode)
 bool 
 mysqli_report(int flags)
 {
-	fn_params  fn(MSfn.report_fn);
+	fn_params<1>  fn(MSfn.report_fn);
 	zval* pz = fn.argsptr();
 	ZVAL_LONG(pz, flags);
 	return fn.zbool();
@@ -233,7 +241,7 @@ mysqli_report(int flags)
 htab_rc 
 mysqli_fetch_array(obj_ptr robj, int mode)
 {
-	fn_params  fn(MSfn.fetch_array_fn);
+	fn_params<2>  fn(MSfn.fetch_array_fn);
 	zval* pz = fn.argsptr();
 	val_ptr::object_bind(pz, robj);
 	pz++;
@@ -244,7 +252,7 @@ mysqli_fetch_array(obj_ptr robj, int mode)
 htab_rc 
 mysqli_fetch_assoc(obj_ptr robj)
 {
-	fn_params  fn(MSfn.fetch_array_fn);
+	fn_params<1>  fn(MSfn.fetch_array_fn);
 	val_ptr::object_bind(fn.argsptr(), robj);
 	return fn.array();
 }
@@ -252,7 +260,7 @@ mysqli_fetch_assoc(obj_ptr robj)
 obj_rc 
 mysqli_fetch_object(obj_ptr robj, str_ptr cname, htab_ptr args)
 {
-	fn_params  fn(MSfn.fetch_array_fn);
+	fn_params<3>  fn(MSfn.fetch_array_fn);
 	zval* pz = fn.argsptr();
 	val_ptr::object_bind(pz, robj);
 	str_rc class_name;
@@ -276,15 +284,15 @@ mysqli_fetch_object(obj_ptr robj, str_ptr cname, htab_ptr args)
 val_rc 
 mysqli_insert_id(obj_ptr msi)
 {
-	fn_params  fn(MSfn.insert_id_fn);
-	val_ptr::object_bind(fn.argsptr(), robj);
+	fn_params<1>  fn(MSfn.insert_id_fn);
+	val_ptr::object_bind(fn.argsptr(), msi);
 	return fn.mixed();
 }
 
 str_rc 
 mysqli_real_escape_string(obj_ptr msi, str_ptr str)
 {
-	fn_params  fn(MSfn.real_escape_string_fn);
+	fn_params<2>  fn(MSfn.real_escape_string_fn);
 	zval* pz = fn.argsptr();
 	val_ptr::object_bind(pz, msi);
 	pz++; val_ptr::string_bind(pz, str);
@@ -297,6 +305,7 @@ register_class(zend_class_entry* idriver_ce)
 	
 }
 
+/*
 htab_rc 
 allRows(obj_ptr result, zend_long fmode = IDriver::FETCH_ASSOC)
 {
@@ -314,7 +323,7 @@ resultNum(obj_ptr result)
 {
 	
 }
-
+*/
 htab_rc 
 Mysqlfn::resultObjects(obj_ptr robj)
 {
@@ -338,7 +347,7 @@ Mysqlfn::resultObjects(obj_ptr robj)
 }
 
 val_return 
-Mysqlfn::getResults(obj_ptr robj)
+Mysqlfn::getResults(obj_ptr robj, int mode)
 {
 	val_return result;
 
@@ -349,7 +358,7 @@ Mysqlfn::getResults(obj_ptr robj)
 	}
 
 	htab_rc test;
-	switch(ifetch_)
+	switch(mode)
 	{
 	case IDriver::FETCH_OBJECT:
 		test = Mysqlfn::resultObjects(robj);
@@ -370,15 +379,16 @@ Mysqlfn::getResults(obj_ptr robj)
 	return result;
 }
 
-
+/*
 str_rc 
 attribute(str_ptr name, str_ptr value)
 {
 	
 }
+*/
 
 val_rc 
-rowFetch(obj_ptr stmt, zend_long fmode = IDriver::FETCH_ASSOC)
+fetchRow(obj_ptr stmt, zend_long fmode = IDriver::FETCH_ASSOC)
 {
 	
 }
@@ -397,9 +407,12 @@ begin()
 	return ok;
 }
 
-void 
+error_return 
 Mysqlfn::bind(obj_ptr stmt, htab_ptr params)
 {
+
+	error_return result;
+
 	str_buf type;
 
 	for_key_value wkv;
@@ -421,10 +434,17 @@ Mysqlfn::bind(obj_ptr stmt, htab_ptr params)
 			type << 's';
 			break;
 		}
-			
-		else
-
 	}
+	str_rc tstr = type.zstr();
+
+	if (tstr.size())
+	{
+		if (!mysqli_stmt_bind_param(stmt, tstr, params))
+		{
+			result.error() << "bind params error";
+		}
+	}
+	return result;
 }
 
 void 
@@ -510,7 +530,7 @@ escape(str_ptr value)
 }
 
 val_return 
-execute(obj_ptr stmt, bool close, bool fetch)
+Mysqlfn::execute(obj_ptr stmt, bool close, bool fetch)
 {
 	val_return result;
 	obj_rc robj; // result object

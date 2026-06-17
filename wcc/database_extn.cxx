@@ -9,6 +9,9 @@
 #include "wcd/pdo_mysql.cpp"
 #include "wcd/pdodriver.cpp"
 #include "wcd/pgsqlfn.cpp"
+// This is undone for now. 
+#include "wcd/mysqlfn.cpp"
+
 #include "wcd/idriver.cpp" 
 
 #include "wcd/raw.cpp"

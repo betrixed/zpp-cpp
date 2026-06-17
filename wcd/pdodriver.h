@@ -43,7 +43,7 @@ namespace wcd {
 		error_return closeStmt(obj_ptr stmt) override;
 
 		str_rc escape(str_ptr value) override;
-		void bind(obj_ptr stmt, htab_ptr params) override;
+		error_return bind(obj_ptr stmt, htab_ptr params) override;
 		val_return execute(obj_ptr stmt, bool close = true, bool fetch = false) override;
 
 
