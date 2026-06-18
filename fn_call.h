@@ -168,6 +168,24 @@ namespace zpp {
 
     };
 
+    class fn_varparams : public fn_result {
+    public:
+        zval*  params_;
+
+        fn_varparams(fn_call& fn, unsigned vct) : fn_result(fn)
+        {
+            params_ = new zval[vct];
+            setParams(params_, vct);
+        }
+
+        ~fn_varparams()
+        {
+            delete[] params_;
+        }
+
+        zval* argsptr() { return params_; /*&params[0];*/ }
+    };
+
     template <size_t ARGCT>
     class fn_params : public fn_result {
     public:

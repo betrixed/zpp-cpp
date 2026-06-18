@@ -107,6 +107,10 @@ namespace zpp {
 
 		bool ends_with(str_ptr match) const;
 
+		bool starts_with(char match) const;
+
+		bool ends_with(char match) const;
+
 		str_rc duplicate() const;
 
 		int  strcmp(const char* bstr) const;

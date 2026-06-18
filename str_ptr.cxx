@@ -261,6 +261,19 @@ str_ptr::starts_with(str_ptr match) const
 	return (this->subview(0,mlen) == mb);
 }
 
+
+bool 
+str_ptr::starts_with(char match) const
+{
+	unsigned slen = size();
+	if (slen == 0)
+	{
+		return false;
+	}
+	const char* cp = data();
+	return (*cp == match);
+}
+
 str_rc
 str_ptr::ucfirst()
 {
@@ -294,6 +307,18 @@ str_ptr::ends_with(str_ptr match) const
 	std::string_view mb = match.vstr();
 	std::string_view endslice = this->subview(mysize-mlen, mlen);
 	return (endslice == mb);
+}
+
+bool 
+str_ptr::ends_with(char match) const
+{
+	size_t slen = size();
+	if (slen == 0)
+	{
+		return false;
+	}
+	const char* last = this->data() + slen - 1;
+	return (match == *last);
 }
 
 int  
