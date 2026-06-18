@@ -18,7 +18,7 @@ public:
 
 	void construct(str_ptr cwd);
 
-	void clean_dir(str_ptr path);
+	error_return clean_dir(str_ptr path);
 
 	error_return copy_all(str_ptr from, str_ptr to);
 
@@ -34,7 +34,7 @@ public:
 
 	bool_return rm_all(htab_ptr flist);
 
-	int  rm_alldir(str_ptr path, bool deldir = false);
+	int_return  rm_alldir(str_ptr path, bool deldir = false);
 
 	int rm_old(htab_ptr rlist, int tsecs);
 

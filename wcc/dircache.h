@@ -24,7 +24,7 @@ public:
 	static zend_class_entry* register_class(zend_class_entry* ce);
 	
 	void construct(val_ptr options) override;
-	bool clear() override;
+	bool_return clear() override;
 	int  deleteExpired() override;
 	bool set(str_ptr key, val_ptr data, zend_long ttl = 0) override;
 	

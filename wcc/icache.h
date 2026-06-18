@@ -31,7 +31,7 @@ public:
 
 	virtual void construct(val_ptr options);
 
-	virtual bool clear();
+	virtual bool_return clear();
 
 	virtual bool deleteKey(str_ptr key);
 

@@ -126,10 +126,12 @@ void ICache::addLocal(obj_ptr pkg)
 }
 
 
-bool ICache::clear()
+bool_return ICache::clear()
 {
 	htab_rw(cached_).clear();
-	return true;
+	bool_return result;
+	result.value_ = true;
+	return result;
 }
 
 
@@ -465,7 +467,13 @@ ZEND_METHOD(Wcc_ICache, clear)
 	ZEND_PARSE_PARAMETERS_END();
 
 	auto cobj = zval_toc<ICache>(ZEND_THIS);
-	RETURN_BOOL(cobj->clear());
+
+	bool_return result = cobj->clear();
+
+	if (!result.throw_errors())
+	{
+		RETURN_BOOL(result.value_);
+	}
 }
 
 ZEND_METHOD(Wcc_ICache, clearPrefix)

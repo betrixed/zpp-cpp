@@ -91,9 +91,17 @@ str_rc
 ParamList::addParam(val_ptr value)
 {
 	htab_rw hw(params_);
-	hw.push_back(value);
 
-	return paramStr((int) params_.size());
+	str_rc result = paramStr((int) params_.size()+1);
+
+	if ((result.size() == 1) && result.starts_with('?'))
+	{
+		hw.push_back(value);
+	}
+	else {
+		hw.set(result, value);
+	}
+	return result;
 }
 
 void 

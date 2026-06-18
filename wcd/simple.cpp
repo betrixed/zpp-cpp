@@ -142,10 +142,19 @@ Simple::arraySet(str_ptr sql, htab_ptr params)
 str_rc 
 Simple::bind(val_ptr value)
 {
-	htab_rw hw(values_);
-	hw.push_back(value);
+	str_rc result;
+
 	IDriver* db = zobj_toc<IDriver>(db_);
-	return db->param(values_.size());
+	result = db->param(values_.size()+1);
+	htab_rw hw(values_);
+	if ((result.size()==1)&&result.starts_with('?'))
+	{
+		hw.push_back(value);
+	}
+	else {
+		hw.set(result, value);
+	}
+	return  result;
 }
 
 val_return 

@@ -307,10 +307,10 @@ DirCache::flushCached()
 	return result;
 }
 
-bool 
+bool_return 
 DirCache::clear()
 {
-	bool result = false;
+	bool_return result;
 
 
 	obj_rc dos_obj = this->getService(SFDi.dos_str);
@@ -322,14 +322,19 @@ DirCache::clear()
 
 	Dos* DOS = zobj_toc<Dos>(dos_obj);
 	
-	int ct = DOS->rm_alldir(path.zstr());
+	int_return ct = DOS->rm_alldir(path.zstr());
+	if (ct.has_errors())
+	{
+		result = ct.move_error();
+		return result;
+	}
+	result.value_ = (ct.value_ > 0);
 
-	result = (ct > 0);
 	str_buf buf;
 
 	if (sess.ok())
 	{
-		buf << "cleared " << ct << " from " << cache_dir_;
+		buf << "cleared " << ct.value_ << " from " << cache_dir_;
 		val_rc arg1(buf.zstr());
 
 		sess.call(SFDi.flash_s, arg1);

@@ -24,16 +24,22 @@ Dos::construct(str_ptr cwd)
 }
 
 
-void 
+error_return 
 Dos::clean_dir(str_ptr path)
 {
+	error_return result;
 	if (file_exists(path) && is_dir(path))
 	{
-		rm_alldir(path);
+		int_return test = rm_alldir(path);
+		if (test.has_errors())
+		{
+			result = test.move_error();
+		}
 	}
 	else {
 		Dos::make_dir(path);
 	}
+	return result;
 }
 
 
@@ -270,23 +276,41 @@ Dos::rm_all(htab_ptr flist)
 }
 
 
-int  
+int_return  
 Dos::rm_alldir(str_ptr path, bool deldir)
 {
-	
+	int_return result;
 
 	unsigned nsize = path.size();
 	if (nsize==0) {
-		return 0;
+		result.error() << "Empty path value";
+		return result;
 	}
 	if (!is_dir(path))
 	{
-		return 0;
+		result.error() << "Path " << path << " not a directory";
+		return result;
 	}
-	str_rc dpath = path;
+
+	str_rc dpath;
 	str_buf buf;
 
+	if (!path.ends_with('/')) 
+	{
+		buf << path << '/';
+		dpath = buf.zstr();
+	}
+	else {
+		dpath = path;
+	}
 	val_rc dh = opendir(dpath);
+
+	if (dh.isFalse())
+	{
+		result.error() << "Unable to list directory " << dpath;
+		return result;
+	}
+	
 	str_rc fpath;
 
 	htab_rc dlist, flist;
@@ -305,7 +329,7 @@ Dos::rm_alldir(str_ptr path, bool deldir)
 		{
 			continue;
 		}
-		buf << dpath << '/' << fname;
+		buf << dpath << fname;
 		fpath = buf.zstr();
 		if (is_dir(fpath)) {
 			dirlist.push_back(fname);
@@ -320,22 +344,29 @@ Dos::rm_alldir(str_ptr path, bool deldir)
 	int ix = 0;
 	for(wk.start(flist); wk.ok(); wk.next())
 	{
-		buf << dpath << '/' << wk.value().zstr();
+		buf << dpath << wk.value().zstr();
 		fpath = buf.zstr();
 		unlink(fpath);
 		ix++;
 	}
 	for(wk.start(dlist); wk.ok(); wk.next())
 	{
-		buf << dpath << '/' << wk.value().zstr();
+		buf << dpath << wk.value().zstr();
 		fpath = buf.zstr();
-		ix += rm_alldir(fpath,true);
+		int_return test = rm_alldir(fpath, true);
+		if (test.has_errors())
+		{
+			result = test.move_error();
+			return result;
+		}
+		ix += test.value_;
 	}
 	if (deldir)
 	{
 		if (rmdir(dpath)) ix++;
 	}
-	return ix;
+	result.value_ = ix;
+	return result;
 }
 
 
@@ -429,7 +460,8 @@ ZEND_METHOD(Wcc_Dos, clean_dir)
 	if (!args.throw_errors())
 	{
 		Dos* cobj = zval_toc<Dos>(ZEND_THIS);
-		cobj->clean_dir(path);
+		error_return result = cobj->clean_dir(path);
+		result.throw_errors();
 	}
 }
 
@@ -544,15 +576,18 @@ ZEND_METHOD(Wcc_Dos, rm_alldir)
 {
 	zarg_rd args(execute_data);
 	str_ptr  path = args.str(args.need(0));
-	zend_long permissions = 0755;
+	bool delpath = false;
 
-	args.zlong(permissions, args.option(1));
+	args.zbool(delpath, args.option(1));
 	
 	if (!args.throw_errors(__FUNCTION__))
 	{
 		Dos* cobj = zval_toc<Dos>(ZEND_THIS);
-		bool result = cobj->make_dir(path, permissions);
-		RETURN_BOOL(result);
+		int_return result = cobj->rm_alldir(path, delpath);
+		if (!result.throw_errors())
+		{
+			RETURN_LONG(result.value_);
+		}
 	}	
 	
 }
