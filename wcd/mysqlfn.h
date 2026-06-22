@@ -22,7 +22,12 @@ enum {
 	MYSQLI_STORE_RESULT = 0,
 	MYSQLI_ASSOC = 1,
 	MYSQLI_NUM = 2,
-	MYSQLI_BOTH = 3
+	MYSQLI_BOTH = 3,
+	
+	MYSQLI_REPORT_OFF = 0,
+  	MYSQLI_REPORT_ERROR = 1,
+  	MYSQLI_REPORT_STRICT = 2,
+  	MYSQLI_REPORT_INDEX = 4
 };
 
 //C++ MSI procedural function prototypes
@@ -30,13 +35,15 @@ bool mysqli_begin_transaction(obj_ptr msi,
 		int flags=0, str_ptr name=str_ptr());
 bool mysqli_commit(obj_ptr msi, int flags=0, str_ptr name=str_ptr());
 
+bool mysqli_rollback(obj_ptr msi, int flags=0, str_ptr name=str_ptr());
+
 bool mysqli_set_charset(obj_ptr msi, str_ptr cset);
 
-obj_rc mysqli_query(obj_ptr msi, int rmode=MYSQLI_STORE_RESULT);
+val_rc mysqli_query(obj_ptr msi, str_ptr query, int rmode=MYSQLI_STORE_RESULT);
 
 bool mysqli_report(int flags);
 
-htab_rc mysqli_fetch_all(obj_ptr msi, int rmode=MYSQLI_NUM);
+htab_rc mysqli_fetch_all(obj_ptr robj, int rmode=MYSQLI_NUM);
 
 htab_rc mysqli_fetch_array(obj_ptr robj, int mode=MYSQLI_NUM);
 
@@ -49,6 +56,8 @@ str_rc mysqli_real_escape_string(obj_ptr msi, str_ptr str);
 
 val_rc mysqli_insert_id(obj_ptr msi);
 
+val_rc mysqli_prepare(obj_ptr msi, str_ptr sql);
+
 bool mysqli_stmt_bind_param(obj_ptr stmt, str_ptr types, htab_ptr params);
 
 bool mysqli_stmt_execute(obj_ptr stmt, htab_ptr params = htab_ptr());
@@ -58,6 +67,9 @@ obj_rc mysqli_stmt_get_result(obj_ptr stmt);
 val_rc mysqli_stmt_affected_rows(obj_ptr stmt);
 
 bool mysqli_stmt_close(obj_ptr stmt);
+
+bool mysqli_close(obj_ptr msi);
+
 
 
 //--------------------------------------------------
@@ -87,9 +99,13 @@ public:
 
 	
 	
-	val_rc fetchRow(obj_ptr stmt, zend_long fmode = IDriver::FETCH_ASSOC);
+	val_return fetchRow(obj_ptr stmt, int fmode = IDriver::FETCH_ASSOC) override;
 
-	bool begin() override;
+	bool begin(htab_ptr args) override;
+
+	bool commit(htab_ptr args) override;
+
+	bool rollback(htab_ptr args) override;
 
 	error_return bind(obj_ptr stmt, htab_ptr params) override;
 
@@ -97,7 +113,7 @@ public:
 
 	error_return closeStmt(obj_ptr stmt) override;
 
-	bool commit() override;
+
 
 	error_return connect() override;
 
@@ -119,7 +135,8 @@ public:
 
 	val_return querySingle(str_ptr query) override;
 
-	bool rollback() override;
+
+	val_return query(str_ptr sql, htab_ptr params) override;
 
 	Mysqlfn();
 	virtual ~Mysqlfn();

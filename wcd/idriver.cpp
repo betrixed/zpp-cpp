@@ -125,41 +125,36 @@ IDriver::construct(obj_ptr icfgobj, str_ptr name)
 	//zend_printf("This %s\n", typeid(*this).name());
 	//showobj("Construct ", self);
 
-	name_ptr_ = self.property_ptr(DBS.cfg_name);
+
+	name_ = name;
+	self.property(DBS.cfg_name, name_);
+
+	icfg_ = icfgobj;
+	self.property(DBS.iconfig_key, icfg_);
+
 	//showmem(DBS.cfg_name.data(), name_ptr_);
 	//zend_printf("name_ptr_%s %lx\n", DBS.cfg_name.data(), (long unsigned int)((zval*) name_ptr_) );
 	
-	val_ptr::try_decref(name_ptr_); 
-	name_ptr_.bind_string(name);
 
-	handle_ptr_ = self.property_ptr(DBS.handle_s);
 
-	cfg_ptr_ = self.property_ptr(DBS.iconfig_key);
-	//showobj("config obj", icfgobj);
-	
-	val_ptr::try_decref(cfg_ptr_); 
-	cfg_ptr_.bind_object(icfgobj);
 	//showmem(DBS.iconfig_key.data(), cfg_ptr_);
-
-	logging_ptr_ = self.property_ptr(DBS.logging_s);
-	lastsql_ptr_ = self.property_ptr(DBS.lastsql_s);
+	logging_ = false;
+	last_sql_ = str_ptr::empty_str();
 
 	ifetch_ = PDO_FETCH_ASSOC;
 
 	wkself_ = weak_ref::refObject(self);
 
-	//showobj("wkself", wkself_);
-
 	IConfig* cfg = icfg_c();
 	db_name_ = cfg->getDatabase();
 	isql_ = cfg->newSql();
-	//showobj("isql_", isql_);
+
 
 }
 
 str_ptr IDriver::getName() const
 {
-	return name_ptr_.zstr();
+	return name_;
 }
 
 void 
@@ -180,13 +175,13 @@ IDriver::debug_info(htab_rw di)
 obj_ptr  
 IDriver::iconfig()
 {
-	return cfg_ptr_.zobject();
+	return icfg_;
 }
 
 IConfig*    
 IDriver::icfg_c()
 {
-	return zobj_toc<IConfig>(cfg_ptr_.zobject());
+	return zobj_toc<IConfig>(icfg_);
 }
 
 void 
@@ -197,6 +192,7 @@ IDriver::destruct()
 		close();
 	}
 
+	// avoid same object reference loops
 	wkself_.init(); 
 
 	schema_def_.init();
@@ -205,7 +201,9 @@ IDriver::destruct()
 
 	isql_.init();
 
-	val_ptr::try_decref(cfg_ptr_);
+	icfg_.init();
+
+	name_.init();
 
 }
 
@@ -236,15 +234,16 @@ IDriver::handle()
 {
 	obj_return result;
 
-	if (!handle_ptr_.ok())
+	if (!handle_.ok())
 	{
 		error_return err = connect();
 		if (err.has_errors())
 		{
 			result = err.move_error();
+			return result;
 		}
 	}
-	result.value_ = handle_ptr_.zobject();
+	result.value_ = handle_;
 	return result;
 }
 
@@ -277,7 +276,7 @@ IDriver::getTableNames()
 void 
 IDriver::close()
 {
-	val_ptr::try_decref(handle_ptr_);
+	handle_.init();
 }
 
 str_rc 
@@ -288,19 +287,19 @@ IDriver::getSqlType()
 }
 
 bool
-IDriver::begin()
+IDriver::begin(htab_ptr args)
 {
 	return false;
 }
 
 bool 
-IDriver::commit()
+IDriver::commit(htab_ptr args)
 {
 	return false;
 }
 
 bool
-IDriver::rollback()
+IDriver::rollback(htab_ptr args)
 {
 	return false;
 }
@@ -657,9 +656,7 @@ IDriver::isConnected()
 str_rc 
 IDriver::lastSQL() const
 {
-	str_rc result;
-	result = lastsql_ptr_.zstr();
-	return result;
+	return last_sql_;
 }
 
 val_return
@@ -719,19 +716,6 @@ IDriver::query(str_ptr query, htab_ptr params)
 }
 
 
-error_return 
-IDriver::transaction()
-{
-	bool test = begin();
-	error_return result;
-
-	if (!test)
-	{
-		result.error() << "Begin transaction failed";
-	}
-	return result;
-}
-
 
 };//namespace
 
@@ -767,13 +751,15 @@ ZEND_METHOD(Wcd_IDriver, __destruct)
 
 ZEND_METHOD(Wcd_IDriver, begin)
 {
-	ZEND_PARSE_PARAMETERS_NONE();
+	zarg_rd args(execute_data);
 
-	IDriver* db = zval_toc<IDriver>(ZEND_THIS);
+	htab_ptr data = args.htab(args.option(0));
 
-	RETURN_BOOL(db->begin());
-
-
+	if (!args.throw_errors())
+	{
+		IDriver* db = zval_toc<IDriver>(ZEND_THIS);
+		RETURN_BOOL(db->begin(data));
+	}
 }
 
 ZEND_METHOD(Wcd_IDriver, bind)
@@ -822,12 +808,18 @@ ZEND_METHOD(Wcd_IDriver, closeStmt)
 
 ZEND_METHOD(Wcd_IDriver, commit)
 {
-	ZEND_PARSE_PARAMETERS_NONE();
+	zarg_rd args(execute_data);
 
-	IDriver* db = zval_toc<IDriver>(ZEND_THIS);
+	htab_ptr data = args.htab(args.option(0));
 
-	bool result = db->commit();
-	RETURN_BOOL(result);
+	if (!args.throw_errors())
+	{
+		IDriver* db = zval_toc<IDriver>(ZEND_THIS);
+
+		bool result = db->commit(data);
+		RETURN_BOOL(result);
+	}
+
 }
 
 ZEND_METHOD(Wcd_IDriver, connect)
@@ -1368,13 +1360,17 @@ ZEND_METHOD(Wcd_IDriver, readSchema)
 
 ZEND_METHOD(Wcd_IDriver, rollback)
 {
-	ZEND_PARSE_PARAMETERS_NONE();
+	zarg_rd args(execute_data);
 
-	IDriver* db = zval_toc<IDriver>(ZEND_THIS);
+	htab_ptr data = args.htab(args.option(0));
 
-	bool result = db->rollback();
-
-	RETURN_BOOL(result);
+	if (!args.throw_errors())
+	{
+		IDriver* db = zval_toc<IDriver>(ZEND_THIS);
+		bool result = db->rollback(data);
+		RETURN_BOOL(result);
+	}
+	
 }
 
 //public function setFetch(int $value): int 
@@ -1392,18 +1388,6 @@ ZEND_METHOD(Wcd_IDriver, setFetch)
 	RETURN_LONG(result);
 }
 
-ZEND_METHOD(Wcd_IDriver, transaction)
-{
-	ZEND_PARSE_PARAMETERS_NONE();
-
-	IDriver* db = zval_toc<IDriver>(ZEND_THIS);
-
-	error_return result = db->transaction();
-
-	bool check = !result.has_errors();
-	RETURN_BOOL(check);
-	result.throw_errors();
-}
 
 ZEND_METHOD(Wcd_IDriver, getWeakRef)
 {

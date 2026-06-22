@@ -28,16 +28,13 @@ namespace wcd {
 
 		static int pdoType(val_ptr val);
 		
-		 bool begin() override;
-		 bool commit() override;
-		 bool rollback() override;
+		 bool begin(htab_ptr args) override;
+		 bool commit(htab_ptr args) override;
+		 bool rollback(htab_ptr args) override;
 
 		htab_return fetchAllRows(obj_ptr stmt, int mode) override;
 		val_return fetchRow(obj_ptr stmt, int mode) override;
 
-		 error_return transaction() override;
-
-		
 		error_return connect() override;
 
 		error_return closeStmt(obj_ptr stmt) override;

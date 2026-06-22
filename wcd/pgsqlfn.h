@@ -129,9 +129,9 @@ public:
 
 	htab_return getTableNames() override;
 
-	bool begin() override;
-	bool commit() override;
-	bool rollback() override;
+	bool begin(htab_ptr args) override;
+	bool commit(htab_ptr args) override;
+	bool rollback(htab_ptr args) override;
 
 	error_return closeStmt(obj_ptr stmt) override;
 

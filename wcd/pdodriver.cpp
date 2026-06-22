@@ -106,9 +106,9 @@ PdoDriver::connect()
 {
 	error_return result;
 
-	obj_rc h = handle_ptr_.zobject();
+	
 
-	if (h.ok())
+	if (handle_.ok())
 	{
 		return result;
 	}
@@ -136,15 +136,14 @@ PdoDriver::connect()
 	args.push_back(pw);
 	args.push_back(options);
 
-	h = ReflectCache::staticInstanceArgs(DBS.pdo_class, args_mgr);
+	obj_rc h = ReflectCache::staticInstanceArgs(DBS.pdo_class, args_mgr);
 
 	if (!h.ok())
 	{
 		result.error() << "PDO connect handle failed for " << dsn.value_;
 	}
 	else {
-		val_ptr::try_decref(handle_ptr_);
-		handle_ptr_.bind_object(h);
+		handle_ = h;
 
 		afterConnect();
 	}
@@ -203,7 +202,7 @@ PdoDriver::query_lcase(str_ptr sql, int fmode)
 }
 
 bool 
-PdoDriver::commit()
+PdoDriver::commit(htab_ptr args)
 {
 	obj_return pdo = handle();
 
@@ -318,7 +317,7 @@ PdoDriver::setCaseAttribute(int value)
 }
 
 bool 
-PdoDriver::begin()
+PdoDriver::begin(htab_ptr args)
 {
 	obj_return pdo = handle();
 
@@ -380,7 +379,7 @@ PdoDriver::execute(obj_ptr stmt, bool close, bool fetch)
 
 		if (isAutoCommit() && inTransaction())
 		{
-			commit();
+			commit(htab_ptr());
 		}
 	}
 
@@ -558,9 +557,10 @@ PdoDriver::prepare(str_ptr query, htab_ptr options)
 	obj_rc pdo(h.value_);
 
 
-	val_ptr::try_decref(lastsql_ptr_);
-	lastsql_ptr_.bind_string(query);
+	last_sql_ = query;
 
+	obj_ptr self(self_);
+	self.property(DBS.lastsql_s, query);
 	//showmem("lastsql", lastsql_ptr_);
 
 
@@ -571,8 +571,9 @@ PdoDriver::prepare(str_ptr query, htab_ptr options)
 	}
 	val_rc     arg2(options);
 	//showarray("options arg", options);
+	val_rc     arg1(query);
 
-	val_rc test = pdo.call(DBS.prepare_fn, lastsql_ptr_, arg2);
+	val_rc test = pdo.call(DBS.prepare_fn, arg1, arg2);
 	
 	if (!test.isObject())
 	{
@@ -677,7 +678,7 @@ PdoDriver::query(str_ptr query, htab_ptr params)
 }
 
 bool 
-PdoDriver::rollback()
+PdoDriver::rollback(htab_ptr args)
 {
 	obj_return h = handle();
 
@@ -690,18 +691,6 @@ PdoDriver::rollback()
 	return result.isTrue();
 }
 
-error_return 
-PdoDriver::transaction()
-{
-	bool test = begin();
-	error_return result;
-
-	if (!test)
-	{
-		result.error() << "Begin transaction failed";
-	}
-	return result;
-}
 
 bool 
 PdoDriver::setAttribute(int key, val_ptr value)

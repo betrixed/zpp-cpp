@@ -57,9 +57,9 @@ namespace wcd {
 		
 		static int pdo_type(unsigned int ztype);
 		
-		virtual bool begin();
-		virtual bool commit();
-		virtual bool rollback();
+		virtual bool begin(htab_ptr args = htab_ptr());
+		virtual bool commit(htab_ptr args = htab_ptr());
+		virtual bool rollback(htab_ptr args = htab_ptr());
 
 		virtual error_return bind(obj_ptr stmt, htab_ptr params);
 
@@ -137,8 +137,6 @@ namespace wcd {
 
 		int  setFetch(int mode);
 
-		virtual error_return transaction();
-
 		obj_rc getTableModel(str_ptr tableName);
 
 		str_rc lastSQL() const;
@@ -147,25 +145,26 @@ namespace wcd {
 		ISql*       isql_c();
 
 		str_ptr getName() const;
+
 	protected:
 
 
 		weak_ref  wkself_; // hold own reference
 		
+
 		// POINTERS TO PROPERTY zval struct STORAGE for read
-		val_ptr   name_ptr_;
+		//val_ptr   name_ptr_;
+		//val_ptr   cfg_ptr_;
+		//val_ptr   logging_ptr_;
+		//val_ptr   lastsql_ptr_;
 
-		val_ptr   handle_ptr_;
-
-		val_ptr   cfg_ptr_;
-		val_ptr   logging_ptr_;
-		val_ptr   lastsql_ptr_;
-
-		/*
+		 
 		obj_rc    icfg_;
 		str_rc    name_;
-		*/
-
+		obj_rc    handle_;
+		
+		str_rc    last_sql_;
+		bool      logging_;
 		str_rc	  db_name_;
 		obj_rc    isql_;
 		int       ifetch_;

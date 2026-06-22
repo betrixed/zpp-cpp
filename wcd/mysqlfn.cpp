@@ -13,18 +13,20 @@ base_obj_mgr<Mysqlfn> Mysqlfn::omg;
 
 class MSFInit : public state_init {
 public:
+	str_intern mysql_s;
+
 	str_intern mysqli_s;
 	str_intern report_mode_s;
-	str_intern query_s;
-	str_intern prepare_s;
-	str_intern commit_s;
+	str_intern mysqli_query_s;
+	str_intern mysqli_prepare_s;
+	str_intern mysqli_commit_s;
 
 	str_intern set_charset_s;
 
 	str_intern fetch_array_s;
 	str_intern fetch_object_s;
 	str_intern fetch_assoc_s;
-	str_intern fetch_all_s;
+	str_intern mysqli_fetch_all_s;
 	str_intern real_escape_string_s;
 	str_intern insert_id_s;
 
@@ -33,8 +35,10 @@ public:
 
 	str_intern bind_param_s;
 	str_intern stmt_execute_s;
+	str_intern stmt_close_s;
 
-	str_intern rollback_commit_s;
+	str_intern mysqli_rollback_s;
+	str_intern mysqli_close_s;
 
 
 
@@ -49,18 +53,22 @@ class MsFnTable {
 public:
 	bool            configured_;
 
-	fn_call         commit_fn;
+	fn_call         mysqli_commit_fn;
+	fn_call         mysqli_rollback_fn;
 	fn_call         fetch_array_fn;
 	fn_call			set_charset_fn;
-	fn_call			query_fn;
+	fn_call			mysqli_query_fn;
+	fn_call         mysqli_prepare_fn;
+	fn_call         mysqli_close_fn;
 	fn_call         report_fn;
 	fn_call         begin_transaction_fn;
-	fn_call         fetch_all_fn;
+	fn_call         mysqli_fetch_all_fn;
 	fn_call         fetch_assoc_fn;
 	fn_call         real_escape_string_fn;
 	fn_call         insert_id_fn;
 	fn_call         bind_param_fn;
 	fn_call         stmt_execute_fn;
+	fn_call         stmt_close_fn;
 
 
 	MsFnTable() : configured_(false) {}
@@ -87,8 +95,9 @@ void MsFnTable::init()
 void MsFnTable::initFn(MSFInit& ms)
 	{
 		begin_transaction_fn.set_fci(ms.begin_transaction_s);
-		commit_fn.set_fci(ms.commit_s);
-		fetch_all_fn.set_fci(ms.fetch_all_s);
+		mysqli_commit_fn.set_fci(ms.mysqli_commit_s);
+		mysqli_rollback_fn.set_fci(ms.mysqli_rollback_s);
+		mysqli_fetch_all_fn.set_fci(ms.mysqli_fetch_all_s);
 
 		fetch_array_fn.set_fci(ms.fetch_array_s);
 		fetch_assoc_fn.set_fci(ms.fetch_assoc_s);
@@ -96,12 +105,16 @@ void MsFnTable::initFn(MSFInit& ms)
 
 		bind_param_fn.set_fci(ms.bind_param_s);
 		stmt_execute_fn.set_fci(ms.stmt_execute_s);
+		stmt_close_fn.set_fci(ms.stmt_close_s);
 
-		query_fn.set_fci(ms.query_s);
+		mysqli_query_fn.set_fci(ms.mysqli_query_s);
 		report_fn.set_fci(ms.report_mode_s);
 
 		real_escape_string_fn.set_fci(ms.real_escape_string_s);
 		set_charset_fn.set_fci(ms.set_charset_s);
+		mysqli_close_fn.set_fci(ms.mysqli_close_s);
+
+		mysqli_prepare_fn.set_fci(ms.mysqli_prepare_s);
 
 	}
 
@@ -111,17 +124,18 @@ void MsFnTable::initFn(MSFInit& ms)
 void
 MSFInit::init()
 {
+	mysql_s = "mysql";
 	mysqli_s = "mysqli";
 	report_mode_s = "mysqli_report";
-	prepare_s = "mysqli_prepare";
-	query_s = "mysqli_query";
+
+	mysqli_prepare_s = "mysqli_prepare";
+	mysqli_query_s = "mysqli_query";
 
 	set_charset_s = "mysqli_set_charset";
 
-	
-	commit_s = "mysqli_commit";
+	mysqli_commit_s = "mysqli_commit";
 	begin_transaction_s = "mysqli_begin_transaction";
-	fetch_all_s = "mysqli_fetch_all";
+	mysqli_fetch_all_s = "mysqli_fetch_all";
 
 	fetch_array_s = "mysqli_fetch_array";
 	fetch_assoc_s = "mysqli_fetch_assoc";
@@ -129,22 +143,15 @@ MSFInit::init()
 
 	bind_param_s = "mysqli_stmt_bind_param";
 	stmt_execute_s = "mysqli_stmt_execute";
+	stmt_close_s = "mysqli_stmt_close";
 
-	insert_id_s = "insert_id";
+	insert_id_s = "mysqli_insert_id";
 	real_escape_string_s = "mysqli_real_escape_string";
-	rollback_commit_s = "rollback_commit";
+	mysqli_rollback_s = "mysqli_rollback";
 }
 
 
-Mysqlfn::Mysqlfn()
-{
 
-}
-
-Mysqlfn::~Mysqlfn()
-{
-
-}
 
 thread_local MsFnTable MSfn;
 
@@ -157,7 +164,9 @@ mysqli_begin_transaction(obj_ptr msi, int flags, str_ptr name)
 	fn_params<3> fn(MSfn.begin_transaction_fn);
 	zval* pz = fn.argsptr();
 	val_ptr::object_bind(pz, msi);
+
 	pz++; ZVAL_LONG(pz, flags);
+
 	pz++; val_ptr::string_bind(pz, name);
 	return fn.zbool();
 }
@@ -198,7 +207,7 @@ mysqli_stmt_execute(obj_ptr stmt, htab_ptr params)
 bool
 mysqli_commit(obj_ptr msi, int flags, str_ptr name)
 {
-	fn_params<3>  fn(MSfn.commit_fn);
+	fn_params<3>  fn(MSfn.mysqli_commit_fn);
 	zval* pz = fn.argsptr();
 	val_ptr::object_bind(pz, msi);
 	pz++; ZVAL_LONG(pz, flags);
@@ -206,6 +215,17 @@ mysqli_commit(obj_ptr msi, int flags, str_ptr name)
 	return fn.zbool();
 }
 
+bool 
+mysqli_rollback(obj_ptr msi, int flags, str_ptr name)
+{
+	fn_params<3>  fn(MSfn.mysqli_rollback_fn);
+	zval* pz = fn.argsptr();
+	val_ptr::object_bind(pz, msi);
+	pz++; ZVAL_LONG(pz, flags);
+	pz++; val_ptr::string_bind(pz, name);
+	return fn.zbool();
+
+}
 
 bool 
 mysqli_set_charset(obj_ptr msi, str_ptr cset)
@@ -218,14 +238,15 @@ mysqli_set_charset(obj_ptr msi, str_ptr cset)
 }
 
 
-obj_rc
-mysqli_query(obj_ptr msi, int rmode)
+val_rc
+mysqli_query(obj_ptr msi, str_ptr query, int rmode)
 {
-	fn_params<2>  fn(MSfn.query_fn);
+	fn_params<3>  fn(MSfn.mysqli_query_fn);
 	zval* pz = fn.argsptr();
 	val_ptr::object_bind(pz, msi);
-	pz++; ZVAL_LONG(pz, rmode);
-	return fn.obj();
+	val_ptr::string_bind(pz+1, query);
+	ZVAL_LONG(pz+2, rmode);
+	return fn.mixed();
 }
 
 
@@ -254,6 +275,16 @@ mysqli_fetch_assoc(obj_ptr robj)
 {
 	fn_params<1>  fn(MSfn.fetch_array_fn);
 	val_ptr::object_bind(fn.argsptr(), robj);
+	return fn.array();
+}
+
+htab_rc
+mysqli_fetch_all(obj_ptr robj, int mode)
+{
+	fn_params<2>  fn(MSfn.mysqli_fetch_all_fn);
+	zval* pz = fn.argsptr();
+	val_ptr::object_bind(pz, robj);
+	ZVAL_LONG(pz+1, mode);
 	return fn.array();
 }
 
@@ -299,11 +330,22 @@ mysqli_real_escape_string(obj_ptr msi, str_ptr str)
 	return fn.str();
 }
 
+val_rc
+mysqli_prepare(obj_ptr msi, str_ptr sql)
+{
+	fn_params<2>  fn(MSfn.mysqli_prepare_fn);
+	zval* pz = fn.argsptr();
+	val_ptr::object_bind(pz, msi);
+	val_ptr::string_bind(pz+1, sql);
+	return fn.mixed();
+}
+
 void 
 register_class(zend_class_entry* idriver_ce)
 {
 	
 }
+
 
 /*
 htab_rc 
@@ -387,20 +429,37 @@ attribute(str_ptr name, str_ptr value)
 }
 */
 
-val_rc 
-fetchRow(obj_ptr stmt, zend_long fmode = IDriver::FETCH_ASSOC)
+val_return 
+Mysqlfn::fetchRow(obj_ptr stmt, int fmode)
 {
-	
+	val_return result;
+	return result;
 }
 
 bool 
-begin()
+Mysqlfn::begin(htab_ptr args)
 {
 	if (inTransaction_)
 	{
 		return false; // throw error
 	}
-	bool ok = mysqli_begin_transation(handle_ptr_.zobject());
+	unsigned argct = args.size();
+
+	zend_long flags = 0;
+	str_rc    name;
+
+	if (argct > 0)
+	{
+		val_ptr test = args.get((int) 0);
+		flags = test.zlong();
+	}
+	if (argct > 1)
+	{
+		name = args.get((int) 1);
+	}
+
+
+	bool ok = mysqli_begin_transaction(handle_, flags, name);
 
 	inTransaction_ = ok;
 
@@ -448,27 +507,54 @@ Mysqlfn::bind(obj_ptr stmt, htab_ptr params)
 }
 
 void 
-close()
+Mysqlfn::close()
 {
-	
+	if (handle_.ok())
+	{
+		mysqli_close(handle_);
+		handle_.init();
+	}
 }
 
 error_return 
-closeStmt(obj_ptr stmt)
+Mysqlfn::closeStmt(obj_ptr stmt)
 {
-	
+	error_return result;
+
+	if (stmt.ok())
+	{
+		mysqli_stmt_close(stmt);
+	}
+	else {
+		result.error() << "Passed invalid object to Mysqlfn::closeStmt";
+
+	}
+	return result;
 }
 
 bool 
-commit()
+Mysqlfn::commit(htab_ptr args)
 {
-	
+	unsigned nct = args.size();
+
+	int flags = 0;
+	str_rc name;
+
+	if (nct > 0)
+	{
+		val_ptr test = args.get((int)0);
+		flags = test.zlong();
+	}
+	if (nct > 1)
+	{
+		name = args.get((int)1);
+	}
+
+	return mysqli_commit(handle_, flags, name);
 }
 
-
-
 error_return 
-connect()
+Mysqlfn::connect()
 {
 	IConfig* cfg = zobj_toc<IConfig>(this->iconfig());
 
@@ -486,7 +572,7 @@ connect()
 
 	htab_rw cp(cparams);
 
-	cp.push_back(host,user,pwd,dbname);
+	cp.push_items(host, user, pwd, dbname);
 
 	obj_rc hconnect = ReflectCache::staticInstanceArgs(Msfi.mysqli_s, cparams);
 
@@ -494,25 +580,18 @@ connect()
 
 	if (!hconnect.ok())
 	{
-		result.error() << "Failed to connect: " << cstr;
+
+		result.error() << "Failed to connect " << user
+		 << " to host: " << host << " db: " << dbname;
 		return result;
 	}
 
-
 	mysqli_report(MYSQLI_REPORT_ERROR|MYSQLI_REPORT_STRICT);
 
-	val_rc::try_decref(handle_ptr_);
-	handle_ptr_.bind_object(hconnect);
+	handle_ = hconnect;
 
-	// make a private wrapper
-	if (wrap_)
-	{
-		delete wrap_;
-	}
-
-	mysqli_set_charset(hconnect,charset );
+	mysqli_set_charset(hconnect, charset );
 	
-
 	if (collation.ok())
 	{
 		str_buf buf;
@@ -524,9 +603,9 @@ connect()
 }
 
 str_rc 
-escape(str_ptr value)
+Mysqlfn::escape(str_ptr value)
 {
-	
+	return mysqli_real_escape_string(handle_, value);
 }
 
 val_return 
@@ -560,55 +639,134 @@ Mysqlfn::execute(obj_ptr stmt, bool close, bool fetch)
 		test = mysqli_stmt_close(stmt);
 	}
 
-	result = this->getResults($robj);
+	result = this->getResults(robj, ifetch_);
+
+	return result;
 }
 
 str_rc 
-getSqlType()
+Mysqlfn::getSqlType()
 {
-	
+	return Msfi.mysql_s;
 }
 
 htab_return 
-getTableNames()
+Mysqlfn::getTableNames()
 {
-	
+	/*$result = $this->handle->query('SHOW TABLES');
+        $rows = $result->fetch_all(MYSQLI_NUM);
+        $reduce = [];
+        foreach ($rows as $row) {
+            $reduce[] = $row[0];
+        }
+        return $reduce;*/
+	str_rc sql("SHOW TABLES");
+	obj_rc rdata = mysqli_query(handle_, sql);
+
+	htab_rc rows = mysqli_fetch_all(rdata);
+
+	htab_return result;
+	result.value_ = htab_ptr::empty_array();
+	htab_rw reduce(result.value_);
+
+	htab_walk wk;
+
+	auto vptr = wk.value();
+	for(wk.start(rows); wk.ok(); wk.next())
+	{
+		htab_ptr rval = vptr.zarray();
+
+		reduce.push_back( rval.get(int(0)) );
+	}
+
+
+	return result;
 }
 
 bool 
-inTransaction()
+Mysqlfn::inTransaction()
 {
 	return inTransaction_;
 }
 
 val_return 
-lastInsertId(str_ptr name)
+Mysqlfn::lastInsertId(str_ptr name)
 {
-	
+	return mysqli_insert_id(handle_);
 }
 
 val_return 
-lastSeqValue(str_ptr name)
+Mysqlfn::lastSeqValue(str_ptr name)
 {
-	
+	val_return result;
+
+	str_buf buf;
+
+	buf << "select preview value for " << name;
+
+	val_rc test = mysqli_query(handle_, buf.zstr(), MYSQLI_NUM);
+
+	htab_ptr rows = test.zarray();
+
+	if (rows.size())
+	{
+		htab_ptr r0 = rows.get((int)0);
+		if (r0.size()) {
+			result.value_ = r0.get((int)0);
+		}
+	}
+	return result;
 }
 
 obj_return 
-prepare(str_ptr query, htab_ptr options=htab_ptr())
+Mysqlfn::prepare(str_ptr query, htab_ptr options)
 {
-	
+	last_sql_ = query;
+
+	obj_rc stmt = mysqli_prepare(handle_, query);
+
+	return stmt;
 }
 
 val_return 
-querySingle(str_ptr query)
+Mysqlfn::querySingle(str_ptr query)
 {
-	
+	val_return result;
+
+	last_sql_ = query;
+
+	val_rc test = mysqli_query(handle_, query);
+
+	if (test.isObject()) {
+		result = Mysqlfn::getResults(test.zobject(), ifetch_);
+	}
+	else {
+		result.value_ = test;
+	}
+
+	return result;
+
 }
 
 bool 
-Mysqlfn::rollback()
+Mysqlfn::rollback(htab_ptr args)
 {
 
+	unsigned nct = args.size();
+
+	int flags = 0;
+	str_rc name;
+
+	if (nct > 0)
+	{
+		val_ptr test = args.get((int)0);
+		flags = test.zlong();
+	}
+	if (nct > 1)
+	{
+		name = args.get((int)1);
+	}
+	return mysqli_rollback(handle_, flags, name);
 }
 
 Mysqlfn::Mysqlfn()
@@ -616,6 +774,10 @@ Mysqlfn::Mysqlfn()
 	MSfn.init();
 }
 
+Mysqlfn::~Mysqlfn()
+{
+
+}
 
 }; // namespace wcd
 

@@ -499,8 +499,7 @@ Pgsqlfn::connect()
 
 	if (hconnect.ok())
 	{
-		val_ptr::try_decref(handle_ptr_);
-		handle_ptr_.bind_object(hconnect);
+		handle_ = hconnect;
 	}
 	else {
 		result.error() << "Failed to connect: " << cstr;
@@ -524,19 +523,18 @@ Pgsqlfn::inTransaction()
 void //virtual
 Pgsqlfn::close()
 {
-	if (handle_ptr_.ok())
+	if (handle_.ok())
 	{
-		obj_ptr pgo(handle_ptr_.zobject());
-		val_rc h(pgo);
-		pg_close(pgo);
+		obj_rc temp(handle_);
+		handle_.init();
+		pg_close(temp);
 	}
 }
 
 obj_return //virtual
 Pgsqlfn::prepare(str_ptr query, htab_ptr options)
 {
-	val_ptr::try_decref(lastsql_ptr_);
-	lastsql_ptr_.bind_string(query);
+	last_sql_.init();
 	obj_rc qobj = PgQuery::omg.new_zobj();
 
 	PgQuery* zobj = zobj_toc<PgQuery>(qobj);
@@ -595,8 +593,7 @@ Pgsqlfn::querySingle(str_ptr query)
 		return result;
 	}
 
-	val_ptr::try_decref(lastsql_ptr_);
-	lastsql_ptr_.bind_string(query);
+	last_sql_ = query;
 
 	obj_rc robj = pg_query(h.value_, query);
 
@@ -696,7 +693,7 @@ Pgsqlfn::getTableNames()
 
 
 bool  //virtual
-Pgsqlfn::begin() 
+Pgsqlfn::begin(htab_ptr args) 
 {
 	str_rc sql("BEGIN");
 	val_return result = querySingle(sql);
@@ -713,7 +710,7 @@ Pgsqlfn::begin()
 }
 
 bool  //virtual
-Pgsqlfn::commit()
+Pgsqlfn::commit(htab_ptr args)
 {
 	str_rc sql("COMMIT");
 	inTransaction_ = false;
@@ -731,7 +728,7 @@ Pgsqlfn::commit()
 }
 
 bool //virtual
-Pgsqlfn::rollback()
+Pgsqlfn::rollback(htab_ptr args)
 {
 	str_rc sql("ROLLBACK");
 	inTransaction_ = false;

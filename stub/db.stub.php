@@ -12,8 +12,6 @@ class IDriver {
 
     protected IfConfig $cfg;
 
-    protected mixed $handle = null;
-
     public bool $logging = false;
 
     public ?string $lastsql = null;
@@ -23,7 +21,13 @@ class IDriver {
 
     public function __destruct();
 
-    public function begin(): bool {}
+    //$args for  wierd variants
+    public function begin(?array $args = null): bool {}
+
+    public function commit(?array $args = null): bool {}
+
+    public function rollback(?array $args = null): bool {}
+
 
     public function bind(mixed $stmt, array $params) : void {}
 
@@ -33,7 +37,7 @@ class IDriver {
 
     public function closeStmt(mixed $stmt) : void {}
 
-    public function commit(): bool {}
+   
 
     public function connect(): void {}
 
@@ -111,7 +115,7 @@ class IDriver {
 
     public function readSchema(): IStore {}
 
-    public function rollback(): bool {}
+    
 
     public function getWeakRef() : \WeakReference {}
 
