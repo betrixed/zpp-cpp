@@ -48,6 +48,14 @@ extern "C" {
 #include "pgsqlfn.h"
 #endif
 
+#ifndef MYSQLFN_WDC_H
+#include "pgsqlfn.h"
+#endif
+
+#ifndef MYSQLFN_WDC_H
+#include "mysqlfn.h"
+#endif
+
 #ifndef DIR_CACHE_H
 #include "wcc/dircache.h"
 #endif
@@ -1423,6 +1431,7 @@ PHP_MINIT_FUNCTION(Wcd_IDriver_reg)
 	Pdo_mysql::register_class(pdo);
 	
 	Pgsqlfn::register_class(dclass);
+	Mysqlfn::register_class(dclass);
 
 	return SUCCESS;
 }

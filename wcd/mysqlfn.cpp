@@ -343,7 +343,10 @@ mysqli_prepare(obj_ptr msi, str_ptr sql)
 void 
 register_class(zend_class_entry* idriver_ce)
 {
-	
+	auto ce = register_class_Wcd_Ext_Mysqlfn(idriver_ce);
+	Mysqlfn::omg.classEntry(ce);
+	STATE_INIT_ADD(Msfi);
+
 }
 
 

@@ -84,7 +84,7 @@ class IDriver {
 
     public function isConnected(): bool {}
 
-    public function lastInsertId(): ?int {}
+    public function lastInsertId(): mixed {}
 
     public function lastSeqValue(string $name): ?int {}
 

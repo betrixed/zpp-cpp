@@ -39,3 +39,7 @@ class Pgsqlfn extends \Wcc\IDriver  {
     public function nextId() : int {}
     public static function attribute(string $name, string $value): string {}
 };
+
+class Mysqlfn extends \Wcc\IDriver  {
+    
+};
