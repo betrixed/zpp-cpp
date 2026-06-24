@@ -63,6 +63,7 @@ PHP_MINFO_FUNCTION(wccd)
 /* }}} */
 
 static const zend_module_dep wccd_deps[] = { /* {{{ */
+	ZEND_MOD_REQUIRED("wccz")
 	ZEND_MOD_REQUIRED("wccr")
 	ZEND_MOD_END
 };
