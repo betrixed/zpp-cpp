@@ -39,7 +39,7 @@ PHP_MSHUTDOWN_FUNCTION(wccz)
 	STATE_MOD_END
 
 #ifdef DEBUG_EXTRA
-	dump_info::run_state_ = false;
+	//dump_info::run_state_ = false;
 #endif
 	return SUCCESS;
 }
