@@ -335,6 +335,7 @@ obj_ptr::property(str_ptr key, obj_ptr value)
     else {
         ZVAL_NULL(&temp);
     }
+    //showmem("obj_property", &temp);
     property(key, val_ptr(&temp));
 }
 
@@ -349,8 +350,6 @@ obj_ptr::property(str_ptr key, htab_ptr value)
     }
     val_ptr::array_bind(&temp, value);
     property(key, val_ptr(&temp));
-
-    
 }
 
 void 
@@ -535,17 +534,9 @@ obj_ptr::obj_property(str_ptr name)
 {
     obj_rc result;
 
-    if (!name.ok())
-    {
-        return result;
-    }
+    val_rc copy = property(name);
+    result = std::move(copy);
 
-    val_ptr test = property_ptr(name);
-    
-    if (test.isObject())
-    {
-        result = test.zobject();
-    }
    /* else {
         zend_printf("No object %s\n", name.data());
     }*/

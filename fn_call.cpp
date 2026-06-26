@@ -1193,6 +1193,7 @@ obj_rc
 weakref_create(obj_ptr wref)
 {
     fn_params<1> fn(TLFNs.weakref_create);
+
     ZVAL_OBJ(fn.argsptr(), wref);
     return fn.obj();
 }
