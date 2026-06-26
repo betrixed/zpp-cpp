@@ -42,7 +42,7 @@ str_rc
 Pdo_pgsql::getSchemaClass()
 {
 	str_rc stype = getSqlType();
-	showstr("Pdo_pgsql sqltype is ", stype);
+	//showstr("Pdo_pgsql sqltype is ", stype);
 
 	stype = stype.ucfirst();
 	str_buf buf;

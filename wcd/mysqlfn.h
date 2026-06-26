@@ -139,7 +139,6 @@ public:
 	val_return query(str_ptr sql, htab_ptr params) override;
 
 	Mysqlfn();
-	virtual ~Mysqlfn();
 
 };
 

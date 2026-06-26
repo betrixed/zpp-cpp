@@ -534,7 +534,7 @@ Pgsqlfn::close()
 obj_return //virtual
 Pgsqlfn::prepare(str_ptr query, htab_ptr options)
 {
-	last_sql_.init();
+	obj_ptr(self_).property(DBS.lastsql_s, query);
 	obj_rc qobj = PgQuery::omg.new_zobj();
 
 	PgQuery* zobj = zobj_toc<PgQuery>(qobj);
@@ -593,7 +593,7 @@ Pgsqlfn::querySingle(str_ptr query)
 		return result;
 	}
 
-	last_sql_ = query;
+	obj_ptr(self_).property(DBS.lastsql_s, query);
 
 	obj_rc robj = pg_query(h.value_, query);
 
@@ -768,7 +768,7 @@ Pgsqlfn::closeStmt(obj_ptr sobj)
 	return result;
 }
 
-Pgsqlfn::Pgsqlfn()
+Pgsqlfn::Pgsqlfn() : IDriver()
 {
 	idseq_  = 0;
 	inTransaction_ = false;

@@ -337,16 +337,23 @@ IConfig::getCollation()
 obj_return 
 IConfig::newConnect(str_ptr name)
 {
-	//showstr("NewConnect", name);
+	obj_return result;
+	
 	str_rc dclass(getDriverClass());
+	//showstr("NewConnect object", dclass);
+	if (!dclass.ok())
+	{
+		result.error() << "Empty Driver class for " << name;
+		return result;
+	}
 	htab_rc args_mgr;
 	htab_rw args(args_mgr);
-	args.push_back(vobj());
+	args.push_back(self_);
 	args.push_back(name);
 
 	//showstr("Driver class", dclass);
 
-	obj_return result;
+
 	result.value_ = ReflectCache::staticInstanceArgs(dclass, args_mgr);
 	
 	if (!result.value_.ok())

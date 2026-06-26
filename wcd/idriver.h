@@ -48,7 +48,7 @@ namespace wcd {
 		virtual htab_return getTableNames();
 		virtual str_return getDSN();
 
-		virtual void debug_info(htab_rw di);
+		void debug_info(htab_rw di) override;
 		
 		virtual val_return lastSeqValue(str_ptr name);
 		virtual str_rc getSchemaClass();
@@ -126,10 +126,7 @@ namespace wcd {
 
 		virtual val_return querySingle(str_ptr query);
 
-		weak_ref selfRef() 
-		{
-			return wkself_;
-		}
+		weak_ref selfRef();
 
 		virtual str_rc quoteName(str_ptr name);
 
@@ -140,6 +137,8 @@ namespace wcd {
 		obj_rc getTableModel(str_ptr tableName);
 
 		str_rc lastSQL() const;
+
+		void   setLastSQL(str_ptr sql);
 		
 		IConfig* 	icfg_c();
 		ISql*       isql_c();
@@ -163,7 +162,7 @@ namespace wcd {
 		str_rc    name_;
 		obj_rc    handle_;
 		
-		str_rc    last_sql_;
+		//str_rc    last_sql_;
 		bool      logging_;
 		str_rc	  db_name_;
 		obj_rc    isql_;

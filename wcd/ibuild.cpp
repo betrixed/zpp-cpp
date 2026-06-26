@@ -309,9 +309,12 @@ using namespace zpp;
 			}
 
 			ParamList* plist = zobj_toc<ParamList>(plist_mgr.value_);
+
+
 			str_ptr sql(plist->getSql());
 
 			htab_ptr values(plist->getValues());
+			
 			htab_ptr rets(plist->getReturns());
 
 			IDriver& db = idb();

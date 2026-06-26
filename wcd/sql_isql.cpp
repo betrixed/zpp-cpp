@@ -37,6 +37,10 @@ extern "C" {
 #include "postgres.h"
 #endif
 
+#ifndef WCC_DEBUGLOG_H
+#include "debuglog.h"
+#endif
+
 namespace wcd {
 
 using namespace zpp;
@@ -90,8 +94,10 @@ ParamList::paramStr(int ct)
 str_rc 
 ParamList::addParam(val_ptr value)
 {
+	str_rc result;
 	htab_rw hw(params_);
 
+/*
 	str_rc result = paramStr((int) params_.size()+1);
 
 	if ((result.size() == 1) && result.starts_with('?'))
@@ -100,6 +106,32 @@ ParamList::addParam(val_ptr value)
 	}
 	else {
 		hw.set(result, value);
+	}
+*/
+	unsigned nextid = hw.size() + 1;
+	result = paramStr(nextid);
+	hw.set(value, result);
+	DebugLog* log = DebugLog::cpp_global();
+	if (log)
+	{
+		log->dump("addParam", params_);
+	}
+	return result;
+}
+
+str_rc 
+ParamList::addParamEquals(val_ptr value)
+{
+	str_rc result;
+	htab_rw hw(params_);
+
+	unsigned nextid = params_.size()+1;
+	result = paramStr(nextid);
+	hw.set(result, value);
+	DebugLog* log = DebugLog::cpp_global();
+	if (log)
+	{
+		log->dump("addParamEquals", params_);
 	}
 	return result;
 }
@@ -141,7 +173,7 @@ ParamList::paramLiteral(val_ptr value)
 			{
 			case SqlPartId::PARAM_PID:
 				temp = static_cast<Param*>(part)->getValue();
-				result = this->addParam(temp);
+				result = this->addParamEquals(temp);
 				break;
 			case SqlPartId::LIT_PID:
 				temp = static_cast<Literal*>(part)->getValue();
@@ -152,7 +184,7 @@ ParamList::paramLiteral(val_ptr value)
 
 	}
 	else {
-		result = this->addParam(value);
+		result = this->addParamEquals(value);
 	}
 	if (!result.value_.size()) {
 		result.error() << "Unhandled paramLiteral argument";
@@ -854,12 +886,27 @@ ZEND_METHOD(Wcd_Sql_ParamList, __construct)
 /* public function addParam(mixed $value) : void {} */
 ZEND_METHOD(Wcd_Sql_ParamList, addParam)
 {
-	zval* value;
-	ZEND_PARSE_PARAMETERS_START(1,1)
-	Z_PARAM_ZVAL(value)
-	ZEND_PARSE_PARAMETERS_END();
-	ParamList* cobj = zval_toc<ParamList>(ZEND_THIS);
-	cobj->addParam(value);
+	zarg_rd args(execute_data);
+	zval* value = args.need(0);
+
+	if (!args.throw_errors())
+	{
+		ParamList* cobj = zval_toc<ParamList>(ZEND_THIS);
+		cobj->addParam(value);
+	}
+}
+
+/* public function addParam(mixed $value) : void {} */
+ZEND_METHOD(Wcd_Sql_ParamList, addParamEquals)
+{
+	zarg_rd args(execute_data);
+	zval* value = args.need(0);
+
+	if (!args.throw_errors())
+	{
+		ParamList* cobj = zval_toc<ParamList>(ZEND_THIS);
+		cobj->addParamEquals(value);
+	}
 }
 
 /* public function addParamList(array $values): string {} */

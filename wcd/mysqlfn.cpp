@@ -79,7 +79,7 @@ public:
 
 };
 
-
+thread_local MsFnTable MSfn;
 
 
 
@@ -91,6 +91,12 @@ void MsFnTable::init()
 		configured_ = true;
 		initFn(Msfi);
 	}
+
+
+void MSFInit::init_req()
+{
+	MSfn.init();
+}
 
 void MsFnTable::initFn(MSFInit& ms)
 	{
@@ -153,7 +159,7 @@ MSFInit::init()
 
 
 
-thread_local MsFnTable MSfn;
+
 
 
 
@@ -339,9 +345,9 @@ mysqli_prepare(obj_ptr msi, str_ptr sql)
 	val_ptr::string_bind(pz+1, sql);
 	return fn.mixed();
 }
-
+//===================================================
 void 
-register_class(zend_class_entry* idriver_ce)
+Mysqlfn::register_class(zend_class_entry* idriver_ce)
 {
 	auto ce = register_class_Wcd_Ext_Mysqlfn(idriver_ce);
 	Mysqlfn::omg.classEntry(ce);
@@ -349,26 +355,6 @@ register_class(zend_class_entry* idriver_ce)
 
 }
 
-
-/*
-htab_rc 
-allRows(obj_ptr result, zend_long fmode = IDriver::FETCH_ASSOC)
-{
-	
-}
-
-htab_rc 
-resultObjects(obj_ptr result)
-{
-	
-}
-
-htab_rc 
-resultNum(obj_ptr result)
-{
-	
-}
-*/
 htab_rc 
 Mysqlfn::resultObjects(obj_ptr robj)
 {
@@ -724,7 +710,7 @@ Mysqlfn::lastSeqValue(str_ptr name)
 obj_return 
 Mysqlfn::prepare(str_ptr query, htab_ptr options)
 {
-	last_sql_ = query;
+	obj_ptr(self_).property(DBS.lastsql_s, query);
 
 	obj_rc stmt = mysqli_prepare(handle_, query);
 
@@ -736,7 +722,7 @@ Mysqlfn::querySingle(str_ptr query)
 {
 	val_return result;
 
-	last_sql_ = query;
+	obj_ptr(self_).property(DBS.lastsql_s, query);
 
 	val_rc test = mysqli_query(handle_, query);
 
@@ -747,6 +733,43 @@ Mysqlfn::querySingle(str_ptr query)
 		result.value_ = test;
 	}
 
+	return result;
+
+}
+
+val_return
+Mysqlfn::query( str_ptr sql, htab_ptr params)
+{
+	val_return result;
+	obj_return stmt_err = this->prepare(sql);
+
+	if (stmt_err.has_errors())
+	{
+		result = stmt_err.move_error();
+		return result;
+	}
+	obj_ptr stmt = stmt_err.value_;
+	if (!stmt.ok())
+	{
+		result.error() << "Prepare fail: " << sql;
+		return result;
+	}
+
+	if (params.size())
+	{
+		this->bind(stmt, params);
+	}
+
+	result = this->execute(stmt, true,true);
+
+	if (!result.has_errors())
+	{
+		error_return test = this->check_results(result.value_);
+		if (test.has_errors())
+		{
+			result = test.move_error();
+		}
+	}
 	return result;
 
 }
@@ -772,15 +795,11 @@ Mysqlfn::rollback(htab_ptr args)
 	return mysqli_rollback(handle_, flags, name);
 }
 
-Mysqlfn::Mysqlfn()
+Mysqlfn::Mysqlfn() : IDriver()
 {
-	MSfn.init();
+	inTransaction_ = false;
 }
 
-Mysqlfn::~Mysqlfn()
-{
-
-}
 
 }; // namespace wcd
 

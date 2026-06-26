@@ -8,14 +8,11 @@ namespace Wcd;
 class IDriver {
     
 
-    protected string $name;
+    public readonly string $name;
 
-    protected IfConfig $cfg;
+    public readonly IConfig $cfg;
 
-    public bool $logging = false;
-
-    public ?string $lastsql = null;
-
+    public ?string  $lastsql;
 
     public function __construct(IConfig $cfg, string $name);
 
@@ -36,8 +33,6 @@ class IDriver {
     public function close() : void {}
 
     public function closeStmt(mixed $stmt) : void {}
-
-   
 
     public function connect(): void {}
 
@@ -115,13 +110,9 @@ class IDriver {
 
     public function readSchema(): IStore {}
 
-    
-
     public function getWeakRef() : \WeakReference {}
 
     public function setFetch(int $value): int {}
-
-    public function transaction() : bool {}
 
 };
 

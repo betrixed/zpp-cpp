@@ -557,10 +557,8 @@ PdoDriver::prepare(str_ptr query, htab_ptr options)
 	obj_rc pdo(h.value_);
 
 
-	last_sql_ = query;
+	obj_ptr(self_).property(DBS.lastsql_s, query);
 
-	obj_ptr self(self_);
-	self.property(DBS.lastsql_s, query);
 	//showmem("lastsql", lastsql_ptr_);
 
 

@@ -39,6 +39,10 @@ namespace wcd
 
 		void construct(weak_ref& driver);
 		str_rc addParam(val_ptr value);
+
+
+		str_rc addParamEquals(val_ptr value);
+		
 		//str_rc addParam(val_ptr value);
 		str_rc addParamList(htab_ptr values);
 		str_rc makeList(int start, int count);

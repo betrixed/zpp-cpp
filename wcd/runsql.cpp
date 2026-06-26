@@ -54,8 +54,7 @@ namespace wcd {
 
 		if (pct)
 		{
-			val_ptr a0 = params.get(int(0));
-			if (a0.isArray())
+			if (params.is_list())
 			{
 				if (pct > 1)
 				{
@@ -78,7 +77,7 @@ namespace wcd {
 					return exresult;
 				}
 				else {
-					params = a0.zarray();
+					params = params.get((int)0);
 				}
 			}
 			db->bind(stmt, params);

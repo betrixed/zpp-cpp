@@ -220,7 +220,9 @@ class JoinTables {
 class ParamList {
     public function __construct(\WeakReference $gen);
 
-    public function addParam(mixed $value) : void {}
+    public function addParam(mixed $value) : string {}
+
+    public function addParamEquals(mixed $value) : string {}
 
     public function addParamList(array $values): string {}
 

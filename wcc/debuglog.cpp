@@ -135,6 +135,7 @@ DebugLog::start(const char* msg, int flags)
 
 	return DebugLog::start(temp, flags);
 }
+
 obj_rc //static 
 DebugLog::start(str_ptr msg, int destflags)
 {

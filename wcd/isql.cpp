@@ -391,7 +391,7 @@ ISql::emit(val_ptr sp, Bindings* bind, str_ptr lalias, str_ptr ralias)
 					return result;
 				}
 				ParamList* list = zobj_toc<ParamList> (paramList.value_);
-	 			buf << list->addParam(pvalue);
+	 			buf << list->addParamEquals(pvalue);
 	 		}
 	 		break;
 	 	default:
@@ -559,19 +559,27 @@ static SqlPart_return getIColumns(val_ptr zv)
 
 void extract_params(htab_ptr rowbind, htab_ptr plist, htab_rw params);
 
+//save results in params variable
 void extract_params(htab_ptr rowbind, htab_ptr plist, htab_rw params)
 {
-	//showarray("after create", ret_params);
+	for_key_value wk;
 
-	htab_walk wk;
-	auto pix = wk.value();
-
-	htab_rc row_values = htab_rc::getValues(rowbind);
-
+	// params to select from row_values
 	for(wk.start(plist); wk.ok(); wk.next())
 	{
-		val_ptr pvalue = row_values.get(pix.zlong());
-		params.push_back(pvalue);
+		int ix = wk.index();
+		val_ptr rowvalue = rowbind.get(ix);
+		val_ptr pvalue = wk.value();
+
+		str_ptr pstr = pvalue.zstr();
+
+		if ((pstr.size()==1)&&(pstr.data()[0] == '?'))
+		{
+			params.push_back(rowvalue);
+		}
+		else {
+			params.set(pstr, rowvalue);
+		}
 	}
 	return;
 }
@@ -1059,7 +1067,7 @@ ISql::update(Bindings& bind)
 			else {
 				buf << ' ';
 			}
-			buf << this->quoteName(col_name) << " = " << plist->addParam(col_value);
+			buf << this->quoteName(col_name) << " = " << plist->addParamEquals(col_value);
 		}
 	}
 	else {
@@ -1082,7 +1090,7 @@ ISql::update(Bindings& bind)
 			else {
 				buf << ' ';
 			}
-			buf << this->quoteName(name.zstr()) << " = " << plist->addParam(bfalse);
+			buf << this->quoteName(name.zstr()) << " = " << plist->addParamEquals(bfalse);
 		}
 	}
 
@@ -1284,7 +1292,7 @@ ISql::where(Bindings &bind, htab_ptr wtab)
 				{
 					Param* pa = static_cast<Param*>(sqlpart);
 					value = pa->getValue();
-					buf << ' ' << params->addParam(value);
+					buf << ' ' << params->addParamEquals(value);
 				}
 				else if (partid == SqlPartId::EXPR_PID)
 				{
@@ -1293,7 +1301,7 @@ ISql::where(Bindings &bind, htab_ptr wtab)
 				}
 			}
 			else { // value is some kind of Raw Param value??
-				buf << ' ' << params->addParam(value);
+				buf << ' ' << params->addParamEquals(value);
 			}
 		}
 		else if (wtype == "nested")
@@ -1332,7 +1340,7 @@ ISql::where(Bindings &bind, htab_ptr wtab)
 				return result;
 			}
 			htab_ptr duo(harray.zarray());
-			buf << " BETWEEN " << params->addParam(duo[int(0)]) << " AND " << params->addParam(duo[int(1)]);
+			buf << " BETWEEN " << params->addParamEquals(duo[int(0)]) << " AND " << params->addParamEquals(duo[int(1)]);
 		}
 		else if (wtype == "in")
 		{

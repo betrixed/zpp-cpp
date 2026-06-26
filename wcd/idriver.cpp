@@ -128,7 +128,7 @@ void
 IDriver::construct(obj_ptr icfgobj, str_ptr name)
 {
 
-	obj_ptr self(vobj());
+	obj_ptr self(self_);
 
 	//zend_printf("This %s\n", typeid(*this).name());
 	//showobj("Construct ", self);
@@ -136,9 +136,13 @@ IDriver::construct(obj_ptr icfgobj, str_ptr name)
 
 	name_ = name;
 	self.property(DBS.cfg_name, name_);
+	//str_rc test = self.str_property(DBS.cfg_name);
+	//showstr("read name property", test);
 
 	icfg_ = icfgobj;
 	self.property(DBS.iconfig_key, icfg_);
+
+	obj_rc test2 = self.obj_property(DBS.iconfig_key);
 
 	//showmem(DBS.cfg_name.data(), name_ptr_);
 	//zend_printf("name_ptr_%s %lx\n", DBS.cfg_name.data(), (long unsigned int)((zval*) name_ptr_) );
@@ -147,16 +151,15 @@ IDriver::construct(obj_ptr icfgobj, str_ptr name)
 
 	//showmem(DBS.iconfig_key.data(), cfg_ptr_);
 	logging_ = false;
-	last_sql_ = str_ptr::empty_str();
+
+	self.property(DBS.lastsql_s,str_ptr::empty_str());
 
 	ifetch_ = PDO_FETCH_ASSOC;
-
-	wkself_ = weak_ref::refObject(self);
-
+	
+	
 	IConfig* cfg = icfg_c();
 	db_name_ = cfg->getDatabase();
 	isql_ = cfg->newSql();
-
 
 }
 
@@ -169,6 +172,9 @@ void
 IDriver::debug_info(htab_rw di)
 {
 	base_d::debug_info(di); // properties.
+
+	di.set(DBS.handle_s, handle_);
+	di.set(DBS.logging_s, logging_);
 
 	di.set(DBS.db_name, db_name_);
 	di.set(SQSTR.db_ref, wkself_);
@@ -324,6 +330,16 @@ IDriver::closeStmt(obj_ptr stmt)
 	error_return result;
 	notImplementedMsg(result.error(), __FUNCTION__);
 	return result;
+}
+
+weak_ref 
+IDriver::selfRef()
+{
+	if (!wkself_.ok())
+	{
+		wkself_ = weak_ref::refObject(self_);
+	}
+	return wkself_;
 }
 
 str_rc 
@@ -664,7 +680,7 @@ IDriver::isConnected()
 str_rc 
 IDriver::lastSQL() const
 {
-	return last_sql_;
+	return obj_ptr(self_).str_property(DBS.lastsql_s);
 }
 
 val_return
