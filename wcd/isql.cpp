@@ -245,7 +245,7 @@ ISql::deleteSql(Bindings& bind)
 	buf << "DELETE FROM";
 
 	htab_ptr tables = this->getTables(bind);
-	obj_return paramList_ret = bind.getParamList();
+	obj_return paramList_ret = bind.getParams();
 
 	if (paramList_ret.has_errors())
 	{
@@ -254,7 +254,7 @@ ISql::deleteSql(Bindings& bind)
 	}
 
 	obj_rc& pobj = paramList_ret.value_;
-	ParamList* plist = zobj_toc<ParamList> (pobj);
+	IParams* plist = zobj_toc<IParams> (pobj);
 
 	htab_walk pos;
 	// first table
@@ -384,13 +384,13 @@ ISql::emit(val_ptr sp, Bindings* bind, str_ptr lalias, str_ptr ralias)
 	 		{
 	 			Param* p = static_cast<Param*>(part);
 	 			val_ptr pvalue = p->getValue();
-				obj_return paramList = bind->getParamList();
+				obj_return paramList = bind->getParams();
 				if (paramList.has_errors())
 				{
 					result = std::move(paramList);
 					return result;
 				}
-				ParamList* list = zobj_toc<ParamList> (paramList.value_);
+				IParams* list = zobj_toc<IParams> (paramList.value_);
 	 			buf << list->addParamEquals(pvalue);
 	 		}
 	 		break;
@@ -460,13 +460,17 @@ ISql::insert_col_params(Bindings& bind, htab_ptr rowbind)
 
 	str_rc place;
 
-	obj_return paramList = bind.getParamList();
-	if (paramList.has_errors())
+	obj_rc sparams = IParams::omg.new_zobj();
+	bind.setParams(sparams);
+
+	//obj_return paramList = bind.getParams();
+	/* if (paramList.has_errors())
 	{
 		result = std::move(paramList);
 		return result;
 	}
-	ParamList* params = zobj_toc<ParamList> (paramList.value_);
+	*/
+	IParams* params = zobj_toc<IParams> (sparams);
 
 	val_rc   zpass;
 
@@ -501,7 +505,7 @@ ISql::insert_col_params(Bindings& bind, htab_ptr rowbind)
 		else 
 		{
 			zpass = (zend_long) pcount;
-			place = params->addParam(zpass);
+			place = params->addParamEquals(zpass);
 			pcount++;
 		}
 		ptext << place;
@@ -510,6 +514,7 @@ ISql::insert_col_params(Bindings& bind, htab_ptr rowbind)
 
 	ctext << ") VALUES (" << plist << ")";
 	result.value_ = ctext.zstr();
+	
 	return result;
 }
 
@@ -563,12 +568,15 @@ void extract_params(htab_ptr rowbind, htab_ptr plist, htab_rw params);
 void extract_params(htab_ptr rowbind, htab_ptr plist, htab_rw params)
 {
 	for_key_value wk;
+	htab_rc row_values = htab_rc::getValues(rowbind);
 
 	// params to select from row_values
 	for(wk.start(plist); wk.ok(); wk.next())
 	{
 		int ix = wk.index();
-		val_ptr rowvalue = rowbind.get(ix);
+
+		val_ptr rowvalue = row_values.get(ix);
+
 		val_ptr pvalue = wk.value();
 
 		str_ptr pstr = pvalue.zstr();
@@ -581,6 +589,7 @@ void extract_params(htab_ptr rowbind, htab_ptr plist, htab_rw params)
 			params.set(pstr, rowvalue);
 		}
 	}
+
 	return;
 }
 
@@ -622,6 +631,7 @@ ISql::insert(Bindings& bind)
 		return result;
 	}
 
+
 	htab_walk  insert_wk;
 	htab_ptr  rowbind;
 	str_return temp;
@@ -633,27 +643,33 @@ ISql::insert(Bindings& bind)
 		
 		size_t rsize = rowbind.size();
 
-		 
 		if (rsize)
 		{
+
 			temp = this->insert_col_params(bind, rowbind);
+			
 			if (temp.has_errors())
 			{
 				result = std::move(temp);
 				return result;
 			}
+
 			pcount += rsize;
 			buf << temp.value_;
 		}
 	}
+	
+
 	if (pcount == 0)
     {
-    	obj_rc self(this->vobj());
+    	obj_rc self(self_);
     	val_rc dtext = self.call(SQSTR.valuesdefault);
 		buf << ' ' << val_ptr(dtext).zstr() << ' ';
     }
+
 	htab_rc rettab;
 	val_ptr  valset;
+
 	if (bind.getArray(ISql::SQL_RETURN, rettab))
 	{
 		buf << " RETURNING ";
@@ -675,16 +691,19 @@ ISql::insert(Bindings& bind)
 			}
 		}
 	}
-	
-	result = bind.getParamList();
+
+	result = bind.getParams();
+
+
+
 	if (result.has_errors())
 	{
 		return result;
 	}
 
-	ParamList* plist = zobj_toc<ParamList>(result.value_);
-
+	IParams* plist = zobj_toc<IParams>(result.value_);
 	htab_ptr params = plist->getParams();
+
 
 	htab_rc   ret_params_mgr;
 	htab_rw ret_params(ret_params_mgr);
@@ -697,7 +716,6 @@ ISql::insert(Bindings& bind)
 		{
 			htab_rc   multirow_mgr;
 			htab_rw multirow(multirow_mgr);
-			
 
 			multirow.push_back(ret_params);
 			while(insert_wk.next())
@@ -716,8 +734,9 @@ ISql::insert(Bindings& bind)
 	}
 	str_rc sql = buf.zstr();
 
-	plist->setSql(sql);
 
+	plist->setSql(sql);
+	
 	if (ret_params.size())
 	{
 		plist->setValues(ret_params_mgr);
@@ -787,7 +806,7 @@ ISql::fromJT(Bindings& bind, JoinTables* jt)
 			// Owner is an "Operation" , usually a Select
 			// TODO: owner must exist?
 			obj_rc plist_mgr(owner.call(SQSTR.get_sql_params));
-		    ParamList* plist = zobj_toc<ParamList>(plist_mgr);
+		    IParams* plist = zobj_toc<IParams>(plist_mgr);
 		    str_rc   sub_sql = plist->getSql();
 
 			//val_rc subq_sql = subq.call(SQSTR.getsql);
@@ -906,7 +925,7 @@ ISql::select_jt(Bindings& bind, JoinTables* jt)
 }
 
 
-static str_return plimit(const char* s, ParamList* plist, val_ptr value, str_buf& buf)
+static str_return plimit(const char* s, IParams* plist, val_ptr value, str_buf& buf)
 {
 	str_return result;
 	if (!value.isNull())
@@ -922,7 +941,7 @@ static str_return plimit(const char* s, ParamList* plist, val_ptr value, str_buf
 }
 
 str_return 
-ISql::limit(ParamList* plist, htab_ptr ltab)
+ISql::limit(IParams* plist, htab_ptr ltab)
 {
 	val_ptr limit_val = ltab.get(SQSTR.limit);
 	val_ptr offset_val = ltab.get(SQSTR.offset);
@@ -973,13 +992,15 @@ ISql::select(Bindings& bind)
 	}
 	*/
 
-	result = bind.getParamList();
+	result = bind.getParams();
+
+
 	if (result.has_errors())
 	{
 		return result;
 	}
 
-	ParamList* plist = zobj_toc<ParamList>(result.value_);
+	IParams* plist = zobj_toc<IParams>(result.value_);
 
 	val_ptr where = bind.get(SQL_WHERE);
 	if (where.isArray())
@@ -1029,7 +1050,7 @@ ISql::update(Bindings& bind)
 
 	JoinTables* joins = bind.getJoinTables();
 	htab_ptr   tables = joins->getTables();
-	result = bind.getParamList();
+	result = bind.getParams();
 
 	obj_rc& pobj = result.value_;
 
@@ -1049,7 +1070,7 @@ ISql::update(Bindings& bind)
 	val_ptr upset = bind.get(SQL_UPDATE);
 	
 
-	ParamList* plist = zobj_toc<ParamList>(pobj);
+	IParams* plist = zobj_toc<IParams>(pobj);
 
 	if (upset.isArray())
 	{
@@ -1174,13 +1195,13 @@ ISql::where(Bindings &bind, htab_ptr wtab)
 
 	htab_ptr jtables(jtab->getTables());
 
-	obj_return pobjret = bind.getParamList();
+	obj_return pobjret = bind.getParams();
 	if (pobjret.has_errors())
 	{
 		result = std::move(pobjret);
 		return result;
 	}
-	ParamList* params = zobj_toc<ParamList> (pobjret.value_);
+	IParams* params = zobj_toc<IParams> (pobjret.value_);
 
 	str_rc bop; // sql boolean operator eg "AND"
 	val_ptr wcol; // column name or object, being processed from where entry
@@ -1424,7 +1445,7 @@ using namespace zpp;
 	
 
 
-/* public function delete(Bindings $bind) : ParamList {} */
+/* public function delete(Bindings $bind) : IParams {} */
 ZEND_METHOD(Wcd_Sql_ISql, deleteSql)
 {
 	zval* bind;
@@ -1507,7 +1528,7 @@ ZEND_METHOD(Wcd_Sql_ISql, getTruncateSql)
 	result.move_zv(return_value);
 }
 
-/*public function insert(Bindings $bind) : ParamList {}*/
+/*public function insert(Bindings $bind) : IParams {}*/
 ZEND_METHOD(Wcd_Sql_ISql, insert)
 {
 	zval* bind;
@@ -1560,7 +1581,7 @@ ZEND_METHOD(Wcd_Sql_ISql, quoteName)
 	result.move_zv(return_value);
 }
 
-/* public function select(Bindings $bind) : ParamList {} */
+/* public function select(Bindings $bind) : IParams {} */
 ZEND_METHOD(Wcd_Sql_ISql, select)
 {
 	zval* bind;
@@ -1623,7 +1644,7 @@ ZEND_METHOD(Wcd_Sql_ISql, truncate)
 	result.value_.move_zv(return_value);
 }
 
-/*public function update(Bindings $bind) : ParamList {}*/
+/*public function update(Bindings $bind) : IParams {}*/
 ZEND_METHOD(Wcd_Sql_ISql, update)
 {
 	zval* bind;

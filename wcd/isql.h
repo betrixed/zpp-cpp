@@ -12,7 +12,7 @@ namespace wcd {
 
 	class Bindings;
 	class IColumns;
-	class ParamList;
+	class IParams;
 	class JoinTables;
 
 	extern zend_class_entry* 	zclass_isql;
@@ -33,7 +33,7 @@ namespace wcd {
 		
 		str_rc orderBy(htab_ptr obind);
 		
-		str_return limit(ParamList* plist, htab_ptr ltab);
+		str_return limit(IParams* plist, htab_ptr ltab);
 		str_return fromJT(Bindings& bind, JoinTables* jt);
 		str_return select_jt(Bindings& bind, JoinTables* jt);
 

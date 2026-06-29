@@ -32,6 +32,8 @@
 #include "wcd/update.cpp"
 #include "wcd/insert.cpp"
 #include "wcd/delete.cpp"
+#include "wcd/iparams.cpp"
+#include "wcd/namedparams.cpp"
 
 void register_database_extn(INIT_FUNC_ARGS)
 {

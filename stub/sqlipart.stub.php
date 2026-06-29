@@ -217,42 +217,6 @@ class JoinTables {
 
 
 
-class ParamList {
-    public function __construct(\WeakReference $gen);
-
-    public function addParam(mixed $value) : string {}
-
-    public function addParamEquals(mixed $value) : string {}
-
-    public function addParamList(array $values): string {}
-
-    public function getParams() : array {}
-
-    public function getReturns() : ?array {}
-
-    public function getSql() : ?string {}
-
-    public function getValues() : ?array {}
-
-    public function makeList(int $start, int $count): string {}
-
-    public function paramLiteral(mixed $value) : string {}
-
-    public function setParams(array $replace) : void {}
-
-    public function setReturns(array $replace) : void {}
-
-    public function setSql(string $sql) : void {}
-
-    public function setValues(array $replace) : void {}
-
-    public function useOwnValues() : void {}
-
-    public function wipe() : void {}
-};
-
-
-
 class Raw {
     public function __construct(string $sql, ?\Wcd\IDriver $connect);
 

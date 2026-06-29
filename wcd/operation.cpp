@@ -220,7 +220,7 @@ Operation::getSqlParams()
 		return result;
 	}
 
-	result = bind->getParamList();
+	result = bind->getParams();
 	if (result.has_errors())
 	{
 		return result;
@@ -241,7 +241,7 @@ Operation::getSql()
 	obj_rc pobj = self.call(SQSTR.get_sql_params);
 	if (pobj.ok())
 	{
-		ParamList* plist = zobj_toc<ParamList>(pobj);
+		IParams* plist = zobj_toc<IParams>(pobj);
 		sql = plist->getSql();
 	}
 	return sql;
@@ -403,7 +403,7 @@ Operation::prepare(int fetch)
 
 	if (pobj_mgr.ok())
 	{
-		ParamList* plist = zobj_toc<ParamList>(pobj_mgr);
+		IParams* plist = zobj_toc<IParams>(pobj_mgr);
 
 		this->wipe();
 

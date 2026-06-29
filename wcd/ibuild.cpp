@@ -21,8 +21,8 @@
 #include "bindings.h"
 #endif
 
-#ifndef WCD_PARAMLIST_H
-#include "paramlist.h"
+#ifndef WCD_IPARAMS_H
+#include "iparams.h"
 #endif
 
 #ifndef WCD_RUNSQL_H
@@ -308,8 +308,7 @@ using namespace zpp;
 				return result;
 			}
 
-			ParamList* plist = zobj_toc<ParamList>(plist_mgr.value_);
-
+			IParams* plist = zobj_toc<IParams>(plist_mgr.value_);
 
 			str_ptr sql(plist->getSql());
 
@@ -428,7 +427,7 @@ using namespace zpp;
 				return result;
 			}
 
-			ParamList* plist = zobj_toc<ParamList>(plist_mgr.value_);
+			IParams* plist = zobj_toc<IParams>(plist_mgr.value_);
 
 			obj_return db = getDb();
 
@@ -543,7 +542,7 @@ using namespace zpp;
 	    	   result = std::move(params_mgr);
 	    	   return result;
 	    }
-	    ParamList* plist = zobj_toc<ParamList>(params_mgr.value_);
+	    IParams* plist = zobj_toc<IParams>(params_mgr.value_);
 	    str_ptr sql(plist->getSql());
 	    //showstr("delete sql", sql);
 	    htab_ptr params(plist->getValues());

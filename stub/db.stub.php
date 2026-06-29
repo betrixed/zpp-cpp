@@ -7,7 +7,6 @@ namespace Wcd;
 
 class IDriver {
     
-
     public readonly string $name;
 
     public readonly IConfig $cfg;
@@ -93,7 +92,7 @@ class IDriver {
 
     public function newDmlBuild() : IBuild {}
 
-    public function newParamList() : \Wcd\Sql\ParamList;
+    public function makeParams() : \Wcd\Sql\IfParamList;
     
     public function param(int $pno): string {}
 

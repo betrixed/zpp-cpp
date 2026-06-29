@@ -13,8 +13,8 @@
 #include "bindings.h"
 #endif
 
-#ifndef WCD_PARAMLIST_H
-#include "paramlist.h"
+#ifndef WCD_IPARAMS_H
+#include "iparams.h"
 #endif
 
 namespace wcd {
@@ -24,7 +24,7 @@ namespace wcd {
 	extern zend_class_entry* zclass_join_info;
 	extern zend_class_entry* zclass_join_tables;
 	extern zend_class_entry* zclass_bindings;
-	extern zend_class_entry* zclass_param_list;
+
 
 	class JoinInfo : public base_d {
 	protected:

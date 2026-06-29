@@ -112,7 +112,7 @@ namespace wcd {
 
 		obj_rc newBindings();
 		obj_rc newDmlBuild();
-		obj_rc newParamList();
+		obj_rc makeParams();
 		
 		virtual str_rc param(unsigned pno);
 

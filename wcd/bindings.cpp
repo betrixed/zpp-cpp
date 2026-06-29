@@ -15,6 +15,10 @@
 #include "model.h"
 #endif
 
+#ifndef WCD_IPARAMS_H
+#include "iparams.h"
+#endif
+
 #ifndef BINDINGS_ARGINFO_H
 #define BINDINGS_ARGINFO_H
 extern "C" {
@@ -27,7 +31,7 @@ namespace wcd {
 void Bindings::debug_info(htab_rw di)
 {
 	di.set(SQSTR.data_key, data_);
-	di.set(SQSTR.param_list, paramList_);
+	di.set(SQSTR.param_list, params_);
 	di.set(SQSTR.isql, isql_);
 	di.set(SQSTR.db_ref, dbref_);
 	di.set(SQSTR.connect, db_);
@@ -171,14 +175,20 @@ Bindings::getJoins()
 	return result;
 }
 
+void 
+Bindings::setParams(obj_ptr obj)
+{
+	params_ = obj;
+}
+
 obj_return
-Bindings::getParamList()
+Bindings::getParams()
 {
 	obj_return result;
 
-	if (paramList_.ok())
+	if (params_.ok())
 	{
-		result.value_ = paramList_;
+		result.value_ = params_;
 		return result;
 	}
 	obj_return dbret = getDb();
@@ -189,8 +199,8 @@ Bindings::getParamList()
 	}
 	IDriver* db = zobj_toc<IDriver>(dbret.value_);
 
-	paramList_ = db->newParamList();
-	result.value_ = paramList_;
+	params_ = db->makeParams();
+	result.value_ = params_;
 	return result;
 }
 
@@ -517,7 +527,7 @@ void Bindings::wipe(int key)
 		data_ = htab_ptr::empty_array();
 	}
 	db_.init();
-	paramList_.init();
+	params_.init();
 }
 
 str_rc alias_str_key(str_ptr malias)
@@ -648,7 +658,7 @@ Bindings::select()
 		result = std::move(plistret);
 		return result;
 	}
-	ParamList* pobj = zobj_toc<ParamList>(plistret.value_);
+	IParams* pobj = zobj_toc<IParams>(plistret.value_);
 
 	val_ptr fetch_z = get(ISql::FETCH_AS);
 
@@ -1000,15 +1010,15 @@ ZEND_METHOD(Wcd_Sql_Bindings, getJoins)
 	result.move_zv(return_value);
 }
 
-/* public function getParamList() : ParamList {} */
-ZEND_METHOD(Wcd_Sql_Bindings, getParamList)
+/* public function getParams() : IParams {} */
+ZEND_METHOD(Wcd_Sql_Bindings, getParams)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	Bindings* cobj = zval_toc<Bindings>(ZEND_THIS);
-	obj_return result = cobj->getParamList();
+	obj_return result = cobj->getParams();
 	result.throw_errors();
-	result.value_.copy_zv(return_value);
+	result.value_.move_zv(return_value);
 }
 
 ZEND_METHOD(Wcd_Sql_Bindings, iSql)
@@ -1070,17 +1080,18 @@ ZEND_METHOD(Wcd_Sql_Bindings, set)
 
 }
 
-/* public function setParamList(ParamList $params) : void {} */
-ZEND_METHOD(Wcd_Sql_Bindings, setParamList)
+/* public function setParams(IParams $params) : void {} */
+ZEND_METHOD(Wcd_Sql_Bindings, setParams)
 {
-	zval* plist;
+	zarg_rd args(execute_data);
 
-	ZEND_PARSE_PARAMETERS_START(1,1)
-	Z_PARAM_OBJECT_OF_CLASS(plist, zclass_param_list)
-	ZEND_PARSE_PARAMETERS_END();
+	obj_ptr  plist = args.obj_class(args.need(0), IParams::omg.classEntry());
 
-	Bindings* cobj = zval_toc<Bindings>(ZEND_THIS);
-	cobj->setParamList(plist);
+	if (!args.throw_errors())
+	{
+		Bindings* cobj = zval_toc<Bindings>(ZEND_THIS);
+		cobj->setParams(plist);
+	}
 }
 
 /* public function unset(int $key) : void {} */

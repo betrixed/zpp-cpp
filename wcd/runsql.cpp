@@ -9,6 +9,10 @@
 #include "idriver.h"
 #endif
 
+#ifndef WCC_DEBUGLOG_H
+#include "wcc/debuglog.h"
+#endif
+
 #ifndef SQL_ARGINFO_H
 #define SQL_ARGINFO_H
 extern "C" {
@@ -38,15 +42,16 @@ namespace wcd {
 		IDriver* db = zobj_toc<IDriver>(db_);
 
 		obj_return stmt_ret = db->prepare(sql_);
+
 		if (stmt_ret.has_errors())
 		{
-			exresult = std::move(stmt_ret);
+			exresult = stmt_ret.move_error();
 			return exresult;
 		}
 
 		obj_ptr stmt = stmt_ret.value_;
 		
-		htab_rc  params = bind_;
+		htab_ptr  params = bind_;
 
 		//showdata("bind", params);
 
@@ -54,10 +59,12 @@ namespace wcd {
 
 		if (pct)
 		{
-			if (params.is_list())
+			if (params.is_list()) //Case of multiple sets of values.
 			{
-				if (pct > 1)
+				val_ptr v0 = params.get(int(0));
+				if (v0.isArray())
 				{
+					// create result array
 					htab_rw result(exresult.value_);
 
 					htab_walk wk;
@@ -74,15 +81,12 @@ namespace wcd {
 						result.push_back(x2.value_);
 					}
 					db->closeStmt(stmt);
-					return exresult;
-				}
-				else {
-					params = params.get((int)0);
+					return exresult; // return multiple rows
 				}
 			}
 			db->bind(stmt, params);
 		}
-		exresult  = db->execute(stmt, true, retval_);
+		exresult = db->execute(stmt, true, retval_);
 		//showmem("exresult Runsql", exresult.value_);
 		return exresult;
 

@@ -2,6 +2,7 @@
 use Wcc\{
     CacheMgr,
     Config,
+     DebugLog,
     Dos,
     Services
 
@@ -51,6 +52,12 @@ function bootstrap()
     $services->set('config',$cfg);
     $services->set('dos', new Dos());
 
+
+$debug = new DebugLog("debug_insertsql.log");
+
+DebugLog::setInstance($debug);
+
+$debug->start("<pre>Start");
 
     $finder = $services->get('finder');
 

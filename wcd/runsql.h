@@ -10,9 +10,9 @@ namespace wcd {
 
 	class RunSql : public base_d {
 	protected:
-		obj_rc  db_;
-		str_rc  sql_;
-		htab_rc  bind_;
+		obj_rc    db_;
+		str_rc    sql_;
+		htab_rc   bind_;
 		bool      retval_;
 
 	public:

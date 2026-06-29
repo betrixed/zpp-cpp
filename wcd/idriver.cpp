@@ -60,6 +60,9 @@ extern "C" {
 #include "wcc/dircache.h"
 #endif
 
+#ifndef WCD_NAMEDPARAMS_H
+#include "wcd/namedparams.h"
+#endif
 
 namespace wcd {
 
@@ -412,19 +415,17 @@ IDriver::newBindings()
 
 	bind.construct(isql_, wkself_);
 
-	obj_rc plist = this->newParamList();
+	obj_rc plist = this->makeParams();
 
-	bind.setParamList(plist);
+	bind.setParams(plist);
 	
 	return result;
 }
 
 obj_rc 
-IDriver::newParamList()
+IDriver::makeParams()
 {
-	obj_rc result(ParamList::omg.new_zobj());
-	ParamList* plist = zobj_toc<ParamList>(result);
-	plist->construct( wkself_ );
+	obj_rc result(NamedParams::omg.new_zobj());
 	return result;
 }
 
@@ -1197,13 +1198,13 @@ ZEND_METHOD(Wcd_IDriver, modelClassName)
 }
 
 
-ZEND_METHOD(Wcd_IDriver, newParamList)
+ZEND_METHOD(Wcd_IDriver, makeParams)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	IDriver* db = zval_toc<IDriver>(ZEND_THIS);
 
-	obj_rc result = db->newParamList();
+	obj_rc result = db->makeParams();
 
 	result.move_zv(return_value);
 }

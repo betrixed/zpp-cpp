@@ -828,7 +828,7 @@ namespace wcd {
 						return result;
 					}
 
-					ParamList* plist = zobj_toc<ParamList>(plist_ret.value_);
+					IParams* plist = zobj_toc<IParams>(plist_ret.value_);
 
 					str_ptr sql(plist->getSql());
 					htab_ptr record(plist->getValues());

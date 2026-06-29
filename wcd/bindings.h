@@ -15,7 +15,7 @@ namespace wcd
 	{
 	protected:
 		htab_rc	  data_;
-		obj_rc    paramList_;
+		obj_rc    params_;
 		obj_rc	  isql_;
 		obj_rc    db_;
 		weak_ref  dbref_;
@@ -77,24 +77,15 @@ namespace wcd
 
 		/** Call setPrime of JoinTables, return JoinTables */
 		obj_rc primeJoin(val_ptr tcol);
-		/*
-		ParamList* paramList()
-		{
-			return zobj_toc<ParamList>(paramList_);
-		}
-		*/
 
-		obj_return getParamList();
+		obj_return getParams();
 
 		void set(int key, val_ptr value);
 		void set(int key, int value);
 		void set(int key, htab_ptr value);
 		void set(int key, const val_rc& value);
 
-		void setParamList(obj_ptr obj)
-		{
-			paramList_ = obj;
-		}
+		void setParams(obj_ptr obj);
 
 		void unset(int key);
 

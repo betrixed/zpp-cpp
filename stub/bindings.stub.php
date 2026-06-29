@@ -26,7 +26,7 @@ class Bindings
 
     public function getJoins(): JoinTables {}
 
-    public function getParamList() : ParamList {}
+    public function getParams() : IParams {}
 
     public function iSql() : ISql {}
 
@@ -38,7 +38,7 @@ class Bindings
 
     public function set(int $key, mixed $value) : void {}
 
-    public function setParamList(ParamList $params) : void {}
+    public function setParams(IParams $params) : void {}
 
     public function unset(int $key) : void {}
 
