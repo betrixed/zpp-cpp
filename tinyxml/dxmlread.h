@@ -20,6 +20,8 @@
 #include "tinyxml2.h"
 #endif
 
+
+
 namespace wcc {
 	//using xmlstr = zstr_own;
 	using namespace zpp;

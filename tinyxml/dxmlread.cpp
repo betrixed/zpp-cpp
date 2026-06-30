@@ -1,6 +1,9 @@
 #ifndef DXMLREAD_CPP
 #define DXMLREAD_CPP
 
+#ifndef WCC_DEBUGLOG_H
+#include "wcc/debuglog.h"
+#endif
 
 #ifndef DXMLREAD_H
 #include "dxmlread.h"
@@ -32,6 +35,8 @@ namespace wcc {
 	using namespace tinyxml2;
 
 xml_fns XML_FNS;
+
+//#define LOG_DXMLREAD
 
 void xml_fns::init()
 {
@@ -108,7 +113,8 @@ base_obj_mgr<Wcc_XmlRead> Wcc_XmlRead::omg;
 		return fileOpen_;
 	}
 	
-	bool XmlWrap::fromFile(str_ptr path)
+	bool 
+	XmlWrap::fromFile(str_ptr path)
 	{
 		hold_ = XmlWrap::get_valid_file_path(path);
 		xele_ = nullptr;
@@ -318,6 +324,16 @@ Wcc_XmlRead::init()
 void Wcc_XmlRead::construct(obj_ptr obj)
 {
 	addRoot_ = obj;
+
+#ifdef LOG_DXMLREAD
+DebugLog* log = DebugLog::cpp_global();
+
+if (log)
+{
+	log->line("Construct mkclass_fn");
+}
+#endif
+
 	mkclass_fn_.set_fci(XML_FNS.makeclass_s, self_);
 }
 
@@ -406,7 +422,8 @@ Wcc_XmlRead::fromString(str_ptr src)
 {
 	obj_rc xmlr = Wcc_XmlRead::omg.new_zobj();
 	Wcc_XmlRead* cobj = zobj_toc<Wcc_XmlRead>(xmlr);
-	
+	cobj->construct(obj_ptr());
+
 	return cobj->parse(src);
 }
 
@@ -417,6 +434,8 @@ Wcc_XmlRead::fromFile(str_ptr filename)
 
 	Wcc_XmlRead* cobj = zobj_toc<Wcc_XmlRead>(xmlr);
 	
+	cobj->construct(obj_ptr());
+
 	return cobj->parseFile(filename);
 }
 
@@ -430,6 +449,15 @@ Wcc_XmlRead::loop()
 	str_rc tagstr;
 	str_rc attrstr;
 	str_rc classname;
+
+#ifdef LOG_DXMLREAD
+DebugLog* log = DebugLog::cpp_global();
+if (log)
+{
+	log->setOutputs(DebugLog::TO_CONSOLE);
+	log->line("Debug Log");
+}
+#endif
 
 	while(!done_ && xml_.read())
 	{
@@ -613,7 +641,14 @@ Wcc_XmlRead::makeClass(str_ptr classname)
 {
 	obj_return result;
 
-	//showstr("in makeClass - ", classname);
+#ifdef LOG_DXMLREAD
+	DebugLog* log = DebugLog::cpp_global();
+
+	if (log)
+	{
+		log->dump("in makeClass", classname);
+	}
+#endif
 
 	str_rc cname;
 	if (class_replace_.size())
@@ -642,11 +677,24 @@ void Wcc_XmlRead::classReplace(htab_ptr cnames)
 void
 Wcc_XmlRead::pushClass(str_ptr classname, str_ptr key)
 {
+#ifdef LOG_DXMLREAD
+	DebugLog* log = DebugLog::cpp_global();
+
+	if (log)
+	{
+		log->dump("pushClass", classname);
+	}
+#endif
 	fn_params<1> fn(mkclass_fn_);
 	val_ptr::string_bind(fn.argsptr(), classname); 
 
 	val_rc newroot = fn.mixed();
-
+#ifdef LOG_DXMLREAD
+	if (log)
+	{
+		log->dump("newroot", val_ptr(newroot));
+	}
+#endif
 	attach_ds(new DStack(key, newroot, XC_OBJECT));
 }
 
