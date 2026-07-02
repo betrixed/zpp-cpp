@@ -311,7 +311,11 @@ IServer::connect(str_ptr name)
 
 	log->dump("Connect", name);
 
-	obj_ptr me = Services::getOne(IServer::omg.class_name());
+	str_ptr sclass = IServer::omg.class_name();
+
+	log->dump("IServer class name", sclass);
+
+	obj_rc me = Services::getOne(sclass);
 
 	log->dump("IServer object?", me);
 
