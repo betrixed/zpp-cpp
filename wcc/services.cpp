@@ -13,6 +13,10 @@
 #include "reflect_cache.h"
 #endif
 
+#ifndef WCC_DEBUGLOG_H
+#include "debuglog.h"
+#endif
+
 #ifndef WCC_SERVICES_ARGINFO
 #define WCC_SERVICES_ARGINFO
 extern "C" {
@@ -209,11 +213,21 @@ Services::getOne(str_ptr key)
 
 	obj_rc result = self->getObject(key);
 
+	DebugLog* log = DebugLog::cpp_global();
+
+	
+
 	if (result.ok())
 	{
-		return result;
+		log->dump("getObject", result);
+		return result;	
 	}
-	return self->newInstance(key);
+
+
+	result = self->newInstance(key);
+
+	log->dump("getObject new", result);
+	return result;
 }
 
 // static
