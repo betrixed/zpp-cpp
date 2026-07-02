@@ -467,13 +467,13 @@ ZEND_METHOD(Wcd_IServer, Connect)
 
 	zarg_rd args(execute_data);
 
-	zend_printf("In " __FUNCTION__ "\n");
-	
+	zend_printf("In %s\n", __FUNCTION__);
+
 	str_ptr name = args.str_or_null(args.option(0));
 
 	if (!args.throw_errors(__FUNCTION__))
 	{
-		wref_return = result = IServer::connect(name);
+		wref_return result = IServer::connect(name);
 		result.throw_errors();
 		result.value_.move_zv(return_value);
 	}
