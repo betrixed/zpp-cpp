@@ -163,8 +163,10 @@ Services*
 Services::cpp_global()
 {
 	obj_ptr sv = g_services;
-	//showobj("get g_services", sv);
-	//showmem("instance", sv);
+
+	DebugLog* log = DebugLog::cpp_global();
+
+	log->dump("cpp_global g_services", sv);
 	return zobj_toc<Services>(sv);
 }
 
@@ -211,11 +213,9 @@ Services::getOne(str_ptr key)
 
 	Services* self = Services::cpp_global();
 
-	obj_rc result = self->getObject(key);
-
 	DebugLog* log = DebugLog::cpp_global();
 
-	
+	obj_rc result = self->getObject(key);
 
 	if (result.ok())
 	{
