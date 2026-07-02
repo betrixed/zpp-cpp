@@ -313,6 +313,8 @@ IServer::connect(str_ptr name)
 
 	obj_ptr me = Services::getOne(IServer::omg.class_name());
 
+	log->dump("IServer object?", me);
+
 	IServer* s = zobj_toc<IServer>(me);
 
 	class_data cd(IServer::omg.class_entry_);
@@ -330,10 +332,12 @@ IServer::connect(str_ptr name)
 	else {
 		//showstr("\nNew activecfg: ", name);
 		val_rc value(name);
+		log->line("get static property");
 		cd.static_property(ISV.active_cfg, value);
 		conkey = name;
-	}
 
+	}
+	log->dump("Connect Key", conkey);
 	return s->getConnect(conkey);
 }
 
