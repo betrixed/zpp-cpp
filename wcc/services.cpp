@@ -201,13 +201,13 @@ Services::setOne(str_ptr key, obj_ptr obj)
 }
 
 /* static */
-obj_ptr  
+obj_rc  
 Services::getOne(str_ptr key)
 {
 
 	Services* self = Services::cpp_global();
 
-	obj_ptr result = self->getObject(key);
+	obj_rc result = self->getObject(key);
 
 	if (result.ok())
 	{
@@ -240,7 +240,7 @@ Services::service(const std::string_view& key)
 	return result;
 }
 
-obj_ptr
+obj_rc
 Services::newInstance(str_ptr name_class)
 {
 
@@ -262,10 +262,10 @@ Services::newInstance(str_ptr name_class)
 	return obj;
 }
 
-obj_ptr
+obj_rc
 Services::getObject(str_ptr key)
 {
-	obj_ptr result;
+	obj_rc result;
 
 	val_ptr test;
 
@@ -479,8 +479,8 @@ ZEND_METHOD(Wcc_Services, getObject)
 	ZEND_PARSE_PARAMETERS_END();
 
 	Services* svc = zval_toc<Services>(ZEND_THIS);
-	obj_ptr result = svc->getObject(skey);
-	result.copy_zv(return_value);
+	obj_rc result = svc->getObject(skey);
+	result.move_zv(return_value);
 }
 
 ZEND_METHOD(Wcc_Services, has)
@@ -519,8 +519,8 @@ ZEND_METHOD(Wcc_Services, newInstance)
 	ZEND_PARSE_PARAMETERS_END();
 
 	Services* svc = zval_toc<Services>(ZEND_THIS);
-	obj_ptr result = svc->newInstance(skey);
-	result.copy_zv(return_value);
+	obj_rc result = svc->newInstance(skey);
+	result.move_zv(return_value);
 }
 
 

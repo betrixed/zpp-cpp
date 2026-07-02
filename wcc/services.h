@@ -39,12 +39,12 @@ public:
 	static val_rc  service(str_ptr key);
 	static val_rc  service(const std::string_view& key);	
 
-	obj_ptr  newInstance(str_ptr key);
+	obj_rc  newInstance(str_ptr key);
 	
-	obj_ptr  setObject(obj_ptr obj, str_ptr key = str_ptr());
+	obj_rc  setObject(obj_ptr obj, str_ptr key = str_ptr());
 
 	/* return cached object */
-	obj_ptr  getObject(str_ptr key);
+	obj_rc    getObject(str_ptr key);
 
 	/* service functions */
 
