@@ -30,11 +30,11 @@ public:
 	Services();
 	virtual ~Services();
 	// instance
-	static obj_ptr  instance();
+	static obj_rc  instance();
 	static Services* cpp_global();
 
-	static obj_ptr  setOne(str_ptr key, obj_ptr obj);
-	static obj_ptr  getOne(str_ptr key);
+	static obj_rc  setOne(str_ptr key, obj_ptr obj);
+	static obj_rc  getOne(str_ptr key);
 
 	static val_rc  service(str_ptr key);
 	static val_rc  service(const std::string_view& key);	

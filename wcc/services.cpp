@@ -164,7 +164,7 @@ Services::cpp_global()
 	return zobj_toc<Services>(sv);
 }
 
-obj_ptr
+obj_rc
 Services::instance()
 {
 	return g_services;
@@ -193,7 +193,7 @@ Services::instance()
 }
 
 /* static */
-obj_ptr 
+obj_rc 
 Services::setOne(str_ptr key, obj_ptr obj)
 {
 	Services* self = Services::cpp_global();
@@ -277,7 +277,7 @@ Services::getObject(str_ptr key)
 	return result;
 }
 
-obj_ptr 
+obj_rc
 Services::setObject(obj_ptr obj, str_ptr key)
 {
 	if (key.isNull()) {
@@ -399,8 +399,8 @@ ZEND_METHOD(Wcc_Services, getOne)
 
 	//showstr("getOne call", skey);
 
-	obj_ptr result = Services::getOne(skey);
-	result.copy_zv(return_value);
+	obj_rc result = Services::getOne(skey);
+	result.move_zv(return_value);
 }
 
 ZEND_METHOD(Wcc_Services, instance)
@@ -408,8 +408,8 @@ ZEND_METHOD(Wcc_Services, instance)
 	ZEND_PARSE_PARAMETERS_START(0, 0)
 	ZEND_PARSE_PARAMETERS_END();
 
-	obj_ptr result = Services::instance();
-	result.copy_zv(return_value);
+	obj_rc result = Services::instance();
+	result.move_zv(return_value);
 }
 
 ZEND_METHOD(Wcc_Services, service)
@@ -437,9 +437,9 @@ ZEND_METHOD(Wcc_Services, setOne)
 	Services* svc = zval_toc<Services>(ZEND_THIS);
 
 	val_ptr test(obj);
-	obj_ptr result = svc->setOne(skey, test.zobject());
+	obj_rc result = svc->setOne(skey, test.zobject());
 
-	result.copy_zv(return_value);
+	result.move_zv(return_value);
 }
 
 
@@ -547,7 +547,7 @@ ZEND_METHOD(Wcc_Services, setObject)
 {
 	obj_ptr obj;
 	str_ptr key;
-	obj_ptr result;
+	
 
 	zarg_rd args(execute_data);
 
@@ -559,10 +559,11 @@ ZEND_METHOD(Wcc_Services, setObject)
 		Services* svc = zval_toc<Services>(ZEND_THIS);
 		// result is now referenced in services
 		
-		result = svc->setObject(obj, key);
+		obj_rc result = svc->setObject(obj, key);
+		result.move_zv(return_value);
 	}
 	// handles potential null
-	result.copy_zv(return_value);
+
 }
 
 ZEND_METHOD(Wcc_Services, setDefer)
