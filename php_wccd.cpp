@@ -58,6 +58,8 @@ PHP_MINFO_FUNCTION(wccd)
 {
 	php_info_print_table_start();
 	php_info_print_table_row(2, "wccd support", "enabled");
+	php_info_print_table_row(2, "wccd version", PHP_WCCD_VERSION);
+	php_info_print_table_row(2, "wccd author", PHP_WCCD_AUTHOR);
 	php_info_print_table_end();
 }
 /* }}} */

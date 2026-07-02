@@ -1,6 +1,8 @@
 #!/bin/bash
 set -e
 sudo make clean
+/etc/php/8.4/fpm/conf.d/stop
 clear
 make
 sudo make install
+#/etc/php/8.4/fpm/conf.d/restart
