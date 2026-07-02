@@ -310,7 +310,7 @@ IServer::connect(str_ptr name)
 	DebugLog* log = DebugLog::cpp_global();
 
 	log->dump("Connect", name);
-	
+
 	obj_ptr me = Services::getOne(IServer::omg.class_name());
 
 	IServer* s = zobj_toc<IServer>(me);
@@ -464,20 +464,20 @@ using namespace wcd;
 //static obj_rc connect(str_ptr name);
 ZEND_METHOD(Wcd_IServer, Connect)
 {
+
 	zarg_rd args(execute_data);
 
-	str_ptr name;
-
-	args.zstring_null(name, args.option(0));
-
-	wref_return result;
+	zend_printf("In " __FUNCTION__ "\n");
+	
+	str_ptr name = args.str_or_null(args.option(0));
 
 	if (!args.throw_errors(__FUNCTION__))
 	{
-		result = IServer::connect(name);
+		wref_return = result = IServer::connect(name);
 		result.throw_errors();
+		result.value_.move_zv(return_value);
 	}
-	result.value_.move_zv(return_value);
+	
 }
 
 
