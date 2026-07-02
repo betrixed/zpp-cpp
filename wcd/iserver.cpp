@@ -214,7 +214,10 @@ IServer::getConnect(str_ptr name)
 	wref_return result;
 	IDriver* db;
 
-	//showstr("getConnect", name);
+	DebugLog* log = DebugLog::cpp_global();
+	
+	log->dump("svc_key_", svc_key_);
+
 	if (svc_key_.ok())
 	{
 		str_rc key = svc_key_;
@@ -234,6 +237,8 @@ IServer::getConnect(str_ptr name)
 		str_rc name_mgr = cd.static_property(ISV.active_cfg);
 		name = name_mgr;
 	}
+	log->dump("name", name);
+
 
 	obj_rc conn(active_.get(name));
 
@@ -258,7 +263,11 @@ IServer::getConnect(str_ptr name)
 		}
 		else {
 			obj_return  dbresult;
+
 			dbresult = activate(alias);
+
+			log->dump("dbresult", dbresult.value_);
+			
 			if (dbresult.has_errors())
 			{
 				result = dbresult.move_error();
@@ -305,6 +314,7 @@ IServer::connect(str_ptr name)
 	class_data cd(IServer::omg.class_entry_);
 	
 	str_rc conkey;
+
 
 	//showstr("::connect askfor", name);
 
