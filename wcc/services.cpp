@@ -162,12 +162,12 @@ Services::Services()
 Services* 
 Services::cpp_global()
 {
-	obj_ptr sv = g_services;
+	//obj_ptr sv = g_services;
 
-	DebugLog* log = DebugLog::cpp_global();
+	///DebugLog* log = DebugLog::cpp_global();
 
-	log->dump("cpp_global g_services", sv);
-	return zobj_toc<Services>(sv);
+	///log->dump("cpp_global g_services", sv);
+	return zobj_toc<Services>(g_services);
 }
 
 obj_rc
@@ -210,23 +210,31 @@ Services::setOne(str_ptr key, obj_ptr obj)
 obj_rc  
 Services::getOne(str_ptr key)
 {
-
+	obj_rc result;
+	DebugLog* log = DebugLog::cpp_global();
+	
+	if (log)
+	{
+		log->dump("getOne: get new object", key);
+	}
 	Services* self = Services::cpp_global();
 
-	DebugLog* log = DebugLog::cpp_global();
 
-	obj_rc result = self->getObject(key);
+	result = self->getObject(key);
 
 	if (result.ok())
 	{
-		log->dump("getObject", result);
+		if (log) {
+			log->dump("getOne: got Object", result);
+			}
 		return result;	
 	}
 
-
+	if (log) {
+		log->dump("getOne: get new object", key);
+	}
 	result = self->newInstance(key);
 
-	log->dump("getObject new", result);
 	return result;
 }
 
