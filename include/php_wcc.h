@@ -20,7 +20,7 @@
 // zend_module_entry wcc_module_entry;
 //#define phpext_wcc_ptr &wcc_module_entry
 #define WCC_VERSION "0.5.8"
-
+#define WCC_AUTHOR  "Michael Rynn"
 
 #ifdef __cplusplus
 extern "C" {

@@ -307,6 +307,10 @@ IServer::getConnect(str_ptr name)
 wref_return //static 
 IServer::connect(str_ptr name)
 {
+	DebugLog* log = DebugLog::cpp_global();
+
+	log->dump("Connect", name);
+	
 	obj_ptr me = Services::getOne(IServer::omg.class_name());
 
 	IServer* s = zobj_toc<IServer>(me);
