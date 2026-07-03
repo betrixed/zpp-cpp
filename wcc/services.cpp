@@ -13,8 +13,10 @@
 #include "reflect_cache.h"
 #endif
 
+#ifdef DBG_SERVICES
 #ifndef WCC_DEBUGLOG_H
 #include "debuglog.h"
+#endif
 #endif
 
 #ifndef WCC_SERVICES_ARGINFO
@@ -167,6 +169,7 @@ Services::cpp_global()
 	///DebugLog* log = DebugLog::cpp_global();
 
 	///log->dump("cpp_global g_services", sv);
+
 	return zobj_toc<Services>(g_services);
 }
 
@@ -211,29 +214,27 @@ obj_rc
 Services::getOne(str_ptr key)
 {
 	obj_rc result;
+	obj_rc services = Services::instance();
+#ifdef DBG_SERVICES
 	DebugLog* log = DebugLog::cpp_global();
-	
 	if (log)
-	{
-		log->dump("getOne: get new object", key);
+	{   
+		log->dump("gServices", services);
+		log->dump("key", key);
 	}
-	Services* self = Services::cpp_global();
+#endif
 
+	Services* svc = zobj_toc<Services>(services);
 
-	result = self->getObject(key);
+	//zend_printf("getOne Services %lx \n", (long int) self);
+	result = svc->getObject(key);
 
 	if (result.ok())
 	{
-		if (log) {
-			log->dump("getOne: got Object", result);
-			}
 		return result;	
 	}
 
-	if (log) {
-		log->dump("getOne: get new object", key);
-	}
-	result = self->newInstance(key);
+	result = svc->newInstance(key);
 
 	return result;
 }
@@ -289,13 +290,14 @@ Services::getObject(str_ptr key)
 {
 	obj_rc result;
 
-	val_ptr test;
-
-	if (htab_rw(instances_).try_fetch(key,test))
+	result = instances_.get(key);
+#ifdef DBG_SERVICES
+	DebugLog* log = DebugLog::cpp_global();
+	if (log)
 	{
-		result = test.zobject();
+		log->dump("getObject result", result);
 	}
-
+#endif
 	return result;
 }
 
@@ -413,22 +415,20 @@ using namespace wcc;
 
 ZEND_METHOD(Wcc_Services, getOne)
 {
-	zend_string* skey;
+	zarg_rd args(execute_data);
 
-	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_STR(skey)
-	ZEND_PARSE_PARAMETERS_END();
+	str_ptr skey = args.str(args.need(0));
 
-	//showstr("getOne call", skey);
-
-	obj_rc result = Services::getOne(skey);
-	result.move_zv(return_value);
+	if (!args.throw_errors())
+	{
+		obj_rc result = Services::getOne(skey);
+		result.move_zv(return_value);
+	}
 }
 
 ZEND_METHOD(Wcc_Services, instance)
 {
-	ZEND_PARSE_PARAMETERS_START(0, 0)
-	ZEND_PARSE_PARAMETERS_END();
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	obj_rc result = Services::instance();
 	result.move_zv(return_value);
