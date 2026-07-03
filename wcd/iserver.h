@@ -41,8 +41,11 @@ namespace wcd {
 
 		static base_obj_mgr<IServer> omg;
 
+		static  obj_return instance();
+
 		virtual void debug_info(htab_rw di);
 		
+		// key for a services callback
 		void construct(str_ptr svckey);
 		void destruct();
 		
@@ -110,6 +113,7 @@ namespace wcd {
 
 		str_intern  sql_classes;
 		str_intern  ext_classes;
+		str_intern  svc_key;
 
 		void init() override;
 	};

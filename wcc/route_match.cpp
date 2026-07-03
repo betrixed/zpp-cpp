@@ -573,10 +573,19 @@ bool RouteMatch::prepare_call()
 
 
 		 	htab_ptr defaults = cobj->getParams();
+		 	obj_rc request;
 
 		 	if (defaults.size())
 		 	{	
-		 		obj_rc request = Services::service(RM_data.request_obj);
+		 		val_return test = Services::service(RM_data.request_obj);
+		 		if (!test.throw_errors()) 
+		 		{
+		 			request = test.value_.zobject();
+		 		} 
+		 		else {
+		 			return false;
+		 		}
+
 		 		RequestGlobals* rg = zobj_toc<RequestGlobals>(request);
 		 		obj_ptr  qry = rg->query();
 

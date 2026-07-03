@@ -70,8 +70,6 @@ protected:
 	obj_rc  loader_;
 	fn_call xml_call_;
 
-	Loader* getLoader();
-
 public:
 	static base_obj_mgr<CacheMgr> omg;
 
@@ -100,6 +98,7 @@ public:
 
 	static val_return readFile(str_ptr filename, str_ptr ext = str_ptr());
 
+	static CacheMgr* instance(error_return& test);
 	void flush_caches();
 
 }; // CacheMgr

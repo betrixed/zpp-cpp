@@ -279,11 +279,12 @@ Response::setExpires(val_ptr exptime)
 
 	datetime_obj utc(expires.clone());
 
-	utc.setTimeZone(str_temp("UTC"));
+
+	utc.setTimeZone(str_rc("UTC"));
 
 	str_buf buf;
 
-	buf << utc.format(str_temp("D, d M Y H:i:s")) << " GMT";
+	buf << utc.format(str_rc("D, d M Y H:i:s")) << " GMT";
 
 	str_rc time = buf.zstr();
 
@@ -293,7 +294,7 @@ Response::setExpires(val_ptr exptime)
 
 void Response::setNotModified()
 {
-	setStatusCode(304, str_temp("Not modified"));
+	setStatusCode(304, str_rc("Not modified"));
 }
 
 void Response::setJsonContent(
@@ -408,7 +409,7 @@ Response::sendCookies()
 {
 	if (!cookies_.isNull())
 	{
-		val_rc result = cookies_.call(str_temp("send"));
+		val_rc result = cookies_.call(str_rc("send"));
 		return val_ptr(result).isTrue();
 	}
 	return true;
@@ -580,13 +581,18 @@ obj_rc
 Response::getEventQueue()
 {
 	val_ptr test(events_);
+	obj_rc result;
 
 	if (test.isFalse())
 	{
-		events_ = Services::service(RSPD.eventqueue);
+		val_return sval = Services::service(RSPD.eventqueue);
+		if (!sval.has_errors()) 
+		{
+			result = sval.value_.zobject();
+		} 
 	}
 	// object or null
-	return obj_rc(test.zobject());
+	return result;
 }
 
 void 
@@ -820,7 +826,7 @@ void Response::setFileToSend(
 			make_header(RSPD.Content_Disposition, temp);
 		}
 		else {
-			basePath = addcslashes(basePath,str_temp("\15\17\\\""));
+			basePath = addcslashes(basePath,str_rc("\15\17\\\""));
 
 			const char dquote = '"';
 			buf << disposition << dquote << basePath << dquote;

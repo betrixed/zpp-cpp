@@ -64,7 +64,7 @@ public:
 
 	obj_rc newRow(htab_ptr rdata, bool isSaved = false);
 
-	static Model* model_instance(str_ptr classname);
+	static obj_return model_instance(str_ptr classname);
 	
 	static str_rc classToTableName(str_ptr cname);
 

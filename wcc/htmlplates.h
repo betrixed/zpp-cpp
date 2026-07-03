@@ -45,9 +45,9 @@ using namespace zpp;
 
 		void mergeData(htab_ptr items);
 
-		str_rc render(htab_ptr options);
+		str_return render(htab_ptr options);
 
-		str_rc renderView(htab_rw options);
+		str_return renderView(htab_rw options);
 
 		VIRTUAL_ZOBJPTR
 	};

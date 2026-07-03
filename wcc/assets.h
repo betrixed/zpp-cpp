@@ -99,7 +99,7 @@ public:
 
 	virtual   void debug_info(htab_rw hw);
 
-	void construct();
+	error_return construct();
 	void destruct();
 
 	void add(val_ptr list);
@@ -131,7 +131,7 @@ public:
 
  	str_rc link();
 
- 	htab_rc loadAssetFile(str_ptr file);
+ 	htab_return loadAssetFile(str_ptr file);
 
  	void reset();
 

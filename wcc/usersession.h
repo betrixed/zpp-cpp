@@ -46,7 +46,7 @@ public:
 
 	void flash(str_ptr msg, str_ptr status, htab_ptr exlines);
 	
-	obj_rc getSession();
+	obj_return getSession();
 	obj_rc getUserData();
 	obj_rc guestSession();
 

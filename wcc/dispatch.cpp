@@ -131,9 +131,16 @@ Dispatch::construct()
 	services_ = Services::instance();
 
 	Services* svc = svc_ptr();
-	finder_ = svc->get(DSPi.finder_str);
-	config_ = svc->get(DSPi.config_str);
-
+	val_return ftest = svc->get(DSPi.finder_str);
+	if (!ftest.throw_errors())
+	{
+		finder_ = std::move(ftest.value_);
+	}
+	ftest = svc->get(DSPi.config_str);
+	if (!ftest.throw_errors())
+	{
+		config_ = std::move(ftest.value_);
+	}
 }
 
 
@@ -416,7 +423,17 @@ Dispatch::dispatch(obj_ptr rmatch)
 
 	Services* svc = svc_ptr();
 
-	obj_rc engine = svc->get(DSPi.engine_str);
+	obj_rc engine;
+
+	val_return etest = svc->get(DSPi.engine_str);
+	if (etest.has_errors())
+	{
+		result = etest.move_error();
+		return result;
+	}
+	else {
+		engine = etest.value_.zobject();
+	}
 
 	if (engine.ok())
 	{
@@ -440,8 +457,16 @@ Dispatch::dispatch(obj_ptr rmatch)
 				sop.call(DSPi.addpaths_fn, temparg);
 			}
 		}
-
-		val_rc view_data = svc->get(DSPi.viewdata_str);
+		val_rc view_data;
+		val_return vtest = svc->get(DSPi.viewdata_str);
+		if (vtest.has_errors())
+		{
+			result = vtest.move_error();
+			return result;
+		}
+		else {
+			view_data = vtest.value_;
+		}
 		if (view_data.isArray())
 		{
 			engine.call(DSPi.sharewithall_fn, view_data);
@@ -485,7 +510,15 @@ Dispatch::forward( val_ptr fto)
 	}
 	else if(fto.isString())
 	{
-		obj_rc response = svc_ptr()->get(DSPi.response_str);
+		obj_rc response;
+
+		val_return test = svc_ptr()->get(DSPi.response_str);
+
+		if (test.throw_errors())
+		{
+			return;
+		}
+		response = test.value_.zobject();
 		Response* robj = zobj_toc<Response>(response);
 
 		robj->redirect(fto.zstr());
@@ -520,7 +553,11 @@ Dispatch::getRoutesCache(str_ptr cache_name)
 	val_rc rstr = cf->getOrNot(DSPi.cache_routes_str, temparg);
 	if (rstr.isTrue())
 	{
-		result = svc_ptr()->get(cache_name);
+		val_return rtest = svc_ptr()->get(cache_name);
+		if (!rtest.throw_errors())
+		{
+			result = std::move(rtest.value_); 
+		}
 	}
 	return result;
 }
@@ -713,9 +750,15 @@ Dispatch::getRoute()
 obj_rc
 Dispatch::getRouteMatch()
 {
+	obj_rc result;
+
 	if (!route_match_.ok())
 	{
-		route_match_ = svc_ptr()->get(DSPi.route_match_str);
+		val_return rtest = svc_ptr()->get(DSPi.route_match_str);
+		if (!rtest.throw_errors())
+		{
+			route_match_ = std::move(rtest.value_);
+		}
 	}
 	return route_match_;
 }
@@ -801,7 +844,16 @@ Dispatch::parseRaw(htab_ptr input)
 {
 	htab_return result;
 
-	obj_rc parser = Services::service(DSPi.route_parser);
+	obj_rc parser;
+
+	val_return ptest = Services::service(DSPi.route_parser);
+	if (ptest.has_errors())
+	{
+		ptest.error() << " No route parser object";
+		result = ptest.move_error();
+		return result;
+	}
+	parser = std::move(ptest.value_);
 	if (!parser.ok())
 	{
 		result.error() << "Service " << DSPi.route_parser << " not found";
@@ -816,9 +868,14 @@ error_return
 Dispatch::respond(val_ptr content)
 {
 	error_return result;
-
-	obj_rc rpobj = Services::service(DSPi.response_str);
-
+	obj_rc rpobj;
+	val_return rtest = Services::service(DSPi.response_str);
+	if (rtest.has_errors())
+	{
+		result = rtest.move_error();
+		return result;
+	}
+	rpobj = std::move(rtest.value_);
 	if (!rpobj.ok())
 	{
 		result.error() = "No response service";

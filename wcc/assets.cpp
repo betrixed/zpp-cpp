@@ -21,6 +21,10 @@
 #include "replace.h"
 #endif
 
+#ifndef WCC_RUNSA_H
+#include "run.h"
+#endif
+
 #ifndef FN_CALL_H
 #include "zpp/fn_call.h"
 #endif
@@ -145,6 +149,7 @@ Assets::setRun(obj_ptr obj)
 {
 	run_ = obj;
 	obj_ptr run = run_;
+
 	web_ = run.str_property(ASI.web_dir);
 
 	str_rc assets_file = run.str_property(ASI.assets_cfg);
@@ -218,11 +223,12 @@ Assets::Assets() : base_d(), render_lock_(false)
 {
 }
 
-void 
+error_return 
 Assets::construct()
 {
 	//zend_printf("Assets::construct\n");
-	
+	error_return result;
+
 	val_rc nullval; // null value
 
 
@@ -232,15 +238,28 @@ Assets::construct()
 
 	assets_ = Config::omg.new_zobj();
 
-	obj_rc values = Services::service(ASI.run_str);
+	val_return vret = Services::service(ASI.run_str);
 
-	if (values.ok())
+	if (vret.has_errors())
 	{
-		setRun(values);
+		result = vret.move_error();
+		return result;
+	}
+
+	obj_rc run_app = vret.value_.zobject();
+	if (run_app.instanceof(Run::omg.classEntry()))
+	{
+		setRun(run_app);
+	}
+	else if (run_app.ok())
+	{ 
+		run_ = run_app;
 	}
 	else {
+		// from some really old code
 		run_ = Config::omg.new_zobj();
 	}
+	return result;
 
 }
 
@@ -645,42 +664,48 @@ Assets::filterPaths(htab_ptr paths)
 	return result;
 }
 
-htab_rc 
+htab_return 
 Assets::loadAssetFile(str_ptr file)
 {
 	//printf("Assets::loadAssetFile %s\n", file.data());
 
-	htab_rc result = htab_ptr::empty_array();
+	htab_return result;
 
 	if (! file_exists(file))
 	{
-		zend_throw_error(zend_ce_error,"Asset file '%s' not found", file.data());
+		result.error() << "Asset file '" << file << "' not found";
 		return result;
 	}
 
-	obj_rc cache_mgr = Services::service(ASI.cache_mgr);
+	val_return cret = Services::service(ASI.cache_mgr);
 
-	if(!cache_mgr.ok())
+	if(cret.has_errors())
 	{
-		zend_throw_error(zend_ce_error,"No Cache Mgr service");
+		result = cret.move_error();
 		return result;
 	}
+	if (cret.value_.isObject())
+	{
+		result.error() << "No Cache Mgr service";
+		return result;
+	}
+	obj_rc cache_mgr = std::move(cret.value_);
 
-	/*
-	val_rc filename(file);
-	val_rc cachename(ASI.file_cache);
-	htab_rc data = cache_mgr.call(ASI.read_cache, filename, cachename);
-	*/
 	CacheMgr* cmgr = zobj_toc<CacheMgr>(cache_mgr);
 
 	val_return vdata = cmgr->readCache(file, ASI.file_cache);
 
-	if (vdata.throw_errors(__FUNCTION__))
+	if (vdata.has_errors())
 	{
-		return htab_ptr::empty_array();
+		result = vdata.move_error();
+		return result;
 	}
-	htab_rc data = vdata.value_.zarray();
 
+	htab_rc data = vdata.value_.zarray();
+	if (!data.ok())
+	{
+		data = htab_ptr::empty_array();
+	}
 
 	//showdata("cached data:  ", data);
 
@@ -714,7 +739,7 @@ Assets::loadAssetFile(str_ptr file)
 	}
 	if (temp.isArray())
 	{
-		result = this->addAssets(temp.zarray());
+		result.value_ = this->addAssets(temp.zarray());
 		//showdata("result", result);
 	}
 	return result;
@@ -804,7 +829,11 @@ ZEND_METHOD(Wcc_Assets, __construct)
 
 	Assets* cobj = zval_toc<Assets>(ZEND_THIS);
 
-	cobj->construct();
+	error_return test = cobj->construct();
+	if (test.throw_errors())
+	{
+		// !what to do?
+	}
 }
 
 ZEND_METHOD(Wcc_Assets, __destruct)
@@ -997,17 +1026,17 @@ ZEND_METHOD(Wcc_Assets, loadAssetFile)
 	zarg_rd args(execute_data);
 
 	str_ptr file = args.str(args.need(0));
-	htab_rc result;
+	htab_return result;
 
 	if (!args.throw_errors(__FUNCTION__))
 	{
 		Assets* cobj = zval_toc<Assets>(ZEND_THIS);
 		result = cobj->loadAssetFile(file);
-	}
-	else {
-		result = htab_ptr::empty_array();
-	}
-	result.move_zv(return_value);
+		if (!result.throw_errors())
+		{
+			result.value_.move_zv(return_value);
+		}
+	}	
 }
 
 ZEND_METHOD(Wcc_Assets, reset)

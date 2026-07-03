@@ -36,7 +36,7 @@ namespace wcc {
 		
 		obj_ptr getServices();
 
-		val_rc service(str_ptr name);
+		val_return service(str_ptr name);
 
 		void set(str_ptr name, val_ptr value);
 

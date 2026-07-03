@@ -67,16 +67,18 @@ DebugLog::cpp_global()
 }
 
 void 
-DebugLog::dump(str_ptr label, zval* anyval)
+DebugLog::dump(str_ptr label, zval* anyval, int maxlevel)
 {
-	dump(label.data(), anyval);
+	dump(label.data(), anyval, maxlevel);
 }
 
-void DebugLog::showmem(const char* label, zval* mem)
+void DebugLog::showmem(const char* label, zval* mem, int maxlevel)
 {
 	str_buf dump;
 	dump_info di(dump);
-
+	if (maxlevel) {
+		di.setMaxLevel(maxlevel);
+	}
 	dump << label << ' ';
 	di.setMaxLevel(5);
 	di.di_showmem(mem);
@@ -87,12 +89,14 @@ void DebugLog::showmem(const char* label, zval* mem)
 
 }
 void 
-DebugLog::dump(const char* label, zval* anyval)
+DebugLog::dump(const char* label, zval* anyval, int maxlevel)
 {
 	str_buf dump;
 
 	dump_info di(dump);
-	di.setMaxLevel(5);
+	if (maxlevel) {
+		di.setMaxLevel(maxlevel);
+	}
 	
 	dump << label << ":" << endl;
 	di.di_showmem(anyval);
@@ -105,26 +109,26 @@ DebugLog::dump(const char* label, zval* anyval)
 
 
 void 
-DebugLog::dump(const char* label, HashTable* arrayval)
+DebugLog::dump(const char* label, HashTable* arrayval, int maxlevel)
 {
 	val_rc value(arrayval);
 
-	dump(label, val_ptr(value));
+	dump(label, val_ptr(value), maxlevel);
 }
 
 void 
-DebugLog::dump(const char* label, zend_string* strval)
+DebugLog::dump(const char* label, zend_string* strval, int maxlevel)
 {
 	val_rc value(strval);
 
-	dump(label, val_ptr(value));
+	dump(label, val_ptr(value), maxlevel);
 }
 
 void 
-DebugLog::dump(const char* label, zend_object* objval)
+DebugLog::dump(const char* label, zend_object* objval, int maxlevel)
 {
 	val_rc value(objval);
-	dump(label, val_ptr(value));
+	dump(label, val_ptr(value), maxlevel);
 }
 
 
@@ -152,8 +156,16 @@ DebugLog::start(str_ptr msg, int destflags)
 		dg->line(msg,0);
 		return result;
 	}
+	obj_rc cfg;
 
-	obj_rc cfg = Services::service(DLSi.config_str);
+	val_return ctest = Services::service(DLSi.config_str);
+	if (!ctest.throw_errors())
+	{
+		cfg = ctest.value_.zobject();
+	}
+	else {
+		return result;
+	}
 	str_rc log_dir;
 
 	htab_rc folders = cfg.array_property(DLSi.temp_paths_str);
@@ -177,7 +189,7 @@ DebugLog::start(str_ptr msg, int destflags)
 	DLSi.gInstance_ = result;
 
 	dg->line(msg, 0);
-
+ 
 	return result;
 
 }

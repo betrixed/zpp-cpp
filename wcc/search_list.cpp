@@ -123,8 +123,10 @@ SearchList::try_path(
 	fs::path fpath = dir /  file;
 	if (fs::is_regular_file(fpath)) 
 	{
+		//convert the std::string
 		std::string temp = fpath.string();
-		result = str_temp(temp.data(), temp.size());
+		// set return variable
+		result = str_rc(temp.data(), temp.size());
 		return true;
 	}
 	return false;

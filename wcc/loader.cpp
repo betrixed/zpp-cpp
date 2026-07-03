@@ -170,7 +170,7 @@ Loader::readPHP(str_ptr path)
 
 static void php_path(str_ptr php_root, const char* s, htab_rw data)
 {
-	str_temp ns(s);
+	str_rc ns(s);
 	str_buf buf;
 
 	buf << php_root << "/" << ns;

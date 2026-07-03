@@ -26,7 +26,7 @@ using namespace zpp;
 
 		void construct(str_ptr name, htab_ptr data);
 
-		void activate(obj_ptr finder);
+		error_return activate(obj_ptr finder);
 
 		void addDefaults(obj_ptr module);
 

@@ -384,14 +384,22 @@ IConfig::getDriverName()
 	return result;
 }
 
+
 str_rc
 IConfig::getDriverClass()
 {
 	str_rc dname = getDriverName();
 	//showstr("Driver Name", dname);
 
-	obj_ptr servers = Services::getOne(IServer::omg.class_name());
-	IServer* sv = zobj_toc<IServer>(servers);
+	obj_return mgr = IServer::instance();
+
+	if (mgr.throw_errors())
+	{
+		return str_ptr::empty_str();
+	}
+
+	IServer* sv = zobj_toc<IServer>(mgr.value_);
+
 	return sv->getDriverClass(dname);
 }
 
@@ -453,10 +461,16 @@ IConfig::getSqlClass()
 	{
 		return pc;
 	}
-	obj_ptr servers = Services::getOne(IServer::omg.class_name());
 
+	obj_return mgr = IServer::instance();
+
+	if (mgr.throw_errors())
+	{
+		return str_ptr::empty_str();
+	}
 	str_rc dname = getDriverName();
-	IServer* sv = zobj_toc<IServer>(servers);
+
+	IServer* sv = zobj_toc<IServer>(mgr.value_);
 	pc = sv->getSqlClass(dname);
 	set(ICS.k_processor, pc);
 	return pc;

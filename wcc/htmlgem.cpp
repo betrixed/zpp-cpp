@@ -227,16 +227,16 @@ HtmlGem::HtmlGem() : base_d()
 	text_class_ =  HTG.text_d;
 	datetime_fmt_ = HTG.datetime_fmt_d;
 	date_fmt_ = HTG.date_fmt_d;
-	date_icon_ = str_temp("@theme/calendar-50.png");
+	date_icon_ = "@theme/calendar-50.png";
 
 	id_add_ = 0;
 
 	htab_rw hw(styles_);
 
-	str_temp figure_style("float:left;width:47%;margin:10px;");
+	str_rc figure_style("float:left;width:47%;margin:10px;");
 	hw.set(HTG.figurekey, figure_style);
 
-	str_temp caption_style("border-style:solid; padding:4px;font-size:0.9em;");
+	str_rc caption_style("border-style:solid; padding:4px;font-size:0.9em;");
 	hw.set(HTG.figcaption, caption_style);
 }
 
@@ -1488,7 +1488,7 @@ HtmlGem::datetime(htab_ptr pset)
 
 	attrlist.set(HTG.data_target, atarg_str);
 
-	str_temp s24("24");
+	str_rc s24("24");
 
 	attrlist.set(HTG.size_key,s24);
 	attrlist.set(HTG.maxlength,s24);
@@ -2045,7 +2045,7 @@ ZEND_METHOD(Wcc_HtmlGem, moneyFormat)
 	str_rc temp;
 
 	if (!slang) {
-		temp = str_temp("en_AU");
+		temp = str_rc("en_AU");
 	}
 	else {
 		temp = slang;

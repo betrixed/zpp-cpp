@@ -40,6 +40,8 @@ class IServer {
     
     public static function Connect(?string $name = null) : ?\WeakReference {}
 
+    public static function Instance() : IServer;
+
     public function __construct(string $svkey) {}
 
     public function __destruct() {}

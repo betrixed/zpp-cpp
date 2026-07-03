@@ -102,11 +102,11 @@ void ServiceAccess::destruct()
 	services_.init();
 }
 
-val_rc
+val_return
 ServiceAccess::service(str_ptr name)
 {
-	val_rc result;
-	val_ptr zu(result);
+	val_return result;
+	val_ptr zu(result.value_); //shadow *zval
 
 	htab_rw hw(cache_);
 	result = hw.get(name);
@@ -120,19 +120,24 @@ ServiceAccess::service(str_ptr name)
 
 	result = cobj->get(name);
 
-	if (!zu.isNull()) {
-		hw.set(name, result);
+	if (!result.has_errors() && !zu.isNull()) {
+		hw.set(name, result.value_);
+		return result;
+	}
+
+	if (result.has_errors())
+	{
 		return result;
 	}
 
 	if ((zend_object*) services_ != (zend_object*) gservices_)
 	{
-		 cobj = zobj_toc<Services>(gservices_);
-
+		cobj = zobj_toc<Services>(gservices_);
 		result = cobj->get(name);
-		if (!zu.isNull())
+
+		if (!result.has_errors() && !zu.isNull())
 		{
-			hw.set(name, result);
+			hw.set(name, result.value_);
 		}
 	}
 
@@ -148,8 +153,8 @@ ServiceAccess::set(str_ptr name, val_ptr value)
 bool 
 ServiceAccess::has(str_ptr name)
 {
-	val_rc test = service(name);
-	return !test.isNull();
+	val_return test = service(name);
+	return (!test.has_errors() && !test.value_.isNull());
 }
 
 
@@ -216,8 +221,11 @@ ZEND_METHOD(Wcc_ServiceAccess, __get)
 	ZEND_PARSE_PARAMETERS_END();
 
 	auto cobj = zval_toc<ServiceAccess>(ZEND_THIS);
-	val_rc result = cobj->service(name);
-	result.move_zv(return_value);
+	val_return result = cobj->service(name);
+	if (!result.throw_errors())
+	{
+		result.value_.move_zv(return_value);
+	}
 }
 
 ZEND_METHOD(Wcc_ServiceAccess, service)
@@ -228,8 +236,10 @@ ZEND_METHOD(Wcc_ServiceAccess, service)
 	ZEND_PARSE_PARAMETERS_END();
 
 	auto cobj = zval_toc<ServiceAccess>(ZEND_THIS);
-	val_rc result = cobj->service(name);
-	result.move_zv(return_value);
+	val_return result = cobj->service(name);
+	if (!result.throw_errors()) {
+		result.value_.move_zv(return_value);
+	}
 }
 
 ZEND_METHOD(Wcc_ServiceAccess, init_access)

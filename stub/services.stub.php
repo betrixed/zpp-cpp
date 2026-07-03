@@ -7,7 +7,7 @@
 namespace Wcc;
 
 final class Services {
-	public static function getOne(string $key) : ?object {}
+	public static function getOne(string $key, ?array $arglist=null) : ?object {}
 
 	public static function instance() : Services {}
 
@@ -25,7 +25,7 @@ final class Services {
 
 	public function isActive(string $name) : bool {}
 
-	public function newInstance(string $name) : ?object {}
+	public function newInstance(string $name, ?array $arglist=null) : ?object {}
 
 	public function set(string $name, mixed $value) : void {}
 

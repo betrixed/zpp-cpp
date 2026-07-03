@@ -13,6 +13,8 @@
 #include "reflect_cache.h"
 #endif
 
+#define DBG_SERVICES
+
 #ifdef DBG_SERVICES
 #ifndef WCC_DEBUGLOG_H
 #include "debuglog.h"
@@ -108,30 +110,27 @@ Services::clearObjects()
 	instances_.reset();
 }
 
-val_rc  
+val_return  
 Services::activate(str_ptr key)
 {
 
-	val_rc result;
+	val_return result;
 	//zend_printf("Services::activate(\"%s\")\n", key.data());
 
-	htab_ptr defer(defer_);
-
 	val_ptr test;
-	if (!defer.try_fetch(key, test))
+
+	test = defer_.get(key);
+
+	if (test.is_nullptr())
 	{
-		if (throw_fail_)
-		{
-			zend_throw_error(zend_ce_error, "Services activate key not found: %s", key.data());
-		}
+		result.error() << "Service " << key << " does not exist";
 		return result;
 	}
-	//showmem("defer value", test);
 
 	if (defer_ct_ > 3)
 	{
 		defer_ct_ = 0;
-		zend_throw_error(zend_ce_error, "Services recursion limit hit: %s", key.data());
+		result.error() << "Service request '" << key << "' recursed more than 3 times";
 		return result;
 	}
 
@@ -150,6 +149,9 @@ Services::activate(str_ptr key)
 		htab_rw(active_).set(key, result2);
 
 		result = get(key);
+	}
+	else {
+		result.value_ = test;
 	}
 	defer_ct_--;
 	return result;
@@ -210,16 +212,16 @@ Services::setOne(str_ptr key, obj_ptr obj)
 }
 
 /* static */
-obj_rc  
-Services::getOne(str_ptr key)
+obj_return  
+Services::getOne(str_ptr key, htab_ptr arglist)
 {
-	obj_rc result;
+	obj_return  result;
 	obj_rc services = Services::instance();
 #ifdef DBG_SERVICES
 	DebugLog* log = DebugLog::cpp_global();
 	if (log)
 	{   
-		log->dump("gServices", services);
+		//log->dump("gServices", services);
 		log->dump("key", key);
 	}
 #endif
@@ -227,20 +229,20 @@ Services::getOne(str_ptr key)
 	Services* svc = zobj_toc<Services>(services);
 
 	//zend_printf("getOne Services %lx \n", (long int) self);
-	result = svc->getObject(key);
+	obj_rc single = svc->getObject(key);
 
-	if (result.ok())
+	if (single.ok())
 	{
+		result.value_ = std::move(single);
 		return result;	
 	}
 
-	result = svc->newInstance(key);
+	return svc->newInstance(key, arglist);
 
-	return result;
 }
 
 // static
-val_rc  
+val_return  
 Services::service(str_ptr key)
 {
 	Services* self = Services::cpp_global();
@@ -249,50 +251,68 @@ Services::service(str_ptr key)
 }
 
 // static
-val_rc  
+val_return  
 Services::service(const std::string_view& key)
 {
-	val_rc result;
+	val_return result;
 
 	auto slen = key.size();
 	if (slen)
 	{
-		str_temp skey(key.data(), slen);
+		str_rc skey(key.data(), slen);
 		result = Services::service(skey);
 	}
 	return result;
 }
 
-obj_rc
-Services::newInstance(str_ptr name_class)
+obj_return
+Services::newInstance(str_ptr name_class, htab_ptr arglist)
 {
+	obj_return result;
 
 	ReflectCache* rc = ReflectCache::cpp();
 
 	//showstr("newInstance of ", name_class);
-
-	obj_rc obj = rc->newInstance(name_class);
+	obj_rc obj;
+	if (arglist.size())
+	{
+#ifdef DBG_SERVICES
+		DebugLog* log = DebugLog::cpp_global();
+		log->dump("newInstanceArgs", arglist);
+#endif
+		obj = rc->newInstanceArgs(name_class, arglist);
+	}
+	else {
+		obj = rc->newInstance(name_class);
+	}
 	
+
 	if (obj.ok())
 	{
 		//showarray("instances", instances_);
 		htab_rw(instances_).set(name_class, obj);
+		result.value_ = std::move(obj);
 	}
 	else {
-		zend_throw_error(zend_ce_error, "newInstance failed for %s", name_class.data());
+		 result.error() << "newInstance failed for " << name_class;
 	}
-
-	return obj;
+	return result;
 }
 
 obj_rc
 Services::getObject(str_ptr key)
 {
 	obj_rc result;
+#ifdef DBG_SERVICES
+	DebugLog* log = DebugLog::cpp_global();
+	if (log)
+	{
+		log->dump("Instances", instances_);
+	}
+#endif
 
 	result = instances_.get(key);
 #ifdef DBG_SERVICES
-	DebugLog* log = DebugLog::cpp_global();
 	if (log)
 	{
 		log->dump("getObject result", result);
@@ -355,30 +375,32 @@ Services::set(str_ptr name, val_rc& val)
 	set(name, val_ptr(val));
 }
 
-val_rc  
+val_return  
 Services::get(str_ptr name)
 {
-	val_rc result;
+	val_return result;
 	
-	val_ptr value;
-
-	//showstr("services::get", name);
-
-	if (!htab_ptr(active_).try_fetch(name, value))
+	if (!name.size())
 	{
+		return result;
+	}
+
+	val_ptr test = active_.get(name);
+
+	if (test.is_nullptr())
+	{
+		//check defered 
 		result = activate(name);
 		return  result;
 	}
 
-
-	if (value.isCallable())
+	if (test.isCallable())
 	{
-		obj_ptr callme = value.zobject();
-		
-		result = call_value(callme);
+		obj_ptr callme = test.zobject();
+		result.value_ = call_value(callme);
 	}
 	else {
-		result = value;
+		result.value_ = test;
 	}
 	return result;
 }
@@ -418,11 +440,15 @@ ZEND_METHOD(Wcc_Services, getOne)
 	zarg_rd args(execute_data);
 
 	str_ptr skey = args.str(args.need(0));
+	htab_ptr arglist = args.htab(args.option(1));
 
 	if (!args.throw_errors())
 	{
-		obj_rc result = Services::getOne(skey);
-		result.move_zv(return_value);
+		obj_return result = Services::getOne(skey, arglist);
+		if (!result.throw_errors())
+		{
+			result.value_.move_zv(return_value);
+		}
 	}
 }
 
@@ -436,32 +462,30 @@ ZEND_METHOD(Wcc_Services, instance)
 
 ZEND_METHOD(Wcc_Services, service)
 {
-	zend_string* skey;
+	zarg_rd args(execute_data);
 
-	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_STR(skey)
-	ZEND_PARSE_PARAMETERS_END();
+	str_ptr skey = args.str(args.need(0));
 
-	val_rc result = Services::service(skey);
-	result.move_zv(return_value);
+	if (!args.throw_errors())
+	{
+		val_return result = Services::service(skey);
+		result.value_.move_zv(return_value);
+	}
 }
 
 ZEND_METHOD(Wcc_Services, setOne)
 {
-	zend_string* skey;
-	zval* 		 obj;
+	zarg_rd args(execute_data);
 
-	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_STR(skey)
-		Z_PARAM_OBJECT(obj)
-	ZEND_PARSE_PARAMETERS_END();
+	str_ptr skey = args.str(args.need(0));
+	obj_ptr obj = args.obj(args.need(1));
 
-	Services* svc = zval_toc<Services>(ZEND_THIS);
-
-	val_ptr test(obj);
-	obj_rc result = svc->setOne(skey, test.zobject());
-
-	result.move_zv(return_value);
+	if (!args.throw_errors())
+	{
+		Services* svc = zval_toc<Services>(ZEND_THIS);
+		obj_rc result = svc->setOne(skey, obj);
+		result.move_zv(return_value);
+	}
 }
 
 
@@ -479,17 +503,17 @@ ZEND_METHOD(Wcc_Services, unset)
 
 ZEND_METHOD(Wcc_Services, get)
 {
-	zend_string* skey;
+	zarg_rd args(execute_data);
+	str_ptr name = args.str(args.need(0));
 
-	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_STR(skey)
-	ZEND_PARSE_PARAMETERS_END();
-
-	Services* svc = zval_toc<Services>(ZEND_THIS);
-
-	val_rc result = svc->get(skey);
-	result.move_zv(return_value);
-
+	if (!args.throw_errors())
+	{
+		Services* svc = zval_toc<Services>(ZEND_THIS);
+		val_return result = svc->get(name);
+		if (!result.throw_errors()){
+			result.value_.move_zv(return_value);
+		}
+	}
 }
 
 ZEND_METHOD(Wcc_Services, getObject)
@@ -534,15 +558,20 @@ ZEND_METHOD(Wcc_Services, isActive)
 
 ZEND_METHOD(Wcc_Services, newInstance)
 {
-	zend_string* skey;
+	zarg_rd args(execute_data);
 
-	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_STR(skey)
-	ZEND_PARSE_PARAMETERS_END();
+	str_ptr cname =  args.str(args.need(0));
+	htab_ptr arglist = args.htab_or_null(args.option(1));
 
-	Services* svc = zval_toc<Services>(ZEND_THIS);
-	obj_rc result = svc->newInstance(skey);
-	result.move_zv(return_value);
+	if (!args.throw_errors())
+	{
+		Services* svc = zval_toc<Services>(ZEND_THIS);
+		obj_return result = svc->newInstance(cname, arglist);
+		if (!result.throw_errors())
+		{
+			result.value_.move_zv(return_value);
+		}
+	}
 }
 
 

@@ -304,20 +304,29 @@ val_rc
 ICache::getService(str_ptr key)
 {
 
-	val_rc svc = htab_ptr(options_).get(key);
+	val_rc result = htab_ptr(options_).get(key);
 	
-	if (svc.ok())
+	if (result.ok())
 	{
-		return svc;
+		return result;
 	}
 
-	svc = Services::service(key);
-	if (svc.ok())
+	val_return vret = Services::service(key);
+	
+
+	if (vret.has_errors())
+	{
+		//TODO:  pass on errors?
+		return result;
+	}
+	val_ptr  vip(vret.value_);
+	if (vip.ok())
 	{
 		htab_rw  owr(options_);
-		owr.set(key, svc);
+		owr.set(key, vip);
+		result = vip;
 	}
-	return svc;
+	return result;
 }
 
 

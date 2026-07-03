@@ -366,12 +366,13 @@ str_rc Plate::fetch(str_ptr name, htab_ptr data)
 	return insert(name, data);
 }
 
-str_rc Plate::getContent()
+str_rc 
+Plate::getContent()
 {
 	val_ptr content = htab_ptr(sections_).get(PLD.content_key);
 	if (content.isNull())
 	{
-		return str_temp("<pre>\n-- Missing Content--\n</pre>\n");
+		return str_rc("<pre>\n-- Missing Content--\n</pre>\n");
 	}
 	return content;
 }
@@ -458,10 +459,16 @@ void Plate::styleEnd()
 
 	auto services = Services::cpp_global();
 
-	val_rc assets_z = services->get(PLD.assets_key);
-	obj_ptr assets(assets_z.zobject());
+	val_return assets_z = services->get(PLD.assets_key);
+	
+
+	if (assets_z.throw_errors())
+	{
+		return;
+	}
+	obj_rc assets(assets_z.value_.zobject());
 	if (assets.ok()) {
-		obj_ptr(assets).call(PLD.addstyle_fn,  styles);
+		assets.call(PLD.addstyle_fn,  styles);
 	}
 }
 

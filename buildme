@@ -1,5 +1,6 @@
 #!/bin/bash
 ARGC=$#
+export XDEBUG_MODE=off
 echo "ARGS = $ARGC"
 set -e
 . ./pvid.sh

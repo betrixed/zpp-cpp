@@ -93,24 +93,33 @@ namespace wcd {
 	val_rc 
 	Model::createFromResult(str_ptr classname, htab_ptr results)
 	{
+		val_rc result;
+
 		if (results.size()==0)
 		{
-			return htab_rc::empty_array();
+			result = htab_rc::empty_array();
+			return result;
 		}
 
-		Model* m = model_instance(classname);
+		obj_return mret = model_instance(classname);
+		if (mret.throw_errors())
+		{
+			result = htab_rc::empty_array();
+			return result;	
+		}
+		
 
 		val_rc rmgr;
 		htab_rw r(rmgr);
 
 		htab_walk wk;
 
-		auto result = wk.value();
+		auto ritem = wk.value();
 
-
+		Model *m = zobj_toc<Model>(mret.value_);
 		for(wk.start(results); wk.ok(); wk.next())
 		{
-			r.push_back(m->newRow(result.zarray(), true));
+			r.push_back(m->newRow(ritem.zarray(), true));
 		}
 
 		return rmgr;
@@ -189,18 +198,33 @@ namespace wcd {
 	obj_rc//static
 	Model::row(str_ptr static_name, htab_ptr data)
 	{
-		Model* m = model_instance(static_name);
+		obj_return m_err = model_instance(static_name);
+
+		obj_rc result;
+		if (m_err.throw_errors())
+		{
+			return result;
+		}
+		Model* m = zobj_toc<Model>(m_err.value_);
 		return m->newRow(data);
 	}
 
 	obj_rc//static
 	Model::rowSaved(str_ptr static_name, htab_ptr data)
 	{
-		Model* m = model_instance(static_name);
-		obj_rc rec = m->newRow(data);
-		IRow* irow = zobj_toc<IRow>(rec);
+		obj_rc result;
+
+		obj_return m_ret = model_instance(static_name);
+		if (m_ret.has_errors())
+		{
+			return result;
+		}
+		Model* m = zobj_toc<Model>(m_ret.value_);
+
+		result = m->newRow(data);
+		IRow* irow = zobj_toc<IRow>(result);
 		irow->create();
-		return rec;
+		return result;
 	}
 
 	obj_return
@@ -291,8 +315,14 @@ namespace wcd {
 	obj_return
 	Model::modelBuild(str_ptr classname)
 	{
-		Model* m = model_instance(classname);
-		return m->getBuilderForMe();
+		obj_return result = model_instance(classname);
+		if (result.has_errors())
+		{
+			return result;
+		}
+		Model* m = zobj_toc<Model>(result.value_); 
+		result = m->getBuilderForMe();
+		return result;
 	}
 
 	obj_return 
@@ -331,27 +361,36 @@ namespace wcd {
 		return result;	
 	}
 
-	Model* //static
+	obj_return //static
 	Model::model_instance(str_ptr classname)
 	{
-		obj_ptr model = Services::getOne(classname);
-		Model* m = zobj_toc<Model>(model);
-
-		return m;
+		return Services::getOne(classname);
 	}
 
 	obj_return //static
 	Model::keyValue(str_ptr static_class, val_ptr keynames, val_ptr values)
 	{
 		
-		Model* m = Model::model_instance(static_class);
+		obj_return result = Model::model_instance(static_class);
+		if (result.has_errors())
+		{
+			return result;
+		}
+		Model* m = zobj_toc<Model>(result.value_);
 		return m->byKeyValue(keynames, values);
 	}
 
-	obj_return 
+	obj_return //static
 	Model::withValues(str_ptr static_class, val_ptr keyvalues)
 	{
-		Model* m = Model::model_instance(static_class);
+		obj_return result;
+
+		obj_return model = Model::model_instance(static_class);
+		if (model.has_errors())
+		{
+			result = model.move_error();
+			return result;
+		}
 
 		htab_rc kv(keyvalues.zarray());
 
@@ -359,6 +398,8 @@ namespace wcd {
 		htab_rc values = htab_rc::getValues(kv);
 		val_rc keynames_mgr(keynames);
 		val_rc values_mgr(values);
+
+		Model *m = zobj_toc<Model>(model.value_);
 		return m->byKeyValue(keynames_mgr, values_mgr);
 	}
 
@@ -369,7 +410,15 @@ namespace wcd {
 
 		htab_ptr  parray(params.zarray());
 
-		Model* m = Model::model_instance(static_name);
+		obj_return mret = Model::model_instance(static_name);
+		if (mret.has_errors())
+		{
+			result = mret.move_error();
+			return result;
+		}
+
+		Model *m = zobj_toc<Model>(mret.value_);
+
 		obj_return buildret = m->getBuilderForMe();
 		if (buildret.has_errors())
 		{
@@ -472,7 +521,15 @@ namespace wcd {
 	{
 		obj_return result;
 
-		Model* m = model_instance(static_name);
+		obj_return mret = model_instance(static_name);
+
+		if (mret.has_errors())
+		{
+			result = mret.move_error();
+			return result;
+		}
+
+		Model* m = zobj_toc<Model>(mret.value_);
 
 		htab_return pkey_ret = m->getPKey();
 
@@ -702,8 +759,15 @@ namespace wcd {
 
 		int datarowct = -1;
 
-		Model* m = model_instance(static_name);
+		obj_return mret = model_instance(static_name);
+		if (mret.has_errors())
+		{
+			result = mret.move_error();
+			return result;
+		}
 
+		Model *m = zobj_toc<Model>(mret.value_);
+		
 		str_rc tableName = m->getName();
 
 		obj_return dbret = m->getConnect();

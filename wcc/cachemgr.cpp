@@ -85,16 +85,44 @@ void CacheMgr::construct(htab_ptr cfg)
 }
 
 
+CacheMgr*
+CacheMgr::instance(error_return& test)
+{
+	CacheMgr* result = nullptr;
+	val_return val_err = Services::service(Cache_i.cache_mgr);
+	if (val_err.has_errors())
+	{
+		test = val_err.move_error();
+		return result;
+	}
+	obj_rc mobj = val_err.value_.zobject();
+	if (mobj.instanceof(CacheMgr::omg.classEntry()))
+	{
+		result = zobj_toc<CacheMgr>(mobj);
+	}
+	else {
+		test.error() << "Not a CacheMgr object: ";
+	}
+	return result;
+}
+
 val_return //static
 CacheMgr::callStatic(str_ptr name, htab_ptr args)
 {
 	str_rc cache_name = name.uncamel();
 
-	obj_rc cache_mgr = Services::service(Cache_i.cache_mgr);
+	val_return result;
+	val_return test;
 
-	CacheMgr* cm = zobj_toc<CacheMgr>(cache_mgr);
-	
-	return cm->readCache(args.get(int(0)), cache_name);
+	CacheMgr* cm = CacheMgr::instance(test);
+	if (cm)
+	{
+		result = cm->readCache(args.get(int(0)), cache_name);
+	}
+	else {
+		result = test.move_error();
+	}
+	return result;
 }
 
 void CacheMgr::debug_info(htab_rw di)
@@ -112,17 +140,26 @@ void CacheMgr::debug_info(htab_rw di)
 	di.set(Cache_i.del_expired, delete_expired_);
 
 }
-
+/*
 Loader* CacheMgr::getLoader()
 {
 	if (!loader_.ok())
 	{
 		Services* svc = Services::cpp_global();
 
-		loader_ = svc->get(Cache_i.s_loader);
+		val_return test = svc->get(Cache_i.s_loader);
+		if (!test.has_errors())
+		{
+			loader_ = test.value_.zobject();
+		}
+		else {
+			test.throw_errors();
+			return null_ptr;
+		}
 	}
 	return zobj_toc<Loader>(loader_);
 }
+*/
 
 void CacheMgr::init(htab_ptr cfg)
 {
@@ -395,8 +432,11 @@ CacheMgr::readFile(str_ptr filename, str_ptr ext)
 	if (zs_cmp_ci(filetype,Cache_i.xml_ext)==0)
 	{
 
-		obj_rc cache_mgr = Services::service(Cache_i.cache_mgr);
-		CacheMgr* cm = zobj_toc<CacheMgr>(cache_mgr);
+		CacheMgr* cm = CacheMgr::instance(result);
+		if (!cm)
+		{
+			return result;
+		}
 
 		fn_params<1>  fn(cm->xml_call_);
 		val_ptr::string_bind(fn.argsptr(), filename);

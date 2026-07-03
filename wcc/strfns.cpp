@@ -238,7 +238,7 @@ ZEND_METHOD(Wcc_Str, test_wcc)
 
 	showstr("extension = ", ext);
 
-	str_temp start("START");
+	str_rc start("START");
 	showstr("start", start);
 
 	str_rc copy(start);
@@ -250,7 +250,7 @@ ZEND_METHOD(Wcc_Str, test_wcc)
 	copy = copy.to_lower();
 	showstr("lower2",copy);	
 
-	str_temp test_trim("  __ TRIM ME ___ ");
+	str_rc test_trim("  __ TRIM ME ___ ");
 	showstr("test_trim", test_trim);
 
 	str_rc tt_copy(test_trim);

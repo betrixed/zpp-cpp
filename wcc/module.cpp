@@ -118,9 +118,11 @@ Module::getName()
 	return name_;
 }
 
-void Module::activate(obj_ptr finder)
+error_return 
+Module::activate(obj_ptr finder)
 {
-	
+	error_return result;
+
 	obj_ptr  data = data_;
 
 	//zend_printf("activate\n");
@@ -133,15 +135,20 @@ void Module::activate(obj_ptr finder)
 	if (def_name.size() && (zs_cmp(def_name, MODi.DEFAULT_MOD)!=0))
 	{
 	
-		val_rc val_dispatch = Services::service(MODi.dispatch_str);
-		if (val_dispatch.isObject())
+		val_return val_test = Services::service(MODi.dispatch_str);
+		if (!val_test.throw_errors())
 		{
-			dispatch = val_dispatch.zobject();
+			dispatch = val_test.value_.zobject();
+		}
+		else {
+			result = val_test.move_error();
+		}
+		if (dispatch.ok())
+		{
 			val_rc sarg(def_name);
 			obj_rc defmod = dispatch.call(MODi.setmodule_fn, sarg);
 			addDefaults(defmod);
 		}
-		
 	}
 
 	str_rc base = data.str_property(MODi.BASE);
@@ -205,9 +212,6 @@ void Module::activate(obj_ptr finder)
 		req.push_back(temp_arg);
 	}
 
-
-
-
 	str_rc asset_file = data.str_property(MODi.ASSET_FILE);
 
 	if (asset_file.size())
@@ -227,14 +231,26 @@ void Module::activate(obj_ptr finder)
 			data.property(MODi.ASSET_FILE, asset_file);
 		}
 
-		obj_rc asset_mgr = Services::service(MODi.ASSETS);
-
+		val_return t_assets = Services::service(MODi.ASSETS);
+		if (t_assets.has_errors())
+		{
+			result = t_assets.move_error();
+			return result;
+		}
+		obj_rc asset_mgr = t_assets.value_.zobject();
 		if (asset_mgr.ok())
 		{
-			
 			Assets* asmgr = zobj_toc<Assets>(asset_mgr);
-			htab_rc added = asmgr->loadAssetFile(asset_file);
+			htab_return ftest  = asmgr->loadAssetFile(asset_file);
+			htab_rc added;
 
+			if (ftest.has_errors())
+			{
+				result = ftest.move_error();
+			}
+			else {
+				added = std::move(ftest.value_);
+			}
 			htab_rc asset_keyslist = data.array_property(MODi.ASSETS);
 			if (!asset_keyslist.size())
 			{
@@ -249,7 +265,7 @@ void Module::activate(obj_ptr finder)
 	}
 	
 	active_ = true;
-
+	return result;
 }
 
 void
@@ -391,7 +407,8 @@ ZEND_METHOD(Wcc_Module, activate)
 	if (!args.throw_errors(__FUNCTION__))
 	{
 		Module* cobj = zval_toc<Module>(ZEND_THIS);
-		cobj->activate(finder);
+		error_return test = cobj->activate(finder);
+		test.throw_errors(__FUNCTION__);
 	}
 }
 	

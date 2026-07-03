@@ -140,7 +140,12 @@ UserSession::adjustExpiry()
 	{
 		UserData* ud = ud_cpp();
 
-		obj_rc gConfig = Services::service(UDi.config_str);
+		val_return r_obj = Services::service(UDi.config_str);
+		if (r_obj.has_errors() || !r_obj.value_.isObject())
+		{
+			return 0; // fail silently
+		}
+		obj_rc gConfig = r_obj.value_.zobject();
 
 		htab_rc ttl_roles = gConfig.array_property(UDi.TTLroles);
 
@@ -280,10 +285,10 @@ void UserSession::unsetKey(str_ptr key)
 	}
 }
 
-obj_rc 
+obj_return
 UserSession::getSession()
 {
-	obj_rc result;
+	obj_return result;
 	//DebugLog* log = DebugLog::cpp_global();
 
 	if (ended_)
@@ -292,15 +297,16 @@ UserSession::getSession()
 	}
 	if (!session_.ok())
 	{
-		session_ = Services::service(UDi.session_str);
-		/*
-		if (log)
+		val_return test = Services::service(UDi.session_str);
+		if (!test.has_errors() && test.value_.isObject())
 		{
-			log->dump("got session", session_);
-		}*/
-
+			session_ = test.value_.zobject();
+		}
+		else {
+			result = test.move_error();
+		}
 	}
-	result = session_;
+	result.value_ = session_;
 	return result;
 }
 
@@ -407,9 +413,10 @@ UserSession::read()
 	if (!wasRead_ && !ended_)
 	{
 		doWrite_ = false;
-		obj_rc session = getSession();
-		if (!session.ok())
+		obj_return sret = getSession();
+		if (sret.has_errors())
 		{
+			// post/hrow exception?
 			return result;
 		}
 		ISession* sesp = is_cpp();
@@ -558,8 +565,13 @@ UserSession::shutdown()
 void 
 UserSession::updated()
 {
-	obj_rc session = getSession();
-	if (session.ok())
+	obj_return sret = getSession();
+	if (sret.has_errors())
+	{
+		return;//TODO: when to worry?
+	}
+	// session_ should have been set
+	if (session_.ok())
 	{
 		ISession* sesp = is_cpp();
 		sesp->set(UDi.userData_p, data_);
@@ -591,14 +603,16 @@ UserSession::UserSession::write(bool force)
 	if (force || doWrite_)
 	{
 		doWrite_ = false;
-		obj_rc session = getSession();
-		if (session.ok())
+		obj_return session = getSession();
+		if (session.has_errors())
+		{
+			return; //TODO: push error up.
+		}
+		if (session_.ok())
 		{
 			adjustExpiry();
 			ISession* sesp = is_cpp();
 			sesp->set(UDi.userData_p, data_);
-
-			//session.property(UDi.userData_p, data_);
 		}
 	}
 }
@@ -728,8 +742,13 @@ ZEND_METHOD(Wcc_UserSession, getSession)
 		return;
 	}
 	UserSession* cobj = zval_toc<UserSession>(ZEND_THIS);
-	obj_rc result = cobj->getSession();
-	result.move_zv(return_value);
+	obj_return result = cobj->getSession();
+
+	if (!result.throw_errors())
+	{
+		result.value_.move_zv(return_value);
+	}
+	
 }
 
 

@@ -66,6 +66,7 @@ void ISVinit::init() {
 	dbcache_str = "dbcache";
 	sql_classes = "sqlClasses";
 	ext_classes = "driverClasses";
+	svc_key  = "dbref"; // default service callback key
 }
 
 
@@ -136,13 +137,22 @@ IServer::initDone()
 obj_rc 
 IServer::getDataCache()
 {
+	obj_rc result;
+
 	if (dbCache_.ok())
 	{
-		return dbCache_;
+		result = dbCache_;
+		return result;
 	}
-	obj_rc cache_mgr = Services::service(ISV.cache_mgr);
-	val_rc arg1(ISV.sql_cache);
-	dbCache_ = cache_mgr.call(ISV.get_cache, arg1);
+
+	val_return ctest = Services::service(ISV.cache_mgr);
+	if (!ctest.has_errors())
+	{
+		obj_rc cache_mgr = ctest.value_.zobject();
+		val_rc arg1(ISV.sql_cache);
+		val_rc cvalue = cache_mgr.call(ISV.get_cache, arg1);
+		dbCache_ = cvalue.zobject();
+	}
 	return dbCache_;
 }
 
@@ -194,6 +204,36 @@ IServer::getConfig(str_ptr name)
 	return result;
 }
 
+obj_return 
+IServer::instance()
+{
+	//The instance is keyed on class name,
+	//but could also use the actual single call svckey?
+
+	Services* sv = Services::cpp_global();
+	str_ptr cname = IServer::omg.class_name();
+	obj_return result;
+
+	obj_rc sobj = sv->getObject(cname);
+	if (sobj.ok())
+	{
+		result.value_ = std::move(sobj);
+		return result;
+	}
+
+	
+
+	htab_rc arglist;
+	htab_rw args(arglist);
+	//new instance given a service callback key
+	args.push_back(ISV.svc_key);
+	// this "side effect" creates an instance of IServer, or gets existing,
+	// because IServer "translates" driver name to the PHP implementing class.
+
+	return Services::getOne(cname, arglist);
+
+}
+
 obj_return
 IServer::needConfig(str_ptr name)
 {
@@ -225,6 +265,7 @@ IServer::getConnect(str_ptr name)
 		svc_key_.init();
 
 		// call keyed activation function
+		// no result expected
 		Services::service(key);
 	}
 
@@ -307,19 +348,25 @@ IServer::getConnect(str_ptr name)
 wref_return //static 
 IServer::connect(str_ptr name)
 {
-	DebugLog* log = DebugLog::cpp_global();
+	wref_return result;
+	//DebugLog* log = DebugLog::cpp_global();
 
-	log->dump("Connect", name);
+	//log->dump("Connect", name);
 
 	str_ptr sclass = IServer::omg.class_name();
 
-	log->dump("IServer class name", sclass);
+	//log->dump("IServer class name", sclass);
 
-	obj_rc me = Services::getOne(sclass);
+	obj_return svr_err = Services::getOne(sclass);
 
-	log->dump("IServer object?", me);
+	if (svr_err.has_errors())
+	{
+		result = svr_err.move_error();
+		return result;
+	}
+	//log->dump("IServer object?", me);
 
-	IServer* s = zobj_toc<IServer>(me);
+	IServer* s = zobj_toc<IServer>(svr_err.value_);
 
 	class_data cd(IServer::omg.class_entry_);
 	
@@ -336,13 +383,14 @@ IServer::connect(str_ptr name)
 	else {
 		//showstr("\nNew activecfg: ", name);
 		val_rc value(name);
-		log->line("get static property");
+		//log->line("get static property");
 		cd.static_property(ISV.active_cfg, value);
 		conkey = name;
 
 	}
-	log->dump("Connect Key", conkey);
-	return s->getConnect(conkey);
+	//log->dump("Connect Key", conkey);
+	result = s->getConnect(conkey);
+	return result;
 }
 
 str_rc 
@@ -486,6 +534,19 @@ ZEND_METHOD(Wcd_IServer, Connect)
 		result.value_.move_zv(return_value);
 	}
 	
+}
+
+ZEND_METHOD(Wcd_IServer, Instance)
+{
+	if (!zarg_rd::zero_args(execute_data, __FUNCTION__))
+	{
+		return;
+	}
+	obj_return result = IServer::instance();
+	if (!result.throw_errors())
+	{
+		result.value_.move_zv(return_value);
+	}
 }
 
 

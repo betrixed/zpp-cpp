@@ -98,9 +98,14 @@ HtmlPlates::getModel()
 {
 	if (model_.isNull()) {
 
-		model_ = Services::service( model_svc_);
+		val_return mtest = Services::service( model_svc_);
 
-		if (obj_ptr(model_).isNull())
+		if (!mtest.has_errors())
+		{
+			model_ = mtest.value_.zobject();
+		}
+
+		if (!model_.ok())
 		{
 			model_ = Config::make(htab_ptr());
 		}
@@ -119,17 +124,18 @@ void HtmlPlates::mergeData(htab_ptr items)
 	htab_rw(values_).merge(items);
 }
 
-str_rc
+str_return
 HtmlPlates::renderView(htab_rw options) 
 {
 	options.set(HPit.final_key, false);
 	return render(options);
 }
 
-str_rc HtmlPlates::render(htab_ptr options) 
+str_return 
+HtmlPlates::render(htab_ptr options) 
 {
 	initValues();
-	str_rc result;
+	str_return result;
 
 	val_ptr isfinal = options.get(HPit.final_key);
 
@@ -151,12 +157,20 @@ str_rc HtmlPlates::render(htab_ptr options)
 			}
 		}
 	}
+	obj_rc engine;
 
-	obj_rc engine = Services::service(HPit.engine_key);
+	val_return etest = Services::service(HPit.engine_key);
+	if (etest.has_errors())
+	{	
+		result = etest.move_error();
+		return result;
+	}
+	engine = etest.value_.zobject();
+
 	//showobj("render call", engine);
 	
 	PlateEngine* pe = nullptr;
-	if (!engine.isNull()) {
+	if (engine.ok()) {
 		 pe = zobj_toc<PlateEngine>(engine);
 		 pe->shareWithAll(values_);
 	}
@@ -282,8 +296,12 @@ ZEND_METHOD(Wcc_HtmlPlates, renderView)
 
 	val_rc options_copy(options);
 
-	str_rc result = cobj->renderView(val_ptr(options_copy));
-	result.move_zv(return_value);
+	str_return result = cobj->renderView(val_ptr(options_copy));
+	if (!result.throw_errors())
+	{
+		result.value_.move_zv(return_value);
+	}
+	
 
 }
 
@@ -298,8 +316,12 @@ ZEND_METHOD(Wcc_HtmlPlates, render)
 	auto cobj = zval_toc<HtmlPlates>(ZEND_THIS);
 
 	//showmem("render options", options);
-	str_rc result = cobj->render(val_ptr(options).zarray());
-	result.move_zv(return_value);
+	str_return result = cobj->render(val_ptr(options).zarray());
+	if (!result.throw_errors())
+	{
+		result.value_.move_zv(return_value);
+	}
+	
 	
 }
 

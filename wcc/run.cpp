@@ -199,7 +199,14 @@ void Run::construct()
 
 
 	Services* sobj = Services::cpp_global();
-	obj_rc config = sobj->newInstance(Config::omg.class_name());
+
+	obj_return config_err = sobj->newInstance(Config::omg.class_name());
+	
+	if (config_err.throw_errors())
+	{
+		return;
+	}
+	obj_rc config = std::move(config_err.value_);
 	sobj->set(Run_i.config_str, config);
 
 	self.property(Run_i.config_str, config);
@@ -287,10 +294,21 @@ void Run::construct()
 obj_ptr 
 Run::setup_world()
 {
+	obj_ptr self(self_);
+
 	DebugLog* log = DebugLog::cpp_global();
 
-	obj_rc config = Services::service(Run_i.config_str);
+	val_return ctest = Services::service(Run_i.config_str);
 
+	obj_rc config;
+
+	if (ctest.has_errors())
+	{
+		ctest.error() << "No config object service";
+		return self;
+	}
+
+	config = ctest.value_.zobject();
 	/*if (log)
 	{
 		log->dump("config", config);
@@ -304,8 +322,6 @@ Run::setup_world()
 	}
 
 	obj_rc site = ReflectCache::staticInstance(app_class);
-
-	obj_ptr self(self_);
 
 	self.property(Run_i.site_str, site);
 	site.call(Run_i.s_prepare);
@@ -393,8 +409,12 @@ Run::setup_cryptic()
 	val_return data;
 	if (file_exists(path))
 	{	
-		obj_rc cache_mgr = sobj->get(Run_i.cache_mgr);
-		CacheMgr *cmgr = zobj_toc<CacheMgr>(cache_mgr);
+		 
+		CacheMgr *cmgr = CacheMgr::instance(result);
+		if (result.has_errors() || !cmgr)
+		{
+			return result;
+		}
 		data = cmgr->readCache(path, Run_i.file_cache);
 
 		/*
@@ -527,7 +547,15 @@ void Run::shutdown()
 
 	if (php_get_session_status() == php_session_active)
 	{
-		obj_rc user_session = sobj->get(Run_i.user_session);
+		obj_rc user_session;
+
+		val_return utest = sobj->get(Run_i.user_session);
+		if (utest.throw_errors())
+		{
+			return;
+		}
+		user_session = utest.value_.zobject();
+
 		if (user_session.ok())
 		{
 			val_rc ended = user_session.call(Run_i.is_ended);
@@ -543,14 +571,25 @@ void Run::shutdown()
 		}
 	}
 	
+	error_return erred;
 
-	obj_rc cache_mgr = sobj->get(Run_i.cache_mgr);
-	CacheMgr *cmgr = zobj_toc<CacheMgr>(cache_mgr);
+	CacheMgr *cmgr = CacheMgr::instance(erred);
+	if (erred.throw_errors() || !cmgr)
+	{
+		return;
+	}
+
 	cmgr->flush_caches();
 	//zend_printf("Caches written\n");
 
-	obj_rc cfg = sobj->get(Run_i.config_str);
-	Config* cobj = zobj_toc<Config>(cfg);
+	val_return ctest = sobj->get(Run_i.config_str);
+
+	if (ctest.throw_errors())
+	{
+		return;
+	}
+
+	Config* cobj = zobj_toc<Config>(ctest.value_.zobject());
 	cobj->clear();
 
 	sobj->clearDefer();
@@ -685,8 +724,13 @@ Run::config_init(str_ptr bootstrap)
 		//showmem("php select", value);
 		if (tlist.isArray())
 		{
-			obj_rc cache_mgr = Services::service(Run_i.cache_mgr);
-			CacheMgr*  cmgr = zobj_toc<CacheMgr>(cache_mgr);
+			CacheMgr*  cmgr = CacheMgr::instance(result);
+
+			if (result.has_errors())
+			{
+				return result;
+			}
+
 			Config*    cfg = zobj_toc<Config>(config);
 
 			htab_walk wk;
@@ -736,11 +780,20 @@ Run::config_init(str_ptr bootstrap)
 			//showmem("Get config namespaces !\n", ns);
 			if (ns.isArray())
 			{
-				obj_rc finder = Services::service(Run_i.finder);
+				 obj_rc finder;
+
+				 val_return ftest = Services::service(Run_i.finder);
+
+				 if (ftest.has_errors())
+				 {
+				 	result = ftest.move_error();
+				 	return result;
+				 }
+				 finder = ftest.value_.zobject();
 				//showobj("Finder service", finder);
 
-				Finder* fd = zobj_toc<Finder>(finder);
-				fd->addPathArray(ns.zarray());
+				 Finder* fd = zobj_toc<Finder>(finder);
+				 fd->addPathArray(ns.zarray());
 			}
 			else {
 				zend_printf("No %s entry in config!\n", Run_i.namespaces_str.data());

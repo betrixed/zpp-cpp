@@ -20,8 +20,8 @@ protected:
 	int       defer_ct_;
 	bool      throw_fail_;
 
-	val_rc  activate(str_ptr key);
-	val_rc  call_value(obj_ptr callme);
+	val_return  activate(str_ptr key);
+	val_rc      call_value(obj_ptr callme);
 
 public:
 
@@ -34,12 +34,12 @@ public:
 	static Services* cpp_global();
 
 	static obj_rc  setOne(str_ptr key, obj_ptr obj);
-	static obj_rc  getOne(str_ptr key);
+	static obj_return  getOne(str_ptr key, htab_ptr arglist=htab_ptr());
 
-	static val_rc  service(str_ptr key);
-	static val_rc  service(const std::string_view& key);	
+	static val_return  service(str_ptr key);
+	static val_return  service(const std::string_view& key);	
 
-	obj_rc  newInstance(str_ptr key);
+	obj_return  newInstance(str_ptr key, htab_ptr arglist = htab_ptr());
 	
 	obj_rc  setObject(obj_ptr obj, str_ptr key = str_ptr());
 
@@ -57,7 +57,7 @@ public:
 	void       set(str_ptr name, val_rc& val);
 	
 	
-	val_rc   	get(str_ptr name);
+	val_return get(str_ptr name);
 
 	void       unset(str_ptr name);
 

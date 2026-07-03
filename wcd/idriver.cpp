@@ -451,8 +451,14 @@ IDriver::clearSchemaCache()
 	str_rc name;
 
 	schema_def_.init();
-	obj_ptr server_mgr = Services::getOne(IServer::omg.class_name());
-	IServer* isv = zobj_toc<IServer>(server_mgr);
+	obj_return server_mgr = IServer::instance();
+
+	if (server_mgr.throw_errors())
+	{
+		return false;
+	}
+
+	IServer* isv = zobj_toc<IServer>(server_mgr.value_);
 	obj_rc cacheobj = isv->getDataCache();
 	if (cacheobj.ok())
 	{
@@ -470,14 +476,21 @@ IDriver::getSchema()
 	
 	ICache*  cache = nullptr;
 	str_rc name;
-	
+	obj_rc result;
 
 	if (schema_def_.ok())
 	{
-		return schema_def_;
+		result = schema_def_;
+		return result;
 	}
-	obj_ptr server_mgr = Services::getOne(IServer::omg.class_name());
-	IServer* isv = zobj_toc<IServer>(server_mgr);
+	obj_return server_mgr = IServer::instance();
+
+	if (server_mgr.throw_errors())
+	{
+		return result;
+	}
+	
+	IServer* isv = zobj_toc<IServer>(server_mgr.value_);
 
 	obj_rc cacheobj = isv->getDataCache();
 	if (cacheobj.ok())
@@ -490,8 +503,6 @@ IDriver::getSchema()
 
 		val_rc nullval;
 		schema_def_ = cache->get(name, nullval); 
-
-
 	}
 	if (!schema_def_.ok())
 	{
@@ -503,8 +514,6 @@ IDriver::getSchema()
 		}
 	}
 	return schema_def_;
-
-
 }
 
 obj_rc 
