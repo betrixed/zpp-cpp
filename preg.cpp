@@ -126,7 +126,7 @@ preg::preg() : pce_(nullptr), global_(false), flags_(0)
 preg::preg(const char* expr, int flags, bool global)
 	:  pce_(nullptr),global_(global),flags_(flags)
 {
-	regexp_ =  str_temp(expr);
+	regexp_ =  str_rc(expr);
 	//showstr("regexp_",regexp_);
 }
 

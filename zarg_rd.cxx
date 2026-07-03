@@ -201,6 +201,34 @@ zarg_rd::htab(zval *arg)
 	return result;
 }
 
+htab_ptr
+zarg_rd::htab_or_null(zval *arg)
+{
+	htab_ptr result;
+	if (!arg && maybe_)
+	{
+		//showarray("arg", result);
+		return result;
+	}
+	val_ptr test(arg);
+
+	switch(test.ztype())
+	{
+	case IS_NULL:
+		 break;
+	case IS_ARRAY:
+		result = test.zarray();
+		break;
+	default:
+		if (!maybe_) {
+			error() << "Array value or Null expected";
+		}
+		break;
+	}
+	//showarray("arg", result);
+	return result;
+}
+
 str_ptr 
 zarg_rd::str_or_null(zval *arg)
 {

@@ -108,21 +108,6 @@ str_rc::str_rc(const char* cp, int slen) : str_ptr()
 	//showstr("str_rc(): ", s);
 }
 
-str_rc& 
-str_rc::operator=(str_temp&& rc)
-{
-
-    zend_string* p = rc.s;
-    //showstr("operator= str_temp&&", p);
-    if (p != s)
-    {
-    	lose();
-    }
-    s = p;
-    
-    rc.s = nullptr;
-    return *this;
-}
 
 str_rc& 
 str_rc::operator=(str_rc&& rc)
@@ -136,6 +121,7 @@ str_rc::operator=(str_rc&& rc)
     	s = p;
     }
     else {
+    	// presume 2 copies, but now one is erased.
     	if (s) {
     		try_decref(s); // 1 instance disappears
     	}
@@ -385,16 +371,6 @@ str_perm::str_perm(const char* c, size_t slen)
 	s = zend_string_init(c, slen, 1);
 }
 
-str_temp::str_temp(const char* c, size_t slen)
-{
-	if (!slen)
-	{
-		slen = strlen(c);
-	}
-	s = zend_string_init(c, slen, 0);
-	//showstr("str_temp", s);
-
-}
 
 str_intern::str_intern(const char* c, size_t slen)
 {

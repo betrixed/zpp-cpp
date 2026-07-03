@@ -97,6 +97,8 @@ public:
 	str_ptr  str_or_null(zval *arg);
 
 	htab_ptr htab(zval *arg);
+	htab_ptr htab_or_null(zval *arg);
+	
 	val_ptr  string_or_array(zval* arg);
 	
 	bool weakref(weak_ref& value, zval* arg);

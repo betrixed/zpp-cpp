@@ -136,6 +136,12 @@ void htab_rw::push_back(HashTable* val)
 	}
 }
 
+void htab_rw::push_back(const char *s)
+{
+	str_rc temp(s);
+	push_back(temp);
+}
+
 void htab_rw::push_back(zend_string* zs)
 {
 	zval tmp = {0};
@@ -177,7 +183,7 @@ void htab_rw::push_back(zval* zv)
 
 void htab_rw::push_back(const char* s, std::size_t slen)
 {
-	str_temp temp(s, slen);
+	str_rc temp(s, slen);
 	push_back((zend_string*)temp);
 }
 

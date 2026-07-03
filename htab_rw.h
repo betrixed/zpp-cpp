@@ -67,7 +67,9 @@ namespace zpp {
         void push_back(zend_string* zs);
         void push_back(zend_object* zobj);
         void push_back(zval* zv);
+        void push_back(const char* s);
 
+        // A C++ magic incantation for code generation
         void push_items(auto&&... args)
         {
             for (auto s : std::initializer_list<str_ptr>{ args... })
