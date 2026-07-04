@@ -170,7 +170,7 @@ namespace zpp {
 
     class fn_varparams : public fn_result {
     public:
-        zval*  params_;
+        zval*  params_; // dynamically created and destroyed.
 
         fn_varparams(fn_call& fn, unsigned vct) : fn_result(fn)
         {
@@ -193,10 +193,12 @@ namespace zpp {
         
         fn_params(fn_call& fn) : fn_result(fn)
         {
+            //does first wipe
             setParams(&params[0], ARGCT);
         }
         fn_params(fn_call& fn, HashTable* nargs) : fn_result(fn)
         {
+            //does first wipe
             setParams(&params[0], ARGCT, nargs);
         }
 
@@ -401,7 +403,7 @@ namespace zpp {
 
     bool function_exists(str_ptr name);
 
-    bool class_exists(str_ptr name);
+    bool class_exists(str_ptr name, bool autoload = false);
 
     val_rc fopen(str_ptr name, str_ptr fmode, 
                 bool use_include_path=false, val_ptr context=val_ptr());

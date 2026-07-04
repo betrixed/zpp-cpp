@@ -409,19 +409,25 @@ fn_call::set_obj(zend_object* zob)
     cache_.object = zob;
 }
 
-bool class_exists(str_ptr arg)
+bool 
+class_exists(str_ptr arg, bool autoload)
 {
-    fn_params<1> c_exists(TLFNs.class_exists);
-    val_ptr::string_bind(&c_exists.params[0], arg);
-    return c_exists.zbool();
+    fn_params<2> fn(TLFNs.class_exists);
+    zval *pz = fn.argsptr();
+
+    val_ptr::string_bind(pz, arg);
+    ZVAL_BOOL(pz+1, autoload);
+
+    return fn.zbool();
 }
 
 bool 
 function_exists(str_ptr name)
 {
-    fn_params<1> fex(TLFNs.function_exists);
-    val_ptr::string_bind(&fex.params[0], name);
-    return fex.zbool();
+    fn_params<1> fn(TLFNs.function_exists);
+    zval *pz = fn.argsptr();
+    val_ptr::string_bind(pz, name);
+    return fn.zbool();
 }
 
 
