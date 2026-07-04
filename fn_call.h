@@ -403,7 +403,7 @@ namespace zpp {
 
     bool function_exists(str_ptr name);
 
-    bool class_exists(str_ptr name, bool autoload = false);
+    bool class_exists(str_ptr name, bool autoload = true);
 
     val_rc fopen(str_ptr name, str_ptr fmode, 
                 bool use_include_path=false, val_ptr context=val_ptr());
