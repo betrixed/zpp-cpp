@@ -253,7 +253,7 @@ Services::getOne(str_ptr key, htab_ptr arglist)
 		return result;	
 	}
 
-	if (class_exists(key, false))
+	if (class_exists(key, true))
 	{
 		result = svc->newInstance(key, arglist);
 	}
