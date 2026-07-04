@@ -11,8 +11,12 @@ extern "C" {
 #include <Zend/zend_closures.h>
 };
 
+//#define DBG_ROUTEMATCH
+
+#ifdef DBG_ROUTEMATCH
 #ifndef WCC_DEBUGLOG_H
 #include "debuglog.h"
+#endif
 #endif
 
 #ifndef ROUTE_MATCH_H
@@ -284,9 +288,9 @@ RouteMatch::call(htab_ptr extra, obj_ptr before, obj_ptr after)
 	{
 		zobj = target_;
 	}
-	
-	DebugLog* debug = DebugLog::cpp_global();
-
+#ifdef DBG_ROUTEMATCH
+	DebugLog* log = DebugLog::cpp_global();
+#endif
 	// appended extra arguments?
 	if (extra.size())
 	{
@@ -345,20 +349,26 @@ RouteMatch::call(htab_ptr extra, obj_ptr before, obj_ptr after)
 				}
 			}
 			else {
-				debug->dump("Method not found", method_name);
+#ifdef DBG_ROUTEMATCH
+				log->dump("Method not found", method_name);
+#endif
 			}
 		}
 
 		if (obj.method_exists(ob_method_))
 		{
 			result.value_ = this->call_method(obj, ob_method_, ob_args_);
-			if (debug)
+#ifdef DBG_ROUTEMATCH
+			if (log)
 			{
-				debug->line("</pre>");
+				log->line("</pre>");
 			}
+#endif
 		}
 		else {
-			debug->dump("Method not found", ob_method_);
+#ifdef DBG_ROUTEMATCH
+			log->dump("Method not found", ob_method_);
+#endif
 		}
 		
 		if (after.ok())
@@ -378,9 +388,11 @@ RouteMatch::call(htab_ptr extra, obj_ptr before, obj_ptr after)
 					result.value_ = result_;
 				}
 			}
+#ifdef DBG_ROUTEMATCH
 			else {
-				debug->dump("Method not found", method_name);
+				log->dump("Method not found", method_name);
 			}
+#endif
 		}	
 	}
 

@@ -13,7 +13,7 @@
 #include "reflect_cache.h"
 #endif
 
-#define DBG_SERVICES
+//#define DBG_SERVICES
 
 #ifdef DBG_SERVICES
 #ifndef WCC_DEBUGLOG_H
@@ -113,6 +113,9 @@ Services::clearObjects()
 val_return  
 Services::activate(str_ptr key)
 {
+#ifdef DBG_SERVICES
+	DebugLog* log = DebugLog::cpp_global();
+#endif
 
 	val_return result;
 	//zend_printf("Services::activate(\"%s\")\n", key.data());
@@ -138,6 +141,10 @@ Services::activate(str_ptr key)
 
 	if (test.isCallable())
 	{	
+#ifdef DBG_SERVICES
+		log->dump("activate callable", test);
+#endif
+
 		obj_ptr callme = test.zobject();
 
 		//zend_printf("Callable object \n");
@@ -151,6 +158,9 @@ Services::activate(str_ptr key)
 		result = get(key);
 	}
 	else {
+#ifdef DBG_SERVICES
+		log->dump("activate value", test);
+#endif
 		result.value_ = test;
 	}
 	defer_ct_--;
@@ -213,6 +223,14 @@ Services::setOne(str_ptr key, obj_ptr obj)
 
 /* static */
 obj_return  
+Services::makeOne(str_ptr key, htab_ptr arglist)
+{
+	Services* me = Services::cpp_global();
+	return me->newInstance(key, arglist);
+}
+
+/* static */
+obj_return  
 Services::getOne(str_ptr key, htab_ptr arglist)
 {
 	obj_return  result;
@@ -221,14 +239,12 @@ Services::getOne(str_ptr key, htab_ptr arglist)
 	DebugLog* log = DebugLog::cpp_global();
 	if (log)
 	{   
-		//log->dump("gServices", services);
 		log->dump("key", key);
 	}
 #endif
 
 	Services* svc = zobj_toc<Services>(services);
 
-	//zend_printf("getOne Services %lx \n", (long int) self);
 	obj_rc single = svc->getObject(key);
 
 	if (single.ok())
@@ -237,7 +253,15 @@ Services::getOne(str_ptr key, htab_ptr arglist)
 		return result;	
 	}
 
-	return svc->newInstance(key, arglist);
+	if (class_exists(key, false))
+	{
+		result = svc->newInstance(key, arglist);
+	}
+	else {
+		result.error() << "Services::getOne" 
+			" cannot make object with key " << key;
+	}
+	return result;
 
 }
 
@@ -294,7 +318,7 @@ Services::newInstance(str_ptr name_class, htab_ptr arglist)
 		result.value_ = std::move(obj);
 	}
 	else {
-		 result.error() << "newInstance failed for " << name_class;
+		 result.error() << "Failed to make " << name_class;
 	}
 	return result;
 }
@@ -379,7 +403,10 @@ val_return
 Services::get(str_ptr name)
 {
 	val_return result;
-	
+#ifdef DBG_SERVICES
+	DebugLog* log = DebugLog::cpp_global();
+	log->dump("svc get", name);
+#endif
 	if (!name.size())
 	{
 		return result;
@@ -394,12 +421,21 @@ Services::get(str_ptr name)
 		return  result;
 	}
 
+	//auto ztype = test.ref_type();
+
+
 	if (test.isCallable())
-	{
+	{	
+#ifdef DBG_SERVICES
+		log->dump("get isCallable", test);
+#endif
 		obj_ptr callme = test.zobject();
 		result.value_ = call_value(callme);
 	}
 	else {
+#ifdef DBG_SERVICES
+		log->dump("get Value", test);
+#endif
 		result.value_ = test;
 	}
 	return result;
@@ -445,7 +481,24 @@ ZEND_METHOD(Wcc_Services, getOne)
 	if (!args.throw_errors())
 	{
 		obj_return result = Services::getOne(skey, arglist);
-		if (!result.throw_errors())
+		if (!result.throw_errors(__FUNCTION__))
+		{
+			result.value_.move_zv(return_value);
+		}
+	}
+}
+
+ZEND_METHOD(Wcc_Services, makeOne)
+{
+	zarg_rd args(execute_data);
+
+	str_ptr skey = args.str(args.need(0));
+	htab_ptr arglist = args.htab(args.option(1));
+
+	if (!args.throw_errors())
+	{
+		obj_return result = Services::makeOne(skey, arglist);
+		if (!result.throw_errors(__FUNCTION__))
 		{
 			result.value_.move_zv(return_value);
 		}

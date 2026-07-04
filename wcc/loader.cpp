@@ -5,8 +5,10 @@
 #include "loader.h"
 #endif
 
+#ifdef  DBG_LOADER
 #ifndef WCC_DEBUGLOG_H
 #include "debuglog.h"
+#endif
 #endif
 
 #ifndef WCC_SERVICES_H
@@ -273,15 +275,14 @@ Loader::require(str_ptr file)
 
 	result.value_ = fn.call(str_ptr(LDRi.invoke_fn), &path);
 
+#ifdef DBG_LOADER
 	DebugLog* log = DebugLog::cpp_global();
-	//bool ok = extload_fn(result.value_, extloader_, 1, &path);
-	//zend_printf("Loader::require %s ", file.data());
-	//showmem("by Extloader", result.value_);
 
 	if (log)
 	{
 		log->dump("require", (zval*)(result.value_));
 	}
+#endif
 	if (!result.value_.ok() && throwNotFound_)
 	{	// Load function may throw anyway.
 

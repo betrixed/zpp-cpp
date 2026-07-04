@@ -7,6 +7,7 @@ extern "C" {
 }
 #endif
 
+
 #ifndef DISPATCH_WCC_H
 #include "dispatch.h"
 #endif
@@ -45,6 +46,14 @@ extern "C" {
 
 #ifndef MODULE_WCC_H
 #include "module.h"
+#endif
+
+//#define DBG_DISPATCH
+
+#ifdef DBG_DISPATCH
+#ifndef WCC_DEBUGLOG_H
+#include "debuglog.h"
+#endif
 #endif
 
 namespace wcc {
@@ -262,6 +271,12 @@ Dispatch::call_module_activate(obj_ptr module)
 obj_rc
 Dispatch::createModule(str_ptr name, htab_ptr mcfg)
 {
+	#ifdef DBG_DISPATCH
+	DebugLog* log = DebugLog::cpp_global();
+	log->dump("createModule name", name);
+	log->dump("createModule data", mcfg);
+	#endif
+
 	obj_rc result;
 	str_rc cname = mcfg.get(DSPi.classname_str);
 	if (!cname.ok())
@@ -284,6 +299,10 @@ obj_return
 Dispatch::addModule(str_ptr name, val_ptr modspec)
 {
 	obj_return result;
+#ifdef DBG_DISPATCH
+	DebugLog* log = DebugLog::cpp_global();
+	log->dump("Dispatch addModule",name);
+#endif
 
 	obj_rc modo;
 	Module* m = nullptr;
@@ -940,6 +959,10 @@ Dispatch::setLog(bool val)
 obj_return 
 Dispatch::setModule(str_ptr name)
 {
+#ifdef DBG_DISPATCH
+	DebugLog* log = DebugLog::cpp_global();
+	log->dump("Dispatch setModule", name);
+#endif
 
 	obj_return result;
 	obj_rc modo = modules_.get(name);
@@ -952,6 +975,7 @@ Dispatch::setModule(str_ptr name)
 	}
 
 	obj_return mdef_err = getDefaultModule();
+
 	if (mdef_err.has_errors())
 	{
 		result = mdef_err.move_error();

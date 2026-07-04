@@ -13,9 +13,10 @@
 #include "wcc/services.h"
 #endif
 
-
+#ifdef DBG_CONFIG
 #ifndef WCC_DEBUG_LOG_H
 #include "wcc/debuglog.h"
+#endif
 #endif
 
 #ifndef ICONFIG_ARGINFO_H

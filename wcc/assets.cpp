@@ -33,6 +33,13 @@
 #include "cachemgr.h"
 #endif
 
+//#define DBG_ASSETS
+#ifdef DBG_ASSETS
+#ifndef WCC_DEBUGLOG_H
+#include "debuglog.h"
+#endif
+#endif
+
 #ifndef ASSETS_ARGINFO_H
 #define ASSETS_ARGINFO_H
 
@@ -677,21 +684,15 @@ Assets::loadAssetFile(str_ptr file)
 		return result;
 	}
 
-	val_return cret = Services::service(ASI.cache_mgr);
+	error_return cret;
+
+	CacheMgr* cmgr = CacheMgr::instance(cret);
 
 	if(cret.has_errors())
 	{
 		result = cret.move_error();
 		return result;
 	}
-	if (cret.value_.isObject())
-	{
-		result.error() << "No Cache Mgr service";
-		return result;
-	}
-	obj_rc cache_mgr = std::move(cret.value_);
-
-	CacheMgr* cmgr = zobj_toc<CacheMgr>(cache_mgr);
 
 	val_return vdata = cmgr->readCache(file, ASI.file_cache);
 

@@ -22,6 +22,13 @@
 #include "assets.h"
 #endif
 
+//#define DBG_MODULE
+#ifdef DBG_MODULE
+#ifndef WCC_DEBUGLOG_H
+#include "debuglog.h"
+#endif
+#endif
+
 #ifndef ARGINFO_MODULE_H
 #define ARGINFO_MODULE_H
 extern "C" {
@@ -126,6 +133,11 @@ Module::activate(obj_ptr finder)
 	obj_ptr  data = data_;
 
 	//zend_printf("activate\n");
+#ifdef DBG_MODULE
+	DebugLog* log = DebugLog::cpp_global();
+	log->line("Module Activate");
+
+#endif
 
 	str_rc def_name = data.str_property(MODi.DEFAULT_MOD);
 	obj_rc dispatch;
@@ -244,12 +256,22 @@ Module::activate(obj_ptr finder)
 			htab_return ftest  = asmgr->loadAssetFile(asset_file);
 			htab_rc added;
 
+#ifdef DBG_MODULE
+			log->line("load asset file");
+
+#endif
 			if (ftest.has_errors())
 			{
 				result = ftest.move_error();
+#ifdef DBG_MODULE
+				log->dump("errors:", result.get_errors());
+#endif
 			}
 			else {
 				added = std::move(ftest.value_);
+#ifdef DBG_MODULE
+					log->dump("add assets", added);
+#endif
 			}
 			htab_rc asset_keyslist = data.array_property(MODi.ASSETS);
 			if (!asset_keyslist.size())

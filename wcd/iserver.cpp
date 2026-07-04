@@ -13,8 +13,10 @@
 #include "idriver.h"
 #endif
 
+#ifdef DBG_ISERVER
 #ifndef WCC_DEBUG_LOG_H
 #include "wcc/debuglog.h"
+#endif
 #endif
 
 #ifndef ICONFIG_ARGINFO_H
@@ -160,7 +162,7 @@ obj_return
 IServer::activate(str_ptr name)
 {
 	//showstr("Activate", name);
-	
+
 	obj_return cfg = needConfig(name);
 
 	obj_return result;
@@ -253,10 +255,10 @@ IServer::getConnect(str_ptr name)
 {
 	wref_return result;
 	IDriver* db;
-
+#ifdef DBG_ISERVER
 	DebugLog* log = DebugLog::cpp_global();
-	
 	log->dump("svc_key_", svc_key_);
+#endif
 
 	if (svc_key_.ok())
 	{
@@ -269,16 +271,15 @@ IServer::getConnect(str_ptr name)
 		Services::service(key);
 	}
 
-
-	
-	class_data cd(IServer::omg.class_entry_);
-
+#ifdef DBG_ISERVER
+	log->dump("name", name);
+#endif
 	if (!name.ok())
 	{
+		class_data cd(IServer::omg.class_entry_);
 		str_rc name_mgr = cd.static_property(ISV.active_cfg);
 		name = name_mgr;
 	}
-	log->dump("name", name);
 
 
 	obj_rc conn(active_.get(name));
@@ -290,11 +291,17 @@ IServer::getConnect(str_ptr name)
 	else {
 
 		str_rc alias = alias_.get(name);
+
 		if (!alias.ok())
 		{
+#ifdef DBG_ISERVER
+			log->dump("Aliases", alias_);
+#endif
 			alias = name;
 		}
-
+#ifdef DBG_ISERVER
+		log->dump("alias", alias);
+#endif
 		conn = active_.get(alias);
 		if (conn.ok())
 		{
@@ -306,9 +313,9 @@ IServer::getConnect(str_ptr name)
 			obj_return  dbresult;
 
 			dbresult = activate(alias);
-
+#ifdef DBG_ISERVER
 			log->dump("dbresult", dbresult.value_);
-			
+#endif
 			if (dbresult.has_errors())
 			{
 				result = dbresult.move_error();
@@ -350,8 +357,9 @@ IServer::connect(str_ptr name)
 {
 	wref_return result;
 	//DebugLog* log = DebugLog::cpp_global();
-
-	//log->dump("Connect", name);
+#ifdef DBG_ISERVER
+	log->dump("Connect", name);
+#endif
 
 	str_ptr sclass = IServer::omg.class_name();
 
@@ -372,23 +380,22 @@ IServer::connect(str_ptr name)
 	
 	str_rc conkey;
 
-
-	//showstr("::connect askfor", name);
-
 	if (!name.size())
 	{	
+		//get
 		conkey = cd.static_property(ISV.active_cfg);
-		//showstr("\nactivecfg: ", conkey);
+
 	}
 	else {
-		//showstr("\nNew activecfg: ", name);
-		val_rc value(name);
-		//log->line("get static property");
+
+		val_rc value(name); //to set
 		cd.static_property(ISV.active_cfg, value);
 		conkey = name;
 
 	}
-	//log->dump("Connect Key", conkey);
+#ifdef DBG_ISERVER
+	log->dump("Connect Key", conkey);
+#endif
 	result = s->getConnect(conkey);
 	return result;
 }

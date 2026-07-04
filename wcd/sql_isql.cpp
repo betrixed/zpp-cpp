@@ -37,8 +37,10 @@ extern "C" {
 #include "postgres.h"
 #endif
 
+#ifdef DBG_SQLISQL
 #ifndef WCC_DEBUGLOG_H
-#include "debuglog.h"
+#include "wcc/debuglog.h"
+#endif
 #endif
 
 namespace wcd {

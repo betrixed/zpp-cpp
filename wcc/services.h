@@ -33,8 +33,9 @@ public:
 	static obj_rc  instance();
 	static Services* cpp_global();
 
-	static obj_rc  setOne(str_ptr key, obj_ptr obj);
+	static obj_rc  	   setOne(str_ptr key, obj_ptr obj);
 	static obj_return  getOne(str_ptr key, htab_ptr arglist=htab_ptr());
+	static obj_return  makeOne(str_ptr cname, htab_ptr arglist=htab_ptr());
 
 	static val_return  service(str_ptr key);
 	static val_return  service(const std::string_view& key);	
