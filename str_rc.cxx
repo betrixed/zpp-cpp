@@ -104,7 +104,13 @@ str_rc::str_rc(const char* cp, int slen) : str_ptr()
 		//check!!
 		slen = strlen(cp);
 	}
-	s = zend_string_init(cp, slen, 0);
+	if (slen==0)
+	{
+		s = str_ptr::empty_str();
+	}
+	else {
+		s = zend_string_init(cp, slen, 0);
+	}
 	//showstr("str_rc(): ", s);
 }
 

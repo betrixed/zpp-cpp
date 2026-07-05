@@ -12,7 +12,12 @@
 #include "preg.h"
 #endif
 
-
+//#define DBG_PREG_CPP
+#ifdef DBG_PREG_CPP
+#ifndef WCC_DEBUGLOG_H
+#include "wcc/debuglog.h"
+#endif
+#endif
 
 #ifndef STR_BUF_H
 #include "str_buf.h"
@@ -33,6 +38,9 @@ extern "C" {
 
 namespace zpp {
 
+#ifdef DBG_PREG_CPP
+using namespace wcc;
+#endif
 
 val_rc explode(str_ptr sep,  str_ptr  split, long limit)
 {
@@ -127,6 +135,7 @@ preg::preg(const char* expr, int flags, bool global)
 	:  pce_(nullptr),global_(global),flags_(flags)
 {
 	regexp_ =  str_rc(expr);
+
 	//showstr("regexp_",regexp_);
 }
 
@@ -160,6 +169,7 @@ preg::release()
 	if (pce_ != nullptr) {
 		//zend_printf("Release PCE %lx\n", pce_);
 	    php_pcre_pce_decref(pce_);
+	    pce_ = nullptr;
 	}
 }
 
@@ -209,23 +219,40 @@ preg::matches(str_ptr subject, zend_long offset)
 	val_rc ret_val;
 
 	int isglobal = global_ ? 1 : 0;
-
+#ifdef DBG_PREG_CPP
+	DebugLog* log = DebugLog::cpp_global();
+	log->line("matches");
+	log->dump("subject", subject);
+#endif
 	pcre_cache_entry* cre = pce();
 	if (!cre)
 	{
 		return 0;
 	}
+#ifdef DBG_PREG_CPP
+	log->line("has pce");
+#endif
 
 #if PHP_VERSION_ID >= 80400
 /**
-   PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, 
-   	zend_string *subject_str, zval *return_value,
-	zval *subpats, bool global, zend_long flags, zend_off_t start_offset)
+  PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, 
+  zend_string *subject_str, zval *return_value,
+  zval *subpats, bool global, zend_long flags, zend_off_t start_offset)
+
 */
+#ifdef DBG_PREG_CPP
+	log->line(">8.4");
+#endif
 	php_pcre_match_impl(cre, subject, ret_val, result_,
 		 isglobal,  flags_,  /*offset*/ offset);
-
+#ifdef DBG_PREG_CPP
+	log->line("returned");
+#endif
 #else
+
+#ifdef DBG_PREG_CPP
+	log->line("useflags < 8.4");
+#endif
 	int useflags = (flags_ == 0) ? 0 : 1;
 	php_pcre_match_impl(cre, subject, ret_val, result_,
 		 isglobal,  useflags,  flags_,  /*offset*/ offset);
@@ -236,6 +263,10 @@ preg::matches(str_ptr subject, zend_long offset)
 
 	test = result_;
 
+#ifdef DBG_PREG_CPP
+	log->dump("return value", result_);
+	log->dump("match_impl result", result_);
+#endif
 	if (!test.isArray())
 	{
 		count_ = 0;
@@ -332,12 +363,26 @@ preg::replace(const char* rp, str_ptr subject)
 	global_ = true;
 	str_rc result;
 
+#ifdef DBG_PREG_CPP
+		DebugLog *log = DebugLog::cpp_global();
+		log->dump("replace subject", subject);
+		log->dump("replace regexp", regexp_);
+#endif
+
 	if (matches(subject) > 0) {
 		htab_ptr rtab_1(result_);
+
+#ifdef DBG_PREG_CPP
+		log->dump("result_", rtab_1);
+#endif
+
 		str_ptr  subj(subject);
 
+
 		std::string_view strview = subj.vstr();
-		std::string_view rval(rp);
+		unsigned rsize = strlen(rp);
+
+		std::string_view rval(rp, rsize);
 
 		//std::stringstream ss;
 		str_buf ss;
@@ -345,9 +390,12 @@ preg::replace(const char* rp, str_ptr subject)
 
 		val_rc rlist = rtab_1.get(zend_long(0));
 		htab_ptr replace(rlist);
-
+#ifdef DBG_PREG_CPP
+		log->dump("replace", replace);
+#endif
 		uint ipos = 0;
 		size_t ct = replace.size();
+
 		for(size_t i = 0; i < ct; i++)
 		{
 			zval* vh2 = replace.get(i);
@@ -361,7 +409,15 @@ preg::replace(const char* rp, str_ptr subject)
 			// prior text first
 
 			auto prior = strview.substr(ipos, soffset - ipos);
-			ss << prior << rval;
+			if (prior.size())
+			{
+				ss << prior;
+			}
+			if (rsize)
+			{
+				ss << rval;
+			}
+			//ss << prior << rval;
 			ipos = soffset + slen;
 		}
 		if (ipos < strview.size()) {
@@ -373,7 +429,8 @@ preg::replace(const char* rp, str_ptr subject)
 			//zend_printf("empty replace result\n");
 			return result;
 		}
-		result.adopt(ss.zstr());
+
+		result = ss.zstr();
 		return result;
 	}
 	result = subject;

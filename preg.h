@@ -47,7 +47,7 @@ namespace zpp {
 	class preg {
 	protected:
 		pcre_cache_entry* pce_; // cached generated entry
-		str_rc      	  regexp_;
+		str_rc      	  regexp_; //hold the expression
 		val_rc            result_; //hold result, array of matches
 		zend_long         count_;
 		bool          	  global_; //match all
