@@ -34,6 +34,7 @@ namespace wcc {
 		obj_rc globals_;
 
 		str_rc host_;
+		str_rc origin_;
 		str_rc body_;
 
 		int  verb_;
@@ -106,6 +107,8 @@ namespace wcc {
 
 		str_rc getHttpHost();
 
+		str_rc getOrigin();
+
 		val_rc getJsonRawBody(bool asArray);
 
 		htab_rc getLanguages();
@@ -122,7 +125,7 @@ namespace wcc {
 		
 		str_rc getRawBody();
 
-		str_ptr getScheme();
+		str_rc getScheme();
 
 		str_rc getServerAddress();
 

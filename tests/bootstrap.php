@@ -4,6 +4,7 @@ namespace Wcc;
 
 
 
+
 /** Folder containing Wcc PHP source */
 $workdir = dirname(__DIR__);
 
@@ -57,8 +58,16 @@ $loader->setBaseDir($wcc_root);
 
 $finder = $loader->getFinder();
 $finder->addPath('voku\helper', "$wcc_root/voku/helper");
+$finder->addPath("Db\Models", "tests/Db/Models");
 
 $svc = Services::instance();
+
+class_alias('WeakReference', 'Wcd\Adbref');
+
+$log = new DebugLog("test.log");
+DebugLog::setInstance($log);
+$log->start("<pre>Test Log");
+
 
 
 $cfg = $svc->getOne(Config::class);
@@ -67,7 +76,9 @@ $svc->set('config', $cfg);
 
 $cfg->config_dir = 'tests/modules';
 
+$svc->set('dos', new Dos());
 $svc->set('response', new Response());
+$svc->set('security', new Security());
 
 echo "BaseDir is " . $loader->getBaseDir() . PHP_EOL;
 

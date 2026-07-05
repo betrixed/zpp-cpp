@@ -25,6 +25,8 @@ class RequestGlobals
 
     public function getScheme(): string {}
 
+
+
     public function getURI(bool $onlyPath = false): string {}
     
     public function getAcceptableContent(): array {}
@@ -76,6 +78,8 @@ class RequestGlobals
     public function getContentType(): ?string {}
 
     public function getHttpHost(): string {}
+
+    public function getOrigin(): string {}
 
     public function getUploadedFiles(bool $onlySuccessful = false, bool $namedKeys = false): array {}
 

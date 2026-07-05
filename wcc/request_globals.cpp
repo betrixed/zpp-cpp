@@ -13,8 +13,12 @@
 #include "file_upload.h"
 #endif
 
+//#define DBG_REQUEST_GLOBALS
+
+#ifdef DBG_REQUEST_GLOBALS
 #ifndef WCC_DEBUGLOG_H
 #include "debuglog.h"
+#endif
 #endif
 
 #ifndef REQUEST_GLOBALS_ARGINFO
@@ -293,7 +297,7 @@ RequestGlobals::getQualityHeader(str_ptr key, str_ptr name)
 
 	htab_ptr server(readServer());
 
-	str_ptr data = server.get(key);
+	str_rc data = server.get(key);
 
 	if (data.isNull())
 	{
@@ -331,7 +335,7 @@ RequestGlobals::getQualityHeader(str_ptr key, str_ptr name)
 		{
 			val_ptr headerPartVal(w2.value());
 
-			str_ptr  headerPart = headerPartVal.zstr();
+			str_rc  headerPart = headerPartVal.zstr();
 
 			if (headerPart.find('=') >= 0) 
 			{
@@ -395,7 +399,7 @@ RequestGlobals::resolveAuthorizationHeaders()
 	}
 	else {
 
-		str_ptr auth_hdr = server.get(RQit.HTTP_AUTHORIZATION);
+		str_rc auth_hdr = server.get(RQit.HTTP_AUTHORIZATION);
 		if (auth_hdr.isNull())
 		{
 			auth_hdr = server.get(RQit.REDIRECT_HTTP_AUTHORIZATION);
@@ -405,7 +409,7 @@ RequestGlobals::resolveAuthorizationHeaders()
 			str_rc lc_auth_hdr(auth_hdr);
 			lc_auth_hdr.lowercase();
 
-			str_ptr test(lc_auth_hdr);
+			str_rc test(lc_auth_hdr);
 
 			if (test.starts_with(RQit.basic_sp)) 
 			{
@@ -434,8 +438,8 @@ RequestGlobals::resolveAuthorizationHeaders()
 			{
 				if (headers.has_key(RQit.Php_Auth_User))
 				{
-					str_ptr user = headers.get(RQit.Php_Auth_User);
-					str_ptr pw = headers.get(RQit.Php_Auth_Pw);
+					str_rc user = headers.get(RQit.Php_Auth_User);
+					str_rc pw = headers.get(RQit.Php_Auth_Pw);
 					str_rc encoded; 
 					str_buf basic;
 
@@ -448,7 +452,7 @@ RequestGlobals::resolveAuthorizationHeaders()
 				}
 				else 
 				{
-					str_ptr digest = headers.get(RQit.Php_Auth_Digest);
+					str_rc digest = headers.get(RQit.Php_Auth_Digest);
 					if (digest.ok())
 					{
 						headers.set(RQit.Authorization, digest);
@@ -666,7 +670,7 @@ str_rc
 RequestGlobals::getClientAddress(bool trustHeader)
 {
 	str_rc result;
-	str_ptr address;
+	str_rc address;
 
 	htab_ptr server(readServer());
 
@@ -752,8 +756,8 @@ RequestGlobals::getDigestAuth()
 			for(wk.start(results); wk.ok(); wk.next())
 			{
 				htab_ptr match(wk.value());
-				str_ptr skey(match.get(int(1)));
-				val_ptr sval(match.get(int(3)));
+				str_rc skey(match.get(int(1)));
+				val_rc sval(match.get(int(3)));
 				auth.set(skey, sval);
 			}
 		}
@@ -866,55 +870,109 @@ RequestGlobals::getHeaders()
 }
 
 str_rc 
+RequestGlobals::getOrigin()
+{	
+	str_rc result;
+	if (origin_.size())
+	{
+		result = origin_;
+		return result;
+	}
+
+	str_buf buf;
+	str_rc scheme = getScheme();
+	str_rc host = getHttpHost();
+
+	buf << scheme << "://" << host;
+	result = buf.zstr();
+
+	return result;
+
+}
+
+str_rc 
 RequestGlobals::getHttpHost()
 {
 	str_rc result;
 
 	htab_ptr server(readServer());
-	str_ptr host = server.get(RQit.HTTP_HOST);
 
+	if (host_.size())
+	{
+		return host_; //cached
+	}
+	str_rc host = server.get(RQit.HTTP_HOST);
+#ifdef DBG_REQUEST_GLOBALS
+	DebugLog* log = DebugLog::cpp_global();
+	log->dump("getHttpHost", host);
+#endif
 	if (!host.size())
 	{
 		host = server.get(RQit.SERVER_NAME);
-
+#ifdef DBG_REQUEST_GLOBALS
+	log->dump("getHttpHost-2", host);
+#endif
 		if (!host.size())
 		{
 			host = server.get(RQit.SERVER_ADDR);
+#ifdef DBG_REQUEST_GLOBALS
+			log->dump("getHttpHost-3", host);
+#endif
+
 		}
 	}
-	result = host;
+
 
 	if (host.size() && strictHost_) 
 	{
-		// regulations want lowercase
-		result = host;
+		//host.trim();
+#ifdef DBG_REQUEST_GLOBALS
+	log->dump("getHttpHost-host-trim", host);
+#endif
+		//host.lowercase();
+		str_ptr empty = str_ptr::empty_str();
 
-		result.trim();
-		result.lowercase();
-		host = result;
 
-		//showstr("host2", host);
-		if (host.find(':') >= 0) 
+		str_rc test(host.data());
+#ifdef DBG_REQUEST_GLOBALS
+	log->dump("getHttpHost-host-lowercase", test);
+#endif
+		str_rc test1;
+		if (test.find(':') >= 0) 
 		{
 			// eliminate port :digits
 			preg rex1("/:[[:digit:]]+$/"); 
 
-			result = rex1.replace("", host); 
-			host = result;
+			test1 = test.data();
+			test = rex1.replace(empty.data(), test1); 
 			//showstr("after rex replace", host);
 		}
 		
 		// Eliminate allowed
 		preg rex2("/[a-z0-9-]+\\.?/");
-
-		str_rc test = rex2.replace("", host); 
+		test1 = test.data();
+		test = rex2.replace(empty.data(), test1); 
+#ifdef DBG_REQUEST_GLOBALS
+	log->dump("getHttpHost replace result", test);
+#endif
 		//showstr("test empty", test);
 		if (test.size() > 0) 
 		{
-			zend_throw_error(zend_ce_exception, "Invalid host %s", host.data());
+#ifdef DBG_REQUEST_GLOBALS
+	log->line("Exception");
+#endif
+			error_return  bad;
+			bad.error() << "Invalid name " << host;
+			bad.throw_errors();
+		}
+		else {
+			result = host;
 		}
 	}
-
+#ifdef DBG_REQUEST_GLOBALS
+	log->dump("getHttpHost-return", result);
+#endif
+	host_ = result;
 	return result;
 }
 
@@ -924,11 +982,10 @@ RequestGlobals::getJsonRawBody(bool asArray)
 	val_rc result;
 
 	str_rc raw = getRawBody();
-	str_ptr test(raw);
 
-	if (test.size())
+	if (raw.size())
 	{
-		result = json_decode(test, asArray);
+		result = json_decode(raw, asArray);
 	}
 	return result;
 }
@@ -1008,7 +1065,7 @@ RequestGlobals::getPort()
 			return result;
 		}
 	}
-	str_ptr scheme = getScheme();
+	str_rc scheme = getScheme();
 
 	if (zs_cmp_ci(scheme, RQit.https)==0)
 	{
@@ -1029,12 +1086,19 @@ RequestGlobals::getRawBody()
 	return body_;
 }
 
-str_ptr
+str_rc
 RequestGlobals::getScheme()
 {
 	htab_ptr server(readServer());
 
-	str_ptr scheme = server.get(RQit.HTTPS);
+#ifdef DBG_REQUEST_GLOBALS
+	DebugLog* log = DebugLog::cpp_global();
+	log->dump("server arrayptr", server);
+#endif
+	str_rc scheme = server.get(RQit.HTTPS);
+#ifdef DBG_REQUEST_GLOBALS
+	log->dump("scheme", scheme);
+#endif
 	if (scheme.size())
 	{
 		if (zs_cmp_ci(scheme, RQit.off_key) != 0)
@@ -1045,6 +1109,9 @@ RequestGlobals::getScheme()
 			scheme = RQit.http;
 		}
 	}
+#ifdef DBG_REQUEST_GLOBALS
+	log->dump("scheme", scheme);
+#endif
 	return scheme;
 }
 
@@ -1053,12 +1120,12 @@ RequestGlobals::getServerAddress()
 {
 	htab_ptr server(readServer());
 
-	str_ptr serverAddr = server.get(RQit.SERVER_ADDR);
+	str_rc serverAddr = server.get(RQit.SERVER_ADDR);
 	if (serverAddr.size()) {
 		return str_rc(serverAddr);
 	}
 
-	return gethostbyname(str_ptr(RQit.localhost));
+	return gethostbyname(RQit.localhost);
 }
 
 str_rc 
@@ -1094,26 +1161,33 @@ RequestGlobals::getURI(bool onlyPath)
 
 	result = server.get(RQit.REQUEST_URI);
 
-	str_ptr uri (result);
+#ifdef DBG_REQUEST_GLOBALS
+	DebugLog* log = DebugLog::cpp_global();
+	log->dump("RequestGlobals getURI-1", result);
 
-	if (uri.isNull())
+#endif
+
+	if (result.isNull())
 	{
 		result = str_empty();
 	}
 	else {
-		size_t slen = uri.size();
+		size_t slen = result.size();
 		if (onlyPath && slen)
 		{
 			//zend_printf("only_path %lx\n", slen);
-			int qpos = uri.find('?');
+			int qpos = result.find('?');
+
 			if (qpos >= 0) {
 				//showstr("uri is", uri);
 				//zend_printf("qpos %ld\n", qpos);
-				result = uri.substr(0,qpos);
+				result = result.substr(0,qpos);
 			}
 		}
 	}
-
+#ifdef DBG_REQUEST_GLOBALS
+	log->dump("RequestGlobals getURI-2", result);
+#endif
 	return result;
 }
 
@@ -1231,7 +1305,7 @@ RequestGlobals::hasHeader(str_ptr header)
 bool 
 RequestGlobals::hasQuery(str_ptr key)
 {
-	htab_ptr query(Hmap::map_htab(get_));
+	htab_rc query(Hmap::map_htab(get_));
 
 	return val_ptr(query.get(key)).ok();
 }
@@ -1249,7 +1323,7 @@ RequestGlobals::isAjax()
 {
 	htab_ptr server(readServer());
 
-	str_ptr check = server.get(RQit.HTTP_X_REQUESTED_WITH);
+	str_rc check = server.get(RQit.HTTP_X_REQUESTED_WITH);
 
 	return (check.size() && (zs_cmp_ci(check, RQit.XMLHttpRequest)==0));
 }
@@ -1260,7 +1334,7 @@ RequestGlobals::isMethod(val_ptr methods, bool strict)
 	int verb = getMethod();
 
 	if (methods.isString()) {
-		str_ptr vstr = methods.zstr();
+		str_rc vstr = methods.zstr();
 		int test = Route::getVerbInt(vstr);
 		if (test == verb) {
 			return true;
@@ -1333,7 +1407,7 @@ RequestGlobals::isPut()
 bool 
 RequestGlobals::isSecure()
 {
-	str_ptr test = getScheme();
+	str_rc test = getScheme();
 
 	if (test.size() == 0)
 		return false;
@@ -1346,14 +1420,14 @@ RequestGlobals::isSoap()
 {
 	htab_ptr server(readServer());
 
-	str_ptr soap = server.get(RQit.HTTP_SOAPACTION);
+	str_rc soap = server.get(RQit.HTTP_SOAPACTION);
 	if (soap.size())
 	{
 		return true;
 	}
 
 	str_rc contentType = getContentType();
-	str_ptr test(contentType);
+	str_rc test(contentType);
 
 	if (!test.size())
 	{
@@ -1539,8 +1613,8 @@ ZEND_METHOD(Wcc_RequestGlobals, getScheme)
 	ZEND_PARSE_PARAMETERS_END();
 
 	RequestGlobals* cobj = zval_toc<RequestGlobals>(ZEND_THIS);
-	str_ptr result = cobj->getScheme();
-	result.copy_zv(return_value);
+	str_rc result = cobj->getScheme();
+	result.move_zv(return_value);
 }
 
 ZEND_METHOD(Wcc_RequestGlobals, getURI)
@@ -1830,6 +1904,16 @@ ZEND_METHOD(Wcc_RequestGlobals, getHttpHost)
 	str_rc result = cobj->getHttpHost();
 	result.move_zv(return_value);
 
+}
+
+ZEND_METHOD(Wcc_RequestGlobals, getOrigin)
+{
+	ZEND_PARSE_PARAMETERS_START(0, 0)
+	ZEND_PARSE_PARAMETERS_END();
+
+	RequestGlobals* cobj = zval_toc<RequestGlobals>(ZEND_THIS);
+	str_rc result = cobj->getOrigin();
+	result.move_zv(return_value);
 }
 
 ZEND_METHOD(Wcc_RequestGlobals, post)
