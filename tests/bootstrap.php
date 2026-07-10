@@ -64,9 +64,14 @@ $svc = Services::instance();
 
 class_alias('WeakReference', 'Wcd\Adbref');
 
-$log = new DebugLog("test.log");
+$debug_flags =  DebugLog::TO_CONSOLE;
+
+$path = "test.log";
+
+$log = new DebugLog($path, $debug_flags);
+
 DebugLog::setInstance($log);
-$log->start("<pre>Test Log");
+$log->start("<pre>test.log", $debug_flags);
 
 
 

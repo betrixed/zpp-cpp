@@ -155,7 +155,7 @@ class Response {
     public function setContentLength(int $contentLength): void {}
 
     public function setContentType(
-        string $contentType, ?string $charset = null): void {}
+        string $contentType, string $charset = "utf-8"): void {}
 
     public function setCookies(CookieBag $bag): void {}
 

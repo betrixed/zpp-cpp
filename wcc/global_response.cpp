@@ -15,6 +15,15 @@
 #include "hmap.h"
 #endif
 
+//#define DBG_GLOBAL_RESPONSE
+
+#ifdef DBG_GLOBAL_RESPONSE
+#ifndef WCC_DEBUGLOG_H
+#include "debuglog.h"
+#endif
+#endif
+
+
 #ifndef RESPONSE_ARGINFO_H
 #define RESPONSE_ARGINFO_H
 extern "C" {
@@ -113,7 +122,7 @@ void Response_init::init()
 	sent_key = "sent";
 	Expires =  "Expires";
 	json_mime = "application/json";
-	utf8 = "UTF-8";
+	utf8 = "utf-8";
 	Status = "Status";
 	readfile = "readfile";
 	Refresh = "Refresh";
@@ -456,15 +465,26 @@ Response::setContentType(
 	const std::string_view& ctype, 
 	const std::string_view& charset)
 {
+                   
 	str_buf buf;
 	buf << ctype;
+               	    
 	if (charset.size())
 	{
 		buf << "; charset=" << charset;
 	}
+                   
 	str_rc hvalue(buf.zstr());
+#ifdef DBG_GLOBAL_RESPONSE
+                   DebugLog* log = DebugLog::cpp_global();
+                   if (log) 
+                   {
+                        str_buf vbuf;
+                        vbuf << "charset " << iform(Numf::HEX) << charset.data();
+                        log->dump("setContentType", hvalue);
+                   }
 	//showstr("hvalue", hvalue);
-
+#endif
 	htab_rw hw(writer());
 	hw.set(RSPD.Content_Type, hvalue);
 }
@@ -1082,17 +1102,19 @@ ZEND_METHOD(Wcc_Response, setContentLength)
 
 ZEND_METHOD(Wcc_Response, setContentType)
 {
-	zend_string* contentType;
-	zend_string* charset;
+	zarg_rd args(execute_data);
+	str_ptr ctype;
+	str_ptr cset;
 
-	ZEND_PARSE_PARAMETERS_START(1,2)
-	Z_PARAM_STR(contentType)
-	Z_PARAM_OPTIONAL
-	Z_PARAM_STR_OR_NULL(charset)
-	ZEND_PARSE_PARAMETERS_END();
+	ctype = args.str(args.need(0));
+	cset = args.str_or_default(args.option(1), RSPD.utf8);
 
-	auto cobj = zval_toc<Response> (ZEND_THIS);
-	cobj->setContentType(contentType, charset);		
+	if (!args.throw_errors())
+	{
+		auto cobj = zval_toc<Response> (ZEND_THIS);
+		cobj->setContentType(ctype, cset);		
+	}
+	
 }
 
 ZEND_METHOD(Wcc_Response, setCookies)
