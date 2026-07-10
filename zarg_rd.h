@@ -95,6 +95,7 @@ public:
 
 	str_ptr  str(zval *arg);
 	str_ptr  str_or_null(zval *arg);
+	str_ptr  str_or_default(zval *arg, const str_intern& strdef);
 
 	htab_ptr htab(zval *arg);
 	htab_ptr htab_or_null(zval *arg);

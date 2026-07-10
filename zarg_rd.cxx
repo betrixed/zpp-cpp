@@ -248,6 +248,25 @@ zarg_rd::str_or_null(zval *arg)
 	return result;
 }
 
+str_ptr
+zarg_rd::str_or_default(zval *arg, const str_intern& strdef)
+{
+	str_ptr result;
+	if (!arg && maybe_)
+	{
+		result = strdef;
+		return result;
+	}
+	val_ptr test(arg);
+	result = test.zstr();
+
+	if (result.ok())
+	{
+		return result;
+	}
+	wrong(arg);
+	return result;
+}
 bool 
 zarg_rd::zstring_null(str_ptr& value, zval* arg)
 {
@@ -498,8 +517,10 @@ zarg_rd::zlong_null(zend_long& value, zval* arg, zend_long ifnull)
 			value = ifnull;
 			break;
 		default:
+                                                if (!maybe_) {
 			error() << "; Expected integer value or NULL";
 			return false;
+                                                }
 	}
 	return true;
 }
@@ -517,6 +538,7 @@ zarg_rd::zbool(bool& value, zval* arg)
 	if (!maybe_)
 	{
 		error() << "; Expected bool value";
+                                      return false;
 	}
 
 	return false;

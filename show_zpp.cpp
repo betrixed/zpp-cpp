@@ -442,7 +442,7 @@ void dump_info::indent(int ct)
 			ss << "p = nullptr";
 		}
 		else {
-		   const char* data = ZSTR_VAL(p);
+		   auto data = ZSTR_VAL(p);
 		   size_t   slen = ZSTR_LEN(p);
 
 			ss << " str(" << iform(Numf::DEC) << (int) slen << ") " << iform(Numf::HEX) << (void*)p;
@@ -450,7 +450,7 @@ void dump_info::indent(int ct)
 			int gcflags = GC_FLAGS(p);
 			if ((gcflags & GC_PERSISTENT) != 0) ss << "ps ";
 			if ((gcflags & IS_STR_INTERNED) != 0) ss << "in ";
-			ss << " : " << ZSTR_VAL(p);
+			ss << " : " << data;
 
 			if (data[slen] == '\0') 
 			{
