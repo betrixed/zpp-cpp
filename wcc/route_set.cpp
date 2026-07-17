@@ -268,8 +268,6 @@ void  RouteSet::addRouteList(htab_ptr list, str_ptr prefix, str_ptr module)
 	//showarray(" list: ", list);
 	htab_walk walk;
 
-	int loopct = 0;
-
 	auto route = walk.value();
 	
 
@@ -277,7 +275,6 @@ void  RouteSet::addRouteList(htab_ptr list, str_ptr prefix, str_ptr module)
 	{
 		//zend_printf("rlist iterate ");
 		//showmem(" route: ", (zval*) route);
-		loopct++;
 		if (route.isObject())
 		{
 			//showmem("add route", route);
