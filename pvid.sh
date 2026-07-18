@@ -1,7 +1,14 @@
 #!/bin/bash
 . /etc/os-release
-pconf=`php-config --ini-dir`
-echo $pconf
-pvid=`php -r "echo(PHP_MAJOR_VERSION . '.' . PHP_MINOR_VERSION);"`
+if [[ $ID == "debian" ]]; then
+   pvid=`php -r "echo(PHP_MAJOR_VERSION . '.' . PHP_MINOR_VERSION);"`
+elif [[ $ID == "arch" || $ID == "endeavouros" || $ID == "cachyos" ]]; then
+   pvid=""
+#  pvid=`php -r "echo(PHP_MAJOR_VERSION . PHP_MINOR_VERSION);"`
+elif [[ $ID == "archarm" ]]; then
+   pvid=""
+else
+   pvid="Unknown case for $ID"	
+fi
 echo $pvid
 # sudo systemctl restart php${pvid}-fpm

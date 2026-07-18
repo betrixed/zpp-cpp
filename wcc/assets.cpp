@@ -428,8 +428,26 @@ Assets::verify_path(str_rc& p_inout)
 	int check = fpath.find('@');
 	if (check >= 0)
 	{
+		#ifdef DBG_ASSETS
+		DebugLog* log = DebugLog::cpp_global();
+		if (log)
+		{
+			log->dump("lookup object @replace", run_);
+			log->dump("string replace", fpath);
+		}
+		#endif
+
 		Replace path_subst(run_);
+
 		fpath = path_subst.eval(fpath);
+
+		#ifdef DBG_ASSETS
+		if (log)
+		{
+			log->dump("result string", fpath);
+		}
+		#endif
+
 		p_inout = fpath;
 	}
 	str_rc real_path = fpath;
