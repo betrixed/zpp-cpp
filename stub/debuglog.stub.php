@@ -25,7 +25,7 @@ class DebugLog {
 
 	public static function start(?string $msg = null) : ?DebugLog {}
 
-	public function __construct(string $path, int $destflags = DebugLog::TO_FILE);
+                    public function __construct(string $path,  int $destflags = DebugLog::TO_FILE);
 
 	public function line(string $s, int $addflags = DebugLog::FILE_APPEND) : void {}
 

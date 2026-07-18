@@ -20,6 +20,7 @@ catch (\Throwaable $ex) {
 }
 //echo "Response = " . print_r($obj,true) . PHP_EOL;
 
+/*
 $content = <<<EOS
 <!DOCTYPE html>
 <html><head>
@@ -32,6 +33,41 @@ $content = <<<EOS
 </html>
 EOS;
 
+
 $obj->setContentType("text/html", "UTF-8");
+*/
+
+$content = <<<EOS
+{
+    "glossary": {
+        "title": "example glossary",
+		"GlossDiv": {
+            "title": "S",
+			"GlossList": {
+                "GlossEntry": {
+                    "ID": "SGML",
+					"SortAs": "SGML",
+					"GlossTerm": "Standard Generalized Markup Language",
+					"Acronym": "SGML",
+					"Abbrev": "ISO 8879:1986",
+					"GlossDef": {
+                        "para": "A meta-markup language, used to create markup languages such as DocBook.",
+						"GlossSeeAlso": ["GML", "XML"]
+                    },
+					"GlossSee": "markup"
+                }
+            }
+        }
+    }
+}
+EOS;
+$obj->setContentType('application/json');
 $obj->setContent($content);
 $obj->send();
+
+$headers = $obj->getHeaders();
+
+debug_zpp_dump($headers);
+
+
+echo "Content Sent".PHP_EOL;

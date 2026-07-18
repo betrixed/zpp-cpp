@@ -302,13 +302,12 @@ ZEND_METHOD(Wcc_DebugLog, __construct)
 
 	str_ptr path = args.str(args.need(0));
 	zend_long flags = 0;
-
 	args.zlong_null(flags, args.option(1), DebugLog::TO_FILE);
-
+                   
 	if (!args.throw_errors(__FUNCTION__))
 	{
 		DebugLog* cobj = zval_toc<DebugLog>(ZEND_THIS);
-		cobj->construct(path);
+		cobj->construct(path, flags);
 	}	
 }
 

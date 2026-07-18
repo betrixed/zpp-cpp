@@ -37,10 +37,10 @@ protected:
 public:
 
 	enum {
-	 	 TO_FILE = 1,
+                        TO_FILE = 1,
 	     TO_CONSOLE = 2,
 	     FILE_APPEND = PHP_FILE::APPEND,
-		 FILE_LOCK = PHP_FILE::EXCL_LOCK
+                        FILE_LOCK = PHP_FILE::EXCL_LOCK
 	};
 
 
