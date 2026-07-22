@@ -34,6 +34,8 @@ namespace zpp {
     class htab_rw : public htab_ptr 
     {
     protected:
+        // ensure copy on write by doing irreversible copy preparation.
+
         void giveback(zval* mgr, size_t init = HT_MIN_SIZE);
         // Mark zval type flags if reference counted or not
 
@@ -41,6 +43,12 @@ namespace zpp {
     public:
         /** Each constructor may duplicate and set the HashTable* of its source,
          *  to ensure its reference count is 1.
+         *  using all sorts of constructor tricks so that the source of initialization 
+         *  is converted, or duplicated into a writable array (rc == 1).
+         *  Of course any other references to the original array will be pointing to the old data.
+         *  This may be subtle-different to what PHP does with a reference operator &.
+         *  Which is maybe a better true delayed COW, that is PHP maybe is doing no write, no copy 
+         *  on the reference.
          */
 
         htab_rw(htab_rc& mgr, size_t init=HT_MIN_SIZE);
