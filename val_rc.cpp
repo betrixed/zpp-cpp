@@ -516,6 +516,7 @@ val_rc::val_rc(zend_long value)
 
 val_rc::val_rc(const str_ptr& rc)
 {
+    zv_ = {0};
     val_ptr(&zv_).bind_string(rc);
 }
 
