@@ -1102,6 +1102,21 @@ ZEND_METHOD(Wcc_Assets, loadAssetFile)
 	}	
 }
 
+
+ZEND_METHOD(Wcc_Assets, jsPull)
+{
+	zarg_rd args(execute_data);
+
+	str_ptr name = args.str(args.need(0));
+
+	if (!args.throw_errors(__FUNCTION__))
+	{
+		Assets* cobj = zval_toc<Assets>(ZEND_THIS);
+		str_rc result = cobj->jsPull(name);
+		result.move_zv(return_value);
+	}	
+}
+
 ZEND_METHOD(Wcc_Assets, reset)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
