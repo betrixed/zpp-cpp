@@ -308,8 +308,6 @@ ZEND_METHOD(Wcc_DebugLog, __construct)
 	{
 		DebugLog* cobj = zval_toc<DebugLog>(ZEND_THIS);
 		cobj->construct(path, flags);
-                                      str_out buf;
-                                      buf << path << "  " << flags << '\n';
 	}	
 }
 

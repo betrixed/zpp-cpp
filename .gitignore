@@ -3,6 +3,7 @@ autom4te.cache/**
 build/**
 php
 php/**
+php-old/**
 modules/**
 *sublime*
 Makefile
@@ -20,6 +21,7 @@ run-tests.php
 /tests/pcan_models/**
 /tests/_data/schema.*
 /tests/_models/**
+/tests/tmp/**
 rdebug.sh
 dump.*
 /.vscode/**
