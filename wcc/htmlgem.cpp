@@ -261,41 +261,36 @@ void HtmlGem::setDateIcon(str_ptr v)
 	date_icon_ = v;
 }
 
-str_rc 
-HtmlGem::ensureIdValue(htab_rw ht)
+str_return 
+HtmlGem::ensureIdName(htab_rw ht)
 {
-	str_rc result;
+	str_return result;
 
-	result = ht.get(HTG.idkey);
+	str_rc idval;
+	str_rc nameval;
 
-	if( result.ok() )
+	idval = ht.get(HTG.idkey);
+	nameval = ht.get(HTG.namekey);
+
+	if (!nameval.ok() && !idval.ok())
 	{
-		//zend_printf("has id");
-		//showstr("id: ", result);
+		result.error() << "InputType with no name or id attribute";
 		return result;
 	}
-
-	result = ht.get(HTG.namekey);
-
-	str_buf nameval;
-
-	if (result.ok())
+	if (!nameval.ok() && idval.ok())
 	{
-		nameval << str_ptr(result);
+		ht.set(HTG.namekey, idval);
 	}
-	else {
-		nameval << HTG.namekey;
-	}	
-	//request-wide sequence?
-	id_add_++;
-
-	nameval << (int) id_add_;
-
-	//nameval.append((int)id_add_);
-
-	result = nameval.zstr();
-	//showstr("set id", result);
-	ht.set(HTG.idkey, result);
+	else if (!idval.ok() && nameval.ok())
+	{
+		str_buf buf;
+		id_add_++;
+		buf << nameval;
+		buf << id_add_;
+		idval = buf.zstr();
+		ht.set(HTG.idkey, idval);
+	}
+	result.value_ = idval;
 	return result;
 }
 
@@ -580,13 +575,21 @@ void HtmlGem::endWrapDiv(str_buf& out) {
 	out << HTG.endtag << HTG.divkey << HTG.tagendl;
 }
 
-str_rc HtmlGem::checkbox(htab_ptr pset)
+str_return
+HtmlGem::checkbox(htab_ptr pset)
 {
+	str_return result;
+
 	htab_rc pscopy(pset);
 
 	htab_rw ps(pscopy);
 
-	str_rc id = ensureIdValue(ps);
+	str_return id_result = ensureIdName(ps);
+
+	if (id_result.has_errors())
+	{
+		result = id_result.move_error();
+	}
 
 	str_buf out;
 
@@ -639,14 +642,16 @@ str_rc HtmlGem::checkbox(htab_ptr pset)
 		out << '<' << HTG.labelkey << HTG.blank << HTG.classkey  << '=';
 		out.quote_name(HTG.checkboxkey); 
 		out << HTG.blank << HTG.forkey << '=';
-		out.quote_name(id);
+		out.quote_name(id_result.value_);
+
 		out << '>' << text << HTG.endtag << HTG.labelkey << HTG.tagendl;
 	}
 
 	if (!wrapdiv.isNull()) {
 		endWrapDiv(out);
 	}
-	return  out.zstr();
+	result.value_ =  out.zstr();
+	return result;
 }
 
 
@@ -685,7 +690,8 @@ str_rc HtmlGem::submit(htab_ptr pset)
 	return getTag(pset, list, HTG.inputtag);
 }
 
-str_rc HtmlGem::datetime_value(htab_ptr pset)
+str_rc 
+HtmlGem::datetime_value(htab_ptr pset)
 {
 	str_buf out;
 	htab_rc pcopy(pset);
@@ -849,9 +855,11 @@ HtmlGem::label_method(htab_rc pscopy, int& labeltype)
 }
 
 
-str_rc
+str_return
 HtmlGem::inputType(htab_ptr pset, str_ptr itype)
 {
+	str_return result;
+
 	htab_rc atype_ht;
 	htab_rw atype(atype_ht);
 
@@ -860,8 +868,11 @@ HtmlGem::inputType(htab_ptr pset, str_ptr itype)
 	htab_rc pscopy(pset);
 	htab_rw ps(pscopy);
 	
-	ensureIdValue(ps);
-
+	str_return id_result = ensureIdName(ps);
+	if (id_result.has_errors())
+	{
+		result = id_result.move_error();
+	}
 	str_buf out;
 
 	if (!ps.has_key(HTG.classkey)) {
@@ -907,25 +918,28 @@ HtmlGem::inputType(htab_ptr pset, str_ptr itype)
 	if (wrapdiv.size()) {
 		endWrapDiv(out);
 	}
-	return out.zstr();
+	result.value_ = out.zstr();
+	return result;
 
 }
 
-str_rc
+str_return
 HtmlGem::plaintext(htab_ptr pset)
 {
 	return inputType(pset, HTG.textkey);
 }
 
-str_rc
+str_return
 HtmlGem::number(htab_ptr pset)
 {
 	return inputType(pset, HTG.number);
 }
 
-str_rc
+str_return
 HtmlGem::radio(htab_ptr pset)
 {
+	str_return result;
+
 	htab_rc pscopy(pset);
 
 	htab_rw ps(pscopy);
@@ -935,29 +949,38 @@ HtmlGem::radio(htab_ptr pset)
 	if (label_s.size()) {
 		ps.unset(HTG.labelkey);
 	}
-	str_rc id = ensureIdValue(ps);
+	str_return id_result = ensureIdName(ps);
+	if (id_result.has_errors())
+	{
+		result = id_result.move_error();
+	}
 
 	str_buf out;
 
 	val_rc altered(ps);
-	out << inputType(altered, HTG.radio);
+	result = inputType(altered, HTG.radio);
+
+	out << result.value_;
 
 	if (label_s.size()) 
 	{
 		htab_rc ldata_ht;
 		htab_rw ldata(ldata_ht);
 
-		ldata.set(HTG.idkey, id);
+		ldata.set(HTG.idkey, id_result.value_);
 		ldata.set(HTG.labelkey,label_s);
 
 		out << HTG.nbspace << out_label(ldata);
 	}
-	return out.zstr();
+	result.value_ = out.zstr();
+	return result;
 }
 
-str_rc
+str_return
 HtmlGem::email(htab_ptr pset)
 {
+	str_return result;
+
 	htab_rc pscopy(pset);
 	htab_rw ps(pscopy);
 
@@ -972,28 +995,30 @@ HtmlGem::email(htab_ptr pset)
 	}
 	val_rc altered(pscopy);
 
-	return inputType(altered,HTG.email);
+	result = inputType(altered,HTG.email);
+	return result;
+
 }
 
-str_rc 
+str_return 
 HtmlGem::hidden(htab_ptr pset)
 {
 	return inputType(pset, HTG.hidden);
 }
 
-str_rc 
+str_return 
 HtmlGem::money(htab_ptr pset)
 {
 	return inputType(pset, HTG.money);
 }
 
-str_rc 
+str_return 
 HtmlGem::phone(htab_ptr pset)
 {
 	return inputType(pset, HTG.tel);
 }
 
-str_rc 
+str_return 
 HtmlGem::password(htab_ptr pset)
 {
 	return inputType(pset, HTG.password);
@@ -1213,16 +1238,21 @@ HtmlGem::select_list(htab_ptr pset)
 	return result;
 }
 
-str_rc
+str_return
  HtmlGem::select(htab_ptr pset)
 {
-	str_rc result;
+	str_return result;
 
 	htab_rc pset_copy(pset);
 
 	htab_rw ps(pset_copy);
 
-	ensureIdValue(ps);
+	str_return id_value = ensureIdName(ps);
+
+	if (id_value.has_errors())
+	{
+		result = id_value.move_error();
+	}
 	str_buf out;
 
 	str_rc wrapdiv = ps.get(HTG.divkey);
@@ -1249,7 +1279,7 @@ str_rc
 	else {
 		out << select << '\n';
 	}
-	result = out.zstr();
+	result.value_ = out.zstr();
 	return result;
 }
 
@@ -1409,9 +1439,11 @@ str_rc HtmlGem::figure(htab_ptr pset)
 
 
 /* setup properties for datetime picker class */
-str_rc 
+str_return 
 HtmlGem::datetime(htab_ptr pset)
 {
+	str_return result;
+
 	str_buf out;
 	str_rc  temp;
 
@@ -1420,12 +1452,15 @@ HtmlGem::datetime(htab_ptr pset)
 	
 	htab_rw ps(pscopy);
 
-	str_rc idstr = ensureIdValue(ps);
+	str_return  id_value = ensureIdName(ps);
 	//showstr("idstr", idstr);
-
+	if (id_value.has_errors())
+	{
+		result = id_value.move_error();
+	}
 	str_buf dateid;
 
-	dateid << "pick" << idstr;
+	dateid << "pick" << id_value.value_;
 
 	str_rc dateid_str = dateid.zstr();
 	//showstr("dateid_str", dateid_str);
@@ -1535,13 +1570,16 @@ HtmlGem::datetime(htab_ptr pset)
 	endWrapDiv(out); // end 2
 	endWrapDiv(out); // end level-item
 	endWrapDiv(out); // end level
-	return out.zstr();
+	result.value_ = out.zstr();
+	return result;
 }
 
 
-str_rc
+str_return
 HtmlGem::multiline(htab_ptr pset)
 {
+	str_return result;
+
 	str_buf out;
 	htab_ptr temp(pset);
 	//showarray("pset", temp);
@@ -1551,8 +1589,11 @@ HtmlGem::multiline(htab_ptr pset)
 
 	htab_rw ps(pscopy);
 
-	ensureIdValue(ps);
-	
+	str_return id_value = ensureIdName(ps);
+	if (id_value.has_errors())
+	{
+		result = id_value.move_error();
+	}
 
 	val_rc clist = ps.get(HTG.classkey);
 
@@ -1607,7 +1648,8 @@ HtmlGem::multiline(htab_ptr pset)
 		out << HTG.endtag << HTG.divkey << HTG.tagendl;
 	}
 
-	return out.zstr();
+	result.value_ = out.zstr();
+	return result;
 }
 }; //namespace wcc;
 //&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&@@@@@@@@@@@@@@@@@@@@&&&&&&&&&&&&&&&&&&&&&
@@ -1638,8 +1680,11 @@ ZEND_METHOD(Wcc_HtmlGem, checkbox)
 	if (!args.throw_errors(__FUNCTION__))
 	{
 		auto cobj = zval_toc<HtmlGem>(ZEND_THIS);
-		str_rc result = cobj->checkbox(pset);
-		result.move_zv(return_value);
+		str_return result = cobj->checkbox(pset);
+		if (!result.throw_errors())
+		{
+			result.value_.move_zv(return_value);
+		}
 
 	}
 }
@@ -1654,8 +1699,11 @@ ZEND_METHOD(Wcc_HtmlGem, datetime)
 	{
 		auto cobj = zval_toc<HtmlGem>(ZEND_THIS);
 
-		str_rc result = cobj->datetime(pset);
-		result.move_zv(return_value);
+		str_return result = cobj->datetime(pset);
+		if (!result.throw_errors())
+		{
+			result.value_.move_zv(return_value);
+		}
 	}
 }
 
@@ -1683,8 +1731,12 @@ ZEND_METHOD(Wcc_HtmlGem, email)
 	{
 		auto cobj = zval_toc<HtmlGem>(ZEND_THIS);
 
-		str_rc result = cobj->email(pset);
-		result.move_zv(return_value);
+		str_return result = cobj->email(pset);
+		if (!result.throw_errors())
+		{
+			result.value_.move_zv(return_value);
+		}
+
 	}
 
 }
@@ -1713,8 +1765,11 @@ ZEND_METHOD(Wcc_HtmlGem, hidden)
 	{
 		auto cobj = zval_toc<HtmlGem>(ZEND_THIS);
 
-		str_rc result = cobj->hidden(pset);
-		result.move_zv(return_value);
+		str_return result = cobj->hidden(pset);
+		if (!result.throw_errors())
+		{
+			result.value_.move_zv(return_value);
+		}
 	}
 
 }
@@ -1746,10 +1801,12 @@ ZEND_METHOD(Wcc_HtmlGem, money)
 	{
 		auto cobj = zval_toc<HtmlGem>(ZEND_THIS);
 
-		str_rc result = cobj->money(pset);
-		result.move_zv(return_value);
+		str_return result = cobj->money(pset);
+		if (!result.throw_errors())
+		{
+			result.value_.move_zv(return_value);
+		}
 	}
-
 }
 
 ZEND_METHOD(Wcc_HtmlGem, multiline)
@@ -1762,9 +1819,12 @@ ZEND_METHOD(Wcc_HtmlGem, multiline)
 	{
 		auto cobj = zval_toc<HtmlGem>(ZEND_THIS);
 
-		str_rc result = cobj->multiline(pset);
+		str_return result = cobj->multiline(pset);
 	//showmem("result - ", result);
-		result.move_zv(return_value);
+		if (!result.throw_errors())
+		{
+			result.value_.move_zv(return_value);
+		}
 	}
 }
 
@@ -1778,10 +1838,12 @@ ZEND_METHOD(Wcc_HtmlGem, number)
 	{
 		auto cobj = zval_toc<HtmlGem>(ZEND_THIS);
 
-		str_rc result = cobj->number(pset);
-		result.move_zv(return_value);
+		str_return result = cobj->number(pset);
+		if (!result.throw_errors())
+		{
+			result.value_.move_zv(return_value);
+		}
 	}
-
 }
 
 ZEND_METHOD(Wcc_HtmlGem, phone)
@@ -1794,10 +1856,12 @@ ZEND_METHOD(Wcc_HtmlGem, phone)
 	{
 		auto cobj = zval_toc<HtmlGem>(ZEND_THIS);
 
-		str_rc result = cobj->phone(pset);
-		result.move_zv(return_value);
+		str_return result = cobj->phone(pset);
+		if (!result.throw_errors())
+		{
+			result.value_.move_zv(return_value);
+		}
 	}
-
 }
 
 ZEND_METHOD(Wcc_HtmlGem, password)
@@ -1810,10 +1874,12 @@ ZEND_METHOD(Wcc_HtmlGem, password)
 	{
 		auto cobj = zval_toc<HtmlGem>(ZEND_THIS);
 
-		str_rc result = cobj->password(pset);
-		result.move_zv(return_value);
+		str_return result = cobj->password(pset);
+		if (!result.throw_errors())
+		{
+			result.value_.move_zv(return_value);
+		}
 	}
-
 }
 
 ZEND_METHOD(Wcc_HtmlGem, radio)
@@ -1826,10 +1892,12 @@ ZEND_METHOD(Wcc_HtmlGem, radio)
 	{
 		auto cobj = zval_toc<HtmlGem>(ZEND_THIS);
 
-		str_rc result = cobj->radio(pset);
-		result.move_zv(return_value);
+		str_return result = cobj->radio(pset);
+		if (!result.throw_errors())
+		{
+			result.value_.move_zv(return_value);
+		}
 	}
-
 }
 
 ZEND_METHOD(Wcc_HtmlGem, plaintext)
@@ -1843,10 +1911,12 @@ ZEND_METHOD(Wcc_HtmlGem, plaintext)
 		auto cobj = zval_toc<HtmlGem>(ZEND_THIS);
 
 
-		str_rc result = cobj->plaintext(pset);
-		result.move_zv(return_value);
+		str_return result = cobj->plaintext(pset);
+		if (!result.throw_errors())
+		{
+			result.value_.move_zv(return_value);
+		}
 	}
-
 }
 
 ZEND_METHOD(Wcc_HtmlGem, select)
@@ -1859,10 +1929,12 @@ ZEND_METHOD(Wcc_HtmlGem, select)
 	{
 		auto cobj = zval_toc<HtmlGem>(ZEND_THIS);
 
-		str_rc result = cobj->select(pset);
-		result.move_zv(return_value);
+		str_return result = cobj->select(pset);
+		if (!result.throw_errors())
+		{
+			result.value_.move_zv(return_value);
+		}
 	}
-
 }
 
 ZEND_METHOD(Wcc_HtmlGem, select_list)
@@ -1879,7 +1951,6 @@ ZEND_METHOD(Wcc_HtmlGem, select_list)
 		str_rc result = cobj->select_list(pset);
 		result.move_zv(return_value);
 	}
-
 }
 
 ZEND_METHOD(Wcc_HtmlGem, output)
@@ -1923,7 +1994,6 @@ ZEND_METHOD(Wcc_HtmlGem, datetime_value)
 		str_rc result = cobj->datetime_value(pset);
 		result.move_zv(return_value);
 	}
-
 }
 
 ZEND_METHOD(Wcc_HtmlGem, check_value)
@@ -1939,7 +2009,6 @@ ZEND_METHOD(Wcc_HtmlGem, check_value)
 		str_rc result = cobj->check_value(pset);
 		result.move_zv(return_value);
 	}
-
 }
 
 ZEND_METHOD(Wcc_HtmlGem, text_value)
@@ -1954,7 +2023,6 @@ ZEND_METHOD(Wcc_HtmlGem, text_value)
 		str_rc result = cobj->text_value(pset);
 		result.move_zv(return_value);
 	}
-
 }
 
 ZEND_METHOD(Wcc_HtmlGem, xcheck)

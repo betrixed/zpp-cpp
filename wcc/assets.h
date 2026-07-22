@@ -115,7 +115,7 @@ public:
 	htab_rc  getWebList(
 		str_ptr selector, 
 		val_ptr names = val_ptr(), 
-		bool list=true);
+		bool list=true, bool unset=false);
 
 	void addStyle(str_ptr style);
 
@@ -128,6 +128,8 @@ public:
  	str_rc header();
 
  	str_rc inline_css(str_ptr name);
+
+ 	str_rc jsPull(str_ptr name);
 
  	str_rc link();
 

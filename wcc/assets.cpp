@@ -104,7 +104,7 @@ Assets::findSourceFile(str_ptr path)
 
 htab_rc  
 Assets::getWebList(str_ptr selector,
-	 val_ptr names, bool list)
+	 val_ptr names, bool aslist, bool unset)
 {
 	htab_rc result;
 	htab_rc order;
@@ -127,13 +127,25 @@ Assets::getWebList(str_ptr selector,
 	for(w1.start(order); w1.ok(); w1.next())
 	{
 		str_ptr name = w1.value();
-		htab_rc asset = assets_.array_property(name);
+		// get the actual zval address of the property, 
+		// so it can be updated (like a reference)
+		// and make it writeable.
+		// as assets_ is functionally private, 
+		// this copy is hopefully not actually done ( if rc is still 1)
+		htab_rw asset(assets_.property_ptr(name));
+		// if (!empty)
 		if (asset.size())
 		{
 			htab_rc items = asset.get(selector);
+
 			if (items.size())
 			{
-				if (list)
+				if (unset)
+				{
+					asset.unset(selector);
+				}
+
+				if (aslist)
 				{
 					htab_walk w2;
 					auto wpath = w2.value();
@@ -174,6 +186,28 @@ Assets::jsPut()
 
 	render_lock_ = true;
 	htab_rc paths = getWebList(ASI.js_str);
+	for_key_value kv1;
+
+	for(kv1.start(paths); kv1.ok(); kv1.next())
+	{
+		str_rc wpath = kv1.value();
+		if (verify_path(wpath)) {
+			buf << script_wrap(wpath);
+		}
+		else 
+			break;
+	}
+	return buf.zstr();
+}
+
+str_rc 
+Assets::jsPull(str_ptr name)
+{
+	str_buf buf;
+
+	render_lock_ = true;
+	val_rc arg(name);
+	htab_rc paths = getWebList(ASI.js_str, arg, true, true);
 	for_key_value kv1;
 
 	for(kv1.start(paths); kv1.ok(); kv1.next())
@@ -956,19 +990,29 @@ ZEND_METHOD(Wcc_Assets, getWebList)
 	str_rc  typekey;
 	val_ptr names;
 	bool    aslist = true;
+	bool    unset = false;
+
 	htab_rc result;
 
 	args.zstring(typekey, args.need(0));
 
     names = args.option(1);
 
-	if (names.ok() && (names.isString() || names.isArray())) {
-		args.zbool(aslist, args.option(2));
+    bool hasMore = names.ok() && (names.isString() || names.isArray());
+   	// passed a 3rd arg?
+
+	if (hasMore) {
+		hasMore = args.zbool(aslist, args.option(2));
 	}
+	// passed a 4th arg?
+	if (hasMore) {
+		hasMore = args.zbool(unset, args.option(3));
+	}
+
 	if (!args.throw_errors(__FUNCTION__))
 	{
 		Assets* cobj = zval_toc<Assets>(ZEND_THIS);
-		result = cobj->getWebList(typekey, names, aslist);
+		result = cobj->getWebList(typekey, names, aslist, unset);
 		result.move_zv(return_value);
 	}	
 }

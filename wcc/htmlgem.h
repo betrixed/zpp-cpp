@@ -64,28 +64,35 @@ namespace wcc {
 		// convert array into string
 		
 		str_rc button(htab_ptr pset);
-		str_rc checkbox(htab_ptr pset);
+		str_rc datetime_value(htab_ptr pset);
 
 		str_rc check_value(htab_ptr pset);
-		str_rc datetime(htab_ptr pset);
-		str_rc datetime_value(htab_ptr pset)
-		;
-		str_rc datetime_text(str_ptr dtvalue);
-		str_rc email(htab_ptr pset);
-		str_rc figure(htab_ptr pset);
-		str_rc hidden(htab_ptr pset);
-
-		str_rc linkTo(htab_ptr pset);
-		str_rc money(htab_ptr pset);
-		str_rc multiline(htab_ptr pset);
-		str_rc password(htab_ptr pset);
-		str_rc phone(htab_ptr pset);
-		str_rc plaintext(htab_ptr pset);
-		str_rc number(htab_ptr pset);
 		
-		str_rc radio(htab_ptr pset);
-		str_rc select(htab_ptr pset);
+		
+		str_rc datetime_text(str_ptr dtvalue);
+		
+		str_rc figure(htab_ptr pset);
+		
+		str_rc linkTo(htab_ptr pset);
+		// input types with str_return
+
+		str_return datetime(htab_ptr pset);
+		str_return hidden(htab_ptr pset);
+		str_return email(htab_ptr pset);
+		str_return money(htab_ptr pset);
+		str_return multiline(htab_ptr pset);
+		str_return password(htab_ptr pset);
+		str_return phone(htab_ptr pset);
+		str_return plaintext(htab_ptr pset);
+		str_return number(htab_ptr pset);
+		str_return radio(htab_ptr pset);
+		str_return select(htab_ptr pset);
+		str_return inputType(htab_ptr pset, str_ptr itype);
+		str_return checkbox(htab_ptr pset);
+
+		// end input types
 		str_rc submit(htab_ptr pset);
+		
 		str_rc text_value(htab_ptr pset);
 
 		str_rc output(val_ptr val);
@@ -93,10 +100,11 @@ namespace wcc {
 		str_rc generateTag(str_ptr tag, htab_ptr pset);
 		str_rc getTag(htab_ptr ps, htab_rw ex, str_ptr tag);
 
-		str_rc inputType(htab_ptr pset, str_ptr itype);
+		
 		str_rc getStyle(str_ptr name);
 
-		str_rc ensureIdValue(htab_rw ps);
+		str_return ensureIdName(htab_rw ps);
+
 		str_rc label_front(htab_ptr ps);
 		str_rc in_label(htab_ptr ps);
 		str_rc out_label(htab_ptr ps);
