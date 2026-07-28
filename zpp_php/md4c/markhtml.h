@@ -1,0 +1,62 @@
+
+#ifndef MARKHTML_H
+#define MARKHTML_H
+
+
+#ifndef ZPP_BASE_H
+#include "zpp/base.h"
+#endif
+
+namespace wcc {
+
+using namespace zpp;
+
+class MTHInit : public state_init {
+public:
+
+    str_intern  pflags_s;
+    str_intern  rflags_s;
+    str_intern  cb_link_s;
+    str_intern  title_attr;
+    str_intern  href_attr;
+    str_intern  blockquote;
+    str_intern  is_info;
+
+    void init() override;
+};
+
+extern MTHInit  MTH;
+
+class  MarkToHtml : public base_d {
+protected:
+	int     pflags_;
+	int     rflags_;
+	str_buf htmlbuf_; // accumulate output
+	str_rc  input_;
+	
+
+public:
+
+	htab_rc tagclass_; // inject class attribute
+
+	static base_obj_mgr<MarkToHtml> omg;
+
+	void debug_info(htab_rw info) override;
+
+	void construct(int parse = 0, int render = 0);
+
+	void set_flags(int parse, int render = 0);
+
+	str_return text(str_ptr markdown);
+
+	void html_append(const char* txt, size_t tlen);
+
+	htab_rc cblink(htab_ptr link);
+
+	void setTagClass(str_ptr tag, str_ptr classattr);
+};
+
+
+}// namespace wcc
+
+#endif

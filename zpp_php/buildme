@@ -1,0 +1,22 @@
+#!/bin/bash
+ARGC=$#
+export XDEBUG_MODE=off
+echo "ARGS = $ARGC"
+set -e
+. ./pvid.sh
+sudo make clean
+sudo rm -f $pconf/zpp.ini
+clear
+b=0
+if [ $ARGC -eq $b ]; then
+  rm -f ./stub/*_arginfo.h
+  FILES=./stub/*.stub.php
+  for f in $FILES
+  do
+    target="${f/.stub.php/_arginfo.h}"
+    make $target
+  done
+fi
+
+#sudo make install
+#sudo cp zpp.ini $pconf/zpp.ini

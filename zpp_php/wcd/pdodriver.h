@@ -1,0 +1,126 @@
+#ifndef WCD_PDODRIVER_H
+#define WCD_PDODRIVER_H
+
+#ifndef WCD_IDRIVER_H
+#include "idriver.h"
+#endif
+
+#ifndef PHP_PDO_DRIVER_H
+#include <ext/pdo/php_pdo_driver.h>
+#endif
+
+namespace wcd {
+
+	using namespace zpp;
+	using namespace wcc;
+
+
+	class PdoDriver : public IDriver {
+	public:
+
+		static base_obj_mgr<PdoDriver> omg;
+
+		static zend_class_entry* register_class(zend_class_entry* idriver_ce);
+
+		virtual void afterConnect();
+
+		virtual htab_rc getConnectOptions();
+
+		static int pdoType(val_ptr val);
+		
+		 bool begin(htab_ptr args) override;
+		 bool commit(htab_ptr args) override;
+		 bool rollback(htab_ptr args) override;
+
+		htab_return fetchAllRows(obj_ptr stmt, int mode) override;
+		val_return fetchRow(obj_ptr stmt, int mode) override;
+
+		error_return connect() override;
+
+		error_return closeStmt(obj_ptr stmt) override;
+
+		str_rc escape(str_ptr value) override;
+		error_return bind(obj_ptr stmt, htab_ptr params) override;
+		val_return execute(obj_ptr stmt, bool close = true, bool fetch = false) override;
+
+
+
+		val_rc getAttribute(int key);
+
+		val_rc getCaseAttribute();
+
+		void setCaseAttribute(int value);
+
+		htab_return getColumnNames(str_ptr tableName);
+		
+
+		str_return getDSN();
+
+		
+
+		str_rc getDatabaseName();
+
+		obj_rc getSchema();
+		
+		htab_return getTableColumns(str_ptr tableName);
+		obj_rc getTableMode(str_ptr tableName);
+
+		
+		bool inTransaction() override;
+		//bool isAutoCommit() override;
+		bool isConnected() override;
+
+
+		val_return lastInsertId(str_ptr name) override;
+		
+		obj_return prepare(str_ptr query, htab_ptr options=htab_ptr()) override;
+
+		obj_return prepareQuery(str_ptr query, htab_ptr values, htab_ptr bindTypes) override;
+
+		
+		void log(htab_ptr info);
+
+		
+
+		error_return prepareExecute(str_ptr query, htab_ptr values, htab_ptr bindTypes);
+
+
+		val_return query(str_ptr query, htab_ptr params) override;
+
+		val_return querySingle(str_ptr query) override;
+
+		htab_return query_lcase(str_ptr sql, int fmode);
+
+
+		str_rc quoteName(str_ptr name);
+
+		obj_rc readSchema();
+
+
+
+		bool setAttribute(int key, val_ptr value);
+
+		
+
+		obj_rc getTableModel(str_ptr tableName);
+
+		str_rc param(unsigned pno) override;
+		
+
+	};
+
+	class PdoInit : public state_init 
+	{
+	public:
+		void init() override;
+
+		str_intern setattribute_fn;
+		str_intern getattribute_fn;
+
+	};
+
+	extern PdoInit PDOI;
+
+}//wcd namespace
+
+#endif

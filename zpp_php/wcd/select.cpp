@@ -1,0 +1,465 @@
+#ifndef WCD_SELECT_CPP
+#define WCD_SELECT_CPP
+
+#ifndef WCD_SELECT_H
+#include "select.h"
+#endif
+
+#ifndef SQL_PART_H
+#include "sql_ipart.h"
+#endif
+
+namespace wcd {
+
+using namespace wcc;
+using namespace zpp;
+
+base_obj_mgr<Select> Select::omg;
+
+
+void Select::debug_info(htab_rw di)
+{
+	Operation::debug_info(di);
+
+	di.set(SQSTR.icolumns, icols_);
+	di.set(SQSTR.auto_alias, autoAlias_);
+}
+
+obj_return 
+Select::getSqlParams()
+{
+	obj_return result;
+	Bindings* bind = nullptr;
+	if (!bindPtr(result, bind))
+	{
+		return result;
+	}
+
+	if (autoAlias_) {
+		bool_return bret = bind->aliasSelect();
+		if (bret.has_errors())
+		{
+			result = std::move(bret);
+			return result;
+		}
+	}
+	obj_rc isql_mgr = bind->isql();
+	ISql* isq = zobj_toc<ISql>(isql_mgr);
+
+	result = isq->select( *bind);
+	if (result.has_errors())
+	{
+		return result;
+	}
+	bind->wipe();
+	return result;
+}
+
+void 
+Select::construct(const weak_ref& db, bool autoAlias)
+{
+	Operation::construct(db);
+
+	autoAlias_ = autoAlias;
+	//showobj("Select::construct", vobj());
+}	
+
+ htab_rc // static
+ Select::getAlive()
+ {
+ 	htab_rc values;
+
+ 	htab_rw hw(values);
+
+ 	base_dlink<Select>& dref = omg.obj_list_;
+
+ 	auto n = dref.next_;
+ 	while(n)
+ 	{
+ 		hw.push_back(n->obj_);
+ 		n = n->next_;
+ 	}
+ 	return values;
+ }
+
+error_return
+Select::aggregate(str_ptr aggfn, str_ptr alias, htab_ptr aggargs)
+{
+	error_return result;
+
+	Bindings* bind = nullptr;
+	if (!bindPtr(result, bind))
+	{
+		return result;
+	}
+
+	htab_rc data;
+
+	htab_rw hw(data);
+
+	hw.set(SQSTR.function, aggfn);
+	hw.set(SQSTR.alias, alias);
+	
+	if (!aggargs.size())
+	{
+		hw.set(SQSTR.columns, SQSTR.asterisk);
+	}
+	else {
+		hw.set(SQSTR.columns, aggargs);
+	}
+
+
+	bind->set(ISql::SQL_AGGREGATE, data);
+	return result;
+}
+
+void 
+Select::destruct()
+{
+	//showobj("~Select", vobj());
+	this->wipe();
+}
+
+void
+Select::wipe()
+{
+	//showobj("Select::wipe", vobj());
+	icols_.init();
+	Operation::wipe();
+}
+
+void
+Select::add(htab_ptr cols)
+{
+	icol().add(cols);
+}
+
+obj_return
+Select::addJoin(obj_ptr ltable, obj_ptr rtable, int jtype)
+{
+	obj_return result;
+
+	obj_rc ji_mgr = JoinInfo::omg.new_zobj();
+	JoinInfo*  ji = zobj_toc<JoinInfo>(ji_mgr);
+
+	ji->construct(ltable, rtable, jtype);
+
+	obj_return jret = this->getJoiner();
+	if (jret.has_errors())
+	{
+		result = std::move(jret);
+		return result;
+	}
+	JoinTables* jt = zobj_toc<JoinTables>(jret.value_);
+
+	jt->addJoin(ji_mgr);
+
+	result.value_ = ji_mgr;
+	return result;
+}
+
+obj_return 
+Select::addTable(str_ptr table, str_ptr alias, htab_ptr cols)
+{
+	obj_return result;
+
+	obj_rc tc_mgr = TColumns::omg.new_zobj();
+	TColumns* tc = zobj_toc<TColumns>(tc_mgr);
+
+	val_rc cols_mgr(cols);
+	tc->construct(table, alias, cols_mgr);
+
+	obj_return jret = this->getJoiner();
+	if (jret.has_errors())
+	{
+		result = std::move(jret);
+		return result;
+	}
+
+	JoinTables* jt = zobj_toc<JoinTables>(jret.value_);
+
+	jt->addTable(tc);
+
+	result.value_ = tc_mgr;
+
+	return result;
+}
+
+htab_return
+Select::getRenamed()
+{
+	htab_return result;
+
+	val_return row_ret= this->getRows();
+
+	if (row_ret.has_errors())
+	{
+		result = std::move(row_ret);
+		return result;
+	}
+	Bindings* bind = nullptr;
+	if (!bindPtr(result, bind))
+	{
+		return result;
+	}
+
+	val_rc rename = bind->get(ISql::SQL_RENAME);
+	val_rc& rowset = row_ret.value_;
+
+	if (rowset.isArray() && rename.isArray())
+	{
+		htab_rc objset;
+		htab_rw hw(objset);
+
+		htab_ptr rows(rowset);
+		htab_ptr rtab(rename);
+		htab_walk wk;
+
+		for(wk.start(rows); wk.ok(); wk.next())
+		{
+			obj_rc split = JoinTables::rowSplit(rows, rtab);
+			hw.push_back(split);
+		}
+		result.value_ = objset;
+	}
+	return result;
+}
+
+obj_return
+Select::iCols()
+{
+	obj_return result;
+	if (!icols_.ok())
+	{
+		icols_ = IColumns::omg.new_zobj();
+		IColumns* ip = zobj_toc<IColumns>(icols_);
+		obj_ptr self(vobj());
+		ip->construct(self);
+	}
+	result.value_ = icols_;
+	return result;
+}
+
+void 
+Select::setAlias(str_ptr alias)
+{
+	icol().setAlias(alias);
+}
+
+
+}; // namespace
+
+using namespace wcd;
+
+ZEND_METHOD(Wcd_Sql_Select, __construct)
+{
+	zarg_rd args(execute_data);
+	weak_ref   db;
+	bool      auto_alias = false;
+
+	args.weakref(db, args.need(0));
+
+	if (!args.zbool(auto_alias, args.option(1)))
+	{
+		/*#if ZEND_DEBUG
+		zend_printf("Arg 2 using default\n");
+		#endif
+		*/
+	};
+
+	if (!args.throw_errors())
+	{
+		Select* sobj = zval_toc<Select>(ZEND_THIS);
+
+		sobj->construct(db, auto_alias);
+		//showobj("DB object", db);
+	}
+
+	/*zval*     dbobj;
+	bool      auto_alias = false;
+	zend_class_entry* ce = IDriver::omg.class_entry_;
+
+	ZEND_PARSE_PARAMETERS_START(1,2)
+	Z_PARAM_OBJECT_OF_CLASS(dbobj, ce)
+	Z_PARAM_OPTIONAL
+	Z_PARAM_BOOL(auto_alias)
+	ZEND_PARSE_PARAMETERS_END();
+
+	Select* sobj = zval_toc<Select>(ZEND_THIS);
+	sobj->construct(dbobj, auto_alias);
+	*/
+}
+
+ZEND_METHOD(Wcd_Sql_Select, __destruct)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+	Select* sobj = zval_toc<Select>(ZEND_THIS);
+	sobj->destruct();
+
+}
+
+ZEND_METHOD(Wcd_Sql_Select, getAlive)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	htab_rc data = Select::getAlive();
+	
+	data.move_zv(return_value);
+
+}
+
+ZEND_METHOD(Wcd_Sql_Select, add)
+{
+	zarg_rd args(execute_data);
+
+	htab_ptr cols;
+
+	args.zarray(cols, args.need(0));
+
+	if (!args.throw_errors())
+	{
+		Select* sobj = zval_toc<Select>(ZEND_THIS);
+
+		sobj->add(cols);
+	}
+}
+
+
+//public function aggregate(string $fn, string $as, ?array $args) : void {}
+ZEND_METHOD(Wcd_Sql_Select, aggregate)
+{
+	zarg_rd args(execute_data);
+
+	str_ptr aggfn;
+	str_ptr alias;
+
+	htab_ptr aggcols;
+
+	args.zstring(aggfn, args.need(0));
+	args.zstring(alias, args.need(1));
+
+	args.zarray_null(aggcols, args.option(2));
+
+	if (!args.throw_errors())
+	{
+		Select* sobj = zval_toc<Select>(ZEND_THIS);
+
+		sobj->aggregate(aggfn, alias, aggcols);
+	}
+}
+
+ZEND_METHOD(Wcd_Sql_Select, addJoin)
+{
+	zarg_rd args(execute_data);
+
+	obj_ptr ltable;
+	obj_ptr rtable;
+	zend_long jtype = JoinInfo::J_INNER;
+	obj_return result;
+
+	args.obj_ofclass(ltable, args.need(0), zclass_sql_icolumns);
+	args.obj_ofclass_null(rtable, args.option(1), zclass_sql_icolumns);
+	args.zlong(jtype, args.option(2));
+	
+
+	if (!args.throw_errors())
+	{
+		Select* sobj = zval_toc<Select>(ZEND_THIS);
+
+		result = sobj->addJoin(ltable,rtable,jtype);
+		result.throw_errors();
+	}	
+
+	result.value_.move_zv(return_value);
+}
+
+ZEND_METHOD(Wcd_Sql_Select, addTable)
+{
+	zarg_rd args(execute_data);
+
+	str_ptr tname;
+	str_ptr talias;
+	htab_ptr cols;
+
+	obj_return result;
+
+	args.zstring(tname, args.need(0));
+	args.zstring_null(talias, args.option(1));
+	args.zarray_null(cols, args.option(2));
+	
+
+	if (!args.throw_errors())
+	{
+		Select* sobj = zval_toc<Select>(ZEND_THIS);
+
+		result = sobj->addTable(tname,talias,cols);
+		result.throw_errors();
+	}	
+
+	result.value_.move_zv(return_value);
+}
+
+ZEND_METHOD(Wcd_Sql_Select, getRenamed)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	Select* sobj = zval_toc<Select>(ZEND_THIS);
+
+	htab_return result = sobj->getRenamed();
+	result.throw_errors();
+
+	result.value_.move_zv(return_value);
+}
+
+ZEND_METHOD(Wcd_Sql_Select, getSqlParams)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	Select* sobj = zval_toc<Select>(ZEND_THIS);
+
+	obj_return result = sobj->getSqlParams();
+
+	result.throw_errors();
+	result.value_.move_zv(return_value);
+}
+
+ZEND_METHOD(Wcd_Sql_Select, icols)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	Select* sobj = zval_toc<Select>(ZEND_THIS);
+
+	obj_return result = sobj->iCols();
+	result.throw_errors();
+	result.value_.copy_zv(return_value);
+}
+
+ZEND_METHOD(Wcd_Sql_Select, wipe)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	Select* sobj = zval_toc<Select>(ZEND_THIS);
+
+	sobj->wipe();
+}
+
+ZEND_METHOD(Wcd_Sql_Select, setAlias)
+{
+	zarg_rd args(execute_data);
+
+	str_ptr alias;
+
+	args.zstring(alias, args.need(0));
+
+	if (!args.throw_errors())
+	{
+		Select* sobj = zval_toc<Select>(ZEND_THIS);
+
+		sobj->setAlias(alias);
+	}	
+
+}
+
+
+#endif
+

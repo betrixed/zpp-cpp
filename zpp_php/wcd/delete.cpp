@@ -1,0 +1,66 @@
+#ifndef WCD_DELETE_CPP
+#define WCD_DELETE_CPP
+
+#ifndef WCD_DELETE_H
+#include "delete.h"
+#endif
+
+#ifndef SQL_PART_H
+#include "sql_ipart.h"
+#endif
+
+namespace wcd {
+
+
+using namespace zpp;
+using namespace wcc;
+
+base_obj_mgr<Delete> Delete::omg;
+
+
+obj_return 
+Delete::getSqlParams()
+{
+	obj_return result;
+
+	Bindings* bind = nullptr;
+	if (!bindPtr(result, bind))
+	{
+		return result;
+	}
+
+	obj_rc isql_mgr = bind->isql();
+
+	ISql* isql = zobj_toc<ISql>(isql_mgr);
+
+	result = isql->deleteSql(*bind);
+
+	if (result.has_errors())
+	{
+		return result;
+	}
+
+	bind->wipe();
+
+	return result;
+}
+
+}; // namespace wcd
+
+using namespace wcd;
+using namespace zpp;
+
+ZEND_METHOD(Wcd_Sql_Delete, getSqlParams)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	Delete* cobj = zval_toc<Delete>(ZEND_THIS);
+
+	obj_return result = cobj->getSqlParams();
+
+	result.throw_errors();
+	result.value_.move_zv(return_value);
+}
+
+
+#endif

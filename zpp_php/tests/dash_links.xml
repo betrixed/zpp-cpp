@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<pdoc>
+    <tb>
+        <tb k='My Profile'>
+            <s k='href'>/user/profile</s>
+            <s k='role'>User</s>
+            <s k='info'>My Profile</s>           
+        </tb>
+        <tb k='Articles'>
+            <s k='href'>/blog</s>
+            <s k='role'>Editor</s>
+            <s k='info'>Edit blog articles</s>
+        </tb>
+        <tb k='Images'>
+            <s k='href'>/images</s>
+            <s k='role'>Editor</s>
+            <s k='info'>Upload, manage images</s>
+        </tb>
+        <tb k='Collections'>
+            <s k='href'>/linkedit/set</s>
+            <s k='role'>Editor</s>
+            <s k='info'>Collections of content</s>
+        </tb>
+        <tb k='Links'>
+            <s k='href'>/linkedit</s>
+            <s k='role'>Editor</s>
+            <s k='info'>Edit link feeds</s>
+        </tb>
+        <tb k='Series'>
+            <s k='href'>/images/series</s>
+            <s k='role'>Editor</s>
+            <s k='info'>Collections of images</s>
+        </tb>
+        <tb k='Bank'>
+            <s k='href'>/bank/index</s>
+            <s k='role'>Finance</s>
+            <s k='info'>Bank Transactions</s>
+        </tb>
+        <tb k='Page statistics'>
+            <s k='href'>/admin/stats</s>
+            <s k='role'>Admin</s>
+            <s k='info'>Selected daily page hits</s>
+        </tb>
+        <tb k='User Logins'>
+            <s k='href'>/admin/user</s>
+            <s k='role'>Admin</s>
+            <s k='info'>Roles and logins</s>        
+        </tb>
+        <tb k='Mail Chimp Admin'>
+            <s k='href'>/chimp/lists</s>
+            <s k='role'>Admin</s>
+            <s k='info'>Mail chimp subscribers</s>        
+        </tb>
+        <tb k='Site Menus'>
+            <s k='href'>/admin/menutop</s>
+            <s k='role'>Admin</s>
+            <s k='info'>Site menus with URLs</s>        
+        </tb>
+        <tb k='Mail out templates'>
+            <s k='href'>/email/email_group/index</s>
+            <s k='role'>Admin</s>
+            <s k='info'>Emails - groups and content</s>        
+        </tb>
+        <tb k='Mail subscriptions'>
+            <s k='href'>/email/email_group/subscriptions</s>
+            <s k='role'>Admin</s>
+            <s k='info'>Member subscriptions</s>        
+        </tb>
+        <tb k='Donations'>
+            <s k='href'>/user/donations</s>
+            <s k='role'>Finance</s>
+            <s k='info'>Donations to Parracan</s>        
+        </tb>
+        <tb k='Member List'>
+            <s k='href'>/user/member/list</s>
+            <s k='role'>Member</s>
+            <s k='info'>Members of Parracan</s>        
+        </tb>
+        <tb k='News'>
+            <s k='href'>/news/rss/fetch</s>
+            <s k='role'>News</s>
+            <s k='info'>Recent RSS feeds from internet</s>        
+        </tb>
+    </tb>
+</pdoc>

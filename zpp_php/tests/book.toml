@@ -1,0 +1,10 @@
+[book]
+authors = ["Michael Rynn"]
+language = "en"
+multilingual = false
+src = "src"
+title = "C++ Classes for PHP extensions"
+description = """C++ Classes for PHP extensions"""
+cover = "zpp_book_cover.webp"
+[output.html]
+site-url = "/zpp-book/"

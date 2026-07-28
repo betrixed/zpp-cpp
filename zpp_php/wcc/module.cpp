@@ -1,0 +1,560 @@
+#ifndef WCC_MODULE_CPP
+#define WCC_MODULE_CPP
+
+
+#ifndef MODULE_WCC_H
+#include "module.h"
+#endif
+
+#ifndef WCC_SERVICES_H
+#include "services.h"
+#endif
+
+#ifndef WCC_ROUTE_H
+#include "route.h"
+#endif
+
+#ifndef WCC_FINDER_H
+#include "finder.h"
+#endif
+
+#ifndef WCC_ASSETS_H
+#include "assets.h"
+#endif
+
+//#define DBG_MODULE
+#ifdef DBG_MODULE
+#ifndef WCC_DEBUGLOG_H
+#include "debuglog.h"
+#endif
+#endif
+
+#ifndef ARGINFO_MODULE_H
+#define ARGINFO_MODULE_H
+extern "C" {
+	#include "stub/module_arginfo.h"
+}
+#endif
+/*
+#ifndef WCC_RUN_H
+#include "run.h"
+#endif
+*/
+
+namespace wcc {
+
+using namespace zpp;
+
+base_obj_mgr<Module> Module::omg;
+
+
+void 
+Module_init::init()
+{
+	DEFAULT_MOD = "default";
+	BASE = "base";
+	ALIAS = "alias";
+	ROUTES = "routes";
+
+	VIEWPATHS = "view_paths";
+	NAMESPACES = "namespaces";
+	REQUIRES = "requires";
+	CLASSFILES = "classfiles";
+
+	DATABASE = "database";
+	ASSETS = "assets";
+	ASSET_FILE = "asset_file";
+
+	dispatch_str = "dispatch";
+	data_str = "data";
+
+	views_str = "views";
+	addpatharray_fn = "addpatharray";
+	addclasses_fn = "addclasses";
+	loadassetfile_fn = "loadassetfile";
+
+	setmodule_fn = "setmodule";
+	dot_str = ".";
+	active_str = "active";
+	cfg_path_str = "cfg_path";
+
+	name_str = "name";
+
+}
+
+Module_init MODi;
+
+void Module::debug_info(htab_rw hw)
+{
+	base_d::debug_info(hw);
+
+	hw.set(MODi.name_str, name_);
+	hw.set(MODi.REQUIRES, requires_);
+	hw.set(MODi.active_str, active_);
+
+	//hw.set(MODi.cfg_path_str, cfg_path_);
+}
+
+
+void
+Module::construct(str_ptr name, htab_ptr data)
+{
+	active_ = false;
+	name_ = name;
+	obj_rc  config = Config::omg.new_zobj();
+	
+	Config* cfg = zobj_toc<Config>(config);
+	cfg->construct(data);
+	obj_ptr self(self_);
+	self.property(MODi.data_str, config);
+
+	obj_rc test = self.obj_property(MODi.data_str);
+
+	if (!test.ok())
+	{
+		showobj("test property_ptr ", test);
+	}
+	this->data_ = config;
+}
+
+
+
+str_rc
+Module::getName()
+{
+	return name_;
+}
+
+error_return 
+Module::activate(obj_ptr finder)
+{
+	error_return result;
+
+	obj_ptr  data = data_;
+
+	//zend_printf("activate\n");
+#ifdef DBG_MODULE
+	DebugLog* log = DebugLog::cpp_global();
+	log->line("Module Activate");
+
+#endif
+
+	str_rc def_name = data.str_property(MODi.DEFAULT_MOD);
+	obj_rc dispatch;
+	val_rc temp_arg;
+	htab_rc plist;
+
+	if (def_name.size() && (zs_cmp(def_name, MODi.DEFAULT_MOD)!=0))
+	{
+	
+		val_return val_test = Services::service(MODi.dispatch_str);
+		if (!val_test.throw_errors())
+		{
+			dispatch = val_test.value_.zobject();
+		}
+		else {
+			result = val_test.move_error();
+		}
+		if (dispatch.ok())
+		{
+			val_rc sarg(def_name);
+			obj_rc defmod = dispatch.call(MODi.setmodule_fn, sarg);
+			addDefaults(defmod);
+		}
+	}
+
+	str_rc base = data.str_property(MODi.BASE);
+
+	if (base.size())
+	{
+		str_buf buf;
+
+		str_rc rval = data.str_property(MODi.ROUTES);
+
+		if (!rval.size())
+		{
+			buf << base << '/' << MODi.ROUTES;
+			rval = buf.zstr();
+
+			data.property(MODi.ROUTES, rval);
+		}
+
+		temp_arg = data.property(MODi.VIEWPATHS);
+
+		if (temp_arg.isNull())
+		{
+			buf << base << '/' << MODi.views_str;
+			rval = buf.zstr();
+			data.property(MODi.VIEWPATHS, rval);
+		}
+	}
+	
+	plist = data.array_property(MODi.NAMESPACES);
+	if (plist.size())
+	{
+
+		temp_arg = plist;
+		finder.call(MODi.addpatharray_fn, temp_arg);
+	}
+	
+	plist = data.array_property(MODi.CLASSFILES);
+
+	if (plist.size())
+	{
+
+		temp_arg = plist;
+		finder.call(MODi.addclasses_fn, temp_arg);
+	}
+
+	temp_arg  = data.property(MODi.REQUIRES);
+
+// TODO: Should this be array merge instead of assign?
+	//showmem("requires", temp_arg);
+
+	// transfer from property to hidden property
+	if (temp_arg.isArray())
+	{
+		requires_ = temp_arg.zarray();
+	}
+	else if (temp_arg.isString())
+	{
+		// add to array
+		htab_rw req(requires_);
+		req.clear();
+		req.push_back(temp_arg);
+	}
+
+	str_rc asset_file = data.str_property(MODi.ASSET_FILE);
+
+	if (asset_file.size())
+	{
+		
+		str_rc dir = dirname(asset_file);
+
+		if (!dir.size() || (zs_cmp(dir, MODi.dot_str)==0))
+		{
+			// absolute path
+			str_buf buf;
+
+			buf << cfg_path_ << '/' << asset_file;
+
+			asset_file = buf.zstr();
+
+			data.property(MODi.ASSET_FILE, asset_file);
+		}
+
+		val_return t_assets = Services::service(MODi.ASSETS);
+		if (t_assets.has_errors())
+		{
+			result = t_assets.move_error();
+			return result;
+		}
+		obj_rc asset_mgr = t_assets.value_.zobject();
+		if (asset_mgr.ok())
+		{
+			Assets* asmgr = zobj_toc<Assets>(asset_mgr);
+			htab_return ftest  = asmgr->loadAssetFile(asset_file);
+			htab_rc added;
+
+#ifdef DBG_MODULE
+			log->line("load asset file");
+
+#endif
+			if (ftest.has_errors())
+			{
+				result = ftest.move_error();
+#ifdef DBG_MODULE
+				log->dump("errors:", result.get_errors());
+#endif
+			}
+			else {
+				added = std::move(ftest.value_);
+#ifdef DBG_MODULE
+					log->dump("add assets", added);
+#endif
+			}
+			htab_rc asset_keyslist = data.array_property(MODi.ASSETS);
+			if (!asset_keyslist.size())
+			{
+				asset_keyslist = htab_ptr::empty_array();
+			}
+
+			htab_rw asset_keys(asset_keyslist);
+
+			asset_keys.merge(added);
+			data.property(MODi.ASSETS, asset_keyslist);
+		}
+	}
+	
+	active_ = true;
+	return result;
+}
+
+void
+Module::addDefaults(obj_ptr defmod)
+{
+	
+	obj_rc  cfgdata =  defmod.obj_property(MODi.data_str);
+	if (!cfgdata.ok())
+	{
+		return;
+	}
+	Config* cfg = zobj_toc<Config>(cfgdata);
+	htab_rc list = cfg->toArray();
+
+	htab_walk  wk;
+
+	obj_ptr self = self_;
+	obj_rc  data = self.obj_property(MODi.data_str);
+
+	auto key = wk.key();
+	auto value = wk.value();
+	for(wk.start(list); wk.ok(); wk.next())
+	{
+		str_ptr pname = key.zstr();
+
+		if (!data.has_property(pname))
+		{
+			data.property(pname, value);
+		}
+	}
+}
+
+// convert string value into list[value]
+htab_rc 
+Module::getValueList(str_ptr key)
+{
+	htab_rc list;
+
+	obj_ptr self = self_;
+	obj_rc  data = self.obj_property(MODi.data_str);
+
+	if (!data.ok())
+	{
+		return list;
+	}
+	val_rc  value = data.property(key);
+	if (value.isString())
+	{
+		htab_rw item(list);
+		item.push_back(value.zstr());
+		return list;
+	}
+	if (value.isArray())
+	{
+		list = value.zarray();
+		return list;
+	}
+
+	list = htab_ptr::empty_array();
+	return list;
+}
+
+htab_rc 
+Module::getAssets()
+{
+	return getValueList(MODi.ASSETS);
+}
+
+htab_rc 
+Module::getViewPaths()
+{
+	return getValueList(MODi.VIEWPATHS);
+}
+
+
+str_rc Module::getConfigPath()
+{
+	return cfg_path_;
+}
+
+void Module::setConfigPath(str_ptr path)
+{
+	cfg_path_ = path;
+	//obj_ptr(self_).property(MODi.cfg_path_str, path);
+}
+
+void Module::setActive(bool val)
+{
+	active_ = val;
+}
+
+bool Module::getActive()
+{
+	return active_;
+}
+
+htab_rc
+Module::getRequires()
+{
+	return requires_;
+}
+
+void Module::setRequires(htab_ptr rlist)
+{
+	requires_ = rlist;
+}
+}//end wcc
+
+
+using namespace wcc;
+using namespace zpp;
+
+ZEND_METHOD(Wcc_Module, __construct)
+{
+	str_ptr  name;
+	htab_ptr data;
+
+	zarg_rd args(execute_data);
+
+	name = args.str(args.need(0));
+	data = args.htab(args.need(1));
+
+	if (!args.throw_errors(__FUNCTION__))
+	{
+		Module* cobj = zval_toc<Module>(ZEND_THIS);
+		cobj->construct(name, data);
+	}
+
+}
+
+ZEND_METHOD(Wcc_Module, activate)
+{
+	obj_ptr finder;
+
+	zarg_rd args(execute_data);
+
+	args.obj_ofclass(finder,args.need(0), Finder::omg.classEntry());
+
+	if (!args.throw_errors(__FUNCTION__))
+	{
+		Module* cobj = zval_toc<Module>(ZEND_THIS);
+		error_return test = cobj->activate(finder);
+		test.throw_errors(__FUNCTION__);
+	}
+}
+	
+ZEND_METHOD(Wcc_Module, addDefaults)
+{
+	obj_ptr defmod;
+
+	zarg_rd args(execute_data);
+
+	args.obj_ofclass(defmod, args.need(0), Module::omg.classEntry());
+
+	if (!args.throw_errors(__FUNCTION__))
+	{
+		Module* cobj = zval_toc<Module>(ZEND_THIS);
+		cobj->addDefaults(defmod);
+	}
+}
+
+ZEND_METHOD(Wcc_Module, getAssets)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+	Module* cobj = zval_toc<Module>(ZEND_THIS);
+	htab_rc result = cobj->getAssets();
+	result.move_zv(return_value);
+
+}
+	
+ZEND_METHOD(Wcc_Module, getName)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+	Module* cobj = zval_toc<Module>(ZEND_THIS);
+	str_rc result = cobj->getName();
+	result.move_zv(return_value);
+}
+	
+ZEND_METHOD(Wcc_Module, getRequires)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+	Module* cobj = zval_toc<Module>(ZEND_THIS);
+	htab_rc result = cobj->getRequires();
+	result.move_zv(return_value);
+}
+
+
+ZEND_METHOD(Wcc_Module, setRequires)
+{
+	zarg_rd args(execute_data);
+
+	htab_ptr rlist = args.htab(args.need(0));
+
+	if (!args.throw_errors(__FUNCTION__))
+	{
+		Module* cobj = zval_toc<Module>(ZEND_THIS);
+		cobj->setRequires(rlist);		
+	}
+}
+
+
+ZEND_METHOD(Wcc_Module, getActive)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+	Module* cobj = zval_toc<Module>(ZEND_THIS);
+	bool result = cobj->getActive();
+	RETURN_BOOL(result);
+}
+
+
+ZEND_METHOD(Wcc_Module, setActive)
+{
+	zarg_rd args(execute_data);
+
+	bool val = true;
+
+	args.zbool(val, args.need(0));
+
+	if (!args.throw_errors(__FUNCTION__))
+	{
+		Module* cobj = zval_toc<Module>(ZEND_THIS);
+		cobj->setActive(val);
+	}
+}
+
+ZEND_METHOD(Wcc_Module, getViewPaths)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+	Module* cobj = zval_toc<Module>(ZEND_THIS);
+	htab_rc result = cobj->getViewPaths();
+	result.move_zv(return_value);
+}
+	
+ZEND_METHOD(Wcc_Module, getConfigPath)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+	Module* cobj = zval_toc<Module>(ZEND_THIS);
+	str_rc result = cobj->getConfigPath();
+	result.move_zv(return_value);
+}
+
+ZEND_METHOD(Wcc_Module, setConfigPath)
+{
+	str_ptr  path;
+	zarg_rd args(execute_data);
+
+	path = args.str(args.need(0));
+
+	if (!args.throw_errors(__FUNCTION__))
+	{
+		Module* cobj = zval_toc<Module>(ZEND_THIS);
+		cobj->setConfigPath(path);
+	}
+}
+
+
+PHP_MINIT_FUNCTION(Wcc_Module_reg)
+{
+	//auto ce = register_class_Wcc_Config(zend_ce_arrayaccess, zend_ce_countable);
+	//zend_standard_class_def
+	auto ce = register_class_Wcc_Module();
+	Module::omg.classEntry(ce);
+
+	STATE_INIT_ADD(MODi)
+
+	return SUCCESS;
+}
+
+
+#endif
