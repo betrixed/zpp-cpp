@@ -1,0 +1,131 @@
+#ifndef ZARG_RD_H
+#define ZARG_RD_H
+
+/**
+ * @file zarg_rd.h
+ * @author Michael Rynn <michael.rynn.500@gmail.com>
+ * @brief zpp::zarg_rd - Argument reader for PHP functions/method
+ * @copyright Copyright (c) 2025 Michael Rynn
+ * @license BSD 3-Clause License
+ */
+#ifndef OBJ_PTR_H
+#include "obj_ptr.h"
+#endif
+
+#ifndef STR_BUF_H
+#include "str_buf.h"
+#endif
+
+#ifndef WEAK_REF_H
+#include "weak_ref.h"
+#endif
+
+namespace zpp {
+
+/**
+ * @class zarg_rd
+ * @brief Argument reader for PHP functions/methods.	
+ * @details
+ *  Use in PHP functions/methods to read and validate arguments.
+ *  Throw zend exceptions on error.
+ *  
+ */
+
+
+class zval_slice {
+protected:
+	zval*	zptr0_;
+	size_t  nargs_;
+public:
+	size_t  size() const {
+		return nargs_;
+	}
+	zval*   ptr() const {
+		return zptr0_;
+	}
+};
+
+
+class zarg_rd : public zval_slice
+{
+protected:
+	str_buf*          	  errors_;
+	bool              	  maybe_;
+	int                   ix_;
+/*
+#if ZEND_DEBUG
+	zend_execute_data* 	  ze_;
+	zval*                 argptr_;
+#endif
+*/
+	
+public:
+	zarg_rd(zend_execute_data* ze);
+	~zarg_rd();
+
+	
+	static void list_args(str_buf& args, zval* p0, size_t ct);
+
+	str_buf& error();
+
+	void wrong(zval* arg);
+	void wrong_notclass(zval* arg, zend_class_entry* ce);
+
+	zval* need(size_t ix);
+	zval* option(size_t ix);
+
+	// Deprecate passing by reference? 
+	// Beware risk of passing a xxx_rc class, and
+	// losing a reference count.
+	
+	bool zstring(str_ptr& value, zval* arg);
+	bool zstring_null(str_ptr& value, zval* arg);
+
+	
+	bool obj_ofclass(obj_ptr& value, zval* arg, zend_class_entry* ce);
+	bool obj_ofclass_null(obj_ptr& value, zval* arg, zend_class_entry* ce);
+	bool obj(obj_ptr& value, zval* arg);
+	bool obj_null(obj_ptr& value, zval* arg);
+
+	// Returning by result probably better.
+	obj_ptr obj(zval* arg);
+	obj_ptr obj_ornull(zval* arg);
+	obj_ptr objclass_ornull(zval* arg, zend_class_entry* ce);
+	obj_ptr obj_class(zval* arg, zend_class_entry* ce);
+
+	str_ptr  str(zval *arg);
+	str_ptr  str_or_null(zval *arg);
+	str_ptr  str_or_default(zval *arg, const str_intern& strdef);
+
+	htab_ptr htab(zval *arg);
+	htab_ptr htab_or_null(zval *arg);
+	
+	val_ptr  string_or_array(zval* arg);
+	
+	bool weakref(weak_ref& value, zval* arg);
+	bool zarray_null(htab_ptr& value, zval* arg);
+	bool zarray(htab_ptr& value, zval* arg);
+
+	bool zlong(zend_long& value, zval* arg);
+	bool zlong_null(zend_long& value, zval* arg, zend_long ifnull = -1);
+
+	bool zbool(bool& value, zval* arg);
+	
+	bool ztype(val_ptr& value, zval* arg, int ptype);
+
+	bool     has_errors() const { return (errors_); }
+	str_rc   get_errors();
+	bool     throw_errors(const char* fncstr = nullptr);
+	
+
+	size_t size() const {
+		return nargs_;
+	}
+
+	static bool more_args(zend_execute_data* ze, const char* fname=nullptr, size_t maxa=0);
+	static bool zero_args(zend_execute_data* ze, const char* fname=nullptr);
+};
+
+}; //namespace zpp
+
+#endif
