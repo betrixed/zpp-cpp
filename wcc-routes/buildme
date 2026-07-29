@@ -1,0 +1,6 @@
+#!/bin/bash
+sudo /etc/php/8.5/fpm/conf.d/stop
+set -e
+sudo make clean
+make
+sudo make install
