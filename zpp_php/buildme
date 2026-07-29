@@ -17,6 +17,6 @@ if [ $ARGC -eq $b ]; then
     make $target
   done
 fi
-
+# not making combined extension right now
 #sudo make install
 #sudo cp zpp.ini $pconf/zpp.ini

@@ -11,7 +11,7 @@ AS_VAR_IF([PHP_WCCM], [no],, [
     [Define to 1 if the PHP extension 'wccm' is available.])
 
   FLAGS="-fPIC"
-  CXXFLAGS="$CXXFLAGS -Wall -O2 --std=c++23 -I./include -I../wcc"
+  CXXFLAGS="$CXXFLAGS -Wall -O2 --std=c++23 -I./include -I../zpp_php"
   PHP_REQUIRE_CXX()
   AC_LANG([C++])
 

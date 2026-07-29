@@ -1,0 +1,23 @@
+#!/bin/bash
+set -e
+./stop.sh
+pushd zpp_php 
+./buildme
+popd
+pushd wcc-zero
+./buildme
+popd
+pushd wcc-routes
+./buildme
+popd
+pushd wcc-html
+./buildme
+popd
+pushd wcc-more
+./buildme
+popd
+pushd wcc-database
+./buildme
+popd
+./start.sh
+echo "DONE"

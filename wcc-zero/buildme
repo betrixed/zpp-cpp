@@ -1,6 +1,7 @@
 #!/bin/bash
 set -e
 sudo make clean
+../stop.sh
 clear
 make
 sudo make install
