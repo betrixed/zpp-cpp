@@ -3,9 +3,7 @@ ARGC=$#
 export XDEBUG_MODE=off
 echo "ARGS = $ARGC"
 set -e
-. ./pvid.sh
 sudo make clean
-sudo rm -f $pconf/zpp.ini
 clear
 b=0
 if [ $ARGC -eq $b ]; then
@@ -14,6 +12,7 @@ if [ $ARGC -eq $b ]; then
   for f in $FILES
   do
     target="${f/.stub.php/_arginfo.h}"
+    echo $target
     make $target
   done
 fi

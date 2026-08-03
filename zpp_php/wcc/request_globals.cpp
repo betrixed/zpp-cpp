@@ -1091,11 +1091,13 @@ RequestGlobals::getScheme()
 {
 	htab_ptr server(readServer());
 
+	str_rc scheme = server.get(RQit.HTTPS);
+
 #ifdef DBG_REQUEST_GLOBALS
 	DebugLog* log = DebugLog::cpp_global();
 	log->dump("server arrayptr", server);
 #endif
-	str_rc scheme = server.get(RQit.HTTPS);
+	
 #ifdef DBG_REQUEST_GLOBALS
 	log->dump("scheme", scheme);
 #endif
@@ -1108,6 +1110,10 @@ RequestGlobals::getScheme()
 		else {
 			scheme = RQit.http;
 		}
+	}
+	else {
+		//TODO: Or throw error?
+		scheme = RQit.https;
 	}
 #ifdef DBG_REQUEST_GLOBALS
 	log->dump("scheme", scheme);
