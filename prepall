@@ -1,32 +1,26 @@
 #!/bin/bash
 ./stop.sh
-pushd php_zpp
-sudo make clean
+pushd php_zpp 
 phpize
 ./configure
 popd
 pushd wcc-zero
-sudo make clean
 phpize
 ./configure
 popd
-pushd wcc-route
-sudo make clean
+pushd wcc-routes
 phpize
 ./configure
 popd
 pushd wcc-html
-sudo make clean
 phpize
 ./configure
 popd
 pushd wcc-more
-sudo make clean
 phpize
 ./configure
 popd
 pushd wcc-database
-sudo make clean
 phpize
 ./configure
 popd

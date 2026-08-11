@@ -8,6 +8,15 @@
 namespace zpp {
 
 struct error_return {
+
+	static bool  had_zend_exception;
+	static void (*original_zthrow_hook)(zend_object *zex);
+
+	static void  on_zend_exception(zend_object* zex);
+
+	static void init_exception_hook();
+	static str_rc last_msg;
+	
 	str_buf*  errors_;
 
 	error_return() : errors_(nullptr) {}
@@ -25,7 +34,7 @@ struct error_return {
 		return *this;
 	}
 
-	bool has_errors() const { return (errors_); }
+	bool has_errors() const;
 
 	str_buf& error();
 

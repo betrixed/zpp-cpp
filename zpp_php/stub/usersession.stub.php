@@ -31,6 +31,8 @@ class UserSession {
 
 	public function getUserData() : Session\UserData {}
 
+	public function getUserId() : int {}
+
 	public function guestSession() : UserSession {}
 
 	public function hasKey(string $key) : bool {}

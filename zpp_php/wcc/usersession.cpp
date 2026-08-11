@@ -314,11 +314,28 @@ UserSession::getUserData()
 	obj_rc user = data_.obj_property(UDi.user_p);
 	if (!user.ok())
 	{
+		// ensure user property is created
 		user = ud_cpp()->getUser();
 	}
 	return data_;
 }
 
+int
+UserSession::getUserId()
+{
+	int result = 0;
+
+	if (wasRead_)
+	{
+		obj_rc user = data_.obj_property(UDi.user_p);
+		if (user.ok())
+		{
+			result = user.int_property(UDi.id_p);
+		}
+	}
+
+	return result;
+}
 
 
 obj_rc 
@@ -754,6 +771,15 @@ ZEND_METHOD(Wcc_UserSession, getUserData)
 	result.move_zv(return_value);
 }
 
+ZEND_METHOD(Wcc_UserSession, getUserId)
+{
+	if (!zarg_rd::zero_args(execute_data, __FUNCTION__))
+	{
+		return;
+	}
+	UserSession* cobj = zval_toc<UserSession>(ZEND_THIS);
+	RETURN_LONG(cobj->getUserId());
+}
 
 ZEND_METHOD(Wcc_UserSession, guestSession)
 {

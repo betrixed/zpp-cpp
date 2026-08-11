@@ -48,6 +48,8 @@ public:
 	
 	obj_return getSession();
 	obj_rc getUserData();
+	int    getUserId();
+	
 	obj_rc guestSession();
 
 	val_rc getKey(str_ptr key, val_ptr adefault);
