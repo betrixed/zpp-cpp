@@ -1,6 +1,6 @@
 #!/bin/bash
 ./stop.sh
-pushd php_zpp
+pushd zpp_php 
 sudo make clean
 phpize
 ./configure
@@ -10,7 +10,7 @@ sudo make clean
 phpize
 ./configure
 popd
-pushd wcc-route
+pushd wcc-routes
 sudo make clean
 phpize
 ./configure

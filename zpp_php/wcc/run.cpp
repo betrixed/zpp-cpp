@@ -766,7 +766,7 @@ Run::config_init(str_ptr bootstrap)
 						cfg->addArray(tfer);
 					}
 					else {
-						result.error() << "Array data expected";
+						result.error() << "Array data expected from " << path;
 						return result;
 					}
 				}
