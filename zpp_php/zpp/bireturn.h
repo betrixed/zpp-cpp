@@ -58,7 +58,7 @@ struct error_return {
 template <typename T>
 struct bireturn  : public error_return 
 {
-	T   	  value_;
+	T   	  value_ {};
 
 	bireturn() : error_return()
 	{

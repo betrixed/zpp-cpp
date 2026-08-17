@@ -29,6 +29,7 @@ namespace zpp {
  * call of value() key() or index() after start() or next() loop,
  * as these values will change with each interation.
  * This depends on internal details of HashTable.
+ * The key() index(), and value() return different types.
  * 
  */
 class for_key_value : public htab_rc {
@@ -45,6 +46,7 @@ public:
 	zend_long       index() const { return h_; }
 
 	// if not packed and key() is null need to use h_ as numeric key
+	// 
 	zend_string*		key() const { return key_; }
 
 	bool start(HashTable* ht);

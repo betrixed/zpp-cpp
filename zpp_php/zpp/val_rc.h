@@ -32,7 +32,7 @@ class htab_rc;
  */
 class val_rc {
 protected:
-    zval zv_;
+    zval zv_ {};
     
     void lose();
 

@@ -36,7 +36,7 @@ public:
 	void addFolder(str_ptr fsdir);
 	void addPath(str_ptr nsroot, str_ptr fspath);
 
-	void addPathArray(htab_ptr pathsArray);
+	error_return addPathArray(htab_ptr pathsArray);
 	void addClass(str_ptr cname, str_ptr fspath);
 	void addClasses(htab_ptr classArray);
 
