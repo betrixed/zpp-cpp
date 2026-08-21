@@ -1132,14 +1132,13 @@ fgets(val_ptr res, zend_long limit)
     fn_params<2> fn(TLFNs.fgets);
     zval *ap = fn.argsptr();
     ZVAL_COPY_VALUE(ap, res);
-    ap++;
     if (limit > 0)
     {
-        ZVAL_LONG(ap, limit);
+        ZVAL_LONG(ap+1, limit);
     }
     else 
     {
-        ZVAL_NULL(ap);
+        ZVAL_NULL(ap+1);
     }
     return fn.str();
 }

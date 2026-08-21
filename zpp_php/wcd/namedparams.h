@@ -14,6 +14,8 @@ namespace wcd
 
 	class NamedParams : public IParams {
 	public:
+		NamedParams();
+		virtual  ~NamedParams();
 
 		static base_obj_mgr<NamedParams>  omg;
 

@@ -66,6 +66,8 @@ class IDriver {
 
     public function getTableNames(): array {}
 
+    public function getSequenceNames(): array {}
+
     public function handle() : mixed {}
 
     public function iSql(): Sql\ISql {}
@@ -92,7 +94,7 @@ class IDriver {
 
     public function newDmlBuild() : IBuild {}
 
-    public function makeParams() : \Wcd\Sql\IfParamList;
+    public function makeParams() : \Wcd\Sql\IParams;
     
     public function param(int $pno): string {}
 
@@ -140,7 +142,7 @@ class IBuild {
 
     public function getFrom() :  Sql\JoinTables {}
 
-    public function getInsertSql(array $columns) :  Wcd\Sql\ParamList {}
+    public function getInsertSql(array $columns) :  Wcd\Sql\IParams {}
 
     public function getSql() :  Sql\ISql {}
 

@@ -28,7 +28,10 @@ namespace wcd
 		htab_rc	   ret_values_;
 
 	public:
+		virtual ~IParams();
 
+		void destruct();
+		
 		static base_obj_mgr<IParams>  omg;
 
 		static zend_class_entry* register_class();

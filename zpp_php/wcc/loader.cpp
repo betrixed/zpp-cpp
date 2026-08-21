@@ -5,6 +5,8 @@
 #include "loader.h"
 #endif
 
+#define DBG_LOADER
+
 #ifdef  DBG_LOADER
 #ifndef WCC_DEBUGLOG_H
 #include "debuglog.h"
@@ -273,11 +275,18 @@ Loader::require(str_ptr file)
 	val_ptr::string_bind(&path, file);
 	obj_ptr fn = extloader_.zobject();
 
-	result.value_ = fn.call(str_ptr(LDRi.invoke_fn), &path);
-
 #ifdef DBG_LOADER
 	DebugLog* log = DebugLog::cpp_global();
+	if (log)
+	{
+		log->dump("Loader::require ", file);
+	}
+#endif
 
+	result.value_ = fn.call(str_ptr(LDRi.invoke_fn), &path);
+
+
+#ifdef DBG_LOADER
 	if (log)
 	{
 		log->dump("require", (zval*)(result.value_));
@@ -306,6 +315,7 @@ Loader::load(str_ptr class_name)
 
 	str_rc path;
 
+
 	if (finder_.ok())
 	{
 		fn_params<1> fn(fdr_find_);
@@ -316,6 +326,11 @@ Loader::load(str_ptr class_name)
 
 		if (!path.ok())
 		{
+#ifdef DBG_LOADER
+			DebugLog* log = DebugLog::cpp_global();
+
+			log->dump("Loader::load class file not found: ", class_name);
+#endif
 			if (throwNotFound_)
 			{
 				result.error() << "Class " << class_name << " not found";

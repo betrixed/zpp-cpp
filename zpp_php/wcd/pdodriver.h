@@ -59,8 +59,6 @@ namespace wcd {
 		
 
 		str_rc getDatabaseName();
-
-		obj_rc getSchema();
 		
 		htab_return getTableColumns(str_ptr tableName);
 		obj_rc getTableMode(str_ptr tableName);

@@ -310,12 +310,12 @@ UserSession::getUserData()
 	{
 		read();
 	}
-	
+	// ensure data has a user object
 	obj_rc user = data_.obj_property(UDi.user_p);
 	if (!user.ok())
 	{
-		// ensure user property is created
 		user = ud_cpp()->getUser();
+		doWrite_ = true; 
 	}
 	return data_;
 }

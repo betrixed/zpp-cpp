@@ -32,6 +32,14 @@ extern "C" {
 }
 #endif
 
+#define DEBUG_LOG_MODEL
+
+#ifdef DEBUG_LOG_MODEL
+#	ifndef WCC_DEBUG_LOG_H
+#		include "wcc/debuglog.h"
+#	endif
+#endif
+
 #include <filesystem>
 
 namespace wcd {

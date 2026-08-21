@@ -16,6 +16,13 @@ extern "C" {
 }
 #endif
 
+#define DBG_LOG_IPARAMS
+#ifdef DBG_LOG_IPARAMS
+#	ifndef WCC_DEBUG_LOG_H
+#		include "wcc/debuglog.h"
+#	endif
+#endif
+
 namespace wcd {
 
 base_obj_mgr<IParams> 	IParams::omg;
@@ -48,6 +55,23 @@ void IParams::debug_info(htab_rw di)
 		di.set(SQSTR.values_key, val_params_);
 }
 
+IParams::~IParams()
+{
+
+}
+
+void IParams::destruct()
+{
+	#ifdef DBG_LOG_IPARAMS
+	DebugLog* log = DebugLog::cpp_global();
+
+	if (log)
+	{
+		log->dump("IParams __destruct", self_);
+	}
+	#endif
+	wipe();
+}
 
 str_rc 
 IParams::paramStr(int ct)
@@ -179,10 +203,11 @@ IParams::makeList(int start, int count)
 void
 IParams::wipe()
 {
+	
 	sql_.init();
-	params_.reset();
-	ret_values_.reset();
-	val_params_.reset();
+	params_ = htab_ptr::empty_array();
+	ret_values_ = htab_ptr::empty_array();
+	val_params_ = htab_ptr::empty_array();
 }
 
 }//namespace wcd
@@ -395,4 +420,11 @@ ZEND_METHOD(Wcd_Sql_IParams, wipe)
 	cobj->wipe();
 }
 
+ZEND_METHOD(Wcd_Sql_IParams, __destruct)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	IParams* cobj = zval_toc<IParams>(ZEND_THIS);
+	cobj->destruct();
+}
 #endif//iparams.cpp

@@ -45,6 +45,7 @@ namespace wcd {
 
 		// functions which cannot be "pure" = 0
 		virtual str_rc getSqlType();
+		virtual htab_return getSequenceNames();
 		virtual htab_return getTableNames();
 		virtual str_return getDSN();
 
@@ -53,7 +54,7 @@ namespace wcd {
 		virtual val_return lastSeqValue(str_ptr name);
 		virtual str_rc getSchemaClass();
 
-		bool clearSchemaCache();
+		error_return clearSchemaCache();
 		
 		static int pdo_type(unsigned int ztype);
 		
@@ -222,6 +223,8 @@ namespace wcd {
 		str_intern  handle_s;
 		str_intern  logging_s;
 		str_intern  lastsql_s;
+		str_intern  sequences_s;
+		
 
 
 		void init() override;

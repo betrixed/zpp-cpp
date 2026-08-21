@@ -18,6 +18,7 @@ namespace wcd {
 		str_rc getSqlType() override;
 		str_rc getSchemaClass() override;
 		htab_return getTableNames() override;
+		htab_return getSequenceNames() override;
 		val_return  lastSeqValue(str_ptr name) override;
 	};
 

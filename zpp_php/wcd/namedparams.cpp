@@ -12,18 +12,40 @@ extern "C" {
 }
 #endif
 
+#define DBG_LOG_NAMEDPARAMS
+#ifdef DBG_LOG_NAMEDPARAMS
+#	ifndef WCC_DEBUG_LOG_H
+#		include "wcc/debuglog.h"
+#	endif
+#endif
+
 namespace wcd {
 
 base_obj_mgr<NamedParams> 	NamedParams::omg;
 
 
+
+NamedParams::NamedParams() : IParams()
+{
+
+}
+
+NamedParams::~NamedParams()
+{
+	#ifdef DBG_LOG_NAMEDPARAMS
+
+	#endif
+}
+
 str_rc 
 NamedParams::n_param(int ct)
 {
+	str_rc result;
 	str_buf buf;
 
 	buf << ":p" << iform(Numf::DEC) << ct;
-	return buf.zstr();
+	result = buf.zstr();
+	return result;
 }
 
 str_rc 

@@ -44,6 +44,14 @@ extern "C" {
 }
 #endif
 
+#define DBG_LOG_IBUILD
+
+#ifdef DBG_LOG_IBUILD
+#	ifndef WCC_DEBUGLOG_H
+#		include "wcc/debuglog.h"
+#	endif
+#endif
+
 namespace wcd {
 using namespace zpp;
 
@@ -231,6 +239,9 @@ using namespace zpp;
 		bool       is_multiple = false;
 		bool 	 bad_argument = false;
 
+#ifdef DBG_LOG_IBUILD
+	DebugLog* log = DebugLog::cpp_global();
+#endif
 		if (rdata.isObject())
 		{
 			row_mgr = rdata.zobject();
@@ -261,7 +272,13 @@ using namespace zpp;
 
 			bind.wipe(ISql::SQL_INSERT);	
 
+			#ifdef DBG_LOG_IBUILD
+				if (log) {
+					log->dump("IBuild::insert", row_mgr);
+				}
+			#endif
 			IRow* irow = zobj_toc<IRow>(row_mgr);
+
 			obj_ptr model_mgr = irow->getModel();
 			//showobj("model insert", model_mgr);
 
@@ -301,9 +318,14 @@ using namespace zpp;
 
 			obj_return plist_mgr = isql().insert(bind);
 
+#ifdef DBG_LOG_IBUILD
+	if (log) {
+		log->dump("IBuild::insert", plist_mgr.value_);
+	}
+#endif
 			if (plist_mgr.has_errors())
 			{
-				result = std::move(plist_mgr);
+				result = plist_mgr.move_error();
 				result.error() << " IBuild::insert failed";
 				return result;
 			}

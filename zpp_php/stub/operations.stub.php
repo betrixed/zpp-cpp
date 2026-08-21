@@ -27,7 +27,7 @@ class Operation {
 
 	public function getSql() : string {}
 
-	public function getSqlParams() : ParamList {}
+	public function getSqlParams() : IParams {}
 
 	public function limit(mixed $ct, mixed $start = null) : void {}
 
@@ -67,11 +67,11 @@ class Select extends Operation {
 
 	public function aggregate(string $fn, string $as, ?array $args) : void {}
 
-	public static function getAlive() : array {}
+	//public static function getAlive() : array {}
 
 	public function getRenamed() : array {}
 
-	public function getSqlParams() : ParamList {}
+	public function getSqlParams() : IParams {}
 
 	public function icols() : IColumns {}
 
@@ -82,16 +82,16 @@ class Select extends Operation {
 };
 
 class Delete extends Operation {
-	public function getSqlParams() : ParamList {}
+	public function getSqlParams() : IParams {}
 };
 
 class Insert extends Operation {
-	public function getSqlParams() : ParamList {}
+	public function getSqlParams() : IParams {}
 };
 
 class Update extends Operation {
 	
 	public function set(string $column, mixed $value): void {}
 
-	public function getSqlParams() : ParamList {}
+	public function getSqlParams() : IParams {}
 };
