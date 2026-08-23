@@ -43,25 +43,25 @@ DebugLogStatic::init_req()
 void 
 DebugLogStatic::end_req()
 {
-	gInstance_.init();
+	gDebugLogInstance_.init();
 }
 
 obj_rc //static 
 DebugLog::instance()
 {
-	return DLSi.gInstance_;
+	return gDebugLogInstance_;
 }
 
 void //static 
 DebugLog::setInstance(obj_ptr obj)
 {
-	DLSi.gInstance_ = obj;
+	gDebugLogInstance_ = obj;
 }
 
 DebugLog* //static 
 DebugLog::cpp_global()
 {
-	obj_ptr obj = DLSi.gInstance_;
+	obj_ptr obj = gDebugLogInstance_;
 	return obj.ok() ? zobj_toc<DebugLog>(obj) 
 					: (DebugLog*) nullptr;
 }
@@ -186,7 +186,7 @@ DebugLog::start(str_ptr msg, int destflags)
 
 	dg->construct(filename, destflags);
 
-	DLSi.gInstance_ = result;
+	gDebugLogInstance_ = result;
 
 	dg->line(msg, 0);
  
@@ -277,6 +277,8 @@ ZEND_METHOD(Wcc_DebugLog, instance)
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	obj_rc result = DebugLog::instance();
+	//showobj("DebugLog instance", result);
+
 	result.move_zv(return_value);
 }
 

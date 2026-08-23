@@ -9,12 +9,12 @@ namespace wcc {
 
 using namespace zpp;
 	
+// ?In untested case of multithread.
+thread_local     obj_rc  	gDebugLogInstance_; 
 
 class DebugLogStatic : public state_init {
 public:
-    obj_rc  	gInstance_;
 	str_intern filename_str;
-
 	str_intern config_str;
 	str_intern temp_paths_str;
 	str_intern logdir_str;

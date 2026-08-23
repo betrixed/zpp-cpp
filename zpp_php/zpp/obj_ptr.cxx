@@ -348,7 +348,10 @@ obj_ptr::property(str_ptr key, htab_ptr value)
     {
         value = htab_ptr::empty_array();
     }
-    val_ptr::array_bind(&temp, value);
+    if (val_ptr::array_bind(&temp, value))
+    {
+        htab_rc::try_addref(value);
+    }
     property(key, val_ptr(&temp));
 }
 

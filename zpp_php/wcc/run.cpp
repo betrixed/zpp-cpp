@@ -33,8 +33,12 @@
 #include "wcc/loader.h"
 #endif
 
-#ifndef WCC_DEBUGLOG_H
-#include "wcc/debuglog.h"
+//#define DBG_LOG_RUN
+
+#ifdef DBG_LOG_RUN
+#	ifndef WCC_DEBUGLOG_H
+#		include "wcc/debuglog.h"
+#	endif
 #endif
 
 #ifndef REQUEST_GLOBALS_H
@@ -229,14 +233,21 @@ void Run::construct()
 	config.property(Run_i.temp_dir, temp_dir);
 	self.property(Run_i.temp_dir, temp_dir);
 
-	buf << temp_dir << "/log/debuglog.txt";
+	#ifdef DBG_LOG_RUN
+	DebugLog* log = DebugLog::cpp_global();
 
-	obj_rc debug = DebugLog::omg.new_zobj();
-	DebugLog* log = zobj_toc<DebugLog>(debug);
-	log->construct(buf.zstr(), DebugLog::TO_FILE);
-	DebugLog::setInstance(debug);
+	if (!log)
+	{
+		buf << temp_dir << "/log/debuglog.txt";
+		obj_rc debug = DebugLog::omg.new_zobj();
+		DebugLog* log = zobj_toc<DebugLog>(debug);
+		log->construct(buf.zstr(), DebugLog::TO_FILE);
+		DebugLog::setInstance(debug);
+		log->line("<pre>Run start");
+	}
+	#endif
 
-	log->line("<pre>Run start");
+	
 
 	temp = getcwd();
 	self.property(Run_i.init_cwd, getcwd());
@@ -295,9 +306,9 @@ obj_ptr
 Run::setup_world()
 {
 	obj_ptr self(self_);
-
+#ifdef DBG_LOG_RUN
 	DebugLog* log = DebugLog::cpp_global();
-
+#endif
 	val_return ctest = Services::service(Run_i.config_str);
 
 	obj_rc config;
@@ -309,17 +320,14 @@ Run::setup_world()
 	}
 
 	config = ctest.value_.zobject();
-	/*if (log)
-	{
-		log->dump("config", config);
-	}*/
 
 	str_rc app_class = config.str_property(Run_i.app_class);
-
+#ifdef DBG_LOG_RUN
 	if (log)
 	{
 		log->dump("app_class", app_class);
 	}
+#endif
 
 	obj_rc site = ReflectCache::staticInstance(app_class);
 
@@ -397,13 +405,10 @@ Run::setup_cryptic()
 	buf << config_dir << '/' << cryptic_data;
 	str_rc path = buf.zstr();
 	
+	#ifdef DBG_LOG_RUN
 	DebugLog* log = DebugLog::cpp_global();
-	/*
-	if (log)
-	{
-		log->dump("cryptic data", path);
-	}
-	*/
+	#endif
+
 	Services* sobj = Services::cpp_global();
 
 	val_return data;
@@ -417,13 +422,6 @@ Run::setup_cryptic()
 		}
 		data = cmgr->readCache(path, Run_i.file_cache);
 
-		/*
-		if (log)
-		{
-			log->dump("cryptic data", data.value_);
-		}
-		*/
-
 		if (data.has_errors())
 		{
 			result = data.move_error();
@@ -435,11 +433,12 @@ Run::setup_cryptic()
 	else {
 		result.error() << "File " << path << " not found";
 	}
-
+	#ifdef DBG_LOG_RUN
 	if (log)
 		{
 			log->line("End setup_cryptic");
 		}
+	#endif
 	return result;
 	
 
@@ -447,8 +446,10 @@ Run::setup_cryptic()
 
 void Run::temp_folders()
 {
-
+	#ifdef DBG_LOG_RUN
 	DebugLog* log = DebugLog::cpp_global();
+	#endif
+
 	/*if (log)
 	{
 		log->line("temp_folders");
@@ -533,10 +534,12 @@ void Run::temp_folders()
 		zend_throw_error(zend_ce_error, "Missing folders: %s", msg.data());
 		
 	}
+	#ifdef DBG_LOG_RUN
 	if (log)
 	{
 		log->line("End temp_folders");
 	}
+	#endif
 
 }
 
@@ -634,43 +637,25 @@ Run::config_init(str_ptr bootstrap)
 	}
 
 	htab_rc bcfg = self.array_property(Run_i.bootstrap);
-
+	#ifdef DBG_LOG_RUN
 	DebugLog* log = DebugLog::cpp_global();
+	#endif
 
 	if (bcfg.size())
 	{
-		/*
-		if (log)
-		{
-			log->dump("bcfg", bcfg);
-		}*/
+
 
 		str_rc target = self.str_property(Run_i.target);
-		/*
-		if (log)
-		{
-			log->dump("target 1", target);
-		}
-		*/
+
 		target.lowercase();
 
-		/*
-		if (log)
-		{
-			log->dump("target 2", target);
-		}
-		*/
 
 		tlist = bcfg.get(target);
 		if (!tlist.ok())
 		{
 			tlist = bcfg.get(Run_i.default_str);
 		}
-		/*
-		if (log)
-		{
-			log->dump("tlist", tlist);
-		}*/
+
 	}
 	else {
 		result.error() <<  "bootstrap property not set" << path;
@@ -684,12 +669,6 @@ Run::config_init(str_ptr bootstrap)
 
 	if (test.isArray())
 	{
-		/*
-		if (log)
-		{
-			log->dump(Run_i.assets_str, test);
-		}
-		*/
 		htab_rc assets = test.zarray();
 		transfer_str(Run_i.web_dir, assets, self);
 		transfer_str(Run_i.theme_str, assets, self);
@@ -697,8 +676,6 @@ Run::config_init(str_ptr bootstrap)
 	
 	
 	tlist = self.property(Run_i.is_web);
-	//showmem("is_web", value);
-
 
 	if (tlist.isFalse()) {
 		tlist = bcfg.get(Run_i.cli_str);
@@ -706,12 +683,6 @@ Run::config_init(str_ptr bootstrap)
 	else {
 		tlist = bcfg.get(Run_i.web_str);
 	}
-	/*
-	if (log)
-		{
-			log->dump("config list", tlist);
-		}
-	*/
 
 	obj_rc config = self.property(Run_i.config_str);
 	//showobj("config", config);
@@ -721,7 +692,6 @@ Run::config_init(str_ptr bootstrap)
 		bcfg = tlist.zarray();
 		tlist = bcfg.get(Run_i.php_str);
 
-		//showmem("php select", value);
 		if (tlist.isArray())
 		{
 			CacheMgr*  cmgr = CacheMgr::instance(result);
@@ -741,7 +711,7 @@ Run::config_init(str_ptr bootstrap)
 			{
 				buf << config_dir << "/" << cfg_path.zstr();
 				path = buf.zstr();
-				//showstr("config ", path);
+
 
 				if (file_exists(path))
 				{
@@ -751,18 +721,13 @@ Run::config_init(str_ptr bootstrap)
 						result = data.move_error();
 						return result;
 					}
-					/*
-						if (log)
-						{		
-							log->dump("Read data", val_ptr(data.value_));
-						}
-					*/
+
 					val_ptr vp(data.value_);
 
 					if (vp.isArray())
 					{
 						htab_rc tfer = vp.zarray();
-						//showarray("config data", tfer);
+
 						cfg->addArray(tfer);
 					}
 					else {
@@ -777,7 +742,7 @@ Run::config_init(str_ptr bootstrap)
 			}
 
 			val_rc ns = config.property(Run_i.namespaces_str);
-			//showmem("Get config namespaces !\n", ns);
+
 			if (ns.isArray())
 			{
 				 obj_rc finder;
@@ -790,7 +755,7 @@ Run::config_init(str_ptr bootstrap)
 				 	return result;
 				 }
 				 finder = ftest.value_.zobject();
-				//showobj("Finder service", finder);
+
 
 				 Finder* fd = zobj_toc<Finder>(finder);
 				 fd->addPathArray(ns.zarray());
@@ -805,7 +770,6 @@ Run::config_init(str_ptr bootstrap)
 
 			str_ptr modules_dir = mpath.zstr();
 
-			//showstr("modules_dir", modules_dir);
 
 			if (is_dir(modules_dir))
 			{
@@ -817,11 +781,12 @@ Run::config_init(str_ptr bootstrap)
 		}
 		
 	}
-
+	#ifdef DBG_LOG_RUN
 	if (log)
 	{
 		log->line("End bootstrap");
 	}
+	#endif
 
 	return result;
 }
