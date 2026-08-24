@@ -655,7 +655,7 @@ Bindings::select()
 
 	if (plistret.has_errors())
 	{
-		result = std::move(plistret);
+		result = plistret.move_error();
 		return result;
 	}
 	IParams* pobj = zobj_toc<IParams>(plistret.value_);
@@ -668,7 +668,7 @@ Bindings::select()
 	obj_return dbret = getDb();
 	if (dbret.has_errors())
 	{
-		result = std::move(dbret);
+		result = dbret.move_error();
 		return result;
 	}
 

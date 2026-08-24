@@ -85,22 +85,28 @@ Finder::addFolder(str_ptr fsdir)
 void 
 Finder::addPath(str_ptr nsroot, str_ptr fspath)
 {
-
 	htab_rw(nsPaths_).set(nsroot, fspath);
 }
 
-void 
+error_return 
 Finder::addPathArray(htab_ptr pathsArray)
 {
-	htab_rw hw(nsPaths_);
+	error_return result;
 
 	for_key_value wk;
 	for(wk.start(pathsArray); wk.ok(); wk.next())
 	{
-		hw.set(wk.key(), wk.value());
-	}
+		str_ptr s1(wk.key());
+		str_ptr s2(wk.value());
 
-	//showarray("addPathArray", nsPaths_);
+		if (!s1.size() || !s2.size())
+		{
+			result.error() << "Paths array must be string pairs";
+			return result;
+		}
+		addPath(s1, s2);
+	}
+	return result;
 }
 
 void 
@@ -453,7 +459,8 @@ ZEND_METHOD(Wcc_Finder, addPathArray)
 	{
 		auto cobj = zval_toc<Finder>(ZEND_THIS);
 
-		cobj->addPathArray(data);
+		error_return check = cobj->addPathArray(data);
+		check.throw_errors();
 	}
 }
 

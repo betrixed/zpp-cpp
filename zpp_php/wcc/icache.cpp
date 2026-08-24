@@ -104,8 +104,8 @@ void ICache::construct(val_ptr options)
 error_return
 ICache::flushCached()
 {
-	error_return result;
-	return result;
+	htab_rw(cached_).clear();
+	return error_return();
 }
 
 void ICache::debug_info(htab_rw s)

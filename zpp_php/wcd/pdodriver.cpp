@@ -44,6 +44,14 @@ extern "C" {
 #include "wcc/dircache.h"
 #endif
 
+#define DEBUG_LOG_PDODRIVER
+
+#ifdef DEBUG_LOG_PDODRIVER
+#	ifndef WCC_DEBUG_LOG_H
+#		include "wcc/debuglog.h"
+#	endif
+#endif
+
 namespace wcd {
 
 
@@ -252,6 +260,14 @@ PdoDriver::bind(obj_ptr stmt, htab_ptr params)
 {
 	error_return result;
 
+	#ifdef DEBUG_LOG_PDODRIVER
+		DebugLog* log = DebugLog::cpp_global();
+
+		if (log)
+		{
+			log->line("PdoDriver::bind");
+		}
+	#endif
 	if (params.size())
 	{
 		// construct a reused call to method "bindValue" for spdo statement object
@@ -298,6 +314,23 @@ PdoDriver::bind(obj_ptr stmt, htab_ptr params)
 				}
 			}
 		}
+	}
+	if (result.has_errors())
+	{
+	#ifdef DEBUG_LOG_PDODRIVER
+		if (log)
+		{
+			log->dump("Error ", result.error().zstr());
+		}
+	#endif			
+	}
+	else {
+	#ifdef DEBUG_LOG_PDODRIVER
+		if (log)
+		{
+			log->line("No errors ");
+		}
+	#endif				
 	}
 	return result;
 }
@@ -547,7 +580,12 @@ PdoDriver::prepare(str_ptr query, htab_ptr options)
 	//showarray("options", options);
 
 	obj_return h;
-	
+	#ifdef DEBUG_LOG_PDODRIVER
+			DebugLog* log = DebugLog::cpp_global();
+
+			log->line("PDO Prepare");
+	#endif
+
 
 	h = handle();
 	if (h.has_errors())
@@ -555,24 +593,61 @@ PdoDriver::prepare(str_ptr query, htab_ptr options)
 		return h;
 	}
 	obj_rc pdo(h.value_);
+	#ifdef DEBUG_LOG_PDODRIVER
+		log->dump("PDO handle", pdo);
+	#endif
 
+    obj_ptr self(self_);
 
-	obj_ptr(self_).property(DBS.lastsql_s, query);
+    #ifdef DEBUG_LOG_PDODRIVER
+		log->dump("Set LastSql query", query);
+	#endif
+	self.property(DBS.lastsql_s, query);
+	#ifdef DEBUG_LOG_PDODRIVER
+		log->dump("Set LastSql after", self);
+	#endif
 
 	//showmem("lastsql", lastsql_ptr_);
-
+	#ifdef DEBUG_LOG_PDODRIVER
+		log->dump("PdoDriver self", self);
+	#endif
 
 	obj_return stmt;
 	if (!options.ok())
 	{
 		options = htab_ptr::empty_array();
 	}
-	val_rc     arg2(options);
+	
 	//showarray("options arg", options);
 	val_rc     arg1(query);
 
-	val_rc test = pdo.call(DBS.prepare_fn, arg1, arg2);
-	
+	#ifdef DEBUG_LOG_PDODRIVER
+		log->dump("prepare arg1", arg1);
+	#endif
+
+	val_rc test;
+
+	if (options.size() > 0) {
+		val_rc     arg2(options);
+		#ifdef DEBUG_LOG_PDODRIVER
+		log->dump("prepare arg2", arg2);
+		#endif
+		test = pdo.call(DBS.prepare_fn, arg1, arg2);
+	}
+	else {
+		test = pdo.call(DBS.prepare_fn, arg1);
+	}
+	if (error_return::had_zend_exception)
+	{
+		test.set_null();
+		#ifdef DEBUG_LOG_PDODRIVER
+		log->dump("zend_exception", error_return::last_msg);
+		#endif
+	}
+	#ifdef DEBUG_LOG_PDODRIVER
+		log->dump("prepare result", test);
+	#endif
+
 	if (!test.isObject())
 	{
 		//showobj("PDO is ", pdo);
@@ -581,8 +656,18 @@ PdoDriver::prepare(str_ptr query, htab_ptr options)
 		str_rc code = pdo.call(DBS.errorcode_fn);
 		stmt.error() << "PDO errorcode: " << code << endl;
 		stmt.error() << "Prepare fail: " << query;
+
+		#ifdef DEBUG_LOG_PDODRIVER
+			log->dump("PDO Prepare error", stmt.error().zstr());
+		#endif
 	}
-	stmt.value_ = test.zobject();
+	else {
+		stmt.value_ = test.zobject();
+		#ifdef DEBUG_LOG_PDODRIVER
+			log->dump("PDO Prepare statement", stmt.value_);
+		#endif
+
+	}
 	return stmt;
 }
 

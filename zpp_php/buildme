@@ -1,10 +1,10 @@
 #!/bin/bash
 ARGC=$#
+clear
 export XDEBUG_MODE=off
 echo "ARGS = $ARGC"
-set -e
 sudo make clean
-clear
+set -e
 b=0
 if [ $ARGC -eq $b ]; then
   rm -f ./stub/*_arginfo.h

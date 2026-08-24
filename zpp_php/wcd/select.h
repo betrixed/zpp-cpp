@@ -28,17 +28,17 @@ protected:
 		return *zobj_toc<IColumns>(icols_);
 	}
 
-	base_dlink<Select> dlink_;
+	//base_dlink<Select> dlink_;
 
 public:
 
 	virtual void debug_info(htab_rw di);
 	
-	static htab_rc getAlive();
+	//static htab_rc getAlive();
 
 	static base_obj_mgr<Select> omg;
 
-	Select() : dlink_(this) 
+	/* Select() : dlink_(this) 
 	{
 		dlink_.linkup(omg.obj_list_);
 	}
@@ -46,6 +46,7 @@ public:
 	virtual ~Select() {
 		dlink_.unlink();
 	}
+	*/
 	virtual obj_return getSqlParams();
 
 	void construct(const weak_ref& db, bool autoAlias = false);

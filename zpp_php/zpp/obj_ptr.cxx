@@ -348,7 +348,10 @@ obj_ptr::property(str_ptr key, htab_ptr value)
     {
         value = htab_ptr::empty_array();
     }
-    val_ptr::array_bind(&temp, value);
+    if (val_ptr::array_bind(&temp, value))
+    {
+        htab_rc::try_addref(value);
+    }
     property(key, val_ptr(&temp));
 }
 
@@ -375,7 +378,10 @@ void obj_ptr::property(str_ptr key, str_ptr value)
 {
     zval temp = {0};
     // No rc++, because zval is thrown away on exit.
-    val_ptr::string_bind(&temp, value);
+    if (val_ptr::string_bind(&temp, value))
+    {   
+        str_rc::try_addref(value);
+    }
     property(key, val_ptr(&temp));
 }
 
@@ -559,11 +565,15 @@ val_rc
 obj_ptr::call(str_ptr method, zval* arg1)
 {
 
-    fn_call fn(method, obj_);
+    fn_call objcall(method, obj_);
 
-    fn_params<1> args(fn);
-    ZVAL_COPY_VALUE(&args.params[0], arg1);
-    return args.mixed();
+    fn_params<1> fn(objcall);
+
+    zval* zv = fn.argsptr();
+
+    ZVAL_COPY_VALUE(zv, arg1);
+
+    return fn.mixed();
 }
 
 val_rc
@@ -573,8 +583,11 @@ obj_ptr::call(str_ptr method,
     fn_call fn(method, obj_);
     fn_params<2> args(fn);
 
-    ZVAL_COPY_VALUE(&args.params[0], arg1);
-    ZVAL_COPY_VALUE(&args.params[1], arg2);
+    zval* zv = args.argsptr();
+    ZVAL_COPY_VALUE(zv, arg1);
+    ZVAL_COPY_VALUE(zv+1, arg2);
+
+
 
     return args.mixed();
 }
@@ -602,10 +615,11 @@ obj_ptr::call(str_ptr method,
 {
     fn_call call(method, obj_);
     fn_params<3> fn(call);
+    zval* zv = fn.argsptr();
 
-    ZVAL_COPY_VALUE(&fn.params[0], arg1);
-    ZVAL_COPY_VALUE(&fn.params[1], arg2);
-    ZVAL_COPY_VALUE(&fn.params[2], arg3);
+    ZVAL_COPY_VALUE(zv, arg1);
+    ZVAL_COPY_VALUE(zv+1, arg2);
+    ZVAL_COPY_VALUE(zv+2, arg3);
 
     return fn.mixed();
 }
@@ -617,20 +631,22 @@ obj_ptr::call(str_ptr method,
             zval*  arg3, zval*  arg4)
 {
     fn_call call(method, obj_);
-    fn_params<4> args(call);
+    fn_params<4> fn(call);
+    zval* zv = fn.argsptr();
 
-    ZVAL_COPY_VALUE(&args.params[0], arg1);
-    ZVAL_COPY_VALUE(&args.params[1], arg2);
-    ZVAL_COPY_VALUE(&args.params[2], arg3);
-    ZVAL_COPY_VALUE(&args.params[3], arg4);
+    ZVAL_COPY_VALUE(zv, arg1);
+    ZVAL_COPY_VALUE(zv+1, arg2);
+    ZVAL_COPY_VALUE(zv+2, arg3);
+    ZVAL_COPY_VALUE(zv+3, arg4);
     
-    return args.mixed();
+    return fn.mixed();
 }
 
 obj_ptr::obj_ptr(val_ptr rc)
 {
     obj_ = rc.zobject();
 }
+
 #ifndef OMIT_BASE_D
 obj_ptr::obj_ptr(base_d* cobj) 
 {

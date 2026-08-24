@@ -34,7 +34,7 @@ class ISql implements IfSql
 {
     public static function tableClass(string $uname) : string {}
     
-    public function deleteSql(Bindings $bind) : ParamList {}
+    public function deleteSql(Bindings $bind) : IParams {}
 
     public function emit(
         IfSqlPart $sp, 
@@ -46,13 +46,13 @@ class ISql implements IfSql
 
     public function getTruncateSql(): string {}
 
-    public function insert(Bindings $bind) : ParamList {}
+    public function insert(Bindings $bind) : IParams {}
 
     public function quoteAlways(string $name): string {}
 
     public function quoteName(string $name): string {}
 
-    public function select(Bindings $bind) : ParamList {}
+    public function select(Bindings $bind) : IParams {}
 
     public function seqLastValue(string $seq_name): string {}
 
@@ -60,7 +60,7 @@ class ISql implements IfSql
 
     public function truncate(Bindings $bindings) : string {}
 
-    public function update(Bindings $bind) : ParamList {}
+    public function update(Bindings $bind) : IParams {}
 
     public function valuesDefault(): string {}
 };

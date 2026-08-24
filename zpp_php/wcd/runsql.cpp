@@ -38,11 +38,22 @@ namespace wcd {
 	RunSql::operation()
 	{
 		val_return exresult;
+		DebugLog* log = DebugLog::cpp_global();
+		if (log)
+		{
+			log->dump("RunSql::operation", sql_);
+		}
 
 		IDriver* db = zobj_toc<IDriver>(db_);
 
 		obj_return stmt_ret = db->prepare(sql_);
 
+		
+
+		if (log)
+		{
+			log->dump("RunSql::op stmt_ret", stmt_ret.value_);
+		}
 		if (stmt_ret.has_errors())
 		{
 			exresult = stmt_ret.move_error();
@@ -100,6 +111,15 @@ namespace wcd {
 		
 		obj_rc obj = RunSql::omg.new_zobj();
 		RunSql*  rs = zobj_toc<RunSql>(obj);
+
+		DebugLog* log = DebugLog::cpp_global();
+
+		if (log)
+		{
+			log->dump("RunSql db", db);
+			log->dump("RunSql::op sql", sql);
+			log->dump("RunSql::op bind", bind);
+		}
 		rs->construct(db, sql, bind, rval);
 
 		return rs->run();

@@ -6,7 +6,6 @@ phpize
 ./configure
 popd
 pushd wcc-zero
-sudo make clean
 phpize
 ./configure
 popd
@@ -16,17 +15,14 @@ phpize
 ./configure
 popd
 pushd wcc-html
-sudo make clean
 phpize
 ./configure
 popd
 pushd wcc-more
-sudo make clean
 phpize
 ./configure
 popd
 pushd wcc-database
-sudo make clean
 phpize
 ./configure
 popd

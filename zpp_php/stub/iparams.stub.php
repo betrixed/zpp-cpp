@@ -41,6 +41,8 @@ class IParams
     public function setParams(array $replace) : void {}    
 
     public function getParams() : array {}
+
+    public function __destruct();
 };
 
 

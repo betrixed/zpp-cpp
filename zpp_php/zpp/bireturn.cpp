@@ -13,9 +13,39 @@
 #include "bireturn.h"
 #endif
 
+
+
 namespace zpp {
 
+bool  error_return::had_zend_exception = false;
+void  (*error_return::original_zthrow_hook)(zend_object *zex) = NULL;
+str_rc error_return::last_msg = str_rc();
 
+void  
+error_return::on_zend_exception(zend_object* zex)
+{
+	
+	if (zex)
+	{
+		str_rc msg("getmessage");
+		fn_call excall(msg, zex);
+		fn_noparams fn(excall);
+		last_msg = fn.str();
+		had_zend_exception = true;
+	}
+	if (original_zthrow_hook != NULL)
+	{
+		original_zthrow_hook(zex);
+	}
+}
+
+void 
+error_return::init_exception_hook()
+{
+	original_zthrow_hook = zend_throw_exception_hook;
+	zend_throw_exception_hook = on_zend_exception;
+	had_zend_exception = false;
+}
 
 void     
 error_return::del_errors()
@@ -27,6 +57,11 @@ error_return::del_errors()
 			errors_ = nullptr;
 		}
 	}
+
+bool error_return::has_errors() const 
+{ 
+	return bool(errors_) || had_zend_exception; 
+}
 
 str_buf& 
 error_return::error()
@@ -55,11 +90,18 @@ error_return::get_errors()
 bool 
 error_return::throw_errors(const char* fncstr)
 {
+	if (had_zend_exception)
+	{
+		// zend engine has already thrown something.
+		error() << " Zend threw: " << last_msg;
+		last_msg.init();
+		had_zend_exception = false;
+	}
 	if (errors_)
 	{
 		//zend_printf("\nThrow errors \n");
-
-		*errors_ << "\n@@@ error_return " << fncstr;
+		
+		*errors_ << "\n<br> error_return " << fncstr;
 		str_rc s = errors_->zstr();
 		//zend_printf("\nThrow errors %s\n", s.data());
 		zend_throw_error(zend_ce_error,"%s", s.data());

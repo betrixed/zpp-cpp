@@ -38,6 +38,8 @@ void register_zero_extn(INIT_FUNC_ARGS)
 	PHP_MINIT(wcc_dos_reg)(INIT_FUNC_ARGS_PASSTHRU);
 #endif
 
+
+	error_return::init_exception_hook();
 /*
 #ifdef PERSISTENT_WCC_CPP
 	PHP_MINIT(wcc_persistent_md);

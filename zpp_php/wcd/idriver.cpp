@@ -64,6 +64,15 @@ extern "C" {
 #include "wcd/namedparams.h"
 #endif
 
+
+#define DBG_LOG_IDRIVER
+
+#ifdef DBG_LOG_IDRIVER
+#	ifndef WCC_DEBUGLOG_H
+#  		include "wcc\debug.log.h"
+#	endif
+#endif
+
 namespace wcd {
 
 base_obj_mgr<IDriver> IDriver::omg;
@@ -111,6 +120,7 @@ void DBSInit::init() {
 		handle_s = "handle";
 		logging_s = "logging";
 		lastsql_s = "lastsql";
+		sequences_s = "sequences";
 	}
 
 
@@ -290,6 +300,17 @@ IDriver::getTableNames()
 }
 
 
+htab_return 
+IDriver::getSequenceNames()
+{
+	
+	htab_return result;
+	notImplementedMsg(result.error(), __FUNCTION__);
+
+	return result;
+}
+
+
 void 
 IDriver::close()
 {
@@ -444,30 +465,67 @@ IDriver::newDmlBuild()
 
 
 
-bool
+error_return
 IDriver::clearSchemaCache()
 {
 	ICache*  cache = nullptr;
 	str_rc name;
+	error_return   result;
+
+	#ifdef DBG_LOG_IDRIVER
+		DebugLog* log = DebugLog::cpp_global();
+		if (log)
+		{
+			log->dump("schema_def_", schema_def_);
+		}
+	#endif
 
 	schema_def_.init();
+
 	obj_return server_mgr = IServer::instance();
+	#ifdef DBG_LOG_IDRIVER
+		if (log)
+		{
+			log->dump("server_mgr", server_mgr.value_);
+		}
+	#endif
 
-	if (server_mgr.throw_errors())
+	if (!server_mgr.has_errors())
 	{
-		return false;
-	}
 
-	IServer* isv = zobj_toc<IServer>(server_mgr.value_);
-	obj_rc cacheobj = isv->getDataCache();
-	if (cacheobj.ok())
-	{
-		cache = zobj_toc<ICache>(cacheobj);
-		str_rc cdir = cache->getOption(SFDi.opt_cachedir);
-		name = icfg_c()->getDatabase();
-		return cache->deleteKey(name); 
+		IServer* isv = zobj_toc<IServer>(server_mgr.value_);
+		obj_rc cacheobj = isv->getDataCache();
+	#ifdef DBG_LOG_IDRIVER
+		if (log)
+		{
+			log->dump("cacheobj", cacheobj);
+		}
+	#endif
+
+		if (cacheobj.ok())
+		{
+			cache = zobj_toc<ICache>(cacheobj);
+			str_rc cdir = cache->getOption(SFDi.opt_cachedir);
+			name = icfg_c()->getDatabase();
+			#ifdef DBG_LOG_IDRIVER
+			if (log)
+			{
+				log->dump("key", name);
+			}
+			#endif
+			cache->deleteKey(name); 
+			#ifdef DBG_LOG_IDRIVER
+			if (log)
+			{
+				log->line("deletekey called");
+			}
+			#endif
+		}
 	}
-	return false;
+	else {
+		result = server_mgr.move_error();
+	}
+	return result;
 }
 
 obj_rc 
@@ -1066,6 +1124,16 @@ ZEND_METHOD(Wcd_IDriver, getTableNames)
 	result.value_.move_zv(return_value);
 }
 
+ZEND_METHOD(Wcd_IDriver, getSequenceNames)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	IDriver* db = zval_toc<IDriver>(ZEND_THIS);
+
+	htab_return result = db->getSequenceNames();
+	result.throw_errors();
+	result.value_.move_zv(return_value);
+}
 
 ZEND_METHOD(Wcd_IDriver, handle)
 {
@@ -1376,8 +1444,8 @@ ZEND_METHOD(Wcd_IDriver, clearSchemaCache)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 	IDriver* db = zval_toc<IDriver>(ZEND_THIS);
-	bool result = db->clearSchemaCache();
-	RETURN_BOOL(result);
+	error_return data = db->clearSchemaCache();
+	data.throw_errors();
 }
 
 //obj_rc readSchema();

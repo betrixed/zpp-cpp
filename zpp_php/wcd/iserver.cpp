@@ -530,7 +530,7 @@ ZEND_METHOD(Wcd_IServer, Connect)
 
 	zarg_rd args(execute_data);
 
-	zend_printf("In %s\n", __FUNCTION__);
+	//zend_printf("In %s\n", __FUNCTION__);
 
 	str_ptr name = args.str_or_null(args.option(0));
 

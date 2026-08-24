@@ -16,6 +16,13 @@ extern "C" {
 #include "sql_ipart.h"
 #endif
 
+#define DEBUG_LOG_SIMPLE
+
+#ifdef DEBUG_LOG_SIMPLE
+#	ifndef WCC_DEBUG_LOG_H
+#		include "wcc/debuglog.h"
+#	endif
+#endif
 
 namespace wcd {
 	using namespace zpp;
@@ -221,7 +228,17 @@ Simple::prepare(str_ptr sql)
 		stmt_.init();
 	}
 
+	#ifdef DEBUG_LOG_SIMPLE
+	DebugLog* log = DebugLog::cpp_global();
+	log->dump("Simple::sql", sql);
+	#endif
+
 	obj_return stmt_ret = db->prepare(sql);
+
+	#ifdef DEBUG_LOG_SIMPLE
+	log->dump("Simple::stmt_", stmt_);
+	#endif
+	
 	if (stmt_ret.has_errors())
 	{
 		result = std::move(stmt_ret);

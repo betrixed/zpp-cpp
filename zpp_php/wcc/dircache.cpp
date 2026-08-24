@@ -28,6 +28,14 @@ extern "C" {
 #define DIRECTORY_SEPARATOR '/'
 #endif
 
+#define DBG_LOG_DIRCACHE
+
+#ifdef DBG_LOG_DIRCACHE
+#	ifndef WCC_DEBUGLOG_H
+#   	include "wcc/debuglog.h"
+#	endif
+#endif
+
 namespace wcc {
 
 using namespace zpp;
@@ -131,8 +139,15 @@ DirCache::construct(val_ptr options)
 
 static bool is_expired(str_ptr file_name)
 {
+#ifdef DBG_LOG_DIRCACHE
+	DebugLog* log = DebugLog::cpp_global();
+	if (log)
+	{
+		log->dump("is_expired", file_name);
+	}
+#endif
 	file_res  fin(file_name, SFDi.fmode_r);
-
+	
 	str_rc expire_str = fgets(fin,28);
 	str_rc dlen_str = fgets(fin,28);
 
@@ -304,6 +319,7 @@ DirCache::flushCached()
 			result.error() << "WritePkg failed for " << key << endl;
 		}
 	}
+	ICache::flushCached();
 	return result;
 }
 
@@ -395,7 +411,13 @@ DirCache::getCached(str_ptr key)
 	}
 
 	file_res fin(file_name, SFDi.fmode_r);
-
+#ifdef DBG_LOG_DIRCACHE
+	DebugLog* log = DebugLog::cpp_global();
+	if (log)
+	{
+		log->dump("is_expired", file_name);
+	}
+#endif
 	str_rc expire_str = fgets(fin,28);
 	str_rc dlen_str = fgets(fin,28);
 
@@ -501,9 +523,26 @@ DirCache::get(str_ptr key, val_ptr noval)
 bool 
 DirCache::deleteKey(str_ptr key)
 {
+#ifdef DBG_LOG_DIRCACHE
+	DebugLog* log = DebugLog::cpp_global();
+#endif
 	str_rc file = this->getFileName(key);
+
+#ifdef DBG_LOG_DIRCACHE
+	if (log)
+	{
+		log->dump("filename", file);
+	}
+#endif
+	
 	if (file_exists(file))
 	{
+		#ifdef DBG_LOG_DIRCACHE
+		if (log)
+		{
+			log->dump("unlink", file);
+		}
+		#endif
 		return unlink(file);
 	}
 	return true;

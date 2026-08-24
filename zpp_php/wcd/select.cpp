@@ -63,7 +63,7 @@ Select::construct(const weak_ref& db, bool autoAlias)
 	autoAlias_ = autoAlias;
 	//showobj("Select::construct", vobj());
 }	
-
+/*
  htab_rc // static
  Select::getAlive()
  {
@@ -81,6 +81,7 @@ Select::construct(const weak_ref& db, bool autoAlias)
  	}
  	return values;
  }
+*/
 
 error_return
 Select::aggregate(str_ptr aggfn, str_ptr alias, htab_ptr aggargs)
@@ -298,6 +299,7 @@ ZEND_METHOD(Wcd_Sql_Select, __destruct)
 
 }
 
+/*
 ZEND_METHOD(Wcd_Sql_Select, getAlive)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
@@ -306,7 +308,7 @@ ZEND_METHOD(Wcd_Sql_Select, getAlive)
 	
 	data.move_zv(return_value);
 
-}
+}*/
 
 ZEND_METHOD(Wcd_Sql_Select, add)
 {

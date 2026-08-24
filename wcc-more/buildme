@@ -1,6 +1,8 @@
 #!/bin/bash
 set -e
-../stop.sh
+pushd ..
+./stop.sh
+popd
 sudo make clean
 clear
 make
