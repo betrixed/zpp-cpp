@@ -80,7 +80,14 @@ Pdo_pgsql::getSequenceNames()
 
 	if (schema) {
 		htab_rc values = schema.array_property(DBS.sequences_s);
-		result.value_ = htab_rc::getKeys(values);
+		if (values.size())
+		{
+			result.value_ = htab_rc::getKeys(values);
+		}
+		else {
+			result.value_ = htab_ptr::empty_array();
+		}
+		
 	} 
 	else {
 		result.error() << "Schema object not found";

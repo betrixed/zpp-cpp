@@ -16,9 +16,9 @@ extern "C" {
 #include "sql_ipart.h"
 #endif
 
-#define DEBUG_LOG_SIMPLE
+//#define DBG_LOG_SIMPLE
 
-#ifdef DEBUG_LOG_SIMPLE
+#ifdef DBG_LOG_SIMPLE
 #	ifndef WCC_DEBUG_LOG_H
 #		include "wcc/debuglog.h"
 #	endif
@@ -122,18 +122,42 @@ Simple::arraySet(str_ptr sql, htab_ptr params)
 	IDriver* db = zobj_toc<IDriver>(db_);
 
 	obj_return stmt_ret = db->prepare(sql);
+
+
 	if (stmt_ret.has_errors())
 	{
 		result = stmt_ret.move_error();
 		return result;
 	}
 	stmt_ = stmt_ret.value_;
+	#ifdef DBG_LOG_SIMPLE
+	DebugLog* log = DebugLog::cpp_global();
+	if (log)
+	{
+		log->dump("arraySet prepared", stmt_);
+	}
+	#endif
+
+
 	autoclose_ = false;
 	if (params.size())
 	{
 		setValues(params);
 	}
+	#ifdef DBG_LOG_SIMPLE
+	if (log)
+	{
+		log->dump("arraySet setValues", params);
+	}
+	#endif
+
 	val_return rows = this->send(true);
+	#ifdef DBG_LOG_SIMPLE
+	if (log)
+	{
+		log->dump("arraySet rows", rows.value_);
+	}
+	#endif
 	db->closeStmt(stmt_);
 	stmt_.init();
 
@@ -228,14 +252,14 @@ Simple::prepare(str_ptr sql)
 		stmt_.init();
 	}
 
-	#ifdef DEBUG_LOG_SIMPLE
+	#ifdef DBG_LOG_SIMPLE
 	DebugLog* log = DebugLog::cpp_global();
 	log->dump("Simple::sql", sql);
 	#endif
 
 	obj_return stmt_ret = db->prepare(sql);
 
-	#ifdef DEBUG_LOG_SIMPLE
+	#ifdef DBG_LOG_SIMPLE
 	log->dump("Simple::stmt_", stmt_);
 	#endif
 	
@@ -415,6 +439,13 @@ ZEND_METHOD(Wcd_Simple, arraySet)
 	args.zstring(sql, args.need(0));
 	args.zarray_null(params, args.option(1));
 
+	#ifdef DBG_LOG_SIMPLE
+	DebugLog* log = DebugLog::cpp_global();
+	if (log)
+	{
+		log->dump("arraySet param", params);
+	}
+	#endif
 	htab_return result;
 
 	if (args.throw_errors(__FUNCTION__))
