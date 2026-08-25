@@ -1,13 +1,12 @@
 #!/bin/bash
 # Stop php-fpm services using modules to be replaced
 # Disable PHP extension modules that may be not working silently. 
-#
-. ./pvid.sh
 IFILE="/etc/php/conf.d/wcc.ini"
 OFILE="/etc/php/conf.d/wcc.off"
-if [ -f "$OFILE" ]; then
-	echo "Turn on extensions"
-	sudo mv "$OFILE" "$IFILE"
+if [ -f "$IFILE" ]; then
+	echo "Turn off extensions"
+	sudo mv "$IFILE" "$OFILE"
 fi
-sudo systemctl restart $FPM
+. ./pvid.sh
+sudo systemctl restart $FPM 
 

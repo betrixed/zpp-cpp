@@ -330,7 +330,10 @@ obj_ptr::property(str_ptr key, obj_ptr value)
     zval temp = {0};
     if (value.ok())
     {
-        val_ptr::object_bind(&temp, value);
+        if (val_ptr::object_bind(&temp, value))
+        {
+            obj_rc::try_addref(value);
+        }
     }
     else {
         ZVAL_NULL(&temp);
