@@ -25,7 +25,7 @@ distribution.
 #define TINYXML2_INCLUDED
 
 
-#define MYOP_NEWCPP
+//#define MYOP_NEWCPP
 
 #ifdef MYOP_NEWCPP
 #include <new>
@@ -221,7 +221,7 @@ public:
     }
 
     ~DynArray() {
-        if ( _mem != _pool ) {
+        if ( _mem != &_pool [0]) {
             #ifdef MYOP_NEWCPP
                 ::delete[] _mem;
             #else
@@ -325,7 +325,7 @@ private:
 
             TIXMLASSERT( newAllocated >= _size );
             memcpy( newMem, _mem, sizeof(T) * _size );	// warning: not using constructors, only works for PODs
-            if ( _mem != _pool ) {
+            if ( _mem != (&_pool[0]) ) {
                 #ifdef MYOP_NEWCPP
                     ::delete[] _mem;
                 #else

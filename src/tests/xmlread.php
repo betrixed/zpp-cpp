@@ -16,7 +16,7 @@ $rd = new XmlRead();
 $testfile3 = "tests/assets.xml";
 $testfile1 = "tests/assets_full.xml";
 $testfile2 = "tests/.test_secrets.xml";
-
+$badpath = "tests/notfound.xml";
 /*
 $config = ReflectCache::staticInstance("Wcc\\Config");
 
@@ -50,9 +50,12 @@ function testone($testfile)
 	//die;
 }
 
+testone($badpath);
+
 testone($testfile3);
 
 testone($testfile2);
+
 
 //echo "DIE NOW\n";
 //return;

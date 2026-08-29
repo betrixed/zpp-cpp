@@ -209,9 +209,9 @@ void StrPair::Reset()
     if ( _flags & NEEDS_DELETE ) {
         //delete [] _start;
         #ifdef MYOP_NEWCPP
-            efree(_start);
-        #else
             delete[] _start;
+        #else
+            efree(_start);
         #endif
     }
     _flags = 0;
