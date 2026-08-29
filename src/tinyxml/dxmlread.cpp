@@ -1,8 +1,12 @@
 #ifndef DXMLREAD_CPP
 #define DXMLREAD_CPP
 
-#ifndef WCC_DEBUGLOG_H
-#include "wcc/debuglog.h"
+//#define DBG_LOG_XMLREAD
+
+#ifdef DBG_LOG_XMLREAD
+	#ifndef WCC_DEBUGLOG_H
+		#include "wcc/debuglog.h"
+	#endif
 #endif
 
 #ifndef DXMLREAD_H
@@ -120,7 +124,14 @@ base_obj_mgr<Wcc_XmlRead> Wcc_XmlRead::omg;
 		xele_ = nullptr;
 
 		XMLError error = xdoc_.LoadFile(path.data());
-		//zend_printf("fromFile %d\n",error);
+		#ifdef DBG_LOG_XMLREAD
+		DebugLog* log = DebugLog::cpp_global();
+		if (log)
+		{
+			log->dump("filename", path);
+		}
+		#endif
+
 		fileOpen_ = (error == XML_SUCCESS);
 		if (fileOpen_)
 		{
@@ -450,7 +461,7 @@ Wcc_XmlRead::loop()
 	str_rc attrstr;
 	str_rc classname;
 
-#ifdef LOG_DXMLREAD
+#ifdef DBG_LOG_XMLREAD
 DebugLog* log = DebugLog::cpp_global();
 if (log)
 {
@@ -641,7 +652,7 @@ Wcc_XmlRead::makeClass(str_ptr classname)
 {
 	obj_return result;
 
-#ifdef LOG_DXMLREAD
+#ifdef DBG_LOG_XMLREAD
 	DebugLog* log = DebugLog::cpp_global();
 
 	if (log)
@@ -677,7 +688,7 @@ void Wcc_XmlRead::classReplace(htab_ptr cnames)
 void
 Wcc_XmlRead::pushClass(str_ptr classname, str_ptr key)
 {
-#ifdef LOG_DXMLREAD
+#ifdef DBG_LOG_XMLREAD
 	DebugLog* log = DebugLog::cpp_global();
 
 	if (log)
