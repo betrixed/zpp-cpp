@@ -11,7 +11,7 @@ AS_VAR_IF([PHP_WCCD], [no],, [
     [Define to 1 if the PHP extension 'wccd' is available.])
 
   FLAGS="-fPIC"
-  CXXFLAGS="$CXXFLAGS -Wall -O2 --std=c++23 -I./include -I../zpp_php"
+  CXXFLAGS="$CXXFLAGS -Wall -O2 --std=c++23 -I./include -I../src"
   PHP_REQUIRE_CXX()
   AC_LANG([C++])
 

@@ -25,7 +25,7 @@ distribution.
 #define TINYXML2_INCLUDED
 
 
-//#define MYOP_NEWCPP
+#define MYOP_NEWCPP
 
 #ifdef MYOP_NEWCPP
 #include <new>

@@ -10,7 +10,7 @@ AS_VAR_IF([PHP_WCCZ], [no],, [
     FLAGS="-fPIC"
 DNL -Map,output.map -Wno-undef -fexceptions -frtti 
 
-    CXXFLAGS="$CXXFLAGS -Wl, -Wall -O2 --std=c++23 -I./include -I../zpp_php"
+    CXXFLAGS="$CXXFLAGS -Wl, -Wall -O2 --std=c++23 -I./include -I../src"
     PHP_REQUIRE_CXX()
     AX_CXX_COMPILE_STDCXX_17
     AX_CXX_COMPILE_STDCXX_20
