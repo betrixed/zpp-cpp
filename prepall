@@ -1,6 +1,6 @@
 #!/bin/bash
 ./stop.sh
-pushd zpp_php 
+pushd src 
 sudo make clean
 phpize
 ./configure

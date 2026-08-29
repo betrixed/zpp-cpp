@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 ./stop.sh
-pushd zpp_php 
+pushd src 
 ./buildme
 popd
 pushd wcc-zero
