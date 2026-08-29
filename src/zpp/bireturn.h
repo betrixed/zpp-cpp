@@ -38,7 +38,7 @@ struct error_return {
 
 	str_buf& error();
 
-	str_rc   get_errors();
+	str_rc   error_str();
 
 	error_return&& move_error() {
 		return std::move(*this);

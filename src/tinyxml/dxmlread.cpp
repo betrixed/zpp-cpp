@@ -96,8 +96,10 @@ base_obj_mgr<Wcc_XmlRead> Wcc_XmlRead::omg;
 	}
 	
 
-	bool XmlWrap::fromString(str_ptr xml)
+	bool_return XmlWrap::fromString(str_ptr xml)
 	{
+		bool_return result;
+
 		hold_ = xml;
 		xele_ = nullptr;
 
@@ -107,41 +109,70 @@ base_obj_mgr<Wcc_XmlRead> Wcc_XmlRead::omg;
 		fileOpen_ = (error == XML_SUCCESS);
 		if (fileOpen_)
 		{
+			result.value_ = true;
 			visit_ = V_DOCUMENT;
 		}
 		else {
+			result.value_ = false;
+			result.error() << xdoc_.ErrorStr();
 			visit_ = V_END_DOCUMENT;
 		}
 		
 
-		return fileOpen_;
+		return result;
 	}
 	
-	bool 
+	bool_return 
 	XmlWrap::fromFile(str_ptr path)
 	{
+		bool_return result;
+
+		result.value_ = false;
+
 		hold_ = XmlWrap::get_valid_file_path(path);
 		xele_ = nullptr;
 
-		XMLError error = xdoc_.LoadFile(path.data());
 		#ifdef DBG_LOG_XMLREAD
-		DebugLog* log = DebugLog::cpp_global();
+			DebugLog* log = DebugLog::cpp_global();
+			if (log)
+			{	
+				log->setOutputs(DebugLog::TO_CONSOLE);
+				log->dump("VALID PATH", hold_);
+			}
+		#endif
+
+		int error = xdoc_.LoadFile(hold_.data());
+		#ifdef DBG_LOG_XMLREAD
+		
 		if (log)
-		{
-			log->dump("filename", path);
+		{	
+			val_rc logval((int)error);
+			log->dump("load returns ", logval);
 		}
 		#endif
 
-		fileOpen_ = (error == XML_SUCCESS);
+		fileOpen_ = (error == (int) XML_SUCCESS) ? true : false;
 		if (fileOpen_)
 		{
 			visit_ = V_DOCUMENT;
+			result.value_ = true;
 		}
 		else {
+			switch(error)
+			{
+			case XML_ERROR_FILE_NOT_FOUND:
+				result.error() << "File not found: " << path;
+				break;
+			default:
+				result.error() << xdoc_.ErrorStr() << " code " << (int) error;
+				break;
+			}
+			
+			result.value_ = false;
 			visit_ = V_END_DOCUMENT;
 		}
 
-		return fileOpen_;
+		return result;
 	}
 
 	val_rc XmlWrap::xml_name_zval()
@@ -386,49 +417,46 @@ Wcc_XmlRead::Wcc_XmlRead()
 	init();
 }
 
-bool 
+bool_return 
 Wcc_XmlRead::openstring(str_ptr str)
 {
-	//zend_printf("called openstring\n");
-	if (!xml_.fromString(str))
-	{
-		zend_throw_error(zend_ce_error,"Cannot parse");
-		return false;
-	}
-	return true;
+	bool_return result;
+	result = xml_.fromString(str);
+
+	return result;
 }
 
-bool Wcc_XmlRead::openfile(str_ptr file)
+bool_return 
+Wcc_XmlRead::openfile(str_ptr file)
 {
-	if (!xml_.fromFile(file))
-	{
-		zend_throw_error(zend_ce_error,"Cannot open %s for xml parse ",file.data());
-		return false;
-	}
-	return true;
+	bool_return result;
+	result = xml_.fromFile(file);
+	return result;
 }
 
-val_rc 
+val_return 
 Wcc_XmlRead::parse(str_ptr src)
 {
-	val_rc result;
+	val_return result;
 	init();
 
-	if (!this->openstring(src))
+	bool_return check = this->openstring(src);
+	if (!check.value_)
 	{
-		str_rc line(src.substr(0,40));
+		//str_rc line(src.substr(0,40));
+		result = check.move_error();
 
-		zend_throw_error(zend_ce_error, "XMLReader::XML fail for '%s'", line.data());
-		return result;
 	}
+	else {
 	//zend_printf("opened string stream\n");
-	result = loop();
+		result = loop();
+	}
 	return result;
 }
 
 
 
-val_rc //static
+val_return //static
 Wcc_XmlRead::fromString(str_ptr src)
 {
 	obj_rc xmlr = Wcc_XmlRead::omg.new_zobj();
@@ -438,9 +466,17 @@ Wcc_XmlRead::fromString(str_ptr src)
 	return cobj->parse(src);
 }
 
-val_rc //static
+val_return //static
 Wcc_XmlRead::fromFile(str_ptr filename)
 {
+	#ifdef DBG_LOG_XMLREAD
+	DebugLog* log = DebugLog::cpp_global();
+	if (log)
+	{	
+		log->setOutputs(DebugLog::TO_CONSOLE);
+		log->dump("fromFile PATH", filename);
+	}
+	#endif
 	obj_rc xmlr = Wcc_XmlRead::omg.new_zobj();
 
 	Wcc_XmlRead* cobj = zobj_toc<Wcc_XmlRead>(xmlr);
@@ -450,25 +486,26 @@ Wcc_XmlRead::fromFile(str_ptr filename)
 	return cobj->parseFile(filename);
 }
 
-val_rc
+val_return
 Wcc_XmlRead::loop()
 {
-	val_rc result;
+	val_return result;
 	done_ = false;
 
-	result.set_bool(false);
+	result.value_.set_bool(false);
+
 	str_rc tagstr;
 	str_rc attrstr;
 	str_rc classname;
 
-#ifdef DBG_LOG_XMLREAD
+/*#ifdef DBG_LOG_XMLREAD
 DebugLog* log = DebugLog::cpp_global();
 if (log)
 {
 	log->setOutputs(DebugLog::TO_CONSOLE);
 	log->line("Debug Log");
 }
-#endif
+#endif */
 
 	while(!done_ && xml_.read())
 	{
@@ -486,9 +523,9 @@ if (log)
 				//showstr("tagstr", tagstr);
 				//showstr("attrstr k", attrstr);
 
-				bool result = tag_start(tagstr, attrstr);
+				bool check = tag_start(tagstr, attrstr);
 
-				if (!result) {
+				if (!check) {
 
 					classname = htab_ptr(tag_objs_).get(tagstr);
 
@@ -513,42 +550,46 @@ if (log)
 		case XmlWrap::V_END_DOCUMENT:
 		case 0:
 			done_ = true;
-			zend_printf("End reached\n");
+			//zend_printf("End reached\n");
 			break;
 		}
 	}
 	if (root_ && !stacked_) {
 
-		result = std::move(root_->ref_);
+		result.value_ = std::move(root_->ref_);
 		delete root_;
 		root_ = nullptr;
-	}
-	else {
-		//zend_printf("root_ %lx, stacked_ %d", root_, stacked_);
-
-		result.set_bool(false);
 	}
 	clean();
 	return result;
 
 }
 
-val_rc 
+val_return
 Wcc_XmlRead::parseFile(str_ptr filename)
 {
 	str_rc  file(filename);
-	val_rc  result;
-
+	val_return  result;
 
 	init();
-	if (!openfile(file))
-	{
-		zend_throw_error(zend_ce_error, "XMLRead open fail for %s", filename.data());
-		return result;
-	}
-	//zend_printf("opened file %s\n", filename.data());
+	bool_return check = openfile(file);
 
-	result = loop();
+	if (!check.value_)
+	{
+		result = check.move_error();
+	#ifdef DBG_LOG_XMLREAD
+	DebugLog* log = DebugLog::cpp_global();
+	if (log)
+	{	str_rc estr = result.error_str();
+		log->dump("File error", estr);
+	}
+	#endif
+
+		result.value_.set_bool(false);
+	}
+	else {
+		result = loop();
+	}
 	//showmem("loop result", result);
 	return result;
 }
@@ -651,7 +692,7 @@ obj_return
 Wcc_XmlRead::makeClass(str_ptr classname)
 {
 	obj_return result;
-
+/*
 #ifdef DBG_LOG_XMLREAD
 	DebugLog* log = DebugLog::cpp_global();
 
@@ -660,7 +701,7 @@ Wcc_XmlRead::makeClass(str_ptr classname)
 		log->dump("in makeClass", classname);
 	}
 #endif
-
+*/
 	str_rc cname;
 	if (class_replace_.size())
 	{
@@ -688,6 +729,7 @@ void Wcc_XmlRead::classReplace(htab_ptr cnames)
 void
 Wcc_XmlRead::pushClass(str_ptr classname, str_ptr key)
 {
+	/*
 #ifdef DBG_LOG_XMLREAD
 	DebugLog* log = DebugLog::cpp_global();
 
@@ -695,17 +737,17 @@ Wcc_XmlRead::pushClass(str_ptr classname, str_ptr key)
 	{
 		log->dump("pushClass", classname);
 	}
-#endif
+#endif*/
 	fn_params<1> fn(mkclass_fn_);
 	val_ptr::string_bind(fn.argsptr(), classname); 
 
 	val_rc newroot = fn.mixed();
-#ifdef LOG_DXMLREAD
+/*#ifdef DBG_LOG_XMLREAD
 	if (log)
 	{
 		log->dump("newroot", val_ptr(newroot));
 	}
-#endif
+#endif*/
 	attach_ds(new DStack(key, newroot, XC_OBJECT));
 }
 
@@ -1075,8 +1117,12 @@ ZEND_METHOD(Wcc_XmlRead, fromString)
 	Z_PARAM_STR(cname)
 	ZEND_PARSE_PARAMETERS_END();
 
-	val_rc result = Wcc_XmlRead::fromString(cname);
-	result.move_zv(return_value);
+	val_return result = Wcc_XmlRead::fromString(cname);
+	if (!result.throw_errors())
+	{
+		result.value_.move_zv(return_value);
+	}
+	
 }
 
 ZEND_METHOD(Wcc_XmlRead, parse)
@@ -1088,8 +1134,11 @@ ZEND_METHOD(Wcc_XmlRead, parse)
 	ZEND_PARSE_PARAMETERS_END();
 
 	auto cobj = zval_toc<Wcc_XmlRead>(ZEND_THIS);
-	val_rc result = cobj->parse(src);
-	result.move_zv(return_value);
+	val_return result = cobj->parse(src);
+	if (!result.throw_errors())
+	{
+		result.value_.move_zv(return_value);
+	}
 }
 
 ZEND_METHOD(Wcc_XmlRead, fromFile)
@@ -1100,8 +1149,20 @@ ZEND_METHOD(Wcc_XmlRead, fromFile)
 	Z_PARAM_STR(cname)
 	ZEND_PARSE_PARAMETERS_END();
 
-	val_rc result = Wcc_XmlRead::fromFile(cname);
-	result.move_zv(return_value);
+	val_return result = Wcc_XmlRead::fromFile(cname);
+	if (!result.throw_errors())
+	{
+		result.value_.move_zv(return_value);
+	}
+	else {
+		#ifdef DBG_LOG_XMLREAD
+		DebugLog* log = DebugLog::cpp_global();
+		if (log)
+		{
+			log->dump("fromFile threw", result.error_str());
+		}
+		#endif
+	}
 }
 
 //Place holder does nothing now
@@ -1148,9 +1209,12 @@ ZEND_METHOD(Wcc_XmlRead, parseFile)
 	ZEND_PARSE_PARAMETERS_END();
 
 	auto cobj = zval_toc<Wcc_XmlRead>(ZEND_THIS);
-	val_rc result = cobj->parseFile(cname);
+	val_return result = cobj->parseFile(cname);
 	//showmem("parseFile result", result);
-	result.move_zv(return_value);
+	if (!result.throw_errors())
+	{
+		result.value_.move_zv(return_value);
+	}
 }
 
 PHP_MINIT_FUNCTION(Wcc_XmlRead_reg)

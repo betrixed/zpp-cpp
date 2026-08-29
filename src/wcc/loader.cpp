@@ -268,34 +268,31 @@ Loader::require(str_ptr file)
 
 	if (!file_exists(file))
 	{
-		result.error() << "Loader::require " << file << " not found";
+		result.error() << "Loader::require not found " << file;
 		return result;
 	}
 	zval path = {0};
 	val_ptr::string_bind(&path, file);
 	obj_ptr fn = extloader_.zobject();
 
-#ifdef DBG_LOADER
-	DebugLog* log = DebugLog::cpp_global();
-	if (log)
-	{
-		log->dump("Loader::require ", file);
-	}
-#endif
-
 	result.value_ = fn.call(str_ptr(LDRi.invoke_fn), &path);
 
 
-#ifdef DBG_LOADER
-	if (log)
-	{
-		log->dump("require", (zval*)(result.value_));
-	}
-#endif
+
 	if (!result.value_.ok() && throwNotFound_)
 	{	// Load function may throw anyway.
 
 		result.error() << "Loader callable failed for " << file;
+
+		#ifdef DBG_LOADER
+		DebugLog* log = DebugLog::cpp_global();
+		if (log)
+		{
+			log->line(result.error_str());
+		}
+		#endif
+
+		
 		return result;
 	}
 	

@@ -74,18 +74,17 @@ error_return::error()
 }
 
 str_rc 
-error_return::get_errors()
+error_return::error_str()
 {
 	str_rc result;
 
 	if (errors_)
 	{	
 		result =  errors_->zstr();
-		delete errors_;
-		errors_ = nullptr;
 	}
 	return result;
 }
+
 
 bool 
 error_return::throw_errors(const char* fncstr)
@@ -105,8 +104,6 @@ error_return::throw_errors(const char* fncstr)
 		str_rc s = errors_->zstr();
 		//zend_printf("\nThrow errors %s\n", s.data());
 		zend_throw_error(zend_ce_error,"%s", s.data());
-		delete errors_;
-		errors_ = nullptr;
 		return true;
 	}
 	return false;

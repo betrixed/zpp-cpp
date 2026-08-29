@@ -365,7 +365,7 @@ Dispatch::addModule(str_ptr name, val_ptr modspec)
 				obj_return test = setModule(value.zstr());
 				if (test.has_errors())
 				{
-					 result.error() << test.get_errors();
+					 result = test.move_error();
 				}
 			}
 		}

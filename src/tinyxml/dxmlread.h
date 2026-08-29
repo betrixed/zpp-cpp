@@ -86,8 +86,8 @@ namespace wcc {
 
 		static str_rc get_valid_file_path(str_ptr src);
 
-		bool fromFile(str_ptr path);
-		bool fromString(str_ptr xml);
+		bool_return fromFile(str_ptr path);
+		bool_return fromString(str_ptr xml);
 
 
 		str_rc  xml_name();
@@ -129,9 +129,9 @@ namespace wcc {
 		static base_obj_mgr<Wcc_XmlRead> omg;
 
 
-		static val_rc fromFile(str_ptr file);
+		static val_return fromFile(str_ptr file);
 
-		static val_rc fromString(str_ptr src);
+		static val_return fromString(str_ptr src);
 		
 		class DStack : public PHPAlloc {
 		protected:
@@ -225,13 +225,13 @@ namespace wcc {
 
 		void      setKeys();
 
-		bool 	  openfile(str_ptr file);
-		bool      openstring(str_ptr src);
+		bool_return 	  openfile(str_ptr file);
+		bool_return       openstring(str_ptr src);
 
 		void      init();
 		void	  clean();
 		
-		val_rc  loop();
+		val_return  loop();
 
 	public:
 
@@ -243,8 +243,8 @@ namespace wcc {
 		virtual ~Wcc_XmlRead();
 
 		/** return PHP array version of xml data */
-		val_rc parseFile(str_ptr filename);
-		val_rc parse(str_ptr src);
+		val_return parseFile(str_ptr filename);
+		val_return parse(str_ptr src);
 		obj_return	makeClass(str_ptr classname);
 		
 		virtual void debug_info(htab_rw ht);

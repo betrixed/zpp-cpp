@@ -42,7 +42,7 @@ function boolstr(bool $value) : string
 }
 
 $extloader = function(string $file) {
-    echo "load $file\n";
+    //echo "load $file\n";
     return require_once($file);
 };
 
