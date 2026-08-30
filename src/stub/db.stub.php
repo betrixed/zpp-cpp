@@ -66,6 +66,8 @@ class IDriver {
 
     public function getTableNames(): array {}
 
+    public function getViewNames(): array {}
+
     public function getSequenceNames(): array {}
 
     public function handle() : mixed {}

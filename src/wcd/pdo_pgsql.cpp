@@ -28,6 +28,12 @@ void PGInit::init()
 			" where schemaname"
 			" not in ('information_schema','pg_catalog')"
 			" order by tablename";
+	viewnames_qry =  
+    "select viewname"
+	" from pg_views" 
+		" where schemaname"
+		" not in ('information_schema','pg_catalog')"
+		" order by viewname";
 }
 
 str_rc 
@@ -50,6 +56,25 @@ Pdo_pgsql::getSchemaClass()
 	buf << "Wcd\\Schema\\" << stype << "\\Dump";
 
 	return buf.zstr();
+}
+
+htab_return 
+Pdo_pgsql::getViewNames()  
+{
+	//val_return
+	htab_ptr    empty;
+	htab_return result;
+
+	obj_return test = this->prepareQuery(PGIs.viewnames_qry, empty, empty);
+	
+	if (test.has_errors())
+	{
+		result = test.move_error();
+	}
+	else { 
+		result = fetchAllRows(test.value_, IDriver::FETCH_COLUMN);
+	}
+	return result;
 }
 
 htab_return 

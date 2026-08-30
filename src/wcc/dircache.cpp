@@ -28,7 +28,7 @@ extern "C" {
 #define DIRECTORY_SEPARATOR '/'
 #endif
 
-#define DBG_LOG_DIRCACHE
+//#define DBG_LOG_DIRCACHE
 
 #ifdef DBG_LOG_DIRCACHE
 #	ifndef WCC_DEBUGLOG_H

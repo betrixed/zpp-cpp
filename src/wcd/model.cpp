@@ -32,9 +32,9 @@ extern "C" {
 }
 #endif
 
-#define DEBUG_LOG_MODEL
+//#define DBG_LOG_MODEL
 
-#ifdef DEBUG_LOG_MODEL
+#ifdef DBG_LOG_MODEL
 #	ifndef WCC_DEBUG_LOG_H
 #		include "wcc/debuglog.h"
 #	endif
@@ -411,7 +411,7 @@ namespace wcd {
 		return m->byKeyValue(keynames_mgr, values_mgr);
 	}
 
-	val_return 
+	val_return //static
 	Model::callStatic(str_ptr static_name, str_ptr method, val_ptr params)
 	{
 		val_return result;

@@ -65,7 +65,7 @@ extern "C" {
 #endif
 
 
-#define DBG_LOG_IDRIVER
+//#define DBG_LOG_IDRIVER
 
 #ifdef DBG_LOG_IDRIVER
 #	ifndef WCC_DEBUGLOG_H
@@ -290,12 +290,19 @@ int IDriver::pdo_type(unsigned int ztype)
 }
 
 htab_return 
-IDriver::getTableNames()
+IDriver::getViewNames()
 {
 	
 	htab_return result;
 	notImplementedMsg(result.error(), __FUNCTION__);
+	return result;
+}
 
+htab_return 
+IDriver::getTableNames()
+{
+	htab_return result;
+	notImplementedMsg(result.error(), __FUNCTION__);
 	return result;
 }
 
@@ -1131,9 +1138,26 @@ ZEND_METHOD(Wcd_IDriver, getSequenceNames)
 	IDriver* db = zval_toc<IDriver>(ZEND_THIS);
 
 	htab_return result = db->getSequenceNames();
-	result.throw_errors();
-	result.value_.move_zv(return_value);
+	if (!result.throw_errors())
+	{
+		result.value_.move_zv(return_value);
+	}
+	
 }
+
+ZEND_METHOD(Wcd_IDriver, getViewNames)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	IDriver* db = zval_toc<IDriver>(ZEND_THIS);
+
+	htab_return result = db->getViewNames();
+	if (!result.throw_errors())
+	{
+		result.value_.move_zv(return_value);
+	}
+}
+
 
 ZEND_METHOD(Wcd_IDriver, handle)
 {

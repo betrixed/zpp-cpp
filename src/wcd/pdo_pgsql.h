@@ -17,8 +17,10 @@ namespace wcd {
 		
 		str_rc getSqlType() override;
 		str_rc getSchemaClass() override;
-		htab_return getTableNames() override;
+		
 		htab_return getSequenceNames() override;
+		htab_return getTableNames() override;
+		htab_return getViewNames() override;
 		val_return  lastSeqValue(str_ptr name) override;
 	};
 
@@ -27,6 +29,7 @@ namespace wcd {
 	public:
 		str_intern pgsql_s;
 		str_intern tablenames_qry;
+		str_intern viewnames_qry;
 
 		void init() override;
 	};

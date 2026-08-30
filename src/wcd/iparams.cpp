@@ -16,7 +16,7 @@ extern "C" {
 }
 #endif
 
-#define DBG_LOG_IPARAMS
+//#define DBG_LOG_IPARAMS
 #ifdef DBG_LOG_IPARAMS
 #	ifndef WCC_DEBUG_LOG_H
 #		include "wcc/debuglog.h"

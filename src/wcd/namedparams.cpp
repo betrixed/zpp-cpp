@@ -12,7 +12,7 @@ extern "C" {
 }
 #endif
 
-#define DBG_LOG_NAMEDPARAMS
+//#define DBG_LOG_NAMEDPARAMS
 #ifdef DBG_LOG_NAMEDPARAMS
 #	ifndef WCC_DEBUG_LOG_H
 #		include "wcc/debuglog.h"

@@ -47,6 +47,8 @@ namespace wcd {
 		virtual str_rc getSqlType();
 		virtual htab_return getSequenceNames();
 		virtual htab_return getTableNames();
+		virtual htab_return getViewNames();
+		
 		virtual str_return getDSN();
 
 		void debug_info(htab_rw di) override;

@@ -44,7 +44,7 @@ extern "C" {
 }
 #endif
 
-#define DBG_LOG_IBUILD
+//#define DBG_LOG_IBUILD
 
 #ifdef DBG_LOG_IBUILD
 #	ifndef WCC_DEBUGLOG_H
