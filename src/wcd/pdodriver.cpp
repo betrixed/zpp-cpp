@@ -125,7 +125,7 @@ PdoDriver::connect()
 
 	if (dsn.has_errors())
 	{
-		result = std::move(dsn);
+		result = dsn.move_error();
 		return result;
 	}
 

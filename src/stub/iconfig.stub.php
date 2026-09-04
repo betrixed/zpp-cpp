@@ -16,7 +16,7 @@ class IConfig {
     public function getDriverClass() : string {}
     public function getPassword() : string {}
     public function getUsername() : string {}
-    public function getPort() : int {}
+    public function getPort() : string {}
     public function getHost() : string {}
     public function getDatabase() : string {}
     public function getSqlClass() : string {}

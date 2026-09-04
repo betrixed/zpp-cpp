@@ -148,9 +148,9 @@ IConfig::assign(htab_ptr cfg)
 
 	// not required
 	vret = getValue(skey, false, null_val);
-	if (vret.value_.isLong() || vret.value_.isString())
+	if (vret.value_.isLong())
 	{
-		vret.value_.toLong();
+		vret.value_.toString();
 		set(ICS.k_port, vret.value_);
 	}
 
@@ -422,11 +422,10 @@ IConfig::getUsername()
 	return stringVal(ICS.k_username);
 }
 
-int 
+str_rc 
 IConfig::getPort()
 {
-	val_return result = getValue(ICS.k_port,false,val_rc());
-	return result.value_.zlong();
+	return stringVal(ICS.k_port);
 }
 
 str_rc 
@@ -635,9 +634,9 @@ ZEND_METHOD(Wcd_IConfig, getPort)
 
 	IConfig* cobj = zval_toc<IConfig>(ZEND_THIS);
 
-	zend_long result = cobj->getPort();
+	str_rc result = cobj->getPort();
 
-	RETURN_LONG(result);
+	result.move_zv(return_value);
 }
 
 ZEND_METHOD(Wcd_IConfig, getHost)
