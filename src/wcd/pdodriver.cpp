@@ -66,6 +66,18 @@ void PdoInit::init() {
 	getattribute_fn = "getattribute";
 }
 
+
+static void add_dsn(str_buf& dsn, const str_rc& key, const str_rc& value)
+{
+	if (value.size())
+	{
+	    if (dsn.size())
+	    {
+	    	dsn << ';';
+	    }
+	    dsn << key << '=' << value;
+	}
+}
 str_return 
 PdoDriver::getDSN()
 {
@@ -82,15 +94,20 @@ PdoDriver::getDSN()
 		return result;
 	}
 
+
 	IConfig* cfg = icfg_c();
-	str_rc host = cfg->getHost();
-	str_rc dbname = cfg->getDatabase();
 
-	str_buf buf;
+	str_buf dsn;
 
-	buf << dname << ':' << "host=" << host
-	    << ";dbname=" << dbname;
-	result.value_ = buf.zstr();
+	add_dsn(dsn, ICS.k_host, cfg->getHost());
+	add_dsn(dsn, ICS.k_port, cfg->getPort());
+	add_dsn(dsn, ICS.k_dbname, cfg->getDatabase());
+
+	str_rc allparts = dsn.zstr();
+
+	dsn << dname << ':' << allparts;
+
+	result.value_ = dsn.zstr();
 
 	return result;
 }
