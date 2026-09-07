@@ -49,6 +49,10 @@ public:
 
 	str_intern web_dir;
 	
+	str_intern  active_str;
+	str_intern  modules_str;
+	str_intern  modcfg_str;
+	str_intern  loaded_str;
 	
 
 	void init() override;

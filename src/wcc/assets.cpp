@@ -104,6 +104,11 @@ void ASinit::init()
 		style_end = "</style>";
 		style_tag = "<style>";
 		web_dir = "web_dir";
+
+		active_str = "active";
+		modules_str = "modules";
+		modcfg_str = "modcfg";
+		loaded_str = "loaded";
 	}
 
 ASinit  ASI;
@@ -337,6 +342,12 @@ Assets::debug_info(htab_rw di)
 	di.set(ASI.web_dir, web_);
 	di.set(ASI.head_blob, headBlob_);
 	di.set(ASI.body_blob, bodyBlob_);
+
+	di.set(ASI.modules_str, modules_);
+	di.set(ASI.active_str, activeModule_);
+	di.set(ASI.modcfg_str, moduleCfg_);
+	di.set(ASI.loaded_str, loaded_);
+
 }
 
 void Assets::destruct()
