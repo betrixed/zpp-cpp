@@ -851,6 +851,9 @@ Assets::loadAssetFile(str_ptr file)
 		result = this->addAssets(temp.zarray());
 		//showdata("result", result);
 	}
+	htab_rw hw(loaded_);
+	hw.set(file, result.value_);
+
 	return result;
 }
 
