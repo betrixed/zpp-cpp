@@ -10,8 +10,6 @@ class Dispatch {
 
 	public function action(array $to) : void {}
 
-	public function addModule(string $name, array|string $mod): Module {}
-
 	public function clearRouteCache(string $file, string $cache_name) : bool {}
 
 	public function dispatch(RouteMatch $rm): void {}
@@ -22,15 +20,9 @@ class Dispatch {
 
 	public function forward( array|string $to) : void {}
 
-	public function getActiveModule(): ?Module {}
-
 	public function getArgs() : ?array {}
 
-	public function getDefaultModule(): Module {}
-
 	public function getMethodName(): ?string {}
-
-	public function getModule(string $name): ?Module {}
 
 	public function getModuleName() : ?string {}
 
@@ -56,9 +48,5 @@ class Dispatch {
 	public function respond(mixed $content): void {}
 
 	public function setLog(bool $val): void {}
-
-	public function setModule(string $name): ?Module {}
-
-	public function setModuleCfg(array $modcfg) : void {}
 
 };

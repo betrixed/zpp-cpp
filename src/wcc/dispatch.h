@@ -11,6 +11,7 @@ using namespace zpp;
 
 	class  Services;
 	class  Run;
+	class  Assets;
 
 	class  Dispatch : public base_d {
 	protected:
@@ -22,22 +23,17 @@ using namespace zpp;
 
 		int  dcount_;
 
-		str_rc   loadedFile_;
-		htab_rc  modules_;
-		htab_rc  loaded_;
-		obj_rc   active_;
-		htab_rc  modcfg_;
-
+		str_rc   loadedFile_; // routes file name
 		obj_rc   services_;
-		obj_rc   finder_;
 		obj_rc   route_match_;
 		obj_rc   config_;
+		obj_rc   assets_;
 
 	private:
 		Services*    svc_ptr();
 		Config*      config_ptr();
 		RouteMatch*  rm_ptr();		
-
+		Assets*      asst_ptr();
 
 		void call_module_activate(obj_ptr module);
 		htab_rc   call__module_requires(obj_ptr module);
@@ -58,8 +54,6 @@ using namespace zpp;
 
 		void action(htab_ptr to);
 
-		obj_return addModule(str_ptr name, val_ptr modspec);
-
 		bool clearRouteCache(str_ptr file, str_ptr cache_name);
 
 		error_return dispatch(obj_ptr rmatch);
@@ -68,17 +62,11 @@ using namespace zpp;
 
 		void forward( val_ptr fto);
 
-		obj_rc getActiveModule();
-
 		htab_ptr getArgs();
 
 		obj_rc getRoutesCache(str_ptr cache_name);
 
-		obj_return getDefaultModule();
-
 		str_rc getMethodName();
-
-		obj_rc getModule(str_ptr name);
 
 		str_rc getModuleName();
 
@@ -102,10 +90,6 @@ using namespace zpp;
 
 		void setLog(bool val);
 
-		obj_return setModule(str_ptr name);
-
-		void  setModuleCfg(htab_ptr cfg);
-
 		VIRTUAL_ZOBJPTR
 
 	};
@@ -113,7 +97,8 @@ using namespace zpp;
 
 class Disp_init : public state_init {
 public:
-	str_intern  finder_str;
+	//str_intern  finder_str;
+	str_intern  assets_str;
 	str_intern  default_str;
 	str_intern  route_match_str;
 	str_intern  run_str;

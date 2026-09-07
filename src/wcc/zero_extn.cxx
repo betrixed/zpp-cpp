@@ -8,6 +8,7 @@
 #include "wcc/services.cpp"
 #include "wcc/search_list.cpp"
 #include "wcc/strfns.cpp"
+#include "wcc/module.cpp"
 #include "wcc/assets.cpp"
 #include "wcc/dos.cpp"
 
@@ -38,6 +39,9 @@ void register_zero_extn(INIT_FUNC_ARGS)
 	PHP_MINIT(wcc_dos_reg)(INIT_FUNC_ARGS_PASSTHRU);
 #endif
 
+#ifdef WCC_MODULE_CPP
+	PHP_MINIT(Wcc_Module_reg)(INIT_FUNC_ARGS_PASSTHRU);
+#endif
 
 	error_return::init_exception_hook();
 /*

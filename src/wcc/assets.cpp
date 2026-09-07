@@ -5,6 +5,14 @@
 #include "assets.h"
 #endif
 
+#ifndef ICACHE_H
+#include "icache.h"
+#endif
+
+#ifndef WCC_LOADER_H
+#include "loader.h"
+#endif
+
 #ifndef WCC_CONFIG_H
 #include "config.h"
 #endif
@@ -33,11 +41,15 @@
 #include "cachemgr.h"
 #endif
 
+#ifndef MODULE_WCC_H
+#include "module.h"
+#endif
+
 //#define DBG_ASSETS
-#ifdef DBG_ASSETS
+
+// For message about duplicate asset name
 #ifndef WCC_DEBUGLOG_H
 #include "debuglog.h"
-#endif
 #endif
 
 #ifndef ASSETS_ARGINFO_H
@@ -61,6 +73,9 @@ void ASinit::init()
 		assets_cfg = "assets_cfg";
 		assets_str = "assets";
 		body_blob = "bodyBlobs";
+
+		config_dir = "config_dir";
+		classname_str = "classname";
 
 		cache_mgr =  "cache_mgr";
 		css_str =    "css";
@@ -300,6 +315,13 @@ Assets::construct()
 		// from some really old code
 		run_ = Config::omg.new_zobj();
 	}
+
+	// modules management
+	throwIfDuplicate_ = false;
+	modules_ = htab_ptr::empty_array();
+	moduleCfg_  = htab_ptr::empty_array();
+	loaded_ = htab_ptr::empty_array();
+
 	return result;
 
 }
@@ -528,23 +550,46 @@ Assets::add(val_ptr nlist)
 	}
 }
 
-htab_rc 
+htab_return 
 Assets::addAssets(htab_ptr data)
 {
+	htab_return result;
+
 	htab_walk wk;
 	auto key = wk.key();
 	auto value = wk.value();
 
-	htab_rc keys_added;
-	htab_rw hw(keys_added);
+	htab_rw hw(result.value_);
+
+	bool duplicate = throwIfDuplicate_;
+	Config* asp = zobj_toc<Config> (assets_);
 
 	for(wk.start(data); wk.ok(); wk.next())
 	{
-		hw.push_back(key);
+		str_rc strkey = key.zstr();
+
+		if (asp->has(strkey)) {
+			if (duplicate)
+			{
+				result.error() << "Duplicate Asset Key: " << strkey;
+				return result;
+			}
+			else {
+				DebugLog* log = DebugLog::cpp_global();
+				if (log) {
+					str_buf buf;
+					buf << "Asset set over-write: " << strkey;
+					log->line(buf.zstr());
+				}
+			}
+		}
+		hw.push_back(strkey);
+
 		assets_.property(key.zstr(), value);
 	}
 	//showdata("keys_added", keys_added);
-	return keys_added;
+
+	return result;
 }
 
 void 
@@ -792,7 +837,7 @@ Assets::loadAssetFile(str_ptr file)
 	}
 	if (temp.isArray())
 	{
-		result.value_ = this->addAssets(temp.zarray());
+		result = this->addAssets(temp.zarray());
 		//showdata("result", result);
 	}
 	return result;
@@ -855,19 +900,250 @@ Assets::unmark(str_ptr item)
 	}
 }
 
-/*
-    public function unmark(string $item) : void
-    {
-        if (isset($this->mark[$item]))
-        {
-            $ix = array_search($item,$this->order);
-            if (is_integer($ix))
-            {
-                array_splice($this->order,$ix,1);
-            }
-            unset($this->mark[$item]);
-        }
-    }*/
+bool_return 
+Assets::clearCache()
+{
+	bool_return result;
+
+	val_return cache_mgr_err = Services::service(ASI.cache_mgr);
+	if (cache_mgr_err.has_errors())
+	{
+		result = cache_mgr_err.move_error();
+		return result;
+	}
+	obj_ptr cache = cache_mgr_err.value_.zobject();
+	if (cache.ok())
+	{
+		ICache* cobj = zobj_toc<ICache>(cache);
+
+		result = cobj->clear();
+	}
+	return result;
+}
+ 	// modules
+
+obj_rc
+Assets::getActiveModule()
+{
+	return activeModule_;
+}
+
+obj_return
+Assets::addModule(str_ptr name, val_ptr data)
+{
+	obj_return result;
+	htab_rc    mcfg;
+	str_rc 	dir;
+
+	Loader* loader = Loader::cpp_global();
+
+	if (data.isString())
+	{
+		
+		dir = data.zstr();
+		str_buf buf;
+		buf << dir << '/' << "module.php";
+
+
+		
+		val_return mdata = loader->require(buf.zstr());
+		if (mdata.has_errors())
+		{
+			result = mdata.move_error();
+			return result;
+		}
+		mcfg = mdata.value_.zarray();
+	}
+	else {
+		dir = run_.str_property(ASI.config_dir);
+		mcfg = data.zarray();
+	}
+
+	if (mcfg.size())
+	{
+		str_rc class_name = mcfg.get(ASI.classname_str);
+		if (!class_name.size())
+		{
+			class_name  = Module::omg.class_name();
+		}
+		htab_rc args_temp;
+		htab_rw args(args_temp);
+
+		args.push_back(name);
+		args.push_back(mcfg);
+
+		obj_rc mobj = ReflectCache::staticInstanceArgs(class_name, args);
+		if (!mobj.ok()) {
+			result.error() << "Cannot make new " << class_name;
+			return result;
+		}
+		result.value_ = mobj;
+
+		Module* modo = zobj_toc<Module>(mobj);
+		modo->setConfigPath(dir);
+
+		htab_rw arr(modules_);
+		arr.set(name, mobj);
+
+		modo->activate( loader->getFinder() );
+
+		htab_rc depends = modo->getRequires();
+
+		if (depends.size())
+		{
+			for_key_value wk;
+
+			for(wk.start(depends); wk.ok(); wk.next())
+			{
+				val_ptr mval = wk.value();
+
+				str_ptr modname = mval.zstr();
+
+				this->setModule(modname);
+			}
+		}
+	}
+	else {
+		result.error() << "No array data for module: " << name;
+	}
+	return result;
+}
+
+obj_return 
+Assets::getDefaultModule()
+{
+	obj_return result;
+
+	obj_rc mdef = modules_.get(MODi.DEFAULT_MOD);
+
+	if (mdef.ok())
+	{
+	    result.value_ = mdef;
+		return result;
+	}
+
+	val_rc defaults = moduleCfg_.get(MODi.DEFAULT_MOD);
+
+	if (defaults.isNull())
+	{
+		result.error() << "Default module '" << MODi.DEFAULT_MOD << "' must exist";
+		return result;
+	}
+	htab_ptr va = defaults.zarray();
+	if (va.size())
+	{
+		if (va.has_key(MODi.ALIAS)) {
+			result.error() << "Default module '" << MODi.DEFAULT_MOD << "' must not have " << MODi.ALIAS;
+			return result;
+		}
+	}
+	else {
+		str_ptr sd = defaults.zstr();
+		if (!sd.size())
+		{
+			result.error() << "Default module '" << MODi.DEFAULT_MOD << "' must be array or string value";
+			return result;
+		}
+	}
+	return addModule(MODi.DEFAULT_MOD, defaults);
+}
+
+str_rc 
+Assets::getModuleName()
+{
+	str_rc result;
+
+	if (activeModule_.ok())
+	{
+		Module* modo = zobj_toc<Module>(activeModule_);
+		result = modo->getName();
+	}
+	return result;
+}
+
+obj_rc 
+Assets::getModule(str_ptr name)
+{
+	obj_rc result = modules_.get(name);
+	return result;
+}
+
+obj_return 
+Assets::setModule(str_ptr name)
+{
+
+#ifdef DBG_ASSETS
+	DebugLog* log = DebugLog::cpp_global();
+	if (log)
+	{
+		log->dump("Assets setModule", name);
+	}
+#endif
+
+	obj_return result;
+	obj_rc modo = modules_.get(name);
+
+	if (modo.ok())
+	{
+		activeModule_ = modo;
+		result.value_ = modo;
+		return result;
+	}
+
+	obj_return mdef_err = getDefaultModule();
+
+	if (mdef_err.has_errors())
+	{
+		result = mdef_err.move_error();
+		return result;
+	}
+	obj_rc mdef = mdef_err.value_;
+
+	val_rc mdata = moduleCfg_.get(name);
+
+	if (mdata.isString() && (zs_cmp(name, MODi.DEFAULT_MOD)!=0))
+	{
+		 result = addModule(name, mdata);
+		 return result;
+	}
+	if (!mdata.isArray())
+	{
+		activeModule_ = mdef;
+		result.value_ = mdef;
+		return result;
+	}
+
+	htab_ptr mda = mdata.zarray();
+	val_rc alias_val = mda.get(MODi.DEFAULT_MOD);
+	if(alias_val.isString())
+	{
+		mdef_err = setModule(alias_val.zstr());
+		if (mdef_err.has_errors())
+		{
+			result = mdef_err.move_error();
+			return result;
+		}
+		mdef = mdef_err.value_;
+	}
+	result = addModule(name, mdata);
+	if (result.has_errors())
+	{
+		return result;
+	}
+	modo = result.value_;
+	Module* m = zobj_toc<Module>(modo);
+	m->addDefaults(mdef);
+
+	activeModule_ = modo;
+	return result;
+}
+
+void 
+Assets::setModuleCfg(htab_ptr modlist)
+{
+	moduleCfg_ = modlist;
+}
+
 
 
 }; //end namespace wcc
@@ -924,8 +1200,11 @@ ZEND_METHOD(Wcc_Assets, addAssets)
 	if (!args.throw_errors(__FUNCTION__))
 	{
 		Assets* cobj = zval_toc<Assets>(ZEND_THIS);
-		htab_rc result = cobj->addAssets(data);
-		result.move_zv(return_value);
+		htab_return result = cobj->addAssets(data);
+		if(!result.throw_errors())
+		{
+			result.value_.move_zv(return_value);
+		}
 	}
 }
 
@@ -1166,6 +1445,108 @@ ZEND_METHOD(Wcc_Assets, unmark)
 		cobj->unmark(item);
 	}
 }
+
+
+ZEND_METHOD(Wcc_Assets, addModule)
+{
+	zarg_rd args(execute_data);
+	str_ptr name = args.str(args.need(0));
+	val_ptr mspec = args.string_or_array(args.need(1));
+
+	if (!args.throw_errors(__FUNCTION__))
+	{
+		Assets* cobj = zval_toc<Assets>(ZEND_THIS);
+		obj_return result = cobj->addModule(name, mspec);
+		if (!result.throw_errors(__FUNCTION__))
+		{
+			result.value_.move_zv(return_value);
+		}
+	}
+}
+
+ZEND_METHOD(Wcc_Assets, setModule)
+{
+	zarg_rd args(execute_data);
+	str_ptr    value  = args.need(0);
+
+	if (!args.throw_errors(__FUNCTION__))
+	{
+		Assets* cobj = zval_toc<Assets>(ZEND_THIS);
+		obj_return result = cobj->setModule(value);
+		result.value_.move_zv(return_value);
+	}
+}
+
+ZEND_METHOD(Wcc_Assets, setModuleCfg)
+{
+	zarg_rd args(execute_data);
+	htab_ptr    value  = args.htab(args.need(0));
+
+	if (!args.throw_errors(__FUNCTION__))
+	{
+		Assets* cobj = zval_toc<Assets>(ZEND_THIS);
+		cobj->setModuleCfg(value);
+	}
+}
+
+
+ZEND_METHOD(Wcc_Assets, getActiveModule)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	Assets* cobj = zval_toc<Assets>(ZEND_THIS);
+	obj_rc result = cobj->getActiveModule();
+	result.move_zv(return_value);
+}
+
+ZEND_METHOD(Wcc_Assets, getDefaultModule)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	Assets* cobj = zval_toc<Assets>(ZEND_THIS);
+	obj_return result = cobj->getDefaultModule();
+	if (!result.throw_errors(__FUNCTION__))
+	{
+		result.value_.move_zv(return_value);
+	}
+}
+
+ZEND_METHOD(Wcc_Assets, getModuleName)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	Assets* cobj = zval_toc<Assets>(ZEND_THIS);
+	str_rc result = cobj->getModuleName();
+	result.move_zv(return_value);
+
+}
+
+ZEND_METHOD(Wcc_Assets, getModule)
+{
+	zarg_rd args(execute_data);
+	str_ptr name = args.str(args.need(0));
+	if (!args.throw_errors(__FUNCTION__))
+	{
+		Assets* cobj = zval_toc<Assets>(ZEND_THIS);
+		obj_rc result = cobj->getModule(name);
+		result.move_zv(return_value);
+	}
+}
+
+ZEND_METHOD(Wcc_Assets, clearCache)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+
+	Assets* cobj = zval_toc<Assets>(ZEND_THIS);
+
+	bool_return result = cobj->clearCache();
+
+	if (!result.throw_errors(__FUNCTION__))
+	{
+		RETURN_BOOL(result.value_);
+	}
+}
+
 
 PHP_MINIT_FUNCTION(wcc_assets_reg)
 {

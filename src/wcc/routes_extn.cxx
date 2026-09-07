@@ -33,7 +33,7 @@
 #include "wcc/target.cpp"
 
 
-#include "wcc/module.cpp"
+//#include "wcc/module.cpp"
 
 #include "wcc/dispatch.cpp"
 
@@ -110,10 +110,12 @@ PHP_MINIT(wcc_pair_d)(INIT_FUNC_ARGS_PASSTHRU);
 	PHP_MINIT(Wcc_CacheMgr_reg)(INIT_FUNC_ARGS_PASSTHRU);
 #endif	
 
+/*
 #ifdef WCC_MODULE_CPP
 	PHP_MINIT(Wcc_Module_reg)(INIT_FUNC_ARGS_PASSTHRU);
 #endif
-
+*/
+	
 #ifdef WCC_DISPATCH_CPP
 	PHP_MINIT(Wcc_Dispatch_reg)(INIT_FUNC_ARGS_PASSTHRU);
 #endif

@@ -44,10 +44,15 @@ extern "C" {
 #include "response.h"
 #endif
 
+/*
 #ifndef MODULE_WCC_H
 #include "module.h"
 #endif
+*/
 
+#ifndef WCC_ASSETS_H
+#include "assets.h"
+#endif
 //#define DBG_DISPATCH
 
 #ifdef DBG_DISPATCH
@@ -67,12 +72,13 @@ Disp_init DSPi;
 void 
 Disp_init::init()
 {
-	finder_str = "finder";
+	//finder_str = "finder";
+	assets_str = "assets";
 	default_str = "default";
 	route_match_str = "route_match";
 
 	config_str = "config";
-	config_dir = "config_dir";
+
 	activate_fn = "activate";
 	cache_routes_str = "cache_routes";
 
@@ -107,13 +113,12 @@ void Dispatch::debug_info(htab_rw hw)
 {
 
 	hw.set(DSPi.route_match_str, route_match_);
-	hw.set(DSPi.finder_str, finder_);
+	hw.set(DSPi.assets_str, assets_);
 	hw.set(DSPi.roles_str, roles_);
-	hw.set(DSPi.active_str, active_);
+
 	hw.set(DSPi.services_str, services_);
 	hw.set(DSPi.config_str, config_);
-	hw.set(DSPi.modules_str, modules_);
-	hw.set(DSPi.modcfg_str, modcfg_);
+
 }
 
 Services* 
@@ -134,21 +139,27 @@ Dispatch::rm_ptr()
 	return zobj_toc<RouteMatch>(route_match_);
 }
 
+Assets*
+Dispatch::asst_ptr()
+{
+	return zobj_toc<Assets>(assets_);
+}
+
 void
 Dispatch::construct()
 {
 	services_ = Services::instance();
 
 	Services* svc = svc_ptr();
-	val_return ftest = svc->get(DSPi.finder_str);
-	if (!ftest.throw_errors())
+	val_return atest = svc->get(DSPi.assets_str);
+	if (!atest.throw_errors())
 	{
-		finder_ = std::move(ftest.value_);
+		assets_ = std::move(atest.value_);
 	}
-	ftest = svc->get(DSPi.config_str);
-	if (!ftest.throw_errors())
+	atest = svc->get(DSPi.config_str);
+	if (!atest.throw_errors())
 	{
-		config_ = std::move(ftest.value_);
+		config_ = std::move(atest.value_);
 	}
 }
 
@@ -230,7 +241,9 @@ Dispatch::action(htab_ptr to)
 	target.push_back(method);
 	target.push_back(args);
 
-	setModule(module);
+	auto asst = asst_ptr();
+
+	asst->setModule(module);
 
 	obj_rc route_match = getRouteMatch();
 
@@ -259,123 +272,6 @@ Dispatch::module_viewpaths(obj_ptr module)
 }
 
 
-void 
-Dispatch::call_module_activate(obj_ptr module)
-{
-	fn_call afn(DSPi.activate_fn, module);
-	fn_params<1>    afn_result(afn);
-	ZVAL_OBJ(&afn_result.params[0], finder_);
-	afn_result.call_fn(); // void result
-}
-
-obj_rc
-Dispatch::createModule(str_ptr name, htab_ptr mcfg)
-{
-	#ifdef DBG_DISPATCH
-	DebugLog* log = DebugLog::cpp_global();
-	log->dump("createModule name", name);
-	log->dump("createModule data", mcfg);
-	#endif
-
-	obj_rc result;
-	str_rc cname = mcfg.get(DSPi.classname_str);
-	if (!cname.ok())
-	{
-		cname = Module::omg.class_name();
-	}
-	htab_rc args;
-	htab_rw margs(args);
-
-	margs.push_back(name);
-	margs.push_back(mcfg);
-
-	result = ReflectCache::staticInstanceArgs(cname, margs);
-
-	return result;
-}
-
-// assumes not already loaded
-obj_return
-Dispatch::addModule(str_ptr name, val_ptr modspec)
-{
-	obj_return result;
-#ifdef DBG_DISPATCH
-	DebugLog* log = DebugLog::cpp_global();
-	log->dump("Dispatch addModule",name);
-#endif
-
-	obj_rc modo;
-	Module* m = nullptr;
-
-	str_rc  dir;
-
-	val_rc  mcfg = modspec;
-	
-
-	if (mcfg.isString())
-	{
-
-		dir = mcfg.zstr();
-		str_buf path;
-
-		path << dir << "/module.php";
-
-		val_return test = Loader::cpp_global()->readPHP(path.zstr());
-
-		if (test.has_errors())
-		{
-			result = test.move_error();
-			return result;
-		}
-
-
-		mcfg = test.value_;
-	}
-	else {
-		dir = config_.str_property(DSPi.config_dir);
-	}
-
-	if (mcfg.isArray())
-	{
-		htab_ptr data = mcfg.zarray();
-		modo = createModule(name, data);
-		
-
-		m = zobj_toc<Module>(modo);
-		m->setConfigPath(dir);
-
-		htab_rw mlist(modules_);
-		mlist.set(name, modo);
-
-		call_module_activate(modo);
-	}
-
-	if (m)
-	{
-		result.value_ = modo;
-		htab_rc reqlist = m->getRequires();
-
-		htab_walk wk;
-
-		auto value = wk.value();
-		for(wk.start(reqlist); wk.ok(); wk.next())
-		{
-			if (value.isString())
-			{
-				obj_return test = setModule(value.zstr());
-				if (test.has_errors())
-				{
-					 result = test.move_error();
-				}
-			}
-		}
-	}
-	else {
-		result.error() << "Failed to create module " << name;
-	}
-
-	return result;
-}
 
 
 bool
@@ -431,8 +327,9 @@ Dispatch::dispatch(obj_ptr rmatch)
 		return result;
 	}
 	
+	auto asst = asst_ptr();
 
-	obj_return module_err = setModule(mod_name);
+	obj_return module_err = asst->setModule(mod_name);
 
 	if (module_err.has_errors())
 	{
@@ -454,13 +351,16 @@ Dispatch::dispatch(obj_ptr rmatch)
 		engine = etest.value_.zobject();
 	}
 
+
 	if (engine.ok())
 	{
-		htab_rc paths = module_viewpaths(active_);
+		auto activeModule = asst->getActiveModule();
+
+		htab_rc paths = module_viewpaths(activeModule);
 
 		if (zs_cmp_ci(mod_name,DSPi.default_str)!=0)
 		{
-			obj_rc defmod = getModule(DSPi.default_str);
+			obj_rc defmod = asst->getModule(DSPi.default_str);
 			htab_rc defpaths = module_viewpaths(defmod);
 			htab_rw allpaths(paths);
 			allpaths.merge(defpaths);
@@ -545,12 +445,6 @@ Dispatch::forward( val_ptr fto)
 }
 
 
-obj_rc
-Dispatch::getActiveModule()
-{
-	return active_;
-}
-
 
 htab_ptr
 Dispatch::getArgs()
@@ -582,43 +476,6 @@ Dispatch::getRoutesCache(str_ptr cache_name)
 }
 
 
-obj_return
-Dispatch::getDefaultModule()
-{
-	obj_return result;
-
-	obj_rc mdef = modules_.get(MODi.DEFAULT_MOD);
-
-	if (mdef.ok())
-	{
-	    result.value_ = mdef;
-		return result;
-	}
-	val_rc defaults = modcfg_[MODi.DEFAULT_MOD];
-
-	if (defaults.isNull())
-	{
-		result.error() << "Default module '" << MODi.DEFAULT_MOD << "' must exist";
-		return result;
-	}
-	htab_ptr va = defaults.zarray();
-	if (va.size())
-	{
-		if (va.has_key(MODi.ALIAS)) {
-			result.error() << "Default module '" << MODi.DEFAULT_MOD << "' must not have " << MODi.ALIAS;
-			return result;
-		}
-	}
-	else {
-		str_ptr sd = defaults.zstr();
-		if (!sd.size())
-		{
-			result.error() << "Default module '" << MODi.DEFAULT_MOD << "' must be array or string value";
-			return result;
-		}
-	}
-	return addModule(MODi.DEFAULT_MOD, defaults);
-}
 
 
 str_rc
@@ -635,25 +492,12 @@ Dispatch::getMethodName()
 }
 
 
-obj_rc
-Dispatch::getModule(str_ptr name)
-{
-	obj_rc result = modules_.get(name);
-	return result;
-}
-
-
 str_rc
 Dispatch::getModuleName()
 {
 	str_rc result;
-
-	if (active_.ok())
-	{
-		Module* modo = zobj_toc<Module>(active_);
-		result = modo->getName();
-	}
-	return result;
+	auto asst = asst_ptr();
+	return asst->getModuleName();
 }
 
 
@@ -956,78 +800,6 @@ Dispatch::setLog(bool val)
 }
 
 
-obj_return 
-Dispatch::setModule(str_ptr name)
-{
-#ifdef DBG_DISPATCH
-	DebugLog* log = DebugLog::cpp_global();
-	log->dump("Dispatch setModule", name);
-#endif
-
-	obj_return result;
-	obj_rc modo = modules_.get(name);
-
-	if (modo.ok())
-	{
-		active_ = modo;
-		result.value_ = modo;
-		return result;
-	}
-
-	obj_return mdef_err = getDefaultModule();
-
-	if (mdef_err.has_errors())
-	{
-		result = mdef_err.move_error();
-		return result;
-	}
-	obj_rc mdef = mdef_err.value_;
-
-	val_rc mdata = modcfg_.get(name);
-
-	if (mdata.isString() && (zs_cmp(name, MODi.DEFAULT_MOD)!=0))
-	{
-		 result = addModule(name, mdata);
-		 return result;
-	}
-	if (!mdata.isArray())
-	{
-		active_ = mdef;
-		result.value_ = mdef;
-		return result;
-	}
-
-	htab_ptr mda = mdata.zarray();
-	val_rc alias_val = mda.get(MODi.DEFAULT_MOD);
-	if(alias_val.isString())
-	{
-		mdef_err = setModule(alias_val.zstr());
-		if (mdef_err.has_errors())
-		{
-			result = mdef_err.move_error();
-			return result;
-		}
-		mdef = mdef_err.value_;
-	}
-	result = addModule(name, mdata);
-	if (result.has_errors())
-	{
-		return result;
-	}
-	modo = result.value_;
-	Module* m = zobj_toc<Module>(modo);
-	m->addDefaults(mdef);
-
-	active_ = modo;
-	return result;
-}
-
-void
-Dispatch::setModuleCfg(htab_ptr cfg)
-{
-	modcfg_ = cfg;
-}
-
 }//end wcc
 
 
@@ -1053,22 +825,6 @@ ZEND_METHOD(Wcc_Dispatch, action)
 	}
 }
 
-ZEND_METHOD(Wcc_Dispatch, addModule)
-{
-	zarg_rd args(execute_data);
-	str_ptr name = args.str(args.need(0));
-	val_ptr mspec = args.string_or_array(args.need(1));
-
-	if (!args.throw_errors(__FUNCTION__))
-	{
-		Dispatch* cobj = zval_toc<Dispatch>(ZEND_THIS);
-		obj_return result = cobj->addModule(name, mspec);
-		if (!result.throw_errors(__FUNCTION__))
-		{
-			result.value_.move_zv(return_value);
-		}
-	}
-}
 
 ZEND_METHOD(Wcc_Dispatch, clearRouteCache)
 {
@@ -1122,14 +878,7 @@ ZEND_METHOD(Wcc_Dispatch, forward)
 	}
 }
 
-ZEND_METHOD(Wcc_Dispatch, getActiveModule)
-{
-	ZEND_PARSE_PARAMETERS_NONE();
 
-	Dispatch* cobj = zval_toc<Dispatch>(ZEND_THIS);
-	obj_rc result = cobj->getActiveModule();
-	result.move_zv(return_value);
-}
 
 ZEND_METHOD(Wcc_Dispatch, getArgs)
 {
@@ -1152,17 +901,7 @@ ZEND_METHOD(Wcc_Dispatch, getRoutesCache)
 	}
 }
 
-ZEND_METHOD(Wcc_Dispatch, getDefaultModule)
-{
-	ZEND_PARSE_PARAMETERS_NONE();
 
-	Dispatch* cobj = zval_toc<Dispatch>(ZEND_THIS);
-	obj_return result = cobj->getDefaultModule();
-	if (!result.throw_errors(__FUNCTION__))
-	{
-		result.value_.move_zv(return_value);
-	}
-}
 
 ZEND_METHOD(Wcc_Dispatch, getMethodName)
 {
@@ -1173,27 +912,9 @@ ZEND_METHOD(Wcc_Dispatch, getMethodName)
 	result.move_zv(return_value);
 }
 
-ZEND_METHOD(Wcc_Dispatch, getModule)
-{
-	zarg_rd args(execute_data);
-	str_ptr name = args.str(args.need(0));
-	if (!args.throw_errors(__FUNCTION__))
-	{
-		Dispatch* cobj = zval_toc<Dispatch>(ZEND_THIS);
-		obj_rc result = cobj->getModule(name);
-		result.move_zv(return_value);
-	}
-}
 
-ZEND_METHOD(Wcc_Dispatch, getModuleName)
-{
-	ZEND_PARSE_PARAMETERS_NONE();
 
-	Dispatch* cobj = zval_toc<Dispatch>(ZEND_THIS);
-	str_rc result = cobj->getModuleName();
-	result.move_zv(return_value);
 
-}
 
 ZEND_METHOD(Wcc_Dispatch, loadRoutes)
 {
@@ -1324,29 +1045,13 @@ ZEND_METHOD(Wcc_Dispatch, setLog)
 	}
 }
 
-ZEND_METHOD(Wcc_Dispatch, setModule)
+ZEND_METHOD(Wcc_Dispatch, getModuleName)
 {
-	zarg_rd args(execute_data);
-	str_ptr    value  = args.need(0);
+	ZEND_PARSE_PARAMETERS_NONE();
 
-	if (!args.throw_errors(__FUNCTION__))
-	{
-		Dispatch* cobj = zval_toc<Dispatch>(ZEND_THIS);
-		obj_return result = cobj->setModule(value);
-		result.value_.move_zv(return_value);
-	}
-}
-
-ZEND_METHOD(Wcc_Dispatch, setModuleCfg)
-{
-	zarg_rd args(execute_data);
-	htab_ptr    value  = args.htab(args.need(0));
-
-	if (!args.throw_errors(__FUNCTION__))
-	{
-		Dispatch* cobj = zval_toc<Dispatch>(ZEND_THIS);
-		cobj->setModuleCfg(value);
-	}
+	Dispatch* cobj = zval_toc<Dispatch>(ZEND_THIS);
+	str_rc result = cobj->getModuleName();
+	result.move_zv(return_value);
 }
 
 PHP_MINIT_FUNCTION(Wcc_Dispatch_reg)

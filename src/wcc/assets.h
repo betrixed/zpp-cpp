@@ -17,6 +17,8 @@ public:
 	str_intern assets_cfg;
 	str_intern assets_str;
 	str_intern body_blob;
+	str_intern config_dir;
+	str_intern classname_str;
 
 	str_intern cache_mgr;
 	str_intern css_str;
@@ -60,6 +62,7 @@ protected:
 	bool render_lock_;
 
 	obj_rc   assets_;
+	bool     throwIfDuplicate_;
 	obj_rc   src_paths_;
 	obj_rc   run_; // a properties holding object
 
@@ -71,6 +74,12 @@ protected:
 
 	htab_rc  inline_styles_;
 	str_rc   web_;
+
+	//module management
+	htab_rc  loaded_;
+	htab_rc  modules_;
+	obj_rc   activeModule_;
+	htab_rc  moduleCfg_;
 
 protected:
 	str_rc findSourceFile(str_ptr path);
@@ -104,11 +113,13 @@ public:
 
 	void add(val_ptr list);
 
-	htab_rc addAssets(htab_ptr data);
+	htab_return addAssets(htab_ptr data);
 
 	void addBlob(str_rc blob, bool header = false);
 
 	htab_ptr addSourcePath(str_ptr path);
+
+	
 
 	str_rc cssHeader();
 
@@ -142,6 +153,25 @@ public:
  	void unmark(str_ptr item);
 
  	void setRun(obj_ptr obj);
+
+ 	bool_return clearCache();
+ 	// modules
+
+ 	obj_rc     getActiveModule();
+
+ 	obj_return addModule(str_ptr name, val_ptr data);
+
+ 	obj_return getDefaultModule();
+
+ 	str_rc getModuleName();
+
+ 	obj_rc getModule(str_ptr name);
+
+ 	obj_return setModule(str_ptr name);
+
+ 	void setModuleCfg(htab_ptr modlist);
+
+
 };
 
 }; //namespace wcc
