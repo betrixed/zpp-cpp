@@ -100,12 +100,11 @@ Disp_init::init()
 
 	beforecall_str = "beforecall";
 	set_str = "set";
-	modcfg_str = "modcfg";
+	
 	services_str = "services";
 
 	roles_str = "roles";
-	active_str = "active";
-	modules_str = "modules";
+
 }
 
 

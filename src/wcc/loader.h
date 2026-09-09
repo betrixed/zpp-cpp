@@ -21,7 +21,6 @@ namespace wcc {
 		/** loaded classes  */
 		htab_rc loaded_;
 		/** required files */
-		htab_rc required_;
 
 		fn_call  	fdr_find_;
 
@@ -61,8 +60,6 @@ namespace wcc {
     	bool_return load(str_ptr class_name);
 
     	htab_ptr  getLoaded();
-
-    	htab_ptr  getRequired();
 
     	bool_return must_load(str_ptr class_name);
 

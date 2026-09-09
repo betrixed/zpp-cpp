@@ -105,12 +105,6 @@ Loader::getLoaded()
 	return loaded_;
 }
 
-htab_ptr
-Loader::getRequired()
-{
-	return required_;
-}
-
 void
 Loader::call_spl(str_ptr fname)
 {
@@ -133,7 +127,7 @@ Loader::Loader() : base_d()
 {
 	isRegistered_ = false;
 	throwNotFound_ = false;
-	record_ = false;
+	record_ = true;
 }
 
 void Loader::debug_info(htab_rw di)
@@ -298,7 +292,7 @@ Loader::require(str_ptr file)
 	
 	if (record_) 
 	{
-		htab_rw wr(this->required_);
+		htab_rw wr(this->loaded_);
 		wr.push_back(&path);
 	}
 	return result;
@@ -495,17 +489,6 @@ ZEND_METHOD(Wcc_Loader, getLoaded)
 	htab_ptr loaded = lob->getLoaded();
 
 	loaded.copy_zv(return_value);
-}
-
-ZEND_METHOD(Wcc_Loader, getRequired)
-{
-	ZEND_PARSE_PARAMETERS_NONE();
-
-	Loader* lob = zval_toc<Loader>(ZEND_THIS);
-
-	htab_ptr required = lob->getRequired();
-
-	required.copy_zv(return_value);
 }
 
 ZEND_METHOD(Wcc_Loader, require)
