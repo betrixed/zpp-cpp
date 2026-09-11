@@ -141,7 +141,7 @@ using namespace zpp;
 			result = where(p0,p1,p2, val_ptr());
 			break;
 		case 2:
-			result = where(p0,p1, val_ptr(), val_ptr());
+			result = whereKeyValue(p0,p1);
 			break;
 		}
 		return result;
@@ -161,10 +161,26 @@ using namespace zpp;
 			return result;
 		}
 
+		// TODO: maybe check if array is a real list
 		val_ptr p0 = aw.get(int(0));
 
 		if (p0.isNull())
 		{
+			// assume plain associative array
+			// treat as k3ys = values
+			for_key_value wk;
+			val_rc opand(SQSTR.and_str);
+			for(wk.start(aw); wk.ok(); wk.next())
+			{
+				str_ptr skey = wk.key(); // Always a string
+				if (!skey.ok()) // and wk.index() ??
+				{
+					result.error() << "Key must be a name";
+					return result;
+				}
+				val_rc temp(skey); // Key for Values should be always strings?
+				this->whereKeyValue(temp, wk.value());
+			}
 			result.error() << msg_array_hole(0);
 		}
 		else if (p0.isArray())
