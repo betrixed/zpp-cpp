@@ -579,6 +579,7 @@ Bindings::whereKeyValue(val_ptr key, val_ptr value)
 	if (key.isString() && !value.isArray())
 	{
 		where(key, SQSTR.cmp_equal, value, SQSTR.and_str);
+		return result;
 	}
 	if (key.isArray() && value.isArray())
 	{

@@ -91,6 +91,8 @@ public:
 	str_intern file_cache;
 
 	str_intern namespaces_str;
+	str_intern classes_str;
+	
 	str_intern modules_str;
 	str_intern error_log;
 	str_intern temp_folder_names;

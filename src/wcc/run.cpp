@@ -136,6 +136,8 @@ void Run_init::init()
 	file_cache = "file_cache";
 
 	namespaces_str = "namespaces";
+	classes_str = "classes";
+
 	modules_str = "modules";
 	error_log = "error_log";
 	temp_folder_names = "temp_folder_names";
@@ -741,29 +743,40 @@ Run::config_init(str_ptr bootstrap)
 				}
 			}
 
-			val_rc ns = config.property(Run_i.namespaces_str);
-
-			if (ns.isArray())
+			
+			
 			{
-				 obj_rc finder;
-
-				 val_return ftest = Services::service(Run_i.finder);
+				Finder* fdr = nullptr;
+				val_return ftest = Services::service(Run_i.finder);
 
 				 if (ftest.has_errors())
 				 {
 				 	result = ftest.move_error();
 				 	return result;
 				 }
+
+				 obj_rc finder;				 
 				 finder = ftest.value_.zobject();
+				 fdr = zobj_toc<Finder>(finder);
 
+				 htab_rc flist = config.array_property(Run_i.namespaces_str);
 
-				 Finder* fd = zobj_toc<Finder>(finder);
-				 fd->addPathArray(ns.zarray());
+				 if (flist.size())
+				{
+					 fdr->addPathArray(flist);
+				}
+				else {
+
+					// DebugLog absence?
+				}
+
+				flist = config.array_property(Run_i.classes_str);
+				if (flist.size())
+				{
+					fdr->addClasses(flist);
+				}
 			}
-			else {
-				zend_printf("No %s entry in config!\n", Run_i.namespaces_str.data());
-
-			}
+			
 			str_buf mpath;
 
 			mpath << config_dir << "/modules";

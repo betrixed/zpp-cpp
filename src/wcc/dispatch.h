@@ -126,12 +126,11 @@ public:
 
 	str_intern  beforecall_str;
 	str_intern  set_str;
-	str_intern  modcfg_str;
+
 	str_intern  services_str;
 
 	str_intern  roles_str;
-	str_intern  active_str;
-	str_intern  modules_str;
+
 
 	void init() override;
 };

@@ -1,9 +1,5 @@
 <?php
-//bootstrap.php
 namespace Wcc;
-
-
-
 
 /** Folder containing Wcc PHP source */
 $workdir = dirname(__DIR__);
