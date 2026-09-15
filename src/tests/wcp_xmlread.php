@@ -127,7 +127,7 @@ function testavg(int $ct, string $msg) {
 		$rd->parseFile($testfile2);
 	}//$emty = new EmptyTest();
 	$cpu_after = getrusage();
-	echo "$msg CPU usage Per iteration of $ct in \u{00B5}s" . PHP_EOL;
+	echo "$msg CPU usage (msec) Per iteration of $ct in msec" . PHP_EOL;
 
 	$user = rutime($cpu_after, $cpu_before, "utime") * 1000.0 / $ct;
 	$system = rutime($cpu_after, $cpu_before, "stime")* 1000.0 / $ct;
@@ -142,6 +142,8 @@ function testavg(int $ct, string $msg) {
 echo "Test file is " . $testfile2 . PHP_EOL;
 testavg(10, "Warm up");
 testavg(200, "Final");
+testavg(2000,"Lots");
+
 show_versions();
 
 

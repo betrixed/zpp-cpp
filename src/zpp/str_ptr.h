@@ -21,7 +21,7 @@
 
 namespace zpp {
 
-	// zpp::qstring is a PHP request memory allocated std::string
+	// zpp::rqstring is a std::string allocated from PHP request memory
 	typedef std::basic_string<char,std::char_traits<char>, alloc_phpreq<char> >  rqstring;
 
 	class str_rc;

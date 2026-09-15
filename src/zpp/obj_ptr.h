@@ -16,9 +16,14 @@
 #include "str_ptr.h"
 #endif
 
+#ifndef HTAB_PTR_H
+#include "htab_ptr.h"
+#endif
+
 namespace zpp {
 
 	class htab_rc;
+
 	class obj_rc;
 	class val_rc;
 	/**

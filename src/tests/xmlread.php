@@ -7,6 +7,7 @@ use Exception;
 require __DIR__ . "/bootstrap.php";
 
 function rutime($ru, $rus, $index){
+	// final numbers in msec!
  return ($ru["ru_$index.tv_sec"]*1000 + intval($ru["ru_$index.tv_usec"]/1000)) - ($rus["ru_$index.tv_sec"]*1000 + intval($rus["ru_$index.tv_usec"]/1000));
 }
 
@@ -50,7 +51,7 @@ function testone($testfile)
 	//die;
 }
 
-testone($badpath);
+//testone($badpath);
 
 testone($testfile3);
 
@@ -139,7 +140,7 @@ function testavg(int $ct, string $msg) {
 		$rd->parseFile("tests/assets_full.xml");
 	}//$emty = new EmptyTest();
 	$cpu_after = getrusage();
-	echo "$msg CPU usage Per iteration of $ct in \u{00B5}s" . PHP_EOL;
+	echo "$msg CPU usage Per iteration of $ct in msec" . PHP_EOL;
 
 	$user = rutime($cpu_after, $cpu_before, "utime") * 1000.0 / $ct;
 	$system = rutime($cpu_after, $cpu_before, "stime")* 1000.0 / $ct;
@@ -166,7 +167,7 @@ function testavgstr(int $ct, string $msg) {
 		$result = $rd->parse($s);
 	}//$emty = new EmptyTest();
 	$cpu_after = getrusage();
-	echo "$msg CPU usage Per iteration of $ct in \u{00B5}s" . PHP_EOL;
+	echo "$msg CPU usage Per iteration of $ct in msec" . PHP_EOL;
 
 	$user = rutime($cpu_after, $cpu_before, "utime") * 1000.0 / $ct;
 	$system = rutime($cpu_after, $cpu_before, "stime")* 1000.0 / $ct;
