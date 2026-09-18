@@ -1,12 +1,21 @@
 #!/bin/bash
 # Stop php-fpm services using modules to be replaced
 # Disable PHP extension modules that may be not working silently. 
-IFILE="/etc/php/conf.d/wcc.ini"
-OFILE="/etc/php/conf.d/wcc.off"
+source /etc/os-release
+source pvid.sh
+echo "os-release: $NAME"
+if [[ "$ID" == "debian" ]]; then
+  IFILE="/etc/php/$pvid/fpm/conf.d/wcc.ini"
+  OFILE="/etc/php/$pvid/fpm/conf.d/wcc.off"
+else
+  IFILE="/etc/php/conf.d/wcc.ini"
+  OFILE="/etc/php/conf.d/wcc.off"
+fi
 if [ -f "$IFILE" ]; then
-	echo "Turn off extensions"
+	echo "Turn off extensions $IFILE"
 	sudo mv "$IFILE" "$OFILE"
 fi
 . ./pvid.sh
+echo "stop $FPM"
 sudo systemctl stop $FPM 
 

@@ -23,6 +23,7 @@
 namespace zpp {
 
 	class htab_rc;
+
 	class obj_rc;
 	class val_rc;
 	/**
