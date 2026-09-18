@@ -23,7 +23,7 @@ class Target {
 
 	public function getParams() : ?array {}
 
-	public function setParams(?array $params) : void {}
+	public function setParams(?array $params) : Target {}
 
 	public function getParam(string $key) : mixed {}
 

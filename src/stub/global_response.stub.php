@@ -109,6 +109,7 @@ class Headers {
 
 
 class Response {
+
     public function __construct(
             ?string $content = null,  ?int $code = null, ?string $status = null);
 

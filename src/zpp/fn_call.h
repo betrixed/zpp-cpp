@@ -101,12 +101,12 @@ namespace zpp {
     protected:
         fn_call&  cfi_;
 
-        fn_result(fn_call& fn) : cfi_(fn), result_({0})
+        fn_result(fn_call& fn) : cfi_(fn), result_({})
         {
             cfi_.fci_.retval = &result_;
 
         }
-        fn_result(fn_call& fn, zend_object* obj) : cfi_(fn), result_({0})
+        fn_result(fn_call& fn, zend_object* obj) : cfi_(fn), result_({})
         {
             cfi_.fci_.retval = &result_;
             cfi_.set_obj(obj);

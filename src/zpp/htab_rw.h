@@ -59,10 +59,10 @@ namespace zpp {
         
         htab_rw(HashTable* h);
 
-        htab_rw(const htab_rw& w)
+        htab_rw(const htab_rw& w) : htab_ptr(w.ht_)
         {
-            ht_ = w.ht_;
         }
+
         const htab_rw& operator=(const zval* p);
         
         
@@ -152,6 +152,9 @@ namespace zpp {
         void removal(htab_ptr exkeys);
     };
 
+    /**
+     * for hash tables created during PHP module init
+     */ 
     class htab_persist {
         HashTable  data_;
         HashTable* htab_;

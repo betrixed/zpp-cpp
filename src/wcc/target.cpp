@@ -379,9 +379,10 @@ ZEND_METHOD(Wcc_Target, setParams)
 	{
 		Target* cobj = zval_toc<Target>(ZEND_THIS);
 		cobj->setParams(data);
+
+		ZVAL_COPY(return_value, ZEND_THIS);
 	}
 }
-
 
 PHP_MINIT_FUNCTION(wcc_target)
 {

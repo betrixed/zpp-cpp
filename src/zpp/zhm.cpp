@@ -10,7 +10,9 @@
 #include "obj.cpp"
 #include "str.cpp"
 #include "htab.cpp"
-#include "fn_call.cpp"
-#include "state_init.cpp"
+
+
+//#include "fn_call.cpp"
+//#include "state_init.cpp"
 
 #endif

@@ -86,7 +86,7 @@ public:
     val_rc(zval&& rc)
     {
         ZVAL_COPY_VALUE(&zv_, &rc);
-        rc = {0};
+        rc = {}; // zero init union
     }
 
     val_rc(HashTable* ht);

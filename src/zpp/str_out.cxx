@@ -35,7 +35,7 @@ str_out::operator<<(const iform& form)
 }
 
 str_out& 
-str_out::operator<<(const fm_endl& el)
+str_out::operator<<(const fm_endl& /*&el*/)
 {
 	append('\n');
 	return *this;

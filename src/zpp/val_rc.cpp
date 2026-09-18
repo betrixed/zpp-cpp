@@ -49,7 +49,7 @@ val_rc::empty_array_ptr()
 void 
 val_rc::init()
 {
-    zv_ = {0};
+    zv_ = {};
     ZVAL_NULL(&zv_);
 }
 
@@ -176,7 +176,7 @@ void // protected
 val_rc::lose()
 {
     val_ptr::try_decref(&zv_);
-    zv_ = {0};
+    zv_ = {};
     //ZVAL_NULL(&zv_);
 }
 
@@ -184,7 +184,7 @@ const val_rc&
 val_rc::operator=(zend_long value)
 {
     val_ptr::try_decref(&zv_);
-    zv_ = {0};
+    zv_ = {};
     ZVAL_LONG(&zv_, value);
     return *this;
 }
@@ -193,7 +193,7 @@ const val_rc&
 val_rc::operator=(const char* s)
 {
     val_ptr::try_decref(&zv_);
-    zv_ = {0};
+    zv_ = {};
     ZVAL_STRING(&zv_, s);
     return *this;
 }
@@ -202,47 +202,47 @@ const val_rc&
 val_rc::operator=(double value)
 {
     val_ptr::try_decref(&zv_);
-    zv_ = {0};
+    zv_ = {};
     ZVAL_DOUBLE(&zv_, value);
     return *this;
 }
 
 val_rc::val_rc() 
 {
-    zv_ = {0};
+    zv_ = {};
     ZVAL_NULL(&zv_);
 }
 
 void val_rc::set_null()
 {
     val_ptr::try_decref(&zv_);
-    zv_ = {0};
+    zv_ = {};
     ZVAL_NULL(&zv_);
 }
 
 void val_rc::set_bool(bool value)
 {
     val_ptr::try_decref(&zv_);
-    zv_ = {0};
+    zv_ = {};
     ZVAL_BOOL(&zv_, value);
 }
 
 val_rc::val_rc(HashTable* ht)
 {
-     zv_ = {0};
+     zv_ = {};
      val_ptr(&zv_).bind_array(ht);
 }
 
 val_rc::val_rc(const char* s)
 {
-    zv_ = {0};
+    zv_ = {};
     ZVAL_STRING(&zv_, s);
 }
 
 #ifndef OMIT_BASE_D
 val_rc::val_rc(base_d* cobj)
 {
-    zv_ = {0};
+    zv_ = {};
     
     val_ptr(&zv_).bind_object(cobj->vobj());
 }
@@ -250,13 +250,13 @@ val_rc::val_rc(base_d* cobj)
 
 val_rc::val_rc(double value)
 {
-    zv_ = {0};
+    zv_ = {};
     ZVAL_DOUBLE(&zv_, value);
 }
 
 val_rc::val_rc(bool bval)
 {
-    zv_ = {0};
+    zv_ = {};
     if (bval)
     {
         ZVAL_TRUE(&zv_);
@@ -268,7 +268,7 @@ val_rc::val_rc(bool bval)
 
 val_rc::val_rc(zval* zv)
 {
-    zv_ = {0};
+    zv_ = {};
     if (zv) {
         // destructor will try to decref.
         ZVAL_COPY(&zv_, zv);
@@ -280,7 +280,7 @@ val_rc::val_rc(zval* zv)
 
 val_rc::val_rc(const val_ptr& rc)
 {
-    zv_ = {0};
+    zv_ = {};
     if (rc.p_) {
         ZVAL_COPY(&zv_, rc.p_);
     }
@@ -316,14 +316,14 @@ val_rc::operator=(const htab_rc &rc)
 
  val_rc::val_rc(int value)
  {
-    zv_ = {0};
+    zv_ = {};
     ZVAL_LONG(&zv_, value);
  }
 
 val_rc::val_rc(const val_rc& rc, bool byRef) 
 {
 
-    zv_ = {0};
+    zv_ = {};
     zval *p = (zval *) rc;
 
     //  Does addref count
@@ -347,7 +347,7 @@ void val_rc::adopt(zval* from)
 {
     lose();
     ZVAL_COPY_VALUE(&zv_, from);
-    *from = {0};
+    *from = {};
 }
 
 /** copy with careful addref */
@@ -439,7 +439,7 @@ void
 val_rc::move_zv(zval* return_value)
 {
     ZVAL_COPY_VALUE(return_value, &zv_);
-    zv_ = {0};
+    zv_ = {};
 }
 
 void 
@@ -498,25 +498,25 @@ val_rc::val_rc(str_rc&& rc)
 
 val_rc::val_rc(zend_string* rc)
 {
-    zv_ = {0};
+    zv_ = {};
     val_ptr(&zv_).bind_string(rc);
 }
 
 val_rc::val_rc(zend_object* rc)
 {
-    zv_ = {0};
+    zv_ = {};
     val_ptr(&zv_).bind_object(rc);
 }
 
 val_rc::val_rc(zend_long value)
 {
-    zv_ = {0};
+    zv_ = {};
     ZVAL_LONG(&zv_, value);
 }
 
 val_rc::val_rc(const str_ptr& rc)
 {
-    zv_ = {0};
+    zv_ = {};
     val_ptr(&zv_).bind_string(rc);
 }
 

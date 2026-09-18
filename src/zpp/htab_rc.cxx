@@ -143,9 +143,8 @@ htab_rc::htab_rc(const htab_rw& c)
 }
 
 // Just share with reference count
-htab_rc::htab_rc(const htab_rc& c)
+htab_rc::htab_rc(const htab_rc& c) : htab_ptr(c.ht_)
 {
-	ht_ = c.ht_;
 	if (ht_)
 	{
 		own();

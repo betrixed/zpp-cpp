@@ -84,7 +84,7 @@ htab_rw::giveback(zval* mgr, size_t init)
 		{	
 
 			val_rc temp(std::move(*mgr)); //move value.
-			*mgr = {0};
+			*mgr = {};
 			ht_ = zend_new_array(init);//rc==1
 			htab_rw wt(ht_); //loan 
 			wt.push_back(temp);
@@ -127,7 +127,7 @@ htab_rw::htab_rw(zval* p, size_t init)
 
 void htab_rw::push_back(HashTable* val)
 {
-	zval tmp = {0};
+	zval tmp = {};
 	bool refct = val_ptr::array_bind(&tmp, val);
 	//showdata("push_back", val);
 	if (zend_hash_next_index_insert(ht_, &tmp))
@@ -144,7 +144,7 @@ void htab_rw::push_back(const char *s)
 
 void htab_rw::push_back(zend_string* zs)
 {
-	zval tmp = {0};
+	zval tmp = {};
 	bool refct = val_ptr::string_bind(&tmp,zs);
 
 	if (zend_hash_next_index_insert(ht_, &tmp))
@@ -155,7 +155,7 @@ void htab_rw::push_back(zend_string* zs)
 
 void htab_rw::push_back(zend_object* zo)
 {
-	zval tmp = {0};
+	zval tmp = {};
 	bool refct = val_ptr::object_bind(&tmp, zo);
 
 	if (zend_hash_next_index_insert(ht_, &tmp))
@@ -212,7 +212,7 @@ htab_rw::set(zval* key, zval* value)
 }
 void htab_rw::set(zval* key, zend_string* value)
 {
-	zval temp = {0};
+	zval temp = {};
 	val_ptr::string_bind(&temp, value);
 	set(key, &temp);
 }
@@ -231,7 +231,7 @@ void htab_rw::set(zend_string* key, HashTable* ht)
 {
 	//showstr("htab_rw::set  key", key);
 
-	zval tmp = {0};
+	zval tmp = {};
 	bool refct = val_ptr::array_bind(&tmp, ht);
 	if (zend_hash_update(ht_, key, &tmp))
 	{	 
@@ -242,7 +242,7 @@ void htab_rw::set(zend_string* key, HashTable* ht)
 
 void htab_rw::set(zend_string* key, zend_object* obj)
 {
-	zval temp = {0};
+	zval temp = {};
 	bool refct = val_ptr::object_bind(&temp, obj);
 
 	if (zend_hash_update(ht_, key, &temp))
@@ -254,21 +254,21 @@ void htab_rw::set(zend_string* key, zend_object* obj)
 
 void htab_rw::set(zend_string* key, double value)
 {
-	zval temp = {0};
+	zval temp = {};
 	ZVAL_DOUBLE(&temp, value);
 	zend_hash_update(ht_, key, &temp);
 }
 
 void htab_rw::set(zend_string* key, int val)
 {
-	zval temp = {0};
+	zval temp = {};
 	ZVAL_LONG(&temp, val);
 	zend_hash_update(ht_, key, &temp);
 }
 
 void htab_rw::setnull(zend_string* key)
 {
-	zval temp = {0};
+	zval temp = {};
 	ZVAL_NULL(&temp);
 	zend_hash_update(ht_, key, &temp);
 }
@@ -276,7 +276,7 @@ void htab_rw::setnull(zend_string* key)
 void 
 htab_rw::setbool(zend_string* key, bool value)
 {
-	zval temp = {0};
+	zval temp = {};
 	ZVAL_BOOL(&temp, value);
 	zend_hash_update(ht_, key, &temp);
 }
@@ -295,7 +295,7 @@ void htab_rw::set(zend_string* key, zval* val)
 void 
 htab_rw::set(zend_string* key, zend_string* value)
 {
-	zval temp = {0};
+	zval temp = {};
 	bool refct = val_ptr::string_bind(&temp, value);
 	if (zend_hash_update(ht_, key, &temp))
 	{
@@ -312,7 +312,7 @@ void htab_rw::set(zend_string* key, const char* value, size_t vlen)
 void 
 htab_rw::set_null(zend_string* key)
 {
-	zval temp = {0};
+	zval temp = {};
 	ZVAL_NULL(&temp);
 	zend_hash_update(ht_, key, &temp);
 }
@@ -320,7 +320,7 @@ htab_rw::set_null(zend_string* key)
 void 
 htab_rw::set_null(zend_long idx)
 {
-	zval temp = {0};
+	zval temp = {};
 	ZVAL_NULL(&temp);
 	zend_hash_index_update(ht_, idx, &temp);
 }
@@ -357,7 +357,7 @@ void htab_rw::set(zend_long idx, val_ptr value)
 
 void htab_rw::set(zend_long idx, HashTable* ht)
 {
-	zval temp = {0};
+	zval temp = {};
 	bool refct = val_ptr::array_bind(&temp,ht);
 	
 	if (zend_hash_index_update(ht_, idx, &temp))
@@ -368,7 +368,7 @@ void htab_rw::set(zend_long idx, HashTable* ht)
 
 void htab_rw::set(zend_long idx, zend_object* value)
 {
-	zval temp = {0};
+	zval temp = {};
 	bool refct = val_ptr::object_bind(&temp,value);
 	
 	if (zend_hash_index_update(ht_, idx, &temp))
@@ -379,7 +379,7 @@ void htab_rw::set(zend_long idx, zend_object* value)
 
 void htab_rw::set(zend_long idx, zend_string* value)
 {
-	zval temp = {0};
+	zval temp = {};
 	val_ptr::string_bind(&temp, value);
 	zend_hash_index_update(ht_, idx, &temp);
 }
@@ -541,6 +541,9 @@ void htab_rw::push_back(str_ptr su)
     push_back((zend_string*) su);
 }
 
+#define TRY_HTAB_PERSIST
+
+#ifdef TRY_HTAB_PERSIST
 //- *@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@*
 
 void 
@@ -591,117 +594,8 @@ htab_persist::htab_persist(size_t slots)
 	init(slots);
 }
 
-
 /*
-void  
-htab_persist::set(val_ptr key, val_ptr value)
-{
-	if (key.isLong())
-	{
-		set(key.zlong(), value);
-	}
-	else {
-		set(key.zstr(), value);
-	}
-}
-
- void 
- htab_persist::set(zend_long ix, val_ptr value)
- {
- 	htab_rw rw(htab_);
-
-	int ztype = value.ref_type();
-	switch(ztype)
-	{
-	case IS_TRUE:
-	case IS_FALSE:
-	case IS_LONG:
-	case IS_DOUBLE:
-		rw.set(ix, value);
-		break;
-	case IS_STRING:
-		{
-			str_ptr s = value.zstr();
-			str_perm sp (s.data(), s.size());
-			rw.set(ix, sp);
-		}
-	case IS_ARRAY:
-		{
-			htab_ptr h (value.zarray());
-
-			htab_persist  hp(h.size());
-
-			htab_walk wk;
-
-			auto subkey = wk.key();
-			auto subval = wk.value();
-			for(wk.start(h); wk.ok(); wk.next())
-			{
-				hp.set(subkey, subval);
-			}
-			rw.set(ix, (HashTable*) hp);
-			hp.wipe();
-		}
-	}
- }
- 
- void 
- htab_persist::set(str_ptr key, val_ptr value)
- {
-	htab_rw rw(htab_);
-
-	if (!key.interned())
-	{
-		str_intern skey(key.data(), key.size());
-		key = skey;
-	}
-	
-
-	int ztype = value.ref_type();
-	switch(ztype)
-	{
-	case IS_TRUE:
-	case IS_FALSE:
-	case IS_LONG:
-	case IS_DOUBLE:
-		rw.set(key, value);
-		break;
-	case IS_STRING:
-		{
-			str_ptr s = value.zstr();
-			if (!s.interned())
-			{
-				str_intern sp (s.data(), s.size());
-				s = sp;
-			}
-			rw.set(key, s);
-		}
-	case IS_ARRAY:
-		{
-			htab_ptr h (value.zarray());
-
-			htab_persist  hp(h.size());
-
-			htab_walk wk;
-
-			auto subkey = wk.key();
-			auto subval = wk.value();
-			for(wk.start(h); wk.ok(); wk.next())
-			{
-				if (subkey.isString())
-					hp.set(subkey.zstr(), subval);
-				else {
-					hp.set(subkey.zlong(), subval);
-				}
-			}
-			rw.set(key, (HashTable*) hp);
-			hp.wipe();
-		}
-	}
-
- }
-
-
+// Causes memory issues
  void 
  htab_persist::freehtmemory(HashTable* ht)
 {
@@ -712,5 +606,6 @@ htab_persist::set(val_ptr key, val_ptr value)
 	pefree(ptr, persistent);
 }
 */
+#endif //TRY_HTAB_PERSIST
 }; // namespace zpp
 #endif

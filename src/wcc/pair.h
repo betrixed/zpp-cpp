@@ -42,6 +42,17 @@ using namespace zpp;
 
 	};
 
+	//! static class interned strings
+	class PairInit : public state_init {
+	public:
+		str_intern one;
+		str_intern two;
+
+		void init() override;
+	};
+
+	extern PairInit PairSI;
+
 }; // namespace
 
 #endif

@@ -474,7 +474,7 @@ str_ptr::json_encode(zval* value, int flags)
 	// TODO: consider options flags
 	str_rc result;
 
-	smart_str buf = {0};
+	smart_str buf = {};
 
 	zend_result zret = php_json_encode(&buf, value, flags);
 

@@ -485,6 +485,13 @@ zarg_rd::obj_null(obj_ptr& value, zval* arg)
 		}
 		return false;
 	}
+	if (itype == IS_OBJECT)
+	{
+		value = test.zobject();
+	}
+	else {
+		value = obj_ptr();
+	}
 	return true;
 }
 
@@ -599,6 +606,7 @@ void
 zarg_rd::wrong(zval* arg)
 {
 	dump_info di(error());
+	di.di_showmem(arg);
 	*errors_ << endl;
 }
 
@@ -606,6 +614,7 @@ void
 zarg_rd::wrong_notclass(zval* arg, zend_class_entry* ce)
 {
 	dump_info di(error());
+	di.di_showmem(arg);
 	*errors_ << " Not class " << ce->name << endl;
 }
 

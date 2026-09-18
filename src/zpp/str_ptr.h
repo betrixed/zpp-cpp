@@ -53,6 +53,7 @@ namespace zpp {
 
 	    str_ptr(zval* p);
 
+
 	    str_ptr(const str_ptr& rc)
 	    {
 	        s = rc.s;
@@ -62,7 +63,11 @@ namespace zpp {
 
 	    str_ptr(const str_intern& zs);
 
-	    //const str_ptr& operator=(const str_rc& zm);
+	    const str_ptr& operator=(const str_ptr& co)
+	    {
+	    	s = co.s;
+	    	return *this;
+	    }
 
 	    operator zend_string*() const { return (zend_string*) s; }
 

@@ -35,6 +35,10 @@
 #include "str_buf.h"
 #endif
 
+#ifndef FOR_KEY_VALUE_H
+#include "for_key_value.h"
+#endif
+
 namespace zpp {
 
 htab_ptr::htab_ptr(HashTable* ht) : ht_(ht)
@@ -61,6 +65,13 @@ htab_ptr::operator=(const zval* p)
 	else {
 		ht_ = nullptr;
 	}
+	return *this;
+}
+
+const htab_ptr& 
+htab_ptr::operator=(const htab_ptr& hp)
+{
+	ht_ = hp.ht_;
 	return *this;
 }
 

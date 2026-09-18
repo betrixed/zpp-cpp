@@ -93,6 +93,8 @@ namespace zpp {
 
         const htab_ptr& operator=(const zval* p);
 
+        const htab_ptr& operator=(const htab_ptr& hp);
+
         uint32_t size() const;
 
         bool isPacked() const {

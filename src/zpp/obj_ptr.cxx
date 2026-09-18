@@ -292,7 +292,7 @@ obj_ptr::callable(zval* arg1, zval* arg2)
     val_rc callme (obj_);
 
     val_rc      result;
-    zval        argv[2] = {{0},{0}};
+    zval        argv[2] = {{},{}};
 
     ZVAL_COPY_VALUE(&argv[0], arg1);
     ZVAL_COPY_VALUE(&argv[1], arg2);
@@ -327,7 +327,7 @@ obj_ptr::property_ptr(str_ptr name)
 void 
 obj_ptr::property(str_ptr key, obj_ptr value)
 {
-    zval temp = {0};
+    zval temp = {};
     if (value.ok())
     {
         if (val_ptr::object_bind(&temp, value))
@@ -346,10 +346,10 @@ obj_ptr::property(str_ptr key, obj_ptr value)
 void 
 obj_ptr::property(str_ptr key, htab_ptr value)
 {
-    zval temp = {0};
+    zval temp = {};
     if (!value.ok())
     {
-        value = htab_ptr::empty_array();
+        value = htab_ptr(htab_ptr::empty_array());
     }
     if (val_ptr::array_bind(&temp, value))
     {
@@ -371,7 +371,7 @@ obj_ptr::property(str_ptr key, val_rc& value)
 
 void obj_ptr::property(str_ptr key, int value)
 {
-    zval temp = {0};
+    zval temp = {};
     // No rc++, because zval is thrown away on exit.
     ZVAL_LONG(&temp, value);
     property(key, val_ptr(&temp));
@@ -379,7 +379,7 @@ void obj_ptr::property(str_ptr key, int value)
 
 void obj_ptr::property(str_ptr key, str_ptr value)
 {
-    zval temp = {0};
+    zval temp = {};
     // No rc++, because zval is thrown away on exit.
     if (val_ptr::string_bind(&temp, value))
     {   
@@ -492,7 +492,7 @@ obj_ptr::property(str_ptr key)
 {
     val_rc result;
 
-    zval rv ={0};
+    zval rv ={};
 
     auto old_scope = EG(fake_scope);
 

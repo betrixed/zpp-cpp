@@ -125,7 +125,7 @@ val_ptr::try_decref(zval* p)
         if (rct <= 0)
         {
             //showmem("!!! RC emergency", p );
-            *p = {0};
+            *p = {};
             return;
         }
         auto ztype = Z_TYPE_P(p);
@@ -168,7 +168,7 @@ val_ptr::try_decref(zval* p)
         default:
             return;
         }
-        *p = {0};
+        *p = {};
     }
 }
 
@@ -615,7 +615,7 @@ val_ptr::bind_array(HashTable* ht)
 
 void val_ptr::setbool(bool value)
 {
-    *p_ = {0};
+    *p_ = {};
     ZVAL_BOOL(p_, value);
 }
 

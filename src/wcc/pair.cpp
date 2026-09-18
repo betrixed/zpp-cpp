@@ -16,20 +16,14 @@ namespace wcc {
 
 base_obj_mgr<Pair> Pair::omg;
 
-//! static class interned strings
-class PairInit : public state_init {
-public:
-	str_intern one;
-	str_intern two;
-
-	void init() override
-	{
-		one = "one";
-		two = "two";
-	}
-};
-
 PairInit PairSI;
+
+void 
+PairInit::init()
+{
+	one = "one";
+	two = "two";
+}
 
 void Pair::construct(val_ptr p1, val_ptr p2)
 {

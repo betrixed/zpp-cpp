@@ -16,6 +16,10 @@
 #include "str_ptr.h"
 #endif
 
+#ifndef HTAB_PTR_H
+#include "htab_ptr.h"
+#endif
+
 namespace zpp {
 
 	class htab_rc;
@@ -58,6 +62,12 @@ namespace zpp {
 
 		const obj_ptr& operator=(zend_object* rc);
 		const obj_ptr& operator=(zval* rc);
+
+		const obj_ptr& operator=(const obj_ptr& co)
+	    {
+	    	obj_ = co.obj_;
+	    	return *this;
+	    }
 		//const obj_ptr& operator=(const val_rc& rc);
 
 		void copy_zv(zval* ret) const;
