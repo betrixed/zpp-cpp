@@ -13,8 +13,6 @@
 #include "wcc/finder.cpp"
 #include "wcc/loader.cpp"
 
-#include "wcc/service_access.cpp"
-
 #include "wcc/hmap.cpp"
 
 #include "wcc/icachedata.cpp"
@@ -37,12 +35,8 @@
 
 #include "wcc/dispatch.cpp"
 
-#include "wcc/debuglog.cpp"
+
 #include "wcc/run.cpp"
-
-
-
-
 
 
 void register_routes_extn(INIT_FUNC_ARGS)
@@ -65,9 +59,7 @@ void register_routes_extn(INIT_FUNC_ARGS)
 	PHP_MINIT(Wcc_Hmap_reg)(INIT_FUNC_ARGS_PASSTHRU);
 #endif
 
-#ifdef SERVICE_ACCESS_CPP
-	PHP_MINIT(ServiceAccess_reg)(INIT_FUNC_ARGS_PASSTHRU);
-#endif
+
 
 #ifdef GLOBAL_RESPONSE_CPP
 	PHP_MINIT(Wcc_Response_reg)(INIT_FUNC_ARGS_PASSTHRU);
@@ -124,9 +116,6 @@ PHP_MINIT(wcc_pair_d)(INIT_FUNC_ARGS_PASSTHRU);
 	PHP_MINIT(wcc_run_reg)(INIT_FUNC_ARGS_PASSTHRU);
 #endif
 
-#ifdef WCC_DEBUGLOG_CPP
-	PHP_MINIT(wcc_debuglog_reg)(INIT_FUNC_ARGS_PASSTHRU);
-#endif
 
 #ifdef SESSION_USERDATA_CPP
 	PHP_MINIT(Session_UserData_reg)(INIT_FUNC_ARGS_PASSTHRU);

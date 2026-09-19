@@ -6,11 +6,13 @@
 #include "wcc/config.cpp"
 #include "wcc/reflect_cache.cpp"
 #include "wcc/services.cpp"
+#include "wcc/service_access.cpp"
 #include "wcc/search_list.cpp"
 #include "wcc/strfns.cpp"
 #include "wcc/module.cpp"
 #include "wcc/assets.cpp"
 #include "wcc/dos.cpp"
+#include "wcc/debuglog.cpp"
 
 //#include "wcc/persistent.cpp"
 
@@ -26,6 +28,10 @@ void register_zero_extn(INIT_FUNC_ARGS)
 	PHP_MINIT(Wcc_ReflectCache)(INIT_FUNC_ARGS_PASSTHRU);
 #endif
 
+#ifdef SERVICE_ACCESS_CPP
+	PHP_MINIT(ServiceAccess_reg)(INIT_FUNC_ARGS_PASSTHRU);
+#endif
+	
 #ifdef STRFNS_CPP
 	PHP_MINIT(Strfns_reg)(INIT_FUNC_ARGS_PASSTHRU);
 #endif
@@ -43,6 +49,11 @@ void register_zero_extn(INIT_FUNC_ARGS)
 	PHP_MINIT(Wcc_Module_reg)(INIT_FUNC_ARGS_PASSTHRU);
 #endif
 
+
+#ifdef WCC_DEBUGLOG_CPP
+	PHP_MINIT(wcc_debuglog_reg)(INIT_FUNC_ARGS_PASSTHRU);
+#endif
+	
 	error_return::init_exception_hook();
 /*
 #ifdef PERSISTENT_WCC_CPP
