@@ -113,7 +113,7 @@ public:
 
 	str_rc debug_str() const;
 	
-	bool prepare_call();
+	bool_return prepare_call();
 
 	val_return call(htab_ptr extra, obj_ptr before, obj_ptr after);
 

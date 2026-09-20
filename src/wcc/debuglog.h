@@ -60,12 +60,12 @@ public:
 	void line(str_ptr msg, int flags = PHP_FILE::APPEND);
 	void line(const char* s);
 
-	void dump(str_ptr label, zval* anyval, int maxlevel=1);
-	void dump(const char* label, zval* anyval, int maxlevel=1);
-	void dump(const char* label, HashTable* arrayval, int maxlevel=1);
-	void dump(const char* label, zend_string* strval, int maxlevel=1);
-	void dump(const char* label, zend_object*  objval, int maxlevel=1);
-	void showmem(const char* label, zval* mem, int maxlevel=1);
+	void dump(str_ptr label, zval* anyval, int maxlevel=2);
+	void dump(const char* label, zval* anyval, int maxlevel=2);
+	void dump(const char* label, HashTable* arrayval, int maxlevel=2);
+	void dump(const char* label, zend_string* strval, int maxlevel=2);
+	void dump(const char* label, zend_object*  objval, int maxlevel=2);
+	void showmem(const char* label, zval* mem, int maxlevel=2);
 	
 	void setOutputs(int flags = TO_CONSOLE);
 	int  getOutputs();

@@ -704,7 +704,7 @@ PHP_METHOD(Wcc_Route, setParams)
 
 	Route* cobj = zval_toc<Route>(ZEND_THIS);
 	cobj->setParams(data);
-	return;
+	ZVAL_COPY(return_value, ZEND_THIS);
 
 }
 

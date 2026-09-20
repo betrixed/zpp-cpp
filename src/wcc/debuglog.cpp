@@ -374,11 +374,13 @@ ZEND_METHOD(Wcc_DebugLog, dump)
 
 	str_ptr label = args.str(args.need(0));
 	zval* value = args.need(1);
+	zend_long maxlevel=3;
+	args.zlong(maxlevel, args.option(2));
 
 	if (!args.throw_errors(__FUNCTION__))
 	{
 		DebugLog* cobj = zval_toc<DebugLog>(ZEND_THIS);
-		cobj->dump(label, value);
+		cobj->dump(label, value, maxlevel);
 	}
 	
 }

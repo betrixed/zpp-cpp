@@ -53,9 +53,9 @@ extern "C" {
 #ifndef WCC_ASSETS_H
 #include "assets.h"
 #endif
-//#define DBG_DISPATCH
+//#define DBG_LOG_DISPATCH
 
-#ifdef DBG_DISPATCH
+#ifdef DBG_LOG_DISPATCH
 #ifndef WCC_DEBUGLOG_H
 #include "debuglog.h"
 #endif
@@ -312,12 +312,23 @@ Dispatch::dispatch(obj_ptr rmatch)
 
 	RouteMatch* rm = rm_ptr();
 
-	if (!rm->prepare_call())
+	#ifdef DBG_LOG_DISPATCH
+		DebugLog* log = DebugLog::cpp_global();
+
+		log->dump("In Dispatch::dispatch", rmatch);
+
+	#endif
+	bool_return pcheck = rm->prepare_call();
+
+	if (pcheck.has_errors())
 	{
-		result.error() << "RouteMatch prepare_call failed";
+		result = pcheck.move_error();
 		return result;
 	}
 
+	#ifdef DBG_LOG_DISPATCH
+		log->line("After prepare_call");
+	#endif
 	str_rc mod_name = rm->getModuleName();
 
 	if (!mod_name.size())
@@ -350,7 +361,9 @@ Dispatch::dispatch(obj_ptr rmatch)
 		engine = etest.value_.zobject();
 	}
 
-
+	#ifdef DBG_LOG_DISPATCH
+		log->line("Setup Engine");
+	#endif
 	if (engine.ok())
 	{
 		auto activeModule = asst->getActiveModule();
@@ -375,6 +388,10 @@ Dispatch::dispatch(obj_ptr rmatch)
 				sop.call(DSPi.addpaths_fn, temparg);
 			}
 		}
+
+	#ifdef DBG_LOG_DISPATCH
+		log->line("Prepare ViewData");
+	#endif
 		val_rc view_data;
 		val_return vtest = svc->get(DSPi.viewdata_str);
 		if (vtest.has_errors())
@@ -390,6 +407,10 @@ Dispatch::dispatch(obj_ptr rmatch)
 			engine.call(DSPi.sharewithall_fn, view_data);
 		}
 	}
+
+	#ifdef DBG_LOG_DISPATCH
+		log->line("Ready to obcall");
+	#endif
 	val_return content = obcall(route_match_);
 
 	if (!content.has_errors())
@@ -643,11 +664,24 @@ Dispatch::getUri()
 val_return
 Dispatch::obcall(obj_ptr rmatch)
 {
+	#ifdef DBG_LOG_DISPATCH
+		DebugLog* log = DebugLog::cpp_global();
+		log->line("Dispatch::obcall route");
+	#endif
+
+
 	val_return   result;
 
 	RouteMatch* rm = zobj_toc<RouteMatch>(rmatch);
+
+
 	obj_rc robj = rm->getMatch();
 	val_rc target;
+
+	
+	#ifdef DBG_LOG_DISPATCH
+		log->dump("Dispatch::obcall route", robj, 6);
+	#endif
 
 
 	if (robj.ok())

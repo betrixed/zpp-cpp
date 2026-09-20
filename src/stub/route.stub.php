@@ -35,7 +35,7 @@ final class  Route {
 
 	public function getParams() : array {}
 
-	public function setParams(array $params) : void {}
+	public function setParams(array $params) : Route {}
 
 	public function getTarget() : mixed {}
 

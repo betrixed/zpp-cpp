@@ -33,6 +33,6 @@ class DebugLog {
 
 	public function getOutputs() : int {}
 
-	public function dump(string $label, mixed $value) : void {}
+	public function dump(string $label, mixed $value, int $maxlevel) : void {}
 
 };

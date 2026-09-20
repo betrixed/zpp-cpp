@@ -31,7 +31,10 @@ public:
 	str_intern reflection_class;
 	str_intern new_instance;
 	str_intern new_instance_args;
+	str_intern reflection_method;
+
 	class_data  rfc_cdata;
+
 
 	
 	ReflectCache_data() 
@@ -46,6 +49,8 @@ public:
 		reflection_class = "reflectionclass";
 		new_instance = "newinstance";
 		new_instance_args = "newinstanceargs";
+		reflection_method = "reflectionmethod";
+
 		// presume reflectionclass is configured.
 		//rfc_cdata.set(reflection_class); // this will segfault here
 		//zend_printf("ReflectCache_data::init\n");
@@ -211,6 +216,19 @@ ReflectCache::instance()
 ReflectCache* ReflectCache::cpp()
 {
 	return zobj_toc<ReflectCache>(g_reflect_cache);
+}
+
+obj_rc 
+ReflectCache::ReflectionMethod(obj_ptr obj, str_ptr method)
+{
+	htab_rc  args_array;
+	htab_rw  args(args_array);
+
+	args.push_back(obj);
+	args.push_back(method);
+
+	obj_rc result = staticInstanceArgs(RFC_data.reflection_method, args);
+	return result;
 }
 
 void

@@ -234,7 +234,7 @@ obj_return
 Services::getOne(str_ptr key, htab_ptr arglist)
 {
 	obj_return  result;
-	obj_rc services = Services::instance();
+
 #ifdef DBG_SERVICES
 	DebugLog* log = DebugLog::cpp_global();
 	if (log)
@@ -243,7 +243,7 @@ Services::getOne(str_ptr key, htab_ptr arglist)
 	}
 #endif
 
-	Services* svc = zobj_toc<Services>(services);
+	Services* svc = Services::cpp_global();
 
 	obj_rc single = svc->getObject(key);
 

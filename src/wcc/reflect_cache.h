@@ -29,6 +29,8 @@ public:
 	
 	ReflectCache();
 
+	static obj_rc ReflectionMethod(obj_ptr obj, str_ptr);
+	 
 	obj_rc getReflectClass(str_ptr class_name);
 
 	obj_rc newInstance(str_ptr class_name);
