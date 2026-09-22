@@ -56,7 +56,7 @@ namespace wcc {
 			htab_ptr errors, str_ptr prefix);
 
 		htab_ptr readServer();
-
+		
 	public:
 
 		enum {

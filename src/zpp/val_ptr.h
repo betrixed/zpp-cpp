@@ -38,6 +38,10 @@ protected:
     friend class htab_rw;
 
 
+    static zval* real_zval(zval* zv);
+
+    val_ptr refto() const;
+    val_ptr indto() const;
 
 public:
     static val_ptr nullval();
@@ -109,12 +113,11 @@ public:
         return result;
     }
 
-    static zval* real_zval(const zval* zv);
+    
 
     val_ptr() : p_(nullptr) {}
 
-    //val_ptr(const zval* rc) : p_(rc) {}
-    val_ptr(const zval* rc);
+    val_ptr(zval* rc) : p_(rc) {}
     
     val_ptr(const val_ptr &c) : p_(c.p_) {}
 
@@ -229,7 +232,7 @@ public:
     int refcount() const;
     int ztype() const {
         if (!p_)
-            return 0;
+            return IS_UNDEF;
         return Z_TYPE_P(p_);
     }
     bool same(const val_ptr& test) const;

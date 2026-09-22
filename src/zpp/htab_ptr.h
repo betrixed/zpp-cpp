@@ -89,9 +89,9 @@ namespace zpp {
 
         htab_ptr(const val_rc& zw);
         
-        htab_ptr(const zval* p);
+        htab_ptr(zval* p);
 
-        const htab_ptr& operator=(const zval* p);
+        const htab_ptr& operator=(zval* p);
 
         const htab_ptr& operator=(const htab_ptr& hp);
 

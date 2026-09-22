@@ -45,7 +45,7 @@ htab_ptr::htab_ptr(HashTable* ht) : ht_(ht)
 {
 }
 
-htab_ptr::htab_ptr(const zval* p)
+htab_ptr::htab_ptr(zval* p)
 {
 	if (p) {
 		ht_ = val_ptr((zval*)p).zarray();
@@ -56,7 +56,7 @@ htab_ptr::htab_ptr(const zval* p)
 }
 
 const htab_ptr& 
-htab_ptr::operator=(const zval* p)
+htab_ptr::operator=(zval* p)
 {
 	// htab_ptr doesn't do reference counting
 	if (p) {

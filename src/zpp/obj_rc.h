@@ -42,7 +42,7 @@ namespace zpp {
 		
 		obj_rc(val_rc&& m);
 
-		obj_rc(const zval* zp);
+		obj_rc(zval* zp);
 
 		obj_rc(const obj_ptr& rc);
 		
@@ -58,7 +58,7 @@ namespace zpp {
 		
 		const obj_rc& operator=(zend_object* rc);
 
-		const obj_rc& operator=(const zval* rc);
+		const obj_rc& operator=(zval* rc);
 		
 		void init();
 

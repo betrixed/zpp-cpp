@@ -63,7 +63,7 @@ namespace zpp {
         {
         }
 
-        const htab_rw& operator=(const zval* p);
+        const htab_rw& operator=(zval* p);
         
         
         int merge(HashTable* src);

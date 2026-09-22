@@ -32,7 +32,7 @@ class htab_rc;
  */
 class val_rc {
 protected:
-    zval zv_ {};
+    zval zv_  {};
     
     void lose();
 
@@ -155,8 +155,8 @@ public:
 
     zend_object* zobject() const;
     
-    int   ref_type() const;
-    zval* dereference() const;
+    int     ref_type() const;
+    val_ptr dereference() const;
     
      bool ok() const;
     // inlines

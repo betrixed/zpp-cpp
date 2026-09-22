@@ -5,7 +5,7 @@
 #include "loader.h"
 #endif
 
-#define DBG_LOADER
+//#define DBG_LOADER
 
 #ifdef  DBG_LOADER
 #ifndef WCC_DEBUGLOG_H

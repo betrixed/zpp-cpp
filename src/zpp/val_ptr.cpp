@@ -128,8 +128,8 @@ val_ptr::try_decref(zval* p)
             *p = {};
             return;
         }
-        auto ztype = Z_TYPE_P(p);
-        switch(ztype) 
+        //auto ztype = Z_TYPE_P(p);
+        switch(Z_TYPE_P(p)) 
         {
         case IS_STRING:
             {
@@ -174,7 +174,7 @@ val_ptr::try_decref(zval* p)
 
 
 zval* //static 
-val_ptr::real_zval(const zval* zv)
+val_ptr::real_zval(zval* zv)
 {
     switch(Z_TYPE_P(zv)) {
         case IS_REFERENCE:
@@ -187,7 +187,22 @@ val_ptr::real_zval(const zval* zv)
     return (zval*) zv;
 }
 
-val_ptr val_ptr::referent()
+val_ptr 
+val_ptr::refto() const
+{
+	return val_ptr(&p_->value.ref->val);
+}
+
+// If already confirmed  ztype IS_DIRECT
+val_ptr 
+val_ptr::indto() const
+{
+	return val_ptr(p_->value.zv);
+}	
+
+
+val_ptr 
+val_ptr::referent()
 {
 	if (p_) {
 		zval* x = p_;
@@ -201,29 +216,72 @@ val_ptr val_ptr::referent()
 int  
 val_ptr::ref_type() const
 {
-    if (!p_) {
-        return IS_NULL;
-    }
-    return Z_TYPE_P(val_ptr::real_zval(p_));
+	int result = ztype();
+	switch(result)
+	{
+	case IS_REFERENCE:
+		return refto().ztype();
+	case IS_INDIRECT:
+		return indto().ztype();
+	default:
+		return result;
+	}
 }
 
 
 bool 
 val_ptr::isDouble() const
 {
-    return (p_ && (ref_type() == IS_DOUBLE));
+    switch(ztype())
+	{
+	case IS_DOUBLE: 
+		return true;
+	case IS_UNDEF:
+		return false;
+	case IS_REFERENCE:
+		return (refto().isDouble());
+	case IS_INDIRECT:
+		return (indto().isDouble());
+	default:
+		return false;
+	}
 }
 
 bool 
 val_ptr::isLong() const
 {
-    return (p_ && (ref_type() == IS_LONG));
+    switch(ztype())
+	{
+	case IS_LONG: 
+		return true;
+	case IS_UNDEF:
+		return false;
+	case IS_REFERENCE:
+		return (refto().isLong());
+	case IS_INDIRECT:
+		return (indto().isLong());
+	default:
+		return false;
+	}
 }
 
 bool 
 val_ptr::isArray() const
 {
-    return (p_ && (ref_type() == IS_ARRAY));
+	switch(ztype())
+	{
+	case IS_ARRAY: 
+		return true;
+	case IS_UNDEF:
+		return false;
+	case IS_REFERENCE:
+		return (refto().isArray());
+	case IS_INDIRECT:
+		return (indto().isArray());
+	default:
+		return false;
+	}
+
 }
 
  bool val_ptr::isResource() const
@@ -240,14 +298,39 @@ val_ptr::isNull() const
 bool 
 val_ptr::isObject() const
 { 
-    return (p_ && (ref_type() == IS_OBJECT));
+    switch(ztype())
+	{
+	case IS_OBJECT: 
+		return true;
+	case IS_UNDEF:
+		return false;
+	case IS_REFERENCE:
+		return (refto().isObject());
+	case IS_INDIRECT:
+		return (indto().isObject());
+	default:
+		return false;
+	}
 }
 
 bool 
 val_ptr::isString() const
 {
-    return (p_ && (ref_type() == IS_STRING));
+	switch(ztype())
+	{
+	case IS_STRING: 
+		return true;
+	case IS_UNDEF:
+		return false;
+	case IS_REFERENCE:
+		return (refto().isString());
+	case IS_INDIRECT:
+		return (indto().isString());
+	default:
+		return false;
+	}
 }
+
 
 bool 
 val_ptr::isReference() const {
@@ -257,6 +340,7 @@ val_ptr::isReference() const {
 bool 
 val_ptr::isBoolean() const
 {
+
 	if (!p_) {
 		return false;
 	}
@@ -267,13 +351,41 @@ val_ptr::isBoolean() const
 bool 
 val_ptr::isTrue() const 
 {
-    return (p_ && (ref_type() == IS_TRUE));
+    switch(ztype())
+    {
+    case IS_TRUE:
+    	return true;
+    case IS_UNDEF:
+    case IS_NULL:
+    case IS_FALSE:
+    	return false;
+    case IS_REFERENCE:
+    	return (refto().isTrue());
+    case IS_INDIRECT:
+    	return (indto().isTrue());
+    default:
+    	return false;
+    }
 }
 
 bool 
 val_ptr::isFalse() const 
 {
-    return ( !(p_) || (ref_type() == IS_FALSE));
+    switch(ztype())
+    {
+    case IS_FALSE:
+    case IS_NULL:
+    case IS_UNDEF:
+    	return true;
+    case IS_TRUE:
+    	return false;
+    case IS_REFERENCE:
+    	return (refto().isFalse());
+    case IS_INDIRECT:
+    	return (indto().isFalse());
+    default:
+    	return false;
+    }
 }
 
 bool 
@@ -282,34 +394,29 @@ val_ptr::isPointer() const
     return (p_ && (ref_type() == IS_PTR));
 }
 
-val_ptr::val_ptr(const zval* rc)
-{
-    p_ = (zval*) rc;
-    //showmem("val_ptr:: ", (zval*) rc);
-}   
 
 bool 
 val_ptr::empty() const 
 {
-	if (!p_)
-		return true;
-	zval* rp = val_ptr::real_zval(p_);
-
-	int rtype = Z_TYPE_P(rp);
-
-	switch (rtype)
+	switch (ztype())
 	{
+	case IS_UNDEF:
+		return true;
 	case IS_NULL:
 	case IS_FALSE:
 		return true;
 	case IS_LONG:
-    	return (Z_LVAL_P(rp) == 0) ? true : false;
+    	return (Z_LVAL_P(p_) == 0) ? true : false;
     case IS_DOUBLE:
-    	return (Z_DVAL_P(rp) == 0.0) ? true : false;
+    	return (Z_DVAL_P(p_) == 0.0) ? true : false;
 	case IS_ARRAY:
-    	return htab_ptr(Z_ARR_P(rp)).size() ? false : true;
+    	return htab_ptr(Z_ARR_P(p_)).size() ? false : true;
     case IS_STRING:
-    	return str_ptr(Z_STR_P(rp)).size() ? false : true;
+    	return str_ptr(Z_STR_P(p_)).size() ? false : true;
+    case IS_REFERENCE:
+    	return (refto().empty());
+    case IS_INDIRECT:
+    	return (indto().empty());
 	default:
     	return false;
 	}
@@ -317,70 +424,79 @@ val_ptr::empty() const
 
 bool 
 val_ptr::ok() const {
-	if (!p_)
+	switch(ztype())
+	{
+	case IS_UNDEF:
+	case IS_NULL:
+	case IS_FALSE:
 		return false;
-	zval* rp = val_ptr::real_zval(p_);
-	int rtype = Z_TYPE_P(rp);
-    if (rtype < IS_TRUE)
-    {
-    	return false;
-    }
-    switch(rtype)
-    {
-    case IS_ARRAY:
-    	return htab_ptr(Z_ARR_P(rp)).size() ? true : false;
+	// empty array or string , don't look futher
+	case IS_ARRAY:
+    	return htab_ptr(Z_ARR_P(p_)).size() ? true : false;
     case IS_STRING:
-    	return str_ptr(Z_STR_P(rp)).size() ? true : false;
-    }
-    // Don't care about zero values of LONG or DOUBLE
-    return true;
+    	return str_ptr(Z_STR_P(p_)).size() ? true : false;
+    case IS_REFERENCE:
+    	return (refto().ok());
+    case IS_INDIRECT:
+    	return (indto().ok());
+	default:
+	// zero numeric is ok
+    	return true;
+	}
 }
 
 zend_string* 
 val_ptr::className() const
 {
-	if (!p_)
-		return nullptr;
-
-	zval* zv = val_ptr::real_zval(p_);
-
-	if (Z_TYPE_P(zv) == IS_OBJECT)
+	switch(ztype())
 	{
-		zend_class_entry *ce = Z_OBJCE_P(zv);
-		return ce->name;	
+	case IS_OBJECT:
+		{
+			zend_class_entry *ce = Z_OBJCE_P(p_);
+			return ce->name;
+		}
+	case IS_REFERENCE:
+		return refto().className();
+	case IS_INDIRECT:	
+		return indto().className();
+	default:
+		return nullptr;
+		//TODO: Throw exception?
 	}
-	//TODO: Throw exception?
-	return nullptr;
 }
 
 zend_object* 
 val_ptr::zobject() const
 {
+	switch(ztype())
+	{
+	case IS_OBJECT:
+		return Z_OBJ_P(p_);
+	case IS_REFERENCE:
+		return refto().zobject();
+	case IS_INDIRECT:
+		return indto().zobject();
+	default:
+		return nullptr;
+	}
 	if (!p_) {
 		return nullptr;
 	}
-	zval* zv = val_ptr::real_zval(p_);
-
-	if (Z_TYPE_P(zv) != IS_OBJECT) {
-		return nullptr;
-	}
-	return Z_OBJ_P(zv);
 }
 
 size_t 
 val_ptr::size() const
 {
-	if (!p_) 
-	{
-		return 0;
-	}
-	zval* zv = val_ptr::real_zval(p_);
-	switch(Z_TYPE_P(zv))
+	switch(ztype())
 	{
 	case IS_ARRAY:
-		return zend_array_count(Z_ARRVAL_P(zv));
+		return zend_array_count(Z_ARRVAL_P(p_));
 	case IS_STRING:
-		return ZSTR_LEN(Z_STR_P(zv));
+		return ZSTR_LEN(Z_STR_P(p_));
+	case IS_REFERENCE:
+		return refto().size();
+	case IS_INDIRECT:
+		return indto().size();
 	default:
 		return 0;
 	}
@@ -397,20 +513,17 @@ str_rc
 val_ptr::to_zstr() const 
 {
 	str_rc result;
-
-	if (!p_)
+	zend_string* s = zstr();
+	if (!s)
 	{
-		return result;
-	}
-
-	zval* zv = val_ptr::real_zval(p_);
-
-	if (Z_TYPE_P(zv) != IS_STRING) {
-		// return a string representation
-		result.adopt(zval_get_string(zv));
+		s = zval_get_string(p_);
+		if (s)
+		{
+			result.adopt(s);
+		}
 	}
 	else {
-		result = Z_STR_P(zv);
+		result = s;
 	}
 	return result;
 }
@@ -418,14 +531,23 @@ val_ptr::to_zstr() const
 zend_string*  
 val_ptr::zstr() const
 {	
-	if (!p_)
-		return nullptr;
-	zval* zv = val_ptr::real_zval(p_);
-	if (Z_TYPE_P(zv) != IS_STRING)
+	zend_string* result;
+	switch(ztype())
 	{
-		return nullptr;
+	case IS_STRING:
+		result = Z_STR_P(p_);
+		break;
+	case IS_REFERENCE:
+		result = refto().zstr();
+		break;
+	case IS_INDIRECT:
+		result = indto().zstr();
+		break;
+	default:
+		result = (zend_string*) nullptr;
+		break;
 	}
-	return Z_STR_P(zv);
+	return result;
 }
 
 rqstring
@@ -445,10 +567,17 @@ val_ptr::vstr() const
 bool 
 val_ptr::isCallable()  const
 {
-	if (!p_)
+	switch(ztype())
+	{
+	case IS_STRING:
+	case IS_ARRAY:
+	case IS_OBJECT:
+		return (zend_is_callable(p_, 0, nullptr));
+	case IS_REFERENCE:
+		return refto().isCallable();
+	default:
 		return false;
-	zval* zv = val_ptr::real_zval(p_);
-	return (zend_is_callable(zv, 0, nullptr));
+	}
 }
 
 bool 
@@ -469,40 +598,49 @@ val_ptr::zdouble() const
 	if (!p_) {
 		return 0.0; 
 	}
-	zval* zv = val_ptr::real_zval(p_);
-	if (Z_TYPE_P(zv) != IS_DOUBLE) {
-		return zval_get_double_func(zv);
+	switch(ztype())
+	{
+	case IS_DOUBLE:
+		return Z_DVAL_P(p_);
+	case IS_REFERENCE:
+		return refto().zdouble();
+	default:
+		return zval_get_double_func(p_);
 	}
-	return Z_DVAL_P(zv);
 }
 
 void* 
 val_ptr::voidptr() const 
 {
-	if (!p_) 
+	switch(ztype())
 	{
-		return nullptr; 
-	}
-	zval* zv = val_ptr::real_zval(p_);
-	if ( Z_TYPE_P(zv) != IS_PTR) {
+	case IS_PTR:
+		return Z_PTR_P(p_);
+	case IS_REFERENCE:
+		return refto().voidptr();
+	case IS_INDIRECT:
+		return indto().voidptr();
+	default:
 		return nullptr;
 	}
-	return Z_PTR_P(zv);
 }
 
 bool
-val_ptr::zbool() const {
-	if (!p_)
+val_ptr::zbool() const 
+{
+	switch(ztype())
 	{
-		return false;
-	}
-	zval* zv = val_ptr::real_zval(p_);
-	switch(Z_TYPE_P(zv)) {
+
 		case IS_TRUE: return true;
-		case IS_FALSE: return false;
-		default: {
-			// so ridiculous
-			val_rc temp(zv);
+		case IS_FALSE: 
+		case IS_UNDEF:
+			return false;	
+		case IS_REFERENCE:
+			return refto().zbool();
+		default:  
+		{
+			//  ridiculous
+			val_rc temp(p_);
 			convert_to_boolean(temp);
 			return val_ptr(temp).zbool();
 		}
@@ -512,32 +650,41 @@ val_ptr::zbool() const {
 zend_long 
 val_ptr::zlong() const
 {
-	if (!p_)
+	switch(ztype())
 	{
+	case IS_LONG:
+		return Z_LVAL_P(p_);
+	case IS_TRUE:
+		return 1;
+	case IS_FALSE:
+	case IS_NULL:
+	case IS_UNDEF:
 		return 0;
-	}
-	zval* zv = val_ptr::real_zval(p_);
-
-	switch(Z_TYPE_P(zv))
-	{
-		case IS_LONG: return Z_LVAL_P(zv);
-		case IS_TRUE: return 1;
-		case IS_FALSE: return 0;
-		default: return zval_get_long_func(zv, false);
+	case IS_REFERENCE:
+		return refto().zlong();
+	case IS_INDIRECT:
+		return indto().zlong();
+	default:
+		return zval_get_long_func(p_, false);
 	}
 }
 
 HashTable* 
 val_ptr::zarray() const
 {
-	if (!p_)
-		return nullptr;
-	zval* zv = val_ptr::real_zval(p_);
-
-	if (Z_TYPE_P(zv) != IS_ARRAY) {
+	switch(ztype())
+	{
+	case IS_ARRAY:
+		return Z_ARRVAL_P(p_);
+	case IS_REFERENCE:
+		return refto().zarray();
+	case IS_INDIRECT:
+		return indto().zarray();
+	default:
 		return nullptr;
 	}
-	return Z_ARRVAL_P(zv);
+
+	
 }
 
 void 

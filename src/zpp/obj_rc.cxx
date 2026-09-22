@@ -89,7 +89,7 @@ obj_rc::obj_rc(const obj_rc& rc) : obj_ptr(rc.obj_)
     own();
 }
 
-obj_rc::obj_rc(const zval* zp)
+obj_rc::obj_rc(zval* zp)
 {
 	obj_ = val_ptr(zp).zobject();
 	own();
@@ -186,14 +186,13 @@ obj_rc::operator=(val_rc&& rc)
 }
 
 const obj_rc& 
-obj_rc::operator=(const zval* rc)
+obj_rc::operator=(zval* rc)
 {
 	lose();
-	//showmem("operator= const zval*", (zval*)rc);
 	obj_ = val_ptr(rc).zobject();
-	//showobj("obj_", obj_);
+
 	own();
-	//showobj("obj_", obj_);
+
 	return *this;
 }
 

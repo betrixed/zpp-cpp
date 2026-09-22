@@ -56,14 +56,14 @@ val_rc::init()
 int   
 val_rc::ref_type() const
 {
-    return Z_TYPE_P((const zval*) val_ptr::real_zval(&zv_));
+    return val_ptr((zval*)&zv_).ref_type();
 }
 
 /** Get zval contained in reference zval */
-zval* 
+val_ptr 
 val_rc::dereference() const
 {
-    return val_ptr::real_zval(&zv_);
+    return val_ptr((zval*)&zv_).referent();
 }
 
 void 
@@ -96,48 +96,26 @@ val_rc::~val_rc()
 zend_string* 
 val_rc::zstr() const
 {
-    zval* p = val_ptr::real_zval(&zv_);
-    if (Z_TYPE_P(p) != IS_STRING)
-    {
-        return nullptr;
-    }
-    return Z_STR_P(p);
+    return val_ptr((zval*)&zv_).zstr();
 }
 
 
 zend_long 
 val_rc::zlong() const
 {
-    val_ptr result(*this);
-    return result.zlong();
+    return val_ptr((zval*)&zv_).zlong();
 }
 
 HashTable*   
 val_rc::zarray() const
 {
-    zval* p = val_ptr::real_zval(&zv_);
-    if (Z_TYPE_P(p) != IS_ARRAY)
-    {
-        return nullptr;
-    }
-    return Z_ARR_P(p);
+    return val_ptr((zval*)&zv_).zarray();
 }
 
 zend_object*    
 val_rc::zobject() const
 {
-    zval* p = val_ptr::real_zval(&zv_);
-    zend_object* result;
-
-    if (Z_TYPE_P(p) == IS_OBJECT)
-    {
-        result = Z_OBJ(zv_);
-    }
-    else {
-        result = nullptr;
-    }
-
-    return result;
+    return val_ptr((zval*)&zv_).zobject();
 }
 
 void 
@@ -169,7 +147,7 @@ val_rc::addref()
 bool 
 val_rc::zbool() const
 {
-    return !(val_ptr(&zv_).empty());
+    return !(val_ptr(*this).empty());
 }
 
 void // protected
