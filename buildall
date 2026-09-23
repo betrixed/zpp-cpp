@@ -4,6 +4,9 @@ set -e
 pushd src 
 ./buildme
 popd
+pushd cpp-zpp
+./buildme
+popd
 pushd wcc-zero
 ./buildme
 popd

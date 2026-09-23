@@ -1,10 +1,10 @@
 config*
-autom4te.cache/**
-build/**
+**/autom4te.cache/**
+**/build/**
 php
 php/**
 php-old/**
-modules/**
+**/modules/**
 *sublime*
 Makefile
 Makefile.*
@@ -14,7 +14,7 @@ libtool
 *.lo
 *.dep
 *arginfo.h
-.libs/**
+**/.libs/**
 run-tests.php
 /nbproject/*
 /nbproject/private/

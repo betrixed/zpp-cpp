@@ -6,9 +6,25 @@ use Exception;
 
 require __DIR__ . "/bootstrap.php";
 
-function rutime($ru, $rus, $index){
-	// final numbers in msec!
- return ($ru["ru_$index.tv_sec"]*1000 + intval($ru["ru_$index.tv_usec"]/1000)) - ($rus["ru_$index.tv_sec"]*1000 + intval($rus["ru_$index.tv_usec"]/1000));
+/**
+ * final numbers in msec!
+ */
+function rutime($end, $start, $index) : float 
+{
+	// 
+	$after_sec = $end["ru_$index.tv_sec"];
+	$after_usec = $end["ru_$index.tv_usec"];
+
+	$before_sec = $start["ru_$index.tv_sec"];
+	$before_usec = $start["ru_$index.tv_usec"];
+
+
+	echo "Start $before_sec $before_usec ";
+	echo "End   $after_sec $after_usec " . PHP_EOL;
+	
+	$msec = 1.0e3;
+ 
+ return (float) ($after_sec*$msec + $after_usec/$msec) - (float) ($before_sec*$msec + $before_usec/$msec);
 }
 
 
@@ -131,7 +147,7 @@ $start = microtime(true);
 
 function testavg(int $ct, string $msg) {
 	$cpu_before = getrusage();
-
+	//$start = microtime(true);
 	for($i = 0; $i < $ct; $i++)
 	{
 		$rd = new XmlRead();
@@ -140,46 +156,28 @@ function testavg(int $ct, string $msg) {
 		$rd->parseFile("tests/assets_full.xml");
 	}//$emty = new EmptyTest();
 	$cpu_after = getrusage();
+	//$end = microtime(true);
+
 	echo "$msg CPU usage Per iteration of $ct in msec" . PHP_EOL;
 
-	$user = rutime($cpu_after, $cpu_before, "utime") * 1000.0 / $ct;
-	$system = rutime($cpu_after, $cpu_before, "stime")* 1000.0 / $ct;
+	$user = rutime($cpu_after, $cpu_before, "utime")  / $ct;
+	$system = rutime($cpu_after, $cpu_before, "stime") / $ct;
 	$total = $user + $system;
 
-	echo "   User   " . $user . PHP_EOL;
-	echo "   System " . $system . PHP_EOL;
-	echo "   Total  " . $total . PHP_EOL;
+	echo "   User   " . number_format($user,4) . PHP_EOL;
+	echo "   System " . number_format($system,4) . PHP_EOL;
+	echo "   Total  " . number_format($total,3) . PHP_EOL;
+
+	//$mtime =  ($end - $start)*1000.0/$ct;
+
+	//echo "microtime = " . number_format($mtime,3) . " msec" . PHP_EOL;
 }
 
 
 testavg(10, "Warm up");
 testavg(2000, "Final");
 
-function testavgstr(int $ct, string $msg) {
-	$cpu_before = getrusage();
-	$rd = new XmlRead();
-	$s = file_get_contents("tests/assets_full.xml");
-	
-	for($i = 0; $i < $ct; $i++)
-	{
-		//$s = file_get_contents("tests/assets_full.xml");
-		//$result = $rd->parse($s);
-		$result = $rd->parse($s);
-	}//$emty = new EmptyTest();
-	$cpu_after = getrusage();
-	echo "$msg CPU usage Per iteration of $ct in msec" . PHP_EOL;
-
-	$user = rutime($cpu_after, $cpu_before, "utime") * 1000.0 / $ct;
-	$system = rutime($cpu_after, $cpu_before, "stime")* 1000.0 / $ct;
-	$total = $user + $system;
-
-	echo "   User   " . $user . PHP_EOL;
-	echo "   System " . $system . PHP_EOL;
-	echo "   Total  " . $total . PHP_EOL;
-}
-
 echo "Test parse of " . $testfile1 . PHP_EOL;
-testavgstr(2000, "Parse String");
 
 show_versions();
 

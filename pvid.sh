@@ -13,6 +13,7 @@ else
    pvid="Unknown case for $ID"	
 fi
 export FPM="php${pvid}-fpm"
+echo "System is $ID"
 echo "FPM service is $FPM"
 
 # sudo systemctl restart php${pvid}-fpm

@@ -272,7 +272,7 @@ DebugLog::line(str_ptr msg, int flags)
 using namespace zpp;
 using namespace wcc;
 
-ZEND_METHOD(Wcc_DebugLog, instance)
+ZEND_METHOD(Zpp_DebugLog, instance)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 
@@ -282,7 +282,7 @@ ZEND_METHOD(Wcc_DebugLog, instance)
 	result.move_zv(return_value);
 }
 
-ZEND_METHOD(Wcc_DebugLog, start)
+ZEND_METHOD(Zpp_DebugLog, start)
 {
 	zarg_rd args(execute_data);
 
@@ -298,7 +298,7 @@ ZEND_METHOD(Wcc_DebugLog, start)
 	}
 }
 
-ZEND_METHOD(Wcc_DebugLog, __construct)
+ZEND_METHOD(Zpp_DebugLog, __construct)
 {
 	zarg_rd args(execute_data);
 
@@ -313,7 +313,7 @@ ZEND_METHOD(Wcc_DebugLog, __construct)
 	}	
 }
 
-ZEND_METHOD(Wcc_DebugLog, line)
+ZEND_METHOD(Zpp_DebugLog, line)
 {
 	zarg_rd args(execute_data);
 
@@ -329,7 +329,7 @@ ZEND_METHOD(Wcc_DebugLog, line)
 	}
 }
 
-ZEND_METHOD(Wcc_DebugLog, setOutputs)
+ZEND_METHOD(Zpp_DebugLog, setOutputs)
 {
 	zarg_rd args(execute_data);
 
@@ -345,7 +345,7 @@ ZEND_METHOD(Wcc_DebugLog, setOutputs)
 }
 
 
-ZEND_METHOD(Wcc_DebugLog, getOutputs)
+ZEND_METHOD(Zpp_DebugLog, getOutputs)
 {
 	if (zarg_rd::zero_args(execute_data, __FUNCTION__))
 		return;
@@ -354,7 +354,7 @@ ZEND_METHOD(Wcc_DebugLog, getOutputs)
 	RETURN_LONG(cobj->getOutputs());	
 }
 
-ZEND_METHOD(Wcc_DebugLog, setInstance)
+ZEND_METHOD(Zpp_DebugLog, setInstance)
 {
 	zarg_rd args(execute_data);
 
@@ -368,7 +368,7 @@ ZEND_METHOD(Wcc_DebugLog, setInstance)
 	}
 }
 
-ZEND_METHOD(Wcc_DebugLog, dump)
+ZEND_METHOD(Zpp_DebugLog, dump)
 {
 	zarg_rd args(execute_data);
 
@@ -386,9 +386,9 @@ ZEND_METHOD(Wcc_DebugLog, dump)
 }
 
 
-PHP_MINIT_FUNCTION(wcc_debuglog_reg)
+PHP_MINIT_FUNCTION(zpp_debuglog_reg)
 {
-	DebugLog::omg.classEntry(register_class_Wcc_DebugLog());
+	DebugLog::omg.classEntry(register_class_Zpp_DebugLog());
 
 	STATE_INIT_ADD(DLSi)
 	

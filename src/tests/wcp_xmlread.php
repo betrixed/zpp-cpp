@@ -3,9 +3,24 @@
 namespace Wcc;
 use Wcp\XmlRead;
 
-function rutime($ru, $rus, $index){
- return ($ru["ru_$index.tv_sec"]*1000 + intval($ru["ru_$index.tv_usec"]/1000)) - ($rus["ru_$index.tv_sec"]*1000 + intval($rus["ru_$index.tv_usec"]/1000));
+function rutime($end, $start, $index) : float 
+{
+	// 
+	$after_sec = $end["ru_$index.tv_sec"];
+	$after_usec = $end["ru_$index.tv_usec"];
+
+	$before_sec = $start["ru_$index.tv_sec"];
+	$before_usec = $start["ru_$index.tv_usec"];
+
+
+	echo "Start $before_sec $before_usec ";
+	echo "End   $after_sec $after_usec " . PHP_EOL;
+	
+	$msec = 1.0e3;
+ 
+ return (float) ($after_sec*$msec + $after_usec/$msec) - (float) ($before_sec*$msec + $before_usec/$msec);
 }
+
 
 use Exception;
 //use Wcc\Db\IServer;
@@ -119,6 +134,8 @@ function testavg(int $ct, string $msg) {
 	global $testfile2;
 
 	$cpu_before = getrusage();
+
+	//$start = microtime(true);
 	for($i = 0; $i < $ct; $i++)
 	{
 		$rd = new XmlRead();
@@ -127,15 +144,21 @@ function testavg(int $ct, string $msg) {
 		$rd->parseFile($testfile2);
 	}//$emty = new EmptyTest();
 	$cpu_after = getrusage();
+	//$end = microtime(true);
+
 	echo "$msg CPU usage (msec) Per iteration of $ct in msec" . PHP_EOL;
 
-	$user = rutime($cpu_after, $cpu_before, "utime") * 1000.0 / $ct;
-	$system = rutime($cpu_after, $cpu_before, "stime")* 1000.0 / $ct;
+	$user = rutime($cpu_after, $cpu_before, "utime") / $ct;
+	$system = rutime($cpu_after, $cpu_before, "stime")/ $ct;
 	$total = $user + $system;
 
 	echo "   User   " . $user . PHP_EOL;
 	echo "   System " . $system . PHP_EOL;
 	echo "   Total  " . $total . PHP_EOL;
+
+	//$mtime =  ($end - $start)*1000.0/$ct;
+
+	//echo "microtime = " . number_format($mtime,3) . " msec" . PHP_EOL;
 }
 
 

@@ -13,7 +13,7 @@ extern "C" {
 #endif
 
 
-zend_class_entry* wcc_str_ce;
+zend_class_entry* zpp_str_ce;
 
 using namespace zpp;
 
@@ -135,7 +135,7 @@ phiz_camel(const zend_string *src, const zend_string *sep)
 	return result;
 }
 
-ZEND_FUNCTION(Wcc_debug_zpp_dump) 
+ZEND_FUNCTION(Zpp_debug_zpp_dump) 
 {
 	zval* value;
 	ZEND_PARSE_PARAMETERS_START(1, 1)
@@ -147,7 +147,7 @@ ZEND_FUNCTION(Wcc_debug_zpp_dump)
 
 ;
 
-ZEND_METHOD(Wcc_Str, uncamel) {
+ZEND_METHOD(Zpp_Str, uncamel) {
 	zend_string* src = NULL;
 	zend_string* sep = NULL;
 
@@ -161,7 +161,7 @@ ZEND_METHOD(Wcc_Str, uncamel) {
 	result.move_zv(return_value);
 }
 
-ZEND_METHOD(Wcc_Str, camel) {
+ZEND_METHOD(Zpp_Str, camel) {
 	zend_string* src = NULL;
 	zend_string* sep = NULL;
 
@@ -175,7 +175,7 @@ ZEND_METHOD(Wcc_Str, camel) {
 	result.move_zv(return_value);
 }
 
-ZEND_METHOD(Wcc_Str, grapheme) {
+ZEND_METHOD(Zpp_Str, grapheme) {
 	zend_string* src = NULL;
 	zend_long    offset = 0;
 	zval*	   code_ref = 0;
@@ -202,7 +202,7 @@ ZEND_METHOD(Wcc_Str, grapheme) {
 	}
 }
 
-ZEND_METHOD(Wcc_Str, intern)
+ZEND_METHOD(Zpp_Str, intern)
 {
 	zend_string* src = NULL;
 	ZEND_PARSE_PARAMETERS_START(1, 1)
@@ -221,6 +221,8 @@ static val_rc global_ref(const char* gname)
 }
 */
 
+
+#ifdef DBG_TEST_WCC
 // may have occasional real test code
 ZEND_METHOD(Wcc_Str, test_wcc)
 {	
@@ -433,9 +435,11 @@ ZEND_METHOD(Wcc_Str, test_wcc)
 	*/
 }
 
+#endif
+
 PHP_MINIT_FUNCTION(Strfns_reg)
 {
-	wcc_str_ce = register_class_Wcc_Str();
+	zpp_str_ce = register_class_Zpp_Str();
 	return SUCCESS;
 }
 #endif//strfns.cpp

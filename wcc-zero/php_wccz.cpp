@@ -1,16 +1,13 @@
 /* wccz extension for PHP */
 
-
-
-
 /* include zpp classes, dump info support, and the state_init auto initialize */
 #include "php_wccz.h"
 
-#include "zpp/base.cpp"
+#include "zpp/base.h"
 
-#include "zpp/show_zpp.cpp"
+#include "zpp/show_zpp.h"
 
-#include "zpp/state_init.cpp"
+#include "zpp/state_init.h"
 
 #include "wcc/zero_extn.cxx"
 
@@ -22,10 +19,6 @@ PHP_MINIT_FUNCTION(wccz)
 #ifdef DEBUG_EXTRA
 	dump_info::run_state_ = true;
 #endif
-
-	register_base_init();
-	register_fn_calls();
-	register_datetime();
 	
 	register_zero_extn(INIT_FUNC_ARGS_PASSTHRU);
 
@@ -80,6 +73,7 @@ PHP_MINFO_FUNCTION(wccz)
 
 static const zend_module_dep wccz_deps[] = { /* {{{ */
 	ZEND_MOD_REQUIRED("intl")
+	ZEND_MOD_REQUIRED("cppzpp")
 	ZEND_MOD_END
 };
 
@@ -89,7 +83,7 @@ zend_module_entry wccz_module_entry = {
 	nullptr,
 	wccz_deps,
 	"wccz",					/* Extension name */
-	ext_functions,				/* zend_function_entry */
+	nullptr,				/* zend_function_entry */
 	PHP_MINIT(wccz),		/* PHP_MINIT - Module initialization */
 	PHP_MSHUTDOWN(wccz),	/* PHP_MSHUTDOWN - Module shutdown */
 	PHP_RINIT(wccz),		/* PHP_RINIT - Request initialization */
