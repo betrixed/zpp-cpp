@@ -190,7 +190,8 @@ Loader::setBaseDir(str_ptr dir)
 	php_path(basedir_, "Wcc", paths);
 	php_path(basedir_, "Wc", paths);
 	php_path(basedir_, "Wcd", paths);
-
+	php_path(basedir_, "Zpp", paths);
+	
 	fob->addPathArray(paths_data);
 
 	this->setFinder(finder);

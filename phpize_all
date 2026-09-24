@@ -5,6 +5,10 @@ sudo make clean
 phpize
 ./configure
 popd
+pushd cpp-zpp
+phpsize
+./configure
+popd
 pushd wcc-zero
 phpize
 ./configure
