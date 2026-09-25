@@ -71,7 +71,7 @@ ISql::columns(htab_ptr bd)
 
 	for(wk.start(bd); wk.ok(); wk.next())
 	{
-		if (ix.isLong() && (ix.zlong() == 0))
+		if (ix.isLong() && (ix.get_long() == 0))
 		{
 			buf << ' ';
 		}
@@ -220,7 +220,7 @@ ISql::orderBy(htab_ptr obind)
 	{
 		if (order_tab.isArray())
 		{
-			if (ix.zlong() > 0)
+			if (ix.get_long() > 0)
 			{
 				buf << ", ";
 			}
@@ -1228,7 +1228,7 @@ ISql::where(Bindings &bind, htab_ptr wtab)
 		//showmem("where_zval", where_zval);
 		htab_ptr where_tab(where_zval.zarray());
 
-		if (wix.zlong() > 0)
+		if (wix.get_long() > 0)
 		{
 			bop = where_tab[SQSTR.boolean];
 			buf << ' ' << bop;

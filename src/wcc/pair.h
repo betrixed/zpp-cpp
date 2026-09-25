@@ -26,13 +26,8 @@ using namespace zpp;
 
 		val_ptr value() const;
 		
-		double test_calc() const 
-		{
-			long a, b;
-			a = first().zlong();
-			b = second().zlong();
-			return (a + b) / double(a);
-		}
+		double test_calc() const;
+		
 
 	public:
 		static base_obj_mgr<Pair> omg;

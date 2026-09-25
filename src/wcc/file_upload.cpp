@@ -50,7 +50,7 @@ FileUpload::construct(htab_ptr file_data, str_ptr name)
 	}
 
 	tmp_name_ = file_data.get(RQit.tmp_name);
-	size_ = val_ptr(file_data.get(RQit.size_key)).zlong();
+	size_ = val_ptr(file_data.get(RQit.size_key)).get_long();
 	type_ = file_data.get(RQit.typekey);
 	error_ = file_data.get(RQit.error_key);
 	key_ = file_data.get(RQit.key_key);

@@ -611,7 +611,7 @@ Bindings::whereKeyValue(val_ptr key, val_ptr value)
 				{
 					//showmem("key = ", k);
 					//showmem("val = ", v);
-					ix = k.zlong();
+					ix = k.get_long();
 					test = values.get(ix);
 					//showmem("test", test);
 					where(v, SQSTR.cmp_equal, test, SQSTR.and_str);
@@ -664,7 +664,7 @@ Bindings::select()
 	val_ptr fetch_z = get(ISql::FETCH_AS);
 
 	int old_fetch = -1;
-	int fetch_as = fetch_z.ok() ? fetch_z.zlong() : -1;
+	int fetch_as = fetch_z.ok() ? fetch_z.get_long() : -1;
 
 	obj_return dbret = getDb();
 	if (dbret.has_errors())

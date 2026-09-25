@@ -84,7 +84,7 @@ MoneyFmt::formatNoSym(val_ptr value)
 {
 	str_rc result;
 
-	double dval = value.zdouble();
+	double dval = value.get_double();
 	zend_string* fs = _php_math_number_format(dval / 100.0, 2, '.', ',');
 	result.adopt(fs);
 	return result;

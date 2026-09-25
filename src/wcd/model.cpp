@@ -170,7 +170,7 @@ namespace wcd {
 		IBuild* ib = zobj_toc<IBuild>(ibret.value_);
 
 		val_return temp = ib->deleteRow(rowobj);
-		result = temp.value_.zbool();
+		result = temp.value_.get_bool();
 		if (temp.has_errors())
 		{
 			result = std::move(temp);
@@ -1012,8 +1012,8 @@ namespace wcd {
 				return result;
 			}
 
-			long maxseqval = max.value_.zlong();
-			long actualval = sval.value_.zlong();
+			long maxseqval = max.value_.get_long();
+			long actualval = sval.value_.get_long();
 			if (maxseqval > actualval)
 			{
 				htab_return options = getKeyOptions();
@@ -1112,7 +1112,7 @@ namespace wcd {
 				if (ftype.isString() && zs_cmp_ci(ftype.zstr(),stamp_type)==0)
 				{
 				   val_ptr test = tsf.get(fname.zstr());
-				   switch(test.zlong())
+				   switch(test.get_long())
 				   {
 				   case 1:
 				   	timestamps_ |= UPDATE_TS;
@@ -1250,7 +1250,7 @@ namespace wcd {
 						htab_ptr pkoption(pkey_options.zarray());
 
 						val_ptr option_key = pkoption.get(MIS.returns_key);
-						int option = option_key.zlong();
+						int option = option_key.get_long();
 						switch(option)
 						{
 						case Crud::ID_SET:
@@ -1295,7 +1295,7 @@ namespace wcd {
 						//showdata("pkoption", pkoption);
 
 						val_ptr option_key = pkoption.get(MIS.returns_key);
-						int option = option_key.zlong();
+						int option = option_key.get_long();
 						switch(option) 
 						{
 							case Crud::ID_SET:

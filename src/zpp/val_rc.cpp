@@ -101,9 +101,9 @@ val_rc::zstr() const
 
 
 zend_long 
-val_rc::zlong() const
+val_rc::get_long() const
 {
-    return val_ptr((zval*)&zv_).zlong();
+    return val_ptr((zval*)&zv_).get_long();
 }
 
 HashTable*   
@@ -145,9 +145,9 @@ val_rc::addref()
 }
 
 bool 
-val_rc::zbool() const
+val_rc::get_bool() const
 {
-    return !(val_ptr(*this).empty());
+    return !(val_ptr(*this).get_bool());
 }
 
 void // protected

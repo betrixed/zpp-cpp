@@ -116,8 +116,8 @@ ICacheData::unserialize(htab_ptr s)
 {
 	key_ = s.get(IC_STR.key_key);
 	data_ = s.get(IC_STR.data_key);
-	ttl_ = val_ptr(s.get(IC_STR.ttl_key)).zlong();
-	stored_ = val_ptr(s.get(IC_STR.stored_key)).zlong();
+	ttl_ = val_ptr(s.get(IC_STR.ttl_key)).get_long();
+	stored_ = val_ptr(s.get(IC_STR.stored_key)).get_long();
 	saved_ = true;
 
 }

@@ -534,8 +534,6 @@ ZEND_METHOD(Wcc_Config, count)
 
 PHP_MINIT_FUNCTION(Wcc_Config_reg)
 {
-	//auto ce = register_class_Wcc_Config(zend_ce_arrayaccess, zend_ce_countable);
-	//zend_standard_class_def
 	auto ce = register_class_Wcc_Config();
 	Config::omg.classEntry(ce);
 

@@ -518,7 +518,7 @@ zarg_rd::zlong_null(zend_long& value, zval* arg, zend_long ifnull)
 
 	switch(itype) {
 		case IS_LONG:
-			value = test.zlong();
+			value = test.get_long();
 			break;
 		case IS_NULL:
 			value = ifnull;
@@ -539,7 +539,7 @@ zarg_rd::zbool(bool& value, zval* arg)
 	int itype = test.ref_type();
 	if (itype == IS_TRUE || itype == IS_FALSE)
 	{
-		value = test.zbool();
+		value = test.get_bool();
 		return true;
 	}
 	if (!maybe_)
@@ -564,7 +564,7 @@ zarg_rd::zlong(zend_long& value, zval* arg)
 		}
 		return false;
 	}
-	value = test.zlong();
+	value = test.get_long();
 	return true;
 }
 

@@ -114,7 +114,7 @@ datetime_obj::date(str_ptr dfmt, zval* value)
 
 	if (val_ptr(timeval).isLong())
 	{
-		result = datetime_obj::date(dfmt, timeval.zlong());
+		result = datetime_obj::date(dfmt, timeval.get_long());
 	}
 	return result;
 }
@@ -303,47 +303,47 @@ long
 dt_interval::years()
 {
 	val_rc temp = obj_ptr(obj_).property(DTData.y_prop);
-	return val_ptr(temp).zlong();
+	return val_ptr(temp).get_long();
 }
 
 long 
 dt_interval::months()
 {
 	val_rc temp = obj_ptr(obj_).property(DTData.m_prop);
-	return val_ptr(temp).zlong();
+	return val_ptr(temp).get_long();
 }
 long 
 dt_interval::days()
 {
 	val_rc temp = obj_ptr(obj_).property(DTData.d_prop);
-	return val_ptr(temp).zlong();
+	return val_ptr(temp).get_long();
 }
 long 
 dt_interval::hours()
 {
 	val_rc temp = obj_ptr(obj_).property(DTData.h_prop);
-	return val_ptr(temp).zlong();
+	return val_ptr(temp).get_long();
 	
 }
 long 
 dt_interval::minutes()
 {
 	val_rc temp = obj_ptr(obj_).property(DTData.i_prop);
-	return val_ptr(temp).zlong();
+	return val_ptr(temp).get_long();
 	
 }
 long 
 dt_interval::seconds()
 {
 	val_rc temp = obj_ptr(obj_).property(DTData.s_prop);
-	return val_ptr(temp).zlong();
+	return val_ptr(temp).get_long();
 }
 
 double 
 dt_interval::fraction()
 {
 	val_rc temp = obj_ptr(obj_).property(DTData.f_prop);
-	return val_ptr(temp).zdouble();
+	return val_ptr(temp).get_double();
 	
 }
 

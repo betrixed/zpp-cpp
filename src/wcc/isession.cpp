@@ -220,7 +220,7 @@ ISession::getEndTime()
 			val_rc extime = adapter_.call(SIN.getexpires_fn);
 			if (extime.isLong())
 			{
-				result = datetime_obj::date(SIN.expires_fmt, extime.zlong());
+				result = datetime_obj::date(SIN.expires_fmt, extime.get_long());
 			}
 		}
 	}

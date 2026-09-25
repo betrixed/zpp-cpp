@@ -31,26 +31,8 @@ public:
 			hand.write_dimension = Config::write_dimension;
 			hand.has_dimension = Config::has_dimension;
 			hand.unset_dimension = Config::unset_dimension;
-
-			/*hand.count_elements = Config::count_elements;
-
-			hand.get_gc = Config::get_gc;
-			hand.read_property = Config::read_property;
-			hand.write_property = Config::write_property;
-			hand.get_property_ptr_ptr = Config::get_property_ptr_ptr;
-			hand.has_property = Config::has_property;
-			hand.unset_property = Config::unset_property;
-			hand.count_elements = Config::get_count;
-			*/
-#endif
-			/*
-			zend_class_entry* ce = mydef::class_entry_;
-			*/
-			
+#endif			
 		}
-
-
-
 	}; // end Config_Mgr
 
 	static Config_Mgr<Config> omg;

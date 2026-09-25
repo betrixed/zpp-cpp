@@ -281,10 +281,10 @@ dump_info::di_dump(val_ptr zu, int level, int refadj)
 		ss << "NULL\n";
 		break;
 	case IS_LONG:
-		ss << "int: " << zu.zlong() << "\n";
+		ss << "int: " << zu.get_long() << "\n";
 		break;
 	case IS_DOUBLE:
-		ss << "dval: " << zu.zdouble() << "\n";
+		ss << "dval: " << zu.get_double() << "\n";
 		break;
 	case IS_STRING:
 		di_showstr(zu.zstr());

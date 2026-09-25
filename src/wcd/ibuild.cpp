@@ -525,7 +525,7 @@ using namespace zpp;
 			result = std::move(data);
 			return result;
 		}
-		result.value_ = data.value_.zlong();
+		result.value_ = data.value_.get_long();
 		return result;
 	}
 

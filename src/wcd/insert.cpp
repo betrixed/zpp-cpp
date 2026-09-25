@@ -38,7 +38,7 @@ Insert::getSqlParams()
 
 	val_ptr idata = bind.get(ISql::SQL_INSERT);
 
-	if (idata.empty())
+	if (idata.isEmpty())
 	{
 		bret = this->getJoiner();
 		if (bret.has_errors())

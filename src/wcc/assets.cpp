@@ -129,7 +129,7 @@ Assets::getWebList(str_ptr selector,
 	htab_rc result;
 	htab_rc order;
 
-	if (names.isNull() || names.empty())
+	if (names.isNull() || names.isEmpty())
 	{
 		order = order_;
 	}

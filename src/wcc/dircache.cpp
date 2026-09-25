@@ -54,11 +54,11 @@ int  SFData::get_fsi_flags()
 	class_data cdata(file_iterator);
 
 	val_rc temp = cdata.constant_value(skip_dots);
-	file_itflags = temp.zlong();
+	file_itflags = temp.get_long();
 	temp = cdata.constant_value(key_as_pathname);
-	file_itflags |= temp.zlong();
+	file_itflags |= temp.get_long();
 	temp = cdata.constant_value(current_as_fileinfo);
-	file_itflags |= temp.zlong();
+	file_itflags |= temp.get_long();
 
 	return file_itflags;
 }

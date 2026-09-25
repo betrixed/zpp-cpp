@@ -273,12 +273,12 @@ RequestGlobals::getBestQuality(htab_ptr parts, str_ptr name)
 
 		if (i == 0)
 		{
-			quality = dval.zdouble();
+			quality = dval.get_double();
 			result = sval.zstr();
 		}
 		else 
 		{
-			double temp = dval.zdouble();
+			double temp = dval.get_double();
 			if (temp > quality)
 			{
 				quality = temp;
@@ -1225,7 +1225,7 @@ RequestGlobals::getUploadedFiles(bool onlySuccess, bool namekeys)
 
 			val_ptr nv = input.get(namekey);
 
-			int input_error = val_ptr(input.get(errorkey)).zlong();
+			int input_error = val_ptr(input.get(errorkey)).get_long();
 
 			str_rc prefix = key.zstr();
 
@@ -1248,7 +1248,7 @@ RequestGlobals::getUploadedFiles(bool onlySuccess, bool namekeys)
 				for(sh.start(smooth); sh.ok(); sh.next())
 				{
 					htab_ptr file = shval.zarray();
-					int error_val = val_ptr(file.get(errorkey)).zlong();
+					int error_val = val_ptr(file.get(errorkey)).get_long();
 
 					if ((!onlySuccess) || (error_val == Upload::ERROR_OK))
 					{
@@ -1353,7 +1353,7 @@ RequestGlobals::isMethod(val_ptr methods, bool strict)
 	}
 
 	if (methods.isLong()) {
-		return (methods.zlong() == verb);
+		return (methods.get_long() == verb);
 	}
 
 	if (methods.isArray())

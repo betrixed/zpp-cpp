@@ -259,7 +259,7 @@ preg::matches(str_ptr subject, zend_long offset)
 #endif
 	val_ptr test(ret_val);
 
-	count_ = test.isLong() ? test.zlong() : 0;
+	count_ = test.isLong() ? test.get_long() : 0;
 
 	test = result_;
 
@@ -316,7 +316,7 @@ preg_callback::replace(str_ptr subject)
 			val_ptr coffset  = w1.get(zend_long(1));
 
 			size_t slen =    ctext.size();
-			size_t soffset = coffset.zlong();
+			size_t soffset = coffset.get_long();
 		// add prior text first
 
 			int prior_len = soffset - ipos;
@@ -405,7 +405,7 @@ preg::replace(const char* rp, str_ptr subject)
 			val_ptr soffset2 = h2.get(zend_long(1));
 
 			size_t slen = slen2.size();
-			size_t soffset = soffset2.zlong();
+			size_t soffset = soffset2.get_long();
 			// prior text first
 
 			auto prior = strview.substr(ipos, soffset - ipos);

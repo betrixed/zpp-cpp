@@ -93,7 +93,7 @@ void ICache::construct(val_ptr options)
 	val_ptr temp;
 	if (hread.try_fetch(IC_STR.expire_key, temp))
 	{
-		ttl_ = temp.zlong();
+		ttl_ = temp.get_long();
 	}
 	else {
 		ttl_ = 86400;

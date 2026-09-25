@@ -57,6 +57,15 @@ Pair::value() const
 	return obj_ptr(self_).property_ptr(PairSI.two);
 }
 
+double 
+Pair::test_calc() const 
+		{
+			double a, b;
+			a = first().get_double();
+			b = second().get_double();
+			return (a + b) / a;
+		}
+
 }; // namespace wcc
 
 using namespace wcc;

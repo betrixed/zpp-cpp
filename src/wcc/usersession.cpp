@@ -162,7 +162,7 @@ UserSession::adjustExpiry()
 
 				val_rc test = adapter.call(UDi.gc_str, tsec);
 
-				result = test.zlong();
+				result = test.get_long();
 			}
 		}
 	}

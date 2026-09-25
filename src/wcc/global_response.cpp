@@ -194,9 +194,9 @@ Response::construct(
 		content_ = content;
 	}
 	if (code.isLong()) {
-		zend_long icode = code.zlong();
+		zend_long icode = code.get_long();
 		if (icode) {
-			setStatusCode(code.zlong(), status);
+			setStatusCode(code.get_long(), status);
 		}
 	}
 

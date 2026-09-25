@@ -556,7 +556,7 @@ zend_long
 obj_ptr::int_property(str_ptr name)
 {
     val_rc copy = property(name);
-    return copy.zlong();
+    return copy.get_long();
 }
 
 void obj_ptr::unset_property(str_ptr name)

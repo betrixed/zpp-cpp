@@ -174,7 +174,7 @@ void CacheMgr::init(htab_ptr cfg)
 	val_ptr expiry = cfg.get(Cache_i.del_expired);
 	if (expiry.isLong())
 	{
-		delete_expired_ = expiry.zlong();
+		delete_expired_ = expiry.get_long();
 	}
 	else {
 		delete_expired_ = 60*10;

@@ -203,7 +203,7 @@ htab_return
 PdoDriver::query_lcase(str_ptr sql, int fmode)
 {
 	val_rc attr_val = getCaseAttribute();
-	long attr = attr_val.zlong();
+	long attr = attr_val.get_long();
 
 	if (attr != PDO_CASE_LOWER)
 	{

@@ -440,7 +440,7 @@ Mysqlfn::begin(htab_ptr args)
 	if (argct > 0)
 	{
 		val_ptr test = args.get((int) 0);
-		flags = test.zlong();
+		flags = test.get_long();
 	}
 	if (argct > 1)
 	{
@@ -532,7 +532,7 @@ Mysqlfn::commit(htab_ptr args)
 	if (nct > 0)
 	{
 		val_ptr test = args.get((int)0);
-		flags = test.zlong();
+		flags = test.get_long();
 	}
 	if (nct > 1)
 	{
@@ -786,7 +786,7 @@ Mysqlfn::rollback(htab_ptr args)
 	if (nct > 0)
 	{
 		val_ptr test = args.get((int)0);
-		flags = test.zlong();
+		flags = test.get_long();
 	}
 	if (nct > 1)
 	{

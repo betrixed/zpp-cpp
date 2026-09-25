@@ -196,7 +196,7 @@ htab_rw::set(zval* key, zval* value)
 	 zval* result = nullptr;
 	 if (test.isLong())
 	 {
-		result = zend_hash_index_update(ht_, test.zlong(), value);
+		result = zend_hash_index_update(ht_, test.get_long(), value);
 	 }
 	 else if (test.isString())
 	 {
@@ -328,7 +328,7 @@ htab_rw::set_null(zend_long idx)
 void htab_rw::set_null(val_ptr key)
 {
 	if (key.isLong()) {
-		 return set_null(key.zlong());
+		 return set_null(key.get_long());
 	}
 	else if (key.isString())
 	{
@@ -339,7 +339,7 @@ void htab_rw::set_null(val_ptr key)
 bool htab_rw::unset(val_ptr key)
 {
 	if (key.isLong()) {
-		 return unset(key.zlong());
+		 return unset(key.get_long());
 	}
 	else if (key.isString())
 	{

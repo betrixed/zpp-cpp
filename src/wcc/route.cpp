@@ -228,7 +228,7 @@ Route::__unserialize(htab_ptr htab)
 	{
 		if (temp.isLong())
 		{
-			 verbs_ = temp.zlong();
+			 verbs_ = temp.get_long();
 			 //temp.set_null();
 		}
 	}
@@ -237,7 +237,7 @@ Route::__unserialize(htab_ptr htab)
 	{
 		if (temp.isLong())
 		{
-			 ajax_ = temp.zlong();
+			 ajax_ = temp.get_long();
 			 //temp.set_null();
 		}
 	}
@@ -317,7 +317,7 @@ Route::getVerbInt(str_ptr sverb)
 
 	if (hr.try_fetch(verbstr,test))
 	{
-		return test.zlong();
+		return test.get_long();
 	}
 	return 0;
 }

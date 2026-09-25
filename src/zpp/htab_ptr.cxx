@@ -172,7 +172,7 @@ htab_ptr::unhive(str_ptr subj)
 			val_ptr  soffset_f1(f1[1]);
 
 			size_t slen = slen_f1.size();
-			zend_long soffset = soffset_f1.zlong();
+			zend_long soffset = soffset_f1.get_long();
 
 			if (!replace_str)
 			{
@@ -341,7 +341,7 @@ bool htab_ptr::try_fetch(zval* key, val_ptr& store) const
 	}
 	else if (test.isLong())
 	{
-		return try_fetch(test.zlong(), store);
+		return try_fetch(test.get_long(), store);
 	}
 	store.init();
 	return false;

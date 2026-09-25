@@ -151,8 +151,10 @@ public:
 
     zend_string* zstr() const;
     HashTable*   zarray() const;
-    zend_long    zlong() const;
 
+    zend_long    get_long() const;
+    bool         get_bool() const;
+    
     zend_object* zobject() const;
     
     int     ref_type() const;
@@ -211,7 +213,7 @@ public:
         return (ref_type() == IS_TRUE);
     }
 
-    bool zbool() const;
+    bool to_bool() const;
     
     bool isFalse() const 
     {

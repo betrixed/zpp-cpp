@@ -292,7 +292,18 @@ val_ptr::isArray() const
 bool 
 val_ptr::isNull() const
 {
-    return (!(p_) || (ref_type() == IS_NULL));
+	switch(ztype())
+	{
+	case IS_UNDEF:
+	case IS_NULL:
+		return true;
+	case IS_REFERENCE:
+		return refto().isNull();
+	case IS_INDIRECT:
+		return indto().isNull();
+	default:
+		return false;
+	}
 }
 
 bool 
@@ -396,7 +407,7 @@ val_ptr::isPointer() const
 
 
 bool 
-val_ptr::empty() const 
+val_ptr::isEmpty() const 
 {
 	switch (ztype())
 	{
@@ -412,11 +423,24 @@ val_ptr::empty() const
 	case IS_ARRAY:
     	return htab_ptr(Z_ARR_P(p_)).size() ? false : true;
     case IS_STRING:
-    	return str_ptr(Z_STR_P(p_)).size() ? false : true;
+    	{
+    	str_ptr test(Z_STR_P(p_));
+    	switch(test.size()) {
+    	case 0:
+    		return true;
+    	case 1:
+    		if (test.data()[0]=='0') {
+    			return true;
+    		}
+    		// fall through
+    	default:
+    		return false;
+    	};
+    	}
     case IS_REFERENCE:
-    	return (refto().empty());
+    	return (refto().isEmpty());
     case IS_INDIRECT:
-    	return (indto().empty());
+    	return (indto().isEmpty());
 	default:
     	return false;
 	}
@@ -593,7 +617,7 @@ val_ptr::getStringData(zend_string** retstr) const
 }
 
 double 
-val_ptr::zdouble() const
+val_ptr::get_double() const
 {
 	if (!p_) {
 		return 0.0; 
@@ -603,7 +627,7 @@ val_ptr::zdouble() const
 	case IS_DOUBLE:
 		return Z_DVAL_P(p_);
 	case IS_REFERENCE:
-		return refto().zdouble();
+		return refto().get_double();
 	default:
 		return zval_get_double_func(p_);
 	}
@@ -626,7 +650,7 @@ val_ptr::voidptr() const
 }
 
 bool
-val_ptr::zbool() const 
+val_ptr::get_bool() const 
 {
 	switch(ztype())
 	{
@@ -636,19 +660,19 @@ val_ptr::zbool() const
 		case IS_UNDEF:
 			return false;	
 		case IS_REFERENCE:
-			return refto().zbool();
+			return refto().get_bool();
 		default:  
 		{
 			//  ridiculous
 			val_rc temp(p_);
 			convert_to_boolean(temp);
-			return val_ptr(temp).zbool();
+			return val_ptr(temp).get_bool();
 		}
 	}
 }
 
 zend_long 
-val_ptr::zlong() const
+val_ptr::get_long() const
 {
 	switch(ztype())
 	{
@@ -661,9 +685,9 @@ val_ptr::zlong() const
 	case IS_UNDEF:
 		return 0;
 	case IS_REFERENCE:
-		return refto().zlong();
+		return refto().get_long();
 	case IS_INDIRECT:
-		return indto().zlong();
+		return indto().get_long();
 	default:
 		return zval_get_long_func(p_, false);
 	}
@@ -780,7 +804,7 @@ val_ptr::php_constant(str_ptr name)
 {
 	return zend_get_constant(name);
 }
-
+/*
 void  
 val_ptr::set_zlong(zend_long val)
 {
@@ -839,6 +863,7 @@ val_ptr::make_ref()
 		}
 	}
 }
+*/
 
 }; //namespace
 //val_ptr.cpp

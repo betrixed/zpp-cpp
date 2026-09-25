@@ -614,7 +614,7 @@ HtmlGem::checkbox(htab_ptr pset)
 	val_ptr check = ps.get(HTG.checked);
 
 	if (!check.isNull()) {
-		int checkval = check.zlong();
+		int checkval = check.get_long();
 		ps.unset(HTG.checked); 
 		//check.init(); //  check now invalid
 		if (checkval != 0) {

@@ -327,7 +327,7 @@ fn_result::zlong()
 {
     if (call_fn())
     {
-        return val_ptr(&result_).zlong();
+        return val_ptr(&result_).get_long();
     }
     return false;
 }
@@ -536,7 +536,7 @@ int file_put_contents(str_ptr filename, val_ptr data,
         ZVAL_NULL(pz+3);
 
     val_rc result = fn.mixed();
-    return result.zlong();
+    return result.get_long();
 }
 
 str_rc file_get_contents(
@@ -1316,7 +1316,7 @@ session_name(str_ptr name)
 
     ref = Z_REF_P(pz1);
     val_ptr         vline = val_ptr(&ref->val);
-    lineNum = vline.zlong();
+    lineNum = vline.get_long();
     val_ptr::try_decref(vline);
     efree(ref);
 

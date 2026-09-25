@@ -481,7 +481,7 @@ Pgsqlfn::connect()
 	if (host.size())
 		cp.push_back(Pgsqlfn::attribute(Pgfi.host_s, host));
 
-	if (portval.zlong() != 0)
+	if (portval.get_long() != 0)
 	{
 		portval.toString();
 		cp.push_back(Pgsqlfn::attribute(Pgfi.port_s, portval.zstr()));
