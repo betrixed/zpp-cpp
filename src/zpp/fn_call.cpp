@@ -337,8 +337,8 @@ fn_result::zlong()
 
 void fn_call::init_f()
 {
-    fci_ = {0};
-    cache_ = {0}; 
+    fci_ = {};
+    cache_ = {}; 
 }
 
 /** reset this from the constructor information */

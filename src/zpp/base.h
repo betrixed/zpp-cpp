@@ -306,7 +306,7 @@ Link all instances of a class T, by optionally mixing in this template.
 
 
 	/**
-	Template function to get back to C++ object from zend_object* or zval*.
+	Template function to get back to C++ object from zend_object* 
 	*/
 
 	template<typename T>

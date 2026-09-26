@@ -567,9 +567,7 @@ void obj_ptr::unset_property(str_ptr name)
 val_rc
 obj_ptr::call(str_ptr method, zval* arg1)
 {
-
     fn_call objcall(method, obj_);
-
     fn_params<1> fn(objcall);
 
     zval* zv = fn.argsptr();
