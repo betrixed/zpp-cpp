@@ -138,8 +138,7 @@ void Response_init::init()
 	fire_key = "fire";
 	before_send = "response:beforeSendHeaders";
 	after_send = "response:afterSendHeaders";
-	headers_sent = "headers_sent";
-	headerfn_key = "header";
+
 	Content_Description = "Content-Description";
 	Content_Transfer_Encoding = "Content-Transfer-Encoding";
 	Content_Disposition = "Content-Disposition";
@@ -199,9 +198,6 @@ Response::construct(
 			setStatusCode(code.get_long(), status);
 		}
 	}
-
-	header_fn.set_fci(RSPD.headerfn_key);
-
 }
 
 void 
@@ -214,16 +210,7 @@ Response::send_header(str_ptr header, bool replace,
 		return;
 	}
 
-	fn_params<3> fn(header_fn);
-
-	zval* pz = fn.argsptr();
-
-	val_ptr::string_bind(pz, header);
-	ZVAL_BOOL(pz+1, replace);
-	ZVAL_LONG(pz+2, response_code);
-
-	// no result expected
-	fn.call_fn();
+	zpp::header(header, replace, response_code);
 }
 
 htab_rw 
@@ -718,7 +705,7 @@ bool
 Response::send_each()
 {
 	//zend_printf("headers_sent yet?\n");
-	bool issent = headers_sent();
+	bool issent = zpp::headers_sent();
 
 	if (issent)
 	{
@@ -781,9 +768,7 @@ Response::headers_sent()
 	{
 		return sent_;
 	}
-	fn_call hsfn(RSPD.headers_sent);
-	fn_noparams fn(hsfn);
-	sent_ = fn.zbool();
+	sent_ = zpp::headers_sent();
 	return sent_;
 }
 

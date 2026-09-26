@@ -9,8 +9,8 @@
  * @license BSD 3-Clause License
  */
 
-#ifndef STR_OUT_H
-#include "str_out.h"
+#ifndef STRM_OUT_H
+#include "strm_out.h"
 #endif
 
 #include <cstdarg>
@@ -28,15 +28,17 @@ namespace zpp {
 	 * @class str_buf
 	 * @brief String buffer using output operator <<
 	 * @details Implementation uses PHP smart_str structure and functions.
-	 * Overrides str_out append methods to add to buffer.
+	 * Overrides strm_out append methods to add to buffer.
 	 * Finalize method creates a zend_string from the buffer.
 	 * The buffer is then reset to empty.
 	 * The buffer is always null terminated.
 	 */
 //! str_buf with memory layout as "smart_string"
-	class str_buf : public str_out {
+	class str_buf : public strm_out {
 	protected:
-		// temporarystore final, for suspected reference drops
+		// temporarystore final, 
+		// created by zstr() method, to prevent any reference dangles
+		// until destructor gets run.
 		str_rc 		 final_; 
 		smart_str    buf;
 
@@ -74,9 +76,10 @@ namespace zpp {
 
 		str_buf& operator=(const char* c);
 
+		// Uses php_printf_to_smart_str .  
 		void printf(const char *format, ...);
 
-		// Finalize, 0-terminate, return as std::string, 
+		// Return copy of buffer as so far. 
 		rqstring str();
 
 		// Finalize, 0-terminate give away
@@ -85,7 +88,7 @@ namespace zpp {
 		// view of content so far, does not finalize
 		std::string_view vstr() const;
 
-		void reset(); // release string, start again
+		void reset(); // release string, and start again
 
 		const char* data() const;
 		size_t size() const;

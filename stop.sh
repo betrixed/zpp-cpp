@@ -4,6 +4,7 @@
 source /etc/os-release
 source pvid.sh
 echo "os-release: $NAME"
+echo "PHP $phpver"
 if [[ "$ID" == "debian" ]]; then
   IFILE="/etc/php/$pvid/mods-available/wcc.ini"
   OFILE="/etc/php/$pvid/mods-available/wcc.off"
@@ -17,7 +18,6 @@ if [ -f "$IFILE" ]; then
 else
 	echo "Have $OFILE"
 fi
-. ./pvid.sh
 echo "stop $FPM"
 sudo systemctl stop $FPM 
 

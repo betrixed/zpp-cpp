@@ -9,12 +9,8 @@
  * @license BSD 3-Clause License
  */
 
-#ifndef STR_OUT_H
-#include "str_out.h"
-#endif
-
-#ifndef STR_PTR_H
-#include "str_ptr.h"
+#ifndef STR_RC_H
+#include "str_rc.h"
 #endif
 
 #ifndef VAL_PTR_H
@@ -27,22 +23,22 @@ namespace zpp {
 
 fm_endl endl;
 
-str_out& 
-str_out::operator<<(const iform& form)
+strm_out& 
+strm_out::operator<<(const iform& form)
 {
 	nf_ = form;
 	return *this;
 }
 
-str_out& 
-str_out::operator<<(const fm_endl& /*&el*/)
+strm_out& 
+strm_out::operator<<(const fm_endl& /*&el*/)
 {
 	append('\n');
 	return *this;
 }
 
-str_out& 
-str_out::operator<<(void* vp)
+strm_out& 
+strm_out::operator<<(void* vp)
 {
 	zend_string* pf = strpprintf(0,"%lx", (unsigned long) vp);
 	append(pf);
@@ -51,7 +47,7 @@ str_out::operator<<(void* vp)
 }
 
 void 
-str_out::quote_name(zend_string* name)
+strm_out::quote_name(zend_string* name)
 {
 	append('"');
 	if (name) { append(name); }
@@ -59,20 +55,20 @@ str_out::quote_name(zend_string* name)
 }
 
 void 
-str_out::quote_name(const char* name)
+strm_out::quote_name(const char* name)
 {
 	append('"');
 	if (name) { append(name,strlen(name)); }
 	append('"');
 }
 
-str_out& 
-str_out::operator<<(val_ptr zv)
+strm_out& 
+strm_out::operator<<(val_ptr zv)
 {
 	return operator<<((zval*) zv);
 }
-str_out& 
-str_out::operator<<(double d)
+strm_out& 
+strm_out::operator<<(double d)
 {
 	zend_string* s = zend_double_to_str(d);
 	append(s);
@@ -80,8 +76,8 @@ str_out::operator<<(double d)
 	return *this;
 }
 
-str_out& 
-str_out::operator<<(zval* zv) 
+strm_out& 
+strm_out::operator<<(zval* zv) 
 {
 	if (!zv) {
 		return *this;
@@ -102,15 +98,15 @@ str_out::operator<<(zval* zv)
 }
 
 
-str_out& 
-str_out::operator<<(char c)
+strm_out& 
+strm_out::operator<<(char c)
 {
 	append(c);
 	return *this;
 }
 
-str_out& 
-str_out::operator<<(const std::string_view &v) 
+strm_out& 
+strm_out::operator<<(const std::string_view &v) 
 {
 	size_t slen = v.length();
 	if (slen > 0) {
@@ -119,8 +115,8 @@ str_out::operator<<(const std::string_view &v)
 	return *this;
 }
 
-str_out& 
-str_out::operator<<(unsigned int iv)
+strm_out& 
+strm_out::operator<<(unsigned int iv)
 {
 	const char* sfmt;
 
@@ -137,8 +133,8 @@ str_out::operator<<(unsigned int iv)
 	return *this;
 }
 
-str_out& 
-str_out::operator<<(int iv) 
+strm_out& 
+strm_out::operator<<(int iv) 
 {	
 	const char* sfmt;
 
@@ -155,8 +151,8 @@ str_out::operator<<(int iv)
 	return *this;
 }
 
-str_out& 
-str_out::operator<<(long iv)
+strm_out& 
+strm_out::operator<<(long iv)
 {
 	const char* sfmt;
 
@@ -174,8 +170,8 @@ str_out::operator<<(long iv)
 
 }
 
-str_out& 
-str_out::operator<<(size_t iv) 
+strm_out& 
+strm_out::operator<<(size_t iv) 
 {	
 	const char* sfmt;
 
@@ -193,7 +189,7 @@ str_out::operator<<(size_t iv)
 }
 
 void
-str_out::append(zend_string* s) 
+strm_out::append(zend_string* s) 
 {
 	if (!s) {
 		return;
@@ -202,29 +198,29 @@ str_out::append(zend_string* s)
 }
 
 
-str_out& 
-str_out::operator<<(const str_rc &w)
+strm_out& 
+strm_out::operator<<(const str_rc &w)
 {
 	append((zend_string*)w);
 	return *this;
 }
 
-str_out& 
-str_out::operator<<(str_ptr w)
+strm_out& 
+strm_out::operator<<(str_ptr w)
 {
 	append(w);
 	return *this;
 }
 
-str_out& 
-str_out::operator<<(zend_string* s)
+strm_out& 
+strm_out::operator<<(zend_string* s)
 {
  	append(s);
  	return *this;
 }
 
-str_out& 
-str_out::operator<<(const char* c)
+strm_out& 
+strm_out::operator<<(const char* c)
 {
 	if (c)
 	{
@@ -235,13 +231,13 @@ str_out::operator<<(const char* c)
 
 
 void 
-str_out::append(const char* c, size_t slen)
+strm_out::append(const char* c, size_t slen)
 {
 	zend_write(c, slen);
 }
 
 void 
-str_out::append(char c)
+strm_out::append(char c)
 {
 	char temp[2];
 	temp[0] = c;

@@ -32,8 +32,6 @@ namespace wcc {
 			return hmap_;
 		}
 
-		fn_call  	header_fn;
-
 
 		str_rc attach_name(str_ptr uri, str_ptr suffix);
 		bool send_each();
@@ -142,8 +140,7 @@ namespace wcc {
 		str_intern    fire_key;
 		str_intern    before_send;
 		str_intern    after_send;
-		str_intern    headers_sent;
-		str_intern    headerfn_key;
+
 		str_intern    Content_Description;
 		str_intern    Content_Transfer_Encoding;
 		str_intern    Content_Disposition;

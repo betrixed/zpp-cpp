@@ -53,10 +53,21 @@ val_rc::init()
     ZVAL_NULL(&zv_);
 }
 
+
 int   
 val_rc::ref_type() const
 {
-    return val_ptr((zval*)&zv_).ref_type();
+    int result = zv_.u1.v.type;
+    switch(result) 
+    {
+        case IS_REFERENCE:
+            result = val_ptr::php_type(zv_.value.ref->val);
+            break;
+        case IS_INDIRECT:
+            result = val_ptr::php_type(*zv_.value.zv);
+            break;
+    }
+    return result;
 }
 
 /** Get zval contained in reference zval */

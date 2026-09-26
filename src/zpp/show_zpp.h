@@ -18,10 +18,10 @@ namespace zpp {
 
 class dump_info {
 private:
-	str_out& 	ss;
+	strm_out& 	ss;
 	size_t       total_;
 
-	static str_out dumper_d;
+	static thread_local strm_out dumper_d;
 	int   max_level_;
 	
 	void object_property_dump(
@@ -37,7 +37,7 @@ private:
 
 public:
 
-	static 	bool run_state_;
+	static thread_local 	bool run_state_;
 
 	static void msg_dump(const char* msg, val_ptr val);
 

@@ -332,7 +332,7 @@ obj_ptr::property(str_ptr key, obj_ptr value)
     {
         if (val_ptr::object_bind(&temp, value))
         {
-            obj_rc::try_addref(value);
+            GC_ADDREF((zend_object*)value);
         }
     }
     else {
@@ -353,7 +353,7 @@ obj_ptr::property(str_ptr key, htab_ptr value)
     }
     if (val_ptr::array_bind(&temp, value))
     {
-        htab_rc::try_addref(value);
+        GC_ADDREF((HashTable*)value);
     }
     property(key, val_ptr(&temp));
 }
@@ -383,7 +383,7 @@ void obj_ptr::property(str_ptr key, str_ptr value)
     // No rc++, because zval is thrown away on exit.
     if (val_ptr::string_bind(&temp, value))
     {   
-        str_rc::try_addref(value);
+        GC_ADDREF((zend_string*)value);
     }
     property(key, val_ptr(&temp));
 }

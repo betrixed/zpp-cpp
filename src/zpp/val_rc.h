@@ -51,6 +51,7 @@ protected:
     static val_rc EmptyArray;
     static val_rc NullValue;
 
+
 public:
     
     static const val_ptr null_value_ptr();
@@ -109,10 +110,11 @@ public:
     void     toDouble();
     void     toString();
 
+    void     make_ref();
     void     decref();
     void     addref();
 
-    void    make_ref();
+    
     void    set_bool(bool value);
     void    set_null();
 
@@ -157,7 +159,8 @@ public:
     
     zend_object* zobject() const;
     
-    int     ref_type() const;
+    int   ref_type() const;
+
     val_ptr dereference() const;
     
      bool ok() const;
@@ -166,11 +169,11 @@ public:
     void adopt(zval* move);
     
     int   ztype() const {
-        return Z_TYPE_P(&zv_);
+        return Z_TYPE(zv_);
     }
 
     bool isUndefined() const {
-        return (Z_TYPE_P(&zv_) == IS_UNDEF);
+        return (Z_TYPE(zv_) == IS_UNDEF);
     }
     
     bool isDouble() const

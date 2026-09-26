@@ -202,7 +202,6 @@ void RouteAdd::ready(Route* route)
 		}
 		else {
 			if (preslash) {
-				//zend_printf("preslash \n");
 				pattern << prefix.substr(1);
 			}
 			else {
@@ -210,13 +209,10 @@ void RouteAdd::ready(Route* route)
 			}
 		}
 	}
-	//str_out sink;
-	//sink << pr2 << " pattern vstr" << pattern.vstr() << '\n';
 
 	str_rc temp;
 
 	temp = pattern.zstr();
-	//showstr("pattern", temp);
 
 	compiled << temp; 
 	pattern << temp; // reset str_buf as fresh content
@@ -297,8 +293,7 @@ void RouteAdd::ready(Route* route)
 	else {
 		cpattern = rpattern;
 	}
-	//showstr("rpattern", rpattern);
-	//showstr("cpattern", cpattern);
+
 	route->setPattern(rpattern);
 	route->setCompiled(cpattern);
 
@@ -322,7 +317,7 @@ void RouteAdd::ready(Route* route)
 					fbuf << sfx;
 				}
 				str_rc fname = fbuf.zstr();
-				showstr("fname", fname);
+
 				t->setFunc(fname);
 			}
 			t->module(module_name_);

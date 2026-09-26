@@ -127,6 +127,7 @@ public:
     fn_call          session_save_path;
 
     fn_call          headers_sent;
+    fn_call          header;
 
     fn_call          sha1;
     fn_call          stripslashes;
@@ -201,6 +202,7 @@ public:
         session_save_path.set_fci(ftab.session_save_path_fn);
 
         headers_sent.set_fci(ftab.headers_sent_fn);
+        header.set_fci(ftab.header_fn);
 
         serialize.set_fci(ftab.s_serialize);
 
@@ -977,6 +979,7 @@ fntable::init()
     session_save_path_fn = "session_save_path";
 
     headers_sent_fn = "headers_sent";
+    header_fn = "header";
 }
 
 void  // virtual
@@ -1291,7 +1294,7 @@ session_name(str_ptr name)
     ZVAL_BOOL(pz, deleteOld);
     return fn.zbool();
  }
-
+// With return value arguments, not yet tested!
  bool 
  headers_sent(str_rc& filename, zend_long& lineNum)
  {
@@ -1323,10 +1326,24 @@ session_name(str_ptr name)
     return result;
 }
 
+void 
+header(str_ptr header, bool replace, int code)
+{
+    fn_params<3> fn(TLFNs.header);
+
+    zval* pz0 = fn.argsptr();
+
+    val_ptr::string_bind(pz0, header);
+    ZVAL_BOOL(pz0+1, replace);
+    ZVAL_LONG(pz0+2, code);
+
+    fn.call_fn();
+}
+
 bool 
 headers_sent()
- {
-    // no arguments 
+{
+    // no arguments version
     fn_noparams fn(TLFNs.headers_sent);
     bool result = fn.zbool();
     return result;

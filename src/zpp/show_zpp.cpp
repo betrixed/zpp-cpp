@@ -19,8 +19,8 @@
 #endif
 
 
-#ifndef STR_OUT_H
-#include "str_out.h"
+#ifndef STRM_OUT_H
+#include "strm_out.h"
 #endif
 
 #ifndef HTAB_WALK_H
@@ -33,9 +33,9 @@ extern "C" {
 
 namespace zpp {
 
-
-str_out dump_info::dumper_d;
-bool dump_info::run_state_ = false;
+// Not thread safe!
+thread_local strm_out dump_info::dumper_d;
+thread_local bool dump_info::run_state_ = false;
 
 void dump_info::atMaxLevel()
 {

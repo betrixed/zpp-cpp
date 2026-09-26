@@ -170,6 +170,11 @@ public:
 
     int refcount() const;
 
+    static int php_type(const zval& p) 
+    {
+        return p.u1.v.type;
+    }
+    
     int ztype() const 
     {
         if (!p_)

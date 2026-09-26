@@ -61,7 +61,7 @@ str_buf::~str_buf()
 	lose();
 }
 
-str_buf::str_buf(zval *v) : str_out()
+str_buf::str_buf(zval *v) : strm_out()
 {
 	initbuf();
 	str_rc temp = val_ptr(v).to_zstr();
@@ -71,13 +71,13 @@ str_buf::str_buf(zval *v) : str_out()
 	}
 }
 
-str_buf::str_buf(zend_string* w) : str_out()
+str_buf::str_buf(zend_string* w) : strm_out()
 {
 	initbuf();
-	str_out::append(w);	
+	strm_out::append(w);	
 }
 
-str_buf::str_buf(const std::string_view& cs) : str_out()
+str_buf::str_buf(const std::string_view& cs) : strm_out()
 {
 	initbuf();
 	auto slen = cs.size();
@@ -87,7 +87,7 @@ str_buf::str_buf(const std::string_view& cs) : str_out()
 	}	
 }
 
-str_buf::str_buf (const char* c, size_t slen) : str_out() 
+str_buf::str_buf (const char* c, size_t slen) : strm_out() 
 {
 	initbuf();
 	if (slen)
@@ -96,7 +96,7 @@ str_buf::str_buf (const char* c, size_t slen) : str_out()
 	}
 }
 
-str_buf::str_buf (const char* c) : str_out()
+str_buf::str_buf (const char* c) : strm_out()
 {
 	initbuf();
 	auto slen = strlen(c);
@@ -106,7 +106,7 @@ str_buf::str_buf (const char* c) : str_out()
 	}
 }
 
-str_buf::str_buf(const rqstring& cs) : str_out()
+str_buf::str_buf(const rqstring& cs) : strm_out()
 {
 	initbuf();
 	auto slen = cs.size();
@@ -169,7 +169,6 @@ str_buf::size() const
 
 
 // return rqstring duplicate of the buffer far, as std::string type
-
 rqstring
 str_buf::str()
 {
@@ -195,13 +194,14 @@ str_buf::zstr()
 {
 	if (buf.s)
 	{
+		// something to newly finalize
 		zend_string* value = smart_str_extract_ex(&buf, 0);
-		final_.adopt(value); // erases old value
+		final_.adopt(value); // forget any old old final_ value
 		//showstr("zstr adopt", value);
 	}
 	else {
 		//TODO: EMPTY or null?
-		// old value remains
+		// return current final_
 	}
 	return final_;
 }

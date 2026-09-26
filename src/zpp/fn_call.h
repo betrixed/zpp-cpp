@@ -137,11 +137,12 @@ namespace zpp {
             }
         }
 
+        //! call with expected void return type
         bool    call_fn();
 
         void    throw_failed();
         
-        /** Call for various return types */
+        //! Call for various return types */
         val_rc  mixed();
         str_rc  str();
         obj_rc  obj();
@@ -201,9 +202,6 @@ namespace zpp {
             //does first wipe
             setParams(&params[0], ARGCT, nargs);
         }
-
-
-
         zval* argsptr() { return params; /*&params[0];*/ }
     };
 
@@ -332,6 +330,7 @@ namespace zpp {
         str_intern  session_save_path_fn;
 
         str_intern  headers_sent_fn;
+        str_intern  header_fn;
         
         void init() override;
         void init_req() override;
@@ -521,6 +520,9 @@ namespace zpp {
     bool headers_sent(str_rc& filename, val_rc& lineNum);
 
     bool headers_sent();
+
+    void header(str_ptr header, bool replace=true, int code = 0);
+
 
 }; // end namespace zpp
 #endif

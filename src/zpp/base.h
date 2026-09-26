@@ -295,7 +295,7 @@ Link all instances of a class T, by optionally mixing in this template.
 
 		virtual str_rc toString() const {
 			return str_rc();
-		};
+		}
 
 		virtual str_ptr extender();
 

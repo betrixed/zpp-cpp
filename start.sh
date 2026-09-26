@@ -3,7 +3,7 @@
 # Disable PHP extension modules that may be not working silently. 
 #
 . ./pvid.sh
-echo "On $ID system"
+echo "On $ID system.  PHP Version $phpver"
 if [ $ID = "debian" ]; then
 IFILE="/etc/php/$pvid/mods-available/wcc.ini"
 OFILE="/etc/php/$pvid/mods-available/wcc.off"
@@ -12,7 +12,7 @@ IFILE="/etc/php/conf.d/wcc.ini"
 OFILE="/etc/php/conf.d/wcc.off"
 fi
 if [ -f "$OFILE" ]; then
-	echo "Turn on extensions"
+	echo "Turn on extensions $IFILE"
 	sudo mv "$OFILE" "$IFILE"
 else
 	echo "Have $IFILE"

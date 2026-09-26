@@ -1,8 +1,8 @@
-#ifndef STR_OUT_H
-#define STR_OUT_H
+#ifndef STRM_OUT_H
+#define STRM_OUT_H
 
 /**
- * @file zpp/str_out.h
+ * @file zpp/strm_out.h
  * @author Michael Rynn <michael.rynn.500@gmail.com>
  * @brief str_out class, string buffer with zend_string memory layout.	
  * @copyright Copyright (c) 2025 Michael Rynn
@@ -63,7 +63,7 @@ namespace zpp {
 	 * @details Use with output operator <<.d
 	 */
 
-	class str_out {
+	class strm_out {
 	protected:
 		iform   	 nf_;
 	public:
@@ -71,41 +71,41 @@ namespace zpp {
 
 		virtual void append(char c);
 
-		virtual ~str_out() {}
+		virtual ~strm_out() {}
 
 		void append(zend_string* s);
 
-		str_out& operator<<(const iform& form);
+		strm_out& operator<<(const iform& form);
 
-		str_out& operator<<(const fm_endl& el);
+		strm_out& operator<<(const fm_endl& el);
 
-		str_out& operator<<(const str_rc &w);
+		strm_out& operator<<(const str_rc &w);
 		
-		str_out& operator<<(val_ptr zval);
+		strm_out& operator<<(val_ptr zval);
 
-		str_out& operator<<(str_ptr w);
+		strm_out& operator<<(str_ptr w);
 
-		str_out& operator<<(zend_string* s);
+		strm_out& operator<<(zend_string* s);
 
-		str_out& operator<<(const char* c);
+		strm_out& operator<<(const char* c);
 
-		str_out& operator<<(size_t nn);
+		strm_out& operator<<(size_t nn);
 
-		str_out& operator<<(void* vp);
+		strm_out& operator<<(void* vp);
 
-		str_out& operator<<(double d);
+		strm_out& operator<<(double d);
 
-		str_out& operator<<(int iv);
+		strm_out& operator<<(int iv);
 
-		str_out& operator<<(unsigned int iv);
+		strm_out& operator<<(unsigned int iv);
 
-		str_out& operator<<(long iv);
+		strm_out& operator<<(long iv);
 
-		str_out& operator<<(char c);
+		strm_out& operator<<(char c);
 
-		str_out& operator<<(const std::string_view &v);
+		strm_out& operator<<(const std::string_view &v);
 
-		str_out& operator<<(zval* zv);
+		strm_out& operator<<(zval* zv);
 
 		void quote_name(const char* name);
 		void quote_name(zend_string* name);

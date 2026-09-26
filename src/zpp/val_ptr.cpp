@@ -220,12 +220,13 @@ val_ptr::ref_type() const
 	switch(result)
 	{
 	case IS_REFERENCE:
-		return refto().ztype();
+		result = php_type(p_->value.ref->val);
+		break;
 	case IS_INDIRECT:
-		return indto().ztype();
-	default:
-		return result;
+		result = php_type(*p_->value.zv);
+		break;
 	}
+	return result;
 }
 
 
