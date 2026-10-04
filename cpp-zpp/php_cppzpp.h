@@ -15,8 +15,7 @@ extern "C" {
 extern zend_module_entry cppzpp_module_entry;
 # define phpext_cppzpp_ptr &cppzpp_module_entry
 
-# define PHP_CPPZPP_VERSION "0.1.0"
-# define PHP_CPPZPP_AUTHOR "Michael Rynn"
+#include "ZPP_VERSION.h"
 
 # if defined(ZTS) && defined(COMPILE_DL_CPPZPP)
 ZEND_TSRMLS_CACHE_EXTERN()

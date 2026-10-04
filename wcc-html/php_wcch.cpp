@@ -55,6 +55,8 @@ PHP_MINFO_FUNCTION(wcch)
 {
 	php_info_print_table_start();
 	php_info_print_table_row(2, "wcch support", "enabled");
+	php_info_print_table_row(2, "Version", PHP_WCCH_VERSION);
+	php_info_print_table_row(2, "Author", PHP_WCCH_AUTHOR);
 	php_info_print_table_end();
 }
 /* }}} */

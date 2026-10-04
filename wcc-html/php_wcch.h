@@ -14,7 +14,9 @@ extern "C" {
 extern zend_module_entry wcch_module_entry;
 # define phpext_wcch_ptr &wcch_module_entry
 
-# define PHP_WCCH_VERSION "0.1.0"
+#include "ZPP_VERSION.h"
+# define PHP_WCCH_VERSION PHP_CPPZPP_VERSION
+# define PHP_WCCH_AUTHOR PHP_CPPZPP_AUTHOR
 
 # if defined(ZTS) && defined(COMPILE_DL_WCCH)
 ZEND_TSRMLS_CACHE_EXTERN()

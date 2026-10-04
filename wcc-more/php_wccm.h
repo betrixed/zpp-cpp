@@ -15,7 +15,9 @@ extern "C" {
 extern zend_module_entry wccm_module_entry;
 #define phpext_wccm_ptr &wccm_module_entry
 
-#define PHP_WCCM_VERSION "0.1.0"
+#include "ZPP_VERSION.h"
+#define PHP_WCCM_VERSION PHP_CPPZPP_VERSION
+#define PHP_WCCM_AUTHOR  PHP_CPPZPP_AUTHOR
 
 #if defined(ZTS) && defined(COMPILE_DL_WCCM)
 ZEND_TSRMLS_CACHE_EXTERN()

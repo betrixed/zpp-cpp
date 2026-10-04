@@ -55,6 +55,8 @@ PHP_MINFO_FUNCTION(wccr)
 {
 	php_info_print_table_start();
 	php_info_print_table_row(2, "wccr support", "enabled");
+	php_info_print_table_row(2, "Version", PHP_WCCR_VERSION);
+	php_info_print_table_row(2, "Author", PHP_WCCR_AUTHOR);
 	php_info_print_table_end();
 }
 /* }}} */
