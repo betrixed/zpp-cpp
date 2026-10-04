@@ -83,7 +83,7 @@ ICacheData::construct(str_ptr key,
 }
 
 void 
-ICacheData::member_info(htab_rw s, bool dinfo)
+ICacheData::member_info(htab_cow s, bool dinfo)
 {
 	// make expiry at front of json
 	s.set(IC_STR.expiry_key,  ttl_ + stored_);
@@ -106,7 +106,7 @@ ICacheData::serialize()
 	return s;
 }
 
-void ICacheData::debug_info(htab_rw hw)
+void ICacheData::debug_info(htab_cow hw)
 {
 	member_info(hw, true);
 }

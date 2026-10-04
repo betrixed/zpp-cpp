@@ -22,7 +22,7 @@ namespace wcd {
 	{
 	protected:
 		str_rc columns(htab_ptr bd);
-		void columnsTC(IColumns* tc, htab_rw col_list); //str_buf& col_list);
+		void columnsTC(IColumns* tc, htab_cow col_list); //str_buf& col_list);
 		htab_ptr getTables(Bindings& bind);
 
 
@@ -78,7 +78,7 @@ namespace wcd {
 
 		virtual str_return truncate(Bindings& bind);
 
-		void debug_info(htab_rw di) override;
+		void debug_info(htab_cow di) override;
 
 		str_return setSeqValue(int value, htab_ptr data);
 		

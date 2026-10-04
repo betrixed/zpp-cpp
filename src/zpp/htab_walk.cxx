@@ -2,9 +2,9 @@
 #define HTAB_WALK_CPP
 
 /**
- * @file zpp/htab_rw.h
+ * @file zpp/htab_walk.h
  * @author Michael Rynn <michael.rynn.500@gmail.com>
- * @brief htab_rw - read/write, not-reference counting, HashTable manager
+ * @brief htab_walk - indexed walk along a HashTable*
  * @copyright Copyright (c) 2025
  * @license BSD 3-Clause License
  */

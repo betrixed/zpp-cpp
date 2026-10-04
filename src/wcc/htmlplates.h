@@ -28,7 +28,7 @@ using namespace zpp;
 	public:
 		static base_obj_mgr<HtmlPlates> omg;
 
-		virtual void debug_info(htab_rw hw);
+		virtual void debug_info(htab_cow hw);
 
 		void construct(str_ptr model_id);
 
@@ -47,7 +47,7 @@ using namespace zpp;
 
 		str_return render(htab_ptr options);
 
-		str_return renderView(htab_rw options);
+		str_return renderView(htab_cow options);
 
 		VIRTUAL_ZOBJPTR
 	};

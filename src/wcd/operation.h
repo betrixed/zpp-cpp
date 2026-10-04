@@ -34,7 +34,7 @@ public:
 
 	static base_obj_mgr<Operation> omg;
 
-	virtual void debug_info(htab_rw di);
+	virtual void debug_info(htab_cow di);
 	
 	void construct(const weak_ref& db);
 	void destruct();

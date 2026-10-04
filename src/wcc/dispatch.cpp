@@ -104,11 +104,12 @@ Disp_init::init()
 	services_str = "services";
 
 	roles_str = "roles";
+	userdata_str = "user_data";
 
 }
 
 
-void Dispatch::debug_info(htab_rw hw)
+void Dispatch::debug_info(htab_cow hw)
 {
 
 	hw.set(DSPi.route_match_str, route_match_);
@@ -160,6 +161,13 @@ Dispatch::construct()
 	{
 		config_ = std::move(atest.value_);
 	}
+	atest = svc->get(DSPi.userdata_str);
+	if (!atest.throw_errors())
+	{
+		user_ = std::move(atest.value_);
+	}
+
+
 }
 
 
@@ -232,7 +240,7 @@ Dispatch::action(htab_ptr to)
 	}
 
 	// make a common quad-tuple list
-	htab_rw target(target4);
+	htab_cow target(target4);
 
 	//:TODO may be check for exception right here!
 	target.push_back(nspace);
@@ -318,7 +326,7 @@ Dispatch::dispatch(obj_ptr rmatch)
 		log->dump("In Dispatch::dispatch", rmatch);
 
 	#endif
-	bool_return pcheck = rm->prepare_call();
+	bool_return pcheck = rm->prepare_call(user_);
 
 	if (pcheck.has_errors())
 	{
@@ -374,7 +382,7 @@ Dispatch::dispatch(obj_ptr rmatch)
 		{
 			obj_rc defmod = asst->getModule(DSPi.default_str);
 			htab_rc defpaths = module_viewpaths(defmod);
-			htab_rw allpaths(paths);
+			htab_cow allpaths(paths);
 			allpaths.merge(defpaths);
 		}
 
@@ -591,7 +599,7 @@ Dispatch::loadRoutes(str_ptr file, str_ptr cache_name)
 			return result;
 		}
 
-		htab_rw wr(rdata);
+		htab_cow wr(rdata);
 		wr.set(DSPi.set_str, rawobj);
 		result.value_ = rdata;
 		//showarray("return rdata array", result.value_);
@@ -705,7 +713,7 @@ Dispatch::obcall(obj_ptr rmatch)
 	}
 
 	htab_rc disval;
-	htab_rw arg(disval);
+	htab_cow arg(disval);
 
 	arg.push_back(self_);
 

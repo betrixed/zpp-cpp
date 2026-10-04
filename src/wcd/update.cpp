@@ -23,7 +23,7 @@ Update::set(str_ptr column, val_ptr value)
 
 	htab_rc args_rc;
 
-	htab_rw args(args_rc);
+	htab_cow args(args_rc);
 
 	args.set(SQSTR.column, column);
 	args.set(SQSTR.valuekey, value);

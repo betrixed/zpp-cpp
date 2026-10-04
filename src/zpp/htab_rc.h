@@ -13,13 +13,13 @@
 #include "htab_ptr.h"
 #endif
 
-#ifndef HTAB_RW_H
-#include "htab_rw.h"
+#ifndef HTAB_COW_H
+#include "htab_cow.h"
 #endif
 
 namespace zpp {
 
-    class htab_rw;
+    class htab_cow;
 /**
  * @class htab_rc
  * @brief Reference counted HashTable manager
@@ -35,7 +35,7 @@ namespace zpp {
         static bool cowop(HashTable*& inout, size_t init = HT_MIN_SIZE);
 
         friend class htab_ptr;
-        friend class htab_rw;
+        friend class htab_cow;
         friend class ref_rc;
 
     public:
@@ -60,7 +60,7 @@ namespace zpp {
         htab_rc(HashTable *h);
 
         /** should make a copy of ht*/
-        htab_rc(const htab_rw&);
+        htab_rc(const htab_cow&);
         htab_rc(const htab_rc& c);
 
 
@@ -108,7 +108,7 @@ namespace zpp {
         static htab_rc getKeys(htab_ptr hr);
 
         // extract subset using keylist with removal from original hfrom
-        static htab_rc extract(htab_ptr exkeys, htab_rw hfrom);
+        static htab_rc extract(htab_ptr exkeys, htab_cow hfrom);
 
         // extract subset using keylist without removal from original hfrom
         static htab_rc subset(htab_ptr exkeys, htab_ptr hfrom, bool nullmiss = false);

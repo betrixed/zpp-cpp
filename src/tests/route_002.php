@@ -45,9 +45,9 @@ $mdata = [
 
 
 $dispatch = new Dispatch();
+$assets = new Assets();
 
-
-$dispatch->setModuleCfg($mdata);
+$assets->setModuleCfg($mdata);
 
 foreach($uritable as $uri)
 {

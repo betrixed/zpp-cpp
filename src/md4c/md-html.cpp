@@ -442,7 +442,7 @@ render_open_a_span(MD_HTML* r,  MD_SPAN_A_DETAIL* det)
 
     val_rc link_title_rc;
 
-    htab_rw all_attr(link_title_rc);
+    htab_cow all_attr(link_title_rc);
 
     MD_ATTRIBUTE& attr_href = det->href;
 

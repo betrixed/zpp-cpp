@@ -18,6 +18,9 @@
 #include "str_ptr.h"
 #endif
 
+#ifndef STR_BUF_H
+#include "str_buf.h"
+#endif
 
 namespace zpp {
 
@@ -38,7 +41,7 @@ protected:
 
     friend class val_rc;
     friend class htab_ptr;
-    friend class htab_rw;
+    friend class htab_cow;
 
 
     static zval* real_zval(zval* zv);
@@ -213,6 +216,8 @@ public:
     //! Return zend_string wrapper, or coerced string */
     str_rc  to_zstr() const;
 
+    str_rc  to_propkey() const;
+
     //! return  the zend_string* , else nullptr
     zend_string* zstr() const;
 
@@ -261,6 +266,9 @@ public:
     const val_ptr& operator=(const val_rc& rc);
 
     static zval* php_constant(str_ptr name);
+
+    zval* make_ref();
+    
     /*
     void  set_zlong(zend_long val);
     void  set_zstr(str_ptr val);

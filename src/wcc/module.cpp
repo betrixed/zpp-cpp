@@ -84,7 +84,7 @@ Module_init::init()
 
 Module_init MODi;
 
-void Module::debug_info(htab_rw hw)
+void Module::debug_info(htab_cow hw)
 {
 	base_d::debug_info(hw);
 
@@ -219,7 +219,7 @@ Module::activate(obj_ptr finder)
 	else if (temp_arg.isString())
 	{
 		// add to array
-		htab_rw req(requires_);
+		htab_cow req(requires_);
 		req.clear();
 		req.push_back(temp_arg);
 	}
@@ -279,7 +279,7 @@ Module::activate(obj_ptr finder)
 				asset_keyslist = htab_ptr::empty_array();
 			}
 
-			htab_rw asset_keys(asset_keyslist);
+			htab_cow asset_keys(asset_keyslist);
 
 			asset_keys.merge(added);
 			data.property(MODi.ASSETS, asset_keyslist);
@@ -336,7 +336,7 @@ Module::getValueList(str_ptr key)
 	val_rc  value = data.property(key);
 	if (value.isString())
 	{
-		htab_rw item(list);
+		htab_cow item(list);
 		item.push_back(value.zstr());
 		return list;
 	}

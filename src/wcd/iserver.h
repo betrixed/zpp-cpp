@@ -43,7 +43,7 @@ namespace wcd {
 
 		static  obj_return instance();
 
-		virtual void debug_info(htab_rw di);
+		virtual void debug_info(htab_cow di);
 		
 		// key for a services callback
 		void construct(str_ptr svckey);

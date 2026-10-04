@@ -51,7 +51,7 @@ namespace wcd {
 		
 		virtual str_return getDSN();
 
-		void debug_info(htab_rw di) override;
+		void debug_info(htab_cow di) override;
 		
 		virtual val_return lastSeqValue(str_ptr name);
 		virtual str_rc getSchemaClass();

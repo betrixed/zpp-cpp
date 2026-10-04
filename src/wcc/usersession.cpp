@@ -40,7 +40,7 @@ base_obj_mgr<UserSession> UserSession::omg;
 
 
 
-void UserSession::debug_info(htab_rw hw)
+void UserSession::debug_info(htab_cow hw)
 {
 	hw.set(UDi.session_str, session_);
 	hw.set(UDi.userData_p, data_);
@@ -99,10 +99,10 @@ void
 UserSession::addFlash(str_ptr text, str_ptr status)
 {
 	zval* flash = data_.property_ptr(UDi.flash_str);
-	htab_rw w(flash);  
+	htab_cow w(flash);  
 
 	htab_rc line;
-	htab_rw wline(line);
+	htab_cow wline(line);
 
 	wline.push_back(text);
 	wline.push_back(status);
@@ -118,7 +118,7 @@ UserSession::addUserRoles(htab_ptr roles)
 
 	val_ptr rlist = data.property_ptr(UDi.roles_p);
 
-	htab_rw myroles(rlist);
+	htab_cow myroles(rlist);
 	auto before_ct = myroles.size();
 
 	myroles.merge(roles);
@@ -211,9 +211,9 @@ void UserSession::flash(str_ptr msg, str_ptr status, htab_ptr exlines)
 		}
 	}
 	zval* fptr = data_.property_ptr(UDi.flash_str);
-	htab_rw list(fptr);
+	htab_cow list(fptr);
 	htab_rc line;
-	htab_rw flash(line);
+	htab_cow flash(line);
 	flash.push_back(buf.zstr());
 
 	if (!status.ok())
@@ -262,7 +262,7 @@ void
 UserSession::setKey(str_ptr key, val_ptr value)
 {
 	zval* keys = data_.property_ptr(UDi.keys_p);
-	htab_rw kdata(keys);
+	htab_cow kdata(keys);
 	kdata.set(key, value);
 	doWrite_ = true;
 }
@@ -270,7 +270,7 @@ UserSession::setKey(str_ptr key, val_ptr value)
 void UserSession::unsetKey(str_ptr key)
 {
 	val_ptr keys = data_.property_ptr(UDi.keys_p);
-	htab_rw kdata(keys);
+	htab_cow kdata(keys);
 	if (kdata.has_key(key))
 	{
 		kdata.unset(key);
@@ -514,7 +514,7 @@ void
 UserSession::setAdmin()
 {
 	htab_rc list;
-	htab_rw roles(list);
+	htab_cow roles(list);
 
 	roles.push_back(UDi.Admin_str);
 	roles.push_back(UDi.User_str);
@@ -528,7 +528,7 @@ void
 UserSession::setGuest()
 {
 	htab_rc list;
-	htab_rw roles(list);
+	htab_cow roles(list);
 
 	roles.push_back(UDi.Guest_str);	
 

@@ -5,6 +5,9 @@
 #include "zpp/base.h"
 #endif
 
+#ifndef WCC_DISPATCH_H
+#include "wcc/dispatch.h"
+#endif
 
 namespace wcc {
 
@@ -16,40 +19,49 @@ namespace wcc {
 
 	class Target : public base_d {
 	public:
-		str_rc class_;
-		str_rc func_;
-		str_rc module_;
-		htab_rc params_;
-
-		virtual void debug_info(htab_rw di);
-	
-		static obj_rc go(str_ptr cname, str_ptr fname);
+		static obj_rc go(str_ptr cname, str_ptr method, htab_ptr params);
 		
 		static base_obj_mgr<Target> omg;
 
-		void construct(str_ptr cname, str_ptr fname);
+		void construct(str_ptr cname, str_ptr fname, htab_ptr params);
 
-		str_ptr getClass();
-		str_ptr getFunc();
-		str_ptr getModule();
-
-		void setFunc(str_ptr name);
-		void setModule(str_ptr name);
-
+		/*
 		htab_rc serialize();
 		void unserialize(htab_ptr htab);
+		*/
 
 		// params
-		void setParam(str_ptr key, val_ptr value);
-		val_rc getParam(str_ptr key);
-		htab_ptr getParams();
-		void setParams(htab_ptr data);
+		void set(str_ptr key, val_ptr value);
+		val_rc get(str_ptr key);
 
-		obj_rc copy();
+		val_rc refParams();
+
+		str_rc   getModule();
+		str_rc   getClass();
+		str_rc   getMethod();
+		val_rc   getRoles();
+
+		void   setModule(str_ptr s);
+		void   setMethod(str_ptr s);
+
+		htab_cow params();
 
 		VIRTUAL_ZOBJPTR	
 
 	};
+
+	class TargetNames : public state_init {
+	public:
+		void init() override;
+
+		str_intern p_objclass;
+		str_intern p_objmethod;
+		str_intern p_params;
+		str_intern s_index;
+
+	};
+
+	extern TargetNames  TNinit;
 
 }; //namespace wcc
 

@@ -11,7 +11,7 @@ final class RouteMatch {
 
 	public function getVerbName() : string;
 
-	public function getErrors() : array;
+	public function getErrors() : string;
 
 	public function getUri() : string;
 
@@ -31,7 +31,7 @@ final class RouteMatch {
 
 	public function getMatch() : ?Route {}
 
-	public function prepare_call() : bool;
+	public function prepare_call( Session\UserData $ud) : bool;
 
 	public function setCallInfo(string $obclass, string $obmethod, array $args) : void;
 

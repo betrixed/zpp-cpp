@@ -125,7 +125,7 @@ CacheMgr::callStatic(str_ptr name, htab_ptr args)
 	return result;
 }
 
-void CacheMgr::debug_info(htab_rw di)
+void CacheMgr::debug_info(htab_cow di)
 {
 	di.set(Cache_i.s_cache_obj, cache_obj_);
 
@@ -228,7 +228,7 @@ void CacheMgr::createCache(str_ptr svckey, str_ptr classname, htab_ptr options)
 	htab_rc config_args = cache_defaults_;
 	//showdata("config_args b", config_args);
 
-	htab_rw config(config_args);
+	htab_cow config(config_args);
 
 	//showdata("config_write c", config_args);
 	config.merge(options);
@@ -236,7 +236,7 @@ void CacheMgr::createCache(str_ptr svckey, str_ptr classname, htab_ptr options)
 	//showdata("config_args", config_args);
 	
 	htab_rc args_cache;
-	htab_rw acwrite(args_cache);
+	htab_cow acwrite(args_cache);
 
 	acwrite.push_back(config_args);
 	//acwrite.push_back(svc->self());
@@ -245,7 +245,7 @@ void CacheMgr::createCache(str_ptr svckey, str_ptr classname, htab_ptr options)
 
 	obj_rc obj = ReflectCache::staticInstanceArgs(classname, args_cache);
 
-	htab_rw hw(cache_obj_);
+	htab_cow hw(cache_obj_);
 	hw.set(svckey, obj);
 	svc->set(svckey, obj);
 }

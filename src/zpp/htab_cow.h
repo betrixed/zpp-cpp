@@ -1,10 +1,10 @@
-#ifndef HTAB_RW_H
-#define HTAB_RW_H
+#ifndef HTAB_COW_H
+#define HTAB_COW_H
 
 /**
- * @file zpp/htab_rw.h
+ * @file zpp/htab_cow.h
  * @author Michael Rynn <michael.rynn.500@gmail.com>
- * @brief htab_rw - read/write, not-reference counting, HashTable manager
+ * @brief htab_cow - read/write, not-reference counting, HashTable manager
  * @copyright Copyright (c) 2025
  * @license BSD 3-Clause License
  */
@@ -21,7 +21,7 @@ namespace zpp {
     class str_intern;
 
     /**
-     * @class htab_rw
+     * @class htab_cow
      * @brief Read/write HashTable manager with copy-on-write semantics on construction.
      * @details  This class provides read and write access to a HashTable*. On construction,
     * it ensures that HashTable has a reference count of 1, for the reference counted class passed in.
@@ -31,7 +31,7 @@ namespace zpp {
 
     
     
-    class htab_rw : public htab_ptr 
+    class htab_cow : public htab_ptr 
     {
     protected:
         // ensure copy on write by doing irreversible copy preparation.
@@ -51,19 +51,19 @@ namespace zpp {
          *  on the reference.
          */
 
-        htab_rw(htab_rc& mgr, size_t init=HT_MIN_SIZE);
-        htab_rw(val_rc& mgr, size_t init=HT_MIN_SIZE);
-        htab_rw(val_ptr mgr, size_t init=HT_MIN_SIZE);
+        htab_cow(htab_rc& mgr, size_t init=HT_MIN_SIZE);
+        htab_cow(val_rc& mgr, size_t init=HT_MIN_SIZE);
+        htab_cow(val_ptr mgr, size_t init=HT_MIN_SIZE);
         
-        htab_rw(zval* p, size_t init=HT_MIN_SIZE);
+        htab_cow(zval* p, size_t init=HT_MIN_SIZE);
         
-        htab_rw(HashTable* h);
+        htab_cow(HashTable* h);
 
-        htab_rw(const htab_rw& w) : htab_ptr(w.ht_)
+        htab_cow(const htab_cow& w) : htab_ptr(w.ht_)
         {
         }
 
-        const htab_rw& operator=(zval* p);
+        const htab_cow& operator=(zval* p);
         
         
         int merge(HashTable* src);
@@ -182,5 +182,5 @@ namespace zpp {
         };
 };
 
-//htab_rw.h
+//htab_cow.h
 #endif

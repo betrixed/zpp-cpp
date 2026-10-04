@@ -25,8 +25,8 @@
 #include "htab_walk.h"
 #endif
 
-#ifndef HTAB_RW_H
-#include "htab_rw.h"
+#ifndef HTAB_COW_H
+#include "htab_cow.h"
 #endif
 
 
@@ -137,7 +137,7 @@ htab_rc::htab_rc(zval* p)
 }
 
 // need to copy, to avoid reference inc for c.
-htab_rc::htab_rc(const htab_rw& c)
+htab_rc::htab_rc(const htab_cow& c)
 {
 	ht_ = zend_array_dup(c.ht_);
 }
@@ -398,7 +398,7 @@ htab_rc::getValues(htab_ptr hr)
 	 htab_rc result;
 	 if (!hr.size())
 		return result;
-	 htab_rw merge(result);
+	 htab_cow merge(result);
 
 	 htab_walk wk;
 	 auto val = wk.value();
@@ -416,7 +416,7 @@ htab_rc::getKeys(htab_ptr hr)
 	 htab_rc result;
 	 if (!hr.size())
 		return result;
-	 htab_rw merge(result);
+	 htab_cow merge(result);
 
 	 htab_walk wk;
 	 auto val = wk.key();
@@ -432,10 +432,10 @@ htab_rc::getKeys(htab_ptr hr)
  * This version "pulls out" the key and value
  * from hfrom array, and returns a new array with the
  * extracted key => value found in key list exkeys.
- * Requires a htab_rw - 
+ * Requires a htab_cow - 
  */
 htab_rc //static
-htab_rc::extract(htab_ptr exkeys, htab_rw hfrom)
+htab_rc::extract(htab_ptr exkeys, htab_cow hfrom)
 {
 
 	htab_rc result;
@@ -445,7 +445,7 @@ htab_rc::extract(htab_ptr exkeys, htab_rw hfrom)
 		return result;
 	}
 
-	htab_rw merger(result);
+	htab_cow merger(result);
 	//showarray("exkeys", exkeys);
 
 	htab_walk wk;
@@ -487,7 +487,7 @@ htab_rc::subset(htab_ptr exkeys, htab_ptr hfrom, bool nullmiss)
 		return result;
 	}
 
-	htab_rw merger(result);
+	htab_cow merger(result);
 	//showarray("exkeys", exkeys);
 
 	htab_walk wk;
@@ -530,7 +530,7 @@ htab_rc::sublist(htab_ptr exkeys, htab_ptr hfrom)
 		return result;
 	}
 
-	htab_rw vlist(result);
+	htab_cow vlist(result);
 	//showarray("exkeys", exkeys);
 
 	htab_walk wk;

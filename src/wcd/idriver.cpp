@@ -182,7 +182,7 @@ str_ptr IDriver::getName() const
 }
 
 void 
-IDriver::debug_info(htab_rw di)
+IDriver::debug_info(htab_cow di)
 {
 	base_d::debug_info(di); // properties.
 
@@ -465,7 +465,7 @@ IDriver::newDmlBuild()
 	str_rc bclass =  cfg->getDmlBuildClass();
 
 	htab_rc args_mgr;
-	htab_rw args(args_mgr);
+	htab_cow args(args_mgr);
 	args.push_back( wkself_ );
 	return ReflectCache::staticInstanceArgs(bclass,args);
 }
@@ -693,7 +693,7 @@ IDriver::getTableModel(str_ptr tableName)
 		m->setConnect(wkself_);
 		m->setName(tableName);
 		
-		htab_rw hw(table_models_);
+		htab_cow hw(table_models_);
 		hw.set(tableName, result);
 	}
 	return result;

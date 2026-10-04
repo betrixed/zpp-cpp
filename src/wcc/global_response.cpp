@@ -213,7 +213,7 @@ Response::send_header(str_ptr header, bool replace,
 	zpp::header(header, replace, response_code);
 }
 
-htab_rw 
+htab_cow 
 Response::writer()
 {
 	return hmap_->writer();
@@ -226,7 +226,7 @@ htab_ptr Response::reader() const
 
 
 void
-Response::debug_info(htab_rw hw)
+Response::debug_info(htab_cow hw)
 {
 	// might as well reuse headers_key
 	hw.set(RSPD.headers_key, headers_);
@@ -255,7 +255,14 @@ void Response::setHeaders(val_ptr headers)
 	Hmap* hto = hdrs_obj();
 
 	if (hto != hfrom) {
-		htab_rw hw = hto->writer();
+		htab_cow hw = hto->writer();
+
+		#ifdef DBG_GLOBAL_RESPONSE
+			DebugLog* log = DebugLog::cpp_global();
+			if (log) {
+				log->dump("setHeaders cow", hw);
+			}
+		#endif
 		htab_ptr data(hfrom->toArray());
 		htab_walk wk;
 		auto  name = wk.key();
@@ -284,7 +291,7 @@ Response::setExpires(val_ptr exptime)
 
 	str_rc time = buf.zstr();
 
-	htab_rw hw = writer();
+	htab_cow hw = writer();
 	hw.set(RSPD.Expires, time);
 }
 
@@ -363,7 +370,7 @@ Response::send()
 void 
 Response::setHeader(str_ptr key, str_ptr value)
 {
-	htab_rw hw(writer());
+	htab_cow hw(writer());
 
 	hw.set(key, value);
 }
@@ -371,7 +378,7 @@ Response::setHeader(str_ptr key, str_ptr value)
 void 
 Response::delay_redirect(str_ptr location, int delay)
 {
-	htab_rw hw(writer());
+	htab_cow hw(writer());
 
 	str_buf buf;
 	buf << delay;
@@ -420,7 +427,7 @@ Response::redirect(str_ptr location, bool external, int statusCode)
 		statusCode = 302;
 	}
 	setStatusCode(302, str_empty());
-	htab_rw hw(writer());
+	htab_cow hw(writer());
 
 	hw.set(RSPD.Location, location);
 }
@@ -434,7 +441,7 @@ Response::setContentType(str_ptr ctype, str_ptr charset)
 void 
 Response::resetHeaders()
 {
-	htab_rw hw(writer());
+	htab_cow hw(writer());
 	hw.clear();
 }
 
@@ -472,7 +479,7 @@ Response::setContentType(
                    }
 	//showstr("hvalue", hvalue);
 #endif
-	htab_rw hw(writer());
+	htab_cow hw(writer());
 	hw.set(RSPD.Content_Type, hvalue);
 }
 
@@ -491,7 +498,7 @@ Response::setStatusCode(int icode, str_ptr  message)
 	auto  key = wk.key();
 
 	htab_rc   keylist;
-	htab_rw rkeys(keylist);
+	htab_cow rkeys(keylist);
 
 	std::string_view needle = RSPD.HTTP_FS.vstr();
 
@@ -509,7 +516,7 @@ Response::setStatusCode(int icode, str_ptr  message)
 		}
 	}
 
-	htab_rw hw = writer();
+	htab_cow hw = writer();
 	if (rkeys.size()) 
 	{
 		hw.removal(rkeys);
@@ -704,9 +711,14 @@ Response::sendHeaders()
 bool 
 Response::send_each()
 {
-	//zend_printf("headers_sent yet?\n");
-	bool issent = zpp::headers_sent();
+#ifdef DBG_GLOBAL_RESPONSE
+	DebugLog* log = DebugLog::cpp_global();
 
+	if (log) {
+		log->line("send_each");
+	}
+#endif
+	bool issent = zpp::headers_sent();
 	if (issent)
 	{
 		//zend_printf("Already sent \n");
@@ -846,7 +858,7 @@ void Response::setFileToSend(
 void 
 Response::setRawHeader(str_ptr header)
 {
-	htab_rw hw(writer());
+	htab_cow hw(writer());
 	val_rc null_value;
 
 	hw.set(header,null_value);

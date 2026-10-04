@@ -32,7 +32,7 @@ public:
 
 	static base_obj_mgr<UserSession> omg;
 	
-	void debug_info(htab_rw hw) override;
+	void debug_info(htab_cow hw) override;
 
 	void construct();
 	obj_rc  activate();

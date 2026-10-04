@@ -67,7 +67,7 @@ Finder::~Finder()
 }
 
 void 
-Finder::debug_info(htab_rw d)
+Finder::debug_info(htab_cow d)
 {
 
 	d.set(FDit.nspaths_key, nsPaths_);
@@ -79,13 +79,13 @@ Finder::debug_info(htab_rw d)
 void 
 Finder::addFolder(str_ptr fsdir)
 {
-	htab_rw(folders_).push_back(fsdir);
+	htab_cow(folders_).push_back(fsdir);
 }
 
 void 
 Finder::addPath(str_ptr nsroot, str_ptr fspath)
 {
-	htab_rw(nsPaths_).set(nsroot, fspath);
+	htab_cow(nsPaths_).set(nsroot, fspath);
 }
 
 error_return 
@@ -113,7 +113,7 @@ void
 Finder::addClasses(htab_ptr classArray)
 {
 	
-	htab_rw hw(classes_);
+	htab_cow hw(classes_);
 
 	for_key_value wk;
 	for(wk.start(classArray); wk.ok(); wk.next())
@@ -125,7 +125,7 @@ Finder::addClasses(htab_ptr classArray)
 void 
 Finder::addClass(str_ptr cname, str_ptr fspath)
 {
-	htab_rw(classes_).set(cname, fspath);
+	htab_cow(classes_).set(cname, fspath);
 }
 
 // properties
@@ -341,7 +341,7 @@ Finder::dirList_dir(str_ptr path)
 		return result;
 	}
 
-	htab_rw list(result);
+	htab_cow list(result);
 	while(true)
 	{
 		val_rc entry = readdir(dh);
@@ -388,7 +388,7 @@ Finder::dirList_fileExt(str_ptr path, htab_ptr extlist)
 		return result;
 	}
 
-	htab_rw list(result);
+	htab_cow list(result);
 	while(true)
 	{
 		val_rc entry = readdir(dh);

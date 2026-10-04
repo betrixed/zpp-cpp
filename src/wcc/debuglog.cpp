@@ -207,7 +207,7 @@ DebugLog::setOutputs(int flags)
 }
 
 void 
-DebugLog::debug_info(htab_rw hw)
+DebugLog::debug_info(htab_cow hw)
 {
 	base_d::debug_info(hw);
 	hw.set(DLSi.outputs_str, (int) outputs_);
@@ -347,8 +347,10 @@ ZEND_METHOD(Zpp_DebugLog, setOutputs)
 
 ZEND_METHOD(Zpp_DebugLog, getOutputs)
 {
-	if (zarg_rd::zero_args(execute_data, __FUNCTION__))
+	if (!zarg_rd::zero_args(execute_data, __FUNCTION__))
+	{
 		return;
+	}
 
 	DebugLog* cobj = zval_toc<DebugLog>(ZEND_THIS);
 	RETURN_LONG(cobj->getOutputs());	

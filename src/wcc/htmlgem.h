@@ -49,7 +49,7 @@ namespace wcc {
 		HtmlGem();
 		virtual ~HtmlGem();
 
-		virtual void debug_info(htab_rw hw);
+		virtual void debug_info(htab_cow hw);
 
 	// php 
 
@@ -98,12 +98,12 @@ namespace wcc {
 		str_rc output(val_ptr val);
 	// none-php
 		str_rc generateTag(str_ptr tag, htab_ptr pset);
-		str_rc getTag(htab_ptr ps, htab_rw ex, str_ptr tag);
+		str_rc getTag(htab_ptr ps, htab_cow ex, str_ptr tag);
 
 		
 		str_rc getStyle(str_ptr name);
 
-		str_return ensureIdName(htab_rw ps);
+		str_return ensureIdName(htab_cow ps);
 
 		str_rc label_front(htab_ptr ps);
 		str_rc in_label(htab_ptr ps);

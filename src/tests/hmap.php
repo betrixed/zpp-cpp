@@ -6,6 +6,7 @@ require "bootstrap.php";
 use ArrayAccess;
 use stdClass;
 use Wcd\IStore;
+use function Zpp\debug_zpp_dump;
 
 $values = [ "key1" => "test-1", 
 	        "key2" => "test-2", 
@@ -130,5 +131,8 @@ $has = isset($ch["absent"]);
 echo "is set " . intval($has) . PHP_EOL;
 
 $missed = $ch->absent ?? null;
+
+
+echo "get text1 " . $ch->get("text1") . PHP_EOL;
 
 echo "Missing property absent " . intval(is_null($missed)) . PHP_EOL;

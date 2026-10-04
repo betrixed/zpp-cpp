@@ -26,7 +26,7 @@ namespace wcd
 	public:
 		static base_obj_mgr<Bindings>  omg;
 
-		void debug_info(htab_rw di) override;
+		void debug_info(htab_cow di) override;
 
 		void construct(obj_ptr sql, weak_ref& connect);
 		void destruct();

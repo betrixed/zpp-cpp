@@ -43,7 +43,7 @@ IPInit::init()
 	param_str = "?";
 }
 
-void IParams::debug_info(htab_rw di)
+void IParams::debug_info(htab_cow di)
 {
 	if (!params_.isNull())
 		di.set(SQSTR.params, params_);
@@ -95,7 +95,7 @@ str_rc
 IParams::addParamEquals(val_ptr value)
 {
 	str_rc result = IPStr.param_str;
-	htab_rw hw(params_);
+	htab_cow hw(params_);
 
 	hw.push_back(result);
 	
@@ -170,7 +170,7 @@ IParams::addParamList(htab_ptr values)
 
 	int bufct = 0;
 
-	htab_rw pw(params_);
+	htab_cow pw(params_);
 
 	for(wk.start(values); wk.ok(); wk.next(), bufct++)
 	{

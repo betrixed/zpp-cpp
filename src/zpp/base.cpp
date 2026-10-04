@@ -40,7 +40,7 @@
 
 #else
 
-#include "htab_rw.h"
+#include "htab_cow.h"
 
 #endif
 
@@ -59,7 +59,7 @@ void register_base_init()
 	STATE_INIT_ADD(BI_str);
 }
 	 void //virtual
-	 base_d::debug_info(htab_rw di)
+	 base_d::debug_info(htab_cow di)
 	 {
 	 	obj_ptr temp(self_);
 

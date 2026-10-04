@@ -1,10 +1,10 @@
-#ifndef HTAB_RW_CPP
-#define HTAB_RW_CPP
+#ifndef HTAB_COW_CPP
+#define HTAB_COW_CPP
 
 /**
- * @file zpp/htab_rw.cxx
+ * @file zpp/htab_cow.cxx
  * @author Michael Rynn <michael.rynn.500@gmail.com>
- * @brief htab_rw - read/write HashTable manager
+ * @brief htab_cow - read/write HashTable manager
  * @copyright Copyright (c) 2025
  * @license BSD 3-Clause License
  * 
@@ -15,8 +15,8 @@
  * It does not manage the reference count of the HashTable, which is done by the donor class.
  *  */
 
-#ifndef HTAB_RW_H
-#include "zpp/htab_rw.h"
+#ifndef HTAB_COW_H
+#include "zpp/htab_cow.h"
 #endif
 
 
@@ -43,9 +43,9 @@ namespace zpp {
 
 
 void 
-htab_rw::giveback(zval* mgr, size_t init)
+htab_cow::giveback(zval* mgr, size_t init)
 {
-	//printf("htab_rw giveback\n");
+	//printf("htab_cow giveback\n");
 	val_ptr test(mgr);
 	//showmem("giveback zval", test);
 
@@ -86,7 +86,7 @@ htab_rw::giveback(zval* mgr, size_t init)
 			val_rc temp(std::move(*mgr)); //move value.
 			*mgr = {};
 			ht_ = zend_new_array(init);//rc==1
-			htab_rw wt(ht_); //loan 
+			htab_cow wt(ht_); //loan 
 			wt.push_back(temp);
 			val_ptr::array_bind(mgr, ht_); // keep rc==1
 		}
@@ -94,38 +94,38 @@ htab_rw::giveback(zval* mgr, size_t init)
 	}
 }
 
-htab_rw::htab_rw(htab_rc& mgr, size_t init)
+htab_cow::htab_cow(htab_rc& mgr, size_t init)
 {
 	// ensure both mgr, and write have same array rc==1
-	//printf("htab_rw htab_rc& mgr\n");
+	//printf("htab_cow htab_rc& mgr\n");
 	htab_rc::cowop(mgr.ht_, init);
 	ht_ = mgr.ht_;
 }
 
 
-htab_rw::htab_rw(val_rc& mgr, size_t init)
+htab_cow::htab_cow(val_rc& mgr, size_t init)
 {
 	giveback(mgr, init);
 }
 
-htab_rw::htab_rw(val_ptr mgr, size_t init)
+htab_cow::htab_cow(val_ptr mgr, size_t init)
 {
 	giveback(mgr, init);
 }
 
-htab_rw::htab_rw(HashTable* h)
+htab_cow::htab_cow(HashTable* h)
 {
-	//printf("htab_rw HashTable*\n");
+	//printf("htab_cow HashTable*\n");
 	ht_ = h;
 }
 
-htab_rw::htab_rw(zval* p, size_t init)
+htab_cow::htab_cow(zval* p, size_t init)
 {
 	giveback(p, init);
 }
 
 
-void htab_rw::push_back(HashTable* val)
+void htab_cow::push_back(HashTable* val)
 {
 	zval tmp = {};
 	bool refct = val_ptr::array_bind(&tmp, val);
@@ -136,13 +136,13 @@ void htab_rw::push_back(HashTable* val)
 	}
 }
 
-void htab_rw::push_back(const char *s)
+void htab_cow::push_back(const char *s)
 {
 	str_rc temp(s);
 	push_back(temp);
 }
 
-void htab_rw::push_back(zend_string* zs)
+void htab_cow::push_back(zend_string* zs)
 {
 	zval tmp = {};
 	bool refct = val_ptr::string_bind(&tmp,zs);
@@ -153,7 +153,7 @@ void htab_rw::push_back(zend_string* zs)
 	}
 }
 
-void htab_rw::push_back(zend_object* zo)
+void htab_cow::push_back(zend_object* zo)
 {
 	zval tmp = {};
 	bool refct = val_ptr::object_bind(&tmp, zo);
@@ -164,15 +164,15 @@ void htab_rw::push_back(zend_object* zo)
 	}
 }
 
-void htab_rw::clear()
+void htab_cow::clear()
 {
 	if (size()) {
-		//showarray("htab_rw clear", ht_);
+		//showarray("htab_cow clear", ht_);
 		zend_hash_clean(ht_);
 	}
 }
 
-void htab_rw::push_back(zval* zv)
+void htab_cow::push_back(zval* zv)
 {
 	if (zend_hash_next_index_insert(ht_, zv))
 	{
@@ -181,7 +181,7 @@ void htab_rw::push_back(zval* zv)
 	}
 }
 
-void htab_rw::push_back(const char* s, std::size_t slen)
+void htab_cow::push_back(const char* s, std::size_t slen)
 {
 	str_rc temp(s, slen);
 	push_back((zend_string*)temp);
@@ -189,7 +189,7 @@ void htab_rw::push_back(const char* s, std::size_t slen)
 
 
 void 
-htab_rw::set(zval* key, zval* value)
+htab_cow::set(zval* key, zval* value)
 {
 	 val_ptr test(key);
 
@@ -210,7 +210,7 @@ htab_rw::set(zval* key, zval* value)
 	 	val_ptr::try_addref(value);
 	 }
 }
-void htab_rw::set(zval* key, zend_string* value)
+void htab_cow::set(zval* key, zend_string* value)
 {
 	zval temp = {};
 	val_ptr::string_bind(&temp, value);
@@ -219,7 +219,7 @@ void htab_rw::set(zval* key, zend_string* value)
 
 /*
 void 
-htab_rw::set(zend_string* key, zend_string* value)
+htab_cow::set(zend_string* key, zend_string* value)
 {
 	zval_own temp(value);
 	set(key, temp);
@@ -227,9 +227,9 @@ htab_rw::set(zend_string* key, zend_string* value)
 */
 
 
-void htab_rw::set(zend_string* key, HashTable* ht)
+void htab_cow::set(zend_string* key, HashTable* ht)
 {
-	//showstr("htab_rw::set  key", key);
+	//showstr("htab_cow::set  key", key);
 
 	zval tmp = {};
 	bool refct = val_ptr::array_bind(&tmp, ht);
@@ -237,10 +237,10 @@ void htab_rw::set(zend_string* key, HashTable* ht)
 	{	 
 		if (refct) GC_ADDREF(ht);
 	}
-	//showarray("htab_rw::set  HashTable* ", value);
+	//showarray("htab_cow::set  HashTable* ", value);
 }
 
-void htab_rw::set(zend_string* key, zend_object* obj)
+void htab_cow::set(zend_string* key, zend_object* obj)
 {
 	zval temp = {};
 	bool refct = val_ptr::object_bind(&temp, obj);
@@ -252,21 +252,21 @@ void htab_rw::set(zend_string* key, zend_object* obj)
 	}
 }
 
-void htab_rw::set(zend_string* key, double value)
+void htab_cow::set(zend_string* key, double value)
 {
 	zval temp = {};
 	ZVAL_DOUBLE(&temp, value);
 	zend_hash_update(ht_, key, &temp);
 }
 
-void htab_rw::set(zend_string* key, int val)
+void htab_cow::set(zend_string* key, int val)
 {
 	zval temp = {};
 	ZVAL_LONG(&temp, val);
 	zend_hash_update(ht_, key, &temp);
 }
 
-void htab_rw::setnull(zend_string* key)
+void htab_cow::setnull(zend_string* key)
 {
 	zval temp = {};
 	ZVAL_NULL(&temp);
@@ -274,15 +274,15 @@ void htab_rw::setnull(zend_string* key)
 }
 
 void 
-htab_rw::setbool(zend_string* key, bool value)
+htab_cow::setbool(zend_string* key, bool value)
 {
 	zval temp = {};
 	ZVAL_BOOL(&temp, value);
 	zend_hash_update(ht_, key, &temp);
 }
-void htab_rw::set(zend_string* key, zval* val)
+void htab_cow::set(zend_string* key, zval* val)
 {
-	//showmem("htab_rw::set zval*", val);
+	//showmem("htab_cow::set zval*", val);
 	if (zend_hash_update(ht_, key, val))
 	{
 		if (Z_TYPE_FLAGS_P(val) != 0) {
@@ -293,7 +293,7 @@ void htab_rw::set(zend_string* key, zval* val)
 }
 
 void 
-htab_rw::set(zend_string* key, zend_string* value)
+htab_cow::set(zend_string* key, zend_string* value)
 {
 	zval temp = {};
 	bool refct = val_ptr::string_bind(&temp, value);
@@ -303,14 +303,14 @@ htab_rw::set(zend_string* key, zend_string* value)
 	}
 }
 
-void htab_rw::set(zend_string* key, const char* value, size_t vlen)
+void htab_cow::set(zend_string* key, const char* value, size_t vlen)
 {
 	str_rc temp(value, vlen);
 	set(key, temp);
 }
 
 void 
-htab_rw::set_null(zend_string* key)
+htab_cow::set_null(zend_string* key)
 {
 	zval temp = {};
 	ZVAL_NULL(&temp);
@@ -318,14 +318,14 @@ htab_rw::set_null(zend_string* key)
 }
 
 void 
-htab_rw::set_null(zend_long idx)
+htab_cow::set_null(zend_long idx)
 {
 	zval temp = {};
 	ZVAL_NULL(&temp);
 	zend_hash_index_update(ht_, idx, &temp);
 }
 
-void htab_rw::set_null(val_ptr key)
+void htab_cow::set_null(val_ptr key)
 {
 	if (key.isLong()) {
 		 return set_null(key.get_long());
@@ -336,7 +336,7 @@ void htab_rw::set_null(val_ptr key)
 	}
 }
 
-bool htab_rw::unset(val_ptr key)
+bool htab_cow::unset(val_ptr key)
 {
 	if (key.isLong()) {
 		 return unset(key.get_long());
@@ -349,13 +349,13 @@ bool htab_rw::unset(val_ptr key)
 }
 
 /*
-void htab_rw::set(zend_long idx, val_ptr value)
+void htab_cow::set(zend_long idx, val_ptr value)
 {
 	update(idx, value);
 }
 */
 
-void htab_rw::set(zend_long idx, HashTable* ht)
+void htab_cow::set(zend_long idx, HashTable* ht)
 {
 	zval temp = {};
 	bool refct = val_ptr::array_bind(&temp,ht);
@@ -366,7 +366,7 @@ void htab_rw::set(zend_long idx, HashTable* ht)
 	}
 }
 
-void htab_rw::set(zend_long idx, zend_object* value)
+void htab_cow::set(zend_long idx, zend_object* value)
 {
 	zval temp = {};
 	bool refct = val_ptr::object_bind(&temp,value);
@@ -377,7 +377,7 @@ void htab_rw::set(zend_long idx, zend_object* value)
 	}
 }
 
-void htab_rw::set(zend_long idx, zend_string* value)
+void htab_cow::set(zend_long idx, zend_string* value)
 {
 	zval temp = {};
 	val_ptr::string_bind(&temp, value);
@@ -385,17 +385,17 @@ void htab_rw::set(zend_long idx, zend_string* value)
 }
 
 
-bool htab_rw::unset(zend_string* skey)
+bool htab_cow::unset(zend_string* skey)
 {
 	return (zend_hash_del(ht_, skey) == SUCCESS);
 }
 
-bool htab_rw::unset(zend_long idx)
+bool htab_cow::unset(zend_long idx)
 {
 	return (zend_hash_index_del(ht_, idx) == SUCCESS);
 }
 
-void htab_rw::set(zend_long idx, zval* value)
+void htab_cow::set(zend_long idx, zval* value)
 {	
 	if (zend_hash_index_update(ht_, idx, value))
 	{
@@ -407,7 +407,7 @@ void htab_rw::set(zend_long idx, zval* value)
 }
 
 int
-htab_rw::merge(HashTable* src)
+htab_cow::merge(HashTable* src)
 {
 	//static int test = 1;
 
@@ -427,7 +427,7 @@ htab_rw::merge(HashTable* src)
 }
 
 val_rc 
-htab_rw::pop()
+htab_cow::pop()
 {
 	zval*     val = nullptr;
 	val_rc    result;
@@ -497,7 +497,7 @@ BAIL_OUT:
 
 
 void
-htab_rw::removal(htab_ptr exkeys)
+htab_cow::removal(htab_ptr exkeys)
 {
 	//showarray("exkeys", exkeys);
 
@@ -520,23 +520,23 @@ htab_rw::removal(htab_ptr exkeys)
 	}
 }
 
-void htab_rw::push_back(const val_rc& zv) 
+void htab_cow::push_back(const val_rc& zv) 
 {
     push_back((zval*) zv);
 }
 
-void htab_rw::push_back(int value) 
+void htab_cow::push_back(int value) 
 {
 	val_rc temp(value);
     push_back((zval*) temp);
 }
 
-void htab_rw::push_back(val_ptr zv) 
+void htab_cow::push_back(val_ptr zv) 
 {
     push_back((zval*) zv);
 }
 
-void htab_rw::push_back(str_ptr su)
+void htab_cow::push_back(str_ptr su)
 {
     push_back((zend_string*) su);
 }

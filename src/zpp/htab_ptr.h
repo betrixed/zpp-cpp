@@ -27,7 +27,7 @@ namespace zpp {
      * This class does not do any reference counting
      * It is used to pass around HashTables without
      * transferring ownership. No write methods are provided.
-     * Use htab_rw for that.
+     * Use htab_cow for that.
      */
     class  htab_ptr {
     protected:

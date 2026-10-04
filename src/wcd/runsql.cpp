@@ -9,8 +9,11 @@
 #include "idriver.h"
 #endif
 
+//#define DBG_LOG_RUNSQL
+#ifdef DBG_LOG_RUNSQL
 #ifndef WCC_DEBUGLOG_H
 #include "wcc/debuglog.h"
+#endif
 #endif
 
 #ifndef SQL_ARGINFO_H
@@ -38,22 +41,26 @@ namespace wcd {
 	RunSql::operation()
 	{
 		val_return exresult;
+		#ifdef DBG_LOG_RUNSQL
 		DebugLog* log = DebugLog::cpp_global();
 		if (log)
 		{
 			log->dump("RunSql::operation", sql_);
 		}
+		#endif
 
 		IDriver* db = zobj_toc<IDriver>(db_);
 
 		obj_return stmt_ret = db->prepare(sql_);
 
 		
-
+		#ifdef DBG_LOG_RUNSQL
 		if (log)
 		{
 			log->dump("RunSql::op stmt_ret", stmt_ret.value_);
 		}
+		#endif
+
 		if (stmt_ret.has_errors())
 		{
 			exresult = stmt_ret.move_error();
@@ -76,7 +83,7 @@ namespace wcd {
 				if (v0.isArray())
 				{
 					// create result array
-					htab_rw result(exresult.value_);
+					htab_cow result(exresult.value_);
 
 					htab_walk wk;
 
@@ -112,6 +119,7 @@ namespace wcd {
 		obj_rc obj = RunSql::omg.new_zobj();
 		RunSql*  rs = zobj_toc<RunSql>(obj);
 
+		#ifdef DBG_LOG_RUNSQL
 		DebugLog* log = DebugLog::cpp_global();
 
 		if (log)
@@ -120,6 +128,8 @@ namespace wcd {
 			log->dump("RunSql::op sql", sql);
 			log->dump("RunSql::op bind", bind);
 		}
+		#endif
+		
 		rs->construct(db, sql, bind, rval);
 
 		return rs->run();

@@ -55,7 +55,7 @@ public:
 	
 	static obj_rc start(str_ptr msg, int flags=TO_FILE);
 	static obj_rc start(const char* msg, int flags=TO_FILE);
-	void debug_info(htab_rw hw) override;
+	void debug_info(htab_cow hw) override;
 	void construct(str_ptr logpath, int flags=TO_FILE);
 	void line(str_ptr msg, int flags = PHP_FILE::APPEND);
 	void line(const char* s);

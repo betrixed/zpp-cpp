@@ -359,7 +359,7 @@ htab_rc
 Mysqlfn::resultObjects(obj_ptr robj)
 {
 	htab_rc rows;
-	htab_rw wr(rows);
+	htab_cow wr(rows);
 
 	obj_rc obj;
 
@@ -559,7 +559,7 @@ Mysqlfn::connect()
 
 	htab_rc cparams;
 
-	htab_rw cp(cparams);
+	htab_cow cp(cparams);
 
 	cp.push_items(host, user, pwd, dbname);
 
@@ -656,7 +656,7 @@ Mysqlfn::getTableNames()
 
 	htab_return result;
 	result.value_ = htab_ptr::empty_array();
-	htab_rw reduce(result.value_);
+	htab_cow reduce(result.value_);
 
 	htab_walk wk;
 

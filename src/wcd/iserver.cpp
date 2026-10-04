@@ -75,7 +75,7 @@ void ISVinit::init() {
 
 
 void 
-IServer::debug_info(htab_rw di)
+IServer::debug_info(htab_cow di)
 {
 	di.set(ISV.svckey_str, svc_key_);
 
@@ -104,14 +104,14 @@ IServer::construct(str_ptr svckey)
 
 	
 
-	htab_rw sw(sqlClasses_);
+	htab_cow sw(sqlClasses_);
 
 	sw.set(ISV.pdo_mysql, ISV.wcd_sql_mysql);
 	sw.set(ISV.pdo_pgsql, ISV.wcd_sql_postgres);
 	sw.set(ISV.pdo_sqlite, ISV.wcd_sql_sqlite);
 	sw.set(ISV.pdo_firebird, ISV.wcd_sql_firebird);
 
-	htab_rw dw(driverClasses_);
+	htab_cow dw(driverClasses_);
 
 	dw.set(ISV.pdo_mysql, ISV.wcd_ext_mysql);
 	dw.set(ISV.pdo_pgsql, ISV.wcd_ext_postgres);
@@ -177,7 +177,7 @@ IServer::activate(str_ptr name)
 	result = ic->newConnect(name);
 	if (result.value_.ok())
 	{
-		htab_rw hw(active_);
+		htab_cow hw(active_);
 		hw.set(name, result.value_);
 		//showobj("activate", result.value_);
 	}
@@ -226,7 +226,7 @@ IServer::instance()
 	
 
 	htab_rc arglist;
-	htab_rw args(arglist);
+	htab_cow args(arglist);
 	//new instance given a service callback key
 	args.push_back(ISV.svc_key);
 	// this "side effect" creates an instance of IServer, or gets existing,
@@ -435,13 +435,13 @@ IServer::config(htab_ptr data)
 	val_rc clist = data.get(ISV.sqls_key);
 	if (clist.isArray())
 	{
-		htab_rw(sqlClasses_).merge(clist.zarray());
+		htab_cow(sqlClasses_).merge(clist.zarray());
 	}
 
 	clist = data.get(ISV.drivers_key);
 	if (clist.isArray())
 	{
-		htab_rw(driverClasses_).merge(clist.zarray());
+		htab_cow(driverClasses_).merge(clist.zarray());
 	}
 	clist = data.get(ISV.db_config);
 	if (clist.isArray())
@@ -497,14 +497,14 @@ IServer::addConfig(obj_rc iconfig, str_ptr name)
 	}
 
 	cfg->setMyKey(name);
-	htab_rw(config_).set(name, iconfig);
+	htab_cow(config_).set(name, iconfig);
 	return result;
 }
 
 void 
 IServer::setAlias(str_ptr alias, str_ptr name)
 {
-	htab_rw(alias_).set(alias, name);
+	htab_cow(alias_).set(alias, name);
 }
 
 htab_ptr 

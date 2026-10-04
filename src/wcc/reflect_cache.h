@@ -39,7 +39,7 @@ public:
 
 	void clear();
 	
-	virtual void debug_info(htab_rw hw);
+	virtual void debug_info(htab_cow hw);
 	
 	VIRTUAL_ZOBJPTR
 	

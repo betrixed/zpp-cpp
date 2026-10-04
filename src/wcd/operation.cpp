@@ -34,7 +34,7 @@ using namespace wcc;
 base_obj_mgr<Operation> Operation::omg;
 
 void 
-Operation::debug_info(htab_rw di)
+Operation::debug_info(htab_cow di)
 {
 	base_d::debug_info(di);
 	di.set(SQSTR.db_ref, dbref_);
@@ -469,7 +469,7 @@ Operation::where(val_ptr lattr, val_ptr rattr, int op, int blogic)
 
 	htab_rc data;
 
-	htab_rw hw(data);
+	htab_cow hw(data);
 
 	if(op < 0)
 	{

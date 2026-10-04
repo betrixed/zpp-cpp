@@ -35,7 +35,7 @@ namespace wcc {
 
 		static Loader* cpp_global();
 
-		void debug_info(htab_rw di) override;
+		void debug_info(htab_cow di) override;
 		
 		Loader();
 

@@ -32,7 +32,7 @@ protected:
 
 public:
 
-	virtual void debug_info(htab_rw di);
+	virtual void debug_info(htab_cow di);
 	
 	//static htab_rc getAlive();
 

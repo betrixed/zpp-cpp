@@ -41,7 +41,7 @@ public:
 
 	static base_obj_mgr<MarkToHtml> omg;
 
-	void debug_info(htab_rw info) override;
+	void debug_info(htab_cow info) override;
 
 	void construct(int parse = 0, int render = 0);
 

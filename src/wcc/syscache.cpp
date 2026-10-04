@@ -45,7 +45,7 @@ base_obj_mgr<SysCache> SysCache::omg;
 
 
 void 
-SysCache::debug_info(htab_rw di)
+SysCache::debug_info(htab_cow di)
 {
 	di.set(SYSC.cache_str, cache_);
 	di.set(SYSC.expires_str, (int)expires_);

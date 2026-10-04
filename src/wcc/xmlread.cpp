@@ -470,7 +470,7 @@ Wcc_XmlRead::tagsTable()
 					value = xml_.xml_str_zval();
 
 					//showarray("tag_objs", tag_objs_);*/
-					htab_rw(tag_objs_).set(tag, value);	
+					htab_cow(tag_objs_).set(tag, value);	
 				}
 				break;
 			case Xntype::END_ELEMENT:
@@ -661,7 +661,7 @@ void Wcc_XmlRead::throwNoKey()
 	done_ = true;
 }
 
-void Wcc_XmlRead::debug_info(htab_rw s)
+void Wcc_XmlRead::debug_info(htab_cow s)
 {
 	//val_rc temp(xml_);
 
@@ -720,7 +720,7 @@ void Wcc_XmlRead::setValue(val_ptr value,  str_ptr key)
 				throwNoKey();
 			}
 			
-			htab_rw hw(ref);
+			htab_cow hw(ref);
 			//showstr("set array key", key);
 			//showmem("value", value);
 
@@ -738,7 +738,7 @@ void Wcc_XmlRead::setValue(val_ptr value,  str_ptr key)
 				throwKey(key);
 			}
 			//showmem("ref", ref);
-			htab_rw hw(ref);
+			htab_cow hw(ref);
 			//showarray("array write", hw);
 			//showmem("push value", value);
 

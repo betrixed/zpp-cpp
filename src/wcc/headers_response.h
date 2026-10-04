@@ -39,7 +39,7 @@ using namespace zpp;
 	public:
 		static Headers_mgr omg;
 		
-		virtual void debug_info(htab_rw ht);
+		virtual void debug_info(htab_cow ht);
 		 
 		void reset();
 		bool send();

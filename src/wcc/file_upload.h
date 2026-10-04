@@ -29,7 +29,7 @@ namespace wcc {
 	public:
 		static base_obj_mgr<FileUpload> omg;
 
-		virtual void debug_info(htab_rw hw);
+		virtual void debug_info(htab_cow hw);
 		
 		void construct(htab_ptr file_data, str_ptr name);
 

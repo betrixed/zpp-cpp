@@ -88,7 +88,7 @@ ReflectCache::getReflectClass(str_ptr class_name)
 
 	//showstr("getReflectClass", class_name);
 
-	htab_rw cache(cache_);
+	htab_cow cache(cache_);
 
 	val_ptr test(cache.get(class_name));
 
@@ -222,7 +222,7 @@ obj_rc
 ReflectCache::ReflectionMethod(obj_ptr obj, str_ptr method)
 {
 	htab_rc  args_array;
-	htab_rw  args(args_array);
+	htab_cow  args(args_array);
 
 	args.push_back(obj);
 	args.push_back(method);
@@ -232,7 +232,7 @@ ReflectCache::ReflectionMethod(obj_ptr obj, str_ptr method)
 }
 
 void
-ReflectCache::debug_info(htab_rw hw)
+ReflectCache::debug_info(htab_cow hw)
 {	
 	hw.set(RFC_data.cache_key, cache_);
 }

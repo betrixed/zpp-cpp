@@ -40,7 +40,7 @@ namespace wcd
 
 		virtual str_rc addParamEquals(val_ptr value);
 
-		void debug_info(htab_rw di) override;
+		void debug_info(htab_cow di) override;
 
 		//str_rc addParam(val_ptr value);
 		str_rc addParamList(htab_ptr values);

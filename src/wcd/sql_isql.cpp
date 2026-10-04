@@ -117,7 +117,7 @@ JoinInfo::add(val_ptr lexp, val_ptr rexp, int jtype, int logic)
 void 
 JoinInfo::addExpr(obj_ptr jexpr)
 {
-	htab_rw(joinExpr_).push_back(jexpr);
+	htab_cow(joinExpr_).push_back(jexpr);
 }
 
 str_ptr// static
@@ -177,7 +177,7 @@ JoinInfo::getJoinType(str_ptr s)
 
 
 void
-JoinTables::debug_info(htab_rw di)
+JoinTables::debug_info(htab_cow di)
 {
 	di.set(SQSTR.by_alias, byAlias_);
 	di.set(SQSTR.results, results_);
@@ -194,7 +194,7 @@ JoinTables::destruct()
 {
 	prime_.init();
 	//showarray("joins_", joins_);
-	htab_rw hw(joins_);
+	htab_cow hw(joins_);
 
 	hw.clear();
 	byAlias_.init();
@@ -212,7 +212,7 @@ JoinTables::addJoin(obj_ptr jiobj)
 {
 	obj_rc result(jiobj);
 
-	htab_rw(joins_).push_back(jiobj);
+	htab_cow(joins_).push_back(jiobj);
 
 	JoinInfo* ji = zobj_toc<JoinInfo>(jiobj);
 
@@ -237,14 +237,14 @@ JoinTables::addTable(obj_ptr icol)
 		result.error() << "addTable with no Alias or Name";
 		return result;
 	}
-	htab_rw(byAlias_).set(name, icol);
+	htab_cow(byAlias_).set(name, icol);
 	return result;
 }
 
 void 
 JoinTables::addResult(obj_ptr ta)
 {
-	htab_rw(results_).push_back(ta);
+	htab_cow(results_).push_back(ta);
 }
 
 void 
@@ -256,7 +256,7 @@ JoinTables::addWhere(val_ptr leftAttr, val_ptr rightAttr, int op, int logic)
 
 	je->construct(leftAttr, rightAttr, op, logic);
 
-	htab_rw(where_).push_back(jobj);
+	htab_cow(where_).push_back(jobj);
 }
 
 obj_rc
@@ -318,22 +318,22 @@ JoinTables::order(str_ptr name, bool descend)
 	val_rc desc;
 
 	desc.set_bool(descend);
-	htab_rw hw(pair);
+	htab_cow hw(pair);
 
 	hw.set(SQSTR.column, name);
 	hw.set(SQSTR.desc, desc);
 
-	htab_rw(orderby_).push_back(pair);
+	htab_cow(orderby_).push_back(pair);
 }
 
 obj_rc //static
 JoinTables::rowSplit(htab_ptr row, htab_ptr rename)
 {
 	htab_rc rec_temp;
-	htab_rw rec(rec_temp);
+	htab_cow rec(rec_temp);
 
 	htab_rc ok_temp;
-	htab_rw ok(ok_temp);
+	htab_cow ok(ok_temp);
 
 	obj_rc obj = class_data::std_object();
 
@@ -353,7 +353,7 @@ JoinTables::rowSplit(htab_ptr row, htab_ptr rename)
 				htab_rc tails;
 
 
-				htab_rw(tails).set(orig.zstr(), val);
+				htab_cow(tails).set(orig.zstr(), val);
 				rec.set(tail, tails);
 			}
 			else {

@@ -153,7 +153,7 @@ Services::activate(str_ptr key)
 
 		//showmem("callme return", result2);
 
-		htab_rw(active_).set(key, result2);
+		htab_cow(active_).set(key, result2);
 
 		result = get(key);
 	}
@@ -314,7 +314,7 @@ Services::newInstance(str_ptr name_class, htab_ptr arglist)
 	if (obj.ok())
 	{
 		//showarray("instances", instances_);
-		htab_rw(instances_).set(name_class, obj);
+		htab_cow(instances_).set(name_class, obj);
 		result.value_ = std::move(obj);
 	}
 	else {
@@ -353,7 +353,7 @@ Services::setObject(obj_ptr obj, str_ptr key)
 		key = obj.className();
 	}
 
-	htab_rw(instances_).set(key, obj);
+	htab_cow(instances_).set(key, obj);
 	return obj;
 }
 
@@ -372,7 +372,7 @@ bool Services::has(str_ptr name)
 
 void Services::setDefer(str_ptr name, val_ptr value)
 {
-	htab_rw(defer_).set(name, value);
+	htab_cow(defer_).set(name, value);
 }
 
 void  Services::set(str_ptr name, val_ptr value)
@@ -380,7 +380,7 @@ void  Services::set(str_ptr name, val_ptr value)
 	zval* data = (zval*) value;
 	zend_string* key = (zend_string*) name;
 
-	htab_rw temp(active_);
+	htab_cow temp(active_);
 
 	temp.set(key, data);
 }
@@ -388,7 +388,7 @@ void  Services::set(str_ptr name, val_ptr value)
 void  
 Services::set(str_ptr name, obj_ptr obj)
 {
-	htab_rw temp(active_);
+	htab_cow temp(active_);
 
 	temp.set(name, obj);
 }
@@ -445,7 +445,7 @@ Services::get(str_ptr name)
 void  
 Services::unset(str_ptr name)
 {
-	htab_rw(active_).unset(name);
+	htab_cow(active_).unset(name);
 }
 
 
@@ -455,7 +455,7 @@ Services::setThrowFail(bool value)
 	throw_fail_ = value;
 }
 
-void Services::debug_info(htab_rw info)
+void Services::debug_info(htab_cow info)
 {
 	base_d::debug_info(info);
 

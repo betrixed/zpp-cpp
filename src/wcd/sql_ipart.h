@@ -183,7 +183,7 @@ namespace wcd {
 
 		static base_obj_mgr<Expr> omg;
 
-		virtual void debug_info(htab_rw di);
+		virtual void debug_info(htab_cow di);
 
 		void construct(str_ptr val);
 
@@ -225,7 +225,7 @@ namespace wcd {
 
 		static base_obj_mgr<JoinExpr> omg;
 
-		virtual void debug_info(htab_rw di);
+		virtual void debug_info(htab_cow di);
 
 		static  str_ptr  opStr(int op);
 		static  str_ptr  boolStr(int nextop);
@@ -258,7 +258,7 @@ namespace wcd {
 
 		static base_obj_mgr<TableAttr> omg;
 
-		virtual void debug_info(htab_rw di);
+		virtual void debug_info(htab_cow di);
 
 		TableAttr() : SqlPartId(TA_PID) {}
 
@@ -285,7 +285,7 @@ namespace wcd {
 
 		static base_obj_mgr<Param> omg;
 
-		virtual void debug_info(htab_rw di);
+		virtual void debug_info(htab_cow di);
 		
 		Param() :  SqlPartId(PARAM_PID) {}
 
@@ -300,7 +300,7 @@ namespace wcd {
 		// Is this needed for an abstract class?
 		static base_obj_mgr<Literal> omg;
 
-		virtual void debug_info(htab_rw di);
+		virtual void debug_info(htab_cow di);
 
 		Literal() : SqlPartId(LIT_PID) {}
 
@@ -322,7 +322,7 @@ namespace wcd {
 
 		static base_obj_mgr<IColumns> omg;
 
-		virtual void debug_info(htab_rw di);
+		virtual void debug_info(htab_cow di);
 
 		IColumns() : SqlPartId(ICOL_PID) {}
 
@@ -365,7 +365,7 @@ namespace wcd {
 
 		void unsetCol(str_ptr key)
 		{
-			htab_rw names(colnames_);
+			htab_cow names(colnames_);
 			names.unset(key);
 		}
 
@@ -393,7 +393,7 @@ namespace wcd {
 		str_rc 		name_;
 		htab_rc 	attr_map_;
 	public:
-		virtual void debug_info(htab_rw di);
+		virtual void debug_info(htab_cow di);
 
 		static base_obj_mgr<TColumns> omg; // can't be same name as base??
 

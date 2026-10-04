@@ -247,7 +247,7 @@ namespace wcc {
 		val_return parse(str_ptr src);
 		obj_return	makeClass(str_ptr classname);
 		
-		virtual void debug_info(htab_rw ht);
+		virtual void debug_info(htab_cow ht);
 	
 		VIRTUAL_ZOBJPTR
 	

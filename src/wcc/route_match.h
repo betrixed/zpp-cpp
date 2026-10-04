@@ -25,12 +25,16 @@ protected:
 	obj_ptr    testRoute(obj_ptr robj);
 
 	obj_ptr    firstMatch(val_ptr wrap);
+
+	obj_rc     qry_hmap_;
+
 public:
 	obj_rc route_;
-	htab_rc roles_;
+	val_rc roles_;
 	htab_rc ob_args_;
 	htab_rc match_args_;
-	htab_rc errors_;
+	
+	bool_return erred_;
 
 // string values
 	str_rc uri_;
@@ -57,7 +61,9 @@ public:
 
 	void setCallInfo(str_ptr obclass, str_ptr obmethod, val_ptr args);
 
-	void debug_info(htab_rw di) override;
+	void debug_info(htab_cow di) override;
+
+	Hmap* query_copy();
 
 	obj_ptr getMatch() const
 	{
@@ -69,9 +75,9 @@ public:
 		route_ = ro;
 	}
 	
-	htab_ptr getErrors() const
+	str_rc getErrors()
 	{
-		return errors_;
+		return erred_.error().zstr();
 	}
 
 	str_ptr getUri() const
@@ -88,6 +94,8 @@ public:
 	{
 		return ob_args_;
 	}
+
+	bool allow_call(obj_ptr user);
 
 	bool find_route(RouteSet* routes);
 	void error_context(Route* route);
@@ -113,7 +121,7 @@ public:
 
 	str_rc debug_str() const;
 	
-	bool_return prepare_call();
+	bool_return prepare_call(obj_ptr user);
 
 	val_return call(htab_ptr extra, obj_ptr before, obj_ptr after);
 

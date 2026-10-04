@@ -45,7 +45,7 @@ void MTHInit::init()
 }
 
 void 
-MarkToHtml::debug_info(htab_rw info)
+MarkToHtml::debug_info(htab_cow info)
 {
     info.set(MTH.pflags_s, pflags_);
     info.set(MTH.rflags_s, rflags_);
@@ -65,7 +65,7 @@ MarkToHtml::construct(int parse, int render)
 {
 	pflags_ = parse;
     rflags_ = render;
-    htab_rw hw(tagclass_);
+    htab_cow hw(tagclass_);
 
     hw.set(MTH.blockquote, MTH.is_info);
 }
@@ -115,7 +115,7 @@ MarkToHtml::html_append(const char* txt, size_t tlen)
 void 
 MarkToHtml::setTagClass(str_ptr tag, str_ptr classattr)
 {
-    htab_rw tc(tagclass_);
+    htab_cow tc(tagclass_);
 
     tc.set(tag, classattr);
 }

@@ -73,7 +73,7 @@ protected:
 public:
 	static base_obj_mgr<CacheMgr> omg;
 
-	void debug_info(htab_rw di) override;
+	void debug_info(htab_cow di) override;
 
 	void construct(htab_ptr cfg);
 

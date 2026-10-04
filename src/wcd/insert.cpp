@@ -55,7 +55,7 @@ Insert::getSqlParams()
 			htab_ptr names = icols->getColNames();
 
 			htab_rc coldata_rc;
-			htab_rw coldata(coldata_rc);
+			htab_cow coldata(coldata_rc);
 
 			htab_walk wk;
 			auto      name_ptr = wk.key();

@@ -1,6 +1,8 @@
 <?php
 namespace Wcc;
 
+use Zpp\DebugLog;
+
 /** Folder containing Wcc PHP source */
 $workdir = dirname(__DIR__);
 
@@ -19,6 +21,7 @@ function get_version(string $extname)
     }
     return $result;
 }
+
 function show_versions() 
 {
     echo "Versions -- " . PHP_EOL;
@@ -50,7 +53,6 @@ if (!class_exists(Loader::class))
 $loader = Loader::instance();
 $loader->setExtLoader($extloader);
 $loader->setBaseDir($wcc_root);
-
 
 $finder = $loader->getFinder();
 $finder->addPath('voku\helper', "$wcc_root/voku/helper");

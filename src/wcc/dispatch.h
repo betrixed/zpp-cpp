@@ -28,6 +28,7 @@ using namespace zpp;
 		obj_rc   route_match_;
 		obj_rc   config_;
 		obj_rc   assets_;
+		obj_rc   user_;
 
 	private:
 		Services*    svc_ptr();
@@ -46,7 +47,7 @@ using namespace zpp;
 
 	public:
 
-		void debug_info(htab_rw hw) override;
+		void debug_info(htab_cow hw) override;
 		
 		static base_obj_mgr<Dispatch> omg;
 
@@ -130,6 +131,7 @@ public:
 	str_intern  services_str;
 
 	str_intern  roles_str;
+	str_intern  userdata_str;
 
 
 	void init() override;

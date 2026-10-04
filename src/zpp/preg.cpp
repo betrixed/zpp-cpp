@@ -70,7 +70,7 @@ val_rc
 union_values(htab_ptr list1, htab_ptr list2)
 {
 	htab_rc   keyset;
-	htab_rw ks(keyset);
+	htab_cow  ks(keyset);
 
 	val_rc one(1);
 
@@ -90,7 +90,7 @@ union_values(htab_ptr list1, htab_ptr list2)
 	// convert to list
 	val_rc result;
 	result.new_array();
-	htab_rw wlist(result);
+	htab_cow wlist(result);
 
 	for(wk.start(keyset); wk.ok(); wk.next())
 	{
@@ -117,7 +117,7 @@ preg::capture(size_t ix)
 
 	if (test.isArray())
 	{
-		htab_rw captures(test);
+		htab_cow captures(test);
 
 		if (ix < captures.size()) 
 		{

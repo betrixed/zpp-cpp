@@ -153,7 +153,7 @@ void Run_init::init()
 }
 
 
-void Run::debug_info(htab_rw di)
+void Run::debug_info(htab_cow di)
 {
 	base_d::debug_info(di);
 }
@@ -283,7 +283,7 @@ void Run::construct()
 
 	
 	htab_rc start_args;
-	htab_rw args(start_args);
+	htab_cow args(start_args);
 
 	obj_rc stats = ReflectCache::staticInstance(Run_i.phpstats_class);
 
@@ -309,7 +309,7 @@ Run::setup_world()
 {
 	obj_ptr self(self_);
 #ifdef DBG_LOG_RUN
-	DebugLog* log = DebugLog::cpp_global();
+	//DebugLog* log = DebugLog::cpp_global();
 #endif
 	val_return ctest = Services::service(Run_i.config_str);
 
@@ -325,10 +325,10 @@ Run::setup_world()
 
 	str_rc app_class = config.str_property(Run_i.app_class);
 #ifdef DBG_LOG_RUN
-	if (log)
+	/*if (log)
 	{
 		log->dump("app_class", app_class);
-	}
+	}*/
 #endif
 
 	obj_rc site = ReflectCache::staticInstance(app_class);
@@ -436,7 +436,7 @@ Run::setup_cryptic()
 		result.error() << "File " << path << " not found";
 	}
 	#ifdef DBG_LOG_RUN
-	if (log)
+		if (log)
 		{
 			log->line("End setup_cryptic");
 		}
@@ -449,7 +449,7 @@ Run::setup_cryptic()
 void Run::temp_folders()
 {
 	#ifdef DBG_LOG_RUN
-	DebugLog* log = DebugLog::cpp_global();
+	//DebugLog* log = DebugLog::cpp_global();
 	#endif
 
 	/*if (log)
@@ -489,8 +489,8 @@ void Run::temp_folders()
 	htab_rc missing_rc;
 	htab_rc temp_path_rc;
 
-	htab_rw missing(missing_rc);
-	htab_rw temp_path(temp_path_rc);
+	htab_cow missing(missing_rc);
+	htab_cow temp_path(temp_path_rc);
 
 	htab_walk wk;
 	auto name = wk.value();
@@ -537,10 +537,10 @@ void Run::temp_folders()
 		
 	}
 	#ifdef DBG_LOG_RUN
-	if (log)
+	/*if (log)
 	{
 		log->line("End temp_folders");
-	}
+	}*/
 	#endif
 
 }
@@ -640,7 +640,7 @@ Run::config_init(str_ptr bootstrap)
 
 	htab_rc bcfg = self.array_property(Run_i.bootstrap);
 	#ifdef DBG_LOG_RUN
-	DebugLog* log = DebugLog::cpp_global();
+	//DebugLog* log = DebugLog::cpp_global();
 	#endif
 
 	if (bcfg.size())
@@ -795,10 +795,10 @@ Run::config_init(str_ptr bootstrap)
 		
 	}
 	#ifdef DBG_LOG_RUN
-	if (log)
+	/*if (log)
 	{
 		log->line("End bootstrap");
-	}
+	}*/
 	#endif
 
 	return result;

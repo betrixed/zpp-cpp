@@ -31,7 +31,7 @@ namespace wcd {
 
 		static base_obj_mgr<IBuild> omg;
 
-		virtual void debug_info(htab_rw di);
+		virtual void debug_info(htab_cow di);
 		
 		void construct(const weak_ref& driver);
 		void destruct();

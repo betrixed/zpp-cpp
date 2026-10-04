@@ -9,7 +9,7 @@ namespace wcx {
 
 static void stdEntityInit(htab_rc& map)
 {
-	htab_rw hw(map);
+	htab_cow hw(map);
 
 	hw.set(XMLPi.LT_ent, (int) '<');
 	hw.set(XMLPi.GT_ent, (int) '>');

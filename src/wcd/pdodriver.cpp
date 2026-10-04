@@ -117,7 +117,7 @@ PdoDriver::getConnectOptions()
 {
 	htab_rc result;
 
-	htab_rw options(result);
+	htab_cow options(result);
 
 	options.push_back((int)PDO_ATTR_ERRMODE);
 	options.push_back((int)PDO_ERRMODE_EXCEPTION);
@@ -154,7 +154,7 @@ PdoDriver::connect()
 	str_rc pw = cfg->getPassword();
 
 	htab_rc  args_mgr;
-	htab_rw args(args_mgr);
+	htab_cow args(args_mgr);
 
 	args.push_back(dsn.value_);
 	args.push_back(user);

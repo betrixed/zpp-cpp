@@ -22,7 +22,7 @@ namespace wcc {
 
 		static str_ptr rex_url();
 		
-		virtual void debug_info(htab_rw hw);
+		virtual void debug_info(htab_cow hw);
 
 		void construct(obj_ptr rset);
 

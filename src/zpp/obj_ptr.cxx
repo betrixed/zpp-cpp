@@ -135,7 +135,7 @@ obj_ptr::get_proplist(htab_rc& mgr)
         return false;
     }
 
-    htab_rw pstore(retval, ct);
+    htab_cow pstore(retval, ct);
     for (size_t i = 0; i < ct; i++) 
     {
         prop_info = ce->properties_info_table[i];

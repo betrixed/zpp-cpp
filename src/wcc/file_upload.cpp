@@ -22,7 +22,7 @@ using namespace zpp;
 	
 base_obj_mgr<FileUpload> FileUpload::omg;
 
-void FileUpload::debug_info(htab_rw di)
+void FileUpload::debug_info(htab_cow di)
 {
 	di.set(RQit.error_key, error_);
 	di.set(RQit.namekey, name_);

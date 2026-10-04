@@ -183,7 +183,7 @@ protected:
 	obj_rc newIterator(str_ptr root)
 	{
 		htab_rc args_array;
-		htab_rw args(args_array);
+		htab_cow args(args_array);
 
 		args.push_back(root);
 		args.push_back(SFDi.get_fsi_flags());
@@ -246,7 +246,7 @@ public:
 
 		setdirit(dit);
 
-		htab_rw files(expired_);
+		htab_cow files(expired_);
 	
 		fn_noparams fvalid(dit_valid);
 		bool more = fvalid.zbool();
@@ -603,7 +603,7 @@ DirCache::register_class(zend_class_entry* ce)
 }
 
 void 
-DirCache::debug_info(htab_rw s)
+DirCache::debug_info(htab_cow s)
 {
 	ICache::debug_info(s);
 

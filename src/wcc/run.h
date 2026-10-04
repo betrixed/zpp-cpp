@@ -21,7 +21,7 @@ namespace wcc {
 
 		static base_obj_mgr<Run> omg;
 
-		void debug_info(htab_rw di) override;
+		void debug_info(htab_cow di) override;
 
 		void construct();
 		void destruct();

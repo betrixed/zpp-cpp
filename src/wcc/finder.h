@@ -29,7 +29,7 @@ public:
 	
 	static str_rc  find_extension(str_ptr fpath, htab_ptr extlist);
 
-	virtual void debug_info(htab_rw hw);
+	virtual void debug_info(htab_cow hw);
 
 	virtual ~Finder();
 	

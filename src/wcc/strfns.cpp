@@ -268,7 +268,7 @@ ZEND_METHOD(Wcc_Str, test_wcc)
 	// test reference pass for array_pop
 	val_rc list_mgr;
 
-	htab_rw list(list_mgr);
+	htab_cow list(list_mgr);
 
 	for(int i = 0; i < 10; i++)
 	{
@@ -283,7 +283,7 @@ ZEND_METHOD(Wcc_Str, test_wcc)
 
 	showmem("last value", lastval);
 	
-	// now test the htab_rw pop(), without making a reference
+	// now test the htab_cow pop(), without making a reference
 
 	val_rc last2 = list.pop();
 

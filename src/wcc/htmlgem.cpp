@@ -211,7 +211,7 @@ HtmlGem::~HtmlGem()
 
 }
 
-void HtmlGem::debug_info(htab_rw hw)
+void HtmlGem::debug_info(htab_cow hw)
 {
 	hw.set(HTG.date_icon, date_icon_);
 	hw.set(HTG.date_fmt, date_fmt_);
@@ -231,7 +231,7 @@ HtmlGem::HtmlGem() : base_d()
 
 	id_add_ = 0;
 
-	htab_rw hw(styles_);
+	htab_cow hw(styles_);
 
 	str_rc figure_style("float:left;width:47%;margin:10px;");
 	hw.set(HTG.figurekey, figure_style);
@@ -262,7 +262,7 @@ void HtmlGem::setDateIcon(str_ptr v)
 }
 
 str_return 
-HtmlGem::ensureIdName(htab_rw ht)
+HtmlGem::ensureIdName(htab_cow ht)
 {
 	str_return result;
 
@@ -398,11 +398,11 @@ HtmlGem::generateTag(str_ptr tag, htab_ptr pset)
 }
 
 str_rc 
-HtmlGem::getTag(htab_ptr ps, htab_rw ex, str_ptr tag)
+HtmlGem::getTag(htab_ptr ps, htab_cow ex, str_ptr tag)
 {
 	htab_rc pscopy(htab_ptr::empty_array());
 
-	htab_rw pset(pscopy);
+	htab_cow pset(pscopy);
 	// add defaults
 	pset.merge(ex);
 	pset.merge(ps);
@@ -549,7 +549,7 @@ HtmlGem::button(htab_ptr pset)
 {
 	htab_rc pscopy(pset);
 
-	htab_rw ps(pscopy);
+	htab_cow ps(pscopy);
 
 	str_rc content = ps.get(HTG.content_key);
 
@@ -582,7 +582,7 @@ HtmlGem::checkbox(htab_ptr pset)
 
 	htab_rc pscopy(pset);
 
-	htab_rw ps(pscopy);
+	htab_cow ps(pscopy);
 
 	str_return id_result = ensureIdName(ps);
 
@@ -630,7 +630,7 @@ HtmlGem::checkbox(htab_ptr pset)
 
 	htab_rc   htemp;
 
-	htab_rw hp(htemp);
+	htab_cow hp(htemp);
 
 	hp.set(HTG.typekey, HTG.checkboxkey);
 
@@ -681,7 +681,7 @@ str_rc HtmlGem::submit(htab_ptr pset)
 {
 	htab_rc  tab_list;
 	// defaults
-	htab_rw list(tab_list);
+	htab_cow list(tab_list);
 
 	//defaults
 	list.set(HTG.typekey,HTG.submit);
@@ -695,7 +695,7 @@ HtmlGem::datetime_value(htab_ptr pset)
 {
 	str_buf out;
 	htab_rc pcopy(pset);
-	htab_rw ps(pcopy);
+	htab_cow ps(pcopy);
 
 	val_ptr val = ps.get(HTG.valuekey);
 	str_ptr fmt = ps.get(HTG.format);
@@ -774,9 +774,9 @@ str_rc
 HtmlGem::text_value(htab_ptr pset)
 {
 	htab_rc pscopy(pset);
-	htab_rw ps(pscopy);
+	htab_cow ps(pscopy);
 
-	htab_rw keys2(label_keys2_);
+	htab_cow keys2(label_keys2_);
 
 	if (keys2.size() == 0) {
 		keys2.push_back(HTG.labelkey);
@@ -802,7 +802,7 @@ HtmlGem::text_value(htab_ptr pset)
 htab_ptr 
 HtmlGem::getLabelKeys1() 
 {
-	htab_rw hw(label_keys1_);
+	htab_cow hw(label_keys1_);
 
 	if (hw.size() == 0)
 	{
@@ -817,10 +817,10 @@ htab_rc
 HtmlGem::label_method(htab_rc pscopy, int& labeltype)
 {
 	htab_ptr kist = getLabelKeys1();
-	htab_rw  ps(pscopy);
+	htab_cow  ps(pscopy);
 
 	htab_rc  result = htab_rc::extract(kist, ps);
-	htab_rw hw_label(result);
+	htab_cow hw_label(result);
 
 	str_rc ltext = ps.get(HTG.labelkey);
 
@@ -861,12 +861,12 @@ HtmlGem::inputType(htab_ptr pset, str_ptr itype)
 	str_return result;
 
 	htab_rc atype_ht;
-	htab_rw atype(atype_ht);
+	htab_cow atype(atype_ht);
 
 	atype.set(HTG.typekey, itype);
 	
 	htab_rc pscopy(pset);
-	htab_rw ps(pscopy);
+	htab_cow ps(pscopy);
 	
 	str_return id_result = ensureIdName(ps);
 	if (id_result.has_errors())
@@ -891,7 +891,7 @@ HtmlGem::inputType(htab_ptr pset, str_ptr itype)
 
 
 	htab_rc ht_label = label_method(ps, label_loc);
-	htab_rw ldata(ht_label);
+	htab_cow ldata(ht_label);
 
 	// label method will have "unset" is
 	/* if (id.ok())
@@ -942,7 +942,7 @@ HtmlGem::radio(htab_ptr pset)
 
 	htab_rc pscopy(pset);
 
-	htab_rw ps(pscopy);
+	htab_cow ps(pscopy);
 
 	str_rc label_s = ps.get(HTG.labelkey);
 
@@ -965,7 +965,7 @@ HtmlGem::radio(htab_ptr pset)
 	if (label_s.size()) 
 	{
 		htab_rc ldata_ht;
-		htab_rw ldata(ldata_ht);
+		htab_cow ldata(ldata_ht);
 
 		ldata.set(HTG.idkey, id_result.value_);
 		ldata.set(HTG.labelkey,label_s);
@@ -982,7 +982,7 @@ HtmlGem::email(htab_ptr pset)
 	str_return result;
 
 	htab_rc pscopy(pset);
-	htab_rw ps(pscopy);
+	htab_cow ps(pscopy);
 
 	str_rc test = ps.get(HTG.placehold);
 
@@ -1028,14 +1028,14 @@ str_rc
 HtmlGem::xcheck(htab_ptr pset)
 {
 	htab_rc pscopy(pset);
-	htab_rw ps(pscopy);
+	htab_cow ps(pscopy);
 
 	if (ps.has_key(HTG.namekey)) {
 		ps.set(HTG.namekey, HTG.xcheck);
 	}
 
 	htab_rc extra;
-	htab_rw ex(extra);
+	htab_cow ex(extra);
 
 	ex.set(HTG.typekey, HTG.hidden)                                                                                                                                                                                                               ;
 	return getTag(ps, ex, HTG.inputtag);
@@ -1063,7 +1063,7 @@ str_rc
 HtmlGem::linkTo(htab_ptr pset)
 {
 	htab_rc   pscopy(pset);
-	htab_rw ps(pscopy);
+	htab_cow ps(pscopy);
 	
 	str_rc href = ps.get(HTG.hrefkey);
 
@@ -1132,7 +1132,7 @@ htab_ptr HtmlGem::getSelectKeys()
 {
 	if (htab_ptr(select_keys_).size()==0)
 	{
-		htab_rw hw(select_keys_);
+		htab_cow hw(select_keys_);
 
 		hw.set(HTG.idkey,true);
 		hw.set(HTG.classkey,true);
@@ -1152,7 +1152,7 @@ HtmlGem::select_list(htab_ptr pset)
 	val_ptr test;
 
 	htab_rc   pscopy(pset);
-	htab_rw   ps(pscopy);
+	htab_cow   ps(pscopy);
 
 	val_rc list = ps.get(HTG.listkey);
 
@@ -1245,7 +1245,7 @@ str_return
 
 	htab_rc pset_copy(pset);
 
-	htab_rw ps(pset_copy);
+	htab_cow ps(pset_copy);
 
 	str_return id_value = ensureIdName(ps);
 
@@ -1263,7 +1263,7 @@ str_return
 	}
 	int method = 0;
 	htab_rc label_ht = label_method(ps,method);
-	htab_rw label(label_ht);
+	htab_cow label(label_ht);
 
 	val_rc  pscopy(pset_copy);
 	str_rc select = select_list(pscopy);
@@ -1285,7 +1285,7 @@ str_return
 
 void HtmlGem::setStyle(str_ptr name, val_ptr value)
 {
-	htab_rw hw(styles_);
+	htab_cow hw(styles_);
 
 	hw.set(name,value); // map or string "xx:ss;"
 }
@@ -1298,7 +1298,7 @@ style_toArray(str_ptr style)
 	htab_ptr pairs(pairs_val);
 
 	htab_rc result;
-	htab_rw hw(result);
+	htab_cow hw(result);
 
 	htab_walk wk;
 
@@ -1334,7 +1334,7 @@ mergeStyles(val_ptr list1, val_ptr list2)
 	{
 		result = list1.zarray();
 	}
-	htab_rw hw(result);
+	htab_cow hw(result);
 	if (list2.isString())
 	{
 		htab_rc merge2 = style_toArray(list2.to_zstr());
@@ -1410,7 +1410,7 @@ str_rc HtmlGem::figure(htab_ptr pset)
 	str_buf out;
 
 	htab_rc pscopy(pset);
-	htab_rw ps(pscopy);
+	htab_cow ps(pscopy);
 
 	str_rc src = ps.get(HTG.file_key);
 	str_ptr test(src);
@@ -1450,7 +1450,7 @@ HtmlGem::datetime(htab_ptr pset)
 	htab_rc pscopy(pset);
 	//showarray("pscopy", pscopy);
 	
-	htab_rw ps(pscopy);
+	htab_cow ps(pscopy);
 
 	str_return  id_value = ensureIdName(ps);
 	//showstr("idstr", idstr);
@@ -1479,7 +1479,7 @@ HtmlGem::datetime(htab_ptr pset)
 
 	int method = 0;
 	htab_rc label_ht = label_method(ps, method);
-	htab_rw label(label_ht);
+	htab_cow label(label_ht);
 
 	//showarray("label table", label);
 
@@ -1501,7 +1501,7 @@ HtmlGem::datetime(htab_ptr pset)
 	str_rc dt_class_str = dtclass.zstr();
 
 	htab_rc attrlist_ht;
-	htab_rw attrlist(attrlist_ht);
+	htab_cow attrlist(attrlist_ht);
 
 	attrlist.set(HTG.typekey, HTG.textkey);
 
@@ -1587,7 +1587,7 @@ HtmlGem::multiline(htab_ptr pset)
 	//showarray("pscopy", pscopy);
 	
 
-	htab_rw ps(pscopy);
+	htab_cow ps(pscopy);
 
 	str_return id_value = ensureIdName(ps);
 	if (id_value.has_errors())

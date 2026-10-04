@@ -70,8 +70,7 @@ void Route_init::init()
 	OBJX_S = "_obx";
 	ROLE_S = "_rol";
 
-
-	htab_rw rv(route_verbs);
+	htab_cow rv(route_verbs);
 
 	rv.set(GET_S, (int)html::V_GET);
 	rv.set(POST_S, (int)html::V_POST);
@@ -87,7 +86,7 @@ void Route_init::init()
 	//zend_printf("route_verbs table size %d, used %d\n", route_verbs.nTableSize, route_verbs.nNumUsed);
 	//verb_names.reset();
 
-	htab_rw p2(verb_names);
+	htab_cow p2(verb_names);
 
 	// Push in ascending order (powers of 2)
 	p2.push_back(GET_S); 
@@ -166,7 +165,7 @@ Route::~Route()
 }
 
 void
-Route::debug_info(htab_rw hw)
+Route::debug_info(htab_cow hw)
 {
 	hw.set(route_data.cc_verbs, (int)verbs_);
 
@@ -189,7 +188,7 @@ Route::__serialize()
 
 	htab_rc result;
 
-	htab_rw hw(result);
+	htab_cow hw(result);
 	hw.set(route_data.cc_id, id_);
 
 	hw.set(route_data.cc_verbs,  (int)verbs_);
@@ -410,7 +409,7 @@ Route::getVerbNames( zend_long flags )
 {
 	htab_rc result;
 
-	htab_rw rval(result);
+	htab_cow rval(result);
 
 	htab_ptr names(route_data.verb_names);
 

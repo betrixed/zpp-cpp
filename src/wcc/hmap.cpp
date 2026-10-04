@@ -5,8 +5,11 @@
 #include "hmap.h"
 #endif
 
+//#define DBG_LOG_HMAP
+#ifdef DBG_LOG_HMAP
 #ifndef WCC_DEBUGLOG_H
 #include "debuglog.h"
+#endif
 #endif
 
 extern "C" {
@@ -218,7 +221,7 @@ Hmap_php::write_property(zend_object* object, zend_string* name, zval* value, vo
 	//{
 		Hmap* cobj = zobj_toc<Hmap>(object);
 		
-		htab_rw hw(cobj->data_);
+		htab_cow hw(cobj->data_);
 
 		zval* result = zend_hash_update(hw, name, value);
 		if (Z_TYPE_FLAGS_P(result) != 0)
@@ -258,7 +261,7 @@ Hmap_php::unset_property(zend_object* object, zend_string* name, void **cache_sl
 	}
 	*/
 	Hmap* cobj = zobj_toc<Hmap>(object);
-	htab_rw hw(cobj->data_);
+	htab_cow hw(cobj->data_);
 	zend_hash_del(hw, name);
 }
 
@@ -292,7 +295,7 @@ Hmap_php::get_properties_for(zend_object* object, zend_prop_purpose purpose)
 	case ZEND_PROP_PURPOSE_DEBUG:
 		{
 			htab_rc temp_mgr;
-			htab_rw  di(temp_mgr);
+			htab_cow  di(temp_mgr);
 
 			
 
@@ -361,7 +364,7 @@ void
 Hmap_php::write_dimension(zend_object* obj, zval* offset, zval* set_value)
 {
 	Hmap* cobj = zobj_toc<Hmap>(obj);
-	htab_rw hw(cobj->data_);
+	htab_cow hw(cobj->data_);
 	hw.set(offset, set_value);
 }
 
@@ -392,7 +395,7 @@ void
 Hmap_php::unset_dimension(zend_object* object, zval* unset)
 {
 	Hmap* cobj = zobj_toc<Hmap>(object);
-	htab_rw hw(cobj->data_);
+	htab_cow hw(cobj->data_);
 	hw.unset(unset);
 }
 
@@ -445,23 +448,47 @@ val_rc
 Hmap::get(str_ptr name)
 {	
 	val_rc result;
+
+
 	htab_ptr look(data_);
+
+	#ifdef DBG_LOG_HMAP
+	DebugLog* log = DebugLog::cpp_global();
+	log->dump("get str key", name);
+	log->dump("look", look);
+	#endif
+
 	if (look.ok())
 	{
 		result = look.get(name);
+		#ifdef DBG_LOG_HMAP
+		log->dump("result", result);
+		#endif
 	}
 	return result;
 }
 
-val_rc Hmap::get(val_ptr key)
+val_rc 
+Hmap::get(val_ptr key)
 {
 	val_rc result;
 
 	htab_ptr look(data_);
+
+	#ifdef DBG_LOG_HMAP
+	DebugLog* log = DebugLog::cpp_global();
+	log->dump("get val_ptr key", key);
+	log->dump("look", look);
+	#endif
+
+	
 	if (look.ok())
 	{
-		result = look.get(key);
+		result = look.get((zval*)key);
 	}
+	#ifdef DBG_LOG_HMAP
+		log->dump("result", result);
+		#endif
 	return result;
 }
 
@@ -469,7 +496,7 @@ val_rc Hmap::get(val_ptr key)
 void  
 Hmap::unset(str_ptr name)
 {
-	htab_rw hw(data_);
+	htab_cow hw(data_);
 	if (hw.ok())
 	{
 		hw.unset(name);
@@ -479,12 +506,18 @@ Hmap::unset(str_ptr name)
 void   
 Hmap::set(str_ptr name, val_ptr value)
 {
-	htab_rw hw(data_);
+	htab_cow hw(data_);
 	hw.set(name, value);
 }
 
+void   
+Hmap::set(val_ptr key, val_ptr value)
+{
+	htab_cow hw(data_);
+	hw.set(key, value);
+}
 
-void Hmap::debug_info(htab_rw hw)
+void Hmap::debug_info(htab_cow hw)
 {
 	// allow derived classes to override
 	base_d::debug_info(hw);
@@ -495,7 +528,7 @@ htab_rc
 Hmap::subsetkey(str_ptr key)
 {
 	htab_rc result;
-	htab_rw hw(result);
+	htab_cow hw(result);
 	val_rc value = get(key);
 	hw.set(key, value);
 	return result;
@@ -506,7 +539,7 @@ htab_rc
 Hmap::subset(htab_ptr data)
 {
 	htab_rc result;
-	htab_rw hw(result);
+	htab_cow hw(result);
 
 	htab_walk wk;
 
@@ -523,7 +556,7 @@ void
 Hmap::addArray(htab_ptr data)
 {
 	for_key_value fkv;
-	htab_rw hw(data_);
+	htab_cow hw(data_);
 
 	for(fkv.start(data); fkv.ok(); fkv.next())
 	{
@@ -693,32 +726,29 @@ ZEND_METHOD(Wcc_Hmap, has)
 
 ZEND_METHOD(Wcc_Hmap, get)
 {
-	zend_string* key;
+	zarg_rd args(execute_data);
+	val_ptr key = args.need(0);
 
-	ZEND_PARSE_PARAMETERS_START(1,1)
-	Z_PARAM_STR(key)
-	ZEND_PARSE_PARAMETERS_END();
-
-	auto cobj = zval_toc<Hmap>(ZEND_THIS);
-
-	val_rc temp = cobj->get(key);
-	temp.move_zv(return_value);
+	if (!args.throw_errors())
+	{
+		auto cobj = zval_toc<Hmap>(ZEND_THIS);
+		val_rc temp = cobj->get(key);
+		temp.move_zv(return_value);
+	}
 }
 
 ZEND_METHOD(Wcc_Hmap, set)
 {
-	zend_string* key;
-	zval*    value;
+	zarg_rd args(execute_data);
 
-	ZEND_PARSE_PARAMETERS_START(2,2)
-	Z_PARAM_STR(key)
-	Z_PARAM_ZVAL(value)
-	ZEND_PARSE_PARAMETERS_END();
+	val_ptr key = args.need(0);
+	val_ptr value = args.need(1);
 
-	auto cobj = zval_toc<Hmap>(ZEND_THIS);
-
-	//showstr("set call", key);
-	cobj->set(key, value);
+	if (!args.throw_errors())
+	{
+		auto cobj = zval_toc<Hmap>(ZEND_THIS);
+		cobj->set(key, value);
+	}
 }
 
 ZEND_METHOD(Wcc_Hmap, unset)
@@ -839,17 +869,16 @@ ZEND_METHOD(Wcc_Hmap, offsetGet)
 
 ZEND_METHOD(Wcc_Hmap, offsetSet)
 {
-	zval*	key;
-	zval*	value;
+	zarg_rd args(execute_data);
 
-	ZEND_PARSE_PARAMETERS_START(2,2)
-	Z_PARAM_ZVAL(key)
-	Z_PARAM_ZVAL(value)
-	ZEND_PARSE_PARAMETERS_END();
+	val_ptr key = args.need(0);
+	val_ptr value = args.need(1);
 
-	auto cobj = zval_toc<Hmap>(ZEND_THIS);
-		zend_printf("offsetSet called\n");
-	cobj->set(key, val_ptr(value));
+	if (!args.throw_errors())
+	{
+		auto cobj = zval_toc<Hmap>(ZEND_THIS);
+		cobj->set(key, value);
+	}
 }
 
 ZEND_METHOD(Wcc_Hmap, offsetExists)

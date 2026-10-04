@@ -93,8 +93,7 @@ val_rc::make_ref()
         Z_TYPE_INFO_P(zp) = IS_REFERENCE_EX; 
         */
         ZVAL_NEW_REF(&zv_, zp);  
-        //showmem("make_ref", &zv_);
-        
+        //showmem("make_ref", &zv_); 
     }                      
 }
 
@@ -138,6 +137,11 @@ val_rc::new_array()
     val_ptr(&zv_).bind_array(ht);  
     htab_rc::try_decref(ht); // because new primary mgr
     //showmem("new_array", &zv_);
+}
+bool
+val_rc::isEmpty() const
+{
+    return val_ptr((zval*)&zv_).isEmpty();
 }
 
 void 

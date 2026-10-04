@@ -47,7 +47,7 @@ Simple::destruct()
 }
 
 void 
-Simple::debug_info(htab_rw di)
+Simple::debug_info(htab_cow di)
 {	
 	di.set(SQSTR.driver, db_);
 	di.set(SQSTR.fetch_key, fetch_);
@@ -93,7 +93,7 @@ Simple::arrayMap(str_ptr keycol,
 
 	if (rows.size())
 	{
-		htab_rw result(result_mgr);
+		htab_cow result(result_mgr);
 
 		htab_walk wk;
 		auto row = wk.value();
@@ -177,7 +177,7 @@ Simple::bind(val_ptr value)
 
 	IDriver* db = zobj_toc<IDriver>(db_);
 	result = db->param(values_.size()+1);
-	htab_rw hw(values_);
+	htab_cow hw(values_);
 	if ((result.size()==1)&&result.starts_with('?'))
 	{
 		hw.push_back(value);

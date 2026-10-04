@@ -20,7 +20,7 @@ using namespace zpp;
 		str_rc  name_;
 	public:
 
-		void debug_info(htab_rw hw) override;
+		void debug_info(htab_cow hw) override;
 		
 		static base_obj_mgr<Module> omg;
 

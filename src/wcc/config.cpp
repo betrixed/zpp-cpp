@@ -22,39 +22,79 @@ namespace wcc {
 	using namespace zpp;
 
 
-	Config::Config_Mgr<Config> Config::omg;
+Config::Config_Mgr<Config> Config::omg;
 
 #ifdef CONFIG_HANDLERS
 zval* 
 Config::read_dimension(zend_object* obj, zval* offset, int type,  zval* return_value)
 {
 	//zend_std_read_property(zend_object *zobj, zend_string *name, int type, void **cache_slot, zval *rv)
-	void* slot = nullptr;
-	return zend_std_read_property(obj, val_ptr(offset).zstr(), type, &slot, return_value);
+	str_rc propkey = val_ptr(offset).to_propkey();
+	Config* cobj = zobj_toc<Config>(obj);
+	val_rc result = cobj->get(propkey);
+	result.move_zv(return_value);
+	return return_value;
+}
+
+ZEND_RESULT_CODE 
+Config::count_elements(zend_object* object, zend_long* count)
+{
+	Config* cobj = zobj_toc<Config>(object);
+	*count = cobj->count();
+	return SUCCESS;
 }
 
 void 
 Config::write_dimension(zend_object* obj, zval* offset,  zval* set_value)
 {
-	void* slot = nullptr;
-	zend_std_write_property(obj, val_ptr(offset).zstr(), set_value, &slot);
+	str_rc propkey = val_ptr(offset).to_propkey();
+	Config* cobj = zobj_toc<Config>(obj);
+	cobj->set(propkey, val_ptr(set_value));
+
 }
 
 int   
 Config::has_dimension(zend_object *object, zval *offset, int check_empty)
 {
-	return obj_ptr(object).has_property(offset);
+	int result = 0;
+	str_rc propkey = val_ptr(offset).to_propkey();
+	Config* cobj = zobj_toc<Config>(object);
+	if (!cobj->has(propkey))
+	{
+		result = 0;
+	}
+	else if (check_empty) {
+		val_rc value = cobj->get(propkey);
+		result = (value.ok() ? 1 : 0);
+	}
+	else {
+		result = 1;
+	}
+	return result;
 }
 
 void   
 Config::unset_dimension(zend_object *object, zval *unset)
 {
-	return obj_ptr(object).unset_property(unset);
+	str_rc propkey = val_ptr(unset).to_propkey();
+	Config* cobj = zobj_toc<Config>(object);
+	cobj->unset(propkey);
 }
-
 
 #endif
 
+zend_long 
+Config::count() const
+{
+	zend_object* self = self_;
+	zend_long result  = self->ce->default_properties_count;
+
+	if (self->properties)
+	{
+		result += zend_hash_num_elements(self->properties);
+	}
+	return result;
+}
 
 obj_rc // static
 Config::make(htab_ptr initdata)
@@ -67,7 +107,7 @@ Config::make(htab_ptr initdata)
 }
 
 void 
-Config::debug_info(htab_rw hw)
+Config::debug_info(htab_cow hw)
 {
 	base_d::debug_info(hw);
 }
@@ -205,7 +245,7 @@ Config::subsetkey(str_ptr key)
 {
 
 	htab_rc result;
-	htab_rw hw(result);
+	htab_cow hw(result);
 	val_rc value = get(key);
 	hw.set(key, value);
 
@@ -217,7 +257,7 @@ Config::subset(htab_ptr data)
 {
 	for_key_value wk;
 	htab_rc result;
-	htab_rw hw(result);
+	htab_cow hw(result);
 	val_ptr vkey;
 
 	for(wk.start(data); wk.ok(); wk.next())
@@ -458,78 +498,79 @@ ZEND_METHOD(Wcc_Config, unhive)
 	result.move_zv(return_value);
 }
 
-/*
+#ifdef CONFIG_ARRAY_ACCESS
 ZEND_METHOD(Wcc_Config, offsetGet)
 {
-	zval* key;
+	zarg_rd args(execute_data);
 
-	ZEND_PARSE_PARAMETERS_START(1,1)
-	Z_PARAM_ZVAL(key)
-	ZEND_PARSE_PARAMETERS_END();
+	val_ptr key = args.need(0);
 
-	auto cobj = zval_toc<Config>(ZEND_THIS);
-
-	val_rc temp = cobj->get(val_ptr(key));
-	temp.move_zv(return_value);
+	if (!args.throw_errors())
+	{
+		auto cobj = zval_toc<Config>(ZEND_THIS);
+		str_rc strkey = key.to_propkey(); // may coerce to string key
+		val_rc temp = cobj->get(strkey);
+		temp.move_zv(return_value);
+	}
 }
 
 ZEND_METHOD(Wcc_Config, offsetSet)
 {
-	zval*	key;
-	zval*	value;
+	zarg_rd args(execute_data);
+	val_ptr	key = args.need(0);
+	val_ptr	value = args.need(1);
 
-	ZEND_PARSE_PARAMETERS_START(2,2)
-	Z_PARAM_ZVAL(key)
-	Z_PARAM_ZVAL(value)
-	ZEND_PARSE_PARAMETERS_END();
+	if (!args.throw_errors())
+	{
+		auto cobj = zval_toc<Config>(ZEND_THIS);
+		str_rc strkey = key.to_propkey(); // may coerce to string key
 
-	auto cobj = zval_toc<Config>(ZEND_THIS);
-		zend_printf("offsetSet called\n");
-	cobj->set(val_ptr(key), val_ptr(value));
+		showstr("strkey", strkey);
+
+		cobj->set(strkey, value);
+	}
 }
 
 ZEND_METHOD(Wcc_Config, offsetExists)
 {
-	zval* key;
+	zarg_rd args(execute_data);
 
-	ZEND_PARSE_PARAMETERS_START(1,1)
-	Z_PARAM_ZVAL(key)
-	ZEND_PARSE_PARAMETERS_END();
+	val_ptr key = args.need(0);
 
-	auto cobj = zval_toc<Config>(ZEND_THIS);
-
-	bool temp = cobj->has(val_ptr(key));
-	RETURN_BOOL(temp);
+	if (!args.throw_errors())
+	{
+		auto cobj = zval_toc<Config>(ZEND_THIS);
+		str_rc strkey = key.to_propkey(); // may coerce to string key
+		bool temp = cobj->has(strkey);
+		RETURN_BOOL(temp);
+	}
 }
 
 
 ZEND_METHOD(Wcc_Config, offsetUnset)
 {
-	zval* key;
+	zarg_rd args(execute_data);
 
-	ZEND_PARSE_PARAMETERS_START(1,1)
-	Z_PARAM_ZVAL(key)
-	ZEND_PARSE_PARAMETERS_END();
+	val_ptr key = args.need(0);
 
-	auto cobj = zval_toc<Config>(ZEND_THIS);
-
-	cobj->unset(val_ptr(key));
+	if (!args.throw_errors())
+	{	
+		auto cobj = zval_toc<Config>(ZEND_THIS);
+		str_rc strkey = key.to_propkey(); // may coerce to string key
+		cobj->unset(strkey);
+	}
 }
-*/
 
-
-/*
 ZEND_METHOD(Wcc_Config, count)
 {
-	ZEND_PARSE_PARAMETERS_START(0,0)
-	ZEND_PARSE_PARAMETERS_END();
-
-	auto cobj = zval_toc<Config>(ZEND_THIS);
-
-	RETURN_LONG(cobj->count());
+	if (zarg_rd::zero_args(execute_data, __FUNCTION__))
+	{
+		auto cobj = zval_toc<Config>(ZEND_THIS);
+		RETURN_LONG(cobj->count());
+	}
 }
-*/
 
+#endif
 
 
 PHP_MINIT_FUNCTION(Wcc_Config_reg)

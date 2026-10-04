@@ -33,7 +33,7 @@ public:
 
 	bool deleteKey(str_ptr key) override;
  	
- 	void debug_info(htab_rw s) override;
+ 	void debug_info(htab_cow s) override;
 
  	error_return flushCached() override;
  	

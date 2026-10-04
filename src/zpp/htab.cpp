@@ -10,7 +10,7 @@
  * 
  */
 #include "htab_ptr.cxx"
-#include "htab_rw.cxx"
+#include "htab_cow.cxx"
 #include "htab_rc.cxx"
 #include "htab_walk.cxx"
 

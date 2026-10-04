@@ -135,7 +135,7 @@ Assets::getWebList(str_ptr selector,
 	}
 	else if (names.isString())
 	{
-		htab_rw hw(order);
+		htab_cow hw(order);
 		hw.push_back(names.zstr());
 	}
 	else {
@@ -143,7 +143,7 @@ Assets::getWebList(str_ptr selector,
 	}
 
 	for_key_value w1;
-	htab_rw hw(result);
+	htab_cow hw(result);
 
 	for(w1.start(order); w1.ok(); w1.next())
 	{
@@ -153,7 +153,7 @@ Assets::getWebList(str_ptr selector,
 		// and make it writeable.
 		// as assets_ is functionally private, 
 		// this copy is hopefully not actually done ( if rc is still 1)
-		htab_rw asset(assets_.property_ptr(name));
+		htab_cow asset(assets_.property_ptr(name));
 		// if (!empty)
 		if (asset.size())
 		{
@@ -333,7 +333,7 @@ Assets::construct()
 }
 
 void 
-Assets::debug_info(htab_rw di)
+Assets::debug_info(htab_cow di)
 {
 	di.set(ASI.src_paths, src_paths_);
 	di.set(ASI.assets_str, assets_);
@@ -425,10 +425,10 @@ Assets::markAdd(str_ptr item)
 			{
 				this->add(req_names);
 			}
-			htab_rw wo(order_);
+			htab_cow wo(order_);
 			wo.push_back(item);
 
-			htab_rw wm(mark_);
+			htab_cow wm(mark_);
 			wm.setbool(item,true);
 		}
 	}
@@ -571,7 +571,7 @@ Assets::addAssets(htab_ptr data)
 	auto key = wk.key();
 	auto value = wk.value();
 
-	htab_rw hw(result.value_);
+	htab_cow hw(result.value_);
 
 	bool duplicate = throwIfDuplicate_;
 	Config* asp = zobj_toc<Config> (assets_);
@@ -609,11 +609,11 @@ Assets::addBlob(str_rc blob, bool header)
 {
 	if (header)
 	{
-		htab_rw hw(headBlob_);
+		htab_cow hw(headBlob_);
 		hw.push_back(blob);
 	}
 	else {
-		htab_rw hw(bodyBlob_);
+		htab_cow hw(bodyBlob_);
 		hw.push_back(blob);
 	}
 }
@@ -633,7 +633,7 @@ Assets::addStyle(str_ptr style)
 
 	str_rc sct = str_replace(ASI.style_tag, estr, style);
 	sct = str_replace(ASI.style_end, estr, sct);
-	htab_rw hw(inline_styles_);
+	htab_cow hw(inline_styles_);
 
 	hw.push_back(sct);
 }
@@ -766,7 +766,7 @@ Assets::filterPaths(htab_ptr paths)
 
 	if (paths.size())
 	{
-		htab_rw hw(result);
+		htab_cow hw(result);
 		Replace pathnames(run_, ASI.prop_expr);
 		for_key_value kv1;
 		for(kv1.start(paths); kv1.ok(); kv1.next())
@@ -824,7 +824,7 @@ Assets::loadAssetFile(str_ptr file)
 	val_ptr paths_v = data.get(ASI.src_paths);
 	if (paths_v.isString())
 	{
-		htab_rw hw(paths);
+		htab_cow hw(paths);
 		hw.push_back(paths_v.zstr());
 	}
 	else {
@@ -852,7 +852,7 @@ Assets::loadAssetFile(str_ptr file)
 		result = this->addAssets(temp.zarray());
 		//showdata("result", result);
 	}
-	htab_rw hw(loaded_);
+	htab_cow hw(loaded_);
 	hw.set(file, result.value_);
 
 	return result;
@@ -910,7 +910,7 @@ Assets::unmark(str_ptr item)
 		{
 			array_splice(this->order_, ix, 1);
 		}
-		htab_rw hw(mark_);
+		htab_cow hw(mark_);
 		hw.unset(item);
 	}
 }
@@ -982,7 +982,7 @@ Assets::addModule(str_ptr name, val_ptr data)
 			class_name  = Module::omg.class_name();
 		}
 		htab_rc args_temp;
-		htab_rw args(args_temp);
+		htab_cow args(args_temp);
 
 		args.push_back(name);
 		args.push_back(mcfg);
@@ -997,7 +997,7 @@ Assets::addModule(str_ptr name, val_ptr data)
 		Module* modo = zobj_toc<Module>(mobj);
 		modo->setConfigPath(dir);
 
-		htab_rw arr(modules_);
+		htab_cow arr(modules_);
 		arr.set(name, mobj);
 
 		modo->activate( loader->getFinder() );

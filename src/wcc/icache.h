@@ -41,7 +41,7 @@ public:
 
 	virtual val_rc getCached(str_ptr key);
 
-	virtual void debug_info(htab_rw s);
+	virtual void debug_info(htab_cow s);
 
 	virtual int  deleteExpired();
 

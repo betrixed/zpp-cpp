@@ -67,7 +67,7 @@ void ServiceAccess::setExtender(obj_ptr obj)
 }
 
 //virtual
-void ServiceAccess::debug_info(htab_rw hw)
+void ServiceAccess::debug_info(htab_cow hw)
 {
 
 	base_d::debug_info(hw);
@@ -108,7 +108,7 @@ ServiceAccess::service(str_ptr name)
 	val_return result;
 	val_ptr zu(result.value_); //shadow *zval
 
-	htab_rw hw(cache_);
+	htab_cow hw(cache_);
 	result = hw.get(name);
 
 	if (!zu.isNull())
@@ -147,7 +147,7 @@ ServiceAccess::service(str_ptr name)
 void 
 ServiceAccess::set(str_ptr name, val_ptr value)
 {
-	htab_rw(cache_).set(name, value);
+	htab_cow(cache_).set(name, value);
 }
 
 bool 
@@ -161,7 +161,7 @@ ServiceAccess::has(str_ptr name)
 void 
 ServiceAccess::unset(str_ptr name)
 {
-	htab_rw(cache_).unset(name);
+	htab_cow(cache_).unset(name);
 }
 
 val_rc 

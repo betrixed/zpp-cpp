@@ -87,7 +87,7 @@ namespace wcd {
 
 		void destruct();
 
-		void debug_info(htab_rw di) override;
+		void debug_info(htab_cow di) override;
 		
 		void setPrime(obj_ptr obj);
 

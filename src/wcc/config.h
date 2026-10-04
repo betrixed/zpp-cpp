@@ -10,6 +10,7 @@ namespace wcc {
 using namespace zpp;
 
 #define CONFIG_HANDLERS
+#define CONFIG_ARRAY_ACCESS
 
 class  Config : public base_d {
 public:
@@ -27,6 +28,7 @@ public:
 #ifdef CONFIG_HANDLERS
 			zend_object_handlers& hand = basedef::handlers_;
 
+			hand.count_elements = Config::count_elements;
 			hand.read_dimension = Config::read_dimension;
 			hand.write_dimension = Config::write_dimension;
 			hand.has_dimension = Config::has_dimension;
@@ -39,7 +41,7 @@ public:
 	
 	static obj_rc make(htab_ptr initdata = htab_ptr());
 
-	void debug_info(htab_rw hw) override;
+	void debug_info(htab_cow hw) override;
 
 	void construct(htab_ptr values);
 
@@ -70,7 +72,7 @@ public:
 	void      clear();
 
 #ifdef CONFIG_HANDLERS
-
+		static ZEND_RESULT_CODE count_elements(zend_object* object, zend_long* count);
 		static zval* read_dimension(zend_object* obj, zval* offset, int type,  zval* return_value);
 	    static void  write_dimension(zend_object* obj, zval* offset,  zval* set_value);
 	    static void  unset_dimension(zend_object *object, zval *unset);

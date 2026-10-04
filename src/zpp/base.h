@@ -29,7 +29,7 @@
 #include "str_rc.h"
 
 #include "htab_rc.h"
-#include "htab_rw.h"
+#include "htab_cow.h"
 
 #include "obj_rc.h"
 #include "val_rc.h"
@@ -291,7 +291,7 @@ Link all instances of a class T, by optionally mixing in this template.
 		{
 		}
 		
-		virtual void debug_info(htab_rw ht);
+		virtual void debug_info(htab_cow ht);
 
 		virtual str_rc toString() const {
 			return str_rc();
@@ -615,7 +615,7 @@ Link all instances of a class T, by optionally mixing in this template.
 			
 			//showobj("obj = ", object);
 			//showarray("base_debug_info", ret);
-			htab_rw hw(ret);
+			htab_cow hw(ret);
 			//showarray("base_debug_info write", ret);
 			T* cobj = cpp(object);
 			//zend_printf("2 T* %lx zobj %lx\n", cobj, cobj->zobj());

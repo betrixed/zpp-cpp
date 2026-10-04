@@ -54,7 +54,7 @@ namespace wcd {
     	IRow();
     	virtual ~IRow();
     	
-    	virtual void debug_info(htab_rw di);
+    	virtual void debug_info(htab_cow di);
 
     	void construct(obj_ptr tmodel, htab_ptr data = htab_ptr(), bool exists = false);
 

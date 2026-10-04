@@ -28,7 +28,7 @@ extern "C" {
 
 namespace wcd {
 
-void Bindings::debug_info(htab_rw di)
+void Bindings::debug_info(htab_cow di)
 {
 	di.set(SQSTR.data_key, data_);
 	di.set(SQSTR.param_list, params_);
@@ -168,7 +168,7 @@ Bindings::getJoins()
 
 	obj_rc result = JoinTables::omg.new_zobj();
 
-	htab_rw(data_).set((zend_long) ISql::SQL_FROM, result);
+	htab_cow(data_).set((zend_long) ISql::SQL_FROM, result);
 	//showobj("newJoins", result);
 	//showobj("isql_", isql_);
 
@@ -231,11 +231,11 @@ Bindings::addToArray(int key, val_ptr value)
 	if (listown.isNull())
 	{
 		htab_rc   list_mgr;
-		htab_rw list(list_mgr);
+		htab_cow list(list_mgr);
 
 		list.push_back(value);
 
-		htab_rw mylist(data_);
+		htab_cow mylist(data_);
 		//showarray("new Array", list_mgr);
 
 		mylist.set((zend_long)key, list_mgr);
@@ -243,7 +243,7 @@ Bindings::addToArray(int key, val_ptr value)
 		
 	}
 	else { //? assert isArray() ?
-		htab_rw vlist(listown);
+		htab_cow vlist(listown);
 		vlist.push_back(value);
 		//showmem("addToArray", listown);
 	}
@@ -373,7 +373,7 @@ Bindings::aliasSelect()
 	{
 		htab_rc   cols_mgr;
 
-		htab_rw all_cols(cols_mgr);
+		htab_cow all_cols(cols_mgr);
 
 		htab_ptr all = jt->getTables();
 		htab_walk wk;
@@ -419,7 +419,7 @@ Bindings::columnAlias(obj_ptr tcolobj)
 	str_rc sfx = buf.zstr();
 
 	htab_rc aliased_mgr;
-	htab_rw aliased(aliased_mgr);
+	htab_cow aliased(aliased_mgr);
 
 	if (tcol->has(SQSTR.asterisk))
 	{
@@ -470,7 +470,7 @@ void
 Bindings::offset(int value)
 {
 	val_ptr ldata = data_.get(ISql::SQL_LIMIT);
-	htab_rw hw(ldata);
+	htab_cow hw(ldata);
 
 	hw.set(SQSTR.offset, value);
 
@@ -479,7 +479,7 @@ Bindings::offset(int value)
 
 void Bindings::set(int key, val_ptr value)
 {
-	htab_rw hw(data_);
+	htab_cow hw(data_);
 
 	hw.set(key, value);
 
@@ -488,7 +488,7 @@ void Bindings::set(int key, val_ptr value)
 
 void Bindings::set(int key, int value)
 {
-	htab_rw hw(data_);
+	htab_cow hw(data_);
 	val_rc wrap(value);
 	hw.set((zend_long)key, wrap);
 	//showarray("data_int", data_);
@@ -496,14 +496,14 @@ void Bindings::set(int key, int value)
 
 void Bindings::set(int key, const val_rc& value)
 {
-	htab_rw hw(data_);
+	htab_cow hw(data_);
 	hw.set((zend_long)key, value);
 	//showarray("data_zval_mgr&", data_);
 }
 
 void Bindings::set(int key, htab_ptr value)
 {
-	htab_rw hw(data_);
+	htab_cow hw(data_);
 	hw.set((zend_long)key, value);
 	//showarray("data_htab_read", data_);
 	//showdata("setdata", data_);
@@ -512,7 +512,7 @@ void Bindings::set(int key, htab_ptr value)
 
 void Bindings::unset(int key)
 {
-	htab_rw(data_).unset(key);
+	htab_cow(data_).unset(key);
 }
 
 void Bindings::wipe(int key)
@@ -520,7 +520,7 @@ void Bindings::wipe(int key)
 	
 	if (key >= 0)
 	{
-		htab_rw hw(data_);
+		htab_cow hw(data_);
 		hw.unset(key);
 	}
 	else {
@@ -543,7 +543,7 @@ void
 Bindings::where(val_ptr column, str_ptr opstr, val_ptr value, str_ptr blogic)
 {
 	val_rc args;
-	htab_rw wh(args);
+	htab_cow wh(args);
 
 	wh.set(SQSTR.column, column);
 
@@ -753,7 +753,7 @@ Bindings::select()
 	if (rename.isArray())
 	{
 		htab_rc objset_mgr;
-		htab_rw objset(objset_mgr);
+		htab_cow objset(objset_mgr);
 
 		JoinTables* fromjt = getJoinTables();
 
@@ -768,7 +768,7 @@ Bindings::select()
 		str_rc mb_id = alias_str_key(table_name);
 
 		htab_rc alias_list_mgr;
-		htab_rw alias_list(alias_list_mgr);
+		htab_cow alias_list(alias_list_mgr);
 
 		htab_walk w1;
 
@@ -792,7 +792,7 @@ Bindings::select()
 			htab_walk w2;
 			auto ai_value = w2.value();
 			// TODO: check recset ??
-			htab_rw rec(recset);
+			htab_cow rec(recset);
 
 			for(w2.start(alias_list); w2.ok(); w2.next())
 			{
@@ -814,7 +814,7 @@ Bindings::orderBy(val_ptr colspec, bool descend, bool nullslast)
 {
 	val_rc args;
 
-	htab_rw hw(args);
+	htab_cow hw(args);
 
 	if (colspec.isString())
 	{
@@ -848,7 +848,7 @@ void
 Bindings::update(str_ptr column, val_ptr value)
 {
 	htab_rc data_mgr;
-	htab_rw data(data_mgr);
+	htab_cow data(data_mgr);
 
 	data.set(SQSTR.column, column);
 	data.set(SQSTR.valuekey, value);
@@ -868,7 +868,7 @@ Bindings::limit(val_ptr limit, val_ptr offset)
 {
 	htab_rc data;
 
-	htab_rw hw(data);
+	htab_cow hw(data);
 
 	
 	hw.set(SQSTR.limit, limit);

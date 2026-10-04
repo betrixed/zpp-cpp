@@ -19,8 +19,8 @@
 #include "htab_ptr.h"
 #endif
 
-#ifndef HTAB_RW_H
-#include "htab_rw.h"
+#ifndef HTAB_COW_H
+#include "htab_cow.h"
 #endif
 
 #ifndef WC_PREG_H
@@ -244,6 +244,7 @@ htab_ptr::get(zend_long idx) const
 zval*  
 htab_ptr::get(zend_string* zkey) const
 {
+	//showstr("::get zkey", zkey);
 	zval* result = nullptr;
 	if (ht_) {
 		result =  zend_hash_find(ht_, zkey);
@@ -292,19 +293,29 @@ htab_ptr::get(val_ptr key) const
 
 zval* 
 htab_ptr::get(zval* key) const
-{
-	if (!ht_)
-		return nullptr;
-	uint8_t ktype = Z_TYPE_P(key);
+{	
+	zval* result = nullptr;
+	if (ht_ && key)
+	{
+		//showmem("htab_ptr::get key", key);
+		int ktype = Z_TYPE_P(key);
+		switch(ktype)
+		{
+		case IS_STRING:
+			result = zend_hash_find(ht_, Z_STR_P(key));
+			break;
+		case IS_LONG:
+			result = zend_hash_index_find(ht_, Z_LVAL_P(key));
+			break;
+		default:
+			break;
+		}
+	}
 
-	if (ktype == IS_STRING) {
-		return zend_hash_find(ht_, Z_STR_P(key));
-	}
-	else if (ktype == IS_LONG) {
-		return zend_hash_index_find(ht_, Z_LVAL_P(key));
-	}
 	//* TODO: exception?
-	return nullptr;
+	//showmem("htab_ptr::result", result);
+
+	return result;
 }
 
 bool htab_ptr::try_fetch(zend_long key, val_ptr& store) const
@@ -372,7 +383,7 @@ htab_rc
 htab_ptr::slice(int offset, int length, bool preserve_keys)
 {
 	htab_rc result_mgr;
-	htab_rw hw(result_mgr);
+	htab_cow hw(result_mgr);
 
 	auto src_len = size();
 

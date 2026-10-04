@@ -108,7 +108,7 @@ ISession_mgr::unset_property(zend_object* object, zend_string* name, void **cach
 	return iobj->remove(name);
 }
 
-void ISession::debug_info(htab_rw di)
+void ISession::debug_info(htab_cow di)
 {
 	di.set(SIN.options_str, options_);
 	di.set(SIN.adapter_str, adapter_);
@@ -161,7 +161,7 @@ ISession::get(str_ptr key, val_ptr defval, bool remove)
 
 	if (gsession && (Z_TYPE_P(gsession) == IS_REFERENCE))
 	{
-		htab_rw sess(gsession);
+		htab_cow sess(gsession);
 		zval* test = sess.get(ukey);
 		if (test)
 		{
@@ -302,7 +302,7 @@ ISession::remove(str_ptr key)
 	zval* gsession = htab_ptr::get_global(SIN.global_sess);
 	if (gsession && (Z_TYPE_P(gsession)==IS_REFERENCE))
 	{
-		htab_rw sess(gsession);
+		htab_cow sess(gsession);
 		sess.unset(ukey);
 	}
 }
@@ -325,7 +325,7 @@ ISession::set(str_ptr key, val_ptr value)
 
 		if (Z_TYPE_P(gsession) == IS_REFERENCE)
 		{
-			htab_rw sess(gsession);
+			htab_cow sess(gsession);
 			sess.set(ukey, value);
 		}
 	}

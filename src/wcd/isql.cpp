@@ -94,7 +94,7 @@ ISql::columns(htab_ptr bd)
 
 
 void  
-ISql::columnsTC(IColumns* tc, htab_rw col_list)
+ISql::columnsTC(IColumns* tc, htab_cow col_list)
 {
 	str_rc cfrag;
 
@@ -195,7 +195,7 @@ ISql::orderField(htab_ptr order)
 }
 
 void
-ISql::debug_info(htab_rw di)
+ISql::debug_info(htab_cow di)
 {
 	
 }
@@ -562,10 +562,10 @@ static SqlPart_return getIColumns(val_ptr zv)
 	return result;
 }
 
-void extract_params(htab_ptr rowbind, htab_ptr plist, htab_rw params);
+void extract_params(htab_ptr rowbind, htab_ptr plist, htab_cow params);
 
 //save results in params variable
-void extract_params(htab_ptr rowbind, htab_ptr plist, htab_rw params)
+void extract_params(htab_ptr rowbind, htab_ptr plist, htab_cow params)
 {
 	for_key_value wk;
 	htab_rc row_values = htab_rc::getValues(rowbind);
@@ -706,7 +706,7 @@ ISql::insert(Bindings& bind)
 
 
 	htab_rc   ret_params_mgr;
-	htab_rw ret_params(ret_params_mgr);
+	htab_cow ret_params(ret_params_mgr);
 
 	if (params.size())
 	{
@@ -715,7 +715,7 @@ ISql::insert(Bindings& bind)
 		if (sql_insert.size() > 1)
 		{
 			htab_rc   multirow_mgr;
-			htab_rw multirow(multirow_mgr);
+			htab_cow multirow(multirow_mgr);
 
 			multirow.push_back(ret_params);
 			while(insert_wk.next())
@@ -723,7 +723,7 @@ ISql::insert(Bindings& bind)
 				rowbind  = insert_wk.value().zarray();
 
 				htab_rc   pset_mgr;
-				htab_rw pset(pset_mgr);
+				htab_cow pset(pset_mgr);
 
 				extract_params(rowbind, params, pset);
 				multirow.push_back(pset);
@@ -893,7 +893,7 @@ ISql::select_jt(Bindings& bind, JoinTables* jt)
 			buf << " DISTINCT ";
 		}
 		htab_rc col_list_mgr;
-		htab_rw col_list(col_list_mgr);
+		htab_cow col_list(col_list_mgr);
 
 		htab_ptr tables = jt->getTables();
 		htab_walk wk;
@@ -1404,7 +1404,7 @@ ISql::where(Bindings &bind, htab_ptr wtab)
 			value = where_tab[SQSTR.values_key]; // if associated parameters
 			htab_ptr vlist(value.zarray());
 			if (vlist.ok()) {
-				htab_rw plist(params->getParams());
+				htab_cow plist(params->getParams());
 				plist.merge(vlist);
 				params->setParams(plist);
 			}

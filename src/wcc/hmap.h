@@ -138,19 +138,19 @@ public:
             return data_;
 	}
 
-	htab_rw writer()
+	htab_cow writer()
 	{
-	    return htab_rw(data_);
+	    return htab_cow(data_);
 	}
 	static Hmap_mgr omg;
 	
-	//void debug_info(htab_rw hw) override;
+	//void debug_info(htab_cow hw) override;
 	
 	//! Create a new Hmap constructed witn HashTable/zend_array
 	static obj_rc newFromArray(val_ptr init);
 	static obj_rc new_hmap();
 	
-	void debug_info(htab_rw hw) override;
+	void debug_info(htab_cow hw) override;
 
 	void construct(htab_ptr values);
 
@@ -159,11 +159,14 @@ public:
 
 	bool   has(str_ptr name);
 	
+	//! This require val_rc for return values.
+	//! use of val_ptr for temporary val_rc
+	//! to recieve will lose data!!
 	val_rc get(str_ptr name);
 	val_rc get(val_ptr name);
 
 	void   set(str_ptr name, val_ptr value);
-	//void   set(val_ptr key, val_ptr value);
+	void   set(val_ptr key, val_ptr value);
 
 	void   unset(str_ptr name);
 	void   unset(val_ptr key);

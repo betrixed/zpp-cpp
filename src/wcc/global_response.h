@@ -42,7 +42,7 @@ namespace wcc {
 
 		static val_rc readfile(str_ptr name);
 
-		virtual void debug_info(htab_rw hw);
+		virtual void debug_info(htab_cow hw);
 
 		
 		void construct(
@@ -80,7 +80,7 @@ namespace wcc {
 
 		void setJsonContent(val_ptr content, int jsonOptions=0);
 
-		htab_rw writer();
+		htab_cow writer();
 
         htab_ptr reader() const;
 

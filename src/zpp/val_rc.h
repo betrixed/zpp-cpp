@@ -206,6 +206,8 @@ public:
         return (ref_type() == IS_OBJECT);
     }
 
+    bool isEmpty() const;
+
     bool isString() const
     {
         return (ref_type() == IS_STRING);

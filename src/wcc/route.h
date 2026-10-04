@@ -57,7 +57,7 @@ public:
 
 	static RouteMgr omg;
 
-	virtual void debug_info(htab_rw hw);
+	virtual void debug_info(htab_cow hw);
 
 	static bool isMyClass(str_ptr obj);
 
@@ -132,8 +132,6 @@ public:
 };
 
 
-using  permstr = str_intern;
-
 //typedef std::vector<str_perm> HttpVerbNames;
 //typedef std::map<str_perm, int, MapComparator > HttpVerbBits;
 
@@ -146,37 +144,36 @@ public:
 	// If using str_intern,  htab_persist must only use freehtmemory.
 	// if using str_perm,    htab_persist can use zend_hash_graceful_destroy 
 
-	permstr GET_S;
-	permstr POST_S;
-	permstr PUT_S;
-	permstr PATCH_S;
-	permstr OPTIONS_S;
-	permstr DELETE_S;
-	permstr HEAD_S;
-	permstr CONNECT_S;
-	permstr TRACE_S;
-	permstr PURGE_S;
+	str_intern GET_S;
+	str_intern POST_S;
+	str_intern PUT_S;
+	str_intern PATCH_S;
+	str_intern OPTIONS_S;
+	str_intern DELETE_S;
+	str_intern HEAD_S;
+	str_intern CONNECT_S;
+	str_intern TRACE_S;
+	str_intern PURGE_S;
 
 			// route
-	permstr cc_verbs;
-	permstr cc_ajax;
-	permstr cc_params;
-	permstr cc_compiled;
-	permstr cc_pattern;
-	permstr cc_target;
-	permstr cc_id;
+	str_intern cc_verbs;
+	str_intern cc_ajax;
+	str_intern cc_params;
+	str_intern cc_compiled;
+	str_intern cc_pattern;
+	str_intern cc_target;
+	str_intern cc_id;
 
 	// values for RouteSet
-	permstr ARG_S;
-	permstr FUN_S;
-	permstr FUNX_S;
-	permstr HITS_S;
-	permstr MOD_S;
-	permstr NSP_S;
-	permstr OBJ_S;
-	permstr OBJX_S;
-	permstr ROLE_S;
-	
+	str_intern ARG_S;
+	str_intern FUN_S;
+	str_intern FUNX_S;
+	str_intern HITS_S;
+	str_intern MOD_S;
+	str_intern NSP_S;
+	str_intern OBJ_S;
+	str_intern OBJX_S;
+	str_intern ROLE_S;
 
 
 	/* Hash tables cannot be dyanmically allocated during Module Init

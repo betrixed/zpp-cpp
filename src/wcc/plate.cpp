@@ -107,7 +107,7 @@ OBtable::init()
 }
 
 
-void Plate::debug_info(htab_rw d)
+void Plate::debug_info(htab_cow d)
 {
 
 	//zend_printf("debug info Plate\n");
@@ -237,7 +237,7 @@ Plate::getPublish()
 
 	//zend_printf("getPublish\n");
 	htab_rc result;
-	htab_rw publish(result);
+	htab_cow publish(result);
 
 	//showarrayy("publish 1", publish_);
 	PlateEngine* pe = zobj_toc<PlateEngine>(engine_);
@@ -255,7 +255,7 @@ Plate::getPublish()
 
 void Plate::addSection(str_ptr name, str_ptr val) 
 {
-	htab_rw(sections_).set(name,val);
+	htab_cow(sections_).set(name,val);
 }
 
 str_ptr Plate::getSection(str_ptr name, str_ptr defaultval)
@@ -279,7 +279,7 @@ Plate::full_render(htab_ptr rdata)
 
 	PlateEngine* engine = zobj_toc<PlateEngine>(engine_);
 	
-	htab_rw wdata(data_);
+	htab_cow wdata(data_);
 
 	if (rdata.size())
 	{
@@ -389,7 +389,7 @@ void Plate::stop()
 	fn_noparams clean(OBfn.obgetclean);
 	str_rc newContent = clean.str();
 
-	htab_rw slabs(sections_);
+	htab_cow slabs(sections_);
 
 	str_buf buf;
 

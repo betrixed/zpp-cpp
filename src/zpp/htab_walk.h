@@ -2,7 +2,7 @@
 #define HTAB_WALK_H
 
 /**
- * @file zpp/htab_rw.h
+ * @file zpp/htab_walk.h
  * @author Michael Rynn <michael.rynn.500@gmail.com>
  * @brief htab_walk - A simple HashTable iterator.
  * @copyright Copyright (c) 2025

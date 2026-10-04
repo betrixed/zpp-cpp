@@ -110,7 +110,7 @@ public:
 
 	VIRTUAL_ZOBJPTR
 
-	virtual   void debug_info(htab_rw hw);
+	virtual   void debug_info(htab_cow hw);
 
 	error_return construct();
 	void destruct();

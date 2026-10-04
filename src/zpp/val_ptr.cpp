@@ -532,7 +532,35 @@ val_ptr::val_ptr(const val_rc& mgr) : p_((zval*) mgr)
 }
 
 /*
-* Return managed string
+*  Convert none strings to string
+*/
+str_rc
+val_ptr::to_propkey() const 
+{
+	str_rc result;
+	int stype=ref_type();
+
+	switch(stype)
+	{
+	case IS_STRING:
+		result.adopt(zstr());
+		break;
+	case IS_LONG:
+	case IS_DOUBLE:
+		auto s = zval_get_string(p_);
+		if (s)
+		{
+			str_buf buf;
+			buf << '_' << s;
+			zend_string_release(s);
+			result = buf.zstr();
+		}
+	}
+	return result;
+}
+
+/*
+*  Convert none strings to string
 */
 str_rc
 val_ptr::to_zstr() const 
@@ -541,7 +569,7 @@ val_ptr::to_zstr() const
 	zend_string* s = zstr();
 	if (!s)
 	{
-		s = zval_get_string(p_);
+		s = zval_get_string_func(p_);
 		if (s)
 		{
 			result.adopt(s);
@@ -799,6 +827,26 @@ val_ptr::refcount() const
 	else
 		return 0;
 }
+
+
+zval*
+val_ptr::make_ref()
+{
+
+	int rtype = ztype();
+	switch(rtype)
+	{
+	case IS_UNDEF:
+		return nullptr;
+	case IS_REFERENCE:
+		return &p_->value.ref->val;
+	default:
+		ZVAL_NEW_REF(p_, p_);
+		break;
+	}
+	return &p_->value.ref->val;
+}
+
 
 zval* 
 val_ptr::php_constant(str_ptr name)

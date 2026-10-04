@@ -154,7 +154,7 @@ htab_rc RouteSet::serialize()
 {
 	htab_rc result;
 
-	htab_rw hw(result);
+	htab_cow hw(result);
 
 	//showarray("fixed 1", fixed_);
 	hw.set(radata.cc_fixed, fixed_);
@@ -182,6 +182,11 @@ void  RouteSet::addRoute(obj_ptr obj)
 	val_rc zobj(obj);
 	//dump_info::msg_dump("addRoute",zobj);
 
+	str_rc compiled = ro->getCompiled();
+
+	if (!compiled.size()) {
+		this->compile(ro);
+	}
 	if (ro->hasParams())
 	{
 		appendRoute(vary_,  ro->compiled_, ro);
@@ -200,7 +205,7 @@ RouteSet::indexRouteKey(obj_ptr ro)
 	str_ptr  key = route->id_;
 	if (key.size())
 	{	
-		htab_rw(nameIndex_).set(key, ro);
+		htab_cow(nameIndex_).set(key, ro);
 	}	
 }
 
@@ -308,7 +313,7 @@ void  RouteSet::addRouteList(htab_ptr list, str_ptr prefix, str_ptr module)
 }
 
 void RouteSet::appendRoute(
-	htab_rw rarr, 
+	htab_cow rarr, 
 	str_ptr key, 
 	Route* myroute)
 {
@@ -328,7 +333,7 @@ void RouteSet::appendRoute(
 		// Already one stored as object, convert to list of 2 objects
 		htab_rc sublist;
 
-		htab_rw hw(sublist);
+		htab_cow hw(sublist);
 
 		hw.push_back(zip); 
 		hw.push_back(store);
@@ -341,14 +346,14 @@ void RouteSet::appendRoute(
 	else if (zip.isArray())
 	{
 		// Add to list of objects, add object
-		htab_rw sublist(zip);
+		htab_cow sublist(zip);
 		sublist.push_back(store);
 	}
 
 	return;
 }
 
-void RouteSet::debug_info(htab_rw hw)
+void RouteSet::debug_info(htab_cow hw)
 {
 	hw.set(radata.cc_fixed, fixed_);
 
@@ -397,34 +402,25 @@ RouteSet::copy_target(Route* route)
 		obj_rc tobj(target.zobject());
 		obj_ptr init_tobj(tobj);
 
+
 		if (init_tobj.instanceof( Target::omg.classEntry() )) 
 		{			
-			bool modifyTarget = false;
-
 			Target* tcobj = zobj_toc<Target>(init_tobj);
 
-			str_ptr test = tcobj->getModule();
-			str_rc target_module;
+			htab_cow params = tcobj->params();
 
-			if (!test.size())
+			if (!params.has_key(route_data.MOD_S))
 			{
-				target_module = this->module_name_;
-				modifyTarget = true;
-			}
-			else {
-				target_module = test;
+				params.set(route_data.MOD_S, module_name_);
 			}
 
-			test =  tcobj->getFunc();
-			str_rc target_method;
-			if (test.size())
-			{
-				//? else TODO: throw exception?
-				target_method = test;
-			}
+			str_rc target_method =  tcobj->getMethod();
+
 			str_rc suffix;
-			test = this->method_sfx_;
+
 			// Use of "<none>" to signify no suffix
+			str_ptr test = method_sfx_;
+
 			if ( test.size() 
 				  && (zs_cmp_ci(test, radata.none_tag)==0)) 
 			{
@@ -448,21 +444,9 @@ RouteSet::copy_target(Route* route)
 				{
 					str_buf fbuf(fn_stub);
 					fbuf << test;
-					target_method = fbuf.zstr();
-					modifyTarget = true;
+					tcobj->setMethod(fbuf.zstr());
 				}
 			}
-
-			if (modifyTarget)
-			{
-				obj_rc ntobj = tcobj->copy();
-				Target* nt = zobj_toc<Target>(ntobj);
-				nt->setModule(target_module);
-				nt->setFunc(target_method);
-				val_rc temp(ntobj);
-				route->setTarget(temp);
-			}
-
 		}
 
 
@@ -539,7 +523,7 @@ RouteSet::compile(Route* route)
 	str_rc name;
 	str_rc blob;
 	htab_rc params_tab;
-	htab_rw params(params_tab);
+	htab_cow params(params_tab);
 
 	while (pr2 > 0) 
 	{ 

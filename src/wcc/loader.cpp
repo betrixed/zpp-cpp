@@ -111,7 +111,7 @@ Loader::call_spl(str_ptr fname)
 	htab_rc cfn;
 	//showstr("call method", fname);
 
-	htab_rw hw(cfn);
+	htab_cow hw(cfn);
 
 	hw.push_back(this->self());
 	hw.push_back(LDRi.s_mustload);
@@ -130,7 +130,7 @@ Loader::Loader() : base_d()
 	record_ = true;
 }
 
-void Loader::debug_info(htab_rw di)
+void Loader::debug_info(htab_cow di)
 {
 	di.set(LDRi.finder_str, finder_);
 	di.set(LDRi.extloader_str, extloader_);
@@ -166,7 +166,7 @@ Loader::readPHP(str_ptr path)
 	return result;
 }
 
-static void php_path(str_ptr php_root, const char* s, htab_rw data)
+static void php_path(str_ptr php_root, const char* s, htab_cow data)
 {
 	str_rc ns(s);
 	str_buf buf;
@@ -185,7 +185,7 @@ Loader::setBaseDir(str_ptr dir)
 	Finder* fob = zobj_toc<Finder>(finder);
 
 	htab_rc paths_data;
-	htab_rw paths(paths_data);
+	htab_cow paths(paths_data);
 
 	php_path(basedir_, "Wcc", paths);
 	php_path(basedir_, "Wc", paths);
@@ -293,7 +293,7 @@ Loader::require(str_ptr file)
 	
 	if (record_) 
 	{
-		htab_rw wr(this->loaded_);
+		htab_cow wr(this->loaded_);
 		wr.push_back(&path);
 	}
 	return result;

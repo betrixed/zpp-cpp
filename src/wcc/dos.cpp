@@ -79,8 +79,8 @@ Dos::copy_all(str_ptr from, str_ptr to)
 	htab_rc dirlist;
 	htab_rc filelist;
 
-	htab_rw dlist(dirlist);
-	htab_rw flist(filelist);
+	htab_cow dlist(dirlist);
+	htab_cow flist(filelist);
 	str_buf buf;
 
 	while(true)
@@ -314,8 +314,8 @@ Dos::rm_alldir(str_ptr path, bool deldir)
 	str_rc fpath;
 
 	htab_rc dlist, flist;
-	htab_rw dirlist(dlist);
-	htab_rw filelist(flist);
+	htab_cow dirlist(dlist);
+	htab_cow filelist(flist);
 
 	while( true ) 
 	{

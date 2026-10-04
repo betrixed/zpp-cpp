@@ -409,7 +409,7 @@ Pgsqlfn::allRows(obj_ptr pgresult, zend_long fmode)
 	{
 	case IDriver::FETCH_OBJECT:
 		{
-			htab_rw rows(result);
+			htab_cow rows(result);
 			while(true) {
 				data = pg_fetch_object(pgresult);
 				if (data.isObject())
@@ -473,7 +473,7 @@ Pgsqlfn::connect()
 
 	htab_rc cparams;
 
-	htab_rw cp(cparams);
+	htab_cow cp(cparams);
 
 	if (dbname.size())
 		cp.push_back(Pgsqlfn::attribute(Pgfi.dbname_s, dbname));

@@ -2,7 +2,7 @@
 # Stop php-fpm services using modules to be replaced
 # Disable PHP extension modules that may be not working silently. 
 #
-. ./pvid.sh
+source pvid.sh
 echo "On $ID system.  PHP Version $phpver"
 if [ $ID = "debian" ]; then
 IFILE="/etc/php/$pvid/mods-available/wcc.ini"

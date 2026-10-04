@@ -71,7 +71,7 @@ public:
 
 	static bool exists();
 
-	void debug_info(htab_rw) override;
+	void debug_info(htab_cow) override;
 
 	val_rc __get(str_ptr key);
 	val_rc __isset(str_ptr key);

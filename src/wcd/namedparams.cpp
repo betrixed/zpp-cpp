@@ -68,7 +68,7 @@ str_rc
 NamedParams::addParamEquals(val_ptr value)
 {
 	str_rc result;
-	htab_rw hw(params_);
+	htab_cow hw(params_);
 
 	unsigned nextid = params_.size()+1;
 	result = paramStr(nextid);

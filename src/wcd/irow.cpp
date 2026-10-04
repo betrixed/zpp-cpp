@@ -53,7 +53,7 @@ IRow::construct(obj_ptr tmodel, htab_ptr data, bool exists)
 	setData(data, exists);
 }
 
-void IRow::debug_info(htab_rw di)
+void IRow::debug_info(htab_cow di)
 {
 	
 	di.set(IRSTR.data_str, data_);
@@ -159,7 +159,7 @@ IRow::getDirty()
 	htab_rc result;
 	result = htab_rc::empty_array();
 
-	htab_rw dirty(result);
+	htab_cow dirty(result);
 
 	if (original_ == data_) {
 		return result;
@@ -241,7 +241,7 @@ IRow::mergeData(htab_ptr attrs)
 		cdefs = defs_zval.zarray();
 	}
 
-	htab_rw hw(data_);
+	htab_cow hw(data_);
 
 	htab_walk wk;
 	auto key = wk.key();

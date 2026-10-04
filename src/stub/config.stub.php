@@ -6,7 +6,7 @@
 namespace Wcc;
 
 #[\AllowDynamicProperties]
-class Config
+class Config # implements ArrayAccess, Countable 
 {
 	public function __construct(?array $values=null);
 
@@ -29,6 +29,17 @@ class Config
 	public function unhive(string $key) : string {}
 
 	public function clear() : void {}
+
+	public function count() : int {}
+
+	public function offsetExists(mixed $offset) : bool {}
+
+	public function offsetGet(mixed $offset) : mixed {}
+
+	public function offsetSet(mixed $offset, mixed $value) : void {}
+
+	public function offsetUnset(mixed $offset) : void {}
+
 
 	
 /*

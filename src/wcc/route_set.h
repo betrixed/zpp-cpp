@@ -44,7 +44,7 @@ public:
 	
 	virtual ~RouteSet();
 
-	virtual void debug_info(htab_rw di);
+	virtual void debug_info(htab_cow di);
 
 	Route* match(RouteMatch* rm);
 
@@ -79,7 +79,7 @@ public:
 	htab_ptr getVary() {
 		return vary_;
 	}
-	static void  appendRoute(htab_rw array, str_ptr key, Route* route);
+	static void  appendRoute(htab_cow array, str_ptr key, Route* route);
 
 	VIRTUAL_ZOBJPTR
 

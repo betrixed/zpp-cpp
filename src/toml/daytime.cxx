@@ -208,7 +208,7 @@ Day24::toString() const
 }
 
 
-void Day24::debug_info(htab_rw di)
+void Day24::debug_info(htab_cow di)
 {
 	di.set(D24.value_key, (double) tval_);
 	di.set(D24.format_str, this->toString());

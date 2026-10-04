@@ -3,8 +3,10 @@
 namespace Wcc;
 
 use ArrayObject;
+use stdClass;
 
 require "bootstrap.php";
+
 
 $gResults = [];
 
@@ -341,17 +343,17 @@ function test_h(int $run)
 	global $check;
 	$count = 1000;
 
-	$c = new ConfigStd();
+	$c = new Config();
 
-	$d = ["key" => 123, "value"=> 2345];
+	$c['key'] = 123;
+	$c['value'] = 2345;
 
-	$c->data = $d;
-	$result = ($c->data["key"] + $c->data["value"]) / $c->data["key"];
+	$result = ($c['key'] + $c['value'] ) / $c['key'];
 
 	if ($run === 0)
 	{
 		echo print_r($c, true) . PHP_EOL;
-		echo "Extend stdClass = " . $result . PHP_EOL;
+		echo "Config Array = " . $result . PHP_EOL;
 		if ($result !== $check) {
 			throw new Exception("Result not the same! $result");
 		}
@@ -360,7 +362,7 @@ function test_h(int $run)
 
 	for($ix = 0; $ix < $count; $ix++)
 	{
-		$result = ($c->data["key"] + $c->data["value"]) / $c->data["key"];
+		$result = ($c['key'] + $c['value'] ) / $c['key'];
 	}
 
 	$end = microtime(true);
@@ -502,6 +504,52 @@ function test_j(int $run)
 	return $itime;
 }
 
+
+function test_n(int $run)
+{
+	global $check;
+
+	$count = 1000;
+
+	$c = new Target("SomeClassName",  "index");
+	//$c->key = 123;
+	//$c->value = 2345;
+
+	$c->key = 123;
+	$c->value = 2345;
+	$result = ($c->key + $c->value) / $c->key;
+
+	if ($run === 0)
+	{
+		echo print_r($c, true) . PHP_EOL;
+	//$result = ($c->key + $c->value) / $c->key;
+	
+		echo "object magic methods = " . $result . PHP_EOL;
+		if ($result !== $check) {
+			throw new Exception("Result not the same! $result");
+		}
+	}
+	$start = microtime(true);
+
+	for($ix = 0; $ix < $count; $ix++)
+	{
+		//$temp = $c->empty;
+		//$result = ($c->key + $c->value) / $c->key;
+		$result = ($c->key + $c->value) / $c->key;
+		//$result = ($temp["key"] + $temp["value"]) / $temp["key"];
+	}
+
+	$end = microtime(true);
+
+	$itime = (($end - $start) / $count) * 1000_000.0;
+	if ($run === 0)
+	{
+		echo "iter = " . chop($itime) . PHP_EOL;
+		echo "----------------------------" . PHP_EOL;
+	}
+	return $itime;
+}
+
 $total_runs = 10000;
 
 $times = [];
@@ -520,6 +568,8 @@ $i = test_i($run);
 $k = test_k($run);
 $j = test_j($run);
 $m = test_m($run);
+$n = test_n($run);
+
 
 if ($run > 0)
 {
@@ -534,6 +584,7 @@ if ($run > 0)
 	$times["i"][] = $i;
 	$times["j"][] = $j;
 	$times["m"][] = $m;
+	$times["n"][] = $n;
 }
 
 row("Local variables (e)", $e/$e, $e/$a, $run);
@@ -546,13 +597,15 @@ row("Wcc\\Config dynamic properties (d)", $d/$e, $d/$a, $run);
 
 row("Use local array (g)", $g/$e, $g/$a, $run);
 
-row("Extend stdClass (h)", $h/$e, $h/$a, $run);
+row("Wcc\\Config as array (h)", $h/$e, $h/$a, $run);
 
 row("Hmap property handler (f)", $f/$e, $f/$a, $run);
 row("Hmap array handler (m)", $m/$e, $m/$a, $run);
 
 row("ArrayObject [array]  (k)", $k/$e, $k/$a, $run);
 row("ArrayObject ->Property  (j)", $j/$e, $j/$a, $run);
+
+row("Target magic methods (n)", $n/$e, $n/$a, $run);
 
 }
 
@@ -594,6 +647,7 @@ $h = $avg["h"];
 $i = $avg["i"];
 $j = $avg["j"];
 $m = $avg["m"];
+$n = $avg["n"];
 
 function r2(string $s, float $x, float $y)
 {
@@ -612,15 +666,16 @@ r2("Wcc\\Config dynamic properties (d)", $d/$e, $d/$a);
 
 r2("Use local array (g)", $g/$e, $g/$a);
 
-r2("Extend stdClass (h)", $h/$e, $h/$a);
+r2("Wcc\\Config as array (h)", $h/$e, $h/$a);
 
 r2("Hmap property handler (f)", $f/$e, $f/$a);
 r2("Hmap array handler (m)", $m/$e, $m/$a);
 
 r2("ArrayObject [array]  (k)", $k/$e, $k/$a);
 r2("ArrayObject ->Property  (j)", $j/$e, $j/$a);
+r2("Target magic method ->Property  (n)", $n/$e, $n/$a);
 
 
 
-echo "Versions - PHP " . phpversion() . " Wcc " . phpversion("Wcc") . " XDebug " 
+echo "Versions - PHP " . phpversion() . " cppzpp " . phpversion("cppzpp") . " XDebug " 
 . phpversion("XDebug") . PHP_EOL;

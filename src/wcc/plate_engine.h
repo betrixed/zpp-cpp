@@ -34,7 +34,7 @@ class Plate; // forward
 
 		static base_obj_mgr<PlateEngine> omg;
 
-		virtual void debug_info(htab_rw hw);
+		virtual void debug_info(htab_cow hw);
 
 		void store(str_ptr name, obj_ptr plate);
 	

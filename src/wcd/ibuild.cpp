@@ -371,7 +371,7 @@ using namespace zpp;
 	}
 
 	void 
-	IBuild::debug_info(htab_rw di)
+	IBuild::debug_info(htab_cow di)
 	{
 		di.set(SQSTR.db_ref, dbref_);
 		di.set(SQSTR.isql, isql_);
@@ -390,7 +390,7 @@ using namespace zpp;
 		val_return result;
 
 		htab_rc args_mgr;
-		htab_rw args(args_mgr);
+		htab_cow args(args_mgr);
 
 		args.set(SQSTR.function, agfn);
 		args.set(SQSTR.columns, columns);
@@ -506,11 +506,11 @@ using namespace zpp;
 		int_return result;
 
 		htab_rc names_mgr;
-		htab_rw names(names_mgr);
+		htab_cow names(names_mgr);
 
 		if (columns.isString())
 		{
-			htab_rw hw(names);
+			htab_cow hw(names);
 			names.push_back(columns.zstr());
 		}
 		else if (columns.isArray()) {

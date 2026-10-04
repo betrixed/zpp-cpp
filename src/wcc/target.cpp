@@ -13,43 +13,76 @@ extern "C" {
 #endif
 
 namespace wcc {
+using namespace zpp;
 
-class TargetData : public state_init {
-public:
+TargetNames  TNinit;
 
-	str_intern class_name;
-	str_intern method;
-	str_intern module;
-	str_intern index;
-	str_intern params;
+void
+TargetNames::init()
+{
+	p_objclass = "objclass";
+	p_objmethod = "objmethod";
+	s_index = "index";
+	p_params = "params";
+}
 
-	TargetData() : state_init() {}
-
-	void init() override
-	{
-		// "protected property names"
-		class_name = "class_name";
-		method = "func_name";
-		module = "module_name";
-		index = "index";
-		params = "params";
-	}
-};
-
-TargetData target_data;
 
 base_obj_mgr<Target> Target::omg;
 
-void Target::debug_info(htab_rw di)
+/*
+void Target::debug_info(htab_cow di)
 {
 	di.set(target_data.class_name, class_);
 	di.set(target_data.method, func_);
 	di.set(target_data.module, module_);
 	di.set(target_data.params, params_);
 }
-	
+	*/
+
+str_rc 
+Target::getModule()
+{
+	htab_cow cow = params();
+	str_rc result;
+
+	if (cow.size())
+	{
+		result = cow.get(route_data.MOD_S);
+		if (!result.ok())
+		{
+			result = DSPi.default_str;
+		}
+	}
+	return result;
+}
+
+str_rc 
+Target::getClass()
+{
+	return obj_ptr(self_).str_property(TNinit.p_objclass);
+}
+
+void   
+Target::setMethod(str_ptr s)
+{
+	obj_ptr(self_).property(TNinit.p_objmethod,s);
+}
+
+void   
+Target::setModule(str_ptr s)
+{
+	htab_cow cow = params();
+	cow.set(route_data.MOD_S, s);
+}
+
+str_rc 
+Target::getMethod()
+{
+	return obj_ptr(self_).str_property(TNinit.p_objmethod);
+}
+
 obj_rc 
-Target::go(str_ptr cname, str_ptr fname)
+Target::go(str_ptr cname, str_ptr method, htab_ptr params)
 {
 	obj_rc result;
 
@@ -57,7 +90,7 @@ Target::go(str_ptr cname, str_ptr fname)
 
 	Target* cobj = zobj_toc<Target>(result);
 
-	cobj->construct(cname, fname);
+	cobj->construct(cname, method, params);
 	//val_rc temp(result);
 	//dump_info::msg_dump("target go ", temp);
 	return result;
@@ -65,323 +98,109 @@ Target::go(str_ptr cname, str_ptr fname)
 
 
 void 
-Target::construct(str_ptr cname, str_ptr fname)
+Target::construct(str_ptr cname, str_ptr method, htab_ptr params)
 {
-	class_ = cname;
-	if (!fname.size())
+	obj_ptr self(self_);
+
+	self.property(TNinit.p_objclass, cname);
+	if (!method.size())
 	{
-		func_ = target_data.index;
+		method = TNinit.s_index;
 	}
-	else { 
-		func_ = fname;
+	self.property(TNinit.p_objmethod, method);
+
+	if (!params.ok())
+	{
+		params = htab_ptr::empty_array();
 	}
+	self.property(TNinit.p_params, params);
+	
 	//showobj("target construct ", vobj());
 
 }
 
-/** Completedly forgotten why this was necessary */
-
-obj_rc
-Target::copy()
-{
-	obj_rc result = Target::omg.new_zobj();
-
-	Target* cobj = zobj_toc<Target>( result );
-
-	cobj->construct(this->class_, this->func_);
-	cobj->setModule(this->module_);
-	cobj->setParams(this->params_);
-	return result;
-}
-
-void 
-Target::setParam(str_ptr key, val_ptr value)
-{
-	htab_rw hw(params_);
-	hw.set(key, value);
-}
-
 val_rc 
-Target::getParam(str_ptr key)
+Target::getRoles()
 {
 	val_rc result;
 
-	if (params_.size())
-	{
-		result = params_.get(key);
-	}
+	htab_cow params = this->params();
+
+	result = params.get(route_data.ROLE_S);
 
 	return result;
 }
 
-htab_ptr 
-Target::getParams()
+val_rc 
+Target::refParams()
 {
-	return params_;
+	val_ptr ap(obj_ptr(self_).property_ptr(TNinit.p_params));
+	return val_rc(ap.make_ref());              
 }
 
-void 
-Target::setParams(htab_ptr data)
+htab_cow
+Target::params() 
 {
-	params_ = data;
-}
+	val_ptr ap(obj_ptr(self_).property_ptr(TNinit.p_params));
 
+	zval* pval = ap.make_ref();
 
-str_ptr 
-Target::getClass()
-{
-	return class_;
-}
-
-str_ptr 
-Target::getFunc()
-{
-	return func_;
-}
-
-str_ptr 
-Target::getModule()
-{
-	return module_;
-}
-
-void Target::setFunc(str_ptr name)
-{
-	func_ = name;
-}
-
-void Target::setModule(str_ptr name)
-{
-	module_ = name;
-}
-
-htab_rc
-Target::serialize()
-{
-	htab_rc result;
-
-	htab_rw hw(result);
-
-	this->debug_info(hw);
-
-	return result;
-}
-
-void 
-Target::unserialize(htab_ptr htab)
-{
-	//showdata("Target", htab);
-	class_ = htab.get(target_data.class_name);
-	func_ = htab.get(target_data.method);
-	module_ = htab.get(target_data.module);
-	params_ = htab.get(target_data.params);
+	return htab_cow(pval);
 }
 
 }; //namespace wcc
 
 ZEND_METHOD(Wcc_Target, __construct)
 {
-	zend_string* cname;
-	zend_string* func;
+	zarg_rd args(execute_data);
 
-	ZEND_PARSE_PARAMETERS_START(2,2)
-	Z_PARAM_STR(cname)
-	Z_PARAM_STR(func)
-	ZEND_PARSE_PARAMETERS_END();
+	str_ptr cname = args.str(args.need(0));
+	str_ptr method = args.str_or_default(args.option(1), TNinit.s_index);
+	htab_ptr params = args.htab_or_null(args.option(2));
 
-	Target* cobj = zval_toc<Target>(ZEND_THIS);
-	cobj->construct(cname, func);
+	if (!args.throw_errors())
+	{
+		Target* cobj = zval_toc<Target>(ZEND_THIS);
+		cobj->construct(cname, method, params);
+	}
 
 }
 
 ZEND_METHOD(Wcc_Target, go)
 {
-	zend_string* cname;
-	zend_string* func = nullptr;
-
-	ZEND_PARSE_PARAMETERS_START(1,2)
-	Z_PARAM_STR(cname)
-	Z_PARAM_OPTIONAL
-	Z_PARAM_STR(func)
-	ZEND_PARSE_PARAMETERS_END();
-
-	obj_rc obj = Target::go(cname, func);
-	//TODO: why needs a ref boost?
-	obj.move_zv(return_value);
-	//showobj("obj after move,", obj);
-	//showmem("return_value after move,", return_value);
-	//val_rc::try_addref(return_value);
-
-}
-
-ZEND_METHOD(Wcc_Target, getClass)
-{
-	ZEND_PARSE_PARAMETERS_NONE();
-
-	Target* cobj = zval_toc<Target>(ZEND_THIS);
-	str_ptr cname = cobj->getClass();
-
-	cname.copy_zv(return_value);
-}
-
-
-ZEND_METHOD(Wcc_Target, getFunc)
-{
-	ZEND_PARSE_PARAMETERS_NONE();
-
-	Target* cobj = zval_toc<Target>(ZEND_THIS);
-	str_ptr name = cobj->getFunc();
-
-	name.copy_zv(return_value);	
-}
-
-
-ZEND_METHOD(Wcc_Target, getModule)
-{
-	ZEND_PARSE_PARAMETERS_NONE();
-
-	Target* cobj = zval_toc<Target>(ZEND_THIS);
-	str_ptr name = cobj->getModule();
-
-	name.copy_zv(return_value);	
-}
-
-
-ZEND_METHOD(Wcc_Target, setFunc)
-{
-	zend_string* func;
-
-	ZEND_PARSE_PARAMETERS_START(1,1)
-	Z_PARAM_STR(func)
-	ZEND_PARSE_PARAMETERS_END();
-	
-	Target* cobj = zval_toc<Target>(ZEND_THIS);
-	cobj->setFunc(func);
-
-}
-
-
-ZEND_METHOD(Wcc_Target, setModule)
-{
-	zend_string* module_name;
-
-	ZEND_PARSE_PARAMETERS_START(1,1)
-	Z_PARAM_STR(module_name)
-	ZEND_PARSE_PARAMETERS_END();
-	
-	Target* cobj = zval_toc<Target>(ZEND_THIS);
-	cobj->setModule(module_name);	
-
-	// Return this Target Object (in ZEND_THIS);
-	ZVAL_COPY(return_value, ZEND_THIS);
-}
-
-
-ZEND_METHOD(Wcc_Target, __serialize)
-{
-	ZEND_PARSE_PARAMETERS_NONE();
-
-	Target* cobj = zval_toc<Target>(ZEND_THIS);
-
-	htab_rc ret = cobj->serialize();
-	ret.move_zv(return_value);
-}
-
-
-ZEND_METHOD(Wcc_Target, __unserialize)
-{
-	zval* data;
-
-	ZEND_PARSE_PARAMETERS_START(1, 1)
-	Z_PARAM_ARRAY(data)
-	ZEND_PARSE_PARAMETERS_END();
-
-	htab_ptr htab(Z_ARR_P(data));
-
-	Target* cobj = zval_toc<Target>(ZEND_THIS);
-
-	cobj->unserialize(htab);	
-}
-
-static void get_param(zend_execute_data* execute_data, zval* return_value)
-{
 	zarg_rd args(execute_data);
 
-	str_ptr key;
-	val_rc result;
+	str_ptr cname = args.str(args.need(0));
+	str_ptr method = args.str_or_default(args.option(1), TNinit.s_index);
+	htab_ptr params = args.htab_or_null(args.option(2));
 
-	args.zstring(key, args.need(0));
-
-	if (!args.throw_errors(__FUNCTION__))
+	if (!args.throw_errors())
 	{
-		Target* cobj = zval_toc<Target>(ZEND_THIS);
-		result = cobj->getParam(key);
+		obj_rc obj = Target::go(cname, method, params);
+		obj.move_zv(return_value);
 	}
+}
+
+ZEND_METHOD(Wcc_Target, refParams)
+{
+	if (!zarg_rd::zero_args(execute_data, __FUNCTION__))
+	{
+		return;
+	}
+	Target* cobj = zval_toc<Target>(ZEND_THIS);
+	val_rc result = cobj->refParams();
 	result.move_zv(return_value);
 }
 
-
-ZEND_METHOD(Wcc_Target, getParam)
+ZEND_METHOD(Wcc_Target, getModule)
 {
-	get_param(execute_data, return_value);
-}
-
-static void set_param(zend_execute_data* execute_data)
-{
-	zarg_rd args(execute_data);
-
-	str_ptr  key;
-	val_ptr value;
-
-	args.zstring(key, args.need(0));
-	value = args.need(1);
-
-	if (!args.throw_errors(__FUNCTION__))
+	if (!zarg_rd::zero_args(execute_data, __FUNCTION__))
 	{
-		Target* cobj = zval_toc<Target>(ZEND_THIS);
-		cobj->setParam(key, value);
-	}	
-}
-
-ZEND_METHOD(Wcc_Target, setParam)
-{
-	set_param(execute_data);
-}
-
-ZEND_METHOD(Wcc_Target, __get)
-{
-	get_param(execute_data, return_value);
-}
-
-ZEND_METHOD(Wcc_Target, __set)
-{
-	set_param(execute_data);
-}
-
-ZEND_METHOD(Wcc_Target, getParams)
-{
-	ZEND_PARSE_PARAMETERS_NONE();
-
-	Target* cobj = zval_toc<Target>(ZEND_THIS);
-	htab_ptr result = cobj->getParams();
-	result.copy_zv(return_value);
-}
-
-ZEND_METHOD(Wcc_Target, setParams)
-{
-	zarg_rd args(execute_data);
-
-	htab_ptr data;
-
-	args.zarray(data, args.need(0));
-
-	if (!args.throw_errors(__FUNCTION__))
-	{
-		Target* cobj = zval_toc<Target>(ZEND_THIS);
-		cobj->setParams(data);
-
-		ZVAL_COPY(return_value, ZEND_THIS);
+		return;
 	}
+	Target* cobj = zval_toc<Target>(ZEND_THIS);
+	str_rc result = cobj->getModule();
+	result.move_zv(return_value);
 }
 
 PHP_MINIT_FUNCTION(wcc_target)
@@ -390,7 +209,7 @@ PHP_MINIT_FUNCTION(wcc_target)
 	zend_class_entry *ce = register_class_Wcc_Target();
 	Target::omg.classEntry(ce);
 	
-	STATE_INIT_ADD(target_data)
+	STATE_INIT_ADD(TNinit)
 	
 	return SUCCESS;
 

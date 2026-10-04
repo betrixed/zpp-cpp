@@ -15,7 +15,7 @@
 #include "obj_rc.h"
 #include "htab_ptr.h"
 #include "htab_rc.h"
-#include "htab_rw.h"
+#include "htab_cow.h"
 #include "htab_walk.h"
 
 #include "val_ptr.h"

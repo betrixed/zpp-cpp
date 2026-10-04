@@ -205,7 +205,7 @@ Literal::toString() const
 	}
 }
 
-void Literal::debug_info(htab_rw di)
+void Literal::debug_info(htab_cow di)
 {
 	base_d::debug_info(di);
 	di.set(SQSTR.partid, LIT_PID);
@@ -214,7 +214,7 @@ void Literal::debug_info(htab_rw di)
 
 //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
-void Expr::debug_info(htab_rw di)
+void Expr::debug_info(htab_cow di)
 {
 	di.set(SQSTR.partid, EXPR_PID);
 	di.set(SQSTR.value,  expr_);
@@ -230,7 +230,7 @@ void Expr::construct(str_ptr val)
 
 
 void 
-JoinExpr::debug_info(htab_rw di)
+JoinExpr::debug_info(htab_cow di)
 {
 	di.set(SQSTR.partid, JE_PID);
 	di.set(SQSTR.lhs_val, lattr_);
@@ -488,7 +488,7 @@ JoinExpr::toOperator(str_ptr s)
 //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 void
-IColumns::debug_info(htab_rw di)
+IColumns::debug_info(htab_cow di)
 {
 	di.set(SQSTR.partid, ICOL_PID);
 	di.set(SQSTR.alias, alias_);
@@ -544,7 +544,7 @@ void IColumns::clear()
 
 void IColumns::addExpr(str_ptr alias, str_ptr expr)
 {
-	htab_rw exp_w(expr_);
+	htab_cow exp_w(expr_);
 	exp_w.set(alias, expr);
 }
 		
@@ -561,7 +561,7 @@ IColumns::add(htab_ptr columns)
 
 		auto ix = wk.key();
 		auto name = wk.value();
-		htab_rw names(colnames_);
+		htab_cow names(colnames_);
 
 		for(wk.start(columns); wk.ok(); wk.next())
 		{
@@ -588,7 +588,7 @@ IColumns::setColAlias(str_ptr name, str_ptr alias)
 	else {
 		val = alias;
 	}
-	htab_rw hw(colnames_);
+	htab_cow hw(colnames_);
 	hw.set(name, val);
 }
 
@@ -633,7 +633,7 @@ TableAttr::construct(str_ptr t, str_ptr a)
 	//showstr("attr_", attr_);
 }
 
-void TableAttr::debug_info(htab_rw di)
+void TableAttr::debug_info(htab_cow di)
 {
 	di.set(SQSTR.partid, TA_PID);
 	di.set(SQSTR.table, table_);
@@ -654,7 +654,7 @@ TableAttr::toString() const
 //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 void // virtual
-TColumns::debug_info(htab_rw di)
+TColumns::debug_info(htab_cow di)
 {
 	IColumns::debug_info(di);
 
@@ -717,7 +717,7 @@ TColumns::attr(str_ptr name)
 	obj_rc ta = TableAttr::makeTA(table, name);
 
 	result = ta;
-	htab_rw hw(attr_map_);
+	htab_cow hw(attr_map_);
 
 	hw.set(name, result);
 
@@ -763,7 +763,7 @@ TColumns::tableCol(str_ptr expr)
 //@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 void 
-Param::debug_info(htab_rw di)
+Param::debug_info(htab_cow di)
 {
 	base_d::debug_info(di);
 	//di.set(SQSTR.valuekey, value_);

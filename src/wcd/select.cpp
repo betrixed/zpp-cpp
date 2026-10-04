@@ -17,7 +17,7 @@ using namespace zpp;
 base_obj_mgr<Select> Select::omg;
 
 
-void Select::debug_info(htab_rw di)
+void Select::debug_info(htab_cow di)
 {
 	Operation::debug_info(di);
 
@@ -69,7 +69,7 @@ Select::construct(const weak_ref& db, bool autoAlias)
  {
  	htab_rc values;
 
- 	htab_rw hw(values);
+ 	htab_cow hw(values);
 
  	base_dlink<Select>& dref = omg.obj_list_;
 
@@ -96,7 +96,7 @@ Select::aggregate(str_ptr aggfn, str_ptr alias, htab_ptr aggargs)
 
 	htab_rc data;
 
-	htab_rw hw(data);
+	htab_cow hw(data);
 
 	hw.set(SQSTR.function, aggfn);
 	hw.set(SQSTR.alias, alias);
@@ -210,7 +210,7 @@ Select::getRenamed()
 	if (rowset.isArray() && rename.isArray())
 	{
 		htab_rc objset;
-		htab_rw hw(objset);
+		htab_cow hw(objset);
 
 		htab_ptr rows(rowset);
 		htab_ptr rtab(rename);

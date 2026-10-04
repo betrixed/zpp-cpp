@@ -293,7 +293,7 @@ htab_rc
 RequestGlobals::getQualityHeader(str_ptr key, str_ptr name)
 {
 	htab_rc result;
-	htab_rw qh(result);
+	htab_cow qh(result);
 
 	htab_ptr server(readServer());
 
@@ -321,7 +321,7 @@ RequestGlobals::getQualityHeader(str_ptr key, str_ptr name)
 		val_ptr part(wk.value());
 
 		htab_rc headerParts;
-		htab_rw collect(headerParts);
+		htab_cow collect(headerParts);
 
 		val_rc rs = data_split.splits(part.zstr(), -1);
 		val_ptr sc_split(rs);
@@ -358,11 +358,11 @@ RequestGlobals::resolveAuthorizationHeaders()
 
 	bool doCallback = auth_call.ok();
 	htab_rc result;
-	htab_rw headers(result);
+	htab_cow headers(result);
 
 	if (doCallback) {
 		htab_rc arg_mgr;	
-		htab_rw args(arg_mgr);
+		htab_cow args(arg_mgr);
 
 		args.set(RQit.step_key, PRE_AUTHORIZE);
 		args.set(RQit.server_key, server_);
@@ -462,7 +462,7 @@ RequestGlobals::resolveAuthorizationHeaders()
 
 			if (doCallback) {
 				htab_rc calldata_ht;	
-				htab_rw calldata(calldata_ht);
+				htab_cow calldata(calldata_ht);
 
 				calldata.set(RQit.step_key, POST_AUTHORIZE);
 				calldata.set(RQit.headers_key, headers);
@@ -493,7 +493,7 @@ RequestGlobals::smoothFiles(htab_ptr names, htab_ptr types,
 {
 	htab_rc result;
 
-	htab_rw files(result);
+	htab_cow files(result);
 
 	for_key_value wk;
 
@@ -510,7 +510,7 @@ RequestGlobals::smoothFiles(htab_ptr names, htab_ptr types,
 		if (name.isString()) 
 		{
 			htab_rc fdata_array;
-			htab_rw ftab(fdata_array);
+			htab_cow ftab(fdata_array);
 
 			ftab.set(RQit.namekey, name);
 			ftab.set(RQit.typekey, types.get(idx));
@@ -538,7 +538,7 @@ RequestGlobals::smoothFiles(htab_ptr names, htab_ptr types,
 
 //public 
 
-void RequestGlobals::debug_info(htab_rw di)
+void RequestGlobals::debug_info(htab_cow di)
 {
 
 	di.set(RQit.server_key, server_);
@@ -645,7 +645,7 @@ RequestGlobals::getBasicAuth()
 		return result;
 	}
 
-	htab_rw data(result);
+	htab_cow data(result);
 
 	data.set(RQit.username, uname);
 	data.set(RQit.password, upwd);
@@ -747,7 +747,7 @@ RequestGlobals::getDigestAuth()
 		str_rc digest(dval);
 
 		if (getall.matches(digest) > 0) {
-			htab_rw auth(result);
+			htab_cow auth(result);
 
 			htab_rc results(getall.results());
 
@@ -826,10 +826,10 @@ htab_rc
 RequestGlobals::getHeaders()
 {
 	htab_rc headers;
-	htab_rw hw(headers);
+	htab_cow hw(headers);
 
 	htab_rc contentHeaders;
-	htab_rw content(contentHeaders);
+	htab_cow content(contentHeaders);
 
 	content.set(RQit.CONTENT_TYPE, true);
 	content.set(RQit.CONTENT_LENGTH, true);
@@ -1201,7 +1201,7 @@ htab_rc
 RequestGlobals::getUploadedFiles(bool onlySuccess, bool namekeys)
 {
 	htab_rc result;
-	htab_rw fileobjs(result);
+	htab_cow fileobjs(result);
 
 	htab_ptr files(Hmap::map_htab(files_));
 
@@ -1253,7 +1253,7 @@ RequestGlobals::getUploadedFiles(bool onlySuccess, bool namekeys)
 					if ((!onlySuccess) || (error_val == Upload::ERROR_OK))
 					{
 						htab_rc dataFile;
-						htab_rw fdata(dataFile);
+						htab_cow fdata(dataFile);
 
 						fdata.set(namekey, file.get(namekey));
 						fdata.set(typekey, file.get(typekey));

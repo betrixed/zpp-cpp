@@ -255,7 +255,7 @@ namespace wcc {
 		val_rc parseFile(str_ptr filename);
 		val_rc parse(str_ptr src);
 
-		virtual void debug_info(htab_rw ht);
+		virtual void debug_info(htab_cow ht);
 	
 		VIRTUAL_ZOBJPTR
 	

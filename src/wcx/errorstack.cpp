@@ -28,7 +28,7 @@ ErrorStack::clear()
 int 
 ErrorStack::pushMsg(str_ptr msg, int level)
 {
-	htab_rw hw(messages_);
+	htab_cow hw(messages_);
 	hw.push_back(msg);
 
 	if (level > errorLevel_)

@@ -118,7 +118,7 @@ namespace wcd {
 		
 
 		val_rc rmgr;
-		htab_rw r(rmgr);
+		htab_cow r(rmgr);
 
 		htab_walk wk;
 
@@ -140,7 +140,7 @@ namespace wcd {
 	}
 
 	void
-	Model::debug_info(htab_rw di)
+	Model::debug_info(htab_cow di)
 	{
 
 		base_d::debug_info(di);
@@ -478,7 +478,7 @@ namespace wcd {
 			if (val.isObject())
 			{
 				htab_rc rows_mgr;
-				htab_rw rows(rows_mgr);
+				htab_cow rows(rows_mgr);
 
 				rows.push_back(val);
 				result.value_ = rows_mgr;
@@ -486,7 +486,7 @@ namespace wcd {
 			return result;
 		}
 		val_rc obj_method;
-		htab_rw arg1(obj_method);
+		htab_cow arg1(obj_method);
 
 		arg1.push_back(build);
 		arg1.push_back(mlower);
@@ -570,7 +570,7 @@ namespace wcd {
 		}
 		else {
 			val_rc vlist_tab;
-			htab_rw vlist(vlist_tab);
+			htab_cow vlist(vlist_tab);
 			vlist.push_back(id);
 			result = m->byKeyValue(pkey_mgr, vlist_tab);
 		}
@@ -599,7 +599,7 @@ namespace wcd {
 		//showdata("pkey get", pkey_fields);
 		if (pkey_fields.size())
 		{
-			htab_rw pkey_options(pkey_options_);
+			htab_cow pkey_options(pkey_options_);
 
 			htab_return cdefs_ret = getColDefs();
 			if (cdefs_ret.has_errors())
@@ -626,7 +626,7 @@ namespace wcd {
 				//zend_printf("get pkey options ");
 				//showmem("pkey", pkey);
 				htab_rc options_mgr;
-				htab_rw options(options_mgr);
+				htab_cow options(options_mgr);
 
 				str_rc key_name = pkey.zstr();
 				key_name.lowercase();
@@ -653,7 +653,7 @@ namespace wcd {
 						if (defval.isString())
 						{
 							htab_rc temp_mgr;
-							htab_rw temp(temp_mgr);
+							htab_cow temp(temp_mgr);
 
 							temp.push_back(SQSTR.default_key);
 							temp.push_back(defval);
@@ -818,7 +818,7 @@ namespace wcd {
 		if (import.isResource())
 		{
 			htab_rc csv_args;
-			htab_rw csv(csv_args);
+			htab_cow csv(csv_args);
 			csv.set(MIS.escape_key, MIS.escape_str);
 
 			obj_rc stmt;
@@ -835,7 +835,7 @@ namespace wcd {
 				}
 
 				htab_rc values_mgr;
-				htab_rw values(values_mgr);
+				htab_cow values(values_mgr);
 
 				htab_walk sw;
 
@@ -884,7 +884,7 @@ namespace wcd {
 				if (datarowct == 0) {
 					//  prepaire for multi inserts
 					htab_rc columns_mgr;
-					htab_rw columns(columns_mgr);
+					htab_cow columns(columns_mgr);
 
 					for(sw.start(values); sw.ok(); sw.next())
 					{
@@ -996,7 +996,7 @@ namespace wcd {
 		{
 			str_ptr seqfield = skey.zstr();
 			htab_rc hcolumn;
-			htab_rw hcol(hcolumn);
+			htab_cow hcol(hcolumn);
 			hcol.push_back(seqfield);
 
 			val_return max = bd->aggregate(max_s,hcolumn);
@@ -1023,7 +1023,7 @@ namespace wcd {
 					return result;
 				}
 				htab_rc data = options.value_.get(seqfield);
-				htab_rw seqdata(data);
+				htab_cow seqdata(data);
 				
 				seqdata.set(MIS.k_field, seqfield);
 				seqdata.set(MIS.k_table, tname);
@@ -1081,7 +1081,7 @@ namespace wcd {
 		//showdata("columns", columns);
 
 		htab_rc tsf_mgr;
-		htab_rw tsf(tsf_mgr);
+		htab_cow tsf(tsf_mgr);
 
 		obj_rc self = vobj();
 
@@ -1233,7 +1233,7 @@ namespace wcd {
 			htab_rc& options = options_ret.value_;
 
 			htab_rc pkey_refresh_mgr;
-			htab_rw pkey_refresh(pkey_refresh_mgr);
+			htab_cow pkey_refresh(pkey_refresh_mgr);
 
 			htab_walk wk;
 			auto pname = wk.value();
@@ -1473,7 +1473,7 @@ namespace wcd {
 		auto name = wk.value();
 
 		htab_rc fkey_list;
-		htab_rw hw(fkey_list);
+		htab_cow hw(fkey_list);
 		str_buf buf;
 
 		for(wk.start(pkey); wk.ok(); wk.next())
@@ -1566,7 +1566,7 @@ namespace wcd {
 
 		if (ts != 0) 
 		{
-			htab_rw stamps(result);
+			htab_cow stamps(result);
 			str_rc dkey;
 
 			if ((ts & CREATE_TS) != 0)
