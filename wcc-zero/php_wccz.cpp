@@ -64,7 +64,9 @@ PHP_RSHUTDOWN_FUNCTION(wccz)
 PHP_MINFO_FUNCTION(wccz)
 {
 	php_info_print_table_start();
-	php_info_print_table_row(2, "Zpp core support", "enabled");
+	php_info_print_table_colspan_header(2, 
+		"Support classes for wccX extensions, configure, dependency services, modules and assets");
+	php_info_print_table_row(2, "Zpp extension classes support", "enabled");
 	php_info_print_table_row(2, "Version", PHP_WCCZ_VERSION);
 	php_info_print_table_row(2, "Author", PHP_WCCZ_AUTHOR);
 	php_info_print_table_end();

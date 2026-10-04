@@ -48,9 +48,17 @@ PHP_RSHUTDOWN_FUNCTION(wccm)
 PHP_MINFO_FUNCTION(wccm)
 {
 	php_info_print_table_start();
+	php_info_print_table_colspan_header(2, "Fast reader for .toml format, HTML generation from Markdown.");
 	php_info_print_table_row(2, "wccm support", "enabled");
 	php_info_print_table_row(2, "Version", PHP_WCCM_VERSION);
 	php_info_print_table_row(2, "Author", PHP_WCCM_AUTHOR);
+	php_info_print_table_row(2, "TOML C - Copyright (c) CK Tan",
+  		"https://github.com/cktan/tomlc99");
+	php_info_print_table_row(2, "MD4C: Markdown parser for C - Copyright (c) 2016-2024 Martin Mitáš" ,
+	  		"http://github.com/mity/md4c");
+
+	
+	
 	php_info_print_table_end();
 }
 /* }}} */

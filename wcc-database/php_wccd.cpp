@@ -57,6 +57,7 @@ PHP_RSHUTDOWN_FUNCTION(wccd)
 PHP_MINFO_FUNCTION(wccd)
 {
 	php_info_print_table_start();
+	php_info_print_table_colspan_header(2, "Database model objects and SQL generators");
 	php_info_print_table_row(2, "wccd support", "enabled");
 	php_info_print_table_row(2, "Version", PHP_WCCD_VERSION);
 	php_info_print_table_row(2, "Author", PHP_WCCD_AUTHOR);

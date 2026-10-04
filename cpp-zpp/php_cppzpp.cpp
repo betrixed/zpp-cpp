@@ -70,10 +70,11 @@ PHP_RSHUTDOWN_FUNCTION(cppzpp)
 PHP_MINFO_FUNCTION(cppzpp)
 {
 	php_info_print_table_start();
-	php_info_print_table_row(2, "Zpp core support", "enabled");
-	php_info_print_table_row(2, "Version", PHP_CPPZPP_VERSION);
+	php_info_print_table_colspan_header(2, "Low level C++ class library functions for for wccXX extensions");
+	php_info_print_table_header(2, "Version Dependency", "<b>" PHP_CPPZPP_VERSION "</b>");
 	php_info_print_table_row(2, "Author", PHP_CPPZPP_AUTHOR);
 	php_info_print_table_end();
+
 }
 /* }}} */
 

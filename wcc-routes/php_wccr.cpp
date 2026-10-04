@@ -54,6 +54,8 @@ PHP_RSHUTDOWN_FUNCTION(wccr)
 PHP_MINFO_FUNCTION(wccr)
 {
 	php_info_print_table_start();
+	php_info_print_table_colspan_header(2,
+	 	"Map URL locations, cached resources and session roles to Object-Method calls");
 	php_info_print_table_row(2, "wccr support", "enabled");
 	php_info_print_table_row(2, "Version", PHP_WCCR_VERSION);
 	php_info_print_table_row(2, "Author", PHP_WCCR_AUTHOR);
