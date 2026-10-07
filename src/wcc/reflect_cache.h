@@ -29,7 +29,7 @@ public:
 	
 	ReflectCache();
 
-	static obj_rc ReflectionMethod(obj_ptr obj, str_ptr);
+	static obj_rc ReflectionMethod(str_ptr objclass, str_ptr method);
 	 
 	obj_rc getReflectClass(str_ptr class_name);
 

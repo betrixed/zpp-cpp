@@ -40,6 +40,7 @@ namespace wcc {
 		str_rc   getClass();
 		str_rc   getMethod();
 		val_rc   getRoles();
+		htab_ptr getArgs();
 
 		void   setModule(str_ptr s);
 		void   setMethod(str_ptr s);

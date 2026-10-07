@@ -218,13 +218,14 @@ ReflectCache* ReflectCache::cpp()
 	return zobj_toc<ReflectCache>(g_reflect_cache);
 }
 
+//static method
 obj_rc 
-ReflectCache::ReflectionMethod(obj_ptr obj, str_ptr method)
+ReflectCache::ReflectionMethod(str_ptr objclass, str_ptr method)
 {
 	htab_rc  args_array;
 	htab_cow  args(args_array);
 
-	args.push_back(obj);
+	args.push_back(objclass);
 	args.push_back(method);
 
 	obj_rc result = staticInstanceArgs(RFC_data.reflection_method, args);

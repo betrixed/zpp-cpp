@@ -109,6 +109,8 @@ public:
     void     toLong();
     void     toDouble();
     void     toString();
+    //! Become 1st value of a new array
+    void     toArray();
 
     void     make_ref();
     void     decref();

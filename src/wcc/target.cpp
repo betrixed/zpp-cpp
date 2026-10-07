@@ -128,6 +128,26 @@ Target::getRoles()
 
 	result = params.get(route_data.ROLE_S);
 
+	if (result.isString())
+	{
+		result.toArray();
+	}
+	return result;
+}
+
+htab_ptr Target::getArgs()
+{
+	htab_ptr result;
+
+	htab_cow params = this->params();
+	if (params.size())
+	{
+		val_ptr test = params.get(route_data.ARG_S);
+		if (test.isArray())
+		{
+			result = test.zarray();
+		}
+	}
 	return result;
 }
 

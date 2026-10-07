@@ -132,11 +132,10 @@ void
 val_rc::new_array()
 {
     lose();
+    // static gives ht.rc == 1
     HashTable* ht = htab_rc::new_array();
-    // added with rc == 1 
-    val_ptr(&zv_).bind_array(ht);  
-    htab_rc::try_decref(ht); // because new primary mgr
-    //showmem("new_array", &zv_);
+    // bind with rc == 1 
+    val_ptr::array_bind(&zv_, ht);  
 }
 bool
 val_rc::isEmpty() const
@@ -478,6 +477,21 @@ val_rc::toString()
         lose();
         ZVAL_STR(&zv_, s);
     }
+}
+
+/*! 
+ * Make any  value first value of an array.
+ * */
+void
+val_rc::toArray()
+{
+    val_rc temp(std::move(*this));
+
+    HashTable* ht = htab_rc::new_array();
+    htab_cow wrap(ht);
+    wrap.push_back(temp);
+    // Already rc==1
+    val_ptr::array_bind(&zv_, ht); 
 }
 
 val_rc::val_rc(str_rc&& rc)

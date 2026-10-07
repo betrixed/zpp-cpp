@@ -20,7 +20,7 @@ protected:
 
 	void set_tuple12(htab_ptr tg);
 	void set_tuple14(htab_ptr tg);
-	htab_rc fetchArgs();
+	htab_return fetchArgs();
 
 	obj_ptr    testRoute(obj_ptr robj);
 
@@ -98,7 +98,7 @@ public:
 	bool allow_call(obj_ptr user);
 
 	bool find_route(RouteSet* routes);
-	void error_context(Route* route);
+	void error_context(Route* route, str_buf& buf);
 	
 	void setModuleName(zend_string* s)
 	{
@@ -122,6 +122,8 @@ public:
 	str_rc debug_str() const;
 	
 	bool_return prepare_call(obj_ptr user);
+	bool_return verify_method_args(htab_ptr targs);
+	bool_return verify_has_method();
 
 	val_return call(htab_ptr extra, obj_ptr before, obj_ptr after);
 

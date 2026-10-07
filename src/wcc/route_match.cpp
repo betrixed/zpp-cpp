@@ -293,26 +293,6 @@ RouteMatch::call(htab_ptr extra, obj_ptr before, obj_ptr after)
 	val_rc  zobj;
 	obj_ptr obj;
 
-
-	fn_call 	   fn_param_optional;
-	fn_noparams    isoptional(fn_param_optional);
-	fn_call        fn_param_getname;
-	fn_noparams    getname(fn_param_getname);
-
-	fn_param_optional.set_fci(RM_data.isoptional_s);
-	fn_param_getname.set_fci(RM_data.getname_s);
-/*
-	if (!ob_class_.size() || !ob_method_.size()) 
-	{ 
-
-		bool_return check = this->prepare_call();
-		if (check.has_errors()) {
-			result = check.move_error();
-			return result;
-		}
-
-	}
-*/
 	if (ob_class_.size())
 	{
 		// only works for objects with zero arguments constructor
@@ -399,108 +379,7 @@ RouteMatch::call(htab_ptr extra, obj_ptr before, obj_ptr after)
 		}
 
 
-/*		
-		if (target_.isObject()) 
-		{
-			Target* target = zobj_toc<Target>(target_.zobject());
-			htab_ptr targs = target->getParams();
-			
-			if (targs.size()) {
-				#ifdef DBG_ROUTEMATCH
-					log->dump("Target Params", targs);
-				#endif
 
-				// pull out of URL query
-				for_key_value wk;
-				for(wk.start(targs); wk.ok(); wk.next())
-				{
-					str_ptr test = wk.key();
-					val_ptr param(wk.value());
-					if (test.ok()) {
-						htab_cow(ob_args_).set(test, param);
-					}
-				}
-			}
-		}
-	*/
-
-		obj_rc mref = ReflectCache::ReflectionMethod(obj, ob_method_);
-
-		
-		if (!mref.ok())
-		{
-			result.error() << ob_class_ << ":: " << ob_method_ << " not found.";
-			return result;
-		}
-
-		Hmap* query = this->query_copy();
-		if (!query)
-		{
-			result.error() << "No query Hmap";
-			return result;
-		}
-
-		val_rc pref_test = mref.call(RM_data.getparameters_fn);
-
-		htab_ptr pref = pref_test.zarray();
-		if (pref.size())
-		{
-			for_key_value wk;
-			// need to call getName, isOptional for each parameter
-			for(wk.start(pref); wk.ok(); wk.next())
-			{
-				//str_ptr key = wk.key();
-				val_ptr pobj = wk.value(); // parameter descibe object
-				obj_ptr param = pobj.zobject();
-
-				#ifdef DBG_ROUTEMATCH
-					log->dump("Parameter obj", param);
-				#endif
-
-				fn_param_optional.set_obj(param);
-				fn_param_getname.set_obj(param);
-
-				bool opt = isoptional.zbool();
-
-
-				if (!opt)
-				{
-					str_rc pname = getname.str();
-
-			    #ifdef DBG_ROUTEMATCH
-					log->dump("Parameter name", pname);
-					log->dump("Query values", query->self());
-				#endif
-					val_ptr obj_arg;
-
-					if (ob_args_.size())
-					{
-						obj_arg = ob_args_.get(pname);
-					}
-
-					if (obj_arg.isNull())
-					{
-						// htab get requires val_rc for result return.
-						val_rc testp = query->get(pname);
-							#ifdef DBG_ROUTEMATCH
-								log->dump("query get", testp);
-							#endif
-						if (testp.ok())
-						{
-							htab_cow cow(ob_args_);
-							cow.set(pname, testp);
-							#ifdef DBG_ROUTEMATCH
-								log->dump("After set ob_args_", ob_args_);
-							#endif
-						}
-						else {
-							result.error() << "Missing argument: " << pname;
-							return result;
-						}
-					}
-				}
-			}
-		}
 		result.value_ = this->call_method(obj, ob_method_, ob_args_);
 
 
@@ -609,9 +488,8 @@ void RouteMatch::set_tuple14(htab_ptr tg)
 }
 
 
-void RouteMatch::error_context(Route* r)
+void RouteMatch::error_context(Route* r, str_buf& buf)
 {
-	str_buf buf;
 
 	buf << "uri: " << uri_ << endl;
 	buf << "compiled: " << r->compiled_ << endl;
@@ -621,18 +499,6 @@ void RouteMatch::error_context(Route* r)
 
 	str_rc params = htab_ptr(r->params_).print_kv("params");
 	buf << params << endl;
-
-	erred_.error() << buf.zstr();
-/*
-	errors_ht.push_back((zend_string*)uri_);
-	errors_ht.push_back((zend_string*)r->compiled_);
-	
-
-	errors_ht.push_back(margs);
-
-	
-	errors_ht.push_back(params);
-*/
 }
 
 bool
@@ -645,14 +511,15 @@ RouteMatch::allow_call(obj_ptr user)
 		{
 			erred_.error() << "Insufficient Privilege";
 			erred_.value_ = false;
+			return false;
 		}
 	}
 	return true;
-
 }
-htab_rc RouteMatch::fetchArgs()
+htab_return RouteMatch::fetchArgs()
 {
-	htab_rc result;
+
+	htab_return result;
 
 	Route* route = zobj_toc<Route>(route_);
 
@@ -671,28 +538,27 @@ htab_rc RouteMatch::fetchArgs()
 		// params are not empty
 		long mct = margs_ht.size();
 		if (mct != ct) {
-			error_msg.adopt(strpprintf(0, "Route matches count should be %u", ct));
-			erred_.error() << error_msg << endl;
-			error_context(route);
+			result.error() << "Route matches count should be " << ct << " not " << mct << endl;
+			error_context(route,  result.error());
+			return result;
 		}
 
 		htab_walk walk;
 
 		auto name = walk.key();
 		auto val = walk.value();
-		
+		htab_cow args(result.value_);
+
 		for( walk.start(params_ht); walk.ok(); walk.next())
 		{	
 			if (!margs_ht.try_fetch(val,test))
 			{
 				str_rc svalue(val.to_zstr());
-				error_msg.adopt(strpprintf(0, "Null value arg# %s", svalue.data()));
-				erred_.error() << error_msg << endl;
-				error_context(route);
+				result.error() << "Null value arg# " << svalue << endl;
+				error_context(route, result.error());
 			}
 			else 
 			{
-				htab_cow args(result);
 				if (test.isString()) {
 					str_rc decoded = call_url_decode(test.zstr());
 					args.set(name,decoded);
@@ -702,163 +568,16 @@ htab_rc RouteMatch::fetchArgs()
 				}
 			}
 		}
-	}
-	else {
-		htab_ptr tg(route->target_);
 
-		if ( tg.ok() && tg.try_fetch(route_data.ARG_S, test) && test.isArray())
-		{
-			result = test.zarray();
-		}
 	}
 	return result;
 }
 
-bool_return 
-RouteMatch::prepare_call(obj_ptr user)
+bool_return
+RouteMatch::verify_has_method()
 {
 	bool_return result;
 
-#ifdef DBG_ROUTEMATCH
-	DebugLog* log = DebugLog::cpp_global();
-	log->dump("in prepare_call", route_,5);
-#endif
-	Route* route = zobj_toc<Route>(route_);
-
-	val_ptr route_target(route->target_);
-
-	obj_rc tg_obj(route_target.zobject());
-
-	if (tg_obj.ok() && tg_obj.instanceof(Target::omg.classEntry()) )
-	{
-		this->target_ = tg_obj;
-
-		#ifdef DBG_ROUTEMATCH
-		log->dump("Target value", tg_obj,5);
-		#endif
-	
-
-		Target* target = zobj_toc<Target>(tg_obj);
-		
-		roles_ = target->getRoles();
-
-		if (!roles_.isEmpty())
-		{
-			if (!this->allow_call(user))
-			{
-				result = erred_.move_error();
-				result.value_ = false;
-				return result;
-			}
-		}
-
-
-		module_name_ = target->getModule();
-	 	ob_class_ = target->getClass();
-	 	ob_method_ = target->getMethod();
-	 	
-	 	val_rc param_ref = target->refParams();
-		htab_cow params(param_ref);
-
-	 	// ARG_S is but one parameter that may be stored
-	 	htab_ptr defaults = params.get(route_data.ARG_S);
-	 	#ifdef DBG_ROUTEMATCH
-		log->dump("Target Params", defaults,5);
-		#endif
-
-	 	ob_args_ = this->fetchArgs();
-
-	 	obj_rc request;
-
-	 	if (defaults.size())
-	 	{	
-
-	 		Hmap* query = this->query_copy();
-			if (!query)
-			{
-				result.error() << "No query Hmap";
-				return result;
-			}
-
-	 		for_key_value   wk;
-	 		for(wk.start(defaults); wk.ok(); wk.next())
-	 		{
-	 			str_rc key = wk.key();
-	 			val_ptr value = wk.value();
-	 			//zend_long aindex = wk.index();
-
-	 			if (key.ok()) // a string key => value
-	 			{
-	 				if (!query->has(key)) {
-	 					query->set(key, value); // enhance with default
-	 				}
-	 			}
-	 			else {
-	 				//  value is a key to be relaced from query
-	 				//  with  
-	 				#ifdef DBG_ROUTEMATCH
-					log->dump("Default without key", defaults,5);
-					#endif
-	 			}
-	 		}
-	 	}
-	 	result.value_ = true;
-	}
-	else if (route_target.isCallable())
-	{
-		this->target_ = tg_obj;
-		result.value_ = true;
-		return result;
-	}
-
-
-	htab_ptr tg(route_target.zarray());
-
-	if (!tg)
-	{
-		return false;
-	}
-
-	roles_ = tg.get(route_data.ROLE_S);
-	if (!roles_.isEmpty())
-	{
-		if (!this->allow_call(user))
-		{
-			result = erred_.move_error();
-			result.value_ = false;
-			return result;
-		}
-	}
-
-
-	// first clean up cobj->errors
-
-	ob_args_.init();
-
-	ob_class_.init();
-	ob_method_.init();
-
-	zend_string* temp;
-	val_ptr test;
-	if (tg.try_fetch(route_data.MOD_S, test) && test.getStringData(&temp))
-	{
-		module_name_ = temp;
-	}
-	else {
-		module_name_.init();
-	}
-
-	ob_args_ = this->fetchArgs();
-
-	size_t ct = tg.size();
-	if ( (ct >= 3) && (tg.has_index(2))) 
-	{
-		set_tuple14(tg);
-	}
-	else {
-		set_tuple12(tg);
-	}
-	
 	size_t clen = ob_class_.size();
 	size_t mlen = ob_method_.size();
 
@@ -868,24 +587,250 @@ RouteMatch::prepare_call(obj_ptr user)
 
 		if (!clen)
 		{
-			error_msg.adopt(strpprintf(0, "Missing class name"));
-			result.error() << error_msg << endl;
+			result.error() << "Missing class name." << endl;
 		}
 		if (!mlen) 
 		{
-			error_msg.adopt(strpprintf(0, "Missing object method"));
-			result.error() << error_msg << endl;
+			result.error() << "Missing object method." << endl;
 		}
-
+		result.value_ = false;
 	}
-	if (erred_.has_errors())
+	else {
+		result.value_ = true;
+	}
+	return result;
+}	
+
+/* make sure any needed method argument is set on ob_args_ */
+bool_return 
+RouteMatch::verify_method_args(htab_ptr targs)
+{
+	bool_return result;
+	fn_call 	   fn_param_optional;
+	fn_noparams    isoptional(fn_param_optional);
+	fn_call        fn_param_getname;
+	fn_noparams    getname(fn_param_getname);
+
+	fn_param_optional.set_fci(RM_data.isoptional_s);
+	fn_param_getname.set_fci(RM_data.getname_s);
+
+	//get mix of URL path-set params and any default target parameters.
+	htab_return args_ret = this->fetchArgs(); 
+	if (args_ret.has_errors())
 	{
-		result = erred_.move_error();
+		result = args_ret.move_error();
+		result.value_ = false;
+		return result;
+	}
+
+	obj_rc mref = ReflectCache::ReflectionMethod(ob_class_, ob_method_);
+
+	Hmap* query = this->query_copy();
+	if (!query)
+	{
+		result.error() << "No query Hmap";
+		return result;
+	}
+
+	val_rc pref_test = mref.call(RM_data.getparameters_fn);
+
+	htab_ptr pref = pref_test.zarray();
+
+	if (pref.size())
+	{
+		htab_rc objargs_array(ob_args_);
+		htab_cow newargs(objargs_array);
+		bool added = true;
+
+		for_key_value wk;
+		// need to call getName, isOptional for each parameter
+		for(wk.start(pref); wk.ok(); wk.next())
+		{
+			//str_ptr key = wk.key();
+			val_ptr pobj = wk.value(); // parameter descibe object
+			obj_ptr param = pobj.zobject();
+
+			#ifdef DBG_ROUTEMATCH
+				log->dump("Parameter obj", param);
+			#endif
+
+			fn_param_optional.set_obj(param);
+			fn_param_getname.set_obj(param);
+
+			bool opt = isoptional.zbool();
+
+			if (!opt)
+			{
+				str_rc pname = getname.str();
+
+		    #ifdef DBG_ROUTEMATCH
+				log->dump("Parameter name", pname);
+				log->dump("Query values", query->self());
+			#endif
+				val_ptr obj_arg;
+
+				obj_arg = ob_args_.get(pname);
+
+				if (obj_arg.isNull())
+				{
+					// htab get requires val_rc for result return.
+					val_rc testp = query->get(pname);
+						#ifdef DBG_ROUTEMATCH
+							log->dump("query get", testp);
+						#endif
+					if (testp.ok())
+					{
+						newargs.set(pname, testp); // set from query
+						added = true;
+						#ifdef DBG_ROUTEMATCH
+							log->dump("Set from query", ob_args_);
+						#endif
+
+						continue;
+					}
+					// find some defaults
+					testp = targs.get(pname);
+					if (testp.ok())
+					{
+						newargs.set(pname, testp); // set from query
+						added = true;
+						#ifdef DBG_ROUTEMATCH
+							log->dump("Set from targs", ob_args_);
+						#endif
+
+						continue;
+					}
+					
+					result.error() << "Missing required value " << pname << " for ";
+					result.error() << ob_class_ << "::" << ob_method_;
+				}
+			}
+		}
+		if (added) {
+			ob_args_ = newargs;
+		}
 		result.value_ = false;
 	}
 	return result;
 }
 
+bool_return 
+RouteMatch::prepare_call(obj_ptr user)
+{
+	bool_return result;
+	result.value_ = false;
+
+#ifdef DBG_ROUTEMATCH
+	DebugLog* log = DebugLog::cpp_global();
+	log->dump("in prepare_call", route_,5);
+#endif
+	Route* route = zobj_toc<Route>(route_);
+
+	htab_rc roles;
+
+	htab_rc targs;
+
+	target_ = route->target_;
+
+	val_ptr route_target(target_);
+
+	htab_return check = this->fetchArgs();
+	if (check.has_errors())
+	{
+		result = check.move_error();
+		return result;
+	}
+
+	if (route_target.isArray())
+	{
+		htab_ptr tg(route_target.zarray());
+
+		size_t ct = tg.size();
+		if ( (ct >= 3) && (tg.has_index(2))) 
+		{
+			set_tuple14(tg);
+			val_ptr test = tg.get(route_data.ARG_S);
+			if (test.isArray())
+			{
+				targs = test.zarray();
+			}
+
+			test = tg.get(route_data.ROLE_S);
+			switch(test.ref_type())
+			{
+			case IS_STRING:
+				{
+					val_rc mutate(test);
+					mutate.toArray();
+					roles = mutate;
+					break;
+				}
+			case IS_ARRAY:
+				roles = test.zarray();
+				break;
+			}
+		}
+		else {
+			set_tuple12(tg);
+		}
+		if (!module_name_.size()) {
+			module_name_ = tg.get(route_data.MOD_S);
+		} 
+	}
+	else {
+		obj_ptr target_obj(target_.zobject());
+		if (target_obj.ok() && target_obj.instanceof(Target::omg.classEntry()) )
+		{	
+			#ifdef DBG_ROUTEMATCH
+			log->dump("Target value", target_obj,5);
+			#endif
+
+			Target* target = zobj_toc<Target>(target_obj);
+			
+			roles = target->getRoles();
+			module_name_ = target->getModule();
+		 	ob_class_ = target->getClass();
+		 	ob_method_ = target->getMethod();
+		 	
+		 	val_rc param_ref = target->refParams();
+			htab_cow params(param_ref);
+
+		 	// ARG_S is but one parameter that may be stored
+		 	targs = params.get(route_data.ARG_S);
+		 	#ifdef DBG_ROUTEMATCH
+			log->dump("Target Params", targs,5);
+			#endif
+
+			// parameters set in URL path..
+
+		}
+		else  if (route_target.isCallable())
+		{
+			result.value_ = true;
+			return result;
+		}
+
+		result = verify_has_method();
+		if (result.has_errors())
+		{
+			return result;
+		}
+	}
+	if (roles.size())
+	{
+		roles_ = roles;
+		if (!this->allow_call(user))
+		{
+			result = erred_.move_error();
+			return result;
+		}
+	}
+
+	result = verify_method_args(targs);
+
+	return result;
+}
+	
 
 void RouteMatch::construct(str_ptr uri, int verbs, int ajax)
 {
