@@ -248,7 +248,8 @@ fn_result::throw_failed(const char* hint)
 bool
 fn_result::call_fn()
 {
-    result_ = {0};
+    result_ = {};
+
     if (cfi_.fci_.size==0)
     {
         throw_failed("fci_ size is 0");
@@ -309,27 +310,29 @@ fn_result::array()
 bool  
 fn_result::zbool()
 {
+    bool bresult = false;
+    int  ztype = IS_FALSE;
+
     if (call_fn())
     {
-        auto ztype = val_ptr(&result_).ref_type();
+        ztype = val_ptr(&result_).ref_type();
         switch(ztype)
         {
         case IS_TRUE:
-            return true;
+            result = true;
+            break;
         case IS_FALSE:
-            return false;
+            result = false;
+            break;
         default:
             {
-            str_rc msgbuf;
-            zend_string* msg = strpprintf(0, "In fn_result zbool() ztype: %d\n", ztype);
+            str_rc msgbuf(strpprintf(0, "In fn_result zbool() ztype: %d\n", ztype));
             msgbuf.adopt(msg);
             throw_failed(msgbuf.data());
             }
-            
-            
         }
     }
-    return false;
+    return result;
 }
 
 zend_long  
