@@ -238,10 +238,10 @@ fn_result::throw_failed(const char* hint)
     str_rc name(fn.zstr());
     if (!name.ok())
     {
-        name = "Name not set";
+        name = " Name not set";
     }
     error_return buf;
-    buf.error() << "fn_call fail " << name.data() << ' ' << hint;
+    buf.error() << "fn_call " << name.data() << " failed " << hint;
     buf.throw_errors();
 }
 
@@ -319,20 +319,21 @@ fn_result::zbool()
         switch(ztype)
         {
         case IS_TRUE:
-            result = true;
+            bresult = true;
             break;
         case IS_FALSE:
-            result = false;
+            bresult = false;
             break;
         default:
             {
-            str_rc msgbuf(strpprintf(0, "In fn_result zbool() ztype: %d\n", ztype));
+            str_rc msgbuf;
+            zend_string* msg = strpprintf(0, "In fn_result zbool() ztype: %d\n", ztype);
             msgbuf.adopt(msg);
             throw_failed(msgbuf.data());
             }
         }
     }
-    return result;
+    return bresult;
 }
 
 zend_long  
