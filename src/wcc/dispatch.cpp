@@ -327,7 +327,7 @@ Dispatch::dispatch(obj_ptr rmatch)
 		log->dump("In Dispatch::dispatch", rmatch);
 
 	#endif
-	bool_return pcheck = rm->prepare_call(user_);
+	bool_return pcheck = rm->prepare_call(user_,assets_);
 
 	if (pcheck.has_errors())
 	{

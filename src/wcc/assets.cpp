@@ -978,20 +978,22 @@ Assets::addModule(str_ptr name, val_ptr data)
 #endif
 		
 		val_return mdata = loader->require(filepath);
+		
 		if (mdata.has_errors())
 		{
+			mdata.error() << endl << " require errors" << endl;
 			result = mdata.move_error();
 			return result;
 		}
 		if (!mdata.value_.isArray())
 		{
-#ifdef DBG_LOG_ASSETS
-	if (log)
-	{
-		log->dump("require module.php returned: ", mdata.value_);
-	}
-#endif
-			result.error() << "addModule: " << filepath << " did not return array";
+		#ifdef DBG_LOG_ASSETS
+			if (log)
+			{
+				log->dump("require module.php returned: ", val_ptr(mdata.value_));
+			}
+		#endif
+			// result.error() << "addModule: " << filepath << " did not return array";
 			return result;
 		}
 		mcfg = mdata.value_.zarray();
@@ -1119,28 +1121,29 @@ Assets::getModule(str_ptr name)
 obj_return 
 Assets::setModule(str_ptr name)
 {
-
-
-
+	#ifdef DBG_LOG_ASSETS
+	DebugLog* log = DebugLog::cpp_global();
+	#endif
 	obj_return result;
-	obj_rc modo = modules_.get(name);
+	
+#ifdef DBG_LOG_ASSETS
+	if (log)
+	{
+		log->dump("Assets setModule", name);
+	}
+#endif
 
+	obj_rc modo = modules_.get(name);
 	if (modo.ok())
 	{
 		activeModule_ = modo;
 		result.value_ = modo;
 		return result;
 	}
-#ifdef DBG_LOG_ASSETS
-	DebugLog* log = DebugLog::cpp_global();
-	if (log)
-	{
-		log->dump("Assets setModule", name);
-	}
-#endif
+
 	obj_return mdef_err = getDefaultModule();
 
-	if (mdef_err.has_errors())
+	if (mdef_err.has_errors() || !mdef_err.value_.ok())
 	{
 		result = mdef_err.move_error();
 		return result;
@@ -1174,12 +1177,13 @@ Assets::setModule(str_ptr name)
 		mdef = mdef_err.value_;
 	}
 	result = addModule(name, mdata);
-	if (result.has_errors())
+	if (result.has_errors() || !result.value_.ok())
 	{
 		return result;
 	}
 	modo = result.value_;
 	Module* m = zobj_toc<Module>(modo);
+
 	m->addDefaults(mdef);
 
 	activeModule_ = modo;

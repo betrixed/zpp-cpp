@@ -129,171 +129,198 @@ error_return
 Module::activate(obj_ptr finder)
 {
 	error_return result;
+	obj_return   default_mod;
 
-	obj_ptr  data = data_;
+	obj_rc assets;
+	Assets* assets_mgr;
+
+	val_rc temp_arg;
+	htab_rc plist;
+
+	str_rc def_name;
+	str_rc prop_str;
+	val_rc prop_val;
+
+	val_return asset_test;
+	val_rc setmod_arg;
+
+	str_rc base_dir;
+
+	htab_rc added;
+	htab_rc asset_keyslist;
+
+	obj_ptr  data(data_);
+
+	if (active_)
+	{
+		return result;
+	}
 
 	//zend_printf("activate\n");
 #ifdef DBG_MODULE
 	DebugLog* log = DebugLog::cpp_global();
 	if (log)
 	{
-	log->line("Module Activate");
-	log->dump("Module self: ", self_, 6);
+		log->line("Module Activate");
+		log->dump("Module self: ", self_, 3);
 	}
 #endif
 
-	str_rc def_name = data.str_property(MODi.DEFAULT_MOD);
-
+	def_name = data.str_property(MODi.DEFAULT_MOD);
+	
+	asset_test = Services::service(MODi.assets_str);
 #ifdef DBG_MODULE
 	if (log)
 	{
-	log->dump("Default module name: ", def_name);
+		log->dump("Assets obj", asset_test.value_);
 	}
 #endif
 
-	obj_rc assets;
-	val_rc temp_arg;
-	htab_rc plist;
+	if (!asset_test.value_.isObject())
+	{
+		result.error() << "Service 'assets' not found";
+		return result;
+	}
+
+	assets = asset_test.value_.zobject();
+	assets_mgr = zobj_toc<Assets>(assets);
+	#ifdef DBG_MODULE
+		if (log)
+		{
+			log->dump("Assets object: ", assets);
+		}
+	#endif
 
 	if (def_name.size() && (zs_cmp(def_name, MODi.DEFAULT_MOD)!=0))
 	{
-	
-		val_return val_test = Services::service(MODi.assets_str);
-		if (!val_test.throw_errors())
+	#ifdef DBG_MODULE
+		if (log)
 		{
-			assets = val_test.value_.zobject();
+			log->dump("Default module name: ", def_name);
 		}
-		else {
-			result = val_test.move_error();
+	#endif
+		default_mod = assets_mgr->setModule(def_name);
+		if (default_mod.has_errors())
+		{
+			result = default_mod.move_error();
 			return result;
 		}
-		if (assets.ok())
-		{
-			val_rc sarg(def_name);
-			obj_rc defmod = assets.call(MODi.setmodule_fn, sarg);
-			addDefaults(defmod);
-		}
+		addDefaults(default_mod.value_);
 	}
+	else {
 
-	str_rc base = data.str_property(MODi.BASE);
+	}
+	base_dir = data.str_property(MODi.BASE);
 
-	if (base.size())
+	if (base_dir.size())
 	{
 		str_buf buf;
 
-		str_rc rval = data.str_property(MODi.ROUTES);
-
-		if (!rval.size())
+		#ifdef DBG_MODULE
+		if (log)
 		{
-			buf << base << '/' << MODi.ROUTES;
-			rval = buf.zstr();
+			log->dump("Defaults from base dir: ", base_dir);
+		}
+		#endif
+		prop_str = data.str_property(MODi.ROUTES);
 
-			data.property(MODi.ROUTES, rval);
+		if (!prop_str.size())
+		{
+			buf << base_dir << '/' << MODi.ROUTES;
+			prop_str = buf.zstr();
+
+			data.property(MODi.ROUTES, prop_str);
 		}
 
-		temp_arg = data.property(MODi.VIEWPATHS);
+		prop_val = data.property(MODi.VIEWPATHS);
 
-		if (temp_arg.isNull())
+		if (prop_val.isNull())
 		{
-			buf << base << '/' << MODi.views_str;
-			rval = buf.zstr();
-			data.property(MODi.VIEWPATHS, rval);
+			buf << base_dir << '/' << MODi.views_str;
+			prop_str = buf.zstr();
+			data.property(MODi.VIEWPATHS, prop_str);
 		}
 	}
 	
 	plist = data.array_property(MODi.NAMESPACES);
+	#ifdef DBG_MODULE
+		if (log)
+		{
+			log->dump("NAMESPACES ", plist);
+		}
+		#endif
 	if (plist.size())
 	{
-
-		temp_arg = plist;
-		finder.call(MODi.addpatharray_fn, temp_arg);
+		Finder* fd = zobj_toc<Finder>(finder);
+		fd->addPathArray(plist);
 	}
 	
 	plist = data.array_property(MODi.CLASSFILES);
 
 	if (plist.size())
 	{
-
-		temp_arg = plist;
-		finder.call(MODi.addclasses_fn, temp_arg);
+		prop_val = plist;
+		finder.call(MODi.addclasses_fn, prop_val);
 	}
 
-	temp_arg  = data.property(MODi.REQUIRES);
+	prop_val  = data.property(MODi.REQUIRES);
 
 // TODO: Should this be array merge instead of assign?
 	//showmem("requires", temp_arg);
 
 	// transfer from property to hidden property
-	if (temp_arg.isArray())
+	if (prop_val.isArray())
 	{
-		requires_ = temp_arg.zarray();
+		requires_ = prop_val.zarray();
 	}
-	else if (temp_arg.isString())
+	else if (prop_val.isString())
 	{
 		// add to array
 		htab_cow req(requires_);
 		req.clear();
-		req.push_back(temp_arg);
+		req.push_back(prop_val.zstr());
 	}
 
-	str_rc asset_file = data.str_property(MODi.ASSET_FILE);
+	prop_str = data.str_property(MODi.ASSET_FILE);
 
-	if (asset_file.size())
+	if (prop_str.size())
 	{
 		
-		str_rc dir = dirname(asset_file);
+		str_rc dir = dirname(prop_str);
 
 		if (!dir.size() || (zs_cmp(dir, MODi.dot_str)==0))
 		{
 			// absolute path
 			str_buf buf;
 
-			buf << cfg_path_ << '/' << asset_file;
+			buf << cfg_path_ << '/' << prop_str;
 
-			asset_file = buf.zstr();
+			prop_str = buf.zstr();
 
-			data.property(MODi.ASSET_FILE, asset_file);
+			data.property(MODi.ASSET_FILE, prop_str);
 		}
+		
 
-		val_return t_assets = Services::service(MODi.ASSETS);
-		if (t_assets.has_errors())
+		htab_return ftest = assets_mgr->loadAssetFile(prop_str);
+		if (ftest.has_errors())
 		{
-			result = t_assets.move_error();
+			result = ftest.move_error();
 			return result;
 		}
-		obj_rc asset_mgr = t_assets.value_.zobject();
-		if (asset_mgr.ok())
+
+		added = std::move(ftest.value_);
+#ifdef DBG_MODULE
+		log->dump("add assets", added);
+#endif
+
+		if (added.size())
 		{
-			Assets* asmgr = zobj_toc<Assets>(asset_mgr);
-			htab_return ftest  = asmgr->loadAssetFile(asset_file);
-			htab_rc added;
-
-#ifdef DBG_MODULE
-			log->line("load asset file");
-
-#endif
-			if (ftest.has_errors())
-			{
-				result = ftest.move_error();
-#ifdef DBG_MODULE
-				log->dump("errors:", result.error().zstr());
-#endif
-				return result;
-			}
-			else {
-				added = std::move(ftest.value_);
-#ifdef DBG_MODULE
-					log->dump("add assets", added);
-#endif
-			}
-			htab_rc asset_keyslist = data.array_property(MODi.ASSETS);
+			asset_keyslist = data.array_property(MODi.ASSETS);
 			if (!asset_keyslist.size())
 			{
 				asset_keyslist = htab_ptr::empty_array();
 			}
-
 			htab_cow asset_keys(asset_keyslist);
-
 			asset_keys.merge(added);
 			data.property(MODi.ASSETS, asset_keyslist);
 		}

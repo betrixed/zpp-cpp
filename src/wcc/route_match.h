@@ -121,7 +121,7 @@ public:
 
 	str_rc debug_str() const;
 	
-	bool_return prepare_call(obj_ptr user);
+	bool_return prepare_call(obj_ptr user, obj_ptr assets);
 	bool_return verify_method_args(htab_ptr targs);
 	bool_return verify_has_method();
 

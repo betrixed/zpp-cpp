@@ -139,11 +139,12 @@ str_ptr::data() const
 size_t 
 str_ptr::size() const 
 {
-	if (!s)
+	size_t result = 0;
+	if (s)
 	{
-		return 0;
+		result = ZSTR_LEN(s);
 	}
-	return ZSTR_LEN(s);
+	return result;
 }
 
 bool 

@@ -36,6 +36,9 @@ extern "C" {
 #include "target.h"
 #endif
 
+#ifndef WCC_ASSETS_H
+#include "assets.h"
+#endif
 
 #ifndef REQUEST_GLOBALS_H
 #include "request_globals.h"
@@ -715,7 +718,7 @@ RouteMatch::verify_method_args(htab_ptr targs)
 }
 
 bool_return 
-RouteMatch::prepare_call(obj_ptr user)
+RouteMatch::prepare_call(obj_ptr user, obj_ptr assets)
 {
 	bool_return result;
 	result.value_ = false;
@@ -740,6 +743,7 @@ RouteMatch::prepare_call(obj_ptr user)
 		result = check.move_error();
 		return result;
 	}
+	ob_args_ = std::move(check.value_);
 
 	if (route_target.isArray())
 	{
@@ -808,6 +812,12 @@ RouteMatch::prepare_call(obj_ptr user)
 		{
 			result.value_ = true;
 			return result;
+		}
+
+		if (module_name_.size())
+		{
+			Assets* asset_mgr = zobj_toc<Assets>(assets);
+			asset_mgr->setModule(module_name_);
 		}
 
 		result = verify_has_method();
@@ -980,12 +990,13 @@ PHP_METHOD(Wcc_RouteMatch, prepare_call)
 	zarg_rd args(execute_data);
 
 	obj_ptr user = args.obj_class(args.need(0), UserData::omg.classEntry());
+	obj_ptr assets = args.obj_class(args.need(1), Assets::omg.classEntry());
 
 	if (!args.throw_errors())
 	{
 		RouteMatch* cobj = zval_toc<RouteMatch>(ZEND_THIS);
 
-		bool_return found = cobj->prepare_call(user);
+		bool_return found = cobj->prepare_call(user,assets);
 
 		if (!found.throw_errors(__FUNCTION__))
 		{

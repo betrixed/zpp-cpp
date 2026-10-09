@@ -31,7 +31,7 @@ final class RouteMatch {
 
 	public function getMatch() : ?Route {}
 
-	public function prepare_call( Session\UserData $ud) : bool;
+	public function prepare_call( Session\UserData $ud, Assets $assetmgr) : bool;
 
 	public function setCallInfo(string $obclass, string $obmethod, array $args) : void;
 
