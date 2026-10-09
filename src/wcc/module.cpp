@@ -65,7 +65,7 @@ Module_init::init()
 	ASSETS = "assets";
 	ASSET_FILE = "asset_file";
 
-	dispatch_str = "dispatch";
+	assets_str = "assets";
 	data_str = "data";
 
 	views_str = "views";
@@ -135,30 +135,42 @@ Module::activate(obj_ptr finder)
 	//zend_printf("activate\n");
 #ifdef DBG_MODULE
 	DebugLog* log = DebugLog::cpp_global();
+	if (log)
+	{
 	log->line("Module Activate");
-
+	log->dump("Module self: ", self_, 6);
+	}
 #endif
 
 	str_rc def_name = data.str_property(MODi.DEFAULT_MOD);
-	obj_rc dispatch;
+
+#ifdef DBG_MODULE
+	if (log)
+	{
+	log->dump("Default module name: ", def_name);
+	}
+#endif
+
+	obj_rc assets;
 	val_rc temp_arg;
 	htab_rc plist;
 
 	if (def_name.size() && (zs_cmp(def_name, MODi.DEFAULT_MOD)!=0))
 	{
 	
-		val_return val_test = Services::service(MODi.dispatch_str);
+		val_return val_test = Services::service(MODi.assets_str);
 		if (!val_test.throw_errors())
 		{
-			dispatch = val_test.value_.zobject();
+			assets = val_test.value_.zobject();
 		}
 		else {
 			result = val_test.move_error();
+			return result;
 		}
-		if (dispatch.ok())
+		if (assets.ok())
 		{
 			val_rc sarg(def_name);
-			obj_rc defmod = dispatch.call(MODi.setmodule_fn, sarg);
+			obj_rc defmod = assets.call(MODi.setmodule_fn, sarg);
 			addDefaults(defmod);
 		}
 	}
@@ -264,8 +276,9 @@ Module::activate(obj_ptr finder)
 			{
 				result = ftest.move_error();
 #ifdef DBG_MODULE
-				log->dump("errors:", result.get_errors());
+				log->dump("errors:", result.error().zstr());
 #endif
+				return result;
 			}
 			else {
 				added = std::move(ftest.value_);
@@ -293,7 +306,13 @@ Module::activate(obj_ptr finder)
 void
 Module::addDefaults(obj_ptr defmod)
 {
-	
+#ifdef DBG_MODULE
+	DebugLog* log = DebugLog::cpp_global();
+	if (log)
+	{
+	log->dump("addDefaults from: ", defmod);
+	}
+#endif	
 	obj_rc  cfgdata =  defmod.obj_property(MODi.data_str);
 	if (!cfgdata.ok())
 	{

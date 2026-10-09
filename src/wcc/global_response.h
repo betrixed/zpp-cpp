@@ -27,6 +27,7 @@ namespace wcc {
 		str_rc content_;
 		obj_rc cookies_; // some cookies interface
 		bool     sent_;
+		bool     isCLI_; // web functions will not work
 
 		Hmap* hdrs_obj() const {
 			return hmap_;
@@ -42,13 +43,13 @@ namespace wcc {
 
 		static val_rc readfile(str_ptr name);
 
-		virtual void debug_info(htab_cow hw);
+		void construct(bool isCLI=false);
 
-		
-		void construct(
-			str_ptr  content,
-			val_ptr     code,
-			str_ptr     status);
+		void debug_info(htab_cow hw) override;
+
+		void setAll(str_ptr content, int code, str_ptr status);
+
+		void isCLI(bool isCLI=true);
 
 		void appendContent(str_ptr  content);
 		bool hasContent();

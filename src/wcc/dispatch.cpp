@@ -53,6 +53,7 @@ extern "C" {
 #ifndef WCC_ASSETS_H
 #include "assets.h"
 #endif
+
 //#define DBG_LOG_DISPATCH
 
 #ifdef DBG_LOG_DISPATCH
@@ -773,7 +774,7 @@ Dispatch::respond(val_ptr content)
 {
 	error_return result;
 	obj_rc rpobj;
-	val_return rtest = Services::service(DSPi.response_str);
+	obj_return rtest = Services::getOne(Response::omg.class_name());
 	if (rtest.has_errors())
 	{
 		result = rtest.move_error();
@@ -796,7 +797,7 @@ Dispatch::respond(val_ptr content)
 	{
 		if (rp->hasContent() || rp->getStatusCode())
 		{
-			showobj("rp", rpobj);
+			//showobj("rp", rpobj);
 			rp->send();
 			return result;
 		}

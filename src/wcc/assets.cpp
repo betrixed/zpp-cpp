@@ -45,11 +45,13 @@
 #include "module.h"
 #endif
 
-//#define DBG_ASSETS
+//#define DBG_LOG_ASSETS
 
 // For message about duplicate asset name
-#ifndef WCC_DEBUGLOG_H
-#include "debuglog.h"
+#ifdef DBG_LOG_ASSETS
+#  ifndef WCC_DEBUGLOG_H
+#    include "debuglog.h"
+#  endif
 #endif
 
 #ifndef ASSETS_ARGINFO_H
@@ -496,7 +498,7 @@ Assets::verify_path(str_rc& p_inout)
 	int check = fpath.find('@');
 	if (check >= 0)
 	{
-		#ifdef DBG_ASSETS
+		#ifdef DBG_LOG_ASSETS
 		DebugLog* log = DebugLog::cpp_global();
 		if (log)
 		{
@@ -509,7 +511,7 @@ Assets::verify_path(str_rc& p_inout)
 
 		fpath = path_subst.eval(fpath);
 
-		#ifdef DBG_ASSETS
+		#ifdef DBG_LOG_ASSETS
 		if (log)
 		{
 			log->dump("result string", fpath);
@@ -587,12 +589,14 @@ Assets::addAssets(htab_ptr data)
 				return result;
 			}
 			else {
+#ifdef DBG_LOG_ASSETS
 				DebugLog* log = DebugLog::cpp_global();
 				if (log) {
 					str_buf buf;
 					buf << "Asset set over-write: " << strkey;
 					log->line(buf.zstr());
 				}
+#endif
 			}
 		}
 		hw.push_back(strkey);
@@ -951,7 +955,13 @@ Assets::addModule(str_ptr name, val_ptr data)
 	str_rc 	dir;
 
 	Loader* loader = Loader::cpp_global();
-
+#ifdef DBG_LOG_ASSETS
+	DebugLog* log = DebugLog::cpp_global();
+	if (log)
+	{
+		log->dump("Assets addModule: ", name);
+	}
+#endif
 	if (data.isString())
 	{
 		
@@ -959,12 +969,29 @@ Assets::addModule(str_ptr name, val_ptr data)
 		str_buf buf;
 		buf << dir << '/' << "module.php";
 
-
+		str_rc filepath = buf.zstr();
+#ifdef DBG_LOG_ASSETS
+	if (log)
+	{
+		log->dump("Assets require file: ", filepath);
+	}
+#endif
 		
-		val_return mdata = loader->require(buf.zstr());
+		val_return mdata = loader->require(filepath);
 		if (mdata.has_errors())
 		{
 			result = mdata.move_error();
+			return result;
+		}
+		if (!mdata.value_.isArray())
+		{
+#ifdef DBG_LOG_ASSETS
+	if (log)
+	{
+		log->dump("require module.php returned: ", mdata.value_);
+	}
+#endif
+			result.error() << "addModule: " << filepath << " did not return array";
 			return result;
 		}
 		mcfg = mdata.value_.zarray();
@@ -981,6 +1008,12 @@ Assets::addModule(str_ptr name, val_ptr data)
 		{
 			class_name  = Module::omg.class_name();
 		}
+#ifdef DBG_LOG_ASSETS
+	if (log)
+	{
+		log->dump("Make class from ", mcfg);
+	}
+#endif
 		htab_rc args_temp;
 		htab_cow args(args_temp);
 
@@ -1087,13 +1120,7 @@ obj_return
 Assets::setModule(str_ptr name)
 {
 
-#ifdef DBG_ASSETS
-	DebugLog* log = DebugLog::cpp_global();
-	if (log)
-	{
-		log->dump("Assets setModule", name);
-	}
-#endif
+
 
 	obj_return result;
 	obj_rc modo = modules_.get(name);
@@ -1104,7 +1131,13 @@ Assets::setModule(str_ptr name)
 		result.value_ = modo;
 		return result;
 	}
-
+#ifdef DBG_LOG_ASSETS
+	DebugLog* log = DebugLog::cpp_global();
+	if (log)
+	{
+		log->dump("Assets setModule", name);
+	}
+#endif
 	obj_return mdef_err = getDefaultModule();
 
 	if (mdef_err.has_errors())

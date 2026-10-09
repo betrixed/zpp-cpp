@@ -252,8 +252,7 @@ DebugLog::line(str_ptr msg, int flags)
 
 		bool dolog = ((outflags&TO_FILE)!=0);
 		if (dolog)
-		{
-			
+		{	
 			str_rc filename = self.str_property(DLSi.filename_str);
 			val_rc data(log);
 			file_put_contents(filename, data, flags | FILE_LOCK);

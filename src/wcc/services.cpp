@@ -126,7 +126,10 @@ Services::activate(str_ptr key)
 
 	if (test.is_nullptr())
 	{
-		result.error() << "Service " << key << " does not exist";
+		if (throw_fail_)
+		{
+			result.error() << "Service " << key << " does not exist";
+		}
 		return result;
 	}
 

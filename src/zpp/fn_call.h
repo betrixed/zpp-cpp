@@ -132,7 +132,7 @@ namespace zpp {
             ci.param_count = ct; 
             ci.params = p; 
             ci.named_params = nargs;
-            if (ct) {
+            if (p && ct) {
                  std::memset(p, 0, ct*sizeof(zval));
             }
         }
@@ -140,7 +140,7 @@ namespace zpp {
         //! call with expected void return type
         bool    call_fn();
 
-        void    throw_failed();
+        void    throw_failed(const char* hint);
         
         //! Call for various return types */
         val_rc  mixed();

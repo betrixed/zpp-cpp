@@ -232,7 +232,7 @@ thread_local TLfnTable TLFNs;
 
 
 void 
-fn_result::throw_failed()
+fn_result::throw_failed(const char* hint)
 {
     val_ptr fn(&cfi_.fci_.function_name);
     str_rc name(fn.zstr());
@@ -240,7 +240,9 @@ fn_result::throw_failed()
     {
         name = "Name not set";
     }
-    zend_throw_error(zend_ce_error, "fn_call fail %s", name.data());
+    error_return buf;
+    buf.error() << "fn_call fail " << name.data() << ' ' << hint;
+    buf.throw_errors();
 }
 
 bool
@@ -249,13 +251,13 @@ fn_result::call_fn()
     result_ = {0};
     if (cfi_.fci_.size==0)
     {
-        throw_failed();
+        throw_failed("fci_ size is 0");
     }
     else if (zend_call_function(&cfi_.fci_,  &cfi_.cache_) == SUCCESS)
     {
         return true;
     }
-    throw_failed();
+    throw_failed("zend_call_function failed");
     return false;
 }
 
@@ -317,8 +319,14 @@ fn_result::zbool()
         case IS_FALSE:
             return false;
         default:
-            zend_printf("ztype: %d\n", ztype);
-            throw_failed();
+            {
+            str_rc msgbuf;
+            zend_string* msg = strpprintf(0, "In fn_result zbool() ztype: %d\n", ztype);
+            msgbuf.adopt(msg);
+            throw_failed(msgbuf.data());
+            }
+            
+            
         }
     }
     return false;

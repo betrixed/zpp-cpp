@@ -110,8 +110,12 @@ class Headers {
 
 class Response {
 
-    public function __construct(
-            ?string $content = null,  ?int $code = null, ?string $status = null);
+    public function __construct(bool $isCLI = false);
+
+    public function setAll(
+            ?string $content = null,  ?int $code = null, ?string $status = null) : void {}
+
+    public function isCLI(bool $value = true) : void {}
 
     public function ajaxHtml(string $content): void {}
 

@@ -73,7 +73,7 @@ using namespace zpp;
 		str_intern  ASSETS;
 		str_intern  ASSET_FILE;
 
-		str_intern  dispatch_str;
+		str_intern  assets_str;
 		str_intern  data_str;
 
 		str_intern  views_str;

@@ -243,7 +243,7 @@ datetime_obj::diff(datetime_obj& dtm)
 		result = std::move(diffobj.result_);
 	}
 	else {
-		diffobj.throw_failed();
+		diffobj.throw_failed(__FUNCTION__);
 	}
 	return result;
 

@@ -174,17 +174,11 @@ Response_init RSPD;
 base_obj_mgr<Response> Response::omg;
 
 void
-Response::construct(
+Response::setAll(
 			str_ptr  content,
-			val_ptr   code,
+			int   code,
 			str_ptr  status)
 {
-	headers_ = Hmap::omg.new_zobj();
-	hmap_ = zobj_toc<Hmap>(headers_);
-
-	val_ptr(events_).setbool(false);
-	sent_ = false;
-
 	if (content.isNull())
 	{
 		content_ = str_empty();// zend empty string
@@ -192,12 +186,27 @@ Response::construct(
 	else {
 		content_ = content;
 	}
-	if (code.isLong()) {
-		zend_long icode = code.get_long();
-		if (icode) {
-			setStatusCode(code.get_long(), status);
-		}
+	if (code > 0) 
+	{
+		setStatusCode(code, status);
 	}
+}
+
+void
+Response::construct(bool isCLI)
+{
+	isCLI_ = isCLI;
+	content_ = str_empty();
+	headers_ = Hmap::omg.new_zobj();
+	hmap_ = zobj_toc<Hmap>(headers_);
+	val_ptr(events_).setbool(false);
+	sent_ = false;
+}
+
+void
+Response::isCLI(bool value)
+{
+	isCLI_ = value;
 }
 
 void 
@@ -209,8 +218,16 @@ Response::send_header(str_ptr header, bool replace,
 	{
 		return;
 	}
+	if (!isCLI_)
+	{
+	// call php function
+		zpp::header(header, replace, response_code);
+	}
+	else {
+		strm_out hout;
 
-	zpp::header(header, replace, response_code);
+		hout << header << " " << response_code;
+	}
 }
 
 htab_cow 
@@ -335,7 +352,9 @@ Response::send()
 	{
 		zend_throw_error(zend_ce_exception, "Response already sent");
 	}
-	sendCookies();
+	if (!isCLI_) {
+		sendCookies();
+	}
 
 	if (!sendHeaders()) 
 	{
@@ -718,7 +737,11 @@ Response::send_each()
 		log->line("send_each");
 	}
 #endif
-	bool issent = zpp::headers_sent();
+	bool issent = false;
+	if (!isCLI_)
+	{
+		issent = zpp::headers_sent();
+	}
 	if (issent)
 	{
 		//zend_printf("Already sent \n");
@@ -872,28 +895,52 @@ using namespace zpp;
 //@@@@@@@@@@@@@@@@		 @@@@@@@@@@@@@@@@@@     @@@@@@@@@@@@@@@@@    @@@@@@@@@@@@@@@    @@@@@@@@@@@@@@@
 ZEND_METHOD(Wcc_Response, __construct)
 {
-	zend_string* content = nullptr;
-	zend_long code = 0;
-	bool  null_code = true;
-	zend_string* status = nullptr;
+	zarg_rd args(execute_data);
 
-	ZEND_PARSE_PARAMETERS_START(0,3)
-	Z_PARAM_OPTIONAL
-	Z_PARAM_STR_OR_NULL(content)
-	Z_PARAM_LONG_OR_NULL(code, null_code)
-	Z_PARAM_STR_OR_NULL(status)
-	ZEND_PARSE_PARAMETERS_END();
+	bool isCLI = false;
 
+	args.zbool(isCLI, args.option(0));
 
-	auto cobj = zval_toc<Response> (ZEND_THIS);
-
-	val_rc arg_code;
-	if (!null_code)
+	if (!args.throw_errors(__FUNCTION__))
 	{
-		arg_code = code;
+		auto cobj = zval_toc<Response> (ZEND_THIS);
+		cobj->construct(isCLI);
 	}
+	
+}
 
-	cobj->construct(content,arg_code,status);
+ZEND_METHOD(Wcc_Response, setAll)
+{
+	zarg_rd args(execute_data);
+
+	str_ptr content;
+	zend_long code = 0;
+	str_ptr status;
+
+	content = args.str_or_null(args.option(0));
+	args.zlong_null(code, args.option(1), 0);
+	status = args.str_or_null(args.option(2));
+
+	if (!args.throw_errors(__FUNCTION__))
+	{
+		auto cobj = zval_toc<Response> (ZEND_THIS);
+		cobj->setAll(content, code, status);
+	}
+}
+
+ZEND_METHOD(Wcc_Response, isCLI)
+{
+	zarg_rd args(execute_data);
+
+	bool isCLI = true;
+
+	args.zbool(isCLI, args.option(0));
+
+	if (!args.throw_errors(__FUNCTION__))
+	{
+		auto cobj = zval_toc<Response> (ZEND_THIS);
+		cobj->isCLI(isCLI);
+	}
 }
 
 ZEND_METHOD(Wcc_Response, ajaxHtml)
