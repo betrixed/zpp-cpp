@@ -7,6 +7,20 @@
 
 namespace wcc {
 
+	class SysCacheInit : public state_init 
+	{
+	public:
+		str_intern cache_key_str;
+		str_intern cache_str;
+		str_intern expires_str;
+		str_intern default_cache_key;
+
+		void init() override;
+
+	};
+
+	extern SysCacheInit SCinit;
+
 	class ICache;
 	
 	class SysCache : public base_d {
@@ -20,7 +34,7 @@ namespace wcc {
 
 		void debug_info(htab_cow di) override;
 
-		void construct(obj_rc cache);
+		error_return construct(htab_ptr options = htab_ptr::empty_array());
 
 		zend_long getExpires();
 

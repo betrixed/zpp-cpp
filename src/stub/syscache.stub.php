@@ -7,7 +7,7 @@ namespace Wcc\Session\Adapt;
 
 class SysCache implements SessionHandlerInterface {
 
-	public function __construct(\Wcc\ICache $cache);
+	public function __construct(array $options = []);
 
 	public function close(): bool {}
 

@@ -23,21 +23,15 @@ namespace wcc {
 
 using namespace zpp;
 
-class SyscInit : public state_init {
-public:
-	str_intern cache_str;
-	str_intern expires_str;
+SysCacheInit SCinit;
 
 
-	void init() override;
-};
-
-SyscInit  SYSC;
-
-void SyscInit::init()
+void SysCacheInit::init()
 {
+	cache_key_str = "cache_key";
 	cache_str = "cache";
 	expires_str = "expires";
+	default_cache_key = "sess_cache";
 }
 
 
@@ -47,8 +41,8 @@ base_obj_mgr<SysCache> SysCache::omg;
 void 
 SysCache::debug_info(htab_cow di)
 {
-	di.set(SYSC.cache_str, cache_);
-	di.set(SYSC.expires_str, (int)expires_);
+	di.set(SCinit.cache_str, cache_);
+	di.set(SCinit.expires_str, (int)expires_);
 }
 
 ICache* 
@@ -57,11 +51,44 @@ SysCache::cache_ptr()
 	return zobj_toc<ICache>(cache_);
 }
 
-void 
-SysCache::construct(obj_rc cache)
+error_return 
+SysCache::construct(htab_ptr options)
 {
+	error_return result;
+
 	expires_ = 0;
-	cache_ = cache;
+	str_rc name_key;
+
+	if (options.size())
+	{
+		name_key = options.get(SCinit.cache_key_str);
+		val_ptr  exp_value = options.get(SCinit.expires_str);
+		// expires value should already be set in cache object.
+		expires_ = exp_value.get_long();
+	}
+	if (!name_key.ok())
+	{
+		name_key = SCinit.default_cache_key;
+	}
+	val_return cache_test = Services::service(name_key);
+
+	if (cache_test.has_errors())
+	{
+		result = cache_test.move_error();
+		return result; 
+	}
+
+	cache_ = cache_test.value_.zobject();
+	if (!cache_.ok() || !cache_.instanceof(ICache::omg.classEntry()))
+	{
+		result.error() <<  "ICache object needed for SysCache";
+		return result;
+	}
+
+	ICache* icache = zobj_toc<ICache>(cache_);
+	expires_ = icache->getTTL();
+
+	return result;
 }
 
 zend_long 
@@ -87,14 +114,23 @@ SysCache::destroy(str_ptr id)
 int  
 SysCache::gc(int max_lifetime)
 {
-	ICache* ic = cache_ptr();
-	int ttl = ic->getTTL();
-	if (ttl != max_lifetime)
+	ICache* ic = nullptr;
+	if (!expires_)
 	{
+		ic = cache_ptr();
+		expires_ = ic->getTTL();
+	}
+	if (expires_ != max_lifetime)
+	{
+		if (!ic)
+		{
+			ic = cache_ptr();
+		}
 		ic->setTTL(max_lifetime);
+		expires_ = max_lifetime;
 		return max_lifetime;
 	}
-	return ttl;
+	return expires_;
 }
 
 bool 
@@ -159,12 +195,12 @@ ZEND_METHOD(Wcc_Session_Adapt_SysCache, __construct)
 {
 	zarg_rd args(execute_data);
 
-	obj_ptr cache = args.obj_class(args.need(0), ICache::omg.classEntry());
+	htab_ptr options = args.htab(args.need(0));
 
 	if (!args.throw_errors())
 	{
 		SysCache* cobj = zval_toc<SysCache>(ZEND_THIS);
-		cobj->construct(cache);
+		cobj->construct(options);
 	}
 
 }
@@ -267,7 +303,7 @@ ZEND_MINIT_FUNCTION(wcc_syscache_reg)
 {
 	auto ce = register_class_Wcc_Session_Adapt_SysCache(php_session_iface_entry);
 	SysCache::omg.classEntry(ce);
-	STATE_INIT_ADD(SYSC);
+	STATE_INIT_ADD(SCinit);
 	return SUCCESS;
 }
 
