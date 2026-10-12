@@ -9,6 +9,8 @@ class SysCache implements SessionHandlerInterface {
 
 	public function __construct(array $options = []);
 
+	public function getEndTime() : int {}
+
 	public function close(): bool {}
 
 	public function destroy(string $id): bool {}

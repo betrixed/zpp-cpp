@@ -14,6 +14,8 @@ class  SessInit : public state_init {
 public:
 	str_intern  global_sess;
 	str_intern  getexpires_fn;
+	str_intern  getendtime_fn;
+	
 	str_intern  expires_fmt;
 	str_intern  unknown_str;
 

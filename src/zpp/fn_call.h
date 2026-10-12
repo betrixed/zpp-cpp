@@ -272,6 +272,7 @@ namespace zpp {
         str_intern  s_defined;
         str_intern  s_dirname;
         str_intern  s_basename;
+        str_intern  s_strtotime;
 
         str_intern  s_extension_loaded;
         str_intern  s_fclose;
@@ -347,7 +348,6 @@ namespace zpp {
         str_intern  settime;
         str_intern  diff;
         str_intern  date;
-        str_intern  strtotime;
         str_intern  invoke_fn;
 
 
@@ -387,7 +387,7 @@ namespace zpp {
 
     val_rc json_decode(str_ptr str, bool asArray, int flags = 0);
 
-    int64_t strtotime(str_ptr datetime, int64_t base_timestamp = -1);
+    zend_long strtotime(str_ptr datetime, const zend_long* base_timestamp = nullptr);
 
     str_rc stripslashes(str_ptr str);
 

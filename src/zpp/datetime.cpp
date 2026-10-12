@@ -37,7 +37,6 @@ void   register_datetime()
 
 void Date_init::init()
 {
-	strtotime = "strtotime";
 	construct_key = "__construct";
 
 	formatkey = "format";
@@ -81,18 +80,6 @@ datetime_obj::make_obj()
 
 }
 
-val_rc //static
-datetime_obj::strtotime(zval* value)
-{
-	fn_call fn(DTData.strtotime);
-
-	fn_params<1> strtotime(fn);
-
-	ZVAL_COPY_VALUE(&strtotime.params[0], value);
-
-	return strtotime.mixed();
-}
-
 str_rc 
 datetime_obj::date(str_ptr dfmt, zend_long timeval)
 {
@@ -110,12 +97,10 @@ datetime_obj::date(str_ptr dfmt, zval* value)
 {
 	str_rc result;
 
-	val_rc timeval = strtotime(value);
+	zend_long timeval = strtotime(value);
 
-	if (val_ptr(timeval).isLong())
-	{
-		result = datetime_obj::date(dfmt, timeval.get_long());
-	}
+	result = datetime_obj::date(dfmt, timeval);
+
 	return result;
 }
 

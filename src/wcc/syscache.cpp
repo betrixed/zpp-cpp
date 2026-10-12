@@ -26,6 +26,7 @@ using namespace zpp;
 SysCacheInit SCinit;
 
 
+
 void SysCacheInit::init()
 {
 	cache_key_str = "cache_key";
@@ -51,13 +52,20 @@ SysCache::cache_ptr()
 	return zobj_toc<ICache>(cache_);
 }
 
+// Tried passing cache object as sole argument,
+// But this modified interface used by all other sessionhandler classes
+// that use an array of options.
 error_return 
 SysCache::construct(htab_ptr options)
 {
 	error_return result;
 
-	expires_ = 0;
+	expires_ = DEFAULT_EXPIRY;
 	str_rc name_key;
+
+	// not true, but close to expected.
+	pkg_stored_ = time(nullptr);
+
 
 	if (options.size())
 	{
@@ -89,6 +97,29 @@ SysCache::construct(htab_ptr options)
 	expires_ = icache->getTTL();
 
 	return result;
+}
+
+
+zend_long 
+SysCache::getEndTime()
+{
+	zend_long ttl = this->expires_;
+	zend_long stored = this->pkg_stored_;
+
+	if (ttl==0)
+	{
+		ttl = DEFAULT_EXPIRY;
+	}
+	if (stored==0)
+	{
+		stored = time(nullptr);
+	}
+	str_buf buf;
+	buf << '+' << ttl << " seconds";
+
+	val_rc result = strtotime(buf.zstr(), &stored);
+
+	return result.get_long();
 }
 
 zend_long 
@@ -162,6 +193,9 @@ SysCache::read(str_ptr id)
 		ic->setTTL(ttl);
 	}
 
+	expires_ = ttl;
+	pkg_stored_ = time(nullptr);
+
 	val_rc mixed = pkg->getData();
 	result = std::move(mixed);
 
@@ -177,7 +211,9 @@ SysCache::write(str_ptr id, str_ptr data)
 	if (pkg_obj.ok())
 	{
 		ICacheData* pkg = zobj_toc<ICacheData>(pkg_obj);
-		expires_ = pkg->getTTL() + time(nullptr);
+		pkg_stored_ = time(nullptr);
+		expires_ = pkg->getTTL();
+
 		return true;
 	}
 	return false;
@@ -228,6 +264,7 @@ ZEND_METHOD(Wcc_Session_Adapt_SysCache, destroy)
 	}
 }
 
+
 ZEND_METHOD(Wcc_Session_Adapt_SysCache, gc)
 {
 	zarg_rd args(execute_data);
@@ -250,6 +287,18 @@ ZEND_METHOD(Wcc_Session_Adapt_SysCache, getExpires)
 	SysCache* cobj = zval_toc<SysCache>(ZEND_THIS);
 	zend_long result = cobj->getExpires();
 	RETURN_LONG(result);
+}
+
+ZEND_METHOD(Wcc_Session_Adapt_SysCache, getEndTime)
+{
+	if (!zarg_rd::zero_args(execute_data, __FUNCTION__))
+	{
+		return;
+	}
+	SysCache* cobj = zval_toc<SysCache>(ZEND_THIS);
+	zend_long result = cobj->getEndTime();
+	RETURN_LONG(result);
+
 }
 
 ZEND_METHOD(Wcc_Session_Adapt_SysCache, open)

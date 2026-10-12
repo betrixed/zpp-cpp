@@ -45,7 +45,9 @@ SessInit::init()
 {
 	global_sess = "_SESSION";
 	getexpires_fn = "getexpires";
-	expires_fmt = "D H:i e";
+	getendtime_fn = "getendtime";
+
+	expires_fmt = "D d/m/y H:i e";
 	unknown_str = "unknown";
 
 	options_str = "options";
@@ -215,9 +217,9 @@ ISession::getEndTime()
 
 	if (adapter_.ok())
 	{
-		if (adapter_.method_exists(SIN.getexpires_fn))
+		if (adapter_.method_exists(SIN.getendtime_fn))
 		{
-			val_rc extime = adapter_.call(SIN.getexpires_fn);
+			val_rc extime = adapter_.call(SIN.getendtime_fn);
 			if (extime.isLong())
 			{
 				result = datetime_obj::date(SIN.expires_fmt, extime.get_long());

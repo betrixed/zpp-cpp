@@ -28,7 +28,6 @@ namespace zpp {
 		str_intern diff;
 		str_intern date;
 		str_intern setdate;
-		str_intern strtotime;
 		str_intern settimezone;
 
 		str_intern y_prop;
@@ -111,7 +110,6 @@ namespace zpp {
 		
 		void setTimeZone(str_ptr zone);
 
-		static val_rc  strtotime(zval* value);
 		static str_rc  date(str_ptr dfmt, zval* value);
 		static str_rc  date(str_ptr dfmt, zend_long timeval);
 		static double  microtime();

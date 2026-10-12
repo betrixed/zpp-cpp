@@ -143,7 +143,35 @@ using namespace zpp;
 		case 2:
 			result = whereKeyValue(p0,p1);
 			break;
+		case 1:
+			if (model_.ok())
+			{
+				Model* model = zobj_toc<Model>(model_);
+				htab_return keyret = model->getPKey();
+				if (keyret.has_errors())
+				{
+					result = keyret.move_error();
+					goto keyerror;
+				}
+				htab_ptr keys = keyret.value_;
+				if (keys.size() != 1)
+				{
+					goto keyerror;
+				}
+				val_ptr kval = keys.get((int)0);
+				if (!kval.isString())
+				{
+					goto keyerror;
+				}
+				result = whereKeyValue(kval,p0);
+				break;
+			}
+		default:
+			break;
 		}
+		return result;
+keyerror:
+		result.error() << " Column name required";
 		return result;
 	}
 
@@ -162,6 +190,7 @@ using namespace zpp;
 		}
 
 		// TODO: maybe check if array is a real list
+
 		val_ptr p0 = aw.get(int(0));
 
 		if (p0.isNull())
@@ -599,7 +628,10 @@ using namespace zpp;
 	}
 
 	
-
+	// This is the only public access function for where.
+	// From call_static, the "findfirst" will have 
+	// a single array indexed by 0 => primary_key value.
+	// and so call where_list, with array htab.
 	error_return
 	IBuild::where(val_ptr column, str_ptr opcmp, val_ptr value, str_ptr bval)
 	{
@@ -644,7 +676,7 @@ using namespace zpp;
 
 		if (!value.ok())
 		{
-			arg2 = SQSTR.cmp_equal;;
+			arg2 = SQSTR.cmp_equal;
 			arg3 = opcmp;
 		}
 		else {

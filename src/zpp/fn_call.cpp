@@ -89,6 +89,7 @@ public:
     fn_call          fgets;
     fn_call          file_get_contents;
     fn_call          file_put_contents;
+    fn_call          strtotime;
 
     fn_call          filemtime;
     fn_call          fopen;
@@ -209,7 +210,7 @@ public:
         copy.set_fci(ftab.s_copy);
         rmdir.set_fci(ftab.s_rmdir);
         basename.set_fci(ftab.s_basename);
-
+        strtotime.set_fci(ftab.s_strtotime);
         sha1.set_fci(ftab.s_sha1);
         stripslashes.set_fci(ftab.s_stripslashes);
         strtr.set_fci(ftab.s_strtr);
@@ -927,7 +928,8 @@ fntable::init()
     s_array_splice = "array_splice";
     s_call_user_func_array = "call_user_func_array";
     s_class_exists = "class_exists";
-    
+    s_strtotime = "strtotime";
+
     s_closedir = "closedir";
     s_constant = "constant";
     s_define = "define";
@@ -1002,7 +1004,6 @@ strtable::init()
     settime = "settime";
     diff = "diff";
     date = "date";
-    strtotime = "strtotime";
     invoke_fn = "__invoke";
 
 
@@ -1423,6 +1424,23 @@ basename(str_ptr path, str_ptr suffix)
     val_ptr::string_bind(pz+1, suffix);
     return fn.str();
 }
+
+zend_long 
+strtotime(str_ptr datetime, const zend_long* base_timestamp)
+{
+    fn_params<2> fn(TLFNs.strtotime);
+    zval* pz = fn.argsptr();
+    val_ptr::string_bind(pz,datetime);
+    if (base_timestamp)
+    {
+        ZVAL_LONG(pz+1, *base_timestamp);
+    }
+    else {
+        ZVAL_NULL(pz+1);
+    }
+    return fn.zlong();
+}
+
 
 } // end namespace zpp
 
