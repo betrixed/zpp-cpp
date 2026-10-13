@@ -25,7 +25,7 @@ public:
 	str_intern  name_str;
 
 	str_intern  savePath_str;
-	
+	str_intern	zoned_format;
 
 	void init() override;
 };
@@ -88,7 +88,7 @@ public:
 
 	obj_rc getAdapter();
 
-	str_rc getEndTime();
+	str_rc getEndTime(val_ptr tzone);
 
 	str_rc getUniqueKey(str_ptr key);
 

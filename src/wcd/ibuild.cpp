@@ -167,6 +167,7 @@ using namespace zpp;
 				break;
 			}
 		default:
+			goto keyerror;
 			break;
 		}
 		return result;

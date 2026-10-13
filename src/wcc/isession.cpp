@@ -22,6 +22,10 @@ extern "C" {
 }
 #endif
 
+extern "C" {
+#include <ext/date/php_date.h>
+};
+
 namespace wcc {
 
 using namespace zpp;
@@ -48,7 +52,7 @@ SessInit::init()
 	getendtime_fn = "getendtime";
 
 	expires_fmt = "D d/m/y H:i e";
-	unknown_str = "unknown";
+	unknown_str = "N.A.";
 
 	options_str = "options";
 	adapter_str = "adapter";
@@ -56,6 +60,7 @@ SessInit::init()
 	name_str = "name";
 
 	savePath_str = "savePath";
+	zoned_format = "D d/m/y H:i e";
 }
 
 
@@ -211,7 +216,7 @@ ISession::getAdapter()
 }
 
 str_rc 
-ISession::getEndTime()
+ISession::getEndTime(val_ptr tzone)
 {
 	str_rc result;
 
@@ -220,9 +225,13 @@ ISession::getEndTime()
 		if (adapter_.method_exists(SIN.getendtime_fn))
 		{
 			val_rc extime = adapter_.call(SIN.getendtime_fn);
-			if (extime.isLong())
+			zend_long ttl = extime.get_long();
+			if (ttl > 0)
 			{
-				result = datetime_obj::date(SIN.expires_fmt, extime.get_long());
+				datetime_obj tstamp( ttl );
+				tstamp.setTimeZone(tzone);
+
+				result = tstamp.format(SIN.zoned_format);
 			}
 		}
 	}
@@ -430,13 +439,27 @@ ZEND_METHOD(Wcc_Session_ISession, getAdapter)
 
 ZEND_METHOD(Wcc_Session_ISession, getEndTime)
 {
-	if (!zarg_rd::zero_args(execute_data, __FUNCTION__))
+	zarg_rd args(execute_data);
+
+	val_ptr tzone = args.need(0);
+
+	if (tzone.isObject())
 	{
-		return;
+		obj_ptr test = tzone.zobject();
+		if (!test.instanceof(php_date_get_timezone_ce()))
+		{
+			args.error() << "Not a DateTimeZone object";
+		}
 	}
-	ISession* cobj = zval_toc<ISession>(ZEND_THIS);
-	str_rc result = cobj->getEndTime();
-	result.move_zv(return_value);
+	else if (!tzone.isString()){
+		args.error() << "Need string or DateTimeZone";
+	}
+	if (!args.throw_errors(__FUNCTION__))
+	{
+		ISession* cobj = zval_toc<ISession>(ZEND_THIS);
+		str_rc result = cobj->getEndTime(tzone);
+		result.move_zv(return_value);
+	}
 }
 
 ZEND_METHOD(Wcc_Session_ISession, id)

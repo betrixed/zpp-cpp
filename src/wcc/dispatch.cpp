@@ -54,7 +54,7 @@ extern "C" {
 #include "assets.h"
 #endif
 
-//#define DBG_LOG_DISPATCH
+#define DBG_LOG_DISPATCH
 
 #ifdef DBG_LOG_DISPATCH
 #ifndef WCC_DEBUGLOG_H
@@ -327,7 +327,7 @@ Dispatch::dispatch(obj_ptr rmatch)
 		log->dump("In Dispatch::dispatch", rmatch);
 
 	#endif
-	bool_return pcheck = rm->prepare_call(user_,assets_);
+	bool_return pcheck = rm->prepare_call(user_, assets_);
 
 	if (pcheck.has_errors())
 	{

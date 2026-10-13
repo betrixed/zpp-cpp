@@ -42,9 +42,7 @@ namespace zpp {
 		str_intern from_string;
 		str_intern date_string;
 		str_intern now_format;
-
-
-
+		
 	};
 
 	extern Date_init DTData;
@@ -97,6 +95,7 @@ namespace zpp {
 		datetime_obj(const std::string_view& timestr);
 		datetime_obj(str_ptr zs);
 		datetime_obj(obj_rc obj); 
+		datetime_obj(zend_long timestamp);
 
 		/** Now constructor */
 		datetime_obj();
@@ -109,6 +108,8 @@ namespace zpp {
 		void setDate(int year, int month, int day);
 		
 		void setTimeZone(str_ptr zone);
+		void setTimeZone(obj_ptr zone);
+		void setTimeZone(val_ptr zone);
 
 		static str_rc  date(str_ptr dfmt, zval* value);
 		static str_rc  date(str_ptr dfmt, zend_long timeval);

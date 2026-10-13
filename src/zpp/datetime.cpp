@@ -58,6 +58,7 @@ void Date_init::init()
 	from_string = "from_string";
 	date_string = "date_string";
 	now_format = "Y-m-d H:i:s";
+
 }
 
 
@@ -142,6 +143,17 @@ datetime_obj::datetime_obj(const std::string_view& c)
 	}
 }
 
+datetime_obj::datetime_obj(zend_long timestamp)
+{
+	if (!make_obj())
+	{
+		return;
+	}
+	auto dobj = php_date_obj_from_obj(obj_);
+
+	php_date_initialize_from_ts_long(dobj, timestamp, 0);
+}
+
 datetime_obj::datetime_obj()
 {
 	if (!make_obj())
@@ -199,13 +211,33 @@ datetime_obj::format(str_ptr dfmt)
 	return result;
 }
 
+
+void datetime_obj::setTimeZone(obj_ptr zone)
+{
+	// PHP must clone object to avoid side effects of a shared object
+	obj_ptr temp(obj_);
+	temp.call(DTData.settimezone, val_rc(zone));
+}
+
+
 void datetime_obj::setTimeZone(str_ptr zone)
 {
 	timezone_obj tz(zone);
-	obj_ptr  temp(obj_);
-
-	temp.call(DTData.settimezone, val_rc(tz));
+	setTimeZone(obj_ptr(tz));
 }
+
+void datetime_obj::setTimeZone(val_ptr zone)
+{
+	if (zone.isString())
+	{
+		setTimeZone(str_ptr(zone.zstr()));
+	}
+	else if (zone.isObject())
+	{
+		setTimeZone(obj_ptr(zone.zobject()));
+	}
+}
+
 
 datetime_obj::datetime_obj(obj_rc fnret)
 {

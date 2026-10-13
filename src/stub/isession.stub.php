@@ -21,7 +21,7 @@ class ISession {
 
 	public function getAdapter(): \SessionHandlerInterface {}
 
-	public function getEndTime(): string {}
+	public function getEndTime(string | \DateTimeZone $timezone): string {}
 
 	static public function id(?string $id = null) : string {}
 	static public function name(?string $name = null): string {}
