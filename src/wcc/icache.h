@@ -43,7 +43,7 @@ public:
 
 	virtual void debug_info(htab_cow s);
 
-	virtual int  deleteExpired();
+	virtual int_return  deleteExpired();
 
 	virtual error_return flushCached();
 

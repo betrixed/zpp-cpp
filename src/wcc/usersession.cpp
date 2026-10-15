@@ -38,8 +38,6 @@ using namespace zpp;
 
 base_obj_mgr<UserSession> UserSession::omg;
 
-
-
 void UserSession::debug_info(htab_cow hw)
 {
 	hw.set(UDi.session_str, session_);
@@ -47,7 +45,6 @@ void UserSession::debug_info(htab_cow hw)
 	hw.setbool(UDi.doWrite, doWrite_);
 	hw.setbool(UDi.wasRead, wasRead_);
 }
-
 
 UserData* 
 UserSession::ud_cpp()

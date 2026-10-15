@@ -60,6 +60,15 @@ int  SFData::get_fsi_flags()
 	temp = cdata.constant_value(current_as_fileinfo);
 	file_itflags |= temp.get_long();
 
+	#ifdef DBG_LOG_DIRCACHE
+		DebugLog* log = DebugLog::cpp_global();
+		str_buf   buf;
+		buf << "FSI flags " << iform(Numf::HEX) << file_itflags;
+		if (log){
+			log->line(buf.zstr());
+		}
+
+	#endif
 	return file_itflags;
 }
 
@@ -188,6 +197,14 @@ protected:
 		args.push_back(root);
 		args.push_back(SFDi.get_fsi_flags());
 
+		#ifdef DBG_LOG_DIRCACHE
+		DebugLog* log = DebugLog::cpp_global();
+		if (log)
+		{
+			log->dump("Iterator args", args);
+		}
+
+		#endif
 		obj_rc dit = ReflectCache::staticInstanceArgs(
 						SFDi.dir_iterator, args);
 
@@ -219,10 +236,11 @@ public:
 		dit_next.set_obj(dit);
 	}
 
-
-
-	htab_rc collect(str_ptr root, str_ptr extn, bool recurse=false)
+	htab_return 
+	collect(str_ptr root, str_ptr extn, bool recurse=false)
 	{
+		htab_return result;
+
 		now_ = time(nullptr);
 		
 		extn_ = extn;
@@ -231,11 +249,27 @@ public:
 
 		expired_ = htab_rc();
 
+		// TODO: ensure path exists and is directory
+
 		obj_rc dit = this->newIterator(root);
 
-		recurseDir(dit);
+		if (dit.ok())
+		{
+			#ifdef DBG_LOG_DIRCACHE
+			DebugLog* log = DebugLog::cpp_global();
+			if (log)
+			{
+				log->dump("iterator :" , dit);
+			}
+			#endif
+			recurseDir(dit);
 
-		return expired_;
+			result.value_ = expired_;
+		}
+		else {
+			result.error() << "Failed to create file iterator for " << root;
+		}
+		return result;
 	}
 
 	
@@ -358,7 +392,7 @@ DirCache::clear()
 	return result;
 }
 
-htab_rc //static
+htab_return //static
 DirCache::getExpiredFiles(str_ptr dir, str_ptr ext)
 {
 	ExpiredCollect collect;
@@ -366,24 +400,44 @@ DirCache::getExpiredFiles(str_ptr dir, str_ptr ext)
 	return collect.collect(dir, ext, dir_tree_);
 }
 
-int  
+int_return
 DirCache::deleteExpired()
 {
-	int result  = 0;
-	
-	ICache::deleteExpired();
+	int_return result;
+	#ifdef DBG_LOG_DIRCACHE
+		DebugLog* log = DebugLog::cpp_global();
+		if (log){
+			log->line("DirCache::deleteExpired");
+		}
+	#endif
 
-	htab_rc expired = getExpiredFiles(cache_dir_, SFDi.sfile_ext);
-	result = expired.size();
-
-	htab_walk wk;
-
-	auto path = wk.value();
-	for(wk.start(expired); wk.ok(); wk.next())
+	result = ICache::deleteExpired();
+	if (result.has_errors())
 	{
-		unlink(path.zstr());
+		return result;
 	}
 
+	htab_return expired = getExpiredFiles(cache_dir_, SFDi.sfile_ext);
+
+	if (expired.has_errors())
+	{
+		result = expired.move_error();
+		return result;
+	}
+
+	
+	if (expired.value_.size())
+	{
+		htab_walk wk;
+		auto path = wk.value();
+		int unlinkct = 0;
+		for(wk.start(expired.value_); wk.ok(); wk.next())
+		{
+			unlink(path.zstr());
+			unlinkct++;
+		}
+		result.value_ += unlinkct;
+	}
 	return result;
 }
 

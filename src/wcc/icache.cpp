@@ -173,18 +173,21 @@ ICache::deleteKey(str_ptr key)
 	return htab_cow(cached_).unset(key);
 }
 
-int 
+int_return
 ICache::deleteExpired()
 {
+	int_return result;
+
 	htab_rc   hset = getExpired();
 	htab_ptr  expired(hset);
 	htab_cow   cache(cached_);
 
-	int result = expired.size();
+	result.value_ = expired.size();
 
-	if (result > 0)
+	if (result.value_ > 0)
 	{
-		zend_printf("Delete %d\n", result);
+		//zend_printf("Delete %d\n", result);
+
 
 		htab_walk htw;
 		auto value = htw.value();
@@ -512,7 +515,14 @@ ZEND_METHOD(Wcc_ICache, deleteExpired)
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	auto cobj = zval_toc<ICache>(ZEND_THIS);
-	RETURN_LONG(cobj->deleteExpired());
+	
+	int_return result  = cobj->deleteExpired();
+
+	if (!result.throw_errors(__FUNCTION__))
+	{
+		RETURN_LONG(result.value_);
+	}
+	
 }
 ZEND_METHOD(Wcc_ICache, deleteMultiple)
 {

@@ -54,7 +54,7 @@ extern "C" {
 #include "assets.h"
 #endif
 
-#define DBG_LOG_DISPATCH
+//#define DBG_LOG_DISPATCH
 
 #ifdef DBG_LOG_DISPATCH
 #ifndef WCC_DEBUGLOG_H
@@ -324,7 +324,7 @@ Dispatch::dispatch(obj_ptr rmatch)
 	#ifdef DBG_LOG_DISPATCH
 		DebugLog* log = DebugLog::cpp_global();
 
-		log->dump("In Dispatch::dispatch", rmatch);
+		if (log) log->dump("In Dispatch::dispatch", rmatch);
 
 	#endif
 	bool_return pcheck = rm->prepare_call(user_, assets_);
@@ -336,7 +336,7 @@ Dispatch::dispatch(obj_ptr rmatch)
 	}
 
 	#ifdef DBG_LOG_DISPATCH
-		log->line("After prepare_call");
+		if (log) log->line("After prepare_call");
 	#endif
 	str_rc mod_name = rm->getModuleName();
 
@@ -371,7 +371,7 @@ Dispatch::dispatch(obj_ptr rmatch)
 	}
 
 	#ifdef DBG_LOG_DISPATCH
-		log->line("Setup Engine");
+		if (log) log->line("Setup Engine");
 	#endif
 	if (engine.ok())
 	{
@@ -399,7 +399,7 @@ Dispatch::dispatch(obj_ptr rmatch)
 		}
 
 	#ifdef DBG_LOG_DISPATCH
-		log->line("Prepare ViewData");
+		if (log) log->line("Prepare ViewData");
 	#endif
 		val_rc view_data;
 		val_return vtest = svc->get(DSPi.viewdata_str);
@@ -418,7 +418,7 @@ Dispatch::dispatch(obj_ptr rmatch)
 	}
 
 	#ifdef DBG_LOG_DISPATCH
-		log->line("Ready to obcall");
+		if (log) log->line("Ready to obcall");
 	#endif
 	val_return content = obcall(route_match_);
 
@@ -675,7 +675,7 @@ Dispatch::obcall(obj_ptr rmatch)
 {
 	#ifdef DBG_LOG_DISPATCH
 		DebugLog* log = DebugLog::cpp_global();
-		log->line("Dispatch::obcall route");
+		if (log) log->line("Dispatch::obcall route");
 	#endif
 
 
@@ -689,7 +689,7 @@ Dispatch::obcall(obj_ptr rmatch)
 
 	
 	#ifdef DBG_LOG_DISPATCH
-		log->dump("Dispatch::obcall route", robj, 6);
+		if (log) log->dump("Dispatch::obcall route", robj, 6);
 	#endif
 
 

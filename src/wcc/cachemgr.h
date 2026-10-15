@@ -84,7 +84,7 @@ public:
 
 	void clearAll();
 	void createCache(str_ptr svckey, str_ptr classname, htab_ptr options);
-	void deleteExpired();
+	int deleteExpired();
 
 	static val_return  callStatic(str_ptr method, htab_ptr params);
 

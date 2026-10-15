@@ -19,7 +19,7 @@ class CacheMgr {
 
 	public function createCache(string $service_key, string $class_name, array $options) : void {}
 
-	public function deleteExpired() : void {}
+	public function deleteExpired() : int {}
 
 	public function getCache(string $service_key) : ?ICache {}
 

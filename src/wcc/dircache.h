@@ -25,7 +25,9 @@ public:
 	
 	void construct(val_ptr options) override;
 	bool_return clear() override;
-	int  deleteExpired() override;
+
+	int_return  deleteExpired() override;
+	
 	bool set(str_ptr key, val_ptr data, zend_long ttl = 0) override;
 	
 	val_rc get(str_ptr key, val_ptr noval = val_ptr()) override;
@@ -42,7 +44,7 @@ public:
 
  	bool writePkg(obj_ptr pkg);
 
- 	htab_rc getExpiredFiles(str_ptr dir, str_ptr ext);
+ 	htab_return getExpiredFiles(str_ptr dir, str_ptr ext);
  	
 
 	VIRTUAL_ZOBJPTR

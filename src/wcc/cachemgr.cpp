@@ -13,6 +13,15 @@
 #include "reflect_cache.h"
 #endif
 
+//#define DBG_CACHE_MGR
+
+#ifdef DBG_CACHE_MGR
+#ifndef WCC_DEBUG_LOG_H
+#include "debuglog.h"
+#endif
+#endif
+
+
 #ifndef TOML_PHP_H
 #include "toml/toml_php.h"
 #endif
@@ -250,38 +259,74 @@ void CacheMgr::createCache(str_ptr svckey, str_ptr classname, htab_ptr options)
 	svc->set(svckey, obj);
 }
 
-void CacheMgr::deleteExpired()
+int CacheMgr::deleteExpired()
 {
+	zend_long total = 0;
+
+	#ifdef DBG_CACHE_MGR
+		DebugLog* log = DebugLog::cpp_global();
+	#endif
 	if (fast_cache_.ok())
 	{
-		obj_ptr fc = cache_obj_.get(fast_cache_);
+		// list of caches, one named 'fast_cache'?
+		val_rc fcache = cache_obj_.get(fast_cache_);
 
-		if (fc.ok())
+
+	#ifdef DBG_CACHE_MGR
+		if (log) log->dump("Cache fast_cache object", val_ptr(fcache));
+	#endif
+		if (fcache.isObject())
 		{
 			val_rc key(expiry_key_);
-			
+	#ifdef DBG_CACHE_MGR
+		if (log) log->dump("expiry_key_", val_ptr(expiry_key_)) ;
+	#endif
+			obj_ptr fc = fcache.zobject();
+
 			val_rc check = fc.call(Cache_i.s_get, key);
+	#ifdef DBG_CACHE_MGR
+		if (log) log->dump("expiry check",check);
+	#endif
 			if (!check.ok())
 			{
 				htab_walk wk;
 
-				fn_call delete_expired(Cache_i.s_delete_expired);
+				// setup reused method call
+				fn_call delete_expire_method;
+
+				delete_expire_method.set_fci(Cache_i.s_delete_expired);
 
 				auto cache = wk.value();
+		#ifdef DBG_CACHE_MGR
+				auto svc_key = wk.key();
+		#endif
 
 				for(wk.start(cache_obj_); wk.ok(); wk.next())
 				{
-					delete_expired.set_obj(cache.zobject());
-					fn_noparams fn(delete_expired);
-					fn.call_fn();
+				#ifdef DBG_CACHE_MGR
+					if (log)
+					{
+						str_rc cache_name = svc_key.zstr();
+						log->dump("Cache Service Name", cache_name);
+						log->dump("Cache Object", cache);
+					}
+				#endif
+
+					delete_expire_method.set_obj(cache.zobject());
+
+					fn_noparams fn(delete_expire_method);
+
+					total += fn.zlong();
 				}
 
 				val_rc ttl(delete_expired_);
 
 				fc.call(Cache_i.s_set, ttl, ttl);
 			}
+
 		}
 	}
+	return total;
 }
 
 obj_ptr 
@@ -541,7 +586,8 @@ ZEND_METHOD(Wcc_CacheMgr, deleteExpired)
 	ZEND_PARSE_PARAMETERS_NONE();
 
 	CacheMgr*  cobj = zval_toc<CacheMgr>(ZEND_THIS);
-	cobj->deleteExpired();
+	int total = cobj->deleteExpired();
+	RETURN_LONG(total);
 }
 
 ZEND_METHOD(Wcc_CacheMgr, getCache)
