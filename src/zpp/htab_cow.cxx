@@ -417,8 +417,17 @@ htab_cow::merge(HashTable* src)
 		test = 0;
 	}
 	*/
-	
-	int oldsize = size();
+	if (!src)
+	{
+		return 0;
+	}
+
+	if (!ht_)
+	{
+		ht_ = src;
+		return size();
+	}
+	int oldsize = size(); 
 	//showdata("\nbefore merge", ht_);
 	php_array_merge(ht_, src);
 	//showdata("\nafter merge", ht_);

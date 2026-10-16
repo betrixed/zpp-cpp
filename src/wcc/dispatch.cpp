@@ -54,7 +54,7 @@ extern "C" {
 #include "assets.h"
 #endif
 
-//#define DBG_LOG_DISPATCH
+#define DBG_LOG_DISPATCH
 
 #ifdef DBG_LOG_DISPATCH
 #ifndef WCC_DEBUGLOG_H
@@ -324,8 +324,9 @@ Dispatch::dispatch(obj_ptr rmatch)
 	#ifdef DBG_LOG_DISPATCH
 		DebugLog* log = DebugLog::cpp_global();
 
-		if (log) log->dump("In Dispatch::dispatch", rmatch);
-
+		if (log) {
+			log->dump("In Dispatch::dispatch", rmatch, 7);
+		}
 	#endif
 	bool_return pcheck = rm->prepare_call(user_, assets_);
 
@@ -339,7 +340,9 @@ Dispatch::dispatch(obj_ptr rmatch)
 		if (log) log->line("After prepare_call");
 	#endif
 	str_rc mod_name = rm->getModuleName();
-
+	#ifdef DBG_LOG_DISPATCH
+		if (log) log->dump("RouteMatch getModuleName", mod_name);
+	#endif
 	if (!mod_name.size())
 	{
 		result.error() << "Need a module name";

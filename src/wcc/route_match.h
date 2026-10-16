@@ -63,7 +63,7 @@ public:
 
 	void debug_info(htab_cow di) override;
 
-	Hmap* query_copy();
+	Hmap* query_hmap(error_return& error);
 
 	obj_ptr getMatch() const
 	{
@@ -122,7 +122,7 @@ public:
 	str_rc debug_str() const;
 	
 	bool_return prepare_call(obj_ptr user, obj_ptr assets);
-	bool_return verify_method_args(htab_ptr targs);
+	bool_return verify_method_args(htab_rc& targs);
 	bool_return verify_has_method();
 
 	val_return call(htab_ptr extra, obj_ptr before, obj_ptr after);

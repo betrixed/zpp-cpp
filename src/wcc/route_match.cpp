@@ -11,7 +11,7 @@ extern "C" {
 #include <Zend/zend_closures.h>
 };
 
-//#define DBG_ROUTEMATCH
+#define DBG_ROUTEMATCH
 
 #ifdef DBG_ROUTEMATCH
 #ifndef WCC_DEBUGLOG_H
@@ -156,17 +156,25 @@ RouteMatch::testRoute(obj_ptr ro)
 }
 
 Hmap* 
-RouteMatch::query_copy()
+RouteMatch::query_hmap(error_return& error)
 {
 	if (!qry_hmap_.ok())
 	{
 		obj_return request = Services::getOne(RequestGlobals::omg.class_name());
 		if (request.has_errors())
 		{
+			error = request.move_error();
 			return nullptr;
 		}
 		RequestGlobals* rg = zobj_toc<RequestGlobals>(request.value_);
 		qry_hmap_ = rg->query();
+		#ifdef DBG_ROUTEMATCH
+		DebugLog* log = DebugLog::cpp_global();
+		if (log)
+		{
+			log->dump("RequestGlobal query returned", qry_hmap_);
+		}
+		#endif
 	}
 	return zobj_toc<Hmap>(qry_hmap_);
 }
@@ -312,7 +320,7 @@ RouteMatch::call(htab_ptr extra, obj_ptr before, obj_ptr after)
 	}
 #ifdef DBG_ROUTEMATCH
 	DebugLog* log = DebugLog::cpp_global();
-	log->dump("Call method of ", zobj);
+	if (log) log->dump("Call method of ", zobj);
 #endif
 	// appended extra arguments?
 	if (extra.size())
@@ -375,7 +383,7 @@ RouteMatch::call(htab_ptr extra, obj_ptr before, obj_ptr after)
 				}
 				else {
 #ifdef DBG_ROUTEMATCH
-					log->dump("Method not found", method_name);
+					if (log) log->dump("Method not found", method_name);
 #endif
 				}
 			}
@@ -405,7 +413,7 @@ RouteMatch::call(htab_ptr extra, obj_ptr before, obj_ptr after)
 			}
 #ifdef DBG_ROUTEMATCH
 			else {
-				log->dump("Method not found", method_name);
+				if (log) log->dump("Method not found", method_name);
 			}
 #endif
 		}	
@@ -458,7 +466,7 @@ void RouteMatch::set_tuple12( htab_ptr tg)
 
 void RouteMatch::set_tuple14(htab_ptr tg)
 {
-	val_ptr mobj;
+	val_rc mobj;
 
 	if (!module_name_.size() ==0 ) {
 		mobj = tg.get(zend_long(0));
@@ -480,11 +488,10 @@ void RouteMatch::set_tuple14(htab_ptr tg)
 	if (mobj.isArray()) {
 		
 		htab_cow targs(mobj);
-		htab_ptr  obargs(ob_args_);
 
-		if (obargs.size() > 0) 
+		if (ob_args_.size() > 0) 
 		{
-			targs.merge(obargs);
+			targs.merge(ob_args_);
 		}
 		ob_args_ = targs;
 	}
@@ -523,6 +530,7 @@ htab_return RouteMatch::fetchArgs()
 {
 
 	htab_return result;
+	result.value_ = htab_ptr::empty_array();
 
 	Route* route = zobj_toc<Route>(route_);
 
@@ -606,32 +614,53 @@ RouteMatch::verify_has_method()
 
 /* make sure any needed method argument is set on ob_args_ */
 bool_return 
-RouteMatch::verify_method_args(htab_ptr targs)
+RouteMatch::verify_method_args(htab_rc& targs)
 {
-	bool_return result;
+	bool_return    result;
+
 	fn_call 	   fn_param_optional;
-	fn_noparams    isoptional(fn_param_optional);
 	fn_call        fn_param_getname;
-	fn_noparams    getname(fn_param_getname);
 
 	fn_param_optional.set_fci(RM_data.isoptional_s);
 	fn_param_getname.set_fci(RM_data.getname_s);
 
+	fn_noparams    isoptional(fn_param_optional);
+	fn_noparams    getname(fn_param_getname);
+
+	
+
+	#ifdef DBG_ROUTEMATCH
+		DebugLog* log = DebugLog::cpp_global();
+		if (log) 
+			{
+				log->dump("Argument targs", targs);
+				log->dump("URL aprams", ob_args_);
+			}
+	#endif
 	//get mix of URL path-set params and any default target parameters.
-	htab_return args_ret = this->fetchArgs(); 
-	if (args_ret.has_errors())
-	{
-		result = args_ret.move_error();
-		result.value_ = false;
-		return result;
-	}
+
+	result.value_ = true;
+
+	htab_cow newargs(targs);
+	newargs.merge(ob_args_); // URL arguments have priority
+
+	#ifdef DBG_ROUTEMATCH
+		if (log) log->dump("Method Args", newargs);
+	#endif
 
 	obj_rc mref = ReflectCache::ReflectionMethod(ob_class_, ob_method_);
+	#ifdef DBG_ROUTEMATCH
+		if (log) log->dump("Method Reflection", mref);
+	#endif
 
-	Hmap* query = this->query_copy();
+	Hmap* query = this->query_hmap(result);
 	if (!query)
 	{
-		result.error() << "No query Hmap";
+		#ifdef DBG_ROUTEMATCH
+			if (log) log->line("No query Hmap");
+		#endif
+		result.error() << endl << "No query Hmap" << endl;
+		result.value_ = false;
 		return result;
 	}
 
@@ -641,8 +670,6 @@ RouteMatch::verify_method_args(htab_ptr targs)
 
 	if (pref.size())
 	{
-		htab_rc objargs_array(ob_args_);
-		htab_cow newargs(objargs_array);
 		bool added = true;
 
 		for_key_value wk;
@@ -654,7 +681,7 @@ RouteMatch::verify_method_args(htab_ptr targs)
 			obj_ptr param = pobj.zobject();
 
 			#ifdef DBG_ROUTEMATCH
-				log->dump("Parameter obj", param);
+				if (log) log->dump("Parameter obj", param);
 			#endif
 
 			fn_param_optional.set_obj(param);
@@ -667,8 +694,10 @@ RouteMatch::verify_method_args(htab_ptr targs)
 				str_rc pname = getname.str();
 
 		    #ifdef DBG_ROUTEMATCH
-				log->dump("Parameter name", pname);
-				log->dump("Query values", query->self());
+				if (log) {
+					log->dump("Parameter name", pname);
+					log->dump("Query values", query->self());
+				}
 			#endif
 				val_ptr obj_arg;
 
@@ -679,14 +708,14 @@ RouteMatch::verify_method_args(htab_ptr targs)
 					// htab get requires val_rc for result return.
 					val_rc testp = query->get(pname);
 						#ifdef DBG_ROUTEMATCH
-							log->dump("query get", testp);
+							if (log) log->dump("query get", testp);
 						#endif
 					if (testp.ok())
 					{
 						newargs.set(pname, testp); // set from query
 						added = true;
 						#ifdef DBG_ROUTEMATCH
-							log->dump("Set from query", ob_args_);
+							if (log) log->dump("Set from query", ob_args_);
 						#endif
 
 						continue;
@@ -698,7 +727,7 @@ RouteMatch::verify_method_args(htab_ptr targs)
 						newargs.set(pname, testp); // set from query
 						added = true;
 						#ifdef DBG_ROUTEMATCH
-							log->dump("Set from targs", ob_args_);
+							if (log) log->dump("Set from targs", ob_args_);
 						#endif
 
 						continue;
@@ -712,7 +741,6 @@ RouteMatch::verify_method_args(htab_ptr targs)
 		if (added) {
 			ob_args_ = newargs;
 		}
-		result.value_ = false;
 	}
 	return result;
 }
@@ -725,41 +753,115 @@ RouteMatch::prepare_call(obj_ptr user, obj_ptr assets)
 
 #ifdef DBG_ROUTEMATCH
 	DebugLog* log = DebugLog::cpp_global();
-	log->dump("in prepare_call", route_,5);
+	if (log)
+	{ 
+		log->dump("in prepare_call", route_,7);
+	}
 #endif
 	Route* route = zobj_toc<Route>(route_);
 
 	htab_rc roles;
 
-	htab_rc targs;
+	htab_rc targs = htab_ptr::empty_array();
 
 	target_ = route->target_;
 
 	val_ptr route_target(target_);
 
 	htab_return check = this->fetchArgs();
+
 	if (check.has_errors())
 	{
 		result = check.move_error();
 		return result;
 	}
+	// Replace position index with matched value
 	ob_args_ = std::move(check.value_);
+	// remember URL assignment parameter values
+	route->params_ = ob_args_;
+
+	#ifdef DBG_ROUTEMATCH
+	if (log)
+	{ 
+		log->dump("Url Args", ob_args_,5);
+	}
+	#endif
 
 	if (route_target.isArray())
 	{
 		htab_ptr tg(route_target.zarray());
 
+		#ifdef DBG_ROUTEMATCH
+		if (log)
+		{ 
+			log->dump("Target Array", tg,5);
+		}
+		#endif
+
 		size_t ct = tg.size();
-		if ( (ct >= 3) && (tg.has_index(2))) 
+		if ( (ct > 2) && (tg.has_index(2))) 
 		{
 			set_tuple14(tg);
-			val_ptr test = tg.get(route_data.ARG_S);
-			if (test.isArray())
-			{
-				targs = test.zarray();
-			}
+		}
+		else if ((ct > 1) && (tg.has_index(1))) {
+			set_tuple12(tg);
+		}
 
-			test = tg.get(route_data.ROLE_S);
+		str_rc temp = tg.get(route_data.MOD_S);
+
+		#ifdef DBG_ROUTEMATCH
+		if (log)
+		{ 
+			log->dump("Module", temp,5);
+		}
+		#endif
+
+		if (temp.size()) 
+		{
+			module_name_ = temp;
+		} 
+		
+		temp = tg.get(route_data.OBJ_S);
+
+		#ifdef DBG_ROUTEMATCH
+		if (log)
+		{ 
+			log->dump("Object class", temp,5);
+		}
+		#endif
+
+		if (temp.size()) {
+			ob_class_ = temp;
+		} 
+
+		temp = tg.get(route_data.FUN_S);
+		if (temp.size()) {
+			ob_method_ = temp;
+		} 
+
+		#ifdef DBG_ROUTEMATCH
+		if (log)
+		{ 
+			log->dump("Object Method", temp,5);
+		}
+		#endif
+
+		val_ptr test = tg.get(route_data.ARG_S);
+		if (test.isArray())
+		{
+			targs = test.zarray();
+			#ifdef DBG_ROUTEMATCH
+			if (log)
+			{ 
+				log->dump("Arguments- targs", targs,5);
+			}
+			#endif
+		}
+		
+
+		test = tg.get(route_data.ROLE_S);
+		if (!test.is_nullptr())
+		{
 			switch(test.ref_type())
 			{
 			case IS_STRING:
@@ -774,19 +876,13 @@ RouteMatch::prepare_call(obj_ptr user, obj_ptr assets)
 				break;
 			}
 		}
-		else {
-			set_tuple12(tg);
-		}
-		if (!module_name_.size()) {
-			module_name_ = tg.get(route_data.MOD_S);
-		} 
 	}
 	else {
 		obj_ptr target_obj(target_.zobject());
 		if (target_obj.ok() && target_obj.instanceof(Target::omg.classEntry()) )
 		{	
 			#ifdef DBG_ROUTEMATCH
-			log->dump("Target value", target_obj,5);
+			if (log) log->dump("Target value", target_obj,5);
 			#endif
 
 			Target* target = zobj_toc<Target>(target_obj);
@@ -802,7 +898,7 @@ RouteMatch::prepare_call(obj_ptr user, obj_ptr assets)
 		 	// ARG_S is but one parameter that may be stored
 		 	targs = params.get(route_data.ARG_S);
 		 	#ifdef DBG_ROUTEMATCH
-			log->dump("Target Params", targs,5);
+			if (log) log->dump("Target Params", targs,5);
 			#endif
 
 			// parameters set in URL path..
@@ -835,7 +931,9 @@ RouteMatch::prepare_call(obj_ptr user, obj_ptr assets)
 			return result;
 		}
 	}
-
+	#ifdef DBG_ROUTEMATCH
+		if (log) log->line("verify_method_args");
+	#endif
 	result = verify_method_args(targs);
 
 	return result;
