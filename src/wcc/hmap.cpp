@@ -343,8 +343,7 @@ Hmap::new_hmap()
 {
 	obj_rc result = Hmap::omg.new_zobj();
 	Hmap* cobj = zobj_toc<Hmap>(result);
-	htab_ptr nullarray;
-	cobj->construct(nullarray);
+	cobj->construct(htab_ptr::empty_array());
 	return result;
 }
 
