@@ -319,7 +319,7 @@ Hmap_php::get_properties_for(zend_object* object, zend_prop_purpose purpose)
 	return nullptr;
 }
 
-obj_rc // static
+obj_rc // static creates Hmap
 Hmap::newFromArray(val_ptr htab)
 {
 	htab_rc hold;
@@ -328,7 +328,7 @@ Hmap::newFromArray(val_ptr htab)
 		hold = htab.zarray(); // already owned
 	}
 	else {
-		hold.adopt(htab_rc::empty_array());// take ownership
+		hold  = htab_ptr::empty_array();// take ownership
 	}
 
 	obj_rc result = Hmap::omg.new_zobj();
@@ -415,8 +415,11 @@ Hmap::construct(htab_ptr values)
 	//showarray("Hmap::construct", values);
 	if (values.size() > 0)
 	{
-		(htab_rc&) data_ = values; // takes ownership
+		 data_ = values; // takes ownership
 		//showdata("construct ", data_);
+	}
+	else {
+		data_ = htab_ptr::empty_array();
 	}
 }
 
