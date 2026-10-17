@@ -11,7 +11,7 @@ extern "C" {
 #include <Zend/zend_closures.h>
 };
 
-#define DBG_ROUTEMATCH
+//#define DBG_ROUTEMATCH
 
 #ifdef DBG_ROUTEMATCH
 #ifndef WCC_DEBUGLOG_H
@@ -758,6 +758,14 @@ RouteMatch::prepare_call(obj_ptr user, obj_ptr assets)
 		log->dump("in prepare_call", route_,7);
 	}
 #endif
+
+	if (!assets.ok())
+	{
+		result.error() << "No Assets Object";
+		result.value_ = false;
+		return result;
+	}
+
 	Route* route = zobj_toc<Route>(route_);
 
 	htab_rc roles;
@@ -909,19 +917,24 @@ RouteMatch::prepare_call(obj_ptr user, obj_ptr assets)
 			result.value_ = true;
 			return result;
 		}
-
-		if (module_name_.size())
-		{
-			Assets* asset_mgr = zobj_toc<Assets>(assets);
-			asset_mgr->setModule(module_name_);
-		}
-
-		result = verify_has_method();
-		if (result.has_errors())
-		{
-			return result;
-		}
 	}
+
+	if (module_name_.size())
+	{
+
+		Assets* asset_mgr = zobj_toc<Assets>(assets);
+		asset_mgr->setModule(module_name_);
+		#ifdef DBG_ROUTEMATCH
+		if (log) log->dump("Assets setModule", assets,7);
+		#endif
+		
+	}
+	result = verify_has_method();
+	if (result.has_errors())
+	{
+		return result;
+	}
+
 	if (roles.size())
 	{
 		roles_ = roles;

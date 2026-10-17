@@ -54,7 +54,7 @@ extern "C" {
 #include "assets.h"
 #endif
 
-#define DBG_LOG_DISPATCH
+//#define DBG_LOG_DISPATCH
 
 #ifdef DBG_LOG_DISPATCH
 #ifndef WCC_DEBUGLOG_H
@@ -146,28 +146,31 @@ Dispatch::asst_ptr()
 	return zobj_toc<Assets>(assets_);
 }
 
-void
+error_return
 Dispatch::construct()
 {
+	error_return result;
 	services_ = Services::instance();
-
+	
 	Services* svc = svc_ptr();
-	val_return atest = svc->get(DSPi.assets_str);
-	if (!atest.throw_errors())
-	{
-		assets_ = std::move(atest.value_);
-	}
-	atest = svc->get(DSPi.config_str);
-	if (!atest.throw_errors())
-	{
-		config_ = std::move(atest.value_);
-	}
-	atest = svc->get(DSPi.userdata_str);
-	if (!atest.throw_errors())
-	{
-		user_ = std::move(atest.value_);
-	}
 
+	val_return atest = svc->get(DSPi.assets_str);
+	if (atest.has_errors()) goto ErrorExit;
+	assets_ = std::move(atest.value_);
+
+	atest = svc->get(DSPi.config_str);
+	if (atest.has_errors()) goto ErrorExit;
+	config_ = std::move(atest.value_);
+
+	atest = svc->get(DSPi.userdata_str);
+	if (atest.has_errors()) goto ErrorExit;
+	user_ = std::move(atest.value_);
+
+	return result;
+
+ErrorExit:
+	result = atest.move_error();
+	return result;
 
 }
 
@@ -856,7 +859,8 @@ ZEND_METHOD(Wcc_Dispatch, __construct)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
 	Dispatch* cobj = zval_toc<Dispatch>(ZEND_THIS);
-	cobj->construct();
+	error_return result = cobj->construct();
+	result.throw_errors(__FUNCTION__);
 }
 
 ZEND_METHOD(Wcc_Dispatch, action)

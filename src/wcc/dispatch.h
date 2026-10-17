@@ -51,7 +51,7 @@ using namespace zpp;
 		
 		static base_obj_mgr<Dispatch> omg;
 
-		void  construct();
+		error_return  construct();
 
 		void action(htab_ptr to);
 
