@@ -135,7 +135,7 @@ zarg_rd::need(size_t ix)
 }
 
 bool 
-zarg_rd::zstring(str_ptr& value, zval* arg)
+zarg_rd::zstring(std::same_as<str_ptr> auto& value, zval* arg)
 {
 
 	val_ptr test(arg);
@@ -268,7 +268,7 @@ zarg_rd::str_or_default(zval *arg, const str_intern& strdef)
 	return result;
 }
 bool 
-zarg_rd::zstring_null(str_ptr& value, zval* arg)
+zarg_rd::zstring_null(std::same_as<str_ptr> auto& value, zval* arg)
 {
 	val_ptr test(arg);
 	value = test.zstr();
@@ -285,7 +285,7 @@ zarg_rd::zstring_null(str_ptr& value, zval* arg)
 }
 
 bool 
-zarg_rd::zarray_null(htab_ptr& value, zval* arg)
+zarg_rd::zarray_null(std::same_as<htab_ptr> auto& value, zval* arg)
 {
 	val_ptr test(arg);
 	int itype = test.ref_type();
@@ -303,7 +303,7 @@ zarg_rd::zarray_null(htab_ptr& value, zval* arg)
 
 
 bool 
-zarg_rd::zarray(htab_ptr& value, zval* arg)
+zarg_rd::zarray(std::same_as<htab_ptr> auto& value, zval* arg)
 {
 	val_ptr test(arg);
 	int itype = test.ref_type();
@@ -321,7 +321,7 @@ zarg_rd::zarray(htab_ptr& value, zval* arg)
 }
 
 bool
-zarg_rd::obj_ofclass_null(obj_ptr& value, zval* arg, zend_class_entry* ce)
+zarg_rd::obj_ofclass_null(std::same_as<obj_ptr> auto& value, zval* arg, zend_class_entry* ce)
 {
 	value = obj_ptr(arg);
 	if (value.instanceof(ce) || value.isNull()) {
@@ -446,7 +446,7 @@ zarg_rd::obj_class(zval* arg, zend_class_entry* ce)
 }
 
 bool 
-zarg_rd::obj(obj_ptr& value, zval* arg)
+zarg_rd::obj(std::same_as<obj_ptr> auto& value, zval* arg)
 {
 	value = obj_ptr(arg);
 	bool result = value.ok();
@@ -474,7 +474,7 @@ zarg_rd::weakref(weak_ref& value, zval* arg)
 }
 
 bool 
-zarg_rd::obj_null(obj_ptr& value, zval* arg)
+zarg_rd::obj_null(std::same_as<obj_ptr> auto& value, zval* arg)
 {
 	val_ptr test(arg);
 	int itype = test.ref_type();
@@ -496,7 +496,7 @@ zarg_rd::obj_null(obj_ptr& value, zval* arg)
 }
 
 bool
-zarg_rd::obj_ofclass(obj_ptr& value, zval* arg, zend_class_entry* ce)
+zarg_rd::obj_ofclass(std::same_as<obj_ptr> auto& value, zval* arg, zend_class_entry* ce)
 {
 	value = obj_ptr(arg);
 	if (value.instanceof(ce)) {

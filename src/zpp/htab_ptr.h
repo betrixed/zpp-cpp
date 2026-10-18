@@ -147,9 +147,9 @@ namespace zpp {
         //! All keys must be integer from 0 and in sequence
         bool is_list() const;
         
+        // Maybe should deprecate these, not direct or useful enough.
         bool try_fetch(zend_string* key, val_ptr&  store) const;
         bool try_fetch(zend_long key, val_ptr& store) const;
-
         bool try_fetch(zval* key, val_ptr& store) const;
         
         void copy_zv(zval* return_value) const;

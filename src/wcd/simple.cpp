@@ -571,7 +571,7 @@ ZEND_METHOD(Wcd_Simple, prepare)
 {
 	zarg_rd args(execute_data);
 
-	str_rc sql;
+	str_ptr sql;
 
 	args.zstring(sql, args.need(0));
 

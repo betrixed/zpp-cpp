@@ -1336,7 +1336,7 @@ ZEND_METHOD(Wcc_Assets, getWebList)
 {
 	zarg_rd args(execute_data);
 
-	str_rc  typekey;
+	str_ptr  typekey;
 	val_ptr names;
 	bool    aslist = true;
 	bool    unset = false;
@@ -1369,7 +1369,7 @@ ZEND_METHOD(Wcc_Assets, getWebList)
 ZEND_METHOD(Wcc_Assets, has)
 {
 	zarg_rd args(execute_data);
-	str_rc  namekey;
+	str_ptr  namekey;
 
 	args.zstring(namekey, args.need(0));
 	if (!args.throw_errors(__FUNCTION__))

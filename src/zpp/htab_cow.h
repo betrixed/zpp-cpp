@@ -39,7 +39,8 @@ namespace zpp {
         void giveback(zval* mgr, size_t init = HT_MIN_SIZE);
         // Mark zval type flags if reference counted or not
 
-        
+        static bool cowop(HashTable*& inout, size_t init = HT_MIN_SIZE);
+
     public:
         /** Each constructor may duplicate and set the HashTable* of its source,
          *  to ensure its reference count is 1.

@@ -941,7 +941,7 @@ ZEND_METHOD(Wcd_Sql_IColumns, __construct)
 	zarg_rd args(execute_data);
 
 
-	obj_rc owner;
+	obj_ptr owner;
 
 	args.obj_null(owner, args.need(0));
 

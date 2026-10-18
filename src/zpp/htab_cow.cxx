@@ -41,6 +41,37 @@
 namespace zpp {
 
 
+bool //static
+htab_cow::cowop(HashTable*& inout, size_t init)
+{
+	//printf("cowop& %lx\n", &inout);
+	HashTable* used = inout;
+	if ( (used == nullptr)
+	   ||(used == const_cast<HashTable*>(&zend_empty_array)))
+	{
+		// TODO:, should test for immutable array (which covers empty array)
+		//zend_printf("New Array\n");
+		HashTable* newht = zend_new_array(init);
+		#ifdef HTAB_SHOW_MEMORY
+		showarray("new array", newht);
+		#endif
+		inout = newht;
+		return true;
+	}
+	if (GC_REFCOUNT(used) > 1) //?Covers all immutable arrays.
+	{
+		// updates not allowed, 
+		// make a copy with rc == 1
+		inout = zend_array_dup(used);
+		#ifdef HTAB_SHOW_MEMORY
+		zend_printf("ARRAY DUPLICATE %lx of ", inout);
+		showarray("used", used);
+		#endif	
+		htab_ptr::try_decref(used);
+	    return true;
+	}
+	return false;
+}
 
 void 
 htab_cow::giveback(zval* mgr, size_t init)
@@ -57,7 +88,7 @@ htab_cow::giveback(zval* mgr, size_t init)
 	case IS_ARRAY:
 		{
 			h = test.zarray();
-			if (htab_rc::cowop(h, init))
+			if (htab_cow::cowop(h, init))
 			{	// replace original with cow.
 				val_ptr::array_bind(mgr, h);
 			}
@@ -98,7 +129,7 @@ htab_cow::htab_cow(htab_rc& mgr, size_t init)
 {
 	// ensure both mgr, and write have same array rc==1
 	//printf("htab_cow htab_rc& mgr\n");
-	htab_rc::cowop(mgr.ht_, init);
+	htab_cow::cowop(mgr.ht_, init);
 	ht_ = mgr.ht_;
 }
 

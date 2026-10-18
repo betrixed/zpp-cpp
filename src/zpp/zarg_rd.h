@@ -78,14 +78,14 @@ public:
 	// Beware risk of passing a xxx_rc class, and
 	// losing a reference count.
 	
-	bool zstring(str_ptr& value, zval* arg);
-	bool zstring_null(str_ptr& value, zval* arg);
+	bool zstring( std::same_as<str_ptr> auto& value, zval* arg);
+	bool zstring_null(std::same_as<str_ptr> auto& value, zval* arg);
 
 	
-	bool obj_ofclass(obj_ptr& value, zval* arg, zend_class_entry* ce);
-	bool obj_ofclass_null(obj_ptr& value, zval* arg, zend_class_entry* ce);
-	bool obj(obj_ptr& value, zval* arg);
-	bool obj_null(obj_ptr& value, zval* arg);
+	bool obj_ofclass(std::same_as<obj_ptr> auto& value, zval* arg, zend_class_entry* ce);
+	bool obj_ofclass_null(std::same_as<obj_ptr> auto& value, zval* arg, zend_class_entry* ce);
+	bool obj(std::same_as<obj_ptr> auto& value, zval* arg);
+	bool obj_null(std::same_as<obj_ptr> auto& value, zval* arg);
 
 	// Returning by result probably better.
 	obj_ptr obj(zval* arg);
@@ -103,8 +103,8 @@ public:
 	val_ptr  string_or_array(zval* arg);
 	
 	bool weakref(weak_ref& value, zval* arg);
-	bool zarray_null(htab_ptr& value, zval* arg);
-	bool zarray(htab_ptr& value, zval* arg);
+	bool zarray_null(std::same_as<htab_ptr> auto& value, zval* arg);
+	bool zarray(std::same_as<htab_ptr> auto& value, zval* arg);
 
 	bool zlong(zend_long& value, zval* arg);
 	bool zlong_null(zend_long& value, zval* arg, zend_long ifnull = -1);
