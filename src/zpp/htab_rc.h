@@ -32,7 +32,6 @@ namespace zpp {
     protected:
         void  own();
         void  lose();
-        static bool cowop(HashTable*& inout, size_t init = HT_MIN_SIZE);
 
         friend class htab_ptr;
         friend class htab_cow;

@@ -35,7 +35,7 @@ class val_rc;
  * @brief val_ptr class, holds a zval pointer. Not reference counted.   
  * A non-null value refers to zval structure that must exists somewhere.
  */
-class val_ptr {
+ class  val_ptr final {
 protected:
     zval *p_;
 
