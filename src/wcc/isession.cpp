@@ -466,8 +466,8 @@ ZEND_METHOD(Wcc_Session_ISession, id)
 {
 	zarg_rd args(execute_data);
 	str_ptr idval;
+	idval = args.str_or_null(args.option(0));
 
-	args.zstring_null(idval, args.option(0));
 	if (!args.throw_errors())
 	{
 		str_rc result = ISession::id(idval);
@@ -485,8 +485,8 @@ ZEND_METHOD(Wcc_Session_ISession, name)
 {
 	zarg_rd args(execute_data);
 	str_ptr nameval;
+	nameval = args.str_or_null(args.option(0));
 
-	args.zstring_null(nameval, args.option(0));
 	if (!args.throw_errors())
 	{
 		str_rc result = ISession::name(nameval);

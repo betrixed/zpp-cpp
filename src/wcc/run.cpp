@@ -826,9 +826,7 @@ ZEND_METHOD(Wcc_Run, __destruct)
 ZEND_METHOD(Wcc_Run, execute)
 {
 	zarg_rd args(execute_data);
-	str_ptr bootstrap;
-
-	args.zstring(bootstrap, args.need(0));
+	str_ptr bootstrap = args.str(args.need(0));
 
 	if (!args.throw_errors(__FUNCTION__))
 	{

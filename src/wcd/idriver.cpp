@@ -1252,11 +1252,9 @@ ZEND_METHOD(Wcd_IDriver, lastInsertId)
 
 ZEND_METHOD(Wcd_IDriver, lastSeqValue)
 {
-	str_ptr   seqname;
-
 	zarg_rd args(execute_data);
 
-	args.zstring(seqname, args.need(0));
+	str_ptr   seqname = args.str(args.need(0));
 
 	if (!args.throw_errors())
 	{
@@ -1374,15 +1372,15 @@ ZEND_METHOD(Wcd_IDriver, prepare)
 
 ZEND_METHOD(Wcd_IDriver, prepareQuery)
 {
+	zarg_rd args(execute_data);
+
 	str_ptr sql;
 	htab_ptr        values;
 	htab_ptr        types;
 
-	zarg_rd args(execute_data);
-
-	args.zstring(sql, args.need(0));
-	args.zarray_null(values, args.option(1));
-	args.zarray_null(types, args.option(2));
+	sql = args.str(args.need(0));
+	values = args.htab_or_null(args.option(1));
+	types = args.htab_or_null(args.option(2));
 
 	if (!args.throw_errors())
 	{
@@ -1401,9 +1399,9 @@ ZEND_METHOD(Wcd_IDriver, prepareExecute)
 
 	zarg_rd args(execute_data);
 
-	args.zstring(sql, args.need(0));
-	args.zarray_null(values, args.option(1));
-	args.zarray_null(types, args.option(2));
+	sql = args.str(args.need(0));
+	values = args.htab_or_null(args.option(1));
+	types = args.htab_or_null(args.option(2));
 
 	if (!args.throw_errors())
 	{

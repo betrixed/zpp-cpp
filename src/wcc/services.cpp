@@ -638,7 +638,7 @@ ZEND_METHOD(Wcc_Services, set)
 	str_ptr skey;
 	val_ptr pvalue;
 
-	args.zstring(skey, args.need(0));
+	skey = args.str(args.need(0));
 	
 	pvalue = args.need(1);
 
@@ -658,8 +658,8 @@ ZEND_METHOD(Wcc_Services, setObject)
 
 	zarg_rd args(execute_data);
 
-	args.obj(obj, args.need(0));
-	args.zstring_null(key, args.option(1));
+	obj = args.obj(args.need(0));
+	key = args.str_or_null(args.option(1));
 
 	if (!args.throw_errors(__FUNCTION__))
 	{

@@ -939,11 +939,7 @@ ZEND_METHOD(Wcd_Sql_JoinExpr, boolstr)
 ZEND_METHOD(Wcd_Sql_IColumns, __construct)
 {
 	zarg_rd args(execute_data);
-
-
-	obj_ptr owner;
-
-	args.obj_null(owner, args.need(0));
+	obj_ptr owner = args.obj_ornull(args.option(0));
 
 	if (!args.throw_errors())
 	{
@@ -1035,25 +1031,20 @@ ZEND_METHOD(Wcd_Sql_IColumns, setOwner)
 {
 	zarg_rd args(execute_data);
 
-	obj_ptr owner;
-
-	args.obj_null(owner, args.need(0));
+	obj_ptr owner = args.obj_ornull(args.option(0));
 
 	if (!args.throw_errors())
 	{
 		IColumns* cobj = zval_toc<IColumns> (ZEND_THIS);
-		cobj->setOwner(cobj);
+		cobj->setOwner(owner);
 	}
-	
 }
 
 ZEND_METHOD(Wcd_Sql_IColumns, add)
 {
 	zarg_rd args(execute_data);
 
-	htab_ptr cols;
-
-	args.zarray(cols, args.need(0));
+	htab_ptr cols = args.htab(args.need(0));
 
 	if (!args.throw_errors())
 	{

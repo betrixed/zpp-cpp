@@ -314,9 +314,7 @@ ZEND_METHOD(Wcd_Sql_Select, add)
 {
 	zarg_rd args(execute_data);
 
-	htab_ptr cols;
-
-	args.zarray(cols, args.need(0));
+	htab_ptr cols  = args.htab(args.need(0));
 
 	if (!args.throw_errors())
 	{
@@ -332,15 +330,10 @@ ZEND_METHOD(Wcd_Sql_Select, aggregate)
 {
 	zarg_rd args(execute_data);
 
-	str_ptr aggfn;
-	str_ptr alias;
+	str_ptr aggfn = args.str(args.need(0));
+	str_ptr alias = args.str(args.need(1));
 
-	htab_ptr aggcols;
-
-	args.zstring(aggfn, args.need(0));
-	args.zstring(alias, args.need(1));
-
-	args.zarray_null(aggcols, args.option(2));
+	htab_ptr aggcols = args.htab_or_null(args.option(2));
 
 	if (!args.throw_errors())
 	{
@@ -354,51 +347,42 @@ ZEND_METHOD(Wcd_Sql_Select, addJoin)
 {
 	zarg_rd args(execute_data);
 
-	obj_ptr ltable;
-	obj_ptr rtable;
+	obj_ptr ltable = args.obj_class(args.need(0), zclass_sql_icolumns);
+	obj_ptr rtable  = args.objclass_ornull(args.option(1), zclass_sql_icolumns);
+	
 	zend_long jtype = JoinInfo::J_INNER;
-	obj_return result;
-
-	args.obj_ofclass(ltable, args.need(0), zclass_sql_icolumns);
-	args.obj_ofclass_null(rtable, args.option(1), zclass_sql_icolumns);
 	args.zlong(jtype, args.option(2));
 	
-
 	if (!args.throw_errors())
 	{
 		Select* sobj = zval_toc<Select>(ZEND_THIS);
 
-		result = sobj->addJoin(ltable,rtable,jtype);
-		result.throw_errors();
+		obj_return result = sobj->addJoin(ltable,rtable,jtype);
+		if (!result.throw_errors())
+		{
+			result.value_.move_zv(return_value);
+		}
 	}	
-
-	result.value_.move_zv(return_value);
 }
 
 ZEND_METHOD(Wcd_Sql_Select, addTable)
 {
 	zarg_rd args(execute_data);
 
-	str_ptr tname;
-	str_ptr talias;
-	htab_ptr cols;
-
-	obj_return result;
-
-	args.zstring(tname, args.need(0));
-	args.zstring_null(talias, args.option(1));
-	args.zarray_null(cols, args.option(2));
-	
+	str_ptr tname = args.str(args.need(0));
+	str_ptr talias = args.str_or_null(args.option(1));
+	htab_ptr cols = args.htab_or_null(args.option(2));
 
 	if (!args.throw_errors())
 	{
 		Select* sobj = zval_toc<Select>(ZEND_THIS);
 
-		result = sobj->addTable(tname,talias,cols);
-		result.throw_errors();
+		obj_return result = sobj->addTable(tname,talias,cols);
+		if (!result.throw_errors())
+		{
+			result.value_.move_zv(return_value);
+		}
 	}	
-
-	result.value_.move_zv(return_value);
 }
 
 ZEND_METHOD(Wcd_Sql_Select, getRenamed)
@@ -449,17 +433,13 @@ ZEND_METHOD(Wcd_Sql_Select, setAlias)
 {
 	zarg_rd args(execute_data);
 
-	str_ptr alias;
-
-	args.zstring(alias, args.need(0));
+	str_ptr alias = args.str(args.need(0));
 
 	if (!args.throw_errors())
 	{
 		Select* sobj = zval_toc<Select>(ZEND_THIS);
-
 		sobj->setAlias(alias);
 	}	
-
 }
 
 

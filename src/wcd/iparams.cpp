@@ -376,11 +376,9 @@ ZEND_METHOD(Wcd_Sql_IParams, setReturns)
 
 ZEND_METHOD(Wcd_Sql_IParams, setSql)
 {
-	str_ptr sql;
-
 	zarg_rd args(execute_data);
 
-	args.zstring(sql, args.need(0));
+	str_ptr sql = args.str(args.need(0));
 
 	if (!args.throw_errors())
 	{

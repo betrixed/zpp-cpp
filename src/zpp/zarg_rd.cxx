@@ -134,22 +134,6 @@ zarg_rd::need(size_t ix)
 	return zptr;
 }
 
-bool 
-zarg_rd::zstring(std::same_as<str_ptr> auto& value, zval* arg)
-{
-
-	val_ptr test(arg);
-	value = test.zstr();
-	if (value.ok())
-	{
-		return true;
-	}
-	if (!maybe_)
-	{
-		error() << "; Expect string";
-	}
-	return false;
-}
 
 str_ptr 
 zarg_rd::str(zval *arg)
@@ -201,6 +185,7 @@ zarg_rd::htab(zval *arg)
 	return result;
 }
 
+
 htab_ptr
 zarg_rd::htab_or_null(zval *arg)
 {
@@ -226,6 +211,31 @@ zarg_rd::htab_or_null(zval *arg)
 		break;
 	}
 	//showarray("arg", result);
+	return result;
+}
+
+htab_ptr
+zarg_rd::htab_or_empty(zval* arg)
+{
+	htab_ptr result;
+	val_ptr test(arg);
+
+	switch(test.ztype())
+	{
+	case IS_UNDEF:
+	case IS_NULL:
+		 if (maybe_)
+		 {
+		 	result = htab_ptr::empty_array();
+		 }
+		 break;
+	case IS_ARRAY:
+		result = test.zarray();
+		break;
+	default:
+		error() << "Supplied value must be Null or Array";
+		break;
+	}
 	return result;
 }
 
@@ -266,73 +276,6 @@ zarg_rd::str_or_default(zval *arg, const str_intern& strdef)
 	}
 	wrong(arg);
 	return result;
-}
-bool 
-zarg_rd::zstring_null(std::same_as<str_ptr> auto& value, zval* arg)
-{
-	val_ptr test(arg);
-	value = test.zstr();
-	if (value.ok() || test.isNull())
-	{
-		value = arg;
-		return true;
-	}
-	if (!maybe_)
-	{
-		error() << "; Expect string or NULL";
-	}
-	return false;
-}
-
-bool 
-zarg_rd::zarray_null(std::same_as<htab_ptr> auto& value, zval* arg)
-{
-	val_ptr test(arg);
-	int itype = test.ref_type();
-	if (itype == IS_ARRAY || itype == IS_NULL)
-	{
-		value = test.zarray();
-		return true;
-	}
-	if (!maybe_)
-	{
-		error() << "; Expect Array or NULL";
-	}
-	return false;
-}
-
-
-bool 
-zarg_rd::zarray(std::same_as<htab_ptr> auto& value, zval* arg)
-{
-	val_ptr test(arg);
-	int itype = test.ref_type();
-
-	if (itype == IS_ARRAY)
-	{
-		value = test.zarray();
-		return true;
-	}
-	if (!maybe_)
-	{
-		error() << "; Expect Array or NULL";
-	}
-	return false;
-}
-
-bool
-zarg_rd::obj_ofclass_null(std::same_as<obj_ptr> auto& value, zval* arg, zend_class_entry* ce)
-{
-	value = obj_ptr(arg);
-	if (value.instanceof(ce) || value.isNull()) {
-		return true;
-	}
-	str_ptr name(ce->name);
-	if (!maybe_)
-	{
-		error() << "; Expect NULL or object of class " << name;
-	}
-	return false;
 }
 
 val_ptr
@@ -445,6 +388,95 @@ zarg_rd::obj_class(zval* arg, zend_class_entry* ce)
 	return result;
 }
 
+#ifdef REALLY_WANT_CONCEPTS
+bool 
+zarg_rd::zstring(std::same_as<str_ptr> auto& value, zval* arg)
+{
+
+	val_ptr test(arg);
+	value = test.zstr();
+	if (value.ok())
+	{
+		return true;
+	}
+	if (!maybe_)
+	{
+		error() << "; Expect string";
+	}
+	return false;
+}
+
+
+bool 
+zarg_rd::zstring_null(std::same_as<str_ptr> auto& value, zval* arg)
+{
+	val_ptr test(arg);
+	value = test.zstr();
+	if (value.ok() || test.isNull())
+	{
+		value = arg;
+		return true;
+	}
+	if (!maybe_)
+	{
+		error() << "; Expect string or NULL";
+	}
+	return false;
+}
+
+bool 
+zarg_rd::zarray_null(std::same_as<htab_ptr> auto& value, zval* arg)
+{
+	val_ptr test(arg);
+	int itype = test.ref_type();
+	if (itype == IS_ARRAY || itype == IS_NULL)
+	{
+		value = test.zarray();
+		return true;
+	}
+	if (!maybe_)
+	{
+		error() << "; Expect Array or NULL";
+	}
+	return false;
+}
+
+
+bool 
+zarg_rd::zarray(std::same_as<htab_ptr> auto& value, zval* arg)
+{
+	val_ptr test(arg);
+	int itype = test.ref_type();
+
+	if (itype == IS_ARRAY)
+	{
+		value = test.zarray();
+		return true;
+	}
+	if (!maybe_)
+	{
+		error() << "; Expect Array or NULL";
+	}
+	return false;
+}
+
+bool
+zarg_rd::obj_ofclass_null(std::same_as<obj_ptr> auto& value, zval* arg, zend_class_entry* ce)
+{
+	value = obj_ptr(arg);
+	if (value.instanceof(ce) || value.isNull()) {
+		return true;
+	}
+	str_ptr name(ce->name);
+	if (!maybe_)
+	{
+		error() << "; Expect NULL or object of class " << name;
+	}
+	return false;
+}
+
+
+
 bool 
 zarg_rd::obj(std::same_as<obj_ptr> auto& value, zval* arg)
 {
@@ -457,21 +489,6 @@ zarg_rd::obj(std::same_as<obj_ptr> auto& value, zval* arg)
 	return result;
 }
 
-bool 
-zarg_rd::weakref(weak_ref& value, zval* arg)
-{
-	value = obj_ptr(arg);
-	bool result = value.ok();
-	if (result)
-	{
-		if (value.class_entry() != zend_ce_weakref)
-		{
-			error() << "; Expected WeakReference class";
-			result = false;
-		}
-	}
-	return result;
-}
 
 bool 
 zarg_rd::obj_null(std::same_as<obj_ptr> auto& value, zval* arg)
@@ -509,6 +526,25 @@ zarg_rd::obj_ofclass(std::same_as<obj_ptr> auto& value, zval* arg, zend_class_en
 	}
 	return false;
 }
+
+#endif // CONCEPTS
+
+bool 
+zarg_rd::weakref(weak_ref& value, zval* arg)
+{
+	value = obj_ptr(arg);
+	bool result = value.ok();
+	if (result)
+	{
+		if (value.class_entry() != zend_ce_weakref)
+		{
+			error() << "; Expected WeakReference class";
+			result = false;
+		}
+	}
+	return result;
+}
+
 
 bool 
 zarg_rd::zlong_null(zend_long& value, zval* arg, zend_long ifnull)
@@ -618,5 +654,20 @@ zarg_rd::wrong_notclass(zval* arg, zend_class_entry* ce)
 	*errors_ << " Not class " << ce->name << endl;
 }
 
+#ifdef REALLY_WANT_CONCEPTS
+template bool zarg_rd::zstring<zpp::str_ptr>(zpp::str_ptr&, _zval_struct*);
+template bool zarg_rd::zstring_null<zpp::str_ptr>(zpp::str_ptr&, _zval_struct*);
+template bool zarg_rd::zarray<zpp::htab_ptr>(zpp::htab_ptr&, _zval_struct*);
+template bool zarg_rd::zarray_null<zpp::htab_ptr>(zpp::htab_ptr&, _zval_struct*);
+
+template bool zarg_rd::obj_ofclass_null<zpp::obj_ptr>
+		(obj_ptr& value, _zval_struct* arg, zend_class_entry* ce);
+template bool zarg_rd::obj<zpp::obj_ptr>
+		(obj_ptr& value, _zval_struct* arg);
+template bool zarg_rd::obj_null<zpp::obj_ptr>
+		(obj_ptr& value, _zval_struct* arg);
+template bool zarg_rd::obj_ofclass<zpp::obj_ptr>
+		(obj_ptr& alue, _zval_struct* arg, zend_class_entry* ce);
+#endif
 }; //namespace
 #endif

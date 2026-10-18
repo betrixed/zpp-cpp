@@ -546,7 +546,7 @@ ZEND_METHOD(Wcc_Finder, dirList_dir)
 	str_ptr path;
 	htab_rc result;
 
-	args.zstring(path, args.need(0));
+	path = args.str( args.need(0));
 
 	if (!args.throw_errors(__FUNCTION__))
 	{
@@ -562,16 +562,15 @@ ZEND_METHOD(Wcc_Finder, dirList_fileExt)
 	str_ptr path;
 	htab_ptr extlist;
 
-	htab_rc result;
+	path = args.str(args.need(0));
 
-	args.zstring(path, args.need(0));
-	args.zarray_null(extlist, args.option(1));
+	extlist = args.htab_or_null(args.option(1));
 
 	if (!args.throw_errors(__FUNCTION__))
 	{
-		result = Finder::dirList_fileExt(path,extlist);
+		htab_rc result = Finder::dirList_fileExt(path,extlist);
+		result.move_zv(return_value);
 	}
-	result.move_zv(return_value);
 }
 
 ZEND_METHOD(Wcc_Finder, find_extension)
@@ -581,16 +580,14 @@ ZEND_METHOD(Wcc_Finder, find_extension)
 	str_ptr path;
 	htab_ptr extlist;
 
-	str_rc result;
-
-	args.zstring(path, args.need(0));
-	args.zarray(extlist, args.need(1));
+	path = args.str(args.need(0));
+	extlist = args.htab(args.need(1));
 
 	if (!args.throw_errors(__FUNCTION__))
 	{
-		result = Finder::find_extension(path,extlist);
+		str_rc result = Finder::find_extension(path,extlist);
+		result.move_zv(return_value);
 	}
-	result.move_zv(return_value);
 }
 
 PHP_MINIT_FUNCTION(Wcc_Finder_reg)

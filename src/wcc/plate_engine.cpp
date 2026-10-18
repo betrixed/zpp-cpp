@@ -479,12 +479,7 @@ ZEND_METHOD(Wcc_PlateEngine, render)
 	zarg_rd args(execute_data);
 
 	str_ptr name = args.str(args.need(0));
-	htab_ptr data;
-
-	if (!args.zarray_null(data, args.option(1)))
-	{
-		data = htab_ptr::empty_array();
-	}
+	htab_ptr data = args.htab_or_empty(args.option(1));
 
 	if (!args.throw_errors(__FUNCTION__))
 	{

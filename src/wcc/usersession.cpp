@@ -728,8 +728,10 @@ ZEND_METHOD(Wcc_UserSession, flash)
 	htab_ptr extra;
 
 	str_ptr text = args.str(args.need(0));
-	args.zstring_null(status, args.option(1));
-	args.zarray_null(extra, args.option(2));
+
+	status = args.str_or_null(args.option(1));
+
+	extra = args.htab_or_null(args.option(2));
 
 	if (!args.throw_errors(__FUNCTION__))
 	{

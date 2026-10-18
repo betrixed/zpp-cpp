@@ -1776,7 +1776,8 @@ row_output(zend_execute_data *execute_data, zval *return_value)
 	obj_ptr irow_obj;
 	bool    reload = false;
 
-	args.obj_ofclass(irow_obj, args.need(0), IRow::omg.classEntry());
+	irow_obj = args.obj_class(args.need(0), IRow::omg.classEntry());
+
 	args.zbool(reload, args.option(1));
 
 	if (!args.throw_errors())
@@ -1790,11 +1791,7 @@ row_output(zend_execute_data *execute_data, zval *return_value)
 			result.throw_errors();
 		}
 		RETURN_BOOL(result.value_);
-		
-	}
-	else {
-		RETURN_BOOL(false);
-	}		
+	}	
 }
 
 ZEND_METHOD(Wcd_Model, createRow)

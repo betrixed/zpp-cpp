@@ -603,18 +603,14 @@ ZEND_METHOD(Wcd_IServer, getConnect)
 {
 	zarg_rd args(execute_data);
 
-	str_ptr name;
-
-	args.zstring(name, args.need(0));
-
-	wref_return result;
+	str_ptr name = args.str(args.need(0));
 
 	if (!args.throw_errors(__FUNCTION__))
 	{
-		result = IServer::connect(name);
+		wref_return result = IServer::connect(name);
 		result.throw_errors();
+		result.value_.move_zv(return_value);
 	}
-	result.value_.move_zv(return_value);
 }
 
 //void config(htab_ptr data);

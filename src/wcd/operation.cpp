@@ -539,22 +539,19 @@ ZEND_METHOD(Wcd_Sql_Operation, addPrime)
 {
 	zarg_rd args(execute_data);
 
-	str_ptr table;
-	str_ptr alias;
-	htab_ptr cols;
-
-	args.zstring(table, args.need(0));
-	args.zstring_null(alias, args.option(1));
-	args.zarray_null(cols, args.option(2));
-
+	str_ptr table = args.str(args.need(0));
+	str_ptr alias = args.str_or_null(args.option(1));
+	htab_ptr cols = args.htab_or_null(args.option(2));
 
 	if (!args.throw_errors())
 	{
 		Operation* cobj = zval_toc<Operation>(ZEND_THIS);
 
 		obj_return result = cobj->addPrime(table, alias, cols);
-		result.throw_errors();
-		result.value_.move_zv(return_value);
+		if (!result.throw_errors())
+		{
+			result.value_.move_zv(return_value);
+		}
 	}
 }
 
@@ -562,22 +559,18 @@ ZEND_METHOD(Wcd_Sql_Operation, firstRow)
 {
 	zarg_rd args(execute_data);
 
-	str_ptr table;
-	str_ptr alias;
-	htab_ptr cols;
-
-	args.zstring(table, args.need(0));
-	args.zstring_null(alias, args.option(1));
-	args.zarray_null(cols, args.option(2));
-
+	str_ptr table = args.str( args.need(0));
+	str_ptr alias = args.str_or_null(args.option(1));
+	htab_ptr cols = args.htab_or_null(args.option(2));
 
 	if (!args.throw_errors())
 	{
 		Operation* cobj = zval_toc<Operation>(ZEND_THIS);
 
 		obj_return result = cobj->addPrime(table, alias, cols);
-		result.throw_errors();
-		result.value_.move_zv(return_value);
+		if (!result.throw_errors()) {
+			result.value_.move_zv(return_value);
+		}
 	}
 }
 
@@ -706,9 +699,7 @@ ZEND_METHOD(Wcd_Sql_Operation, orderStr)
 {
 	zarg_rd args(execute_data);
 
-	str_ptr clause;
-
-	args.zstring(clause, args.need(0));
+	str_ptr clause = args.str(args.need(0));
 
 	if (!args.throw_errors())
 	{
@@ -746,10 +737,8 @@ ZEND_METHOD(Wcd_Sql_Operation, returns)
 {
 	zarg_rd args(execute_data);
 
-	htab_ptr rvalues;
-
-	args.zarray(rvalues, args.need(0));
-
+	htab_ptr rvalues = args.htab(args.need(0));
+	
 	if (!args.throw_errors())
 	{
 		Operation* cobj = zval_toc<Operation>(ZEND_THIS);

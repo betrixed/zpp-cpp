@@ -1247,7 +1247,8 @@ ZEND_METHOD(Wcc_Assets, addAssets)
 {
 	zarg_rd args(execute_data);
 	htab_ptr data;
-	args.zarray(data, args.need(0));
+
+	data = args.htab(args.need(0));
 
 	if (!args.throw_errors(__FUNCTION__))
 	{
@@ -1265,8 +1266,11 @@ ZEND_METHOD(Wcc_Assets, addBlob)
 	zarg_rd args(execute_data);
 	str_ptr blob;
 	bool    headblob = false;
-	args.zstring(blob, args.need(0));
+
+	blob = args.str(args.need(0));
+
 	args.zbool(headblob, args.option(1));
+
 	if (!args.throw_errors(__FUNCTION__))
 	{
 		Assets* cobj = zval_toc<Assets>(ZEND_THIS);
@@ -1278,7 +1282,9 @@ ZEND_METHOD(Wcc_Assets, addSourcePath)
 {
 	zarg_rd args(execute_data);
 	str_ptr path;
-	args.zstring(path, args.need(0));
+
+	path = args.str(args.need(0));
+
 	if (!args.throw_errors(__FUNCTION__))
 	{
 		Assets* cobj = zval_toc<Assets>(ZEND_THIS);
@@ -1290,7 +1296,9 @@ ZEND_METHOD(Wcc_Assets, addStyle)
 {
 	zarg_rd args(execute_data);
 	str_ptr style;
-	args.zstring(style, args.need(0));
+
+	style = args.str(args.need(0));
+
 	if (!args.throw_errors(__FUNCTION__))
 	{
 		Assets* cobj = zval_toc<Assets>(ZEND_THIS);
@@ -1343,7 +1351,7 @@ ZEND_METHOD(Wcc_Assets, getWebList)
 
 	htab_rc result;
 
-	args.zstring(typekey, args.need(0));
+	typekey = args.str(args.need(0));
 
     names = args.option(1);
 
@@ -1371,7 +1379,8 @@ ZEND_METHOD(Wcc_Assets, has)
 	zarg_rd args(execute_data);
 	str_ptr  namekey;
 
-	args.zstring(namekey, args.need(0));
+	namekey = args.str(args.need(0));
+
 	if (!args.throw_errors(__FUNCTION__))
 	{
 		Assets* cobj = zval_toc<Assets>(ZEND_THIS);
@@ -1396,8 +1405,8 @@ ZEND_METHOD(Wcc_Assets, inline_css)
 	zarg_rd args(execute_data);
 
 	str_ptr name;
+	name = args.str(args.need(0));
 
-	args.zstring(name, args.need(0));
 	if (!args.throw_errors(__FUNCTION__))
 	{
 		Assets* cobj = zval_toc<Assets>(ZEND_THIS);
@@ -1489,7 +1498,7 @@ ZEND_METHOD(Wcc_Assets, unmark)
 
 	str_ptr item;
 
-	args.zstring(item, args.need(0));
+	item = args.str(args.need(0));
 
 	if (!args.throw_errors(__FUNCTION__))
 	{

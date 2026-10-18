@@ -7,7 +7,6 @@ extern "C" {
 }
 #endif
 
-
 #ifndef DISPATCH_WCC_H
 #include "dispatch.h"
 #endif
@@ -903,12 +902,11 @@ ZEND_METHOD(Wcc_Dispatch, dispatch)
 ZEND_METHOD(Wcc_Dispatch, dispatchError)
 {
 	zarg_rd args(execute_data);
-	htab_ptr data;
+	
 	obj_ptr rm = args.obj_class(args.need(0), RouteMatch::omg.classEntry());
 	str_ptr cname = args.str(args.need(1));
 	str_ptr method = args.str(args.need(2));
-	
-	args.zarray_null(data, args.option(3));
+	htab_ptr data = args.htab_or_null(args.option(3));
 
 	if (!args.throw_errors(__FUNCTION__))
 	{

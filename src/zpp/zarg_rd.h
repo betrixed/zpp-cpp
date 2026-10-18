@@ -1,6 +1,11 @@
 #ifndef ZARG_RD_H
 #define ZARG_RD_H
 
+//#define REALLY_WANT_CONCEPTS
+
+#ifdef REALLY_WANT_CONCEPTS
+#include <concepts>
+#endif
 /**
  * @file zarg_rd.h
  * @author Michael Rynn <michael.rynn.500@gmail.com>
@@ -77,7 +82,8 @@ public:
 	// Deprecate passing by reference? 
 	// Beware risk of passing a xxx_rc class, and
 	// losing a reference count.
-	
+	#ifdef REALLY_WANT_CONCEPTS
+	// deprecate all of these
 	bool zstring( std::same_as<str_ptr> auto& value, zval* arg);
 	bool zstring_null(std::same_as<str_ptr> auto& value, zval* arg);
 
@@ -87,6 +93,11 @@ public:
 	bool obj(std::same_as<obj_ptr> auto& value, zval* arg);
 	bool obj_null(std::same_as<obj_ptr> auto& value, zval* arg);
 
+
+	bool zarray_null(std::same_as<htab_ptr> auto& value, zval* arg);
+	bool zarray(std::same_as<htab_ptr> auto& value, zval* arg);
+
+	#endif
 	// Returning by result probably better.
 	obj_ptr obj(zval* arg);
 	obj_ptr obj_ornull(zval* arg);
@@ -99,12 +110,11 @@ public:
 
 	htab_ptr htab(zval *arg);
 	htab_ptr htab_or_null(zval *arg);
+	htab_ptr htab_or_empty(zval *arg);
 	
 	val_ptr  string_or_array(zval* arg);
 	
 	bool weakref(weak_ref& value, zval* arg);
-	bool zarray_null(std::same_as<htab_ptr> auto& value, zval* arg);
-	bool zarray(std::same_as<htab_ptr> auto& value, zval* arg);
 
 	bool zlong(zend_long& value, zval* arg);
 	bool zlong_null(zend_long& value, zval* arg, zend_long ifnull = -1);

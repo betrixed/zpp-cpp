@@ -407,37 +407,27 @@ ZEND_METHOD(Wcd_Simple, arrayMap)
 {
 	zarg_rd args(execute_data);
 
-	str_ptr keycol;
-	str_ptr valcol;
-	str_ptr table;
+	str_ptr keycol = args.str(args.need(0));
+	str_ptr valcol = args.str(args.need(1));
+	str_ptr table = args.str(args.need(2));
 
-	args.zstring(keycol, args.need(0));
-	args.zstring(valcol, args.need(1));
-	args.zstring(table, args.need(2));
-
-	htab_return result;
-
-	if (args.throw_errors(__FUNCTION__))
+	if (!args.throw_errors(__FUNCTION__))
 	{
-		result = htab_rc::empty_array();
-	}
-	else {
 		Simple* sobj = zval_toc<Simple>(ZEND_THIS);
-		result = sobj->arrayMap(keycol,valcol, table);
+		htab_return result = sobj->arrayMap(keycol,valcol, table);
+		if (!result.throw_errors()) {
+			result.value_.move_zv(return_value);
+		}
 	}
-	result.throw_errors();
-	result.value_.move_zv(return_value);
 }
 
 ZEND_METHOD(Wcd_Simple, arraySet)
 {
 	zarg_rd args(execute_data);
 
-	str_ptr sql;
-	htab_ptr params;
+	str_ptr sql = args.str(args.need(0));
 
-	args.zstring(sql, args.need(0));
-	args.zarray_null(params, args.option(1));
+	htab_ptr params = args.htab_or_null(args.option(1));
 
 	#ifdef DBG_LOG_SIMPLE
 	DebugLog* log = DebugLog::cpp_global();
@@ -446,18 +436,16 @@ ZEND_METHOD(Wcd_Simple, arraySet)
 		log->dump("arraySet param", params);
 	}
 	#endif
-	htab_return result;
-
-	if (args.throw_errors(__FUNCTION__))
+	
+	if (!args.throw_errors(__FUNCTION__))
 	{
-		result.value_ = htab_rc::empty_array();
-	}
-	else {
 		Simple* sobj = zval_toc<Simple>(ZEND_THIS);
-		result = sobj->arraySet(sql,params);
+		htab_return result = sobj->arraySet(sql,params);
+		if (!result.throw_errors())
+		{
+			result.value_.move_zv(return_value);
+		}
 	}
-	result.throw_errors();
-	result.value_.move_zv(return_value);
 }
 
 ZEND_METHOD(Wcd_Simple, bind)
@@ -479,46 +467,41 @@ ZEND_METHOD(Wcd_Simple, exec)
 {
 	zarg_rd args(execute_data);
 
-	str_ptr sql;
-	htab_ptr params;
+	str_ptr sql = args.str(args.need(0));
 
-	args.zstring(sql, args.need(0));
-	args.zarray(params, args.option(1));
-
-	val_return result;
-
+	htab_ptr params = args.htab_or_null(args.option(1));
+	
 	if(!args.throw_errors(__FUNCTION__))
 	{
 		Simple* sobj = zval_toc<Simple>(ZEND_THIS);
 
-		result = sobj->exec(sql, params);
+		val_return result = sobj->exec(sql, params);
 
-		result.throw_errors();
+		if (!result.throw_errors())
+		{
+			result.value_.move_zv(return_value);
+		}
 	}
-	result.value_.move_zv(return_value);
 }
 
 ZEND_METHOD(Wcd_Simple, firstRow)
 {
 	zarg_rd args(execute_data);
 
-	str_ptr sql;
-	htab_ptr params;
-
-	args.zstring(sql, args.need(0));
-	args.zarray(params, args.option(1));
-
-	val_return result;
+	str_ptr sql = args.str(args.need(0));
+	htab_ptr params = args.htab_or_null(args.option(1));
 
 	if(!args.throw_errors(__FUNCTION__))
 	{
 		Simple* sobj = zval_toc<Simple>(ZEND_THIS);
 
-		result = sobj->firstrow(sql, params);
+		val_return result = sobj->firstrow(sql, params);
 
-		result.throw_errors();
+		if (!result.throw_errors())
+		{
+			result.value_.move_zv(return_value);
+		}
 	}
-	result.value_.move_zv(return_value);
 }
 
 ZEND_METHOD(Wcd_Simple, getRows)
@@ -547,64 +530,57 @@ ZEND_METHOD(Wcd_Simple, sendValues)
 {
 	zarg_rd args(execute_data);
 
-	htab_ptr values;
-        bool     retval = true;
+	bool     retval = true;
+	htab_ptr values = args.htab(args.need(0));
 
-	args.zarray(values, args.need(0));
-        args.zbool(retval, args.option(1));
-
-	val_return result;
+	args.zbool(retval, args.option(1));
 
 	if(!args.throw_errors(__FUNCTION__))
 	{
 		Simple* sobj = zval_toc<Simple>(ZEND_THIS);
 
-		result = sobj->sendValues(values);
+		val_return result = sobj->sendValues(values, retval);
 
-		result.throw_errors();
+		if (!result.throw_errors())
+		{
+			result.value_.move_zv(return_value);
+		}
 	}
-
-	result.value_.move_zv(return_value);
 }
 
 ZEND_METHOD(Wcd_Simple, prepare)
 {
 	zarg_rd args(execute_data);
 
-	str_ptr sql;
-
-	args.zstring(sql, args.need(0));
-
-	bool_return result;
+	str_ptr sql = args.str(args.need(0));
 
 	if(!args.throw_errors(__FUNCTION__))
 	{
 		Simple* sobj = zval_toc<Simple>(ZEND_THIS);
 
-		result = sobj->prepare(sql);
+		bool_return result = sobj->prepare(sql);
 
-		result.throw_errors();
+		if (!result.throw_errors())
+		{
+			RETURN_BOOL(result.value_);
+		}
 	}
-	RETURN_BOOL(result.value_);
 }
 
 ZEND_METHOD(Wcd_Simple, quoteName)
 {
 	zarg_rd args(execute_data);
 
-	str_ptr name;
-
-	args.zstring(name, args.need(0));
-
-	str_rc result;
+	str_ptr name = args.str(args.need(0));
 
 	if(!args.throw_errors(__FUNCTION__))
 	{
 		Simple* sobj = zval_toc<Simple>(ZEND_THIS);
 
-		result = sobj->quoteName(name);
+		str_rc result = sobj->quoteName(name);
+
+		result.move_zv(return_value);
 	}
-	result.move_zv(return_value);
 }
 
 ZEND_METHOD(Wcd_Simple, returnsValues)
@@ -635,9 +611,7 @@ ZEND_METHOD(Wcd_Simple, run)
 ZEND_METHOD(Wcd_Simple, setValues)
 {
 	zarg_rd args(execute_data);
-	htab_ptr values;
-
-	args.zarray(values, args.need(0));
+	htab_ptr values = args.htab(args.need(0));
 
 	if(!args.throw_errors(__FUNCTION__))
 	{

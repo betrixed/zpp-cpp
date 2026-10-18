@@ -74,11 +74,11 @@ class JoinExpr implements IfSqlPart {
 
 class IColumns implements IfSqlPart {
 
-    public function __construct(?Object $owner);
+    public function __construct(?Object $owner = null);
 
     public function __destruct() {}
 
-    public function setOwner(?Object $owner) : ?Object {}
+    public function setOwner(?Object $owner = null) : ?Object {}
 
     public function getPartId() : int {}
 

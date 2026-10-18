@@ -462,9 +462,8 @@ ZEND_METHOD(Wcc_ICache, make_cache)
 ZEND_METHOD(Wcc_ICache, addLocal)
 {
 	zarg_rd args(execute_data);
-	obj_ptr     pkg;
 
-	args.obj_ofclass(pkg, args.need(0), ICacheData::omg.classEntry());
+	obj_ptr pkg = args.obj_class(args.need(0), ICacheData::omg.classEntry());
 
 	if (!args.throw_errors(__FUNCTION__))
 	{
@@ -475,8 +474,10 @@ ZEND_METHOD(Wcc_ICache, addLocal)
 
 ZEND_METHOD(Wcc_ICache, clear)
 {
-	ZEND_PARSE_PARAMETERS_START(0, 0)
-	ZEND_PARSE_PARAMETERS_END();
+	if (!zarg_rd::zero_args(execute_data, __FUNCTION__))
+	{
+		return;
+	}
 
 	auto cobj = zval_toc<ICache>(ZEND_THIS);
 

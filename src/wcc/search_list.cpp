@@ -207,7 +207,8 @@ ZEND_METHOD(Wcc_SearchList, addPaths)
 	htab_ptr	paths;
 	zarg_rd args(execute_data);
 
-	args.zarray(paths, args.need(0));
+	paths = args.htab(args.need(0));
+
 	SearchList* cobj = zval_toc<SearchList>(ZEND_THIS);
 	cobj->addPaths(paths);
 }

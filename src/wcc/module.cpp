@@ -470,7 +470,7 @@ ZEND_METHOD(Wcc_Module, activate)
 
 	zarg_rd args(execute_data);
 
-	args.obj_ofclass(finder,args.need(0), Finder::omg.classEntry());
+	finder = args.obj_class(args.need(0), Finder::omg.classEntry());
 
 	if (!args.throw_errors(__FUNCTION__))
 	{
@@ -486,7 +486,7 @@ ZEND_METHOD(Wcc_Module, addDefaults)
 
 	zarg_rd args(execute_data);
 
-	args.obj_ofclass(defmod, args.need(0), Module::omg.classEntry());
+	defmod = args.obj_class(args.need(0), Module::omg.classEntry());
 
 	if (!args.throw_errors(__FUNCTION__))
 	{

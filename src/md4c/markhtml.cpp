@@ -166,8 +166,8 @@ ZEND_METHOD(Wcc_MarkToHtml, setTagClass)
     str_ptr tag;
     str_ptr cvalue;
 
-    args.zstring(tag, args.need(0));
-    args.zstring(cvalue, args.need(1));
+    tag = args.str(args.need(0));
+    cvalue = args.str(args.need(1));
 
     if (!args.throw_errors())
     {
@@ -180,15 +180,12 @@ ZEND_METHOD(Wcc_MarkToHtml, text)
 {
     zarg_rd args(execute_data);
 
-    str_ptr    input;
-    str_return result;
-
-    args.zstring(input, args.need(0));
+    str_ptr    input = args.str(args.need(0));
 
     if (!args.throw_errors())
     {
         MarkToHtml* mth = zval_toc<MarkToHtml>(ZEND_THIS);
-        result = mth->text(input);
+        str_return result = mth->text(input);
         result.throw_errors();
         result.value_.move_zv(return_value);
     }
@@ -198,15 +195,12 @@ ZEND_METHOD(Wcc_MarkToHtml, cblink)
 {
     zarg_rd args(execute_data);
 
-    htab_ptr    input;
-    htab_rc     result;
-
-    args.zarray(input, args.need(0));
+    htab_ptr    input = args.htab(args.need(0));
 
     if (!args.throw_errors())
     {
         MarkToHtml* mth = zval_toc<MarkToHtml>(ZEND_THIS);
-        result = mth->cblink(input);
+        htab_rc     result = mth->cblink(input);
         result.move_zv(return_value);
     }
 }

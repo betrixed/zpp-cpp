@@ -361,7 +361,7 @@ ZEND_METHOD(Zpp_DebugLog, setInstance)
 
 	obj_ptr obj;
 
-	args.obj_ofclass(obj, args.need(0), DebugLog::omg.classEntry());
+	obj = args.objclass_ornull(args.need(0), DebugLog::omg.classEntry());
 
 	if (!args.throw_errors(__FUNCTION__))
 	{
