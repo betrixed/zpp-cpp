@@ -236,19 +236,15 @@ htab_ptr::print_all(const char* label)
 zval* 
 htab_ptr::get(zend_long idx) const
 {
-	if (!ht_)
-		return nullptr;
-	return zend_hash_index_find(ht_, idx);
+	zval* result = (ht_) : zend_hash_index_find(ht_, idx) : nullptr;
+	return result;
 }
 
 zval*  
 htab_ptr::get(zend_string* zkey) const
 {
 	//showstr("::get zkey", zkey);
-	zval* result = nullptr;
-	if (ht_) {
-		result =  zend_hash_find(ht_, zkey);
-	}
+	zval* result = (ht_) ? zend_hash_find(ht_, zkey) : nullptr;
 	return result;
 }
 

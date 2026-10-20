@@ -83,13 +83,13 @@ namespace zpp {
         
         htab_ptr(HashTable* ht);
 
-        operator HashTable*() const { return ht_; }
-
-        HashTable* ptr() const { return ht_; }
-
         htab_ptr(const val_rc& zw);
         
         htab_ptr(zval* p);
+
+        operator HashTable*() const { return ht_; }
+
+        HashTable* ptr() const { return ht_; }
 
         const htab_ptr& operator=(zval* p);
 

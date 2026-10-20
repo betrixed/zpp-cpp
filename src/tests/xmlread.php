@@ -2,6 +2,8 @@
 
 namespace Wcc;
 use Exception;
+use function Zpp\debug_zpp_dump;
+
 //use Wcc\Db\IServer;
 
 require __DIR__ . "/bootstrap.php";
