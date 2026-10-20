@@ -236,7 +236,7 @@ htab_ptr::print_all(const char* label)
 zval* 
 htab_ptr::get(zend_long idx) const
 {
-	zval* result = (ht_) : zend_hash_index_find(ht_, idx) : nullptr;
+	zval* result = (ht_) ? zend_hash_index_find(ht_, idx) : nullptr;
 	return result;
 }
 
