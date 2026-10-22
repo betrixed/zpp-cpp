@@ -5,6 +5,14 @@
 #include "select.h"
 #endif
 
+//#define DBG_LOG_SELECT
+
+#ifdef DBG_LOG_SELECT
+#ifndef WCC_DEBUG_LOG_H
+#include "wcc/debuglog.h"
+#endif
+#endif
+
 #ifndef SQL_PART_H
 #include "sql_ipart.h"
 #endif
@@ -88,9 +96,13 @@ Select::aggregate(str_ptr aggfn, str_ptr alias, htab_ptr aggargs)
 {
 	error_return result;
 
+
 	Bindings* bind = nullptr;
-	if (!bindPtr(result, bind))
+	obj_return obj_err;
+
+	if (!bindPtr(obj_err, bind))
 	{
+		result = obj_err.move_error();
 		return result;
 	}
 
@@ -140,11 +152,20 @@ Select::addJoin(obj_ptr ltable, obj_ptr rtable, int jtype)
 {
 	obj_return result;
 
+	#ifdef DBG_LOG_SELECT
+		DebugLog* log = DebugLog::cpp_global();
+
+		if (log) log->line("addJoin");
+	#endif
+
 	obj_rc ji_mgr = JoinInfo::omg.new_zobj();
 	JoinInfo*  ji = zobj_toc<JoinInfo>(ji_mgr);
 
 	ji->construct(ltable, rtable, jtype);
 
+	#ifdef DBG_LOG_SELECT
+		if (log) log->dump("new JoinInfo", ji_mgr);
+	#endif
 	obj_return jret = this->getJoiner();
 	if (jret.has_errors())
 	{
@@ -164,20 +185,25 @@ Select::addTable(str_ptr table, str_ptr alias, htab_ptr cols)
 {
 	obj_return result;
 
+	#ifdef DBG_LOG_SELECT
+		DebugLog* log = DebugLog::cpp_global();
+
+		if (log) log->line("addTable");
+	#endif
+
 	obj_rc tc_mgr = TColumns::omg.new_zobj();
 	TColumns* tc = zobj_toc<TColumns>(tc_mgr);
 
 	val_rc cols_mgr(cols);
 	tc->construct(table, alias, cols_mgr);
 
-	obj_return jret = this->getJoiner();
-	if (jret.has_errors())
+	result = this->getJoiner();
+	if (result.has_errors())
 	{
-		result = std::move(jret);
 		return result;
 	}
 
-	JoinTables* jt = zobj_toc<JoinTables>(jret.value_);
+	JoinTables* jt = zobj_toc<JoinTables>(result.value_);
 
 	jt->addTable(tc);
 
@@ -199,8 +225,12 @@ Select::getRenamed()
 		return result;
 	}
 	Bindings* bind = nullptr;
-	if (!bindPtr(result, bind))
+
+	obj_return obj_err;
+
+	if (!bindPtr(obj_err, bind))
 	{
+		result = obj_err.move_error();
 		return result;
 	}
 
@@ -348,6 +378,7 @@ ZEND_METHOD(Wcd_Sql_Select, addJoin)
 	zarg_rd args(execute_data);
 
 	obj_ptr ltable = args.obj_class(args.need(0), zclass_sql_icolumns);
+
 	obj_ptr rtable  = args.objclass_ornull(args.option(1), zclass_sql_icolumns);
 	
 	zend_long jtype = JoinInfo::J_INNER;

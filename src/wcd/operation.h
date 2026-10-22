@@ -28,13 +28,13 @@ protected:
 	
 	void genSql();
 
-	bool bindPtr(error_return& e, Bindings*&);
-	bool dbPtr(error_return& e, IDriver*&);
+	bool bindPtr(obj_return& e, Bindings*&);
+	bool dbPtr(obj_return& e, IDriver*&);
 public:
 
 	static base_obj_mgr<Operation> omg;
 
-	virtual void debug_info(htab_cow di);
+	void debug_info(htab_cow di) override;
 	
 	void construct(const weak_ref& db);
 	void destruct();

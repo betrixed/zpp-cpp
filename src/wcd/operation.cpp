@@ -40,6 +40,7 @@ Operation::debug_info(htab_cow di)
 	di.set(SQSTR.db_ref, dbref_);
 	di.set(SQSTR.driver, driver_);
 	di.set(SQSTR.join_tables, joiner_);
+	di.set(SQSTR.bind_key, bind_);
 }
 
 obj_return
@@ -62,14 +63,13 @@ Operation::getDb()
 }
 
 bool 
-Operation::bindPtr(error_return& e, Bindings*& ptr)
+Operation::bindPtr(obj_return& e, Bindings*& ptr)
 {
 	if (!bind_.ok())
 	{
-		obj_return obret = getBind();
-		if (obret.has_errors())
+		e = getBind();
+		if (e.has_errors())
 		{
-			e = std::move(obret);
 			return false;
 		}	
 	}
@@ -78,14 +78,13 @@ Operation::bindPtr(error_return& e, Bindings*& ptr)
 }
 
 bool 
-Operation::dbPtr(error_return& e, IDriver*& ptr)
+Operation::dbPtr(obj_return& e, IDriver*& ptr)
 {
 	if (!driver_.ok())
 	{
-		obj_return obret = getDb();
-		if (obret.has_errors())
-		{
-			e = std::move(obret);
+		e = getDb();
+		if (e.has_errors())
+		{ 
 			return false;
 		}	
 	}
@@ -180,6 +179,7 @@ Operation::getJoiner()
 	{
 		joiner_ = JoinTables::omg.new_zobj();
 		Bindings* bind = nullptr;
+
 		if (!bindPtr(result, bind))
 		{
 			return result;
@@ -250,28 +250,35 @@ Operation::getSql()
 error_return 
 Operation::limit(val_ptr ct, val_ptr start)
 {
-	error_return err;
+	error_return result;
+
 	Bindings* bind = nullptr;
 	
+	obj_return err;
+
 	if (!bindPtr(err, bind))
 	{
-		return err;
+		result = err.move_error();
+		return result;
 	}
 	bind->limit(ct, start);
-	return err;
+	return result;
 }
 
 error_return 
 Operation::orderBy(val_ptr column, bool descend, bool nullslast)
 {
-	error_return err;
+	error_return result;
 	Bindings* bind = nullptr;
-	if (!bindPtr(err, bind))
+
+	obj_return obj_err;
+	if (!bindPtr(obj_err, bind))
 	{
-		return err;
+		result = obj_err.move_error();
+		return result;
 	}
 	bind->orderBy(column, descend, nullslast);
-	return err;
+	return result;
 }
 
 static bool nextwd(htab_ptr src, unsigned& ix, str_rc& word)

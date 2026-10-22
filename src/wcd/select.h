@@ -57,7 +57,7 @@ public:
 
 	void add(htab_ptr cols);
 
-	obj_return addJoin(obj_ptr ltable, obj_ptr rtable, int jtype);
+	obj_return addJoin(obj_ptr ltable, obj_ptr rtable = obj_ptr(), int jtype = JoinInfo::J_INNER);
 
 	obj_return addTable(str_ptr table, str_ptr alias, htab_ptr cols);
 

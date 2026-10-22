@@ -125,7 +125,7 @@ zarg_rd::need(size_t ix)
 
 	if (ix >= nargs_)
 	{
-		error() << "; Bad argument index " << ix_;
+		error() << "; Missing argument? index " << ix_+1;
 		zptr = (zval*) nullptr;
 	}
 	else {
@@ -351,19 +351,31 @@ zarg_rd::objclass_ornull(zval* arg, zend_class_entry* ce)
 {
 	obj_ptr result;
 
-	if (!arg && maybe_)
+	if (!arg)
 	{
+		// if need, then error was setup already
+		// if option, then return as if null
 		return result;
 	}
 
-	result = arg;
-
-	if (result.ok() && result.instanceof(ce))
+	val_ptr test(arg);
+	int vtype = test.ztype();
+	switch(vtype)
 	{
+	case IS_NULL:
 		return result;
+	case IS_OBJECT:
+		result = test.zobject();
+		if (result.instanceof(ce))
+		{
+			return result;
+		}
+		break;
+	default:
+		error() << "# Not null of object of class ";
+		wrong_notclass(arg, ce);
+		break;
 	}
-	error() << "# Not null or object of class ";
-	wrong_notclass(arg, ce);
 	return result;
 }
 
@@ -377,14 +389,23 @@ zarg_rd::obj_class(zval* arg, zend_class_entry* ce)
 		return result;
 	}
 
-	result = arg;
-
-	if (result.ok() && result.instanceof(ce))
+	val_ptr test(arg);
+	int vtype = test.ztype();
+	switch(vtype)
 	{
-		return result;
+	case IS_OBJECT:
+		result = test.zobject();
+		if (result.instanceof(ce))
+		{
+			return result;
+		}
+		break;
+	case IS_NULL:
+	default:
+		error() << "# Need object of class ";
+		wrong_notclass(arg, ce);
+		break;
 	}
-	error() << "# Not object of class ";
-	wrong_notclass(arg, ce);
 	return result;
 }
 
@@ -637,6 +658,7 @@ zarg_rd::throw_errors(const char* fncstr)
 	}
 	return false;
 }
+
 
 void 
 zarg_rd::wrong(zval* arg)
