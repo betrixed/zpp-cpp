@@ -142,7 +142,11 @@ request_init::init() {
 
     is_uploaded_file = "is_uploaded_file";
     move_uploaded_file = "move_uploaded_file";
-	
+	argc_s = "argc";
+	argv_s = "argv";
+	uri_classname = "Uri\\Rfc3986\\Uri";
+	uri_getquery = "getquery";
+	hdr_query_string = "QUERY_STRING";
 }
 
 
@@ -484,6 +488,103 @@ RequestGlobals::resolveAuthorizationHeaders()
 		} 
 	}
 	return result;
+}
+
+str_rc 
+RequestGlobals::parseCLI(str_ptr prefix)
+{
+	htab_rc args = this->getHeader(RQit.argv_s);
+	str_buf req_buf;
+	str_rc  req;
+
+	str_rc query = str_ptr::empty_str();
+	htab_rc qval_own = htab_ptr::empty_array();
+	htab_cow qval(qval_own);
+
+	int doneix = 0;
+	if (prefix.size())
+	{
+		req_buf << prefix;
+	}
+
+	if (args.size() <= 1)
+	{
+		req_buf << "/index.php";
+	}
+	else {
+		req = args.get((int) 1);
+		if (req.starts_with('/'))
+		{
+			doneix++;
+			// construct a Uri parser
+			htab_rc carg_own;
+			htab_cow carg(carg_own);
+
+			carg.push_back(req);
+			obj_rc uriobj = ReflectCache::staticInstanceArgs(RQit.uri_classname, carg_own);
+			query = uriobj.call(RQit.uri_getquery);
+			if (query.size())
+			{
+				parse_str(query, qval_own);
+			}
+			else {
+				query = str_ptr::empty_str();
+			}
+			req_buf << req;
+		}
+		for_key_value args_ht;
+		preg rexparam("#^\\-(\\-)?(\\w+)(?:\\=(.*))?$#");
+
+		str_buf qbuf;
+
+		qbuf << query;
+
+		for(args_ht.start(args); args_ht.ok(); args_ht.next())
+		{
+			int i = args_ht.index();
+			val_ptr value = args_ht.value();
+			if (value.isString())
+			{
+				str_rc arg = value.zstr();
+				arg = str_replace("/", "%2F", arg);
+				if (rexparam.matches(arg))
+				{
+					htab_ptr m = rexparam.captures();
+					str_rc pname = m.get((int) 2);
+					str_rc pvalue = m.get((int) 3);
+					if (qbuf.size())
+					{
+						qbuf << "&";
+					}
+					qbuf << urlencode(pname) << '=';
+					if (pvalue.size())
+					{
+						str_rc dvalue = urldecode(pvalue);
+						qval.set(pname, dvalue);
+						qbuf << pvalue;
+					}
+				}
+				else {
+					req_buf << '/' << arg;
+				}
+			}
+		}
+		if (req_buf.size()==0)
+		{
+			req_buf << '/';
+		}
+		if (query.size())
+		{
+			setHeader(RQit.hdr_query_string);
+			Hmap* rget = zobj_toc<Hmap>(request_);
+			rget->addArray(qval);
+		}
+	} // processed command line arguments
+	req = req_buf.zstr();
+
+	setHeader(RQit.REQUEST_URI, req);
+
+	return req;
 }
 
 htab_rc 
@@ -2112,6 +2213,24 @@ ZEND_METHOD(Wcc_RequestGlobals, setAuthCallback)
 
 	RequestGlobals* cobj = zval_toc<RequestGlobals>(ZEND_THIS);
 	cobj->setAuthCallback(value);
+}
+
+ZEND_METHOD(Wcc_RequestGlobals, parseCLI)
+{
+	zarg_rd args(execute_data);
+
+	str_ptr prefix = args.str_or_null(args.option(0));
+	if (!prefix.ok())
+	{
+		prefix = str_ptr::empty_str();
+	}
+
+	if (!args.throw_errors())
+	{
+		RequestGlobals* cobj = zval_toc<RequestGlobals>(ZEND_THIS);
+		str_rc result = cobj->parseCLI(prefix);
+		result.move_zv(return_value);
+	}
 }
 
 PHP_MINIT_FUNCTION(RequestGlobals_reg)

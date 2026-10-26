@@ -106,10 +106,17 @@ public:
     fn_call          mb_detect_order;
     fn_call          mkdir;
     fn_call          opendir;
+    
+    fn_call          parse_str;
     fn_call          pathinfo;
     fn_call          php_sapi_name;
     fn_call          preg_quote;
     fn_call          rawurlencode;
+    fn_call          urlencode;
+    fn_call          urldecode;
+
+    
+
     fn_call          readdir;
     fn_call          realpath; 
     fn_call          serialize;
@@ -184,11 +191,16 @@ public:
         mb_detect_order.set_fci(ftab.s_mb_detect_order);
         mkdir.set_fci(ftab.s_mkdir);
         opendir.set_fci(ftab.s_opendir);
+
+        parse_str.set_fci(ftab.s_parse_str);
         pathinfo.set_fci(ftab.s_pathinfo);
 
         php_sapi_name.set_fci(ftab.s_php_sapi_name);
         preg_quote.set_fci(ftab.s_preg_quote);
         rawurlencode.set_fci(ftab.s_rawurlencode);
+        urlencode.set_fci(ftab.s_urlencode);
+        urldecode.set_fci(ftab.s_urldecode);
+            
         readdir.set_fci(ftab.s_readdir);
         realpath.set_fci(ftab.s_realpath);
 
@@ -663,6 +675,24 @@ array_pop(htab_rc& array_ref)
     return result;
 }
 
+void 
+parse_str(str_ptr qstr, htab_rc& array_ref)
+{
+    fn_params<2> fn(TLFNs.parse_str);
+    zval* pz = fn.argsptr();
+    val_ptr::string_bind(pz, qstr);
+    pz += 1; // point to next zval
+    val_ptr::array_bind(pz, array_ref);
+    ZVAL_NEW_REF(pz, pz); 
+
+    // void function result returned
+    fn.call_fn();
+    zend_reference* ref = Z_REF_P(pz); // pull out the reference handle;
+    ZVAL_COPY_VALUE(pz, &ref->val);  // get the actual zval
+    efree(ref); // free temporary reference handle
+
+    array_ref = z_ARRAY_P(pz); // update with ?changed HashTable*
+}
 
 htab_rc
 array_splice(htab_rc& input, int offset, int length, htab_ptr replace)
@@ -878,6 +908,22 @@ rawurlencode(str_ptr s)
 }
 
 str_rc 
+urlencode(str_ptr s)
+{
+    fn_params<1>  fn(TLFNs.urlencode);
+    val_ptr::string_bind(fn.argsptr(), s);
+    return fn.str();
+}
+
+str_rc 
+urldecode(str_ptr s)
+{
+    fn_params<1>  fn(TLFNs.urldecode);
+    val_ptr::string_bind(fn.argsptr(), s);
+    return fn.str();
+}
+
+str_rc 
 ucwords(str_ptr s)
 {
     fn_params<1>  fn(TLFNs.ucwords);
@@ -966,6 +1012,10 @@ fntable::init()
     s_php_sapi_name = "php_sapi_name";
     s_preg_quote = "preg_quote";
     s_rawurlencode = "rawurlencode";
+    s_urlencode = "urlencode";
+    s_urldecode = "urldecode";
+
+
     s_readdir = "readdir";
     s_realpath = "realpath";
 

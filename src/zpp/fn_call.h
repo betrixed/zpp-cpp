@@ -246,7 +246,6 @@ namespace zpp {
 
     val_rc pathinfo(str_ptr path, PathInfo flags = PathInfo::ALL);
 
-
     void register_fn_calls();
 
     /** 
@@ -303,6 +302,9 @@ namespace zpp {
         str_intern  s_php_sapi_name;
         str_intern  s_preg_quote;
         str_intern  s_rawurlencode;
+        str_intern  s_urlencode;
+        str_intern  s_urldecode;
+
         str_intern  s_readdir;
         str_intern  s_realpath;
 
@@ -320,7 +322,8 @@ namespace zpp {
         str_intern  s_weakref_create;
         str_intern  s_weakref_get;
         
-        
+        str_intern  s_parse_str;
+
         str_intern  session_write_close_fn;
         str_intern  session_status_fn;
         str_intern  session_id_fn;
@@ -382,6 +385,8 @@ namespace zpp {
     str_rc mb_detect_order(const val_rc& encoding);
     str_rc mb_detect_encoding(str_ptr str, const val_rc& encodings, bool strict = false );
     str_rc rawurlencode(str_ptr s);
+    str_rc urlencode(str_ptr s);
+    str_rc urldecode(str_ptr s);
     str_rc strtr(str_ptr subj, str_ptr from, str_ptr to);
     str_rc ucwords(str_ptr subj);
 
@@ -394,8 +399,10 @@ namespace zpp {
     // calls to direct function implementations
     bool file_exists(str_ptr fname);
 
-    val_rc array_pop(val_rc& arrayref);
+    // returns popped value
+    val_rc array_pop(htab_rc& arrayref);
 
+    void   parse_str(str_ptr qstr, htab_rc& arrayref);
 
     // wrappers for TLfnTable calls
     bool extension_loaded(str_ptr name);

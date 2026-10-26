@@ -759,12 +759,7 @@ RouteMatch::prepare_call(obj_ptr user, obj_ptr assets)
 	}
 #endif
 
-	if (!assets.ok())
-	{
-		result.error() << "No Assets Object";
-		result.value_ = false;
-		return result;
-	}
+	
 
 	Route* route = zobj_toc<Route>(route_);
 
@@ -921,7 +916,12 @@ RouteMatch::prepare_call(obj_ptr user, obj_ptr assets)
 
 	if (module_name_.size())
 	{
-
+		if (!assets.ok())
+		{
+			result.error() << "Assets Object required";
+			result.value_ = false;
+			return result;
+		}
 		Assets* asset_mgr = zobj_toc<Assets>(assets);
 		asset_mgr->setModule(module_name_);
 		#ifdef DBG_ROUTEMATCH
@@ -938,6 +938,10 @@ RouteMatch::prepare_call(obj_ptr user, obj_ptr assets)
 	if (roles.size())
 	{
 		roles_ = roles;
+		if (!user.ok())
+		{
+			result.error() << "User is required";
+		}
 		if (!this->allow_call(user))
 		{
 			result = erred_.move_error();
@@ -1094,14 +1098,12 @@ PHP_METHOD(Wcc_RouteMatch, getObjArgs)
 }
 
 
-
-
 PHP_METHOD(Wcc_RouteMatch, prepare_call)
 {
 	zarg_rd args(execute_data);
 
-	obj_ptr user = args.obj_class(args.need(0), UserData::omg.classEntry());
-	obj_ptr assets = args.obj_class(args.need(1), Assets::omg.classEntry());
+	obj_ptr user = args.objclass_ornull(args.need(0), UserData::omg.classEntry());
+	obj_ptr assets = args.objclass_ornull(args.need(1), Assets::omg.classEntry());
 
 	if (!args.throw_errors())
 	{

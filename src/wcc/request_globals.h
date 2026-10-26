@@ -122,7 +122,8 @@ namespace wcc {
 		int getPort();
 
 
-		
+		str_rc parseCLI(str_ptr prefix);
+
 		str_rc getRawBody();
 
 		str_rc getScheme();
@@ -280,7 +281,11 @@ namespace wcc {
 		str_intern    is_uploaded_file;
 		str_intern    move_uploaded_file;
 		
-
+		str_intern   argv_s;
+		str_intern   argc_s;
+		str_intern   uri_classname;
+		str_intern   uri_getquery;
+		str_intern   hdr_query_string;
 
 		void init() override;
 	};

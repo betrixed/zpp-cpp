@@ -25,7 +25,7 @@ class RequestGlobals
 
     public function getScheme(): string {}
 
-
+    public function parseCLI(string $prefix="") : string {}
 
     public function getURI(bool $onlyPath = false): string {}
     
