@@ -23,6 +23,8 @@ class RequestGlobals
 
     public function isAjax(): bool {}
 
+    public function isCLI() : bool {}
+
     public function getScheme(): string {}
 
     public function parseCLI(string $prefix="") : string {}

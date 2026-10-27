@@ -691,7 +691,7 @@ parse_str(str_ptr qstr, htab_rc& array_ref)
     ZVAL_COPY_VALUE(pz, &ref->val);  // get the actual zval
     efree(ref); // free temporary reference handle
 
-    array_ref = z_ARRAY_P(pz); // update with ?changed HashTable*
+    array_ref = Z_ARRVAL_P(pz); // update with ?changed HashTable*
 }
 
 htab_rc

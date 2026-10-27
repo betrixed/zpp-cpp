@@ -269,6 +269,39 @@ Services::getOne(str_ptr key, htab_ptr arglist)
 }
 
 // static
+/*! Ensure 
+ */
+obj_return  
+Services::objectService(str_ptr key, str_ptr cname)
+{
+	obj_return result;
+
+	Services* self = Services::cpp_global();
+	val_rc test = self->active_.get(key);
+	obj_rc cobj = self->instances_.get(cname);
+    if (cobj.ok())
+    {
+    	if (test.isObject() && (test.zobject() == (zend_object*)cobj))
+    	{
+    		result.value_ = cobj;
+    		return result;
+    	} 
+    	htab_cow(self->active_).set(key, cobj);
+    	return result;
+    }
+
+	result = self->newInstance(cname);
+	if (result.has_errors())
+	{
+		return result;
+	}
+	htab_cow(self->active_).set(key, result.value_);
+	htab_cow(self->instances_).set(cname, result.value_);
+
+	return result;
+}
+
+// static
 val_return  
 Services::service(str_ptr key)
 {
@@ -730,6 +763,22 @@ ZEND_METHOD(Wcc_Services, clearObjects)
 	svc->clearObjects();
 }
 
+ZEND_METHOD(Wcc_Services, objectService)
+{
+	zarg_rd args(execute_data);
+
+	str_ptr key = args.str(args.need(0));
+	str_ptr cname = args.str(args.need(1));
+
+	if (!args.throw_errors())
+	{
+		obj_return result = Services::objectService(key, cname);
+		if (!result.throw_errors(__FUNCTION__))
+		{
+			result.value_.move_zv(return_value);
+		}
+	}
+}
 
 PHP_MINIT_FUNCTION(wc_services_md)
 {

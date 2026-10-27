@@ -140,6 +140,7 @@ request_init::init() {
 	finfo_file = "finfo_file";
 	finfo_close = "finfo_close";	
 
+	STDIN_s = "STDIN";
     is_uploaded_file = "is_uploaded_file";
     move_uploaded_file = "move_uploaded_file";
 	argc_s = "argc";
@@ -496,7 +497,7 @@ RequestGlobals::parseCLI(str_ptr prefix)
 	htab_rc args = this->getHeader(RQit.argv_s);
 	str_buf req_buf;
 	str_rc  req;
-
+	val_rc  hd_arg;
 	str_rc query = str_ptr::empty_str();
 	htab_rc qval_own = htab_ptr::empty_array();
 	htab_cow qval(qval_own);
@@ -541,8 +542,11 @@ RequestGlobals::parseCLI(str_ptr prefix)
 
 		for(args_ht.start(args); args_ht.ok(); args_ht.next())
 		{
-			int i = args_ht.index();
 			val_ptr value = args_ht.value();
+			if (args_ht.index() <= doneix)
+			{
+				continue;
+			}
 			if (value.isString())
 			{
 				str_rc arg = value.zstr();
@@ -575,14 +579,14 @@ RequestGlobals::parseCLI(str_ptr prefix)
 		}
 		if (query.size())
 		{
-			setHeader(RQit.hdr_query_string);
+			hd_arg = query;
+			setHeader(RQit.hdr_query_string, hd_arg);
 			Hmap* rget = zobj_toc<Hmap>(request_);
 			rget->addArray(qval);
 		}
 	} // processed command line arguments
-	req = req_buf.zstr();
-
-	setHeader(RQit.REQUEST_URI, req);
+	hd_arg = req_buf.zstr();
+	setHeader(RQit.REQUEST_URI, hd_arg);
 
 	return req;
 }
@@ -661,11 +665,47 @@ void RequestGlobals::debug_info(htab_cow di)
 	di.set(RQit.method_override, methodOverride_);
 }	
 
+bool RequestGlobals::isCLI()
+{
+	if (isCLI_ != IS_UNDEF)
+	{
+		return (isCLI_ == IS_TRUE) ? true : false;
+	}
+
+	if (defined(RQit.STDIN_s))
+	{
+		isCLI_ = IS_TRUE;
+		return true;
+	}
+
+	Hmap* server = zobj_toc<Hmap>(server_);
+	if (server->has(RQit.REMOTE_ADDR) || server->has(RQit.HTTP_USER_AGENT))
+	{
+		isCLI_ = IS_FALSE;
+		return false;
+	}
+
+	val_rc test;
+	test = server->getOrNot(RQit.argc_s,test);
+	if (test.isLong())
+	{
+		if (test.get_long() > 0)
+		{
+			isCLI_ = IS_TRUE;
+			return true;
+		}
+	}
+	isCLI_ = IS_FALSE;
+	return false;
+	
+
+}
 
 void RequestGlobals::construct()
 {
 
 	val_ptr test = htab_rc::get_global(RQit.G_SERVER);
+	isCLI_ = IS_UNDEF;
 
 	if (test.isArray())
 	{
@@ -1784,6 +1824,18 @@ ZEND_METHOD(Wcc_RequestGlobals, isMethod)
 
 	RequestGlobals* cobj = zval_toc<RequestGlobals>(ZEND_THIS);
 	bool result = cobj->isMethod(methods, strict);
+	RETURN_BOOL(result);
+}
+
+ZEND_METHOD(Wcc_RequestGlobals, isCLI)
+{
+	if (!zarg_rd::zero_args(execute_data, __FUNCTION__))
+	{
+		return;
+	}
+
+	RequestGlobals* cobj = zval_toc<RequestGlobals>(ZEND_THIS);
+	bool result = cobj->isCLI();
 	RETURN_BOOL(result);
 }
 

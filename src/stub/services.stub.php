@@ -13,6 +13,8 @@ final class Services {
 	
 	public static function setOne(string $key, ?object $obj = null) : object {}
 
+	public static function objectService(string $key, string $cname) : object {}
+
 	public static function instance() : Services {}
 
 	public static function service(string $name) : mixed {}

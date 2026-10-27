@@ -1102,10 +1102,10 @@ PHP_METHOD(Wcc_RouteMatch, prepare_call)
 {
 	zarg_rd args(execute_data);
 
-	obj_ptr user = args.objclass_ornull(args.need(0), UserData::omg.classEntry());
-	obj_ptr assets = args.objclass_ornull(args.need(1), Assets::omg.classEntry());
+	obj_ptr user = args.objclass_ornull(args.option(0), UserData::omg.classEntry());
+	obj_ptr assets = args.objclass_ornull(args.option(1), Assets::omg.classEntry());
 
-	if (!args.throw_errors())
+	if (!args.throw_errors(__FUNCTION__))
 	{
 		RouteMatch* cobj = zval_toc<RouteMatch>(ZEND_THIS);
 

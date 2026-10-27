@@ -38,6 +38,8 @@ namespace wcc {
 		str_rc body_;
 
 		int  verb_;
+		int  isCLI_;
+		
 		bool strictHost_;
 		bool methodOverride_;
 		bool spoof_;
@@ -76,6 +78,8 @@ namespace wcc {
 		htab_ptr getPost();
 		htab_ptr getQuery();
 		htab_ptr getServer();
+
+		bool     isCLI();
 
 		obj_rc makeFile(htab_ptr data, str_ptr name);
 
@@ -281,6 +285,7 @@ namespace wcc {
 		str_intern    is_uploaded_file;
 		str_intern    move_uploaded_file;
 		
+		str_intern   STDIN_s;
 		str_intern   argv_s;
 		str_intern   argc_s;
 		str_intern   uri_classname;
