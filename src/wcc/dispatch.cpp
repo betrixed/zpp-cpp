@@ -100,6 +100,7 @@ Disp_init::init()
 
 	beforecall_str = "beforecall";
 	set_str = "set";
+	dos_str = "dos";
 	
 	services_str = "services";
 
@@ -151,17 +152,19 @@ Dispatch::construct()
 	error_return result;
 	services_ = Services::instance();
 	
-	Services* svc = svc_ptr();
-
-	val_return atest = svc->get(DSPi.assets_str);
+	obj_return atest = Services::objectService(DSPi.dos_str, Dos::omg.class_name());
 	if (atest.has_errors()) goto ErrorExit;
-	assets_ = std::move(atest.value_);
 
-	atest = svc->get(DSPi.config_str);
+	atest = Services::objectService(DSPi.config_str, Config::omg.class_name());
 	if (atest.has_errors()) goto ErrorExit;
-	config_ = std::move(atest.value_);
+	config_ = atest.move_value();
+	 
+	atest = Services::objectService(DSPi.assets_str, Assets::omg.class_name());
+	if (atest.has_errors()) goto ErrorExit;
+	assets_ = atest.move_value();
 
-	atest = svc->get(DSPi.userdata_str);
+
+	atest = Services::objectService(DSPi.userdata_str, UserData::omg.class_name());
 	if (atest.has_errors()) goto ErrorExit;
 	user_ = std::move(atest.value_);
 

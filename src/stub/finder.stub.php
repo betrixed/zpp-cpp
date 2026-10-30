@@ -24,7 +24,9 @@ class Finder {
 
 	public function getFolders() : array {}
 
-	public function find(string $cname) : null|string {}
+	public function findLeaf(string $leafpath) : ?string {}
+
+	public function findClass(string $cname) : ?string {}
 
 	public static function dirList_dir(string $s) : array {}
 

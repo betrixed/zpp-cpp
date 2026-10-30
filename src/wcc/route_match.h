@@ -63,7 +63,7 @@ public:
 
 	void debug_info(htab_cow di) override;
 
-	Hmap* query_hmap(error_return& error);
+	Hmap* query_hmap(bool_return& error);
 
 	obj_ptr getMatch() const
 	{

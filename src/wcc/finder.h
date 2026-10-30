@@ -10,6 +10,26 @@ namespace wcc {
 
 using namespace zpp;
 
+class Finder_init : public state_init 
+{
+public:
+
+	str_intern nspaths_key;
+	str_intern classes_key;
+	str_intern folders_key;
+	str_intern php_ext;
+	str_intern dir_sep;
+	str_intern dir_dot;
+	str_intern dir_two;
+	str_intern glob_all;
+
+
+	void init() override;
+
+};
+
+extern Finder_init  FDit;
+
 class  Finder : public base_d {
 protected:
 	htab_empty nsPaths_;
@@ -48,7 +68,9 @@ public:
 	htab_ptr getFolders() const;
 
 	//! return path if found or null
-	str_rc find(str_ptr cname );
+	str_rc findClass(str_ptr cname );
+
+	str_rc findLeaf(str_ptr leafpath);
 
 };
 

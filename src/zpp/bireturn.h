@@ -100,6 +100,11 @@ struct bireturn  : public error_return
 		return *this;
 	}
 
+	T&& move_value()
+	{
+		return std::move(value_);
+	}
+	
 	bireturn& operator=(bireturn&& m)
 	{
 		del_errors();

@@ -156,18 +156,24 @@ RouteMatch::testRoute(obj_ptr ro)
 }
 
 Hmap* 
-RouteMatch::query_hmap(error_return& error)
+RouteMatch::query_hmap(bool_return& error)
 {
 	if (!qry_hmap_.ok())
 	{
 		obj_return request = Services::getOne(RequestGlobals::omg.class_name());
 		if (request.has_errors())
 		{
+			error.value_ = false;
 			error = request.move_error();
 			return nullptr;
 		}
 		RequestGlobals* rg = zobj_toc<RequestGlobals>(request.value_);
 		qry_hmap_ = rg->query();
+		if (!qry_hmap_.ok())
+		{
+			error.error() << "No query Hmap" << endl;
+			return nullptr;
+		}
 		#ifdef DBG_ROUTEMATCH
 		DebugLog* log = DebugLog::cpp_global();
 		if (log)
@@ -176,6 +182,7 @@ RouteMatch::query_hmap(error_return& error)
 		}
 		#endif
 	}
+	error.value_ = true;
 	return zobj_toc<Hmap>(qry_hmap_);
 }
 
@@ -645,7 +652,11 @@ RouteMatch::verify_method_args(htab_rc& targs)
 	newargs.merge(ob_args_); // URL arguments have priority
 
 	#ifdef DBG_ROUTEMATCH
-		if (log) log->dump("Method Args", newargs);
+		if (log) {
+			log->dump("Method Args", newargs);
+			log->dump("ob_class", ob_class_);
+			log->dump("ob_method", ob_method_);
+		}
 	#endif
 
 	obj_rc mref = ReflectCache::ReflectionMethod(ob_class_, ob_method_);
@@ -653,16 +664,7 @@ RouteMatch::verify_method_args(htab_rc& targs)
 		if (log) log->dump("Method Reflection", mref);
 	#endif
 
-	Hmap* query = this->query_hmap(result);
-	if (!query)
-	{
-		#ifdef DBG_ROUTEMATCH
-			if (log) log->line("No query Hmap");
-		#endif
-		result.error() << endl << "No query Hmap" << endl;
-		result.value_ = false;
-		return result;
-	}
+
 
 	val_rc pref_test = mref.call(RM_data.getparameters_fn);
 
@@ -670,6 +672,16 @@ RouteMatch::verify_method_args(htab_rc& targs)
 
 	if (pref.size())
 	{
+		bool_return qresult;
+
+		Hmap* query = this->query_hmap(qresult);
+		if (qresult.has_errors())
+		{
+			result = qresult.move_error();
+			result.value_ = false;
+			return result;
+		}
+
 		bool added = true;
 
 		for_key_value wk;
@@ -914,21 +926,26 @@ RouteMatch::prepare_call(obj_ptr user, obj_ptr assets)
 		}
 	}
 
-	if (module_name_.size())
+	if (assets.ok() && module_name_.size())
 	{
-		if (!assets.ok())
-		{
-			result.error() << "Assets Object required";
-			result.value_ = false;
-			return result;
-		}
 		Assets* asset_mgr = zobj_toc<Assets>(assets);
 		asset_mgr->setModule(module_name_);
+
 		#ifdef DBG_ROUTEMATCH
 		if (log) log->dump("Assets setModule", assets,7);
 		#endif
-		
 	}
+		/*
+		else {
+			result.error() << "Assets Object required";
+			result.value_ = false;
+			return result;
+
+		}
+		*/
+
+		
+
 	result = verify_has_method();
 	if (result.has_errors())
 	{
@@ -941,6 +958,7 @@ RouteMatch::prepare_call(obj_ptr user, obj_ptr assets)
 		if (!user.ok())
 		{
 			result.error() << "User is required";
+			return result;
 		}
 		if (!this->allow_call(user))
 		{

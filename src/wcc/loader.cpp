@@ -165,7 +165,7 @@ Loader::readPHP(str_ptr path)
 	//showmem("readPHP result", result);
 	return result;
 }
-
+/*
 static void php_path(str_ptr php_root, const char* s, htab_cow data)
 {
 	str_rc ns(s);
@@ -175,6 +175,7 @@ static void php_path(str_ptr php_root, const char* s, htab_cow data)
 	str_rc value = buf.zstr();
 	data.set(ns, value);
 }
+*/
 
 void 
 Loader::setBaseDir(str_ptr dir) 
@@ -182,8 +183,9 @@ Loader::setBaseDir(str_ptr dir)
 	basedir_ = dir; 
 
 	obj_rc finder = Finder::omg.new_zobj();
-	Finder* fob = zobj_toc<Finder>(finder);
+	//Finder* fobj = zobj_toc<Finder>(finder);
 
+	/*
 	htab_rc paths_data;
 	htab_cow paths(paths_data);
 
@@ -193,12 +195,13 @@ Loader::setBaseDir(str_ptr dir)
 	php_path(basedir_, "Zpp", paths);
 	
 	fob->addPathArray(paths_data);
-
+	*/
+	
 	this->setFinder(finder);
 
 	this->regLoader();
 	
-	Services* sobj = Services::cpp_global();
+	/*Services* sobj = Services::cpp_global();
 
 	obj_ptr self(this->self());
 
@@ -207,6 +210,7 @@ Loader::setBaseDir(str_ptr dir)
 
 	sobj->setObject(finder);
 	sobj->setObject(self);
+	*/
 }
 
 
@@ -272,8 +276,6 @@ Loader::require(str_ptr file)
 
 	result.value_ = fn.call(str_ptr(LDRi.invoke_fn), &path);
 
-
-
 	if (!result.value_.ok() && throwNotFound_)
 	{	// Load function may throw anyway.
 
@@ -300,21 +302,74 @@ Loader::require(str_ptr file)
 }
 
 
+
+bool_return 
+Loader::tryLoad(str_ptr fpath)
+{
+#ifdef DBG_LOADER
+			DebugLog* log = DebugLog::cpp_global();
+
+			log->dump("tryLoad: ", fpath);
+#endif
+	bool_return result;
+
+	val_return test = require(fpath);
+	if (!test.has_errors())
+	{
+		result.value_ = true;	
+	}
+	else {
+		result.value_ = false;
+		result = test.move_error();
+	}
+	return result;
+}
+
 bool_return
 Loader::load(str_ptr class_name)
 {
 	bool_return result;
 
-	str_rc path;
+	str_rc path =  str_replace(std::string_view("\\"), std::string_view("/"), class_name);
+	str_buf buf;
+	buf << path << FDit.php_ext;
+
+	str_rc leafpath = buf.zstr();
+
+#ifdef DBG_LOADER
+	DebugLog* log = DebugLog::cpp_global();
+	if (log) {
+		log->dump("load: ", class_name);
+	}
+#endif
+	// try a path, that is a class name, with any "\\" mapped to "/"
+	// and .php extension added.
+
+	if (basedir_.ok())
+	{
+		buf << basedir_ << '/' << leafpath;
+		path = buf.zstr();
+
+		if (file_exists(path))
+		{
+			result = tryLoad(path);
+			return result;
+		}
 
 
+	}
 	if (finder_.ok())
 	{
-		fn_params<1> fn(fdr_find_);
 
-		val_ptr::string_bind(fn.argsptr(), class_name);
+		Finder* cobj = zobj_toc<Finder>(finder_);
 
-		path = fn.str();
+		path = cobj->findLeaf(leafpath);
+
+		if (!path.ok())
+		{
+			path = cobj->findClass(class_name);
+		}
+
 
 		if (!path.ok())
 		{
@@ -328,27 +383,11 @@ Loader::load(str_ptr class_name)
 				result.error() << "Class " << class_name << " not found";
 			}
 			result.value_ = false;
-			return result;
+		}
+		else {
+			result = tryLoad(path);
 		}
 	}
-	else {
-
-		str_rc rname = str_replace(LDRi.ns_sep, LDRi.dir_sep, class_name);
-		str_buf buf;
-
-		buf << basedir_ << LDRi.dir_sep << rname << '.' << LDRi.php_ext;
-
-		path = buf.zstr();
-	}
-//callable_fn(val_rc& result, val_rc& callme, int argct = 0, zval* argv = nullptr);
-	val_return data = require(path);
-
-	if (data.has_errors())
-	{
-		result.value_ = false;
-		result = data.move_error();
-	}
-
 	return result;
 }
 

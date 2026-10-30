@@ -25,6 +25,9 @@ namespace wcc {
 		fn_call  	fdr_find_;
 
 		void call_spl(str_ptr fname);
+
+		bool_return tryLoad(str_ptr fname);
+		
 	public:
 
 		static base_obj_mgr<Loader> omg;

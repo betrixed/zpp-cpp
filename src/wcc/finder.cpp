@@ -28,35 +28,19 @@ using namespace zpp;
 
 base_obj_mgr<Finder> Finder::omg;
 
-class Finder_init : public state_init 
-{
-public:
-
-	str_intern nspaths_key;
-	str_intern classes_key;
-	str_intern folders_key;
-	str_intern php_ext;
-	str_intern dir_sep;
-	str_intern dir_dot;
-	str_intern dir_two;
-	str_intern glob_all;
-
-
-	void init() override 
-	{
-		nspaths_key = "nspaths";
-		classes_key = "classes";
-		folders_key = "folders";
-		dir_sep = "/";
-		php_ext = ".php";
-		dir_dot = ".";
-		dir_two = "..";
-		glob_all = ".*";
-	}
-
-};
-
 Finder_init  FDit;
+
+void Finder_init::init() 
+{
+	nspaths_key = "nspaths";
+	classes_key = "classes";
+	folders_key = "folders";
+	dir_sep = "/";
+	php_ext = ".php";
+	dir_dot = ".";
+	dir_two = "..";
+	glob_all = ".*";
+}
 
 using namespace zpp;
 
@@ -148,7 +132,30 @@ Finder::getFolders() const
 }
 
 str_rc 
-Finder::find(str_ptr cname)
+Finder::findLeaf(str_ptr leafpath)
+{
+			// ipos == 0, root class file_name is in a folder?
+	htab_walk fwk;
+	str_rc    result;
+	str_rc    test;
+	str_buf   buf;
+	auto folder = fwk.value();
+	for(fwk.start(folders_); fwk.ok(); fwk.next())
+	{
+		buf << folder.zstr() << FDit.dir_sep << leafpath;
+		test = buf.zstr();
+
+		if (std::filesystem::exists(test.vstr())) 
+		{
+			result = std::move(test);
+			break;
+		}
+	}
+	return result;
+}
+
+str_rc 
+Finder::findClass(str_ptr cname)
 {
 	str_rc result;
 	str_rc test_path;
@@ -235,22 +242,7 @@ Finder::find(str_ptr cname)
 			}
 			// loop again
 		}
-		else {
-			// ipos == 0, root class file_name is in a folder?
-			htab_walk fwk;
-			auto folder = fwk.value();
-			for(fwk.start(folders_); fwk.ok(); fwk.next())
-			{
-				buf << folder.zstr() << FDit.dir_sep << filepath;
-				test_path = buf.zstr();
 
-				if (std::filesystem::exists(test_path.vstr())) 
-				{
-					result = std::move(test_path);
-					return result;
-				}
-			}
-		}
 	}
 	return result;
 }
@@ -525,18 +517,33 @@ ZEND_METHOD(Wcc_Finder, getFolders)
 	result.copy_zv(return_value);	
 }
 
-ZEND_METHOD(Wcc_Finder, find)
+
+ZEND_METHOD(Wcc_Finder, findLeaf)
 {
-	zend_string* cname;
+	zarg_rd args(execute_data);
 
-	ZEND_PARSE_PARAMETERS_START(1,1)
-	Z_PARAM_STR(cname)
-	ZEND_PARSE_PARAMETERS_END();
+	str_ptr leafpath = args.str(args.need(0));
 
-	auto cobj = zval_toc<Finder>(ZEND_THIS);
+	if (!args.throw_errors())
+	{
+		auto cobj = zval_toc<Finder>(ZEND_THIS);
+		str_rc result = cobj->findLeaf(leafpath);
+		result.move_zv(return_value);
+	}
+}
 
-	str_rc result = cobj->find(cname);
-	result.move_zv(return_value);
+ZEND_METHOD(Wcc_Finder, findClass)
+{
+	zarg_rd args(execute_data);
+
+	str_ptr cname = args.str(args.need(0));
+
+	if (!args.throw_errors())
+	{
+		auto cobj = zval_toc<Finder>(ZEND_THIS);
+		str_rc result = cobj->findClass(cname);
+		result.move_zv(return_value);
+	}
 }
 
 ZEND_METHOD(Wcc_Finder, dirList_dir)

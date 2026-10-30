@@ -127,7 +127,8 @@ public:
 
 	str_intern  beforecall_str;
 	str_intern  set_str;
-
+	str_intern  dos_str;
+	
 	str_intern  services_str;
 
 	str_intern  roles_str;
