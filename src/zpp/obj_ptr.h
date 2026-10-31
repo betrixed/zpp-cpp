@@ -137,6 +137,7 @@ namespace zpp {
 	        zval* arg1, zval* arg2, zval* arg3, zval* arg4);
 
 		bool instanceof(zend_class_entry *ce) const;
+		bool instanceof(str_ptr class_name) const;
 		bool method_exists(str_ptr method) const;
 		bool isDateTime() const;
 

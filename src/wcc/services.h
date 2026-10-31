@@ -58,7 +58,8 @@ public:
 	void       set(str_ptr name, obj_ptr obj);
 	void       set(str_ptr name, val_rc& val);
 	
-	
+	obj_return     singleton(str_ptr svckey, str_ptr cname);
+
 	val_return get(str_ptr name);
 
 	void       unset(str_ptr name);

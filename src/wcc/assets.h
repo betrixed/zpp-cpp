@@ -108,9 +108,13 @@ public:
 
 	static str_rc implode_blob(htab_ptr blobs);
 
+	static obj_return instance();
+	
+
 	VIRTUAL_ZOBJPTR
 
 	virtual   void debug_info(htab_cow hw);
+
 
 	error_return construct();
 	void destruct();
@@ -174,6 +178,8 @@ public:
  	obj_return setModule(str_ptr name);
 
  	void setModuleCfg(htab_ptr modlist);
+
+ 	
 
 
 };

@@ -19,6 +19,7 @@ final class Services {
 
 	public static function service(string $name) : mixed {}
 
+
 	public function unset(string $name) : void {}
 
 	public function get(string $name) : mixed {}
@@ -38,6 +39,8 @@ final class Services {
 	public function setDefer(string $name, mixed $value) : void {}
 
 	public function setThrowFail(bool $value) : void {}
+
+	public function singleton(string $svckey, string $cname) : object {}
 
 	public function clearActive() : void {}
 

@@ -115,6 +115,14 @@ void ASinit::init()
 
 ASinit  ASI;
 
+//static 
+obj_return
+Assets::instance()
+{
+	Services* svc = Services::cpp_global();
+
+	return svc->singleton(ASI.assets_str, Assets::omg.class_name());
+}
 
 str_rc 
 Assets::findSourceFile(str_ptr path)
@@ -1490,6 +1498,21 @@ ZEND_METHOD(Wcc_Assets, styleHeader)
 	str_rc text = cobj->styleHeader();
 
 	text.move_zv(return_value);
+}
+
+ZEND_METHOD(Wcc_Assets, instance)
+{
+	if (!zarg_rd::zero_args(execute_data, __FUNCTION__))
+	{
+		return;
+	}
+
+	obj_return result = Assets::instance();
+
+	if (!result.throw_errors())
+	{
+		result.value_.move_zv(return_value);
+	}
 }
 
 ZEND_METHOD(Wcc_Assets, unmark)

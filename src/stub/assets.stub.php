@@ -6,6 +6,9 @@
 namespace Wcc;
 
 class Assets {
+
+	public static function instance() : Assets {}
+	
 	public function __construct();
 
 	public function __destruct();

@@ -20,6 +20,10 @@
 #include "obj_rc.h"
 #endif
 
+#ifndef CLASS_DATA_H
+#include "class_data.h"
+#endif
+
 extern "C" {
 #include <ext/date/php_date.h>
 #include <Zend/zend_closures.h>
@@ -660,6 +664,17 @@ obj_ptr::instanceof(zend_class_entry *ce) const
 {
     if (!obj_)
         return false;
+    if (ce == obj_->ce)
+        return true;
+    return instanceof_function_slow(obj_->ce, ce);
+}
+
+bool 
+obj_ptr::instanceof(str_ptr cname) const
+{
+    if (!obj_)
+        return false;
+    zend_class_entry *ce = class_data::get_class(cname);
     if (ce == obj_->ce)
         return true;
     return instanceof_function_slow(obj_->ce, ce);

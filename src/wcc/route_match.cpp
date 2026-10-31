@@ -758,7 +758,7 @@ RouteMatch::verify_method_args(htab_rc& targs)
 }
 
 bool_return 
-RouteMatch::prepare_call(obj_ptr user, obj_ptr assets)
+RouteMatch::prepare_call()
 {
 	bool_return result;
 	result.value_ = false;
@@ -926,10 +926,19 @@ RouteMatch::prepare_call(obj_ptr user, obj_ptr assets)
 		}
 	}
 
-	if (assets.ok() && module_name_.size())
+	if (module_name_.size())
 	{
-		Assets* asset_mgr = zobj_toc<Assets>(assets);
-		asset_mgr->setModule(module_name_);
+		obj_return assets_obj = Assets::instance();
+
+		if (assets_obj.has_errors())
+		{
+			result = assets_obj.move_error();
+			return result;
+		}
+
+		Assets* assets = zobj_toc<Assets>(assets_obj.value_);
+
+		assets->setModule(module_name_);
 
 		#ifdef DBG_ROUTEMATCH
 		if (log) log->dump("Assets setModule", assets,7);
@@ -955,12 +964,22 @@ RouteMatch::prepare_call(obj_ptr user, obj_ptr assets)
 	if (roles.size())
 	{
 		roles_ = roles;
-		if (!user.ok())
+
+		val_return  user_svc = Services::service(DSPi.userdata_str);
+		if (user_svc.has_errors())
 		{
-			result.error() << "User is required";
+			result = user_svc.move_error();
 			return result;
 		}
-		if (!this->allow_call(user))
+		obj_rc user_data = user_svc.value_.zobject();
+
+		if (!user_data.ok() || !user_data.instanceof(UserData::omg.classEntry()))
+		{
+			result.error() << "UserData object is required";
+			return result;
+		}
+
+		if (!this->allow_call(user_data))
 		{
 			result = erred_.move_error();
 			return result;
@@ -1118,24 +1137,19 @@ PHP_METHOD(Wcc_RouteMatch, getObjArgs)
 
 PHP_METHOD(Wcc_RouteMatch, prepare_call)
 {
-	zarg_rd args(execute_data);
-
-	obj_ptr user = args.objclass_ornull(args.option(0), UserData::omg.classEntry());
-	obj_ptr assets = args.objclass_ornull(args.option(1), Assets::omg.classEntry());
-
-	if (!args.throw_errors(__FUNCTION__))
+	if (!zarg_rd::zero_args(execute_data,__FUNCTION__))
 	{
-		RouteMatch* cobj = zval_toc<RouteMatch>(ZEND_THIS);
-
-		bool_return found = cobj->prepare_call(user,assets);
-
-		if (!found.throw_errors(__FUNCTION__))
-		{
-			ZVAL_BOOL(return_value,found.value_);
-		}
+		return;
 	}
-	
-	return;
+	RouteMatch* cobj = zval_toc<RouteMatch>(ZEND_THIS);
+
+	bool_return found = cobj->prepare_call();
+
+	if (!found.throw_errors(__FUNCTION__))
+	{
+		ZVAL_BOOL(return_value,found.value_);
+	}
+	//return;
 }
 
 

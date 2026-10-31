@@ -268,37 +268,48 @@ Services::getOne(str_ptr key, htab_ptr arglist)
 
 }
 
+obj_return
+Services::singleton(str_ptr key, str_ptr cname)
+{
+	obj_return result;
+
+	obj_rc cobj = instances_.get(cname);
+	obj_rc test = active_.get(key);
+
+    if (cobj.ok())
+    {
+    	result.value_ = std::move(cobj);
+    	if (!test.ok() || ((zend_object*)test != (zend_object*)cobj))
+    	{
+    		htab_cow(active_).set(key, cobj);
+    	}
+    	return result;
+    }
+    if (test.ok())
+    {
+    	if (test.instanceof(cname))
+    	{
+    		htab_cow(instances_).set(cname, test);
+    		result.value_ = test;
+    		return result;
+    	}
+
+    }
+	// First time setup, create both entries
+	result = newInstance(cname);
+	htab_cow(active_).set(key, result.value_);
+	return result;
+
+}
 // static
 /*! Ensure 
  */
 obj_return  
 Services::objectService(str_ptr key, str_ptr cname)
 {
-	obj_return result;
 
 	Services* self = Services::cpp_global();
-	val_rc test = self->active_.get(key);
-	obj_rc cobj = self->instances_.get(cname);
-    if (cobj.ok())
-    {
-    	if (test.isObject() && (test.zobject() == (zend_object*)cobj))
-    	{
-    		result.value_ = cobj;
-    		return result;
-    	} 
-    	htab_cow(self->active_).set(key, cobj);
-    	return result;
-    }
-
-	result = self->newInstance(cname);
-	if (result.has_errors())
-	{
-		return result;
-	}
-	htab_cow(self->active_).set(key, result.value_);
-	htab_cow(self->instances_).set(cname, result.value_);
-
-	return result;
+	return self->singleton(key, cname);
 }
 
 // static
@@ -779,6 +790,26 @@ ZEND_METHOD(Wcc_Services, objectService)
 		}
 	}
 }
+
+ZEND_METHOD(Wcc_Services, singleton)
+{
+	zarg_rd args(execute_data);
+
+	str_ptr key = args.str(args.need(0));
+	str_ptr cname = args.str(args.need(1));
+
+	if (!args.throw_errors())
+	{
+		Services* svc = zval_toc<Services>(ZEND_THIS);
+		obj_return result = svc->singleton(key, cname);
+
+		if (!result.throw_errors(__FUNCTION__))
+		{
+			result.value_.move_zv(return_value);
+		}
+	}
+}
+
 
 PHP_MINIT_FUNCTION(wc_services_md)
 {

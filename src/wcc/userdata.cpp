@@ -60,6 +60,7 @@ void UserDataInit::init()
 	session_str = "session";
 	destroy_fn = "destroy";
 	start_fn = "start";
+	// userData property/serialize name
 	userData_p = "userData";
 
 	doWrite = "doWrite";
