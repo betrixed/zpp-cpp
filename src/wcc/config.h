@@ -12,6 +12,16 @@ using namespace zpp;
 #define CONFIG_HANDLERS
 #define CONFIG_ARRAY_ACCESS
 
+class  Config_init : public state_init {
+public:
+	str_intern config_str;
+
+	void init() override;
+
+};
+
+extern Config_init CFGi;
+
 class  Config : public base_d {
 public:
 	template <typename T> class Config_Mgr : public base_obj_mgr<T>
@@ -40,6 +50,8 @@ public:
 	static Config_Mgr<Config> omg;
 	
 	static obj_rc make(htab_ptr initdata = htab_ptr());
+
+	static obj_return instance();
 
 	void debug_info(htab_cow hw) override;
 

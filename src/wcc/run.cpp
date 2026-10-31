@@ -206,14 +206,13 @@ void Run::construct()
 
 	Services* sobj = Services::cpp_global();
 
-	obj_return config_err = sobj->newInstance(Config::omg.class_name());
+	obj_return config_err = Config::instance();
 	
 	if (config_err.throw_errors())
 	{
 		return;
 	}
 	obj_rc config = std::move(config_err.value_);
-	sobj->set(Run_i.config_str, config);
 
 	self.property(Run_i.config_str, config);
 

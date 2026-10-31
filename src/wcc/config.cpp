@@ -1,6 +1,10 @@
 #ifndef WCC_CONFIG_CPP
 #define WCC_CONFIG_CPP
 
+#ifndef WCC_SERVICES_H
+#include "services.h"
+#endif
+
 #ifndef WCC_CONFIG_H
 #include "config.h"
 #endif
@@ -8,6 +12,7 @@
 #ifndef WCC_REPLACE_H
 #include "replace.h"
 #endif
+
 
 extern "C" {
 	#include <Zend/zend_attributes.h>
@@ -23,6 +28,8 @@ namespace wcc {
 
 
 Config::Config_Mgr<Config> Config::omg;
+
+Config_init   CFGi;
 
 #ifdef CONFIG_HANDLERS
 zval* 
@@ -94,6 +101,12 @@ Config::count() const
 		result += zend_hash_num_elements(self->properties);
 	}
 	return result;
+}
+
+//static
+obj_return Config::instance()
+{
+	return Services::objectService(CFGi.config_str, Config::omg.class_name());
 }
 
 obj_rc // static
@@ -343,6 +356,20 @@ ZEND_METHOD(Wcc_Config, __construct)
 	cobj->construct(arg1);
 }
 
+ZEND_METHOD(Wcc_Config, instance)
+{
+	if (!zarg_rd::zero_args(execute_data, __FUNCTION__))
+	{
+		return;
+	}
+
+	obj_return result = Config::instance();
+	if (!result.throw_errors())
+	{
+		result.value_.move_zv(return_value);
+	}
+}
+
 ZEND_METHOD(Wcc_Config, getOrNot)
 {
 	zend_string* key;
@@ -577,6 +604,8 @@ PHP_MINIT_FUNCTION(Wcc_Config_reg)
 {
 	auto ce = register_class_Wcc_Config();
 	Config::omg.classEntry(ce);
+
+	STATE_INIT_ADD(CFGi)
 
 	return SUCCESS;
 }

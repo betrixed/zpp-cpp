@@ -36,8 +36,6 @@ namespace wcc {
 		
 		obj_ptr getServices();
 
-		obj_rc  singleton(str_ptr svckey, str_ptr cname);
-
 		val_return service(str_ptr name);
 
 		void set(str_ptr name, val_ptr value);
