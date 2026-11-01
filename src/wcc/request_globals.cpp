@@ -1704,7 +1704,7 @@ RequestGlobals::getRouteMatch()
 		reqMethod = getMethod();
 		reqAjax = isAjax() ? ajax::AJ_ONLY : ajax::AJ_NONE;
 	}
-	if (reqURI.size() > 0)
+	if (reqURI.size() > 1)
 	{
 		reqURI = reqURI.trim("/", str_rc::RTRIM);
 	}
