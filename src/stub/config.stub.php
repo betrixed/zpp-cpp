@@ -8,6 +8,8 @@ namespace Wcc;
 #[\AllowDynamicProperties]
 class Config # implements ArrayAccess, Countable 
 {
+	static public function instance() : Config {}
+
 	public function __construct(?array $values=null);
 
 	public function getOrNot(string $key, mixed $ifnot) : mixed {}

@@ -9,6 +9,10 @@
 #include "route.h"
 #endif
 
+#ifndef ROUTE_MATCH_H
+#include "route_match.h"
+#endif
+
 #ifndef FILE_UPLOAD_H
 #include "file_upload.h"
 #endif
@@ -148,6 +152,8 @@ request_init::init() {
 	uri_classname = "Uri\\Rfc3986\\Uri";
 	uri_getquery = "getquery";
 	hdr_query_string = "QUERY_STRING";
+
+	nulluri_s = "null";
 }
 
 
@@ -1660,6 +1666,55 @@ RequestGlobals::setStrictHost(bool val)
 	strictHost_ = val;
 }
 
+obj_rc
+RequestGlobals::getRouteMatch()
+{
+	obj_rc result;
+	str_rc reqURI;
+	int    reqMethod;
+	int    reqAjax;
+
+	if (match_.ok())
+	{
+		result = match_;
+		return result;
+	}
+
+	if (isCLI())
+	{
+		val_rc test;
+		Hmap* smap = zobj_toc<Hmap>(server_);
+		test = smap->getOrNot(RQit.argc_s,test);
+		if (test.get_long() > 1)
+		{
+			reqURI = getURI(false);
+			if (!reqURI.size())
+			{
+				reqURI = parseCLI(str_ptr::empty_str());
+			}
+		}
+		else {
+			reqURI = RQit.nulluri_s;
+		}
+		reqMethod = html::V_GET;
+		reqAjax = ajax::AJ_NONE;
+	}
+	else {
+		reqURI = getURI(true);
+		reqMethod = getMethod();
+		reqAjax = isAjax() ? ajax::AJ_ONLY : ajax::AJ_NONE;
+	}
+	if (reqURI.size() > 0)
+	{
+		reqURI = reqURI.trim("/", str_rc::RTRIM);
+	}
+	result = RouteMatch::omg.new_zobj();
+	RouteMatch* rm = zobj_toc<RouteMatch>(result);
+	rm->construct(reqURI, reqMethod, reqAjax);
+
+	return result;
+}
+
 }; // end namespace
 
 ZEND_METHOD(Wcc_RequestGlobals, __construct)
@@ -2281,6 +2336,16 @@ ZEND_METHOD(Wcc_RequestGlobals, parseCLI)
 	{
 		RequestGlobals* cobj = zval_toc<RequestGlobals>(ZEND_THIS);
 		str_rc result = cobj->parseCLI(prefix);
+		result.move_zv(return_value);
+	}
+}
+
+ZEND_METHOD(Wcc_RequestGlobals, getRouteMatch)
+{
+	if (zarg_rd::zero_args(execute_data,__FUNCTION__))
+	{
+		RequestGlobals* cobj = zval_toc<RequestGlobals>(ZEND_THIS);
+		obj_rc result = cobj->getRouteMatch();
 		result.move_zv(return_value);
 	}
 }

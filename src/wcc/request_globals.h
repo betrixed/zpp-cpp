@@ -43,6 +43,9 @@ namespace wcc {
 		bool strictHost_;
 		bool methodOverride_;
 		bool spoof_;
+
+
+		obj_rc match_;
 		
 		val_rc authCallback_;
 
@@ -175,6 +178,8 @@ namespace wcc {
 		int numFiles(bool onlySuccess);
 
 		void setStrictHost(bool val);
+
+		obj_rc getRouteMatch();
 	};
 
 
@@ -291,6 +296,8 @@ namespace wcc {
 		str_intern   uri_classname;
 		str_intern   uri_getquery;
 		str_intern   hdr_query_string;
+		str_intern   nulluri_s;
+		
 
 		void init() override;
 	};

@@ -116,5 +116,7 @@ class RequestGlobals
     public function getQuery() : array {}
 
     public function getServer() : array {}
+
+    public function getRouteMatch() : RouteMatch {}
    
 };

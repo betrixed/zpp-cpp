@@ -31,6 +31,12 @@ Config::Config_Mgr<Config> Config::omg;
 
 Config_init   CFGi;
 
+
+void Config_init::init()
+{
+	config_str = "config";
+}
+
 #ifdef CONFIG_HANDLERS
 zval* 
 Config::read_dimension(zend_object* obj, zval* offset, int type,  zval* return_value)

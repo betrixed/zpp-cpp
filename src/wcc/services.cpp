@@ -278,11 +278,11 @@ Services::singleton(str_ptr key, str_ptr cname)
 
     if (cobj.ok())
     {
-    	result.value_ = std::move(cobj);
     	if (!test.ok() || ((zend_object*)test != (zend_object*)cobj))
     	{
     		htab_cow(active_).set(key, cobj);
     	}
+    	result.value_ = std::move(cobj);
     	return result;
     }
     if (test.ok())
@@ -290,7 +290,7 @@ Services::singleton(str_ptr key, str_ptr cname)
     	if (test.instanceof(cname))
     	{
     		htab_cow(instances_).set(cname, test);
-    		result.value_ = test;
+    		result.value_ = std::move(test);
     		return result;
     	}
 
