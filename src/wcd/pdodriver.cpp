@@ -694,6 +694,10 @@ PdoDriver::prepareQuery(str_ptr query, htab_ptr values, htab_ptr bindTypes)
 {
 	obj_return result;
 
+	#ifdef DBG_LOG_PDODRIVER
+	DebugLog* log = DebugLog::cpp_global();
+	#endif
+
 	result = prepare(query);
 	
 	if (result.has_errors())
@@ -727,16 +731,22 @@ PdoDriver::prepareQuery(str_ptr query, htab_ptr values, htab_ptr bindTypes)
 				else {
 					temp = (zend_long)pdoType(val);
 				}
-				stmt.call(DBS.bind_value, val, temp);
+				#ifdef DBG_LOG_PDODRIVER
+					if (log) log->dump("bind value", val);
+				#endif
+				stmt.call(DBS.bind_value, key, val, temp);
 			}
 			test = stmt.call(DBS.execute_fn, null);
+			#ifdef DBG_LOG_PDODRIVER
+				if (log) log->dump("execute_fn return", test);
+			#endif
 		}
 	}
 	else {
 		test = stmt.call(DBS.execute_fn, null);
 	}
 	if (!test.ok())
-	{	
+	{	// returned IS_UNDEF,IS_NULL, or IS_FALSE
 		result.error() << "Statement execute failed: " << query;
 	}
 	//showmem("prepareQuery test", test);
@@ -749,17 +759,34 @@ PdoDriver::query(str_ptr query, htab_ptr params)
 	htab_ptr btypes;
 	val_return result;
 
+	#ifdef DBG_LOG_PDODRIVER
+	DebugLog* log = DebugLog::cpp_global();
+	if (log) {
+		log->dump("query", query);
+		log->dump("params", params);
+		str_buf buf;
+		buf << "Fetch " << ifetch_;
+		log->dump("fetch: ", buf.zstr());
+	}
+	#endif
+
 	obj_return stmt_ret = prepareQuery(query, params, btypes);
 
 	if (stmt_ret.has_errors())
 	{
+		#ifdef DBG_LOG_PDODRIVER
+			if (log) log->dump("Errors: ", stmt_ret.error_str());
+		#endif
 		result = stmt_ret.move_error();
 		return result;
 	}
 
 	obj_ptr stmt = stmt_ret.value_;
 
-	val_rc data = stmt.call(DBS.fetchall_fn);
+
+
+	val_rc argval(ifetch_);
+	val_rc data = stmt.call(DBS.fetchall_fn, argval);
 
 	stmt.call(DBS.close_cursor);
 

@@ -1526,9 +1526,6 @@ ZEND_METHOD(Wcd_IDriver, getWeakRef)
 
 PHP_MINIT_FUNCTION(Wcd_IDriver_reg)
 {
-	STATE_INIT_ADD(DBS)
-
-
 	zend_class_entry* dclass = register_class_Wcd_IDriver();
 
 	IDriver::omg.classEntry(dclass);
@@ -1548,6 +1545,8 @@ PHP_MINIT_FUNCTION(Wcd_IDriver_reg)
 	
 	Pgsqlfn::register_class(dclass);
 	Mysqlfn::register_class(dclass);
+
+	STATE_INIT_ADD(DBS);
 
 	return SUCCESS;
 }
