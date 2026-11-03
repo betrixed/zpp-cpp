@@ -37,6 +37,8 @@ final class RouteMatch {
 
 	public function setModuleName(string $name) : void {}
 
+	public function setRoute(Route $route) : bool {}
+
 	public function findRoute(RouteSet $rset) : bool {}
 
 	public function call(?array $extra = null,  Pair|null $before = null, Pair|null $after = null) : mixed {}

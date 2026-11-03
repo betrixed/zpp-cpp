@@ -69,11 +69,6 @@ public:
 	{
 		return route_;
 	}
-
-	void setRoute(obj_ptr ro)
-	{
-		route_ = ro;
-	}
 	
 	str_rc getErrors()
 	{
@@ -97,7 +92,7 @@ public:
 
 	bool allow_call(obj_ptr user);
 
-	bool find_route(RouteSet* routes);
+	bool findRoute(RouteSet* routes);
 	void error_context(Route* route, str_buf& buf);
 	
 	void setModuleName(zend_string* s)
@@ -124,6 +119,8 @@ public:
 	bool_return prepare_call();
 	bool_return verify_method_args(htab_rc& targs);
 	bool_return verify_has_method();
+
+	bool_return setRoute(obj_ptr route);
 
 	val_return call(htab_ptr extra, obj_ptr before, obj_ptr after);
 

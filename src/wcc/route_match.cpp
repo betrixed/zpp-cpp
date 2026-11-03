@@ -227,7 +227,7 @@ RouteMatch::debug_str() const
 
 
 bool 
-RouteMatch::find_route(RouteSet* routeset)
+RouteMatch::findRoute(RouteSet* routeset)
 {
 	val_ptr	match;
 
@@ -758,6 +758,16 @@ RouteMatch::verify_method_args(htab_rc& targs)
 }
 
 bool_return 
+RouteMatch::setRoute(obj_ptr route)
+{
+	bool_return result;
+
+	route_ = route;
+	result = prepare_call();
+	return result;
+}
+
+bool_return 
 RouteMatch::prepare_call()
 {
 	bool_return result;
@@ -1166,6 +1176,25 @@ PHP_METHOD(Wcc_RouteMatch, setModuleName)
 	
 }
 
+PHP_METHOD(Wcc_RouteMatch, setRoute)
+{
+	zarg_rd args(execute_data);
+
+	obj_ptr route = args.obj_class(args.need(0), Route::omg.classEntry());
+
+	if (!args.throw_errors())
+	{
+		RouteMatch* cobj = zval_toc<RouteMatch>(ZEND_THIS);
+		bool_return result = cobj->setRoute(route);
+		if (!result.throw_errors(__FUNCTION__))
+		{
+			ZVAL_BOOL(return_value,result.value_);
+		}
+	}
+	//return;
+}
+
+
 PHP_METHOD(Wcc_RouteMatch, getMatch)
 {
 	ZEND_PARSE_PARAMETERS_NONE();
@@ -1190,7 +1219,7 @@ PHP_METHOD(Wcc_RouteMatch, findRoute)
 	RouteMatch* prm = zval_toc<RouteMatch>(ZEND_THIS);
 	RouteSet*	   rset = zval_toc<RouteSet>(route_set);
 
-	bool found = prm->find_route(rset);
+	bool found = prm->findRoute(rset);
 
 	ZVAL_BOOL(return_value,found);
 	return;
