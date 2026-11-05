@@ -913,13 +913,9 @@ ZEND_METHOD(Wcc_Response, setAll)
 {
 	zarg_rd args(execute_data);
 
-	str_ptr content;
-	zend_long code = 0;
-	str_ptr status;
-
-	content = args.str_or_null(args.option(0));
-	args.zlong_null(code, args.option(1), 0);
-	status = args.str_or_null(args.option(2));
+	str_ptr content = args.str_or_null(args.option(0));
+	zend_long code = args.zlong_default(args.option(1), 0);
+	str_ptr status = args.str_or_null(args.option(2));
 
 	if (!args.throw_errors(__FUNCTION__))
 	{

@@ -522,9 +522,7 @@ ZEND_METHOD(Wcd_Sql_Operation, __construct)
 {
 	zarg_rd args(execute_data);
 
-	weak_ref driver;
-
-	args.weakref(driver, args.need(0));
+	weak_ref driver = args.weakref(args.need(0));
 
 	if (!args.throw_errors())
 	{
@@ -620,22 +618,15 @@ ZEND_METHOD(Wcd_Sql_Operation, getRows)
 
 	zarg_rd args(execute_data);
 
-	zend_long fetch = -1;
-
-	args.zlong(fetch, args.option(0));
-
-	if (fetch < 0)
-	{
-		fetch = IDriver::FETCH_ASSOC;
-	}
-	val_return result;
+	zend_long fetch = args.zlong_default(args.option(0), IDriver::FETCH_ASSOC);
 
 	if (!args.throw_errors())
 	{
 		Operation* cobj = zval_toc<Operation>(ZEND_THIS);
-		result = cobj->getRows(fetch);
-		result.throw_errors();
-		result.value_.move_zv(return_value);
+		val_return result = cobj->getRows(fetch);
+		if (!result.throw_errors()) {
+			result.value_.move_zv(return_value);
+		}
 	}
 }
 
@@ -721,14 +712,8 @@ ZEND_METHOD(Wcd_Sql_Operation, prepare)
 {
 	zarg_rd args(execute_data);
 
-	zend_long fetch = -1;
+	zend_long fetch = args.zlong_default(args.option(0), IDriver::FETCH_ASSOC);
 
-	args.zlong(fetch, args.option(0));
-
-	if (fetch < 0)
-	{
-		fetch = IDriver::FETCH_ASSOC;
-	}
 	obj_return result;
 
 	if (!args.throw_errors())
@@ -772,11 +757,8 @@ ZEND_METHOD(Wcd_Sql_Operation, where)
 	val_ptr lattr(args.need(0));
 	val_ptr rattr(args.option(1));
 
-	zend_long op = -1;
-	zend_long blogic = -1;
-
-	args.zlong(op, args.option(2));
-	args.zlong(blogic, args.option(3));
+	zend_long op = args.zlong_default(args.option(2), -1);
+	zend_long blogic = args.zlong_default(args.option(3), -1);
 
 	if (!args.throw_errors())
 	{

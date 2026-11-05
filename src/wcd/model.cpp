@@ -2071,11 +2071,11 @@ ZEND_METHOD(Wcd_Model, setColDefs)
 
 ZEND_METHOD(Wcd_Model, setConnect)
 {
-	weak_ref cobj;
+	
 
 	zarg_rd args(execute_data);
 
-	args.weakref(cobj, args.need(0));
+	weak_ref cobj = args.weakref(args.need(0));
 
 	if (!args.throw_errors())
 	{

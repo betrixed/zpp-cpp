@@ -373,15 +373,8 @@ ZEND_METHOD(Wcd_Simple, __construct)
 {
 	zarg_rd args(execute_data);
 
-	weak_ref db;
-	zend_long fetch = IDriver::FETCH_ASSOC;
-
-	args.weakref(db, args.need(0));
-
-	if (!args.zlong_null(fetch, args.option(1)))
-	{
-		fetch = IDriver::FETCH_ASSOC;
-	}
+	weak_ref db = args.weakref(args.need(0));
+	zend_long fetch = args.zlong_default(args.option(1), IDriver::FETCH_ASSOC);
 
 	if (args.throw_errors(__FUNCTION__))
 	{

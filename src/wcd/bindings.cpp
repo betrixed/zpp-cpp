@@ -889,16 +889,11 @@ using namespace wcd;
 /* public function __construct(ISql $gen, IConnect $connect); */
 ZEND_METHOD(Wcd_Sql_Bindings, __construct)
 {
-	
-	weak_ref wref;
-
 	zarg_rd args(execute_data);
 
 	obj_ptr gensql = args.obj_class(args.need(0), ISql::omg.class_entry_);
 
-	//args.obj(gensql, args.need(0));
-	
-	args.weakref(wref, args.need(1));
+	weak_ref wref = args.weakref(args.need(1));
 
 	if (!args.throw_errors())
 	{

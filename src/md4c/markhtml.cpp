@@ -129,11 +129,8 @@ ZEND_METHOD(Wcc_MarkToHtml, __construct)
 {
     zarg_rd args(execute_data);
 
-    zend_long parse = 0;
-    zend_long render = 0;
-
-    args.zlong(parse, args.option(0));
-    args.zlong(render, args.option(1));
+    zend_long parse = args.zlong_default(args.option(0), 0);
+    zend_long render = args.zlong_default(args.option(1), 0);
 
     if (!args.throw_errors())
     {
@@ -146,11 +143,8 @@ ZEND_METHOD(Wcc_MarkToHtml, setFlags)
 {
     zarg_rd args(execute_data);
 
-    zend_long parse = 0;
-    zend_long render = 0;
-
-    args.zlong(parse, args.option(0));
-    args.zlong(render, args.option(1));
+    zend_long parse = args.zlong_default(args.option(0), 0);
+    zend_long render = args.zlong_default(args.option(1), 0);
 
     if (!args.throw_errors())
     {

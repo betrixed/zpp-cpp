@@ -550,43 +550,42 @@ zarg_rd::obj_ofclass(std::same_as<obj_ptr> auto& value, zval* arg, zend_class_en
 
 #endif // CONCEPTS
 
-bool 
-zarg_rd::weakref(weak_ref& value, zval* arg)
+weak_ref 
+zarg_rd::weakref(zval* arg)
 {
-	value = obj_ptr(arg);
-	bool result = value.ok();
-	if (result)
+	weak_ref result(arg);
+
+	if (!result.ok() || result.class_entry() != zend_ce_weakref)
 	{
-		if (value.class_entry() != zend_ce_weakref)
-		{
-			error() << "; Expected WeakReference class";
-			result = false;
-		}
+		error() << "; Expected WeakReference class";
 	}
 	return result;
 }
 
 
-bool 
-zarg_rd::zlong_null(zend_long& value, zval* arg, zend_long ifnull)
+zend_long 
+zarg_rd::zlong_default(zval* arg, zend_long ifnot)
 {
 	val_ptr test(arg);
 	int itype = test.ref_type();
+	zend_long result = ifnot;
 
 	switch(itype) {
 		case IS_LONG:
-			value = test.get_long();
+			result = Z_LVAL_P(test);
 			break;
 		case IS_NULL:
-			value = ifnull;
-			break;
+		case IS_UNDEF:
+            if (!maybe_) 
+            {
+				error() << "; Expected integer or NULL";
+			} 
+			break;  
 		default:
-                                                if (!maybe_) {
-			error() << "; Expected integer value or NULL";
-			return false;
-                                                }
-	}
-	return true;
+			 result = test.get_long();
+			 break;
+	}  
+	return result;
 }
 
 bool 
@@ -608,21 +607,30 @@ zarg_rd::zbool(bool& value, zval* arg)
 	return false;
 }
 
-
-bool 
-zarg_rd::zlong(zend_long& value, zval* arg)
+zend_long 
+zarg_rd::zlong(zval* arg)
 {
+	zend_long result = -1;
+
 	val_ptr test(arg);
-	if (!test.isLong()) 
+	switch(test.ztype())
 	{
+	case IS_NULL:
+	case IS_UNDEF:
+		// probably a mistake
 		if (!maybe_)
 		{
-			error() << "; Expected integer value";
+			error() << "Integer value expected";
 		}
-		return false;
+		break;
+	case IS_LONG:
+		result = Z_LVAL_P(test);
+		break;
+	default: // ?Surprise conversion
+		result = test.get_long();
+		break;
 	}
-	value = test.get_long();
-	return true;
+	return result;
 }
 
 

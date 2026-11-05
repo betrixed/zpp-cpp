@@ -212,6 +212,13 @@ void val_rc::set_null()
     ZVAL_NULL(&zv_);
 }
 
+
+void val_rc::wipe()
+{
+    val_ptr::try_decref(&zv_);
+    zv_ = {};
+}
+
 void val_rc::set_bool(bool value)
 {
     val_ptr::try_decref(&zv_);

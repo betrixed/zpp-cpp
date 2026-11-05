@@ -119,7 +119,7 @@ public:
     
     void    set_bool(bool value);
     void    set_null();
-
+    void    wipe(); 
 
     void new_array();
     void empty_array();

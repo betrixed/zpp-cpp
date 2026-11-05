@@ -925,19 +925,15 @@ ZEND_METHOD(Wcd_Ext_PdoDriver, pdoType)
 
 ZEND_METHOD(Wcd_Ext_PdoDriver, query_lcase)
 {
-	htab_return result;
-	str_ptr     sql;
-	zend_long   fmode;
-
 	zarg_rd args(execute_data);
 
-	sql = args.str(args.need(0));
-	args.zlong(fmode, args.need(1));
+	str_ptr sql = args.str(args.need(0));
+	zend_long fmode = args.zlong(args.need(1));
 
 	if (!args.throw_errors())
 	{
 		PdoDriver* cobj = zval_toc<PdoDriver>(ZEND_THIS);	
-		result = cobj->query_lcase(sql, fmode);
+		htab_return result = cobj->query_lcase(sql, fmode);
 		if (!result.throw_errors())
 		{
 			result.value_.move_zv(return_value);

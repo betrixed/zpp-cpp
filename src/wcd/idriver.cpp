@@ -972,12 +972,10 @@ ZEND_METHOD(Wcd_IDriver, fetchAllRows)
 {
 	zarg_rd args(execute_data);
 
+	//TODO: class type check?
 	obj_ptr stmt = args.obj(args.need(0));
-	zend_long fmode = PDO_FETCH_ASSOC;
 
-	args.zlong(fmode, args.option(1));
-
-	htab_return result;
+	zend_long fmode = args.zlong_default(args.option(1), PDO_FETCH_ASSOC);
 
 	if (!args.throw_errors())
 	{
@@ -994,9 +992,8 @@ ZEND_METHOD(Wcd_IDriver, fetchRow)
 	zarg_rd args(execute_data);
 
 	obj_ptr stmt = args.obj(args.need(0));
-	zend_long fmode = PDO_FETCH_ASSOC;
-
-	args.zlong(fmode, args.option(1));
+	zend_long fmode = args.zlong_default(args.option(1), PDO_FETCH_ASSOC);
+	
 	if (!args.throw_errors())
 	{
 		IDriver* db = zval_toc<IDriver>(ZEND_THIS);	

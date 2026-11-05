@@ -114,10 +114,10 @@ public:
 	
 	val_ptr  string_or_array(zval* arg);
 	
-	bool weakref(weak_ref& value, zval* arg);
+	weak_ref weakref(zval* arg);
 
-	bool zlong(zend_long& value, zval* arg);
-	bool zlong_null(zend_long& value, zval* arg, zend_long ifnull = -1);
+	zend_long zlong(zval* arg);
+	zend_long zlong_default(zval* arg, zend_long ifnot = -1);
 
 	bool zbool(bool& value, zval* arg);
 	

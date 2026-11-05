@@ -708,9 +708,7 @@ ZEND_METHOD(Wcc_ICache, setMultiple)
 	zarg_rd args(execute_data);
 
 	htab_ptr list = args.htab(args.need(0));
-	zend_long ttl = 0;
-
-	args.zlong_null(ttl, args.option(1), 0);
+	zend_long ttl = args.zlong_default(args.option(1), 0);
 
 	if (!args.throw_errors(__FUNCTION__))
 	{

@@ -52,7 +52,8 @@ public:
 
 	static base_obj_mgr<RouteMatch> omg;
 
-	static val_rc call_method(obj_ptr obj, str_ptr method, htab_ptr args);
+	// forces check for exceptions thrown by PHP
+	static val_return call_method(obj_ptr obj, str_ptr method, htab_ptr args);
 
 	//public function __construct(string $uri, int $verb_flag, mixed $ajax_flag);
 	void construct(str_ptr uri, int verbs, int ajax);

@@ -178,7 +178,7 @@ ZEND_METHOD(Wcc_Target, __construct)
 	str_ptr method = args.str_or_default(args.option(1), TNinit.s_index);
 	htab_ptr params = args.htab_or_null(args.option(2));
 
-	if (!args.throw_errors())
+	if (!args.throw_errors(__FUNCTION__))
 	{
 		Target* cobj = zval_toc<Target>(ZEND_THIS);
 		cobj->construct(cname, method, params);
@@ -194,7 +194,7 @@ ZEND_METHOD(Wcc_Target, go)
 	str_ptr method = args.str_or_default(args.option(1), TNinit.s_index);
 	htab_ptr params = args.htab_or_null(args.option(2));
 
-	if (!args.throw_errors())
+	if (!args.throw_errors(__FUNCTION__))
 	{
 		obj_rc obj = Target::go(cname, method, params);
 		obj.move_zv(return_value);

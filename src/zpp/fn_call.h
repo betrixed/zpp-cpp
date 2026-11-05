@@ -336,6 +336,8 @@ namespace zpp {
         str_intern  headers_sent_fn;
         str_intern  header_fn;
         
+        str_intern  getmessage_fn;
+        
         void init() override;
         void init_req() override;
 

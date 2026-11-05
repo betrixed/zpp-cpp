@@ -236,9 +236,7 @@ ZEND_METHOD(Wcd_Sql_IParams, param)
 {
 	zarg_rd args(execute_data);
 
-	zend_long value = 0;
-
-	args.zlong(value, args.need(0));
+	zend_long value = args.zlong_default(args.need(0), 0);
 
 	if (!args.throw_errors())
 	{
@@ -251,10 +249,7 @@ ZEND_METHOD(Wcd_Sql_IParams, param)
 ZEND_METHOD(Wcd_Sql_IParams, paramStr)
 {
 	zarg_rd args(execute_data);
-	zend_long value = 0;
-
-	args.zlong(value, args.need(0));
-
+	zend_long value = args.zlong(args.need(0));
 
 	if (!args.throw_errors())
 	{

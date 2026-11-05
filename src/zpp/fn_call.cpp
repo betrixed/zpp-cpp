@@ -237,12 +237,9 @@ public:
 
 
 };
-// as thread_local , won't be exporting the instance of this
+// as thread_local , won't be exporting address of this?
 
 thread_local TLfnTable TLFNs;
-
-
-
 
 void 
 fn_result::throw_failed(const char* hint)
@@ -1044,6 +1041,8 @@ fntable::init()
 
     headers_sent_fn = "headers_sent";
     header_fn = "header";
+
+    getmessage_fn = "getmessage";
 }
 
 void  // virtual

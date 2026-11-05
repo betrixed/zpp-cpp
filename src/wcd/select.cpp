@@ -285,18 +285,13 @@ using namespace wcd;
 ZEND_METHOD(Wcd_Sql_Select, __construct)
 {
 	zarg_rd args(execute_data);
-	weak_ref   db;
+	
+	weak_ref db = args.weakref(args.need(0));
+
 	bool      auto_alias = false;
-
-	args.weakref(db, args.need(0));
-
 	if (!args.zbool(auto_alias, args.option(1)))
 	{
-		/*#if ZEND_DEBUG
-		zend_printf("Arg 2 using default\n");
-		#endif
-		*/
-	};
+	}
 
 	if (!args.throw_errors())
 	{
@@ -306,19 +301,6 @@ ZEND_METHOD(Wcd_Sql_Select, __construct)
 		//showobj("DB object", db);
 	}
 
-	/*zval*     dbobj;
-	bool      auto_alias = false;
-	zend_class_entry* ce = IDriver::omg.class_entry_;
-
-	ZEND_PARSE_PARAMETERS_START(1,2)
-	Z_PARAM_OBJECT_OF_CLASS(dbobj, ce)
-	Z_PARAM_OPTIONAL
-	Z_PARAM_BOOL(auto_alias)
-	ZEND_PARSE_PARAMETERS_END();
-
-	Select* sobj = zval_toc<Select>(ZEND_THIS);
-	sobj->construct(dbobj, auto_alias);
-	*/
 }
 
 ZEND_METHOD(Wcd_Sql_Select, __destruct)
@@ -381,8 +363,7 @@ ZEND_METHOD(Wcd_Sql_Select, addJoin)
 
 	obj_ptr rtable  = args.objclass_ornull(args.option(1), zclass_sql_icolumns);
 	
-	zend_long jtype = JoinInfo::J_INNER;
-	args.zlong(jtype, args.option(2));
+	zend_long jtype = args.zlong_default(args.option(2),JoinInfo::J_INNER);
 	
 	if (!args.throw_errors())
 	{

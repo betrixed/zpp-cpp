@@ -104,7 +104,7 @@ DebugLog::dump(const char* label, zval* anyval, int maxlevel)
 
 	str_rc out = dump.zstr();
 
-	line(out);
+	line(out,FILE_APPEND);
 }
 
 
@@ -214,7 +214,7 @@ DebugLog::debug_info(htab_cow hw)
 }
 
 void 
-DebugLog::construct(str_ptr logpath, int destflags)
+DebugLog::construct(str_ptr logpath, int destflags, int fileflags)
 {
 	obj_ptr self = self_;
 
@@ -223,21 +223,22 @@ DebugLog::construct(str_ptr logpath, int destflags)
 	self.property(DLSi.filename_str, temparg);
 
 	outputs_ = destflags;
-
+	file_flags_ = fileflags;
 }
 
 void 
-DebugLog::line(const char* s)
+DebugLog::line(const char* s, int fileflags)
 {
 	str_rc temp(s);
-	this->line(temp, DebugLog::FILE_APPEND);
+	this->line(temp, fileflags);
 }
 void 
-DebugLog::line(str_ptr msg, int flags)
+DebugLog::line(str_ptr msg, int fileflags)
 {
 	obj_ptr self(self_);
 
 	int outflags = outputs_;
+	file_flags_ = fileflags;
 
 	bool trace = ((outflags & (TO_FILE|TO_CONSOLE)) != 0);
 	if (trace)
@@ -255,7 +256,9 @@ DebugLog::line(str_ptr msg, int flags)
 		{	
 			str_rc filename = self.str_property(DLSi.filename_str);
 			val_rc data(log);
-			file_put_contents(filename, data, flags | FILE_LOCK);
+			file_put_contents(filename, data, file_flags_ | FILE_LOCK);
+			// go back to append moode
+			file_flags_ = FILE_APPEND;
 		}
 		bool docons = ((outflags&TO_CONSOLE)!=0);
 		if (docons)
@@ -286,9 +289,7 @@ ZEND_METHOD(Zpp_DebugLog, start)
 	zarg_rd args(execute_data);
 
 	str_ptr msg = args.str(args.need(0));
-	zend_long flags = 0;
-
-	args.zlong_null(flags, args.option(1), DebugLog::TO_FILE);
+	zend_long flags = args.zlong_default(args.option(1), DebugLog::TO_FILE);
 
 	if (!args.throw_errors(__FUNCTION__))
 	{
@@ -302,13 +303,13 @@ ZEND_METHOD(Zpp_DebugLog, __construct)
 	zarg_rd args(execute_data);
 
 	str_ptr path = args.str(args.need(0));
-	zend_long flags = 0;
-	args.zlong_null(flags, args.option(1), DebugLog::TO_FILE);
-                   
+	zend_long outputs = args.zlong_default(args.option(1), DebugLog::TO_FILE);
+    zend_long fileflags =  args.zlong_default(args.option(1), DebugLog::FILE_RESET);
+
 	if (!args.throw_errors(__FUNCTION__))
 	{
 		DebugLog* cobj = zval_toc<DebugLog>(ZEND_THIS);
-		cobj->construct(path, flags);
+		cobj->construct(path, outputs, fileflags);
 	}	
 }
 
@@ -317,9 +318,7 @@ ZEND_METHOD(Zpp_DebugLog, line)
 	zarg_rd args(execute_data);
 
 	str_ptr msg = args.str(args.need(0));
-	zend_long flags = 0;
-
-	args.zlong_null(flags, args.option(1),  DebugLog::FILE_APPEND);
+	zend_long flags = args.zlong_default(args.option(1),  DebugLog::FILE_APPEND);
 
 	if (!args.throw_errors(__FUNCTION__))
 	{
@@ -332,14 +331,12 @@ ZEND_METHOD(Zpp_DebugLog, setOutputs)
 {
 	zarg_rd args(execute_data);
 
-	zend_long flags;
-
-	args.zlong(flags, args.need(0));
+	zend_long outputs = args.zlong(args.need(0));
 
 	if (!args.throw_errors(__FUNCTION__))
 	{
 		DebugLog* cobj = zval_toc<DebugLog>(ZEND_THIS);
-		cobj->setOutputs(flags);	
+		cobj->setOutputs(outputs);	
 	}
 }
 
@@ -375,8 +372,7 @@ ZEND_METHOD(Zpp_DebugLog, dump)
 
 	str_ptr label = args.str(args.need(0));
 	zval* value = args.need(1);
-	zend_long maxlevel=3;
-	args.zlong(maxlevel, args.option(2));
+	zend_long maxlevel= args.zlong_default(args.option(2),3);
 
 	if (!args.throw_errors(__FUNCTION__))
 	{

@@ -7,6 +7,10 @@
 
 namespace zpp {
 
+weak_ref::weak_ref(zval* arg) : obj_rc(arg)
+{
+}
+
 weak_ref::weak_ref() : obj_rc()
 {
 }

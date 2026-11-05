@@ -13,7 +13,8 @@ public:
 	weak_ref();
 	weak_ref(const obj_ptr&);
 	weak_ref(const weak_ref& obj);
-
+	weak_ref(zval* arg);
+	
 	// use this to make a new WeakReference
 	static weak_ref refObject(obj_ptr p);
 

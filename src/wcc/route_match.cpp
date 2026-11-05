@@ -285,27 +285,40 @@ RouteMatch::findRoute(RouteSet* routeset)
 }
 
 
-val_rc //static
+val_return //static
 RouteMatch::call_method(obj_ptr obj, str_ptr method, htab_ptr args)
 {
 
-	val_rc result;
+	val_return result;
 
 	if (args.size())
 	{
-		result = obj.call_hargs(method, args);
+		result.value_ = obj.call_hargs(method, args);
 	}
 	else {
-		result = obj.call(method);
+		result.value_ = obj.call(method);
 	}
-
-	
+	if (result.has_errors())
+	{
+		#ifdef DBG_ROUTEMATCH
+			DebugLog* log = DebugLog::cpp_global();
+			if (log)
+			{
+				str_rc temp = result.error_str();
+				log->dump("call_method error_str ", temp);
+			}
+		#endif
+	}
 	return result;
 }
 
 val_return
 RouteMatch::call(htab_ptr extra, obj_ptr before, obj_ptr after)
 {
+#ifdef DBG_ROUTEMATCH
+	DebugLog* log = DebugLog::cpp_global();
+#endif
+
 	val_return  result;
 
 	val_rc  zobj;
@@ -326,7 +339,6 @@ RouteMatch::call(htab_ptr extra, obj_ptr before, obj_ptr after)
 		zobj = target_;
 	}
 #ifdef DBG_ROUTEMATCH
-	DebugLog* log = DebugLog::cpp_global();
 	if (log) log->dump("Call method of ", zobj);
 #endif
 	// appended extra arguments?
@@ -368,6 +380,9 @@ RouteMatch::call(htab_ptr extra, obj_ptr before, obj_ptr after)
 
 		if (before.ok())
 		{
+			#ifdef DBG_ROUTEMATCH
+				if (log) log->dump("Try Before ", before);
+			#endif
 			Pair* ppair = zobj_toc<Pair>(before);
 
 			val_ptr first(ppair->first()); // method name
@@ -379,14 +394,19 @@ RouteMatch::call(htab_ptr extra, obj_ptr before, obj_ptr after)
 			{
 				if (obj.method_exists(method_name))
 				{
-					result_ = this->call_method(obj, method_name, second.zarray());
-					test = result_;
+					result = this->call_method(obj, method_name, second.zarray());
+					if (result.has_errors())
+					{
+						return result;
+					}
+					val_ptr test(result.value_);
 					if (test.isFalse() || test.isObject())
 					{
-						result.value_ = result_;
 						return result;
 						// abort by beforeCall
 					}
+					// clean up
+					result.value_.wipe();
 				}
 				else {
 #ifdef DBG_ROUTEMATCH
@@ -396,36 +416,35 @@ RouteMatch::call(htab_ptr extra, obj_ptr before, obj_ptr after)
 			}
 		}
 
-
-
-		result.value_ = this->call_method(obj, ob_method_, ob_args_);
-
-
+		result  = this->call_method(obj, ob_method_, ob_args_);
+		if (result.has_errors())
+		{
+			return result;
+		}
+		
 		if (after.ok())
 		{
 			Pair* ppair = zobj_toc<Pair>(after);
 
+			#ifdef DBG_ROUTEMATCH
+				if (log) log->dump("Try After ", after);
+			#endif
 			val_ptr first(ppair->first());
 			val_ptr second(ppair->second());
 
 			method_name = second.zstr();
 			if (method_name.size() && obj.method_exists(method_name))
 			{
-				result_ = this->call_method(obj, method_name, second.zarray());
-				test = result_;
-				if (!test.isNull())
-				{
-					result.value_ = result_;
-				}
+				result = this->call_method(obj, method_name, second.zarray());
 			}
 #ifdef DBG_ROUTEMATCH
 			else {
-				if (log) log->dump("Method not found", method_name);
+				// skipable
+				if (log) log->dump("After method not found", method_name);
 			}
 #endif
 		}	
 	}
-
 	return result;
 }
 
@@ -951,7 +970,7 @@ RouteMatch::prepare_call()
 		assets->setModule(module_name_);
 
 		#ifdef DBG_ROUTEMATCH
-		if (log) log->dump("Assets setModule", assets,7);
+			if (log) log->dump("Assets setModule", assets_obj.value_,7);
 		#endif
 	}
 		/*
@@ -1228,24 +1247,21 @@ PHP_METHOD(Wcc_RouteMatch, findRoute)
 
 ZEND_METHOD(Wcc_RouteMatch, call)
 {
-	zval* extra_args = nullptr;
-	zval* before_pair = nullptr;
-	zval* after_pair = nullptr;
+	zarg_rd args(execute_data);
+	//val_return call(htab_ptr extra, obj_ptr before, obj_ptr after);
+	htab_ptr  extra_args=args.htab_or_null(args.option(0));
+	auto pair_ce = Pair::omg.classEntry();
+	obj_ptr before_pair = args.objclass_ornull(args.option(1),pair_ce);
+	obj_ptr after_pair = args.objclass_ornull(args.option(2),pair_ce);
 
-	zend_class_entry* pair_ce = Pair::omg.classEntry();
-
-	ZEND_PARSE_PARAMETERS_START(0, 3)
-	Z_PARAM_OPTIONAL
-	Z_PARAM_ARRAY_OR_NULL(extra_args)
-	Z_PARAM_OBJECT_OF_CLASS_OR_NULL(before_pair, pair_ce)
-	Z_PARAM_OBJECT_OF_CLASS_OR_NULL(after_pair, pair_ce)
-	ZEND_PARSE_PARAMETERS_END();
-
-	RouteMatch* prm = zval_toc<RouteMatch>(ZEND_THIS);
-	val_return result = prm->call(extra_args, before_pair, after_pair);
-	if (!result.throw_errors(__FUNCTION__))
+	if (!args.throw_errors())
 	{
-		result.value_.move_zv(return_value);
+		RouteMatch* prm = zval_toc<RouteMatch>(ZEND_THIS);
+		val_return result = prm->call(extra_args, before_pair, after_pair);
+		if (!result.throw_errors(__FUNCTION__))
+		{
+			result.value_.move_zv(return_value);
+		}
 	}
 }
 

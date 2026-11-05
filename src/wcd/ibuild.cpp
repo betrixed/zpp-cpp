@@ -955,11 +955,9 @@ using namespace wcd;
 
 ZEND_METHOD(Wcd_IBuild, __construct)
 {
-	weak_ref db;
-
 	zarg_rd args(execute_data);
 
-	args.weakref(db, args.need(0));
+	weak_ref db = args.weakref(args.need(0));
 
 	if (!args.throw_errors())
 	{

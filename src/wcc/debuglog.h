@@ -33,12 +33,15 @@ extern DebugLogStatic DLSi;
 
 class  DebugLog : public base_d {
 protected: 
-		int outputs_;
+	int outputs_;
+	int file_flags_;
 public:
 
 	enum {
 		TO_FILE = 1,
 	     TO_CONSOLE = 2,
+
+	     FILE_RESET = 0,
 	     FILE_APPEND = PHP_FILE::APPEND,
 		 FILE_LOCK = PHP_FILE::EXCL_LOCK
 	};
@@ -53,12 +56,12 @@ public:
 	static obj_rc instance();
 	static void setInstance(obj_ptr obj);
 	
-	static obj_rc start(str_ptr msg, int flags=TO_FILE);
-	static obj_rc start(const char* msg, int flags=TO_FILE);
+	static obj_rc start(str_ptr msg, int outputs=TO_FILE);
+	static obj_rc start(const char* msg, int outputs=TO_FILE);
 	void debug_info(htab_cow hw) override;
-	void construct(str_ptr logpath, int flags=TO_FILE);
-	void line(str_ptr msg, int flags = PHP_FILE::APPEND);
-	void line(const char* s);
+	void construct(str_ptr logpath, int outputs=TO_FILE, int flags=FILE_RESET);
+	void line(str_ptr msg, int flags = FILE_APPEND);
+	void line(const char* s, int flags = FILE_APPEND);
 
 	void dump(str_ptr label, zval* anyval, int maxlevel=2);
 	void dump(const char* label, zval* anyval, int maxlevel=2);

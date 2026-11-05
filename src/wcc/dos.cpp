@@ -510,9 +510,7 @@ ZEND_METHOD(Wcc_Dos, make_dir)
 {
 	zarg_rd args(execute_data);
 	str_ptr  path = args.str(args.need(0));
-	zend_long permissions = 0755;
-
-	args.zlong(permissions, args.option(1));
+	zend_long permissions = args.zlong_default(args.option(1), 0755);
 	
 	if (!args.throw_errors(__FUNCTION__))
 	{
@@ -595,10 +593,10 @@ ZEND_METHOD(Wcc_Dos, rm_alldir)
 ZEND_METHOD(Wcc_Dos, rm_old)
 {
 	zarg_rd args(execute_data);
-	zend_long time;
+	
 	htab_ptr  flist = args.htab(args.need(0));
 	
-	args.zlong(time, args.need(1));
+	zend_long time = args.zlong(args.need(1));
 	
 	if (!args.throw_errors(__FUNCTION__))
 	{

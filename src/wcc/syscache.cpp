@@ -268,8 +268,8 @@ ZEND_METHOD(Wcc_Session_Adapt_SysCache, destroy)
 ZEND_METHOD(Wcc_Session_Adapt_SysCache, gc)
 {
 	zarg_rd args(execute_data);
-	zend_long lifetime = 0;
-	args.zlong(lifetime, args.need(0));
+	zend_long lifetime = args.zlong(args.need(0));
+	
 	if (!args.throw_errors())
 	{
 		SysCache* cobj = zval_toc<SysCache>(ZEND_THIS);

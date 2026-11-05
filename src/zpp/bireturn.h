@@ -7,22 +7,28 @@
 
 namespace zpp {
 
+//TODO: replace str_buf, has_thrown_ with a Throwable object
 struct error_return {
 
-	static bool  had_zend_exception;
-	static void (*original_zthrow_hook)(zend_object *zex);
+	inline static thread_local bool  had_zend_exception = false;
+	inline static thread_local void (*original_zthrow_hook)(zend_object *zex) = nullptr;
+
+	inline static thread_local  obj_rc last_exception  = obj_rc();
 
 	static void  on_zend_exception(zend_object* zex);
-
 	static void init_exception_hook();
-	static str_rc last_msg;
-	
-	str_buf*  errors_;
 
-	error_return() : errors_(nullptr) {}
+	str_buf*  errors_;
+	bool      has_thrown_;
+
+	error_return() : errors_(nullptr), has_thrown_(false) {}
+
+	bool did_zend_throw();
 
 	error_return(error_return&& m) {
 		errors_ = m.errors_;
+		has_thrown_ = m.has_thrown_;
+		m.has_thrown_ = false;
 		m.errors_ = nullptr;
 	}
 
@@ -30,11 +36,13 @@ struct error_return {
 	{
 		del_errors();
 		errors_ = m.errors_;
+		has_thrown_ = m.has_thrown_;
+		m.has_thrown_ = false;
 		m.errors_ = nullptr;
 		return *this;
 	}
 
-	bool has_errors() const;
+	bool has_errors();
 
 	str_buf& error();
 
@@ -67,7 +75,10 @@ struct bireturn  : public error_return
 	bireturn(bireturn&& m) : error_return()
 	{
 		errors_ = m.errors_;
+		has_thrown_ = m.has_thrown_;
 		m.errors_ = nullptr;
+		m.has_thrown_ = false;
+
 		value_ = m.value_;
 		m.value_ = T();
 	}
@@ -96,6 +107,7 @@ struct bireturn  : public error_return
 	{
 		del_errors();
 		errors_ = e.errors_;
+		has_thrown_ = e.has_thrown_;
 		e.errors_ = nullptr;
 		return *this;
 	}
@@ -109,6 +121,7 @@ struct bireturn  : public error_return
 	{
 		del_errors();
 		errors_ = m.errors_;
+		has_thrown_ = m.has_thrown_;
 		m.errors_ = nullptr;
 		value_ = m.value_;
 		m.value_ = T();

@@ -12,6 +12,8 @@ class DebugLog {
 
 	const int TO_CONSOLE = 2;
 
+	const int FILE_RESET = 0;
+
 	const int FILE_APPEND = 8;
 
 	const int FILE_LOCK = 2;
@@ -25,7 +27,7 @@ class DebugLog {
 
 	public static function start(?string $msg = null) : ?DebugLog {}
 
-    public function __construct(string $path,  int $destflags = DebugLog::TO_FILE);
+    public function __construct(string $path,  int $destflags = DebugLog::TO_FILE, int $fileflags = DebugLog::FILE_RESET);
 
 	public function line(string $s, int $addflags = DebugLog::FILE_APPEND) : void {}
 
@@ -33,6 +35,6 @@ class DebugLog {
 
 	public function getOutputs() : int {}
 
-	public function dump(string $label, mixed $value, int $maxlevel) : void {}
+	public function dump(string $label, mixed $value, int $maxlevel=3) : void {}
 
 };
