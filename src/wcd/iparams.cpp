@@ -16,7 +16,7 @@ extern "C" {
 }
 #endif
 
-//#define DBG_LOG_IPARAMS
+#define DBG_LOG_IPARAMS
 #ifdef DBG_LOG_IPARAMS
 #	ifndef WCC_DEBUG_LOG_H
 #		include "wcc/debuglog.h"
@@ -27,32 +27,27 @@ namespace wcd {
 
 base_obj_mgr<IParams> 	IParams::omg;
 
-class IPInit : public state_init {
-public:
-	str_intern param_str;
-
-	void init() override;
-
-};
-
-IPInit IPStr;
-
+IParams_str IPMs;
 void 
-IPInit::init()
+IParams_str::init()
 {
-	param_str = "?";
+	any_param = "?";
+	params_s = "params";
+	sql_s = "sql";
+	returnValues_s = "returnValues";
+	paramValues_s = "paramValues";
 }
 
 void IParams::debug_info(htab_cow di)
 {
 	if (!params_.isNull())
-		di.set(SQSTR.params, params_);
-	if (!ret_values_.isNull())
-		di.set(SQSTR.returns_str, ret_values_);
+		di.set(IPMs.params_s, params_);
+	if (!returnValues_.isNull())
+		di.set(IPMs.returnValues_s, returnValues_);
 	if (!sql_.isNull())
-		di.set(SQSTR.sql, sql_);
-	if (!val_params_.isNull())
-		di.set(SQSTR.values_key, val_params_);
+		di.set(IPMs.sql_s, sql_);
+	if (!paramValues_.isNull())
+		di.set(IPMs.paramValues_s, paramValues_);
 }
 
 IParams::~IParams()
@@ -76,7 +71,7 @@ void IParams::destruct()
 str_rc 
 IParams::paramStr(int ct)
 {
-	return IPStr.param_str;
+	return IPMs.any_param;
 }
 
 zend_class_entry* 
@@ -86,7 +81,7 @@ IParams::register_class()
 	
 	IParams::omg.classEntry(ce);
 
-	STATE_INIT_ADD(IPStr);
+	STATE_INIT_ADD(IPMs);
 
 	return ce;
 }
@@ -94,7 +89,7 @@ IParams::register_class()
 str_rc 
 IParams::addParamEquals(val_ptr value)
 {
-	str_rc result = IPStr.param_str;
+	str_rc result = IPMs.any_param;
 	htab_cow hw(params_);
 
 	hw.push_back(result);
@@ -117,7 +112,7 @@ IParams::getSql()
 void 
 IParams::useOwnValues()
 {
-	val_params_ = params_;
+	paramValues_ = params_;
 }
 
 str_return
@@ -161,7 +156,14 @@ IParams::paramLiteral(val_ptr value)
 str_rc 
 IParams::addParamList(htab_ptr values)
 {
+
+	#ifdef DBG_LOG_IPARAMS
+	DebugLog* log = DebugLog::cpp_global();
+	if (log) log->dump("IParams values",values);
+	#endif
+
 	str_buf buf;
+
 
 	int ix = (int) params_.size();
 
@@ -206,8 +208,48 @@ IParams::wipe()
 	
 	sql_.init();
 	params_ = htab_ptr::empty_array();
-	ret_values_ = htab_ptr::empty_array();
-	val_params_ = htab_ptr::empty_array();
+	returnValues_ = htab_ptr::empty_array();
+	paramValues_ = htab_ptr::empty_array();
+}
+
+htab_rc 
+IParams::__serialize()
+{
+	htab_rc result;
+
+	htab_cow hw(result);
+
+	hw.set(IPMs.params_s, params_);
+	if (sql_.size())
+	{
+		hw.set(IPMs.sql_s, sql_);
+	}
+	if (returnValues_.size()) {
+		hw.set(IPMs.returnValues_s, returnValues_);
+	}
+	if (paramValues_.size())
+	{
+		hw.set(IPMs.paramValues_s, paramValues_);
+	}
+	return result;
+}
+
+void 
+IParams::__unserialize(htab_ptr htab)
+{
+	val_ptr test = htab.get(IPMs.params_s);
+	if (test.isArray()) {
+		params_ = test.zarray();
+	}
+	else {
+		params_ = htab_ptr::empty_array();
+	}
+
+	test = htab.get(IPMs.sql_s);
+	sql_ = test.zstr();
+
+	returnValues_ = htab.get(IPMs.returnValues_s);
+	paramValues_ = htab.get(IPMs.paramValues_s);
 }
 
 }//namespace wcd
@@ -420,4 +462,33 @@ ZEND_METHOD(Wcd_Sql_IParams, __destruct)
 	IParams* cobj = zval_toc<IParams>(ZEND_THIS);
 	cobj->destruct();
 }
+
+
+PHP_METHOD(Wcd_Sql_IParams, __serialize)
+{
+	ZEND_PARSE_PARAMETERS_NONE();
+	
+	IParams* cobj = zval_toc<IParams>(ZEND_THIS);
+
+	htab_rc ret = cobj->__serialize();
+
+	ret.move_zv(return_value);
+}
+
+PHP_METHOD(Wcd_Sql_IParams, __unserialize)
+{
+	zval* data;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+	Z_PARAM_ARRAY(data)
+	ZEND_PARSE_PARAMETERS_END();
+
+	htab_ptr hr(data);
+
+	IParams* cobj = zval_toc<IParams>(ZEND_THIS);
+
+	cobj->__unserialize(hr);
+
+}
+
 #endif//iparams.cpp

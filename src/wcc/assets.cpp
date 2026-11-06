@@ -1273,11 +1273,9 @@ ZEND_METHOD(Wcc_Assets, addBlob)
 {
 	zarg_rd args(execute_data);
 	str_ptr blob;
-	bool    headblob = false;
 
 	blob = args.str(args.need(0));
-
-	args.zbool(headblob, args.option(1));
+	bool  headblob = args.zbool_default(args.option(1),false);
 
 	if (!args.throw_errors(__FUNCTION__))
 	{
@@ -1352,32 +1350,28 @@ ZEND_METHOD(Wcc_Assets, getWebList)
 {
 	zarg_rd args(execute_data);
 
-	str_ptr  typekey;
-	val_ptr names;
 	bool    aslist = true;
 	bool    unset = false;
+	
+	auto listct = args.size();
 
-	htab_rc result;
+	str_ptr  typekey = args.str(args.need(0));
 
-	typekey = args.str(args.need(0));
+    val_ptr names = args.string_or_array(args.need(1));
 
-    names = args.option(1);
-
-    bool hasMore = names.ok() && (names.isString() || names.isArray());
-   	// passed a 3rd arg?
-
-	if (hasMore) {
-		hasMore = args.zbool(aslist, args.option(2));
+    
+	if (listct > 2) {
+		aslist = args.zbool_default(args.option(2),true);
 	}
 	// passed a 4th arg?
-	if (hasMore) {
-		hasMore = args.zbool(unset, args.option(3));
+	if (listct > 4) {
+		unset = args.zbool_default(args.option(3), false);
 	}
 
 	if (!args.throw_errors(__FUNCTION__))
 	{
 		Assets* cobj = zval_toc<Assets>(ZEND_THIS);
-		result = cobj->getWebList(typekey, names, aslist, unset);
+		htab_rc result = cobj->getWebList(typekey, names, aslist, unset);
 		result.move_zv(return_value);
 	}	
 }

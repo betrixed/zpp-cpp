@@ -470,6 +470,41 @@ Operation::run()
 }
 
 error_return 
+Operation::whereIn(val_ptr column, htab_ptr values, int blogic, bool bnot)
+{
+	error_return err;
+
+	htab_rc binddata;
+	htab_cow data(binddata);
+	if (blogic < 0)
+	{
+		blogic = JoinExpr::B_AND;
+	}
+	str_ptr bstr = JoinExpr::boolStr(blogic);
+
+	val_rc bool_val(bnot);
+	data.set(SQSTR.not_key, bool_val);
+
+	data.set(SQSTR.column, column);
+	data.set(SQSTR.typekey, SQSTR.in_key);
+	data.set(SQSTR.values_key,  values);
+	data.set(SQSTR.boolean, bstr);
+
+	obj_return bind_ret = getBind();
+	if (bind_ret.has_errors())
+	{
+		err = std::move(bind_ret);
+		return err;
+	}
+	Bindings* bind = zobj_toc<Bindings>(bind_ret.value_);
+
+	val_rc temp(binddata);
+	bind->add(ISql::SQL_WHERE, temp);
+
+	return err;
+}
+
+error_return 
 Operation::where(val_ptr lattr, val_ptr rattr, int op, int blogic)
 {
 	error_return err;
@@ -673,16 +708,9 @@ ZEND_METHOD(Wcd_Sql_Operation, orderBy)
 {
 	zarg_rd args(execute_data);
 
-	
-	bool      descend = false;
-	bool      nullslast = false;
-
 	val_ptr column(args.need(0));
-
-	if (args.zbool(descend,args.option(1)))
-	{
-		args.zbool(nullslast,args.option(2));
-	}
+	bool descend = args.zbool_default(args.option(1), false);
+	bool nullslast = args.zbool_default(args.option(2), false);
 
 	if (!args.throw_errors())
 	{
@@ -762,9 +790,38 @@ ZEND_METHOD(Wcd_Sql_Operation, where)
 
 	if (!args.throw_errors())
 	{
-		Operation* cobj = zval_toc<Operation>(ZEND_THIS);
+		obj_rc self(ZEND_THIS);
+		Operation* cobj = zobj_toc<Operation>(self);
 		error_return result = cobj->where(lattr, rattr, op, blogic);
-		result.throw_errors();
+		if (!result.throw_errors())
+		{
+			self.move_zv(return_value);
+		}
+
+	}
+}
+
+ZEND_METHOD(Wcd_Sql_Operation, whereIn)
+{
+	zarg_rd args(execute_data);
+
+	val_ptr column(args.need(0));
+	val_ptr values(args.need(1));
+
+	zend_long blogic = args.zlong_default(args.option(2), -1);
+
+	bool bnot = args.zbool_default(args.option(3), false);
+	
+	if (!args.throw_errors())
+	{
+		obj_rc self(ZEND_THIS);
+
+		Operation* cobj = zobj_toc<Operation>(self);
+		error_return result = cobj->where(column, values, blogic, bnot);
+		if (!result.throw_errors())
+		{
+			self.move_zv(return_value);
+		}
 	}
 }
 

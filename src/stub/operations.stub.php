@@ -8,6 +8,10 @@ namespace Wcd\Sql;
 
 class Operation {
 	
+	// also from JOIN_EXPR
+	const int OP_AND = 7;
+	const int OP_OR = 8;
+
 	public function __construct(\WeakReference $db);
 
 	public function __destruct();
@@ -43,7 +47,10 @@ class Operation {
 
 	public function run() : mixed {}
 
-	public function where(mixed $lattr, mixed $rattr = null, ?int $op = null, ?int $logic = null) : void {}
+	public function where(mixed $lattr, mixed $rattr = null, ?int $op = OP_AND, ?int $logic = null) : Operation {}
+
+	public function whereIn(mixed $column, array $values, 
+		int $op = Operations::OP_AND, bool $bnot = false) : Operation  {}
 
 	public function wipe() : void {}
 };

@@ -1015,8 +1015,7 @@ ZEND_METHOD(Wcc_UserSession, write)
 {
 	zarg_rd args(execute_data);
 
-	bool force = false; //default
-	args.zbool(force, args.option(0));
+	bool force = args.zbool_default(args.option(0), false);
 
 	if (!args.throw_errors(__FUNCTION__))
 	{

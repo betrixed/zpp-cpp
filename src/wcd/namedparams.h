@@ -27,6 +27,8 @@ namespace wcd
 
 		str_rc addParamEquals(val_ptr value) override;
 
+		str_rc addParamList(htab_ptr values) override;
+
 	};
 
 } //namespace wcd

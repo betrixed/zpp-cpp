@@ -119,8 +119,9 @@ public:
 	zend_long zlong(zval* arg);
 	zend_long zlong_default(zval* arg, zend_long ifnot = -1);
 
-	bool zbool(bool& value, zval* arg);
-	
+	bool zbool_default(zval* arg, bool ifnot = false);
+	bool zbool(zval* arg);
+
 	bool ztype(val_ptr& value, zval* arg, int ptype);
 
 	bool     has_errors() const { return (errors_); }

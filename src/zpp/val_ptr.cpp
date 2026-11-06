@@ -733,6 +733,7 @@ val_ptr::zarray() const
 		return refto().zarray();
 	case IS_INDIRECT:
 		return indto().zarray();
+		//TODO : consider empty array value?
 	default:
 		return nullptr;
 	}

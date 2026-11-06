@@ -131,9 +131,11 @@ void sql_strtab::init()
 	returns_str = "returns";
 	return_str = "return";
 	bind_key = "bind";
+
 	id_key = "identity";
 	default_key = "default";
 	auto_inc = "auto_inc";
+	in_key = "in";
 
 	results  = "results";
 	by_alias  = "by_alias";

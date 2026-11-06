@@ -466,9 +466,7 @@ ZEND_METHOD(Wcc_Loader, setThrowNotFound)
 {
 	zarg_rd args(execute_data);
 
-	bool bval = true;
-
-	args.zbool(bval, args.need(0));
+	bool bval = args.zbool_default(args.need(0),true);
 
 	if (!args.throw_errors(__FUNCTION__))
 	{
@@ -593,9 +591,7 @@ ZEND_METHOD(Wcc_Loader, setRecord)
 {
 	zarg_rd args(execute_data);
 
-	bool  value = true;
-
-	args.zbool(value, args.need(0));
+	bool value = args.zbool(args.need(0));
 
 	if (!args.throw_errors(__FUNCTION__))
 	{

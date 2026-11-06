@@ -589,21 +589,47 @@ zarg_rd::zlong_default(zval* arg, zend_long ifnot)
 }
 
 bool 
-zarg_rd::zbool(bool& value, zval* arg)
+zarg_rd::zbool_default(zval* arg, bool ifnot)
 {
 	val_ptr test(arg);
 	int itype = test.ref_type();
-	if (itype == IS_TRUE || itype == IS_FALSE)
+	switch(itype)
 	{
-		value = test.get_bool();
+	case IS_TRUE:
 		return true;
+	case IS_FALSE:
+		return false;
+	case IS_LONG:
+		return test.get_bool();
+	case IS_UNDEF:
+	default:
+		if (!maybe_)
+		{
+			error() << "; Expected bool value";           
+		}
+		break;
 	}
-	if (!maybe_)
-	{
-		error() << "; Expected bool value";
-                                      return false;
-	}
+	return ifnot;
+}
 
+bool 
+zarg_rd::zbool(zval* arg)
+{
+	val_ptr test(arg);
+	int itype = test.ref_type();
+	switch(itype)
+	{
+	case IS_TRUE:
+		return true;
+	case IS_FALSE:
+		return false;
+	case IS_LONG:
+		return test.get_bool();
+	case IS_UNDEF:
+	default:
+		error() << "; Expected bool value";           
+		break;
+	}
 	return false;
 }
 

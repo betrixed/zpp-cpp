@@ -22,10 +22,10 @@ namespace wcd
 		str_rc     sql_;
 
 		/** values of params */
-		htab_rc    val_params_;
+		htab_rc    paramValues_;
 
 		/** return values */
-		htab_rc	   ret_values_;
+		htab_rc	   returnValues_;
 
 	public:
 		virtual ~IParams();
@@ -40,10 +40,13 @@ namespace wcd
 
 		virtual str_rc addParamEquals(val_ptr value);
 
+		virtual str_rc addParamList(htab_ptr values);
+
 		void debug_info(htab_cow di) override;
 
 		//str_rc addParam(val_ptr value);
-		str_rc addParamList(htab_ptr values);
+		
+
 		str_rc makeList(int start, int count);
 
 		void setParams(htab_ptr replace)
@@ -58,12 +61,12 @@ namespace wcd
 
 		void setReturns(htab_ptr rets)
 		{
-			ret_values_ = rets;
+			returnValues_ = rets;
 		}
 
 		void setValues(htab_ptr vals)
 		{	
-			val_params_ = vals;
+			paramValues_ = vals;
 		}
 
 		void useOwnValues();
@@ -74,20 +77,39 @@ namespace wcd
 
 		htab_ptr getReturns() 
 		{
-			return ret_values_;
+			return returnValues_;
 		}
 
 		htab_ptr getValues() 
 		{
-			return val_params_;
+			return paramValues_;
 		}
 
 		htab_ptr getParams() 
 		{
 			return params_;
 		}
+
+		htab_rc __serialize();
+	
+		void __unserialize(htab_ptr htab);
+
 	};
 
+	class IParams_str : public state_init {
+	public:
+
+		void init() override;
+
+		str_intern any_param;
+		str_intern params_s;
+		str_intern sql_s;
+		str_intern returnValues_s;
+		str_intern paramValues_s;
+
+	};
+
+	extern IParams_str IPMs;
 } //namespace wcd
 
 

@@ -1093,9 +1093,8 @@ ZEND_METHOD(Wcc_Dispatch, respond)
 ZEND_METHOD(Wcc_Dispatch, setLog)
 {
 	zarg_rd args(execute_data);
-	bool    value;
-
-	args.zbool(value, args.need(0));
+	
+	bool    value = args.zbool(args.need(0));
 
 	if (!args.throw_errors(__FUNCTION__))
 	{

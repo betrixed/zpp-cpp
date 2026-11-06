@@ -1049,10 +1049,9 @@ ZEND_METHOD(Wcd_IBuild, deleteRow)
 //public function distinct(bool $set = true): void
 ZEND_METHOD(Wcd_IBuild, distinct)
 {
-	bool set = true;
 	zarg_rd args(execute_data);
 
-	args.zbool(set, args.option(0));
+	bool set = args.zbool_default(args.option(0), true);
 
 	if (!args.throw_errors())
 	{
@@ -1229,10 +1228,8 @@ ZEND_METHOD(Wcd_IBuild, orderBy)
 {
 	zarg_rd args(execute_data);
 
-	bool         descend = false;
 	val_ptr    colspec(args.need(0));
-
-	args.zbool(descend, args.option(1));
+	bool descend = args.zbool_default(args.option(1), false);
 
 	if (!args.throw_errors())
 	{

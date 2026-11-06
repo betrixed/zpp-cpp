@@ -839,8 +839,9 @@ ZEND_METHOD(Wcd_Ext_Pgs_PgQuery, setParams)
 ZEND_METHOD(Wcd_Ext_Pgs_PgQuery, execute)
 {
 	zarg_rd args(execute_data);
-	bool    usePgResult = true;
-	args.zbool(usePgResult, args.option(0));
+
+	bool usePgResult = args.zbool_default(args.option(0), true);
+	
 	if (!args.throw_errors())
 	{
 		PgQuery* cobj = zval_toc<PgQuery>(ZEND_THIS);

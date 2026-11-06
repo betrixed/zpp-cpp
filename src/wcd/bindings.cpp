@@ -1032,13 +1032,8 @@ ZEND_METHOD(Wcd_Sql_Bindings, orderBy)
 	zarg_rd args(execute_data);
 
 	val_ptr colspec( args.need(0));
-	bool descend = false;
-	bool nullslast = false;
-
-	if (args.zbool(descend, args.option(1)))
-	{	
-		args.zbool(nullslast, args.option(2));
-	}
+	bool descend = args.zbool_default(args.option(1), false);
+	bool nullslast = args.zbool_default(args.option(2), false);
 
 	if (!args.throw_errors())
 	{

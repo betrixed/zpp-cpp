@@ -21,9 +21,18 @@ extern "C" {
 }
 #endif
 
+#define DBG_LOG_ISQL
+#ifdef DBG_LOG_ISQL
+
+#	ifndef WCC_DEBUG_LOG_H
+#		include "wcc/debuglog.h"
+#	endif
+
+#endif
+
 namespace wcd {
 using namespace zpp;
-
+using namespace wcc;
 
 
 base_obj_mgr<ISql> ISql::omg;
@@ -1379,7 +1388,18 @@ ISql::where(Bindings &bind, htab_ptr wtab)
 				result.error() << "IN needs values array";
 				return result;
 			}
-			buf << " ("  << params->addParamList(value.zarray()) << ')';
+
+			htab_ptr list = value.zarray();
+
+			#ifdef DBG_LOG_ISQL
+			DebugLog* log = DebugLog::cpp_global();
+			if (log) {
+				log->dump("in params", pobjret.value_);
+				log->dump("IN LIST()", list);
+			}
+			#endif
+
+			buf << " ("  << params->addParamList(list) << ')';
 		}
 		else if (wtype =="raw")
 		{

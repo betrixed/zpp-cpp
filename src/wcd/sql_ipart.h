@@ -95,10 +95,12 @@ namespace wcd {
 		str_intern sql;
 		str_intern returns_str;
 		str_intern return_str;
+		
 		str_intern bind_key;
 		str_intern id_key;
 		str_intern default_key;
 		str_intern auto_inc;
+		str_intern in_key;
 
 		str_intern  results;
 		str_intern  by_alias;

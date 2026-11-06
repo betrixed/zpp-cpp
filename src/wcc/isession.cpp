@@ -538,8 +538,7 @@ ZEND_METHOD(Wcc_Session_ISession, has)
 ZEND_METHOD(Wcc_Session_ISession, regenerateId)
 {
 	zarg_rd args(execute_data);
-	bool deleteOld = false; //default
-	args.zbool(deleteOld, args.option(0));
+	bool deleteOld = args.zbool_default(args.option(0), false);
 	if (!args.throw_errors())
 	{
 		ISession* cobj = zval_toc<ISession>(ZEND_THIS);

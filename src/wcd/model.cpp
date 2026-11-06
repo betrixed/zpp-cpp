@@ -1773,12 +1773,9 @@ void
 row_output(zend_execute_data *execute_data, zval *return_value)
 {
 	zarg_rd args(execute_data);
-	obj_ptr irow_obj;
-	bool    reload = false;
 
-	irow_obj = args.obj_class(args.need(0), IRow::omg.classEntry());
-
-	args.zbool(reload, args.option(1));
+	obj_ptr irow_obj = args.obj_class(args.need(0), IRow::omg.classEntry());
+	bool    reload = args.zbool_default(args.option(1), false);
 
 	if (!args.throw_errors())
 	{

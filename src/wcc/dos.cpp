@@ -573,10 +573,9 @@ ZEND_METHOD(Wcc_Dos, rm_all)
 ZEND_METHOD(Wcc_Dos, rm_alldir)
 {
 	zarg_rd args(execute_data);
-	str_ptr  path = args.str(args.need(0));
-	bool delpath = false;
 
-	args.zbool(delpath, args.option(1));
+	str_ptr  path = args.str(args.need(0));
+	bool delpath = args.zbool_default(args.option(1), false);
 	
 	if (!args.throw_errors(__FUNCTION__))
 	{

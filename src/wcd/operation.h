@@ -71,7 +71,10 @@ public:
 
 	val_return run();
 
-	error_return where(val_ptr lattr, val_ptr rattr, int op, int blogic);
+	error_return where(val_ptr lattr, val_ptr rattr, int bop, int blogic);
+
+	error_return whereIn(val_ptr column, htab_ptr values, 
+		int bop=JoinExpr::OP_AND, bool bnot=false);
 
 	virtual void wipe();
 };

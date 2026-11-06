@@ -949,16 +949,13 @@ ZEND_METHOD(Wcd_IDriver, escape)
 
 ZEND_METHOD(Wcd_IDriver, execute)
 {
-	val_ptr stmt;
-
-	bool  close = true;
-	bool  fetch = false;
+	
 
 	zarg_rd args(execute_data);
 
-	args.ztype(stmt, args.need(0), IS_OBJECT);
-	args.zbool(close, args.option(1));
-	args.zbool(fetch, args.option(2));
+	obj_ptr stmt = args.obj(args.need(0));
+	bool close = args.zbool_default(args.option(1),true);
+	bool fetch = args.zbool_default(args.option(2),false);
 
 	if (!args.throw_errors())
 	{

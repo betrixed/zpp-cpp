@@ -897,9 +897,7 @@ ZEND_METHOD(Wcc_Response, __construct)
 {
 	zarg_rd args(execute_data);
 
-	bool isCLI = false;
-
-	args.zbool(isCLI, args.option(0));
+	bool isCLI = args.zbool_default(args.option(0), false);
 
 	if (!args.throw_errors(__FUNCTION__))
 	{
@@ -928,9 +926,7 @@ ZEND_METHOD(Wcc_Response, isCLI)
 {
 	zarg_rd args(execute_data);
 
-	bool isCLI = true;
-
-	args.zbool(isCLI, args.option(0));
+	bool isCLI = args.zbool_default(args.option(0), true);
 
 	if (!args.throw_errors(__FUNCTION__))
 	{

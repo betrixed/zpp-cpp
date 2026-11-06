@@ -288,10 +288,7 @@ ZEND_METHOD(Wcd_Sql_Select, __construct)
 	
 	weak_ref db = args.weakref(args.need(0));
 
-	bool      auto_alias = false;
-	if (!args.zbool(auto_alias, args.option(1)))
-	{
-	}
+	bool auto_alias = args.zbool_default(args.option(1), false);
 
 	if (!args.throw_errors())
 	{

@@ -16,12 +16,12 @@ class IParams
     //  with a real value.
     public function addParamEquals(mixed $value): string {} 
     
+    public function addParamList(array $values): string {} 
+
     public function wipe() : void {}
     
     public function paramLiteral(mixed $obval) : string {} 
     
-    public function addParamList(array $values): string {} 
-
     public function makeList(int $start, int $count): string {} 
     
     public function getValues() : ?array {} 
@@ -42,6 +42,10 @@ class IParams
 
     public function getParams() : array {}
 
+    public function __serialize() : array {}
+
+    public function __unserialize(array $data) : void {}
+    
     public function __destruct();
 };
 
@@ -49,11 +53,14 @@ class IParams
 class NamedParams extends IParams
 {
     static public function n_param(int $ct) : string;
-    
-    public function paramStr(int $ct) : string {}
+
+    // override; public function addParamEquals(mixed $value): string {} 
+    // override; public function addParamList(array $values): string {} 
+
+   // override; public function paramStr(int $ct) : string {}
     
     // Confusing, If requiires setup with reverse arrangement
     //  with a real value.
-    public function addParamEquals(mixed $value): string {} 
+   
     
 };

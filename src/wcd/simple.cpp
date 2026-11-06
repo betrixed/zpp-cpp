@@ -523,10 +523,8 @@ ZEND_METHOD(Wcd_Simple, sendValues)
 {
 	zarg_rd args(execute_data);
 
-	bool     retval = true;
 	htab_ptr values = args.htab(args.need(0));
-
-	args.zbool(retval, args.option(1));
+	bool retval = args.zbool_default(args.option(1), true);
 
 	if(!args.throw_errors(__FUNCTION__))
 	{
@@ -580,9 +578,7 @@ ZEND_METHOD(Wcd_Simple, returnsValues)
 {
 	zarg_rd args(execute_data);
 
-	bool  bval;
-
-	args.zbool(bval, args.need(0));
+	bool bval = args.zbool(args.need(0));
 
 	if(!args.throw_errors(__FUNCTION__))
 	{

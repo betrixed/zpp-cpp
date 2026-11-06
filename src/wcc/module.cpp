@@ -548,9 +548,7 @@ ZEND_METHOD(Wcc_Module, setActive)
 {
 	zarg_rd args(execute_data);
 
-	bool val = true;
-
-	args.zbool(val, args.need(0));
+	bool val = args.zbool_default(args.need(0),true);
 
 	if (!args.throw_errors(__FUNCTION__))
 	{
