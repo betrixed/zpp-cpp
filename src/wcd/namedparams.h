@@ -21,9 +21,9 @@ namespace wcd
 
 		static zend_class_entry* register_class(zend_class_entry* ce_simpleparams);
 
-		static str_rc	n_param(int ct);
+		static str_rc	n_param(size_t ct);
 
-		str_rc paramStr(int ct) override;
+		str_rc paramStr(size_t ct) override;
 
 		str_rc addParamEquals(val_ptr value) override;
 

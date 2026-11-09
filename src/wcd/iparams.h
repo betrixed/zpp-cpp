@@ -36,7 +36,7 @@ namespace wcd
 
 		static zend_class_entry* register_class();
 
-		virtual str_rc paramStr(int ct);
+		virtual str_rc paramStr(size_t ct);
 
 		virtual str_rc addParamEquals(val_ptr value);
 

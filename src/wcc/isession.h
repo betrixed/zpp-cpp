@@ -27,6 +27,10 @@ public:
 	str_intern  savePath_str;
 	str_intern	zoned_format;
 
+	str_intern  fakeid_key;
+	str_intern  isCLI_str;
+
+
 	void init() override;
 };
 
@@ -59,7 +63,7 @@ protected:
 
 	str_rc prefix_;
 
-	
+	bool   isCLI_;
 
 public:
 	static ISession_mgr omg;
@@ -71,7 +75,7 @@ public:
 
 	static int status();
 
-	static bool exists();
+	bool exists();
 
 	void debug_info(htab_cow) override;
 

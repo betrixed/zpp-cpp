@@ -20,6 +20,7 @@ public:
 	str_intern logdir_str;
 	str_intern tempdir_str;
 	str_intern outputs_str;
+	str_intern fileflags_str;
 	
 	void init() override; // start module;
 
@@ -60,8 +61,8 @@ public:
 	static obj_rc start(const char* msg, int outputs=TO_FILE);
 	void debug_info(htab_cow hw) override;
 	void construct(str_ptr logpath, int outputs=TO_FILE, int flags=FILE_RESET);
-	void line(str_ptr msg, int flags = FILE_APPEND);
-	void line(const char* s, int flags = FILE_APPEND);
+	int line(str_ptr msg, int flags = FILE_APPEND);
+	int line(const char* s, int flags = FILE_APPEND);
 
 	void dump(str_ptr label, zval* anyval, int maxlevel=2);
 	void dump(const char* label, zval* anyval, int maxlevel=2);

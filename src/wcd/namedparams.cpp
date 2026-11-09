@@ -12,7 +12,7 @@ extern "C" {
 }
 #endif
 
-#define DBG_LOG_NAMEDPARAMS
+//#define DBG_LOG_NAMEDPARAMS
 #ifdef DBG_LOG_NAMEDPARAMS
 #	ifndef WCC_DEBUG_LOG_H
 #		include "wcc/debuglog.h"
@@ -39,7 +39,7 @@ NamedParams::~NamedParams()
 }
 
 str_rc 
-NamedParams::n_param(int ct)
+NamedParams::n_param(size_t ct)
 {
 	str_rc result;
 	str_buf buf;
@@ -50,7 +50,7 @@ NamedParams::n_param(int ct)
 }
 
 str_rc 
-NamedParams::paramStr(int ct)
+NamedParams::paramStr(size_t ct)
 {
 	return n_param(ct);
 }
@@ -80,28 +80,32 @@ NamedParams::addParamEquals(val_ptr value)
 
 
 str_rc //override
-NamedParams::addParamList(htab_ptr values)
+NamedParams::addParamList(htab_ptr list)
 {
 	str_rc result;
+
+		#ifdef DBG_LOG_NAMEDPARAMS
+			DebugLog* log = DebugLog::cpp_global();
+			if (log) log->dump("NamedParams addlist",list);
+		#endif
+
 	str_buf text;
 
-	#ifdef DBG_LOG_NAMEDPARAMS
-		DebugLog* log = DebugLog::cpp_global();
-		if (log) log->dump("addParamList values",values);
-	#endif
 
-	auto ix = params_.size();
+
+	size_t ct = params_.size();
 
 	htab_cow hw(params_);
 	
 	bool first = true;
-	for_key_value loop;
-	for(loop.start(values); loop.ok(); loop.next())
+	//for_key_value loop;
+	htab_walk wk;
+	auto listval = wk.value();
+	for(wk.start(list); wk.ok(); wk.next())
 	{
-		ix++;
-		str_rc pstr = paramStr(ix);
-		val_ptr myvalue(loop.value());
-		hw.set(pstr, myvalue);
+		ct++;
+		str_rc pstr = paramStr(ct);
+		hw.set(pstr, listval);
 		if (first)
 		{
 			first = false;
@@ -112,7 +116,7 @@ NamedParams::addParamList(htab_ptr values)
 		text << pstr;
 	}
 	#ifdef DBG_LOG_NAMEDPARAMS
-	if (log) log->dump("params_",params_);
+		if (log) log->dump("params_",params_,5);
 	#endif
 	result = text.zstr();
 	return result;

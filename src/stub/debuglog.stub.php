@@ -29,7 +29,7 @@ class DebugLog {
 
     public function __construct(string $path,  int $destflags = DebugLog::TO_FILE, int $fileflags = DebugLog::FILE_RESET);
 
-	public function line(string $s, int $addflags = DebugLog::FILE_APPEND) : void {}
+	public function line(string $s, int $addflags = DebugLog::FILE_APPEND) : int {}
 
 	public function setOutputs(int $destflags = DebugLog::TO_FILE) : void {}
 

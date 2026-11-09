@@ -58,6 +58,9 @@ SessInit::init()
 	adapter_str = "adapter";
 	prefix_str = "prefix";
 	name_str = "name";
+	
+	fakeid_key = "fake-id";
+	isCLI_str = "isCLI";
 
 	savePath_str = "savePath";
 	zoned_format = "D d/m/y H:i e";
@@ -126,13 +129,14 @@ void ISession::debug_info(htab_cow di)
 void 
 ISession::construct(htab_ptr options)
 {
-	options_ = options;
+	setOptions(options);
+	
 }
 
 void 
 ISession::destroy()
 {
-	if (ISession::exists())
+	if (exists())
 	{
 		php_session_destroy();
 		htab_ptr::set_global(SIN.global_sess, val_rc::empty_array_ptr());
@@ -158,7 +162,7 @@ ISession::get(str_ptr key, val_ptr defval, bool remove)
 {
 	val_rc result;
 
-	if (!ISession::exists())
+	if (!exists())
 	{
 		return result;
 	}
@@ -245,7 +249,7 @@ ISession::getEndTime(val_ptr tzone)
 bool 
 ISession::has(str_ptr key)
 {
-	if (!ISession::exists())
+	if (!exists())
 	{
 		return false;
 	}
@@ -296,7 +300,7 @@ ISession::name(str_ptr name)
 bool 
 ISession::regenerateId(bool deleteOld)
 {
-	if (!ISession::exists())
+	if (!exists())
 	{
 		return false;
 	}
@@ -306,7 +310,7 @@ ISession::regenerateId(bool deleteOld)
 void
 ISession::remove(str_ptr key)
 {
-	if (!ISession::exists()) {
+	if (!exists()) {
 		return;
 	}
 	str_rc ukey = getUniqueKey(key);
@@ -329,7 +333,7 @@ ISession::set(str_ptr key, obj_ptr value)
 void 
 ISession::set(str_ptr key, val_ptr value)
 {
-	if (ISession::exists())
+	if (exists())
 	{
 		str_rc ukey = getUniqueKey(key);
 		zval* gsession = htab_ptr::get_global(SIN.global_sess);
@@ -348,20 +352,35 @@ ISession::setAdapter(obj_ptr itf)
 	adapter_ = itf;
 }
 
+//Allow only one call to this.
 void ISession::setOptions(htab_ptr opt)
 {
-	prefix_ =  opt.get(SIN.prefix_str);
-	if (!prefix_.ok())
+	if (!options_.size())
 	{
-		prefix_ = str_ptr::empty_str();
+		options_ = opt;
+		prefix_ =  options_.get(SIN.prefix_str);
+		if (!prefix_.ok())
+		{
+			prefix_ = str_ptr::empty_str();
+		}
+		val_ptr test(options_.get(SIN.isCLI_str));
+		isCLI_ = test.get_bool();
+
+		if (isCLI_)
+		{
+			str_rc fakeid = options_.get(SIN.fakeid_key);
+			if (fakeid.ok())
+			{
+				ISession::id(fakeid);
+			}
+		}
 	}
-	options_ = opt;
 }
 
 bool
 ISession::start()
 {
-	if (ISession::exists() || headers_sent())
+	if (exists() || headers_sent())
 	{
 		return false; 
 	}
@@ -422,7 +441,9 @@ ZEND_METHOD(Wcc_Session_ISession, exists)
 	{
 		return;
 	}
-	bool result = ISession::exists();
+	ISession* cobj = zval_toc<ISession>(ZEND_THIS);
+
+	bool result = cobj->exists();
 	RETURN_BOOL(result);
 }
 

@@ -33,6 +33,7 @@ DebugLogStatic::init()
 	logdir_str = "log_dir";
 	tempdir_str = "temp_dir";
 	outputs_str = "outputs";
+	fileflags_str = "fileflags";
 }
 
 void 
@@ -211,6 +212,7 @@ DebugLog::debug_info(htab_cow hw)
 {
 	base_d::debug_info(hw);
 	hw.set(DLSi.outputs_str, (int) outputs_);
+	hw.set(DLSi.fileflags_str, (int) file_flags_);
 }
 
 void 
@@ -226,17 +228,19 @@ DebugLog::construct(str_ptr logpath, int destflags, int fileflags)
 	file_flags_ = fileflags;
 }
 
-void 
+int 
 DebugLog::line(const char* s, int fileflags)
 {
 	str_rc temp(s);
-	this->line(temp, fileflags);
+	return this->line(temp, fileflags);
 }
-void 
+
+int 
 DebugLog::line(str_ptr msg, int fileflags)
 {
-	obj_ptr self(self_);
 
+	obj_ptr self(self_);
+	int written = 0;
 	int outflags = outputs_;
 	file_flags_ = fileflags;
 
@@ -255,8 +259,16 @@ DebugLog::line(str_ptr msg, int fileflags)
 		if (dolog)
 		{	
 			str_rc filename = self.str_property(DLSi.filename_str);
+			int wsize = log.size();
 			val_rc data(log);
-			file_put_contents(filename, data, file_flags_ | FILE_LOCK);
+			written = file_put_contents(filename, data, file_flags_);
+
+			if ((wsize > 0) && (wsize != written))
+			{
+				error_return report;
+				report.error() << "Log Write failed for: " << log;
+				report.throw_errors();
+			}
 			// go back to append moode
 			file_flags_ = FILE_APPEND;
 		}
@@ -265,7 +277,9 @@ DebugLog::line(str_ptr msg, int fileflags)
 		{
 			zend_write(log.data(), log.size());
 		}
+
 	}
+	return written;
 }
 
 }// end namespace wcc
@@ -323,7 +337,8 @@ ZEND_METHOD(Zpp_DebugLog, line)
 	if (!args.throw_errors(__FUNCTION__))
 	{
 		DebugLog* cobj = zval_toc<DebugLog>(ZEND_THIS);
-		cobj->line(msg, flags);	
+		zend_long result = cobj->line(msg, flags);	
+		RETURN_LONG(result);
 	}
 }
 

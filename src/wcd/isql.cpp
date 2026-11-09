@@ -21,7 +21,7 @@ extern "C" {
 }
 #endif
 
-#define DBG_LOG_ISQL
+//#define DBG_LOG_ISQL
 #ifdef DBG_LOG_ISQL
 
 #	ifndef WCC_DEBUG_LOG_H
@@ -1196,7 +1196,9 @@ ISql::where(Bindings &bind, htab_ptr wtab)
 {
 	str_return result;
 
-
+	#ifdef DBG_LOG_ISQL
+			DebugLog* log = DebugLog::cpp_global();
+	#endif
 	str_buf buf;
 
 	// TODO: jtables set wether needed or not!
@@ -1392,7 +1394,6 @@ ISql::where(Bindings &bind, htab_ptr wtab)
 			htab_ptr list = value.zarray();
 
 			#ifdef DBG_LOG_ISQL
-			DebugLog* log = DebugLog::cpp_global();
 			if (log) {
 				log->dump("in params", pobjret.value_);
 				log->dump("IN LIST()", list);

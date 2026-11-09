@@ -25,6 +25,13 @@
 #include "sql_ipart.h"
 #endif
 
+//#define DBG_LOG_OPERATION
+#ifdef DBG_LOG_OPERATION
+#	ifndef WCC_DEBUG_LOG_H
+#		include "wcc/debuglog.h"
+#	endif
+#endif
+
 namespace wcd {
 
 
@@ -474,6 +481,10 @@ Operation::whereIn(val_ptr column, htab_ptr values, int blogic, bool bnot)
 {
 	error_return err;
 
+	#ifdef DBG_LOG_OPERATION
+		DebugLog* log = DebugLog::cpp_global();
+	#endif
+
 	htab_rc binddata;
 	htab_cow data(binddata);
 	if (blogic < 0)
@@ -500,6 +511,14 @@ Operation::whereIn(val_ptr column, htab_ptr values, int blogic, bool bnot)
 
 	val_rc temp(binddata);
 	bind->add(ISql::SQL_WHERE, temp);
+	showdata("WhereIn", binddata);
+
+	#ifdef DBG_LOG_OPERATION
+		if (log)
+		{
+			log->dump("Operation whereIn", binddata, 4);
+		}
+	#endif
 
 	return err;
 }
@@ -806,7 +825,7 @@ ZEND_METHOD(Wcd_Sql_Operation, whereIn)
 	zarg_rd args(execute_data);
 
 	val_ptr column(args.need(0));
-	val_ptr values(args.need(1));
+	htab_ptr values = args.htab(args.need(1));
 
 	zend_long blogic = args.zlong_default(args.option(2), -1);
 
@@ -817,7 +836,7 @@ ZEND_METHOD(Wcd_Sql_Operation, whereIn)
 		obj_rc self(ZEND_THIS);
 
 		Operation* cobj = zobj_toc<Operation>(self);
-		error_return result = cobj->where(column, values, blogic, bnot);
+		error_return result = cobj->whereIn(column, values, blogic, bnot);
 		if (!result.throw_errors())
 		{
 			self.move_zv(return_value);

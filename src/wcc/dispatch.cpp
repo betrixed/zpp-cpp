@@ -151,22 +151,12 @@ Dispatch::construct()
 {
 	error_return result;
 	obj_return atest;
+	val_return vtest;
 
-	Services* svc = Services::cpp_global();
+	services_ = Services::instance();
 
-	services_ = svc->self();
-	
-	val_return vtest = svc->get(DSPi.userdata_str);
+	Services* svc = zobj_toc<Services>(services_);
 
-	if (!vtest.has_errors())
-	{
-		user_ = vtest.value_.zobject();
-	}
-	if (!user_.ok()) 
-	{
-		result.error() << "No UserSession ready";
-	}
-	
 	atest = svc->singleton(DSPi.dos_str, Dos::omg.class_name());
 	if (atest.has_errors()) goto ErrorExit;
 
@@ -177,6 +167,18 @@ Dispatch::construct()
 	atest = Assets::instance();
 	if (atest.has_errors()) goto ErrorExit;
 	assets_ = atest.move_value();
+
+	vtest = svc->get(DSPi.userdata_str);
+	//showmem("userdata", vtest.value_);
+
+	if (!vtest.has_errors())
+	{
+		user_ = vtest.value_.zobject();
+	}
+	if (!user_.ok()) 
+	{
+		result.error() << "No UserSession ready";
+	}
 	return result;
 
 ErrorExit:
