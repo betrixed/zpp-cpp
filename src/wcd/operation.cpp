@@ -511,7 +511,6 @@ Operation::whereIn(val_ptr column, htab_ptr values, int blogic, bool bnot)
 
 	val_rc temp(binddata);
 	bind->add(ISql::SQL_WHERE, temp);
-	showdata("WhereIn", binddata);
 
 	#ifdef DBG_LOG_OPERATION
 		if (log)
