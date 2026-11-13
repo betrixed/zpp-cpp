@@ -40,6 +40,8 @@ final class Services {
 
 	public function setThrowFail(bool $value) : void {}
 
+	public function setInstance(string $svckey,  object  $instance) : void {}
+
 	public function singleton(string $svckey, string $cname) : object {}
 
 	public function clearActive() : void {}

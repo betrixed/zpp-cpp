@@ -268,38 +268,51 @@ Services::getOne(str_ptr key, htab_ptr arglist)
 
 }
 
+void
+Services::setInstance(str_ptr key, obj_ptr instance)
+{
+	str_ptr cname = instance.className();
+	htab_cow(instances_).set(cname, instance);
+
+	val_ptr test = active_.get(key);
+	if (!test.isObject() || (test.zobject() != (zend_object*) instance))
+	{
+		htab_cow(active_).set(key,instance);
+	}	
+}
+
 obj_return
 Services::singleton(str_ptr key, str_ptr cname)
 {
 	obj_return result;
+	obj_rc& cobj = result.value_; //alias referenced
 
-	obj_rc cobj = instances_.get(cname);
-	obj_rc test = active_.get(key);
+	cobj = instances_.get(cname);
 
-    if (cobj.ok())
+    if (!cobj.ok() || !cobj.instanceof(cname))
     {
-    	if (!test.ok() || ((zend_object*)test != (zend_object*)cobj))
-    	{
-    		htab_cow(active_).set(key, cobj);
-    	}
-    	result.value_ = std::move(cobj);
-    	return result;
+    	result = newInstance(cname);
+    	// Just created, so active_ doesn't have this for sure.
     }
-    if (test.ok())
-    {
-    	if (test.instanceof(cname))
+    else
+    { // valid cobj found from instances_
+    	val_ptr test = active_.get(key);
+
+    	if (!test.is_nullptr())
     	{
-    		htab_cow(instances_).set(cname, test);
-    		result.value_ = std::move(test);
+    		if (!test.isObject() || (test.zobject() != (zend_object*) cobj))
+    		{
+    			result.error() << "Service key " << key << " already used ";
+    		}
     		return result;
     	}
-
     }
-	// First time setup, create both entries
-	result = newInstance(cname);
-	htab_cow(active_).set(key, result.value_);
+	if (!result.has_errors())
+	{
+		htab_cow(active_).set(key, cobj);
+	}
+    
 	return result;
-
 }
 // static
 /*! Ensure 
@@ -788,6 +801,21 @@ ZEND_METHOD(Wcc_Services, objectService)
 		{
 			result.value_.move_zv(return_value);
 		}
+	}
+}
+
+
+ZEND_METHOD(Wcc_Services, setInstance)
+{
+	zarg_rd args(execute_data);
+
+	str_ptr key = args.str(args.need(0));
+	obj_ptr instance = args.obj(args.need(1));
+
+	if (!args.throw_errors())
+	{
+		Services* svc = zval_toc<Services>(ZEND_THIS);
+		svc->setInstance(key, instance);
 	}
 }
 

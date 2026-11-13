@@ -59,6 +59,7 @@ public:
 	void       set(str_ptr name, val_rc& val);
 	
 	obj_return     singleton(str_ptr svckey, str_ptr cname);
+	void     	   setInstance(str_ptr svckey, obj_ptr instance);
 
 	val_return get(str_ptr name);
 

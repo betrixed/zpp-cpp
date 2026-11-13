@@ -33,7 +33,7 @@
 #include "wcc/loader.h"
 #endif
 
-//#define DBG_LOG_RUN
+#define DBG_LOG_RUN
 
 #ifdef DBG_LOG_RUN
 #	ifndef WCC_DEBUGLOG_H
@@ -161,6 +161,11 @@ void Run::debug_info(htab_cow di)
 void Run::construct()
 {
 
+	#ifdef DBG_LOG_RUN
+	DebugLog* log = DebugLog::cpp_global();
+	if (log) log->line("Run::construct");
+	#endif
+
 	obj_ptr self = this->self();
 
 	val_rc  temp = datetime_obj::microtime();
@@ -214,7 +219,17 @@ void Run::construct()
 	}
 	obj_rc config = std::move(config_err.value_);
 
+
+
+
 	self.property(Run_i.config_str, config);
+
+	#ifdef DBG_LOG_RUN
+	if (log) {
+		log->dump("config", config);
+		log->dump("services", sobj->self());
+	}
+	#endif
 
 	str_rc site_leaf = constant(Run_i.site_leaf_const);
 	self.property(Run_i.site_leaf, site_leaf);
@@ -235,8 +250,6 @@ void Run::construct()
 	self.property(Run_i.temp_dir, temp_dir);
 
 	#ifdef DBG_LOG_RUN
-	DebugLog* log = DebugLog::cpp_global();
-
 	if (!log)
 	{
 		buf << temp_dir << "/log/debuglog.txt";
@@ -257,7 +270,6 @@ void Run::construct()
 	self.property(Run_i.page_hits,temp);
 
 	sobj->set(Run_i.run_str, self);
-	sobj->setObject(config);
 
 	temp = constant(Run_i.target_const);
 	//showmem("target", temp);
@@ -308,7 +320,7 @@ Run::setup_world()
 {
 	obj_ptr self(self_);
 #ifdef DBG_LOG_RUN
-	//DebugLog* log = DebugLog::cpp_global();
+	DebugLog* log = DebugLog::cpp_global();
 #endif
 	val_return ctest = Services::service(Run_i.config_str);
 
@@ -324,10 +336,10 @@ Run::setup_world()
 
 	str_rc app_class = config.str_property(Run_i.app_class);
 #ifdef DBG_LOG_RUN
-	/*if (log)
+	if (log)
 	{
 		log->dump("app_class", app_class);
-	}*/
+	}
 #endif
 
 	obj_rc site = ReflectCache::staticInstance(app_class);
@@ -387,6 +399,10 @@ static void transfer_str(str_ptr pname, htab_ptr from, obj_ptr to)
 error_return 
 Run::setup_cryptic()
 {
+	#ifdef DBG_LOG_RUN
+	DebugLog* log = DebugLog::cpp_global();
+	#endif
+
 	error_return result;
 
 	obj_ptr self (this->self());
@@ -406,9 +422,7 @@ Run::setup_cryptic()
 	buf << config_dir << '/' << cryptic_data;
 	str_rc path = buf.zstr();
 	
-	#ifdef DBG_LOG_RUN
-	DebugLog* log = DebugLog::cpp_global();
-	#endif
+	
 
 	Services* sobj = Services::cpp_global();
 
@@ -448,7 +462,7 @@ Run::setup_cryptic()
 void Run::temp_folders()
 {
 	#ifdef DBG_LOG_RUN
-	//DebugLog* log = DebugLog::cpp_global();
+	DebugLog* log = DebugLog::cpp_global();
 	#endif
 
 	/*if (log)
@@ -536,10 +550,10 @@ void Run::temp_folders()
 		
 	}
 	#ifdef DBG_LOG_RUN
-	/*if (log)
+	if (log)
 	{
 		log->line("End temp_folders");
-	}*/
+	}
 	#endif
 
 }
@@ -608,6 +622,10 @@ void Run::shutdown()
 error_return
 Run::config_init(str_ptr bootstrap)
 {
+	#ifdef DBG_LOG_RUN
+	DebugLog* log = DebugLog::cpp_global();
+	log->line("Call bootstrap file");
+	#endif
 	error_return result;
 
 	obj_ptr self = this->self();
@@ -638,25 +656,18 @@ Run::config_init(str_ptr bootstrap)
 	}
 
 	htab_rc bcfg = self.array_property(Run_i.bootstrap);
-	#ifdef DBG_LOG_RUN
-	//DebugLog* log = DebugLog::cpp_global();
-	#endif
 
 	if (bcfg.size())
 	{
-
-
 		str_rc target = self.str_property(Run_i.target);
 
 		target.lowercase();
-
 
 		tlist = bcfg.get(target);
 		if (!tlist.ok())
 		{
 			tlist = bcfg.get(Run_i.default_str);
 		}
-
 	}
 	else {
 		result.error() <<  "bootstrap property not set" << path;
@@ -782,7 +793,6 @@ Run::config_init(str_ptr bootstrap)
 
 			str_ptr modules_dir = mpath.zstr();
 
-
 			if (is_dir(modules_dir))
 			{
 				htab_rc flist = Finder::dirList_dir(modules_dir);
@@ -794,10 +804,10 @@ Run::config_init(str_ptr bootstrap)
 		
 	}
 	#ifdef DBG_LOG_RUN
-	/*if (log)
+	if (log)
 	{
 		log->line("End bootstrap");
-	}*/
+	}
 	#endif
 
 	return result;
