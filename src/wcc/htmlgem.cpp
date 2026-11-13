@@ -2126,6 +2126,19 @@ ZEND_METHOD(Wcc_HtmlGem, moneyFormat)
 	result.move_zv(return_value);
 }
 
+ZEND_METHOD(Wcc_HtmlGem, escape)
+{
+	zarg_rd args(execute_data);
+
+	str_ptr text = args.str(args.need(0));
+
+	if (!args.throw_errors(__FUNCTION__))
+	{
+		str_rc result = htmlspecialchars(text);
+		result.move_zv(return_value);
+	}
+}
+
 PHP_MINIT_FUNCTION(Wcc_HtmlGem_reg)
 {
 	auto ce = register_class_Wcc_HtmlGem();

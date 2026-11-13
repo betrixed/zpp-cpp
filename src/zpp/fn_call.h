@@ -337,6 +337,7 @@ namespace zpp {
         str_intern  header_fn;
         
         str_intern  getmessage_fn;
+        str_intern  htmlspecialchars_fn;
         
         void init() override;
         void init_req() override;
@@ -531,6 +532,8 @@ namespace zpp {
     bool headers_sent();
 
     void header(str_ptr header, bool replace=true, int code = 0);
+
+    str_rc htmlspecialchars(str_ptr text);
 
 
 }; // end namespace zpp

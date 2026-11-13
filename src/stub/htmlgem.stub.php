@@ -81,6 +81,8 @@ class HtmlGem {
 
     public function output(mixed $value) : string {}
 
+    public function escape(string $text) : string {}
+
     static public function moneyFormat(?string $lang) : Money {} 
 };
 

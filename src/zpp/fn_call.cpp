@@ -146,6 +146,8 @@ public:
     fn_call          weakref_create;
     fn_call          weakref_get;
 
+    fn_call          htmlspecialchars;
+
     void init(const fntable& ftab)
     {
         if (configured_)
@@ -232,7 +234,8 @@ public:
         unserialize.set_fci(ftab.s_unserialize);
         weakref_create.set_fci(ftab.s_weakref_create);
         weakref_get.set_fci(ftab.s_weakref_get);
-        
+        htmlspecialchars.set_fci(ftab.htmlspecialchars_fn);
+
     }
 
 
@@ -1042,7 +1045,8 @@ fntable::init()
     headers_sent_fn = "headers_sent";
     header_fn = "header";
 
-    getmessage_fn = "getmessage";
+    getmessage_fn = "getmessage"; // for throwables
+    htmlspecialchars_fn = "htmlspecialchars";
 }
 
 void  // virtual
@@ -1490,6 +1494,14 @@ strtotime(str_ptr datetime, const zend_long* base_timestamp)
     return fn.zlong();
 }
 
+str_rc htmlspecialchars(str_ptr text)
+{
+    fn_params<1> fn(TLFNs.htmlspecialchars);
+
+    zval* pz = fn.argsptr();
+    val_ptr::string_bind(pz,text);
+    return fn.str();
+}
 
 } // end namespace zpp
 
